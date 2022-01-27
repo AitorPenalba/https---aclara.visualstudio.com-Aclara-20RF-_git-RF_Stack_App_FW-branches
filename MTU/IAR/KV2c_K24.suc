@@ -1,0 +1,458 @@
+call graph root [task] : STRT_StartupTask;
+call graph root [task] : PWR_task;
+call graph root [task] : PWROR_Task;
+call graph root [task] : TMR_HandlerTask;
+call graph root [task] : SELF_testTask;
+call graph root [task] : TIME_SYS_HandlerTask;
+call graph root [task] : PHY_Task;
+call graph root [task] : MAC_Task;
+call graph root [task] : HMC_APP_Task;
+call graph root [task] : MFGP_uartRecvTask;
+call graph root [task] : MFGP_uartCmdTask;
+//call graph root [task] : ALRM_RealTimeTask;
+call graph root [task] : ID_task;
+call graph root [task] : DEMAND_task;
+call graph root [task] : HD_DailyShiftTask;
+call graph root [task] : DBG_TxTask;
+call graph root [task] : DBG_CommandLineTask;
+call graph root [task] : PAR_appTask;
+call graph root [task] : DFWA_task;
+call graph root [task] : NWK_Task;
+call graph root [task] : DTLS_Task;
+call graph root [task] : APP_MSG_HandlerTask;
+//call graph root [task] : FIO_Task;
+call graph root [task] : IDL_IdleTask;
+call graph root [task] : IDL_SleepTask;
+call graph root [task] : PWRLG_Idle_Task;
+call graph root [task] : PWRLG_Task;
+call graph root [task] : toolchain_startup;
+call graph root [task] : _mqx_idle_task;
+call graph root [task] : _mqx_init_task;
+call graph root [task] : SM_Task;
+call graph root [task] : MFGP_optoTask;
+call graph root [task] : EVL_AlarmHandlerTask;
+
+call graph root [interrupt] : Radio0_IRQ_ISR [radio.o];
+call graph root [interrupt] : isr_busy [dvr_extflash.o];
+call graph root [interrupt] : isr_tmr [dvr_extflash.o];
+call graph root [interrupt] : ISR_InternalFlash;
+call graph root [interrupt] : dtlsUART_isr [MFG_Dtls.o];
+call graph root [interrupt] : isr_brownOut;
+call graph root [interrupt] : Spi0DmaIsr;
+call graph root [interrupt] : Spi1DmaIsr;
+call graph root [interrupt] : Spi2DmaIsr;
+call graph root [interrupt] : TIME_SYS_vApplicationTickHook [time_sys.o];
+call graph root [interrupt] : _int_exception_isr;
+call graph root [interrupt] : _int_default_isr;
+call graph root [interrupt] : _ki2c_isr [i2c_int_ki2c.o];
+call graph root [interrupt] : _kuart_int_err_isr;
+call graph root [interrupt] : _kuart_int_rx_tx_isr;
+call graph root [interrupt] : edma_done_isr [edma.o];
+call graph root [interrupt] : edma_err_isr [edma.o];
+call graph root [interrupt] : adc_complete_isr [adc_kadc.o];
+call graph root [interrupt] : adt_idelay_isr [adt_kpdb.o];
+//call graph root [interrupt] : meter_trouble_isr_busy [ALRM_Handler.o];
+
+function _psp_exception_return             : 20;
+function _sched_check_scheduler_internal   : 4;
+function _sched_execute_scheduler_internal : 4;
+function _sched_run_internal               : 0;
+function _sched_start_internal             : 0;
+function _task_block                       : 0;
+
+exclude close[partitions.o], pwrMode[partitions.o], TimeReq_Done[MAC.o], _task_set_exception_handler,
+// _klog_block_internal, _klog_context_switch_internal, _klog_isr_end_internal, _klog_isr_start_internal,
+        _kuart_polled_ioctl,
+        edma_channel_release[edma.o], edma_channel_setup[edma.o], edma_channel_status[edma.o],
+        edma_channel_claim[edma.o], edma_request_disable[edma.o], edma_request_enable[edma.o],
+        edma_request_source[edma.o], edma_transfer_submit[edma.o], _task_exit_function_internal,
+        _GetfloatFull[xscanffull.o], _GetintFull[xscanffull.o], _GetstrFull[xscanffull.o],
+        DtlsSslRealloc[dtls.o], restore[IF_intFlash.o], _io_i2c_int_uninstall ;
+
+possible calls LED_vApplicationTickHook [LED.o]  : TMR_vApplicationTickHook [timer_util.o],
+                                                   hwtimer_systick_isr [hwtimer_systick.o];
+possible calls DBG_CommandLine_NoiseBand         : StartRx[radio.o];
+possible calls AddCA                             : ;  // AddCA doesn't call it's call back
+possible calls DoCertificateVerify[internal.o]   : ;
+possible calls DoClientHello[internal.o]         : ;
+possible calls DoServerKeyExchange[internal.o]   : ;
+possible calls ID_init                           : open[partitions.o];
+possible calls MAC_ProcessRxPacket               : NWK_Request;
+possible calls MFG_GetSetFrequencies[MFG_Port.o] : PHY_Channel_Set, PHY_Channel_Get, PHY_RxChannel_Set,
+                                                   PHY_RxChannel_Get, PHY_TxChannel_Set, PHY_TxChannel_Get;
+possible calls PHY_Task                          : Shutdown[radio.o];
+possible calls ReadyRx[radio.o]                  : StartRx [radio.o];
+possible calls TIME_SYS_vApplicationTickHook[time_sys.o] : TMR_vApplicationTickHook [timer_util.o],
+                                                            LED_vApplicationTickHook[LED.o];
+possible calls TMR_vApplicationTickHook[timer_util.o] : hwtimer_systick_isr [hwtimer_systick.o];
+possible calls adt_idelay_isr[adt_kpdb.o]        : ;
+possible calls dtlsUART_isr[MFG_Dtls.o]          : ;
+possible calls edma_done_isr[edma.o]             : ;
+possible calls edma_err_isr[edma.o]              : ;
+possible calls wolfSSL_accept                    : ;
+possible calls wolfSSL_connect                   : ;
+possible calls wolfssl_log[logging.o]            : ;
+possible calls SendConfirm[STACK.o]              : NWK_Confirm [STACK.o], nwk_confirm_cb [SM.o],
+                                                   NWK_GetSetRequest_CB[ STACK.o];
+possible calls SendConfirm[PHY.o]                : phy_confirm_cb [SM.o], phy_confirm_cb [MAC.o],
+                                                   PHY_GetSetRequest_CB[PHY.o];
+possible calls SM_SendConfirm[SM.o]              : SM_GetSetRequest_CB[SM.o];
+
+possible calls PWRLG_Task : UART_init, CRC_initialize, FIO_finit, VBATREG_init, TIME_SYS_HandlerInit, TMR_HandlerInit,
+                            DST_Init, TIME_SYS_SetTimeFromRTC, BM_init, DBG_init, BSP_ADC_init, MODECFG_init,
+                            PAR_initRtos, PHY_init, MAC_init, NWK_init, SMTDCFG_init, DTLS_init, APP_MSG_init, SEC_init,
+                            SM_init;
+
+possible calls STRT_StartupTask : WDOG_Init,PWR_waitForStablePower,UART_init,CRC_initialize,FIO_finit,
+                                  VDEV_init,VBATREG_init,TIME_SYS_HandlerInit,TMR_HandlerInit,DST_Init,
+                                  TIME_SYS_SetTimeFromRTC,SELF_init,BM_init,DBG_init,BSP_ADC_init,PWR_TSK_init,
+                                  PWRCFG_init,MODECFG_init,PWROR_init,SYSBUSY_init,DFWA_init,DFWTDCFG_init,LED_init,
+                                  MFGP_init,MFGP_cmdInit,HMC_STRT_init,HMC_APP_RTOS_Init,HMC_ENG_init,PAR_initRtos,
+                                  DEMAND_init,ID_init,PHY_init,MAC_init,NWK_init,SMTDCFG_init,DTLS_init,APP_MSG_init,
+                                  HD_init,OR_MR_init,SEC_init,EDCFG_init,EVL_Initalize,FIO_init,PWR_printResetCause,
+                                  SM_init,ALRM_init;
+
+possible calls TMR_HandlerTask : PortTimer_CallBack [DBG_SerialDebug.o],
+                                 APP_MSG_resendRegistrationMetadata [APP_MSG_Handler.o],
+                                 DFWA_DownloadCompleteTimerExpired [dfw_app.o],
+                                 DFWA_PatchCompleteTimerExpired [dfw_app.o],
+                                 DtlsBackoffTimerExpired [dtls.o],
+                                 resetTmrCallBack_ISR [demand.o],
+                                 HD_bubbleUpTimerExpired [historyd.o],
+                                 HMC_STRT_ISR,
+                                 ID_bubbleUpTimerExpired [ID_intervalTask.o],
+                                 mfgp_QuietModeTimeout_ [MFG_Port.o],
+                                 flushPartitions_CB [partitions.o],
+                                 STK_MGR_LogTimerExpired [STACK.o],
+                                 TIME_SYS_reqTimeoutCallback,
+                                 ledVisual_CB [LED.o];
+
+possible calls HMC_DMD_Reset : DBGC_DemandResetCallBack [DBG_CommandLine.o], DEMAND_ResetCallback [ demand.o ];
+possible calls OR_PM_MsgHandler :   APP_MSG_SecurityHandler,
+                                    APP_MSG_SetDmdResetDateHandler,
+                                    DEMAND_demandFutureConfigurationHandler,
+                                    DEMAND_DrReadListHandler,
+                                    DST_dstEnabledHandler,
+                                    DST_dstEndRuleHandler,
+                                    DST_dstOffsetHandler,
+                                    DST_dstStartRuleHandler,
+                                    DST_timeZoneOffsetHandler,
+                                    HD_dailySelfReadTimeHandler,
+                                    HD_dsBuDataRedundancyHandler,
+                                    HD_dsBuMaxTimeDiversityHandler,
+                                    HD_dsBuReadingTypesHandler,
+                                    HD_dsBuTrafficClassHandler,
+                                    ID_lpBuChannel1Handler,
+                                    ID_lpBuChannel2Handler,
+                                    ID_lpBuChannel3Handler,
+                                    ID_lpBuChannel4Handler,
+                                    ID_lpBuChannel5Handler,
+                                    ID_lpBuChannel6Handler,
+                                    ID_LpBuDataRedundancyHandler,
+                                    ID_LpBuMaxTimeDiversityHandler,
+                                    ID_LpBuScheduleHandler,
+                                    ID_LpBuTrafficClassHandler,
+                                    MODECFG_decommissionModeHandler,
+                                    OR_MR_OrReadListHandler,
+                                    PWRCFG_OutageDelcarationDelayHandler,
+                                    PWRCFG_RestorationDeclarationDelayHandler;
+possible calls APP_MSG_HandlerTask : OR_MR_MsgHandler,
+                                     HD_MsgHandler,
+                                     ID_MsgHandler,
+                                     RG_CF_MsgHandler,
+                                     RG_MD_MsgHandler,
+                                     eng_res_MsgHandler,
+                                     OR_PM_MsgHandler,
+                                     DFWI_Apply_MsgHandler,
+                                     DFWI_Packet_MsgHandler,
+                                     DFWI_Init_MsgHandler,
+                                     DFWI_Verify_MsgHandler,
+                                     DEMAND_ResetMsg;
+
+possible calls DtlsSessionStateChangedCallback [dtls.o] : APP_MSG_DTLSSessionStateChanged [APP_MSG_Handler.o];
+possible calls DtlsApplicationRx               [dtls.o] : APP_MSG_HandleMessage [APP_MSG_Handler.o];
+
+possible calls wc_GenerateSeed           : DtlsGenerateSeed [dtls.o];
+possible calls GetInputData [internal.o] : DtlsRcvCallback [dtls.o];
+possible calls SendBuffered              : DtlsSendCallback [dtls.o];
+
+possible calls wolfSSL_Malloc["../../Common/wolfssl/IDE/IAR-EWARM/Projects/lib/MTU/Debug/Exe/wolfssl.a"] : DtlsSslMalloc [dtls.o];
+possible calls wolfSSL_Free              : DtlsSslFree [dtls.o];
+possible calls DoCertificate[internal.o] : DtlsVerifyCallback [dtls.o];
+possible calls SendCertificateVerify     : EccSignCallback [dtls.o];
+possible calls SendServerKeyExchange     : EccSignCallback [dtls.o];
+possible calls APP_MSG_SecurityHandler   : DTLS_AppSecurityAuthModeChanged;
+
+possible calls FIO_finit                          : init [partitions.o];
+possible calls FIO_fopen                          : open[partitions.o], read[partitions.o],  write[partitions.o],
+                                                    erase[partitions.o], restore[partitions.o];
+possible calls DBG_CommandLine_NvRead             : open[partitions.o], read[partitions.o];
+possible calls DBG_CommandLine_FlashSecurity      : open[partitions.o];
+possible calls DFWA_init                          : open[partitions.o], read[partitions.o], erase[partitions.o];
+possible calls erasePatchSpace[dfw_interface.o]   : open[partitions.o], erase[partitions.o];
+possible calls dlPcktWriteToNv[dfw_interface.o]   : open[partitions.o], read[partitions.o], write[partitions.o];
+possible calls DFWP_init                          : open[partitions.o];
+possible calls DVR_EFL_unitTest                   : open[partitions.o];
+possible calls EVL_Initalize                      : open[partitions.o];
+possible calls MFGP_FlashSecurity[MFG_Port.o]     : open[partitions.o], read[partitions.o], write[partitions.o];
+possible calls PAR_initRtos                       : open[partitions.o], ioctl[partitions.o];
+possible calls SEC_init                           : open[partitions.o], write[partitions.o];
+possible calls virginDeviceSetup[virgin_device.o] : open[partitions.o], read[partitions.o], write[partitions.o],
+                                                    erase[partitions.o];
+possible calls VDEV_init                          : open[partitions.o], read[partitions.o];
+possible calls MEMC_testPowerDown                 : pwrMode[partitions.o];
+possible calls getPatchHeader[dfw_app.o]          : read[partitions.o];
+possible calls decryptPatch[dfw_app.o]            : read[partitions.o], write[partitions.o];
+possible calls executeMacroCmds[dfw_app.o]        : read[partitions.o], write[partitions.o];
+possible calls copyNvData[dfw_app.o]              : read[partitions.o], write[partitions.o], erase[partitions.o],
+                                                    size[partitions.o];
+possible calls readWriteBuffer[dfw_app.o]         : read[partitions.o], write[partitions.o];
+possible calls calcCRC[dfw_app.o]                 : read[partitions.o];
+possible calls decryptData[dfw_app.o]             : read[partitions.o], write[partitions.o], erase[partitions.o];
+possible calls verifySignature[dfw_app.o]         : read[partitions.o];
+possible calls DFWP_getBitStatus                  : read[partitions.o];
+possible calls DFWP_getMissingPackets             : read[partitions.o];
+possible calls DFWP_getMissingPacketsRange        : read[partitions.o];
+possible calls DFWP_modifyBit                     : read[partitions.o];
+possible calls EventLogRead[EVL_event_log.o]      : read[partitions.o];
+possible calls FIO_ferase                         : read[partitions.o], write[partitions.o], erase[partitions.o];
+possible calls FIO_fwrite                         : read[partitions.o], write[partitions.o];
+possible calls FIO_fread                          : read[partitions.o];
+possible calls verifyFixFileChecksum[file_io.o]   : read[partitions.o], write[partitions.o];
+possible calls FIO_printFileInfo                  : read[partitions.o];
+possible calls FIO_printFile                      : read[partitions.o];
+possible calls FIO_fileDump                       : read[partitions.o];
+possible calls calcFileCrc[file_io.o]             : read[partitions.o];
+possible calls FIO_CalcFileCrc[file_io.o]         : read[partitions.o];
+possible calls MFGP_dtlsHelper[MFG_Port.o]        : read[partitions.o], write[partitions.o];
+possible calls DtlsGetCertificate[dtls.o]         : read[partitions.o];
+possible calls keyIsBlank[ecc108_mqx.o]           : read[partitions.o];
+possible calls addAllLoadProfileChannels[ID_intervalTask.o] : read[partitions.o];
+possible calls IntervalDataCh[ID_intervalTask.o]  : read[partitions.o];
+possible calls doPatch[dfw_app.o]                 : write[partitions.o], flush[partitions.o];
+possible calls DFWA_CopyPgmToPgmImagePartition    : write[partitions.o], erase[partitions.o];
+possible calls EventLogWrite[EVL_event_log.o]     : write[partitions.o];
+possible calls SEC_InitKeys[ecc108_mqx.o]         : write[partitions.o];
+possible calls StoreNextID_Data[ID_intervalTask.o]: write[partitions.o];
+possible calls DBG_CommandLine_virgin             : erase[partitions.o], write [partitions.o];
+possible calls DBG_CommandLine_virginDelay [DBG_CommandLine.o]       : erase[partitions.o];
+possible calls MFGP_virginDelay[MFG_Port.o]       : erase[partitions.o];
+possible calls VDEV_isNVEmpty[virgin_device.o]    : open[partitions.o], read[partitions.o];
+possible calls DFWP_ClearBitMap                   : erase[partitions.o];
+possible calls EventInitializeMetaData[EVL_event_log.o]: erase[partitions.o];
+possible calls EventLogEraseFlash                 : erase[partitions.o];
+possible calls EVL_clearEventLog                  : erase[partitions.o];
+possible calls MFGP_virgin[MFG_Port.o]            : erase[partitions.o];
+possible calls ID_cfgIntervalData                 : erase[partitions.o], size[partitions.o];
+possible calls resetChannel[ID_intervalTask.o]    : erase[partitions.o];
+possible calls FIO_fflush                         : flush[partitions.o];
+possible calls PWR_task                           : flush[partitions.o], ADC_ShutDown, HMC_APP_TaskPowerDown;
+possible calls PWR_SafeReset                      : flush[partitions.o];
+possible calls DFWA_SetSwapState                  : ioctl[partitions.o];
+possible calls FIO_ioctl                          : ioctl[partitions.o];
+possible calls RADIO_Event_Set                    : Init[radio.o], StartRx[radio.o], SleepRx[radio.o],
+                                                    SendData[radio.o], ReadData[radio.o], Do_CCA[radio.o],
+                                                    Standby[radio.o], StandbyTx[radio.o], StandbyRx[radio.o],
+                                                    Ready[radio.o], ReadyTx[radio.o], ReadyRx[radio.o],
+                                                    Shutdown[radio.o];
+
+
+possible calls MAC_RestoreConfig_From_BkupRAM   : open[partitions.o], read[partitions.o];
+possible calls bnk_close[dvr_banked.o]          : close [dvr_extflash.o];
+possible calls bnk_erase[dvr_banked.o]          : erase [dvr_extflash.o];
+possible calls bnk_flush[dvr_banked.o]          : flush [dvr_extflash.o];
+possible calls bnk_init[dvr_banked.o]           : init [dvr_extflash.o];
+possible calls bnk_ioctl[dvr_banked.o]          : dvr_ioctl [dvr_extflash.o];
+possible calls bnk_open[dvr_banked.o]           : dvr_open [dvr_extflash.o];
+possible calls bnk_read[dvr_banked.o]           : dvr_read [dvr_extflash.o];
+possible calls bnk_restore[dvr_banked.o]        : restore [dvr_extflash.o];
+possible calls bnk_setPowerMode[dvr_banked.o]   : pwrMode [dvr_extflash.o];
+possible calls bnk_timeSlice[dvr_banked.o]      : timeSlice [dvr_extflash.o];
+possible calls bnk_write[dvr_banked.o]          : dvr_write [dvr_extflash.o];
+
+possible calls HD_MsgHandler           : read[partitions.o], write[partitions.o];
+possible calls HD_setDsBuReadingTypes  : erase[partitions.o];
+possible calls HD_clearHistoricalData  : erase[partitions.o];
+possible calls HD_init                 : open[partitions.o];
+possible calls HD_DailyShiftTask       : write[partitions.o];
+
+possible calls init[partitions.o] : init[dvr_extflash.o],     dvr_open[dvr_extflash.o],
+                                    ? init[dvr_banked.o],     ? open[dvr_banked.o],
+                                    init[dvr_cache.o],        open[dvr_cache.o],
+                                    init[dvr_sectPreErase.o], open[dvr_sectPreErase.o],
+                                    ? init[IF_intFlash.o],      dvr_open[IF_intFlash.o],
+                                    bnk_init [ dvr_banked.o ];
+possible calls close[partitions.o] : close[dvr_extflash.o],
+                                     ? close[dvr_banked.o],
+                                     close[dvr_cache.o],
+                                     close[dvr_sectPreErase.o],
+                                     close[IF_intFlash.o];
+possible calls pwrMode[partitions.o] : pwrMode[dvr_extflash.o],
+                                       ? setPowerMode[dvr_banked.o],
+                                       setPowerMode[dvr_cache.o],
+                                       setPowerMode[dvr_sectPreErase.o],
+                                       ? setPowerMode[IF_intFlash.o];
+possible calls read[partitions.o] : dvr_read[dvr_extflash.o],
+                                    ? read[dvr_banked.o],
+                                    read[dvr_cache.o],
+                                    read[dvr_sectPreErase.o],
+                                    dvr_read[IF_intFlash.o];
+possible calls write[partitions.o] : dvr_write[dvr_extflash.o],
+                                     ? write[dvr_banked.o],
+                                     write[dvr_cache.o],
+                                     write[dvr_sectPreErase.o],
+                                     dvr_write[IF_intFlash.o];
+possible calls erase[partitions.o] : erase[dvr_extflash.o],
+                                     ? erase[dvr_banked.o],
+                                     erase[dvr_cache.o],
+                                     erase[dvr_sectPreErase.o],
+                                     erase[IF_intFlash.o];
+possible calls flush[partitions.o] : flush[dvr_extflash.o],
+                                     ? flush[dvr_banked.o],
+                                     flush[dvr_cache.o],
+                                     flush[dvr_sectPreErase.o],
+                                     flush[IF_intFlash.o];
+possible calls restore[partitions.o] : restore[dvr_extflash.o],
+                                      ? restore[dvr_banked.o],
+                                      restore[dvr_cache.o],
+                                      restore[dvr_sectPreErase.o],
+                                      restore[IF_intFlash.o];
+possible calls ioctl[partitions.o] : dvr_ioctl[dvr_extflash.o],
+                                     ? ioctl[dvr_banked.o],
+                                     ioctl[dvr_cache.o],
+                                     ioctl[dvr_sectPreErase.o],
+                                     dvr_ioctl[IF_intFlash.o];
+possible calls PAR_timeSlice : timeSlice[dvr_extflash.o],
+                               ? timeSlice[dvr_banked.o],
+                               timeSlice[dvr_cache.o],
+                               timeSlice[dvr_sectPreErase.o],
+                               ? timeSlice[IF_intFlash.o],
+                               flush[partitions.o];
+
+possible calls ? init[dvr_banked.o]            : init [dvr_extflash.o];
+possible calls ? open[dvr_banked.o]            : dvr_open [dvr_extflash.o];
+possible calls ? close[dvr_banked.o]           : close [dvr_extflash.o];
+possible calls ? setPowerMode[dvr_banked.o]    : pwrMode [dvr_extflash.o];
+possible calls ? read[dvr_banked.o]            : dvr_read [dvr_extflash.o];
+possible calls ? write[dvr_banked.o]           : dvr_write [dvr_extflash.o];
+possible calls ? erase[dvr_banked.o]           : erase [dvr_extflash.o];
+possible calls ? flush[dvr_banked.o]           : flush [dvr_extflash.o];
+possible calls ? ioctl[dvr_banked.o]           : dvr_ioctl [dvr_extflash.o];
+possible calls ? restore[dvr_banked.o]         : restore [dvr_extflash.o];
+possible calls ? timeSlice[dvr_banked.o]       : timeSlice [dvr_extflash.o];
+possible calls ? findCurrentBank[dvr_banked.o] : dvr_read [dvr_extflash.o];
+
+possible calls init[dvr_cache.o]         : bnk_init[dvr_banked.o],          init [dvr_extflash.o];
+possible calls open[dvr_cache.o]         : bnk_open [dvr_banked.o],         dvr_open [dvr_extflash.o];
+possible calls close[dvr_cache.o]        : bnk_close [dvr_banked.o],        close [dvr_extflash.o];
+possible calls setPowerMode[dvr_cache.o] : bnk_setPowerMode [dvr_banked.o], pwrMode [dvr_extflash.o];
+possible calls read[dvr_cache.o]         : bnk_read [dvr_banked.o],         dvr_read [dvr_extflash.o];
+possible calls write[dvr_cache.o]        : bnk_write [dvr_banked.o],        dvr_write [dvr_extflash.o];
+possible calls erase[dvr_cache.o]        : bnk_erase [dvr_banked.o],        erase [dvr_extflash.o];
+possible calls flush[dvr_cache.o]        : bnk_flush [dvr_banked.o],        flush [dvr_extflash.o];
+possible calls ioctl[dvr_cache.o]        : bnk_ioctl [dvr_banked.o],        dvr_ioctl [dvr_extflash.o];
+possible calls restore[dvr_cache.o]      : bnk_restore [dvr_banked.o],      restore [dvr_extflash.o];
+possible calls timeSlice[dvr_cache.o]    : bnk_timeSlice [dvr_banked.o],    timeSlice [dvr_extflash.o];
+
+possible calls init[dvr_sectPreErase.o]         : init [dvr_extflash.o];
+possible calls open[dvr_sectPreErase.o]         : dvr_open [dvr_extflash.o];
+possible calls close[dvr_sectPreErase.o]        : close [dvr_extflash.o];
+possible calls setPowerMode[dvr_sectPreErase.o] : pwrMode [dvr_extflash.o];
+possible calls read[dvr_sectPreErase.o]         : dvr_read [dvr_extflash.o];
+possible calls write[dvr_sectPreErase.o]        : dvr_write [dvr_extflash.o];
+possible calls erase[dvr_sectPreErase.o]        : erase [dvr_extflash.o];
+possible calls flush[dvr_sectPreErase.o]        : flush [dvr_extflash.o];
+possible calls ioctl[dvr_sectPreErase.o]        : dvr_ioctl [dvr_extflash.o];
+possible calls restore[dvr_sectPreErase.o]      : restore [dvr_extflash.o];
+possible calls timeSlice[dvr_sectPreErase.o]    : timeSlice [dvr_extflash.o];
+
+possible calls NWK_ProcessDataIndication [STACK.o] : APP_MSG_UnsecureHandleMessage [APP_MSG_Handler.o], NWK_Request;
+possible calls NWK_SendDataIndication              : APP_MSG_UnsecureHandleMessage [APP_MSG_Handler.o];
+
+possible calls Process_CCAReq    [PHY.o] : Do_CCA [radio.o];
+possible calls Process_StartReq  [PHY.o] : Init [radio.o], Ready [radio.o], Standby [radio.o], RadioEvent_Set[PHY.o];
+possible calls RadioEvent_RxData [PHY.o] : ReadData [radio.o];
+possible calls Process_DataReq   [PHY.o] : SendData [radio.o];
+possible calls Process_StopReq   [PHY.o] : Shutdown [radio.o];
+possible calls RxChannels_Set    [PHY.o] : SleepRx  [radio.o], StartRx [radio.o];
+//RadioEvent_Int
+
+//possible calls Event_Set[radio.o] : RadioEvent_Set [PHY.o];
+possible calls MAC_PacketManag_Acknowledge : TxCallback [pwr_last_gasp.o], STK_MGR_Stats_CB [STACK.o];
+possible calls MAC_SendConfirm             : NWK_Confirm [STACK.o], mac_confirm_cb [SM.o], MAC_GetSetRequest_CB[MAC.o];
+possible calls hwtimer_callback_unblock    : _bsp_systimer_callback;
+possible calls hwtimer_systick_isr[hwtimer_systick.o] : _bsp_systimer_callback;
+possible calls _time_get_elapsed_ticks     : _bsp_get_hwticks;
+possible calls _time_get_elapsed_ticks_fast: _bsp_get_hwticks;
+possible calls _time_get_hwticks           : _bsp_get_hwticks;
+possible calls _time_get_nanoseconds       : _bsp_get_hwticks;
+possible calls _time_get_ticks             : _bsp_get_hwticks;
+possible calls _time_get_microseconds      : _bsp_get_hwticks;
+possible calls _time_notify_kernel         : _bsp_get_hwticks;
+possible calls _int_exception_isr          : task_exception_handler;
+//possible calls _svc_handler                : _klog_block_internal;
+//possible calls _pend_svc                   : _klog_context_switch_internal;
+//possible calls _int_kernel_isr             : _klog_isr_end_internal, _klog_isr_start_internal;
+
+possible calls _io_fclose                  : _io_serial_int_close, _adc_close, _io_i2c_int_close;
+possible calls _io_fflush                  : _io_serial_int_ioctl, _io_i2c_int_ioctl;
+possible calls _io_fseek                   : _io_serial_int_ioctl, _io_i2c_int_ioctl;
+possible calls _io_ioctl                   : _io_serial_int_ioctl, _io_i2c_int_ioctl;
+possible calls _io_fopen                   : _io_serial_int_open, _adc_open, _io_i2c_int_open;
+possible calls _io_fgetc                   : _io_serial_int_read, _io_i2c_int_read;
+possible calls _io_read                    : _io_serial_int_read, _adc_read, _io_i2c_int_read;
+possible calls _io_fputc                   : _io_serial_int_write, _io_i2c_int_write;
+possible calls _io_write                   : _io_serial_int_write, _adc_write, _io_i2c_int_write;
+
+possible calls _io_i2c_int_close     : _ki2c_int_deinit;
+possible calls _io_i2c_int_open      : _ki2c_int_init;
+possible calls _io_i2c_int_read      : _ki2c_int_rx;
+possible calls _io_i2c_int_write     : _ki2c_int_tx;
+possible calls _io_i2c_int_ioctl     : _ki2c_polled_ioctl;
+
+possible calls _io_serial_int_uninstall     : _kuart_int_deinit;
+possible calls _io_serial_int_close         : _io_serial_int_ioctl, _kuart_int_deinit;
+possible calls _io_serial_int_open          : _kuart_int_enable, _kuart_int_init;
+possible calls _io_serial_int_read          : _kuart_int_putc;
+possible calls _io_serial_int_putc_internal : _kuart_int_putc;
+possible calls _io_serial_int_ioctl         : _kuart_polled_ioctl;
+possible calls _io_serial_int_addc          : _kuart_polled_ioctl;
+
+possible calls hwtimer_deinit     : hwtimer_systick_deinit [hwtimer_systick.o],
+                                    hwtimer_systick_stop [hwtimer_systick.o];
+possible calls hwtimer_get_time   : hwtimer_systick_get_time [hwtimer_systick.o];
+possible calls hwtimer_init       : hwtimer_systick_init [hwtimer_systick.o];
+possible calls hwtimer_set_freq   : hwtimer_systick_set_div [hwtimer_systick.o];
+possible calls hwtimer_set_period : hwtimer_systick_set_div [hwtimer_systick.o];
+possible calls hwtimer_start      : hwtimer_systick_start [hwtimer_systick.o];
+possible calls hwtimer_stop       : hwtimer_systick_stop [hwtimer_systick.o];
+
+possible calls TimingPadVerify[internal.o] : TLS_hmac;
+possible calls VerifyMac[internal.o]       : TLS_hmac;
+possible calls BuildMessage[internal.o]    : TLS_hmac;
+
+possible calls dma_deinit          : edma_deinit [edma.o];
+possible calls dma_init            : edma_init [edma.o];
+
+
+possible calls _task_destroy_internal : _mutex_cleanup;
+
+possible calls EVL_MarkSent : EventLogCallbackTest;
+
+possible calls HMC_APP_main : HMC_FINISH_LogOff,
+                              HMC_STRT_LogOn,
+                              HMC_MTRINFO_app,
+                              HMC_TIME_Set_Time,
+                              HMC_DMD_Reset,
+                              HMC_SYNC_applet,
+                              HMC_SS_applet,
+                              HMC_REQ_applet;
+
+
+possible calls Indication_Send[PHY.o] : MAC_Indication [MAC.o];
+
+possible calls TimeReq_Done[MAC.o] : TimeReq_Create [MAC.o];
+
+possible calls DtlsConnectResultCallback [dtls.o] : MFGP_DtlsResultsCallback;
+
+

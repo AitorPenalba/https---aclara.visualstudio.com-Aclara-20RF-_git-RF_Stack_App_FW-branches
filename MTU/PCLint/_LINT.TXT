@@ -1,0 +1,863 @@
+
+--- Module:   V:\MTU\Aclara_BSP\ADC.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\AES.c (C)
+
+--- Module:   V:\MTU\Common\alarm_task.c (C)
+
+--- Module:   V:\Common\ALRM_Handler.c (C)
+
+--- Module:   V:\MTU\Common\APP_MSG_Handler.c (C)
+
+--- Module:   V:\Common\ascii.c (C)
+
+--- Module:   V:\Common\bcd.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\BSP_aclara.c (C)
+   UART_DEBUG_PORT,
+                  ^
+V:\MTU\Aclara_BSP\BSP_aclara.h  106  Error 113: Inconsistent enum declaration
+   UART_HOST_COMM_PORT,
+                      ^
+V:\MTU\Aclara_BSP\BSP_aclara.h  107  Error 113: Inconsistent enum declaration
+} enum_UART_ID;
+^
+V:\MTU\Aclara_BSP\BSP_aclara.h  109  Error 113: Inconsistent enum declaration
+
+--- Module:   V:\Common\BUF_MemoryBuffers.c (C)
+
+--- Module:   V:\Common\buffer.c (C)
+
+--- Module:   V:\Common\byteswap.c (C)
+
+--- Module:   V:\Common\Security\cert-builder.c (C)
+
+--- Module:   V:\Common\NET\COMM.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\CRC.c (C)
+
+--- Module:   V:\Common\crc16_m.c (C)
+
+--- Module:   V:\Common\crc32.c (C)
+
+--- Module:   V:\Common\DBG_CommandLine.c (C)
+      startBlock  = (uint16_t)min( ((uint16_t)strtoul( argv[1], NULL, 0)), tbl63.lastBlockElement );
+                                                                                                  ^
+V:\Common\DBG_CommandLine.c  2865  Warning 666: Expression with side effects passed to repeated parameter 1 in macro 'min'
+      endBlock = (uint16_t)max( startBlock, ( (uint16_t)strtoul( argv[2], NULL, 0 ) ) );
+                                                                                      ^
+V:\Common\DBG_CommandLine.c  2870  Warning 666: Expression with side effects passed to repeated parameter 2 in macro 'max'
+            startTime -= ( tbl61.lpDataSet1.nbrBlksIntsSet * tbl61.lpDataSet1.nbrMaxIntTimeSet * 60000 );
+                                                                                                        ^
+V:\Common\DBG_CommandLine.c  2907  Warning 647: Suspicious truncation
+            startTime -= ( tbl63.nbrValidInt * tbl61.lpDataSet1.nbrMaxIntTimeSet * TIME_TICKS_PER_MIN );
+                                                                                                       ^
+V:\Common\DBG_CommandLine.c  2912  Warning 647: Suspicious truncation
+            pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "%s ", argv[ arg ] );
+                                                                                  ^
+V:\Common\DBG_CommandLine.c  4209  Info 737: Loss of sign in promotion from int to unsigned int
+V:\Common\DBG_CommandLine.c  4209  Info 713: Loss of precision (arg. no. 2) (unsigned int to int)
+                     pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), ".. " );
+                                                                                           ^
+V:\Common\DBG_CommandLine.c  4229  Info 737: Loss of sign in promotion from int to unsigned int
+V:\Common\DBG_CommandLine.c  4229  Info 713: Loss of precision (arg. no. 2) (unsigned int to int)
+                     pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "\n%06x ", tblOffset );
+                                                                                           ^
+V:\Common\DBG_CommandLine.c  4237  Info 737: Loss of sign in promotion from int to unsigned int
+V:\Common\DBG_CommandLine.c  4237  Info 713: Loss of precision (arg. no. 2) (unsigned int to int)
+                  pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "%02X ", pBuffer->data[i] );
+                                                                                        ^
+V:\Common\DBG_CommandLine.c  4239  Info 737: Loss of sign in promotion from int to unsigned int
+V:\Common\DBG_CommandLine.c  4239  Info 713: Loss of precision (arg. no. 2) (unsigned int to int)
+  retVal = HMC_ENG_getHmgEngStats( (void *) &fileData, sizeof(fileData) );
+                                                                         ^
+V:\Common\DBG_CommandLine.c  4282  Info 838: Previously assigned value to variable 'retVal' has not been used
+
+    --- Wrap-up for Module: V:\Common\DBG_CommandLine.c
+
+R:ge_kv2c_pjt.lnt  17  Info 766: Header file 'V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.h' not used in module 'DBG_CommandLine.c'
+
+--- Module:   V:\Common\DBG_SerialDebug.c (C)
+
+--- Module:   V:\MTU\Common\demand.c (C)
+
+--- Module:   V:\Common\DFW\dfw_app.c (C)
+
+--- Module:   V:\Common\DFW\dfw_interface.c (C)
+
+--- Module:   V:\Common\DFW\dfw_pckt.c (C)
+
+--- Module:   V:\Common\DFW\dfwtd_config.c (C)
+
+--- Module:   V:\Common\NET\DTLS\dtls.c (C)
+
+    --- Wrap-up for Module: V:\Common\NET\DTLS\dtls.c
+
+R:ge_kv2c_pjt.lnt  24  Info 843: Variable '_skipRandomNumber' (line 328, file V:\Common\NET\DTLS\dtls.c) could be declared as const
+V:\Common\NET\DTLS\dtls.c  328  Info 830: Location cited in prior message
+
+--- Module:   V:\Common\Driver\dvr_banked.c (C)
+
+--- Module:   V:\Common\Driver\dvr_cache.c (C)
+
+--- Module:   V:\Common\Driver\dvr_extflash.c (C)
+
+--- Module:   V:\Common\Driver\dvr_sectPreErase.c (C)
+
+--- Module:   V:\Common\Driver\dvr_sharedMem.c (C)
+
+--- Module:   V:\Common\Security\ecc108_apps.c (C)
+};
+^
+V:\Common\Security\ecc108_apps.c  405  Info 785: Too few initializers for aggregate 'intROM' of type 'const struct intFlashNvMap_t'
+
+--- Module:   V:\Common\Security\ecc108_comm.c (C)
+
+--- Module:   V:\Common\Security\ecc108_comm_marshaling.c (C)
+
+--- Module:   V:\Common\Security\ecc108_i2c.c (C)
+
+--- Module:   V:\Common\Security\ecc108_mqx.c (C)
+
+--- Module:   V:\MTU\Common\ed_config.c (C)
+
+--- Module:   V:\MTU\Common\endpt_cim_cmd.c (C)
+
+--- Module:   V:\Common\eng_res.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.c (C)
+
+--- Module:   V:\Common\OS\Event.c (C)
+
+--- Module:   V:\Common\EVL_event_log.c (C)
+
+--- Module:   V:\Common\exe_list.c (C)
+
+--- Module:   V:\Common\file_io.c (C)
+#define FILENAME( x ) [ x ] = #x
+                               ^
+V:\Common\file_io.c  83  Info 773: Expression-like macro 'FILENAME' not parenthesized
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\findSYNC.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\fir_filt_circ_buff.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c (C)
+
+--- Module:   V:\Common\FTM1.c (C)
+
+--- Module:   V:\Common\FTM3.c (C)
+
+--- Module:   V:\Common\NET\PHY\galois.c (C)
+
+--- Module:   V:\Common\gpio.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\gresample.c (C)
+
+--- Module:   V:\Common\HEEP_util.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+
+--- Module:   V:\MTU\Common\historyd.c (C)
+   addQualityCodeSuspect = ( crcValue == hdFileData_.CRC ) ? false : true;
+                                                                     ^
+V:\MTU\Common\historyd.c  355  Info 838: Previously assigned value to variable 'addQualityCodeSuspect' has not been used
+        qualCode |= ( addQualityCodeSuspect ) ?  0x80 : 0x00; //set MSB, additional QC if suspect data
+                                                            ^
+V:\MTU\Common\historyd.c  487  Error 64: Type mismatch (assignment) (int/enum)
+          qualCode |= ( addQualityCodeSuspect ) ?  0x80 : 0x00; //set MSB, additional QC if suspect data
+                                                              ^
+V:\MTU\Common\historyd.c  496  Error 64: Type mismatch (assignment) (int/enum)
+
+--- Module:   V:\MTU\Common\HMC\hmc_app.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+
+--- Module:   V:\MTU\Common\HMC\hmc_demand.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+
+--- Module:   V:\MTU\Common\HMC\hmc_diags.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_display.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_ds.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_eng.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+
+--- Module:   V:\MTU\Common\HMC\hmc_finish.c (C)
+         HMC_SS_applet( HMC_APP_API_CMD_LOG_OFF, NULL);
+                                                      ^
+V:\MTU\Common\HMC\hmc_finish.c  189  Warning 534: Ignoring return value of function 'HMC_SS_applet(unsigned char, void *)' (compare with line 80, file V:\MTU\Common\HMC\hmc_snapshot.h, module V:\MTU\Common\HMC\hmc_app.c)
+V:\MTU\Common\HMC\hmc_snapshot.h  80  Info 830: Location cited in prior message
+         HMC_SS_applet( HMC_APP_API_CMD_LOG_OFF, NULL);
+                                                      ^
+V:\MTU\Common\HMC\hmc_finish.c  223  Warning 534: Ignoring return value of function 'HMC_SS_applet(unsigned char, void *)' (compare with line 80, file V:\MTU\Common\HMC\hmc_snapshot.h, module V:\MTU\Common\HMC\hmc_app.c)
+V:\MTU\Common\HMC\hmc_snapshot.h  80  Info 830: Location cited in prior message
+
+--- Module:   V:\MTU\Common\HMC\hmc_msg.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+                  numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
+                                                                                          ^
+V:\MTU\Common\HMC\hmc_msg.c  306  Info 734: Loss of precision (assignment) (32 bits to 16 bits)
+                        numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
+                                                                                                ^
+V:\MTU\Common\HMC\hmc_msg.c  568  Info 734: Loss of precision (assignment) (32 bits to 16 bits)
+
+--- Module:   V:\MTU\Common\HMC\hmc_mtr_info.c (C)
+
+    --- Wrap-up for Module: V:\MTU\Common\HMC\hmc_mtr_info.c
+
+R:ge_kv2c_pjt.lnt  61  Info 752: local declarator 'searchDataBlockReadingType(const struct uomLookupEntry_t *, struct uomData_t *)' (line 461, file V:\MTU\Common\HMC\hmc_mtr_info.c) not referenced
+V:\MTU\Common\HMC\hmc_mtr_info.c  461  Info 830: Location cited in prior message
+
+--- Module:   V:\MTU\Common\HMC\hmc_prg_mtr.c (C)
+                  HMC_APP_ResetAppletTimeout(); //reset applet timer if we are still programming
+                                              ^
+V:\MTU\Common\HMC\hmc_prg_mtr.c  1354  Warning 534: Ignoring return value of function 'HMC_APP_ResetAppletTimeout(void)' (compare with line 269, file V:\MTU\Common\HMC\hmc_app.c)
+V:\MTU\Common\HMC\hmc_app.c  269  Info 830: Location cited in prior message
+         TIME_UTIL_ConvertSysFormatToMtrHighFormat( &sysTime, &procParams->DateTime );  /* Seconds not used by MP70 */
+                                                                                     ^
+V:\MTU\Common\HMC\hmc_prg_mtr.c  2667  Warning 534: Ignoring return value of function 'TIME_UTIL_ConvertSysFormatToMtrHighFormat(const struct sysTime_t *, struct MtrTimeFormatHighPrecision_t *)' (compare with line 98, file V:\Common\time_util.h, module V:\Common\ALRM_Handler.c)
+V:\Common\time_util.h  98  Info 830: Location cited in prior message
+
+--- Module:   V:\MTU\Common\HMC\hmc_prot.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+
+--- Module:   V:\MTU\Common\HMC\hmc_request.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+
+--- Module:   V:\MTU\Common\HMC\hmc_seq_id.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_snapshot.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_start.c (C)
+{
+^
+V:\MTU\Common\HMC\hmc_start.c  492  Warning 578: Declaration of symbol 'buffer' hides symbol 'buffer' (line 1630, file V:\Common\wolfssl\wolfssl\internal.h)
+V:\Common\wolfssl\wolfssl\internal.h  1630  Info 830: Location cited in prior message
+{
+^
+V:\MTU\Common\HMC\hmc_start.c  509  Warning 578: Declaration of symbol 'buffer' hides symbol 'buffer' (line 1630, file V:\Common\wolfssl\wolfssl\internal.h)
+V:\Common\wolfssl\wolfssl\internal.h  1630  Info 830: Location cited in prior message
+
+    --- Wrap-up for Module: V:\MTU\Common\HMC\hmc_start.c
+
+R:ge_kv2c_pjt.lnt  67  Info 766: Header file 'V:\MTU\OS\lib\ep_k24f120m.iar\debug\bsp\serial.h' not used in module 'hmc_start.c'
+
+--- Module:   V:\MTU\Common\HMC\hmc_sync.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+
+--- Module:   V:\MTU\Common\HMC\hmc_time.c (C)
+         unsigned write          : 1;  /* 0 = Read Operation, 1 = Write Operation */
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  223  Error 114: Inconsistent structure declaration for tag '(untagged)'
+         unsigned rsvd           : 2;
+                                 ^
+V:\MTU\Common\HMC\hmc_eng.h  224  Error 114: Inconsistent structure declaration for tag '(untagged)'
+
+    --- Wrap-up for Module: V:\MTU\Common\HMC\hmc_time.c
+
+R:ge_kv2c_pjt.lnt  69  Info 749: local enumeration constant 'mfgProcPgmCtrlParam::eMP_PGMCTRL_STRT_PGM' (line 99, file V:\MTU\Common\HMC\hmc_time.c) not referenced
+V:\MTU\Common\HMC\hmc_time.c  99  Info 830: Location cited in prior message
+R:ge_kv2c_pjt.lnt  69  Info 749: local enumeration constant 'mfgProcPgmCtrlParam::eMP_PGMCTRL_STP_PGM_MX_DEMANDS_LOGOFF' (line 100, file V:\MTU\Common\HMC\hmc_time.c) not referenced
+V:\MTU\Common\HMC\hmc_time.c  100  Info 830: Location cited in prior message
+R:ge_kv2c_pjt.lnt  69  Info 749: local enumeration constant 'mfgProcPgmCtrlParam::eMP_PGMCTRL_STP_NO_CLR_LOGOFF' (line 101, file V:\MTU\Common\HMC\hmc_time.c) not referenced
+V:\MTU\Common\HMC\hmc_time.c  101  Info 830: Location cited in prior message
+R:ge_kv2c_pjt.lnt  69  Info 749: local enumeration constant 'mfgProcPgmCtrlParam::eMP_PGMCTRL_STP_CLR_MAX_DMD_NO_LOGOFF' (line 103, file V:\MTU\Common\HMC\hmc_time.c) not referenced
+V:\MTU\Common\HMC\hmc_time.c  103  Info 830: Location cited in prior message
+
+--- Module:   V:\MTU\Common\HMC\hmc_tsk_lst.c (C)
+
+--- Module:   V:\MTU\Common\ID_intervalTask.c (C)
+                              (void)memcpy( (uint8_t *)&LP_Config_.multiplier[ch], st15.multiplier, sizeof(LP_Config_.multiplier[ch]) );
+                                                                                                                                      ^
+V:\MTU\Common\ID_intervalTask.c  956  Info 866: Unusual use of 'SYM' in argument to sizeof
+
+--- Module:   V:\MTU\Common\IDL_IdleProcess.c (C)
+
+--- Module:   V:\Common\Driver\IF_intFlash.c (C)
+
+--- Module:   V:\Common\NET\indication.c (C)
+
+--- Module:   V:\MTU\Common\HMC\intf_cim_cmd.c (C)
+
+    --- Wrap-up for Module: V:\MTU\Common\HMC\intf_cim_cmd.c
+
+R:ge_kv2c_pjt.lnt  75  Info 766: Header file 'C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.2\arm\inc\c\stdio.h' not used in module 'intf_cim_cmd.c'
+
+--- Module:   V:\Common\invert_bits.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\IO_setup.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\LED.c (C)
+
+--- Module:   V:\Common\NET\MAC\MAC.c (C)
+
+--- Module:   V:\Common\NET\MAC\MAC_FrameEncoder.c (C)
+
+--- Module:   V:\Common\NET\MAC\MAC_FrameManagement.c (C)
+
+--- Module:   V:\Common\NET\MAC\MAC_PacketManagement.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\MaximizeEyeOpening.c (C)
+
+--- Module:   V:\Common\mem_chk.c (C)
+
+--- Module:   V:\Common\OS\MessageQ.c (C)
+
+--- Module:   V:\Common\MFG_Dtls.c (C)
+
+--- Module:   V:\Common\MFG_Port.c (C)
+} struct_CmdLineEntry;
+^
+V:\Common\MFG_Port.c  252  Warning 631: tag 'struct_CmdLineEntry' defined differently at line 173, file V:\Common\DBG_CommandLine.c
+V:\Common\DBG_CommandLine.c  173  Info 830: Location cited in prior message
+   DST_getDstOffset( (int16_t *) &nDstOffset );
+                                             ^
+V:\Common\MFG_Port.c  3945  Info 740: Unusual pointer cast (incompatible indirect types)
+      bytesReceived = UART_read( UART_HOST_COMM_PORT, rx_string, sizeof( rx_string ) );
+                                                                                      ^
+V:\Common\MFG_Port.c  6234  Info 734: Loss of precision (assignment) (32 bits to 16 bits)
+}
+^
+V:\Common\MFG_Port.c  11616  Info 818: Pointer parameter 'argv' (line 11593) could be declared as pointing to const
+V:\Common\MFG_Port.c  11593  Info 830: Location cited in prior message
+}
+^
+V:\Common\MFG_Port.c  11655  Info 818: Pointer parameter 'argv' (line 11632) could be declared as pointing to const
+V:\Common\MFG_Port.c  11632  Info 830: Location cited in prior message
+}
+^
+V:\Common\MFG_Port.c  11694  Info 818: Pointer parameter 'argv' (line 11671) could be declared as pointing to const
+V:\Common\MFG_Port.c  11671  Info 830: Location cited in prior message
+
+--- Module:   V:\Common\MIMT_info.c (C)
+
+--- Module:   V:\Common\mode_config.c (C)
+
+--- Module:   V:\Common\NET\MTLS\mtls.c (C)
+
+--- Module:   V:\Common\OS\Mutex.c (C)
+
+--- Module:   V:\Common\NH_NoiseHistData.c (C)
+
+--- Module:   V:\Common\object_list.c (C)
+
+--- Module:   V:\MTU\Common\OR_MR_Handler.c (C)
+
+--- Module:   V:\Common\pack.c (C)
+
+--- Module:   V:\Common\partitions.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\PerformCFOCompensation.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\phase2freq_wi_unwrap.c (C)
+
+--- Module:   V:\Common\NET\PHY\PHY.c (C)
+PHY_SET_STATUS_e PHY_Attribute_Set( PHY_SetReq_t const *pSetReq); // Prototype should be only used by phy.c and radio.c only.
+                                                                ^
+V:\Common\NET\PHY\PHY.c  416  Info 762: Redundantly declared symbol 'PHY_Attribute_Set(const struct PHY_SetReq_t *)' previously declared at line 206, file V:\Common\NET\PHY\PHY.h
+V:\Common\NET\PHY\PHY.h  206  Info 830: Location cited in prior message
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\preamble_detect.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_data.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_initialize.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\processDerotatedSamples.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c (C)
+
+--- Module:   V:\MTU\Common\pwr_config.c (C)
+
+--- Module:   V:\MTU\Common\pwr_last_gasp.c (C)
+
+--- Module:   V:\MTU\Common\pwr_restore.c (C)
+
+--- Module:   V:\MTU\Common\pwr_task.c (C)
+
+--- Module:   V:\Common\OS\Queue.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\radio.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\Si446x_Library\radio_comm.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\radio_config_normal.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\radio_hal.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\radio_TCXO.c (C)
+
+--- Module:   V:\Common\rand.c (C)
+
+--- Module:   V:\MTU\Common\RG_CF_Handler.c (C)
+
+--- Module:   V:\MTU\Common\RG_MD_Handler.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\rng.c (C)
+
+--- Module:   V:\Common\NET\PHY\rs.c (C)
+
+--- Module:   V:\Common\NET\PHY\rsdec.c (C)
+
+--- Module:   V:\Common\NET\PHY\rsenc.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\RTC.c (C)
+   UART_DEBUG_PORT,
+                  ^
+V:\MTU\Aclara_BSP\BSP_aclara.h  106  Error 113: Inconsistent enum declaration
+   UART_HOST_COMM_PORT,
+                      ^
+V:\MTU\Aclara_BSP\BSP_aclara.h  107  Error 113: Inconsistent enum declaration
+} enum_UART_ID;
+^
+V:\MTU\Aclara_BSP\BSP_aclara.h  109  Error 113: Inconsistent enum declaration
+
+--- Module:   V:\Common\runTimeInit.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\ScaleClipFreq2phase.c (C)
+
+--- Module:   V:\Common\SELF_test.c (C)
+
+--- Module:   V:\Common\OS\Semaphore.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c (C)
+      Pro2Cmd[1] &= 0x7F;
+                        ^
+V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c  170  Info 771: Symbol 'Pro2Cmd' (line 108) conceivably not initialized
+V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c  108  Info 830: Location cited in prior message
+        Pro2Cmd[cmdIndex] = va_arg (argList, int);
+#...                          /*lint  -save  -e* */( __ALIGNOF__(int) > __VA_ST
+                                                ^
+V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c  470  Warning 686: Option '-e*' is suspicious because of 'the likelihood of causing meaningless output'; receiving a syntax error inside a library file most likely means something is wrong with your Lint configuration
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\sign.c (C)
+
+--- Module:   V:\Common\NET\SM.c (C)
+  .StatsCaptureTime              = SM_STATS_CAPTURE_TIME_DEFAULT  ,
+                                   ^
+V:\Common\NET\SM.c  131  Info 708: union initialization
+  .NetworkStateTransitionTime    = SM_NETWORK_STATE_TRANSITION_TIME_DEFAULT, /*lint !e651 */
+#...                              {0, 0}
+                                   ^
+V:\Common\NET\SM.c  138  Info 708: union initialization
+
+--- Module:   V:\Common\NET\smtd_config.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SoftDemodulator.c (C)
+
+--- Module:   V:\Common\Driver\spi_mstr.c (C)
+
+--- Module:   V:\Common\NET\IP\STACK.c (C)
+
+--- Module:   V:\Common\stack_check.c (C)
+
+--- Module:   V:\MTU\Common\STRT_Startup.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator.c (C)
+
+--- Module:   V:\Common\sys_busy.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\sys_clock.c (C)
+
+--- Module:   V:\MTU\Common\Task.c (C)
+
+--- Module:   V:\Common\Temperature.c (C)
+
+--- Module:   V:\Common\OS\TickTime.c (C)
+
+--- Module:   V:\Common\time_DST.c (C)
+
+--- Module:   V:\Common\time_sync.c (C)
+
+--- Module:   V:\Common\time_sys.c (C)
+
+--- Module:   V:\Common\time_util.c (C)
+
+--- Module:   V:\Common\timer_util.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\UART.c (C)
+
+--- Module:   V:\Common\vbat_reg.c (C)
+
+--- Module:   V:\MTU\Common\version.c (C)
+
+--- Module:   V:\Common\virgin_device.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\WDOG.c (C)
+
+/// Start of Pass 2 ///
+
+--- Module:   V:\MTU\Aclara_BSP\ADC.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\AES.c (C)
+
+--- Module:   V:\MTU\Common\alarm_task.c (C)
+
+--- Module:   V:\Common\ALRM_Handler.c (C)
+
+--- Module:   V:\MTU\Common\APP_MSG_Handler.c (C)
+
+--- Module:   V:\Common\ascii.c (C)
+
+--- Module:   V:\Common\bcd.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\BSP_aclara.c (C)
+
+--- Module:   V:\Common\BUF_MemoryBuffers.c (C)
+
+--- Module:   V:\Common\buffer.c (C)
+
+--- Module:   V:\Common\byteswap.c (C)
+
+--- Module:   V:\Common\Security\cert-builder.c (C)
+
+--- Module:   V:\Common\NET\COMM.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\CRC.c (C)
+
+--- Module:   V:\Common\crc16_m.c (C)
+
+--- Module:   V:\Common\crc32.c (C)
+
+--- Module:   V:\Common\DBG_CommandLine.c (C)
+
+--- Module:   V:\Common\DBG_SerialDebug.c (C)
+
+--- Module:   V:\MTU\Common\demand.c (C)
+
+--- Module:   V:\Common\DFW\dfw_app.c (C)
+
+--- Module:   V:\Common\DFW\dfw_interface.c (C)
+
+--- Module:   V:\Common\DFW\dfw_pckt.c (C)
+
+--- Module:   V:\Common\DFW\dfwtd_config.c (C)
+
+--- Module:   V:\Common\NET\DTLS\dtls.c (C)
+
+--- Module:   V:\Common\Driver\dvr_banked.c (C)
+
+--- Module:   V:\Common\Driver\dvr_cache.c (C)
+
+--- Module:   V:\Common\Driver\dvr_extflash.c (C)
+
+--- Module:   V:\Common\Driver\dvr_sectPreErase.c (C)
+
+--- Module:   V:\Common\Driver\dvr_sharedMem.c (C)
+
+--- Module:   V:\Common\Security\ecc108_apps.c (C)
+
+--- Module:   V:\Common\Security\ecc108_comm.c (C)
+
+--- Module:   V:\Common\Security\ecc108_comm_marshaling.c (C)
+
+--- Module:   V:\Common\Security\ecc108_i2c.c (C)
+
+--- Module:   V:\Common\Security\ecc108_mqx.c (C)
+
+--- Module:   V:\MTU\Common\ed_config.c (C)
+
+--- Module:   V:\MTU\Common\endpt_cim_cmd.c (C)
+
+--- Module:   V:\Common\eng_res.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.c (C)
+
+--- Module:   V:\Common\OS\Event.c (C)
+
+--- Module:   V:\Common\EVL_event_log.c (C)
+
+--- Module:   V:\Common\exe_list.c (C)
+
+--- Module:   V:\Common\file_io.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\findSYNC.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\fir_filt_circ_buff.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c (C)
+
+--- Module:   V:\Common\FTM1.c (C)
+
+--- Module:   V:\Common\FTM3.c (C)
+
+--- Module:   V:\Common\NET\PHY\galois.c (C)
+
+--- Module:   V:\Common\gpio.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\gresample.c (C)
+
+--- Module:   V:\Common\HEEP_util.c (C)
+
+--- Module:   V:\MTU\Common\historyd.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_app.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_demand.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_diags.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_display.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_ds.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_eng.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_finish.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_msg.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_mtr_info.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_prg_mtr.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_prot.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_request.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_seq_id.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_snapshot.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_start.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_sync.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_time.c (C)
+
+--- Module:   V:\MTU\Common\HMC\hmc_tsk_lst.c (C)
+
+--- Module:   V:\MTU\Common\ID_intervalTask.c (C)
+
+--- Module:   V:\MTU\Common\IDL_IdleProcess.c (C)
+
+--- Module:   V:\Common\Driver\IF_intFlash.c (C)
+
+--- Module:   V:\Common\NET\indication.c (C)
+
+--- Module:   V:\MTU\Common\HMC\intf_cim_cmd.c (C)
+
+--- Module:   V:\Common\invert_bits.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\IO_setup.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\LED.c (C)
+
+--- Module:   V:\Common\NET\MAC\MAC.c (C)
+
+--- Module:   V:\Common\NET\MAC\MAC_FrameEncoder.c (C)
+
+--- Module:   V:\Common\NET\MAC\MAC_FrameManagement.c (C)
+
+--- Module:   V:\Common\NET\MAC\MAC_PacketManagement.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\MaximizeEyeOpening.c (C)
+
+--- Module:   V:\Common\mem_chk.c (C)
+
+--- Module:   V:\Common\OS\MessageQ.c (C)
+
+--- Module:   V:\Common\MFG_Dtls.c (C)
+
+--- Module:   V:\Common\MFG_Port.c (C)
+
+--- Module:   V:\Common\MIMT_info.c (C)
+
+--- Module:   V:\Common\mode_config.c (C)
+
+--- Module:   V:\Common\NET\MTLS\mtls.c (C)
+
+--- Module:   V:\Common\OS\Mutex.c (C)
+
+--- Module:   V:\Common\NH_NoiseHistData.c (C)
+
+--- Module:   V:\Common\object_list.c (C)
+
+--- Module:   V:\MTU\Common\OR_MR_Handler.c (C)
+
+--- Module:   V:\Common\pack.c (C)
+
+--- Module:   V:\Common\partitions.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\PerformCFOCompensation.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\phase2freq_wi_unwrap.c (C)
+
+--- Module:   V:\Common\NET\PHY\PHY.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\preamble_detect.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_data.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_initialize.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\processDerotatedSamples.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c (C)
+
+--- Module:   V:\MTU\Common\pwr_config.c (C)
+
+--- Module:   V:\MTU\Common\pwr_last_gasp.c (C)
+
+--- Module:   V:\MTU\Common\pwr_restore.c (C)
+
+--- Module:   V:\MTU\Common\pwr_task.c (C)
+
+--- Module:   V:\Common\OS\Queue.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\radio.c (C)
+
+During Specific Walk:
+  File V:\Common\DBG_CommandLine.c line 10365: RADIO_Get_RSSI(0?, 3200?, [1]?, 1?, 0?, 0?) #2
+V:\Common\Radio\Si446x_Radio\radio.c  4746  Warning 429: Custodial pointer 'buf' (line 4669) has not been freed or returned
+V:\Common\Radio\Si446x_Radio\radio.c  4669  Info 830: Location cited in prior message
+
+--- Module:   V:\Common\Radio\Si446x_Radio\Si446x_Library\radio_comm.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\radio_config_normal.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\radio_hal.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\radio_TCXO.c (C)
+
+--- Module:   V:\Common\rand.c (C)
+
+--- Module:   V:\MTU\Common\RG_CF_Handler.c (C)
+
+--- Module:   V:\MTU\Common\RG_MD_Handler.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\rng.c (C)
+
+--- Module:   V:\Common\NET\PHY\rs.c (C)
+
+--- Module:   V:\Common\NET\PHY\rsdec.c (C)
+
+--- Module:   V:\Common\NET\PHY\rsenc.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\RTC.c (C)
+
+--- Module:   V:\Common\runTimeInit.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\ScaleClipFreq2phase.c (C)
+
+--- Module:   V:\Common\SELF_test.c (C)
+
+--- Module:   V:\Common\OS\Semaphore.c (C)
+
+--- Module:   V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\PreambleDetector\sign.c (C)
+
+--- Module:   V:\Common\NET\SM.c (C)
+
+--- Module:   V:\Common\NET\smtd_config.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SoftDemodulator.c (C)
+
+--- Module:   V:\Common\Driver\spi_mstr.c (C)
+
+--- Module:   V:\Common\NET\IP\STACK.c (C)
+
+--- Module:   V:\Common\stack_check.c (C)
+
+--- Module:   V:\MTU\Common\STRT_Startup.c (C)
+
+--- Module:   V:\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator.c (C)
+
+--- Module:   V:\Common\sys_busy.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\sys_clock.c (C)
+
+--- Module:   V:\MTU\Common\Task.c (C)
+
+--- Module:   V:\Common\Temperature.c (C)
+
+--- Module:   V:\Common\OS\TickTime.c (C)
+
+--- Module:   V:\Common\time_DST.c (C)
+
+--- Module:   V:\Common\time_sync.c (C)
+
+--- Module:   V:\Common\time_sys.c (C)
+
+--- Module:   V:\Common\time_util.c (C)
+
+--- Module:   V:\Common\timer_util.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\UART.c (C)
+
+--- Module:   V:\Common\vbat_reg.c (C)
+
+--- Module:   V:\MTU\Common\version.c (C)
+
+--- Module:   V:\Common\virgin_device.c (C)
+
+--- Module:   V:\MTU\Aclara_BSP\WDOG.c (C)
+
+--- Global Wrap-up
+
+Info 765: external 'pTskName_BuAm' (line 237, file V:\MTU\Common\Task.c) could be made static
+V:\MTU\Common\Task.c  237  Info 830: Location cited in prior message
+Info 765: external 'pTskName_MfgUartRecv' (line 230, file V:\MTU\Common\Task.c) could be made static
+V:\MTU\Common\Task.c  230  Info 830: Location cited in prior message
+Info 765: external 'pTskName_Sm' (line 224, file V:\MTU\Common\Task.c) could be made static
+V:\MTU\Common\Task.c  224  Info 830: Location cited in prior message
+Warning 526: Symbol '__ALIGNOF__()' (line 470, file V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c) not defined
+V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c  470  Info 830: Location cited in prior message
+Warning 628: no argument information provided for function '__ALIGNOF__()' (line 470, file V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c)
+V:\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c  470  Info 830: Location cited in prior message
+Info 765: external 'searchDataBlock(enum meterReadingType, const struct DataBlock_t *, enum blockIdentifier_t *)' (line 460, file V:\MTU\Common\HMC\hmc_mtr_info.c) could be made static
+V:\MTU\Common\HMC\hmc_mtr_info.c  460  Info 830: Location cited in prior message
+Info 765: external 'searchHmcUomPowerOfTen(enum meterReadingType, unsigned char *)' (line 462, file V:\MTU\Common\HMC\hmc_mtr_info.c) could be made static
+V:\MTU\Common\HMC\hmc_mtr_info.c  462  Info 830: Location cited in prior message
+Info 765: external 'searchDirectReadPowerOfTen(enum meterReadingType, unsigned char *)' (line 463, file V:\MTU\Common\HMC\hmc_mtr_info.c) could be made static
+V:\MTU\Common\HMC\hmc_mtr_info.c  463  Info 830: Location cited in prior message
+Info 765: external 'searchUomLookupEntry(enum meterReadingType, const struct uomLookupEntry_t *, struct uomData_t *)' (line 459, file V:\MTU\Common\HMC\hmc_mtr_info.c) could be made static
+V:\MTU\Common\HMC\hmc_mtr_info.c  459  Info 830: Location cited in prior message
+Note 974: Worst case function for stack usage: 'APP_MSG_SecurityHandler' is recursive, loop contains call to 'LED_checkModeStatus'. See +stack for a full report.
+Note 900: Successful completion, 110 messages produced

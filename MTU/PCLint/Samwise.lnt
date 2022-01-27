@@ -1,0 +1,300 @@
+//  Standard lint options
+//+v  // Sends output to stdout and stderr; causes line doubling in IAR IDE.`
+
+//-max_threads=8
+-width( 0 ) // Don't break long lines.
+
+//-summary
++e900       // always produce at least one line of output
+
+// Use the following line if you want to know the exact location of the error on the line
+//-hb^3
+
+//-fdc  // Don't distinguish between signed and unsigned char
+//++dva_arg(ap, T)=(0)
+-emacro(*,va_arg)
+//-frc     // remove commas before __VA_ARGS__
+
+-esym(526,__INTADDR__)
+-esym(628,__INTADDR__)
+
+-e641       // Don't complain about converting enum to int
+-d__packed=
+-dPACK_MID=
+
+co-iar.lnt  // Include the standard IAR settings
+includes.lnt
+
++libdir(%COMP_DIR%\arm\inc\c)
++libdir(%COMP_DIR%\arm\CMSIS\Include)
++libdir(%COMP_DIR%\arm\inc\Freescale)
+
++libdir("ROOT_DIR\MTU\%OS_DIR%\lib\ep_k24f120m.iar\debug")
++libdir("ROOT_DIR\MTU\%OS_DIR%\lib\ep_k24f120m.iar\debug\bsp")
++libdir("ROOT_DIR\MTU\%OS_DIR%\lib\ep_k24f120m.iar\debug\psp")
++libdir("ROOT_DIR\MTU\%OS_DIR%\lib\ep_k24f120m.iar\debug\bsp\Generated_Code")
++libdir("ROOT_DIR\MTU\%OS_DIR%\config\ep_k24f120m")
++libdir("ROOT_DIR\MTU\%OS_DIR%")
++libdir("ROOT_DIR\MTU\%OS_DIR%\mqx\source\include")
++libdir("ROOT_DIR\MTU\%OS_DIR%\mqx\source\io")
++libdir("ROOT_DIR\MTU\%OS_DIR%\mqx\source\io\serial")
++libh("si446x_api_lib.h")
++libdir("ROOT_DIR\Common\Radio\Si446x_Radio\Si446x_Library")
++libdir("ROOT_DIR\Common\Radio\Si446x_Radio\Si446x_Library\Si446x")
++libdir("ROOT_DIR\Common\wolfssl")
++libdir("ROOT_DIR\Common\wolfssl\wolfssl")
++libdir("ROOT_DIR\Common\wolfssl\wolfcrypt")
++libdir("ROOT_DIR\Common\wolfssl\wolfssl\wolfcrypt")
+
+
+-i%COMP_DIR%/arm/inc
+-i%COMP_DIR%/arm/inc/c
+-i%COMP_DIR%/arm/inc/Freescale
+-i%COMP_DIR%/arm/CMSIS/Include
+
+-dEP=1
+-dHAL_TARGET_HARDWARE=HAL_TARGET_Y84020_1_REV_A
+
+/************************************************************/
+
+-header(uint_32.h)
+
+// This definition is necessary for WOLFSSL CCM library
+-dWOLFSSL_USER_SETTINGS
+
+-e46  // Compiler allows bit fields of type other than bool, int, unsigned int
+-e451 // Repeated include files
+-e537 // Repeated include files
+-e754 // structure members not referenced
+-e783 // Line does not end with new-line
+-e793 // limit of string name exceeded
+-e835 // Right side argument of << is 0
+-e845 // Right side argument of + is 0
+
+-esym(522,dvr_shm_lock,dvr_shm_unlock)
+-esym( 718, __set_SP)   // compiler built-in functions - undeclared
+-esym( 746, __set_SP)   // compiler built-in functions - no prototype
+-esym( 715, Arg0, argc, argv )   // Unreferenced function argument
+-esym(756,uint8,uint16,uint32,uint64,int8,int16,int32,int64,float32,float64,bool_t) //Remove the not referenced errors
+-esym(769,bool_false,bool_true)
+-esym(458, EnableDebugPrint_) // Unprotected read access is OK. Only used for debugging.
+-esym(534,memcpy,memset,printf,fprintf,_io_fprintf,sprintf,snprintf)   // ignoring return value
+
+-emacro(572,BIG_ENDIAN_16BIT)
+-emacro(778,BIG_ENDIAN_16BIT)
+-emacro(835,BIG_ENDIAN_16BIT)
+-emacro(413,offsetof)
+-emacro(516,offsetof)
+-emacro(545,offsetof)
+-emacro(718,offsetof)
+-emacro(737,offsetof)
+-emacro(746,offsetof)
+-emacro(716,RESET)
+-emacro(527,RESET)
+-emacro(774,BRN_OUT)
+-emacro(568,min)
+--emacro(568,min)
+-emacro(650,min)
+--emacro(650,min)
+-e775
+-e2650
+-emacro(775,min) /* nonnegative value can't be less than 0  */
+--emacro(775,min) /* nonnegative value can't be less than 0 */
+-emacro(2650,min) /* >= or <= out of range for operators */
+--emacro(2650,min) /* >= or <= out of range for operators */
+-emacro(831,BRN_OUT)
+-emacro(506,BRN_OUT)
+-emacro(526,NOP)
+//******************************************************************************
+// Options that have been turned off/disabled due to history or just not needed
+
+-elibsym(14) //Remove the Previously Defined Error messages in the *.h files
+
+//MultiThread support options
+//-sem(PWR_task, thread_mono)
+//-sem(STRT_StartupTask, thread_mono)
+//-sem(PHY_OutputTask, thread_mono) // This currently produce a lot of extra 457 errors that need to be checked
+//-sem(PHY_InputTask, thread_mono)  // This currently produce a lot of extra 457 errors that need to be checked
+//-sem(TMR_HandlerTask, thread_mono)
+//-sem(TIME_SYS_HandlerTask, thread_mono)
+//-sem(MFG_PortRxTask, thread_mono)
+//-sem(ALRM_RealTimeTask, thread_mono)
+//-sem(BUBUP_BubbleUpTask, thread_mono)
+//-sem(MANUF_ManufacturingTestTask, thread_mono)
+//-sem(DBG_CommandLineTask, thread_mono)
+//-sem(HMC_APP_Task, thread_mono)
+//-sem(PAR_appTask, thread_mono)
+//-sem(TEST_TemporaryTestTask, thread_mono)
+//-sem(IDL_IdleTask, thread_mono)
+
+//-sem(OS_MUTEX_Lock, thread_lock)
+//-sem(OS_MUTEX_Unlock, thread_unlock)
+
+//-sem(dvr_shm_lock, thread_lock)
+//-sem(dvr_shm_unlock, thread_unlock)
+
+//-atomic(unsigned long)
+//-atomic(unsigned short)
+//-atomic(unsigned char)
+//-atomic(signed long)
+//-atomic(signed short)
+//-atomic(signed char)
+
+//+stack(&file=ROOT_DIR\Aclara\VLF_Transponder\PcLint\StackUsage.txt, DBG_CommandLine_Process(184))  // KTL - add these non-deterministic functions into this so we get better numbers
+// For the Regression Test: 'V' Drive is not defined and env variable such as 'ROOT_DIR' for +stack function cannot be used.
+// Hence to eliminate Lint reporting error, "-stack" is being used.
+// If you need stack Usage Report you should use '+stack' instead of '-stack'.
+//-stack(&file=V:\MTU\PcLint\StackUsage.txt, DBG_CommandLine_Process(184))  // KTL - add these non-deterministic functions into this so we get better numbers
++stack(&file=V:\MTU\PcLint\StackUsage.txt)
+
+// 459 Function Symbol whose address was taken has an unprotected access to variable Symbol-- This message is
+// activated only when it appears that the program has more than one thread. See chapter 12. Multi-Thread Support to
+// determine what those conditions might be.  If a function address is taken, we presume that we are unable to
+// determine statically all the locations from which the function may be called and so we presume that any and all
+// threads can call this function and so the function needs to have protected access to every static variable that it
+// might touch.  There are several remedies to such a message. If multiple threads can indeed access this 352 function,
+// then place a mutex lock in the function. If there already is a mutex lock and we dont recognize it, then set the
+// thread_protected semantic for the function. If only one thread really accesses this function or if the access is
+// guaranteed to be benign, then, after making sure this condition is commented in the code, use the same
+// thread_protected semantic for the function.
+-e459
+
+// 457 Thread Symbol1 has an unprotected write access to variableSymbol2 which is used by thread Symbol3 -- A
+// variable (Symbol2) was modified by a thread (Symbol1) outside of any recognized mutex lock. It was also accessed by a
+// second thread (Symbol3). The latter access may or may not have been protected. If unprotected, a second message will
+// be issued with the roles of Symbol1 and Symbol3 interchanged.
+-e457
+
+// Temporary disables
+-esym(765,BUBUP_LP_SEM,BUBUP_DS_SEM,BUBUP_LP_EVNT,BUBUP_DS_EVNT)
+-esym(765,INTF_CIM_CMD_getTemperature)
+-esym(714,INTF_CIM_CMD_getTemperature)
+-esym(765,STRT_StartupTask)
+-esym(759,STRT_StartupTask)
+-esym(459,CIM_Handler_Init,MFG_PortRxTask,MANUF_init,ALRM_init,BUBUP_init,DAC_init)
+-esym(459,ALRM_RealTimeTask,BUBUP_BubbleUp_LP_Task,BUBUP_BubbleUp_DS_Task)
+-esym(459,MAC_init,MAC_Task,MAC_Param_init)
+-esym(459,PHY_init)
+-esym(459,PHY_RxTask)
+-esym(459,PHY_TxTask)
+-esym(459,PHY_ControlTask)
+-esym(459,fakeMAC)
+-esym(457,text_plain,TxData,OutboundMsg)
+-esym(458,IDL_Get_IdleCounter)
+-esym(459,DBG_CommandLine_Help,DBG_CommandLine_DebugEnable,DBG_CommandLine_DebugDisable,DBG_CommandLine_DAC_Ampl,DBG_CommandLine_DAC_Cycl,DBG_CommandLine_DAC_Freq,DBG_CommandLine_Manuf,DBG_CommandLine_Versions)
+-esym(459,DBG_CommandLine_Milestone1Test,DBG_CommandLine_MacTx,DBG_CommandLine_MacAck,DBG_CommandLine_MacRx)
+-esym(459,HMC_REQ_queueHandle,HMC_CMD_SEM)
+-esym(765,DBG_CommandLine*)
+-esym(759,DBG_CommandLine*)
+-esym(457,MANUF_START_SEM,MANUF_STOP_SEM) // Remove Unprotected access to Semaphores used in the project
+-esym(522,DBG_EnableDebug,DBG_DisableDebug,DBG_StartManufMode,DBG_StopManufMode)
+-esym(457,sDeviceDriver_eFlash) // Remove Unprotected access to Semaphores used in the project
+-esym(459,bCheckForBusy_,bUseHardwareBsy_,bWrEnabled,_dvrOpenCnt,bWrEnabled_)
+-esym(459,loggedIn_,update_,comSettings_,update_)
+-esym(459,_crc16,HMC_APP_QueueHandle,appletTimer_,bReInitAllApps_,bEnabled_,appletResponse_,hmcRxTx_,bProcessApplet_)
+-esym(459,bSendComResponse_,bSendComResponseToApplet_,appletIndex_,allAppletsIdlePassCnt_,appletIndexPersistent_)
+-esym(459,mtrEngFileHndl_, consecutiveAborts_,sStatus_,eMode_,resExpiredTimerId_,taDelayExpiredTimerId_)
+-esym(459,comTimerExpiredTimerId_,rxToggleBitExpected_,retries_,bDoData_,pTxRx_,sendAckNak_,expectingACK_)
+-esym(459,rxToggleBitActual_,status_,bProcessData_,psem_IdByte_,pTableIndex_,_sTypeInfo,UartHandle)
+-esym(459,bReadFromMeter_,dvrOpenCnt_,autoErase_,pChipId_,ePwrMode_,bTmrIsrTriggered_)
+-esym(459,HMC_DIAGS_ucStatus,bModuleInitialized_,hmcDiagQueueHandle,alarmMsg_,diagFileHndl_,mtrDiags_)
+-esym(459,_numHalfCycles,_halfCyclesPerSystemTick)
+-esym(459,PauseDebugManuf,EnableDebigPrint,bFeatureEnabled_,bDoMeterCom_)
+-esym(459,_sFile,bQsAddedToOL,mtrInfoFileHndl_,stdTblsRead_,state_,destSrcIdx_,index_,tblParams_,fileInfo_,stdTbl0_)
+-esym(459,mtrInfoFileHndl_,st21_,st0_,st1_,stdTblsRead_,needHmc,quantDesc,tblParams_,readData_)
+-esym(459,timerExpired_,_sTimer,_TMR_headNode,_TMR_Tick_Cntr)
+-esym(459,PWR_Sem,rstReason_,powerDownTbl,EnableDebugPrint,rtosCmds_,bBusyIsr_,HMC_LP_Sem)
+-esym(459,AES_Mutex, CRC_Mutex)
+-esym(459,rtosEn_,timerId_)
+-esym(459,snapshotStatus_,bDoCom_,snapshotData_)
+-esym(459,busyTime_uS_,pwrMode_)
+-esym(459,stdTbl1_,bModuleInitialized,hmcTimeQueueHandle,alarmMsg,alarmId_,eState_,setDateTimeProcParam_,bMeterDateChange_,procedureNumberAndId_,_prgCtrlMfgProcParam,seqId_)
+-esym(459,_sTimeSys,_timePup,_timeSys,_timeSysValid,_nuDST_TimeChanged)
+-esym(459,pVDEVPTbl_,pWholeNVPTbl_,bVirginAtPwrUp_)
+-esym(459,idMboxHandle_,fileHndlMeta_,fileHndlCfg_,bModuleError,pIdPartitions_)
+-esym(459,DbgCommandBuffer)
+-esym(459,failCntDwn_,bPrintStatus_,retrySession_,sessionFailures_)
+-esym(459,HmcCmdSemCreated,intfCimSemCreated_,SpiSemCreated)
+-esym(459,intFlashMutex_,intFlashSem_,bIntFlashMutexCreated_)
+-esym(459,DFW_APP_semHandle,bVarPartitionError_,pDFWVarsPTbl_,pDFWPatchPTbl_,pDFWBitfieldPTbl_,pDFWImagePTbl_,rdModWrBuf_)
+-esym(459,pDFWImageNvPTbl_,patchCmd_)
+-esym(459,intfCimSemCreated_,intfCimSem_,intfCimDmdSemCreated_,intfCimDmdSem_,intfCimDmdRstSemCreated_,intfCimDmdRstSem_,intfCimSemCreated_,intfCimSem_,bModuleError_)
+-esym(459,bModuleError_,bModuleError_,hmcDiagQueueHandle_,idMutex_,bModuleError_,bModuleError_,intfCimSemCreated_,intfCimSem_,intfCimSemCreated_,intfCimSem_)
+-esym(459,intfCimSemCreated_,intfCimSem_,_timeSysSemCreated,_timeSysSem,_timeSysMutex,_timeSysSemCreated,_timeSysSem,_tmrUtilSemCreated,_tmrUtilSem,_tmrUtilMutex)
+-esym(459,_tmrUtilSemCreated,_tmrUtilSem,preEraseMutexCreated_,preEraseMutex_,cacheMutexCreated_,cacheMutex_,bankedMutexCreated_,bankMutex_,spiSem_,spiMutex_)
+-esym(459,flashMutexCreated_,extFlashMutex_,flashSemCreated_,extFlashSem_,encryptMutexCreated_,encryptMutex_,extFlashSem_)
+-esym(459,busyMutex_,busyState_,busyCounter_)
+-esym(459,lDataUsage)
+-esym(459,eErrorCode_,appSemHandle_,bReadStatusFromNv_)
+-esym(843,persistCache_) //This variable can't be const.
+-esym(628,__INTADDR__)  //This is used in the built-in offsetof() macro.
+
+//The following are specifically for the IAR compiler
+
+//The following are specifically for the MQX OS
+-esym(765,MQX_template_list)
+-esym(714,MQX_template_list)
+-esym(767,NULL) // Remove warning that NULL is defined differently
+-esym(123,status,min,max)
+
+//The following are Specific to the BSP
+-esym(457,LED_Set,LED_init,UART_init) //Remove the write protect error for LedHandle
+-esym(457,IDL_IdleTask) //Remove the write protect error for IdleCounter
+-esym(457,ADC_init,ADC_Setup_ADC1,ADC_Setup_ADC2,ADC_Setup_ADC3) //Remove the write protect error for ADC variables
+-esym(457,ADC_ProcessRawInputData) //Remove the write protect error for ADC variables
+-esym(458,ADC_ProcessRawInputData,UART_Receive) //Remove the write protect error for ADC variables
+-esym(459,ADC_VLF_Input_Isr,ADC_OutFeedBack1_Isr,ADC_OutFeedBack2_Isr) //Remove the unprotected access error for ADC variables
+-esym(459,BSP_ADC_init,RNG_init)
+-esym(843,ADC_FdBk1_Buffer,ADC_FdBk2_Buffer,ADC_FdBk1_PrevToggle,ADC_FdBk2_PrevToggle,DAC_NullData) //Remove the could be a const error
+-esym(528,ADC_FdBk1_PrevToggle,ADC_FdBk2_PrevToggle) // Remove the not used error - will be used in future and this can be removed
+-esym(844,ADC1_CircBuffer)
+-esym(765,ADC_INPUT_EVNT,ADC1_BUFF_FULL_EVNT)
+-esym(765,ADC_VLF_Input_Isr,ADC_OutFeedBack1_Isr,ADC_OutFeedBack2_Isr)
+-esym(765,DAC_VLF_Output_Isr,DAC_VLF_OUTPUT_SEM,DAC_WaitNullData)
+-esym(459,DAC_VLF_Output_Isr,DBG_CommandLine_DAC,DBG_CommandLine_DAC_Test) //KTL - this may be removed later
+-esym(765,Spi0DmaIsr,Spi1DmaIsr,Spi2DmaIsr)
+-esym(459,Spi0DmaIsr,Spi1DmaIsr,Spi2DmaIsr)
+-esym(459,_dvrOpenCnt,SPI_Sem,semCreated,mutexCreated,_autoErase,_pChipId,txByte_,pSpiX_,bCheckForBusy_,bUseHardwareBsy_,bWrEnabled,_dvrOpenCnt,bWrEnabled_)
+-esym(459,flushPartitions_)
+-esym(843,persistCache_) //This variable can't be const.
+-esym(765,ISR_InternalFlash)
+
+//The following are functions/definitions that are not currently used in the project
+-esym(755,ONE_SEC,ONE_MIN,QTR_SEC,TEN_MSEC,MSEC,FIFTY_MSEC,FIVE_MSEC,FIVE_MIN,HALF_SEC,TENTH_SEC)
+-esym(765,DBG_PrintMsg,lpBuAllChannelsHandler)
+-esym(759,DBG_PrintMsg)
+-esym(714,DBG_PrintMsg)
+-esym(765,OS_TASK_Get_Priority,OS_TASK_Set_Priority)
+-esym(759,OS_TASK_Get_Priority,OS_TASK_Set_Priority)
+-esym(714,OS_TASK_Get_Priority,OS_TASK_Set_Priority)
+-esym(765,Compare_Milestone_string)
+-esym(759,Compare_Milestone_string)
+-esym(714,Compare_Milestone_string)
+-esym(765,DBG_CommandLine_*,MFG_PortTx)
+-esym(759,DBG_CommandLine_*,MFG_PortTx)
+-esym(765,readingTypeIdApparentkVAhTot_,readingTypeIdApparentkVAhTotSize,readingTypeIdPwrDwnCntsMtr_,readingTypeIdreadingTypeIdPwrDwnCntsMtrSize)
+-esym(714,readingTypeIdApparentkVAhTotSize,readingTypeIdreadingTypeIdPwrDwnCntsMtrSize)
+-esym(750,HMC_REQ_PRNT_HEX_INFO)
+-esym(844,pSysMem,pVbatMem)
+
+-emacro(572,BIG_ENDIAN_16BIT)
+-emacro(778,BIG_ENDIAN_16BIT)
+-emacro(835,BIG_ENDIAN_16BIT)
+-emacro(545,offsetof)
+-emacro(516,offsetof)
+-emacro(413,offsetof)
+-emacro(718,offsetof)
+-emacro(746,offsetof)
+-emacro(791,SPI_PORT_1_CS_PIN_MUX)
+-emacro(835,SPI_PORT_1_CS_PIN_MUX)
+-emacro(835,SIM_CLKDIV1_OUTDIV3)
+-emacro(845,SIM_CLKDIV1_OUTDIV3)
+-emacro(716,RESET)
+-emacro(527,RESET)
+-emacro(774,BRN_OUT)
+-emacro(831,BRN_OUT)
+-emacro(506,BRN_OUT)
+-emacro(526,NOP)
+
+-efunc(714,PAR_flushPartitions)
+

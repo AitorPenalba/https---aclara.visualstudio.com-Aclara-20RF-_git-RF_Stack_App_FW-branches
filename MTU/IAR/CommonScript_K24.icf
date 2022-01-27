@@ -1,0 +1,229 @@
+/***********************************************************************************************************************
+  Define the symbols for general use
+ **********************************************************************************************************************/
+define symbol BOOTLOADER     = 1; /* Use when building the bootloader */
+define symbol APP            = 2; /* Use when building the Application */
+define symbol FLASH_SWAP_APP = 3; /* Use for K22 Boards and DCU that do not use a bootloader */
+
+/*###ICF### Section handled by ICF editor, don't touch! ****/
+/*-Editor annotation file-*/
+/* IcfEditorFile="$TOOLKIT_DIR$\config\ide\IcfEditor\cortex_v1_0.xml" */
+/*-Specials-*/
+/*-Memory Regions-*/
+define symbol __ICFEDIT_intvec_start__     = 0x00000000;
+define symbol __ICFEDIT_region_ROM_start__ = 0x00000000;
+define symbol __ICFEDIT_region_ROM_end__   = 0x000FFFFF;
+
+/* The Bootloader allocates RAM without knowledge of where or how the App code uses RAM.
+ * One of the App code uses of RAM is the NV cache RAM which must be .noinit.  Additionally, each App target allocates
+ * these at different addresses.  Trying to keep the BL and App sychronized would be diffecult to maintain.
+ *
+ * The solution is to make the BL use RAM starting at a different address than the App and to keep all the critical
+ * App sections below that address.  The linker steering spreadsheets must check those critical section to be below
+ * the BL starting RAM address.
+ *
+ * So far the NV Cache RAM is the only critical section.
+*/
+if ( TARGET == BOOTLOADER )
+{
+define symbol __ICFEDIT_region_RAM_start__ = 0x20000000;
+}
+else
+{
+define symbol __ICFEDIT_region_RAM_start__ = 0x1FFF0000;
+}
+
+if ( TARGET == FLASH_SWAP_APP )
+{
+define symbol __ICFEDIT_region_RAM_end__ = 0x2000FFF0;
+}
+else
+{
+define symbol __ICFEDIT_region_RAM_end__ = 0x2002FFF0;
+}
+/*-Sizes-*/
+define symbol __ICFEDIT_size_cstack__ = 0;
+define symbol __ICFEDIT_size_heap__   = 0;
+/**** End of ICF editor section. ###ICF###*/
+
+if ( ( TARGET != BOOTLOADER ) && ( TARGET != APP ) && ( TARGET != FLASH_SWAP_APP ) )
+{
+   error "Unsupported TARGET - Set in Options/Linker/Config/Configuration files symbol definitions";
+}
+
+/* Need to define these before they are used */
+if ( (TARGET == FLASH_SWAP_APP) || (TARGET == APP) )
+{
+   /* FLASH_BANK_SIZE common to APP projects since certain partitions are based on this location */
+   define          symbol FLASH_BANK_SIZE    = 0x00080000;
+   define          symbol ENCRYPT_KEY_SIZE   = 0x00001000;
+   define          symbol SWAP_STATE_SIZE    = 0x00001000;
+
+   /* This MUST be the same offset as ENCRYPT_KEY_START in partition_cfg.h */
+   define exported symbol ENCRYPT_KEY_start = FLASH_BANK_SIZE -
+                                              SWAP_STATE_SIZE -
+                                              ENCRYPT_KEY_SIZE;
+   define          symbol ENCRYPT_KEY_end   = ENCRYPT_KEY_start + ENCRYPT_KEY_SIZE - 1;
+
+   /* This MUST be the same offset as SWAP_STATE_START in partition_cfg.h */
+   define          symbol SWAP_STATE_start  = ENCRYPT_KEY_end + 1;
+   define          symbol SWAP_STATE_end    = SWAP_STATE_start + SWAP_STATE_SIZE - 1;
+}
+
+/* Project ROM location and size */
+if (TARGET == BOOTLOADER)
+{
+   define          symbol BOOTLOADER_start         = 0x00000000;  /* This is the Bootloader Vector table location */
+   define          symbol BOOTLOADER_end           = 0x00003FFF;
+   define exported symbol __VECTOR_TABLE_ROM_START = 0x00000000;
+   define          symbol PROJECT_start            = 0x00000000;
+   define          symbol PROJECT_end              = 0x00003FFF;
+   define          symbol APPLICATION_start        = 0x00004000; /* This is the APP Vector table location */
+   define exported symbol app_vector               = APPLICATION_start;
+   define          symbol VersionSize              = 0x20;  /* 4B Version, 12B Date, 9B Time, 7B RSVD */
+}
+else if (TARGET == APP)
+{
+   define          symbol BOOTLOADER_start         = 0x00000000; /* This is the BL Vector table location */
+   define          symbol BOOTLOADER_end           = 0x00003FFF;
+   define          symbol APPLICATION_start        = 0x00004000; /* This is the APP Vector table location */
+   define exported symbol __VECTOR_TABLE_ROM_START = 0x00004000;
+   define          symbol PROJECT_start            = 0x00004000;
+   define          symbol PROJECT_end              = ENCRYPT_KEY_start - 1;
+}
+else if (TARGET == FLASH_SWAP_APP)
+{
+   define          symbol APPLICATION_start        = 0x00000000; /* This is the APP Vector table location */
+   define          symbol AVAILABLE_ROM_end        = 0x0007FFFF;
+   define exported symbol __VECTOR_TABLE_ROM_START = 0x00000000;
+   define          symbol PROJECT_start            = 0x00000000;
+   define          symbol PROJECT_end              = ENCRYPT_KEY_start - 1;
+}
+
+if ( (TARGET == BOOTLOADER) || (TARGET == APP) )
+{
+   define exported symbol LNKR_BL_FW_VER_ADDR      = 0x00000410; /* Location of the Bootloader FW version */
+   define exported symbol LNKR_BL_FW_VER_DT_ADDR   = 0x00000414; /* Location of the Bootloader FW build date/time */
+   define          symbol DFW_BL_INFO_PART_size    = 0x00001000; /* Size of the partition  NOT size of data */
+   define          symbol DFW_BL_INFO_PART_start   = __ICFEDIT_region_ROM_end__ - DFW_BL_INFO_PART_size + 1;
+   define          symbol DFW_BL_INFO_PART_end     = __ICFEDIT_region_ROM_end__;
+   define          symbol BOOTLOADER_size          = BOOTLOADER_end - BOOTLOADER_start + 1;
+   define          symbol BL_BACKUP_start          = DFW_BL_INFO_PART_start - BOOTLOADER_size;
+   define          symbol BL_BACKUP_end            = BL_BACKUP_start + BOOTLOADER_size - 1;
+   if (TARGET == APP)
+   {
+      define          symbol UPPER_PRJ_start          = SWAP_STATE_end   + 1;
+      define          symbol UPPER_PRJ_end            = BL_BACKUP_start - 1;
+   }
+}
+
+
+/* Project RAM location and size */
+// Programming Acceleration RAM shared by the internal and external Flash read/write functions
+//NOTE: DCU 3 targets use non-4KB sectors, ensure this is assigned to the appropriate RAM space
+define          symbol DVR_SHARED_MEM_start        = 0x14000000;
+define          symbol DVR_SHARED_MEM_end          = 0x14000FFF;
+
+/* mem_init writes a storeblock_struct at the end of kernel data, max size 32 bytes, so use 0x100 offset */
+/* Above comment does not apply to Bootloader, but still placing in same loaction */
+define exported symbol __BOOT_STACK_ADDRESS     = __ICFEDIT_region_RAM_end__ - 0x100;
+
+if (TARGET != BOOTLOADER)  /* MQX */
+{
+   define exported symbol __DEFAULT_PROCESSOR_NUMBER     = 1;
+   define exported symbol __DEFAULT_INTERRUPT_STACK_SIZE = 1024;
+   define exported symbol __KERNEL_DATA_END              = __ICFEDIT_region_RAM_end__;
+}
+
+/**********************************************************************************************************************/
+
+/***********************************************************************************************************************
+  Define the memory address range and memory regions
+ **********************************************************************************************************************/
+define memory mem with size = 4G;
+
+/* Common ROM regions */
+if (TARGET == APP)
+{
+   define region ROM_region            = mem:[from PROJECT_start to PROJECT_end] | mem:[from UPPER_PRJ_start to UPPER_PRJ_end];
+}
+else
+{
+   define region ROM_region            = mem:[from PROJECT_start        to PROJECT_end];
+}
+define region DVR_SHARED_MEM_region = mem:[from DVR_SHARED_MEM_start to DVR_SHARED_MEM_end];
+
+if ( (TARGET == BOOTLOADER) || (TARGET == APP) )
+{
+   define region DFW_BL_INFO_region    = mem:[from DFW_BL_INFO_PART_start to DFW_BL_INFO_PART_end];
+}
+
+if ( ( TARGET == APP ) || ( TARGET == FLASH_SWAP_APP ) )
+{
+   define region ENCRYP_KEY_region   = mem:[from ENCRYPT_KEY_start      to ENCRYPT_KEY_end];
+   define region SWAP_STATE_region   = mem:[from SWAP_STATE_start       to SWAP_STATE_end];
+}
+if ( TARGET == APP )
+{
+   define region ROM_EXTENDED_region = mem:[from (SWAP_STATE_end + 1) to (DFW_BL_INFO_PART_start - 1)];
+}
+
+/* Common RAM regions */
+define region RAM_region   = mem:[from __ICFEDIT_region_RAM_start__ to __ICFEDIT_region_RAM_end__];
+/**********************************************************************************************************************/
+
+/* Common block and keep directives, specific place directives (must be before generic place directives) */
+
+if (TARGET != BOOTLOADER)  /* MQX */
+{
+   do not initialize  { section .kernel_data };
+}
+
+if ( ( TARGET == BOOTLOADER ) || ( TARGET == FLASH_SWAP_APP ) )
+{
+   define block CFMPROTROM  with size      = 16 { section .cfmconfig };
+   keep { section .cfmconfig };
+   "INT_VEC_TABLE": place at address mem:__VECTOR_TABLE_ROM_START { readonly section .intvec, block CFMPROTROM };
+}
+
+if ( TARGET == BOOTLOADER )
+{
+   define region Version_region        = mem:[from LNKR_BL_FW_VER_ADDR to LNKR_BL_FW_VER_ADDR + VersionSize - 1];
+   define block  VersionInfo with size = VersionSize, alignment = 4 { ro data section .rodata object version.o };
+   "Version": place in Version_region { block VersionInfo };
+   keep { ro data section .rodata object version.o };
+
+   "Boot.s":     place in ROM_region  { ro section .text object boot.o };   /* Make boot.s first code after version info.   */
+}
+
+if ( TARGET == APP )
+{
+   keep { section .boot };
+   "INT_VEC_TABLE": place at address mem:__VECTOR_TABLE_ROM_START { readonly section .intvec };
+   "BOOT":          place at address mem: BOOTLOADER_start { readonly section .boot };
+}
+
+if ( ( TARGET == FLASH_SWAP_APP ) || ( TARGET == APP ) )
+{
+   "APP_ECC_NOINIT": place at start of ENCRYP_KEY_region { rw data section .noinit object ecc108_apps.o };
+   do not initialize  { rw data section .noinit object ecc108_apps.o };
+}
+
+/* Common directives for initializations */
+initialize by copy { readwrite };
+do not initialize  { section .noinit };
+
+/* Common ROM Placements */
+"ACCEL_PGM_NOINIT": place in DVR_SHARED_MEM_region { rw data section .noinit object dvr_sharedMem.o };
+
+/* Common RAM placements */
+//place at address mem:__ICFEDIT_region_RAM_start__ { readwrite section .vectors_ram };
+
+if (TARGET == BOOTLOADER)  /* MQX */
+{
+   "RAM": place in RAM_region   { readwrite };
+}
+
+/* End of Common Steering section */
+/* Include file that includes the specific target steering */
+include "TargetSteering.icf";

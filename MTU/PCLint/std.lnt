@@ -1,0 +1,14 @@
+//  Standard lint options
+-hbm^3
+
+-t3               // Set tabs to 3 spaces
+//-vfisf            // verbose - memory consumed, indirect files
+//-vi               // verbose - indirect files
+//-v#oaif            // verbose - all source files
+//-vf
+//-vo             // Print options as encountered
+
+-passes(2)
+
+MyPath.lnt
+Samwise.lnt      // compiler specific reserved words; library directories

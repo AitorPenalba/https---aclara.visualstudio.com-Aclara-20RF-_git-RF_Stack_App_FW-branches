@@ -1,0 +1,1934 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <fileVersion>5</fileVersion>
+    <fileChecksum>4256802281</fileChecksum>
+    <configuration>
+        <name>Debug</name>
+        <outputs>
+            <file>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\partition_cfg.h</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\IDL_IdleProcess.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\endpt_cim_cmd.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_request.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\indication.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\STRT_Startup.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\virgin_device.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Radio\Si446x_Radio\radio.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_seq_id.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_prg_mtr.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\OR_MR_Handler.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\MAC\MAC_PacketManagement.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\SM.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\OS_AL\Event.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\sys_busy.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\partitions.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\mode_config.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\MFG_Dtls.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_demand.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\historyd.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\SELF_test.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_msg.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\ID_intervalTask.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NH_NoiseHistData.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\stack_check.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_diags.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\time_sys.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\ed_config.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\Task.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\pwr_task.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_app.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\vbat_reg.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Security\cert-builder.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_finish.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_display.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_eng.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\pwr_config.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_mtr_info.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_tsk_lst.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\version.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\pwr_restore.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\OS\TickTime.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_sync.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\byteswap.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\FTM1.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\object_list.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_prot.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\RG_MD_Handler.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\time_sync.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_ds.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\intf_cim_cmd.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\MIMT_info.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\APP_MSG_Handler.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\demand.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\PhaseDetect.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_snapshot.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\RG_CF_Handler.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Temperature.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\alarm_task.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\pwr_last_gasp.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\smtd_config.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\time_DST.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_start.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\EP_Common\HMC\hmc_time.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Driver\dvr_encryption.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\MaximizeEyeOpening.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\rsdec.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\PHY.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\MTLS\mtls.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\MAC\MAC_FrameManagement.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\ScaleClipFreq2phase.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\DBG_SerialDebug.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Security\ecc108_mqx.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\FTM3.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\phase2freq_wi_unwrap.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\smtd_config.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SoftDemodulator.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\OS_AL\MessageQ.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\rsenc.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\mode_config.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Radio\Si446x_Radio\radio_TCXO.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\crc16_m.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\MAC\MAC.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\COMM.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\SELF_test.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_data.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\buffer.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\time_util.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\OS_AL\Queue.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\MAC\MAC_FrameEncoder.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\mem_chk.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\pack.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\PerformCFOCompensation.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\fir_filt_circ_buff.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\MFG_Port.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NH_NoiseHistData.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\stack_check.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\rand.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\ALRM_Handler.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\OS_AL\TickTime.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Radio\Si446x_Radio\radio.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\MFG_Dtls.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\timer_util.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\OS_AL\Mutex.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\processDerotatedSamples.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\galois.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\sign.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\rs.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\OS_AL\Semaphore.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\IP\STACK.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_initialize.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\preamble_detect.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\gresample.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\HEEP_util.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\MIMT_info.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\findSYNC.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\rng.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\CRC.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Driver\dvr_extflash.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Security\ecc108_comm_marshaling.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\WDOG.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\RTC.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\byteswap.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Driver\dvr_sharedMem.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\ADC.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Driver\spi_mstr.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\sys_clock.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Driver\dvr_sectPreErase.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Radio\Si446x_Radio\radio_config_normal.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Security\cert-builder.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Driver\dvr_encryption.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\LED.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\ascii.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\radio_hal.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\DFW\dfw_interface.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_snapshot.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\bcd.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Security\ecc108_comm.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\DFW\dfw_pckt.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Driver\dvr_cache.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\DFW\dfw_app.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\gpio.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_time.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\OR_MR_Handler.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_diags.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\object_list.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\pwr_last_gasp.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\exe_list.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\invert_bits.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Radio\Si446x_Radio\Si446x_Library\radio_comm.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\DFW\dfwtd_config.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\demand.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\IO_setup.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Security\ecc108_i2c.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\STRT_Startup.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\DBG_CommandLine.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\partitions.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\NET\DTLS\dtls.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\file_io.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\eng_res.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Security\ecc108_apps.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\IDL_IdleProcess.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Driver\dvr_banked.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\FTM1.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Driver\IF_intFlash.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\UART.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\AES.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\BUF_MemoryBuffers.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\EVL_event_log.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Aclara_BSP\BSP_aclara.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Util\crc32.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_sync.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\time_DST.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_seq_id.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\vbat_reg.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\ID_intervalTask.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\historyd.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\pwr_restore.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_demand.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_prg_mtr.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_display.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\sys_busy.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\intf_cim_cmd.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\time_sync.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\virgin_device.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_request.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\PhaseDetect.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\Temperature.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\APP_MSG_Handler.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_finish.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_app.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\version.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\Common\time_sys.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\ed_config.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\endpt_cim_cmd.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_eng.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\RG_CF_Handler.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_prot.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_start.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\Task.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\pwr_task.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\pwr_config.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_tsk_lst.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_mtr_info.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_ds.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\HMC\hmc_msg.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\RG_MD_Handler.o</file>
+            <file>$PROJ_DIR$\I210+c_RA6 Debug\Obj\Source\EP_Common\alarm_task.o</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_sectPreErase.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\MTLS\mtls.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\IO_setup.c</file>
+            <file>$PROJ_DIR$\..\..\Common\DFW\dfw_interface.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\spi_mstr.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\DTLS\dtls.c</file>
+            <file>$PROJ_DIR$\..\..\Common\DFW\dfw_app.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameEncoder.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\UART.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameManagement.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_PacketManagement.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\MAC\MAC.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\CRC.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\radio_hal.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\rng.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_banked.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\sys_clock.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_cache.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\LED.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\WDOG.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\IP\STACK.c</file>
+            <file>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\RTC.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\ADC.c</file>
+            <file>$PROJ_DIR$\..\..\Common\DFW\dfw_pckt.c</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\AES.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_encryption.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_data.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_initialize.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\sign.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodulator.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preamble_detect.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\gresample.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\findSYNC.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\MaximizeEyeOpening.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\ScaleClipFreq2phase.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\fir_filt_circ_buff.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\processDerotatedSamples.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\phase2freq_wi_unwrap.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\PerformCFOCompensation.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\rsdec.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\indication.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\PHY.c</file>
+            <file>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Queue.c</file>
+            <file>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Semaphore.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</file>
+            <file>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\TickTime.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\COMM.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_config_normal.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_comm.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_comm_marshaling.c</file>
+            <file>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Mutex.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\rsenc.c</file>
+            <file>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Event.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\galois.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\cert-builder.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\rs.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_apps.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\smtd_config.c</file>
+            <file>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\MessageQ.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_i2c.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NET\SM.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\radio_comm.c</file>
+            <file>$PROJ_DIR$\..\..\Common\DBG_CommandLine.c</file>
+            <file>$PROJ_DIR$\..\..\Common\bcd.c</file>
+            <file>$PROJ_DIR$\..\..\Common\MFG_Dtls.c</file>
+            <file>$PROJ_DIR$\..\..\Common\byteswap.c</file>
+            <file>$PROJ_DIR$\..\..\Common\MFG_Port.c</file>
+            <file>$PROJ_DIR$\..\..\Common\mode_config.c</file>
+            <file>$PROJ_DIR$\..\..\Common\NH_NoiseHistData.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_mqx.c</file>
+            <file>$PROJ_DIR$\..\..\Common\gpio.c</file>
+            <file>$PROJ_DIR$\..\..\Common\timer_util.c</file>
+            <file>$PROJ_DIR$\..\..\Common\DBG_SerialDebug.c</file>
+            <file>$PROJ_DIR$\..\..\Common\eng_res.c</file>
+            <file>$PROJ_DIR$\..\..\Common\mem_chk.c</file>
+            <file>$PROJ_DIR$\..\..\Common\object_list.c</file>
+            <file>$PROJ_DIR$\..\..\Common\rand.c</file>
+            <file>$PROJ_DIR$\..\..\Common\FTM1.c</file>
+            <file>$PROJ_DIR$\..\..\Common\HEEP_util.c</file>
+            <file>$PROJ_DIR$\..\..\Common\crc16_m.c</file>
+            <file>$PROJ_DIR$\..\..\Common\time_util.c</file>
+            <file>$PROJ_DIR$\..\..\Common\BUF_MemoryBuffers.c</file>
+            <file>$PROJ_DIR$\..\..\Common\buffer.c</file>
+            <file>$PROJ_DIR$\..\..\Common\invert_bits.c</file>
+            <file>$PROJ_DIR$\..\..\Common\file_io.c</file>
+            <file>$PROJ_DIR$\..\..\Common\crc32.c</file>
+            <file>$PROJ_DIR$\..\..\Common\ALRM_Handler.c</file>
+            <file>$PROJ_DIR$\..\..\Common\exe_list.c</file>
+            <file>$PROJ_DIR$\..\..\Common\MIMT_info.c</file>
+            <file>$PROJ_DIR$\..\..\Common\ascii.c</file>
+            <file>$PROJ_DIR$\..\..\Common\EVL_event_log.c</file>
+            <file>$PROJ_DIR$\..\..\Common\pack.c</file>
+            <file>$PROJ_DIR$\..\..\Common\FTM3.c</file>
+            <file>$PROJ_DIR$\..\..\Common\Temperature.c</file>
+            <file>$PROJ_DIR$\..\..\Common\virgin_device.c</file>
+            <file>$PROJ_DIR$\..\..\Common\stack_check.c</file>
+            <file>$PROJ_DIR$\..\..\Common\vbat_reg.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_ds.c</file>
+            <file>$PROJ_DIR$\..\..\Common\time_sys.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_eng.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_finish.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_msg.c</file>
+            <file>$PROJ_DIR$\..\..\Common\SELF_test.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_demand.c</file>
+            <file>$PROJ_DIR$\..\..\Common\time_DST.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_diags.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_request.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_prot.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_display.c</file>
+            <file>$PROJ_DIR$\..\..\Common\time_sync.c</file>
+            <file>$PROJ_DIR$\..\..\Common\partitions.c</file>
+            <file>$PROJ_DIR$\..\..\Common\sys_busy.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_app.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_prg_mtr.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_snapshot.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_start.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_mtr_info.c</file>
+            <file>$PROJ_DIR$\..\Common\endpt_cim_cmd.c</file>
+            <file>$PROJ_DIR$\..\Common\pwr_task.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\PHY.o</file>
+            <file>$PROJ_DIR$\..\Common\pwr_config.c</file>
+            <file>$PROJ_DIR$\..\Common\ed_config.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\DFW\dfwtd_config.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\MAC\MAC_FrameManagement.o</file>
+            <file>$PROJ_DIR$\..\Common\STRT_Startup.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\IO_setup.o</file>
+            <file>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_sync.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_tsk_lst.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SoftDemodulator.o</file>
+            <file>$PROJ_DIR$\..\Common\Task.c</file>
+            <file>$PROJ_DIR$\..\Common\demand.c</file>
+            <file>$PROJ_DIR$\..\Common\historyd.c</file>
+            <file>$PROJ_DIR$\..\Common\ID_intervalTask.c</file>
+            <file>$PROJ_DIR$\..\Common\pwr_last_gasp.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Driver\dvr_sharedMem.o</file>
+            <file>$PROJ_DIR$\..\Common\OR_MR_Handler.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.o</file>
+            <file>$PROJ_DIR$\..\Common\version.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\MaximizeEyeOpening.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\CRC.o</file>
+            <file>$PROJ_DIR$\..\Common\alarm_task.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\hmc_time.c</file>
+            <file>$PROJ_DIR$\..\Common\IDL_IdleProcess.c</file>
+            <file>$PROJ_DIR$\..\Common\pwr_restore.c</file>
+            <file>$PROJ_DIR$\..\Common\PhaseDetect.c</file>
+            <file>$PROJ_DIR$\..\Common\RG_CF_Handler.c</file>
+            <file>$PROJ_DIR$\..\Common\RG_MD_Handler.c</file>
+            <file>$PROJ_DIR$\..\Common\HMC\intf_cim_cmd.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\LED.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\phase2freq_wi_unwrap.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Driver\dvr_extflash.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\DFW\dfw_interface.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\sys_clock.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Exe\Y84074-1-V2.00.xx.hex</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_initialize.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Security\ecc108_i2c.o</file>
+            <file>$PROJ_DIR$\..\..\Common\OS\Queue.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Driver\dvr_banked.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\processDerotatedSamples.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\fir_filt_circ_buff.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\rsdec.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\findSYNC.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\UART.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\rng.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\DFW\dfw_app.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\PerformCFOCompensation.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\preamble_detect.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\MFG_Port.o</file>
+            <file>$PROJ_DIR$\..\..\Common\OS\Mutex.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\ADC.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\DFW\dfw_pckt.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\IP\STACK.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Radio\Si446x_Radio\Si446x_Library\radio_comm.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\MAC\MAC.o</file>
+            <file>$PROJ_DIR$\..\..\Common\OS\TickTime.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\SM.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\bcd.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\crc32.o</file>
+            <file>$PROJ_DIR$\..\..\Common\OS\Event.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Exe\Y84500-1-V3.00.xx.out</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\MAC\MAC_PacketManagement.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\DBG_CommandLine.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\buffer.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_data.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\ScaleClipFreq2phase.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\PreambleDetector\sign.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\AES.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\BSP_aclara.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Driver\dvr_cache.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\MAC\MAC_FrameEncoder.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\MTLS\mtls.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\timer_util.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\rand.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Driver\dvr_sectPreErase.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\ALRM_Handler.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\DTLS\dtls.o</file>
+            <file>$PROJ_DIR$\..\..\Common\OS\Semaphore.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Driver\spi_mstr.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\gresample.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Driver\IF_intFlash.o</file>
+            <file>$PROJ_DIR$\..\..\Common\OS\MessageQ.c</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\exe_list.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\indication.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\COMM.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\OS\Event.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\radio_hal.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\RTC.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Radio\Si446x_Radio\radio_TCXO.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\OS\Mutex.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\HEEP_util.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\time_util.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Security\ecc108_comm.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\DBG_SerialDebug.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\galois.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\EVL_event_log.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\pack.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Security\ecc108_mqx.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\mem_chk.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Security\ecc108_apps.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Radio\Si446x_Radio\radio_config_normal.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\gpio.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Aclara_BSP\WDOG.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\OS\MessageQ.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\file_io.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\crc16_m.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Security\ecc108_comm_marshaling.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\rs.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\OS\Queue.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\ascii.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\FTM3.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\BUF_MemoryBuffers.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\NET\PHY\rsenc.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\Util\invert_bits.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\eng_res.o</file>
+            <file>$PROJ_DIR$\GE_I210+c Debug\Obj\Source\Common\OS\Semaphore.o</file>
+        </outputs>
+        <file>
+            <name>[ROOT_NODE]</name>
+            <outputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 410</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 431 169</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\dvr_sectPreErase.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 424 132</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\MTLS\mtls.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 421 69</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\IO_setup.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 353 157</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\DFW\dfw_interface.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 380 139</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\spi_mstr.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 429 130</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 363 128</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\DTLS\dtls.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 426 162</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\DFW\dfw_app.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 395 145</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameEncoder.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 420 92</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\UART.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 393 170</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameManagement.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 351 70</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_PacketManagement.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 411 11</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 404 84</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 418 175</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\CRC.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 368 122</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\radio_hal.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 437 138</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\rng.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 394 121</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\dvr_banked.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 386 167</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 381 131</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\dvr_cache.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 419 144</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\LED.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 377 136</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\WDOG.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 454 125</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\IP\STACK.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 402 114</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 349 155</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\RTC.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 438 126</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\ADC.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 400 129</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\DFW\dfw_pckt.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 401 143</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\AES.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 417 171</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\dvr_encryption.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 64 135</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 379 123</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 428 68</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_data.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 414 87</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_initialize.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 383 115</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\sign.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 416 111</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodulator.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 357 78</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preamble_detect.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 397 116</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\gresample.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 430 117</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 365 89</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\findSYNC.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 392 120</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\MaximizeEyeOpening.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 367 65</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\ScaleClipFreq2phase.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 415 71</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\fir_filt_circ_buff.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 388 96</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 350 109</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\processDerotatedSamples.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 387 108</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\phase2freq_wi_unwrap.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 378 76</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\PerformCFOCompensation.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 396 95</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 390 100</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\rsdec.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 389 66</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\indication.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 434 4</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\PHY.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 346 67</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Queue.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 91</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Semaphore.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 113</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 439 82</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\TickTime.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 103</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\COMM.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 435 85</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_config_normal.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 452 133</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Security\ecc108_comm.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 443 142</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Security\ecc108_comm_marshaling.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 458 124</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Mutex.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 107</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\rsenc.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 464 80</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Event.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 13</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\galois.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 446 110</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 7 104</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Security\cert-builder.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 32 134</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\rs.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 459 112</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Security\ecc108_apps.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 451 165</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 391 72</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\smtd_config.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 60 77</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\MessageQ.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 79</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Security\ecc108_i2c.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 384 158</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NET\SM.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 406 12</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 445 172</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\radio_comm.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 403 154</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\DBG_CommandLine.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 412 160</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\bcd.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 407 141</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\MFG_Dtls.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 17 105</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\byteswap.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 43 127</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\MFG_Port.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 398 97</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\mode_config.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 16 81</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\NH_NoiseHistData.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 23 98</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Security\ecc108_mqx.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 449 74</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\gpio.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 453 146</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\timer_util.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 422 106</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\DBG_SerialDebug.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 444 73</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\eng_res.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 466 164</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\mem_chk.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 450 93</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\object_list.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 45 150</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\rand.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 423 101</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\FTM1.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 44 168</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 441 118</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\crc16_m.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 457 83</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\time_util.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 442 90</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\BUF_MemoryBuffers.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 463 173</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\buffer.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 413 88</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 465 153</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\file_io.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 456 163</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\crc32.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 408 176</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\ALRM_Handler.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 425 102</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\exe_list.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 433 152</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\MIMT_info.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 51 119</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\ascii.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 461 137</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\EVL_event_log.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 447 174</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\pack.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 448 94</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\FTM3.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 462 75</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\Temperature.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 57 193</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\virgin_device.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 6 190</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\stack_check.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 24 99</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\vbat_reg.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 31 180</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 49 210</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\time_sys.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 26 198</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_eng.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 35 201</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_finish.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 33 195</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_msg.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 21 211</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\SELF_test.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 20 86</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_demand.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 18 184</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\time_DST.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 61 178</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_diags.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 25 149</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_request.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 3 191</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_prot.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 46 203</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_display.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 34 186</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\time_sync.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 48 189</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\partitions.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 15 161</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\sys_busy.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 14 187</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_app.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 30 196</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_prg_mtr.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 9 185</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 8 179</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_snapshot.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 55 140</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_start.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 62 204</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_mtr_info.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 37 209</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\endpt_cim_cmd.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 2 200</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\pwr_task.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 29 206</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\pwr_config.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 36 207</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\ed_config.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 27 199</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\STRT_Startup.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 5 159</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 52 194</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_sync.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 42 177</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_tsk_lst.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 38 208</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\Task.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 28 205</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\demand.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 53 156</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\historyd.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 19 182</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\ID_intervalTask.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 22 181</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 59 151</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\OR_MR_Handler.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 10 148</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\version.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 39 197</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\alarm_task.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 58 213</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\hmc_time.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 63 147</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 1 166</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\pwr_restore.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 40 183</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\PhaseDetect.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 54 192</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\RG_CF_Handler.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 56 202</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\RG_MD_Handler.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 47 212</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\HMC\intf_cim_cmd.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 50 188</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\OS\Queue.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 460</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\OS\Mutex.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 440</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\OS\TickTime.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 41</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\OS\Event.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 436</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\GE_I210+c Debug\Exe\Y84500-1-V3.00.xx.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 382</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\OS\Semaphore.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 467</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\OS\MessageQ.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 455</file>
+                </tool>
+            </outputs>
+        </file>
+        <forcedrebuild>
+            <name>[MULTI_TOOL]</name>
+            <tool>ILINK</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>[REBUILD_ALL]</name>
+        </forcedrebuild>
+    </configuration>
+</project>

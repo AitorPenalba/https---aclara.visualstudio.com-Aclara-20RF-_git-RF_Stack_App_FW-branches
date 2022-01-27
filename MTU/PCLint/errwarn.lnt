@@ -1,0 +1,56 @@
+-emacro( 545, offsetof )   //Warning 545: Suspicious use of &
+-emacro( 569, _* )
+-emacro(750, DBG_printf) // Suppress local macro not referenced warnings
+-emacro(750, *) // Suppress local macro not referenced warnings
+-emacro( (413),offsetof)
+-esym(793,MTR_APP_API*)
+-emacro(506,TRUE)
+-emacro( 10, CLRWDT, NOP, RESET )
+-emacro( 110, OS_* )
+-emacro( 522, OS_*, CLRWDT, RESET, SLEEP )
+
+// Suppress Suspicious cast for pointers in bootTable[]
+-emacro(611,NV_read,NV_write,FlashRead_physical_padded,ReadEEPromBlockCount,Byte_Swap,FlashPaddedAddrCompute,GetStartAddress)
+-emacro(611,Bootloader_Do_Patch,FlashRead_logical,FlashWrite_logical,Reset_For_Bootload,Byte_Swap2)
+-emacro(611,CRC32_PATCH_CHECK,CRC32_Init,CRC32_Calc_String,CRC32_Value,GetRCON,I2C_Open,Ext_Memory_Open)
+-emacro(611,READ_NV_STATUS,CLEAR_NV_STATUS)
+
+// Override microchip's __builtin_offsetof for Lint
+++"doffsetof(type,member)=((size_t)&((type*)0)->member)"
+
+-e46  // Compiler allows bit structs with types other than bool, int, unsigned
+-esym(522,ClearWatchDog)
+-e160 // ({ construct
+-e537 // Repeated include file; note 451 not suppressed to find missing sentinels
+
+// Temporary suppressions
+-e641 // Converting enum to int
+-e655 // Using bit-wise operations on compatible enums
+-e778 // Constant expression evaluates to 0
+
+-e146 // Allow binary constants of form "0b010"
+-e156 // Don't warn about braced initializers for scalar types
+-e701 // Suppress Shift left of signed qty warnings
+-e708 // Suppress union initialization warnings
+-e754 // Suppress Local structure member not referenced warnings
+-e768 // Suppress global struct member not referenced warnings
+-e769 // Suppress global enumeration constant not referenced warnings
+-e835 // Suppress "A zero has been given as [left/right] argument to operator"
+-e818 // Suppress "could be declared as pointing to const" warnings
+-e843 // Suppress "could be declared as const" warnings
+-e844 // Suppress "could be declared as pointing to const" warnings
+
+-e849 // Suppress "Two symbols have same enumerator value"
+-e751 // Suppress "local typedef 'failCountsReg_t' not referenced"
+-e755 // Suppress "macro not referenced"
+-e756 // Suppress "global typedef not referenced"
+-e758 // Suppress "enum not referenced"
+//-w2   // Errors and warnings only - on Info messages
+// End temporary suppressions
+
+-esym(715,ucNotUsed,ucDummy,pvParameters)
+-esym(528,parser_var_add_string,parser_var_remove)
+-esym(754,diag_type,error_type,cause)
+
+// End warning suppressions
+

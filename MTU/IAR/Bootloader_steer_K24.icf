@@ -1,0 +1,12 @@
+if (TARGET == BOOTLOADER)
+{
+// Bootloader does not use Linker steering, so place all readonly in ROM, and readwrite in RAM
+/* ================================================================================================================== */
+/* NOTE: Do NOT include these in the CommonScript or steered sections.  When not included the linker will generate    */
+/*       an error for anything not identified in the steering scripts.  The error needs to be corrected in the linker */
+/*       script spreadsheet.                                                                                          */
+/* ================================================================================================================== */
+define block TEXTSECTION with alignment = 4  { section .text };
+"ROM":              place in ROM_region { block TEXTSECTION, readonly };
+
+} // End of if (TARGET == BOOTLOADER)

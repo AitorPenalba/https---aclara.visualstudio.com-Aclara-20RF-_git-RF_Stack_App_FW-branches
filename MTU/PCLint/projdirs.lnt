@@ -1,0 +1,12 @@
+-i\BSP
+-i\Common
+-i\Common/driver
+-i\Common/util
+-i\DFW
+-i\HMC
+-i\NET
+-i\NET/IP
+-i\NET/MAC
+-i\NET/PHY
+-i\OS
+-i\Project

@@ -1,0 +1,14 @@
+// Please update the following paths based on your PC and your PcLint path configuration
+// Note:  the path C:\Projects\SRFN  is what needs to be checked into TFS as that is the path necessary for the
+// automated test tool
+//        Most other users will be able to use the path V:
+//+dROOT_DIR=C:\Projects\SRFN
++dROOT_DIR=V:\
+
+// 2 following lines are needed for automated test tool; check in with proper setting for test tool!
+//+dCOMP_DIR="C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.2\"
+//-setenv(COMP_DIR="C:/Program Files (x86)/IAR Systems/Embedded Workbench 7.2")
+   
+// Set for personal environment
++dCOMP_DIR="C:/Program Files (x86)/IAR Systems/Embedded Workbench 7.2"`
+-setenv(COMP_DIR="C:/Program Files (x86)/IAR Systems/Embedded Workbench 7.2")

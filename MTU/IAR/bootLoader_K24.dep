@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <fileVersion>5</fileVersion>
+    <fileChecksum>2160460567</fileChecksum>
+    <configuration>
+        <name>Debug</name>
+        <outputs>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\boot.o.rsp</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\List\bootLoader.map</file>
+            <file>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\filenames.h</file>
+            <file>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\dvr_intFlash_cfg.h</file>
+            <file>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\cfg_hal.h</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Exe\bootLoader.bin</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\boot.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Exe\bootLoader.out</file>
+            <file>$PROJ_DIR$\..\TargetBuildConfigs\I210+C\K24\hal.h</file>
+            <file>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\partition_cfg.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.h</file>
+            <file>$PROJ_DIR$\..\..\Common\invert_bits.c</file>
+            <file>$PROJ_DIR$\..\BootLoader\boot.S</file>
+            <file>$PROJ_DIR$\..\..\Common\invert_bits.h</file>
+            <file>$PROJ_DIR$\..\..\Common\project.h</file>
+            <file>$PROJ_DIR$\..\BootLoader\bootloader_main.c</file>
+            <file>$PROJ_DIR$\..\..\Common\byteswap.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.c</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.c</file>
+            <file>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\cfg_app.h</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.h</file>
+            <file>$PROJ_DIR$\..\..\Common\byteswap.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.c</file>
+            <file>$PROJ_DIR$\..\..\Common\heep.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_cache.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\aarch32\iccarm_builtin.h</file>
+            <file>$TOOLKIT_DIR$\lib\shb_l.a</file>
+            <file>$PROJ_DIR$\..\BootLoader\vectors.c</file>
+            <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\WDOG.c</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Product_string.h</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\sys_clock.c</file>
+            <file>$TOOLKIT_DIR$\lib\dl7M_tln.a</file>
+            <file>$TOOLKIT_DIR$\lib\rt7M_tl.a</file>
+            <file>$TOOLKIT_DIR$\lib\m7M_tls.a</file>
+            <file>$PROJ_DIR$\..\Aclara_BSP\sys_clock.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\stdbool.h</file>
+            <file>$PROJ_DIR$\..\..\Common\MQX\4.2.0\OS_AL\portable_aclara.h</file>
+            <file>$PROJ_DIR$\..\..\Common\MQX\4.2.0\OS_AL\portable_freescale.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+            <file>$PROJ_DIR$\..\..\Common\partitions.c</file>
+            <file>$TOOLKIT_DIR$\inc\c\string.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_banked.h</file>
+            <file>$TOOLKIT_DIR$\inc\NXP\MK24F12.h</file>
+            <file>$PROJ_DIR$\..\Common\version.c</file>
+            <file>$TOOLKIT_DIR$\inc\c\stddef.h</file>
+            <file>$PROJ_DIR$\..\..\Common\error_codes.h</file>
+            <file>$PROJ_DIR$\..\..\Common\rand.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\spi_mstr.h</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_comm_marshaling.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_sectPreErase.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\aarch32\intrinsics.h</file>
+            <file>$PROJ_DIR$\..\..\Common\crc32.h</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_config.h</file>
+            <file>$PROJ_DIR$\..\..\Common\partitions.h</file>
+            <file>$PROJ_DIR$\..\Common\version.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\aarch32\iar_intrinsics_common.h</file>
+            <file>$PROJ_DIR$\..\..\Common\file_io.h</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_physical.h</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\spi_mstr.c</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+            <file>$PROJ_DIR$\..\..\Common\Security\ecc108_comm.h</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\WDOG.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\vectors.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\invert_bits.o</file>
+            <file>$PROJ_DIR$\..\BootLoader\BuildConfig\features.h</file>
+            <file>$PROJ_DIR$\..\Bootloader\BuildConfig\TargetSteering.icf</file>
+            <file>$PROJ_DIR$\CommonScript_K24.icf</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\sys_clock.o</file>
+            <file>$PROJ_DIR$\..\BootLoader\BuildConfig\CompileSwitch.h</file>
+            <file>$PROJ_DIR$\..\BootLoader\BuildConfig\meter.h</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\dvr_extflash.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\bootloader_main.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\byteswap.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\version.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\dvr_sharedMem.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\partitions.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\spi_mstr.o</file>
+            <file>$PROJ_DIR$\bootLoader_K24 Debug\Obj\IF_intFlash.o</file>
+            <file>$PROJ_DIR$\..\..\Common\driver\dvr_encryption.h</file>
+            <file>$PROJ_DIR$\Bootloader_steer_K24.icf</file>
+        </outputs>
+        <file>
+            <name>$PROJ_DIR$\bootLoader_K24 Debug\Exe\bootLoader.bin</name>
+            <inputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 7</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\bootLoader_K24 Debug\Exe\bootLoader.out</name>
+            <outputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 1</file>
+                </tool>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 5</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 36 38 37 28 72 86 73 84 68 6 78 79 77 81 70 82 83 74 69 80</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>[ROOT_NODE]</name>
+            <outputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 7 1</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 70</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 65 31 64 40 30 43 66 13</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\BootLoader\boot.S</name>
+            <outputs>
+                <tool>
+                    <name>AARM</name>
+                    <file> 6</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>AARM</name>
+                    <file> 0</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\BootLoader\bootloader_main.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 78</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 47 65 31 64 60 27 55 40 49 30 43 32 66 41 42 67 53 57 62 56 10 46 26 85 17 54 50 25 58 14 51 22 75 71 76 21 4 3 9 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\byteswap.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 79</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 65 31 64 40 30 43 66 23</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 84</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 47 65 31 64 34 40 49 30 45 43 32 66 41 42 10 46 26 85 17 54 18 50 25 58 14 51 22 75 71 76 21 4 9 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 81</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 65 31 64 40 49 30 43 32 66 41 42 18 50 25 58 14 51 22 75 71 76 21 4 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 77</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 47 65 31 64 34 40 49 30 45 43 32 66 41 42 23 10 46 26 85 17 54 18 52 50 25 13 58 14 51 22 75 71 76 21 4 9 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\BootLoader\vectors.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 69</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 65 31 64 30 43 66</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\WDOG.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 68</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 47 65 31 64 40 49 30 43 32 66 41 42 50 25 14 51 22 75 71 76 21 4 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 74</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 47 65 31 64 40 49 30 43 32 66 41 42 50 25 14 51 22 39 75 71 76 21 4 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\partitions.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 82</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 65 31 64 34 40 49 30 45 43 32 66 41 42 10 46 26 85 17 54 50 61 25 58 14 51 22 75 71 76 21 4 2 9 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Common\version.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 80</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 65 31 64 34 40 49 30 45 43 32 66 41 42 50 25 14 51 22 75 71 76 21 4 59 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\Common\driver\spi_mstr.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 83</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 47 65 31 64 40 49 30 43 32 66 41 42 52 50 25 58 14 51 22 39 75 71 76 21 4 8</file>
+                </tool>
+            </inputs>
+        </file>
+        <forcedrebuild>
+            <name>[REBUILD_ALL]</name>
+        </forcedrebuild>
+    </configuration>
+</project>

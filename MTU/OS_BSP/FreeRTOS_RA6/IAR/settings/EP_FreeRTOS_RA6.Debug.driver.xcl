@@ -1,0 +1,21 @@
+"--endian=little" 
+
+"--cpu=Cortex-M33" 
+
+"--drv_vector_table_base=0x0" 
+
+"--fpu=VFPv5_SP" 
+
+"-p" 
+
+"C:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\CONFIG\debugger\Renesas\R7FA6E10F.ddf" 
+
+"--semihosting" 
+
+"--device=R7FA6E10F" 
+
+"--multicore_nr_of_cores=1" 
+
+
+
+

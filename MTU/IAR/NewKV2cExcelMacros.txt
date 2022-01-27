@@ -1,0 +1,1067 @@
+Attribute VB_Name = "Module1"
+Option Explicit
+Public fileNumber As Integer
+Public Const unsteered = "UNSTEERED"
+Public Sub addModule()
+    Dim answer As String
+    Dim groupName As Variant
+    Dim index As Integer
+    Dim memType(5) As String
+    Dim moduleName As Variant
+    Dim search As Range
+    Dim srchString As String
+    Dim sht As Worksheet
+    
+    groupName = InputBox("Name of group containing new module: ")
+    If groupName = vbCancel Then Exit Sub
+    moduleName = InputBox("Name new module: ")
+    If moduleName = vbCancel Then Exit Sub
+    
+    memType(0) = "Code"
+    memType(1) = "Const"
+    memType(2) = "DINIT"
+    memType(3) = "InitData"
+    memType(4) = "BSS"
+    
+    Sheets("App Grouping").Activate
+    Set search = Range("A:A").Find(what:=groupName)
+    If search Is Nothing Then
+        MsgBox groupName & "not found", vbOKOnly
+        Exit Sub
+    End If
+    ' Find the end of this "group"
+    While search = groupName
+        Set search = search.Offset(1, 0)
+    Wend
+    ' Insert three cells at this row, shifting cells below down
+    Range(search, search.Offset(0, 2)).Insert shift:=xlDown
+    Set search = search.Offset(-1, 0)
+    search = search.Offset(-1, 0)
+    search.Offset(0, 2) = moduleName
+    
+    ' Add entries to .mapdata sheet
+    Sheets(".map data").Activate
+    For index = 0 To UBound(memType, 1) - 1
+        Set search = Cells.Find(what:=memType(index), lookat:=xlWhole)
+        Set search = search.End(xlDown).Offset(-1, 0)
+        Range(search, search.Offset(0, 8)).Insert shift:=xlDown
+        Range(search.Offset(-2, 0), search.Offset(-2, 8)).Copy search.Offset(-1, 0)
+        search.Offset(0, 4) = moduleName
+    Next index
+    
+    ' Add entries in each App * sheet
+    For Each sht In ActiveWorkbook.Worksheets
+        ' Add to group
+        If sht.Name <> "App Grouping" And sht.Name Like "App *" Then
+            sht.Activate
+            Set search = Range("A:A").Find(what:=groupName)
+            If search Is Nothing Then
+                answer = MsgBox(groupName & " not found in " & sht.Name, vbInformation)
+                Exit Sub
+            End If
+            ' Find end of this group
+            While search = groupName
+                Set search = search.Offset(1, 0)
+            Wend
+            Range(search, search.Offset(0, 10)).Insert shift:=xlDown
+            Range(search.Offset(-2, 0), search.Offset(-2, 10)).Copy search.Offset(-1, 0)
+            search.Offset(-3, 10).Copy Range(search.Offset(-2, 10), search.Offset(-1, 10))
+            search.Offset(-1, 3) = moduleName
+            
+            ' Now find in bottom part of sheet in place directive
+            If InStr(sht.Name, "BSS") <> 0 Then ' APP_BSS uses blocks instead of "place in" directives
+                Set search = Cells.Find(what:="define block " & groupName & "_", after:=search.Offset(1, 0), lookat:=xlPart).Offset(1, 0)
+          
+            Else
+                Set search = Cells.Find(what:=Chr(34) & groupName & "_", after:=search.Offset(1, 0), lookat:=xlPart).Offset(1, 0)
+            End If
+            srchString = search.Offset(-1, 0)
+            While Left(search, 1) = " "
+                Set search = search.Offset(1, 0)
+            Wend
+            search.Insert shift:=xlDown
+            search.Offset(-2, 0).Copy search.Offset(-1, 0)
+            
+            ' Now find group in "LinkerScript" sheet
+            Sheets("LinkerScript").Activate
+            Set search = Cells.Find(what:=srchString).Offset(1, 0)
+            While Left(search, 1) = " "
+                Set search = search.Offset(1, 0)
+            Wend
+            search.Insert shift:=xlDown
+            search.Offset(-2, 0).Copy search.Offset(-1, 0)
+        End If
+    Next sht
+End Sub
+Public Sub deleteModule()
+    Dim answer As String
+    Dim index As Integer
+    Dim memType(5) As String
+    Dim moduleName As Variant
+    Dim search As Range
+    Dim searchCopy As Range
+    Dim srchString As String
+    Dim sht As Worksheet
+    
+    moduleName = InputBox("Name new module: ")
+    If moduleName = vbCancel Then Exit Sub
+    
+    ' Delet all entries in "LinkerScript" sheet
+    Sheets("LinkerScript").Activate
+    Set search = Cells.Find(what:=moduleName, lookat:=xlPart)
+    While Not search Is Nothing
+        Set searchCopy = search.Offset(1, 0)
+        search.Delete shift:=xlUp
+        Set search = Cells.FindNext(after:=searchCopy)
+    Wend
+    
+    memType(0) = "Code"
+    memType(1) = "Const"
+    memType(2) = "DINIT"
+    memType(3) = "InitData"
+    memType(4) = "BSS"
+    
+    Sheets("App Grouping").Activate
+    Set search = Range("C:C").Find(what:=moduleName)
+    If search Is Nothing Then
+        MsgBox moduleName & " not found", vbOKOnly
+        Exit Sub
+    End If
+    ' Delete three cells at this row, shifting cells below up
+    Range(search.Offset(0, -2), search).Delete shift:=xlUp
+    
+    
+    ' Delete entries from .mapdata sheet
+    Sheets(".map data").Activate
+    For index = 0 To UBound(memType, 1) - 1
+        Set search = Cells.Find(what:=memType(index), lookat:=xlWhole)
+        Set search = search.Offset(3, 0)    ' Since this cell is merged, can't do this in one offset!!!
+        Set search = search.Offset(0, 4)
+        Set search = Range(search, search.End(xlDown)).Find(what:=moduleName)
+        Range(search.Offset(0, -4), search.Offset(0, 4)).Delete shift:=xlUp
+    Next index
+    
+    ' Add entries in each App * sheet
+    For Each sht In ActiveWorkbook.Worksheets
+        ' Add to group
+        If sht.Name <> "App Grouping" And sht.Name Like "App *" Then
+            sht.Activate
+            ' First, find in bottom part of sheet
+            Set search = Cells.Find(what:="object " & moduleName, lookat:=xlPart)
+            Set search = Cells.FindNext(after:=search)
+            search.EntireRow.Delete shift:=xlUp
+            
+            ' Find module in group section
+            Set search = Range("D:D").Find(what:=moduleName)
+            Set searchCopy = search.Offset(1, 0)
+            search.EntireRow.Delete shift:=xlUp
+            searchCopy.Offset(-2, 7).Copy searchCopy.Offset(-1, 7)
+        End If
+    Next sht
+End Sub
+Public Sub deleteRowsNoProject()
+    Dim noProjRows As Range
+    Dim nextRow As Integer
+    
+    Sheets("worksheet for .mapdata").Activate
+    Set noProjRows = Range("A1")
+    While noProjRows <> ""
+        nextRow = noProjRows.Row
+        If noProjRows.Offset(0, 5) = "" Then
+            noProjRows.EntireRow.Delete
+            Set noProjRows = Cells(nextRow, 1)
+        Else
+            Set noProjRows = noProjRows.Offset(1, 0)
+        End If
+    Wend
+        
+End Sub
+Public Sub DoImport()
+Attribute DoImport.VB_ProcData.VB_Invoke_Func = "D\n14"
+    Dim iFile As FileDialog         ' Input map file chosen by user
+    Dim FSO As Object               ' Used to get file attributes
+    Dim objShell As Object          ' Used to get file attributes
+    Dim sectionNames As Variant
+    Dim cMode As XlCalculation
+    Dim i As Integer
+    Dim j As Integer
+    Dim index As Integer
+    Dim mappath As String
+    Dim mfiles(5, 2) As String
+    Dim cursht As Worksheet
+
+    mfiles(1, 1) = "GE_KV2C"
+    mfiles(1, 2) = "Y84030-1-V1.40.xx.map"
+    mfiles(2, 1) = "GE_I210+_"
+    mfiles(2, 2) = "Y84020-1-V1.40.xx.map"
+    mfiles(3, 1) = "GE_I210+C"
+    mfiles(3, 2) = "Y84021-1-V1.50.map"
+    mfiles(4, 1) = "K22_GE_KV2C"
+    mfiles(4, 2) = "Y84001-301-V1.140.xx.map"
+    mfiles(5, 1) = "K22_GE_I210+"
+    mfiles(5, 2) = "Y84001-1-V1.140.xx.map"
+    
+    cMode = Application.Calculation
+    Application.Calculation = xlCalculationManual
+    Application.ScreenUpdating = False
+    
+'    sectionNames = Array( _
+'        "DINIT", _
+'        "TEXT", _
+'        "CONST", _
+'        "INIT", _
+'        "BSS")
+        
+    Set objShell = CreateObject("Shell.Application")
+    Set FSO = CreateObject("scripting.FileSystemObject")
+    
+    mappath = ActiveWorkbook.Name
+    
+    mappath = Replace(mappath, "_LinkerWorkSheet.xlsm", "")
+    mappath = ActiveWorkbook.Path & "\" & mappath & " Debug\List\"
+    
+    ' Ask user for Linker Map file name
+    Set iFile = Application.FileDialog(msoFileDialogOpen)
+    iFile.Filters.Clear
+    iFile.Filters.Add "Linker map", "*.map", 1
+    
+    ' Find associated default map file name
+    For index = 1 To UBound(mfiles, 1)
+        If UCase(Left(ActiveWorkbook.Name, Len(mfiles(index, 1)))) = UCase(mfiles(index, 1)) Then
+            iFile.InitialFileName = mappath & mfiles(index, 2)
+            Exit For
+        End If
+    Next index
+    
+    ' Present dialog box and check for cancel
+    If iFile.Show = 0 Then
+        Application.Calculation = cMode
+        Exit Sub
+    End If
+    
+    fileNumber = FreeFile
+    Open iFile.SelectedItems(1) For Input As #fileNumber         ' Open the linker map file
+        
+    Set cursht = ActiveSheet
+    Sheets("worksheet for .mapdata").Activate
+    ActiveSheet.Cells.Delete
+    UndoTextToColumns
+        
+    ' Loop through all section names and all "project" numbers
+'    For i = 0 To UBound(sectionNames)
+'        For j = 1 To 10
+'            ActiveCell = sectionNames(i)
+'            ActiveCell.Offset(0, 1) = j
+'            Seek #fileNumber, 1
+'            ImportMap (ActiveCell.Value)
+'        Next
+'    Next
+
+    Application.StatusBar = "ImportMapOnePass"
+    ImportMapOnePass ("all")
+    Range("A1").Select
+    Close #1
+    Application.StatusBar = "Import Done!"
+    TextToColumns
+    Application.StatusBar = "Text to Columns Done!"
+    SortImport
+    Application.StatusBar = "Sort Import Done!"
+    deleteRowsNoProject
+    Application.StatusBar = "Delete Non-project Rows Done!"
+    subtotalImport
+    Application.StatusBar = "Subtotal Import Done!"
+    transfer
+    Application.StatusBar = "DoImport Done!"
+    Application.ScreenUpdating = True
+    
+    If cMode <> Application.Calculation Then Application.Calculation = cMode
+    cursht.Activate
+    
+End Sub
+Public Function gotoMapData() As Long
+Attribute gotoMapData.VB_ProcData.VB_Invoke_Func = "G\n14"
+    Dim section As String
+    Dim project As String
+    Dim search As Range
+    Dim mapData As Worksheet
+    
+    section = ActiveCell
+    project = ActiveCell.Offset(0, 5)
+    Set mapData = ActiveWorkbook.Sheets(".map data")
+    Set search = mapData.Cells()
+    
+    Set search = search.Find(what:=section, LookIn:=xlValues, lookat:=xlWhole)
+    While search.Offset(0, 5) <> project
+        Set search = search.Offset(1, 0)
+    Wend
+    mapData.Activate
+    search.Activate
+    If search.Offset(1, 2) = "" Then
+        search.Offset(0, 2).FormulaR1C1 = "0x0"
+        search.Offset(0, 3).FormulaR1C1 = "0x0"
+        search.Offset(0, 4).FormulaR1C1 = "placeholder"
+        gotoMapData = 1
+    Else
+        Range(search.Offset(0, 2), search.Offset(0, 2).End(xlDown)).FormulaR1C1 = "0x0"
+        Range(search.Offset(0, 3), search.Offset(0, 3).End(xlDown)).FormulaR1C1 = "0x0"
+        Range(search.Offset(0, 4), search.Offset(0, 4).End(xlDown)).FormulaR1C1 = "placeholder"
+        gotoMapData = (search.Offset.End(xlDown).Row - search.Row) + 1
+    End If
+    search.Select
+
+    
+    'Sheets("worksheet for .mapdata").Activate
+    
+End Function
+Sub GroupImport()
+'
+'
+' GroupSection Macro
+'
+'
+    Sheets("worksheet for .mapdata").Activate
+    Application.DisplayAlerts = False
+    Range(Range("A1"), Range("A1").End(xlDown).Offset(0, 5)).Select
+    Selection.Subtotal GroupBy:=6, Function:=xlCount, TotalList:=Array(6), _
+        Replace:=True, PageBreaks:=False, SummaryBelowData:=True
+    Range("A1", Cells.Find(what:="Grand Count").Offset(0, 1)).Select
+    Selection.Subtotal GroupBy:=1, Function:=xlCount, TotalList:=Array(6), _
+        Replace:=False, PageBreaks:=False, SummaryBelowData:=True
+    Application.DisplayAlerts = True
+End Sub
+Sub GetLine(file As Integer, ByRef line As String)
+' GetLine allows for reading "unix" style files where line ending is line feed only.
+' Also works for Windows style CR LF endings
+    Dim ch As String
+    
+    line = ""       ' Make input string empty
+    Do
+        ch = Input(1, file)             ' Get one character
+        If ch <> Chr(Asc(vbLf)) Then
+            line = line & ch            ' Not a LF, add to input
+        End If
+    Loop Until EOF(file) Or ch = Chr(Asc(vbLf)) ' Exit on LF of end of file
+        
+End Sub
+
+Sub ImportMapOnePass(section As String)
+    Dim appProjStr As String        ' e.g., "[1]". This changes so look it up in the 'Overall" sheet
+    Dim appProjNum As Integer       ' extract number from appProjStr
+    Dim address As Long             ' Load address of item
+    Dim steered As Boolean          ' map file identified as output from linker with steering enabled
+    Dim curCell As Range            ' Used to step through rows of spreadsheet
+    Dim cursht As Worksheet         ' Sheet activated when this macro invoked
+    Dim exitCriteria As Boolean     ' Pertinent portion of file read
+    Dim srchCell As Range
+    Dim LineData As String          ' Input data from map file
+    Dim module As String
+    Dim AddressRegEx As Object      ' Regular expression object
+    Dim AngleRegEx As Object        ' Regular expression object
+    Dim ProjectRegEx As Object      ' Regular expression object
+    Dim forRegEx As Object          ' Regular expression object
+    Dim rwDataRegEx As Object       ' Regular expression object
+    Dim minus1RegEx As Object       ' Regular expression object
+    Dim linkerRegEx As Object       ' Regular expression object
+    Dim projExistsRegEx As Object   ' Regular expression object
+    Dim wolfRegEx As Object         ' Regular expression object
+    Dim startRegEx As Object        ' Regular expression object
+    Dim steeredRegEx As Object      ' Regular expression object
+    Dim Matches As Object           ' Regular expression object
+    
+    Sheets("worksheet for .mapdata").Activate
+    
+    ' Create instances of RegExp
+    Set AngleRegEx = New RegExp
+    Set AddressRegEx = New RegExp
+    Set ProjectRegEx = New RegExp
+    Set forRegEx = New RegExp
+    Set rwDataRegEx = New RegExp
+    Set minus1RegEx = New RegExp
+    Set projExistsRegEx = New RegExp
+    Set linkerRegEx = New RegExp
+    Set wolfRegEx = New RegExp
+    Set startRegEx = New RegExp
+    Set steeredRegEx = New RegExp
+    
+    Set curCell = ActiveCell.Offset(1, 0)
+    curCell = """Start"""
+    Set curCell = curCell.Offset(1, 0)
+    Set srchCell = Sheets("Overall").Cells.Find(what:="App")
+    appProjStr = srchCell.Offset(0, 2)
+    appProjNum = Mid(appProjStr, InStr(appProjStr, "[") + 1, InStr(appProjStr, "]") - 2)
+    
+    
+    AngleRegEx.Pattern = "<for (\w+)"
+    AddressRegEx.Pattern = "0x([0-9,a-f,A-F]{8})"    ' e.g. 0x1fff0000
+    ProjectRegEx.Pattern = "\[[0-9]+\]"    ' e.g. [1]
+    forRegEx.Pattern = "<for rw (code|data) (object|section)"
+    rwDataRegEx.Pattern = " section \.(data|textrw)"
+    minus1RegEx.Pattern = "-1>"
+    projExistsRegEx.Pattern = "\[[1-9][0-9]*\]"
+    linkerRegEx.Pattern = "- Linker created -"
+    wolfRegEx.Pattern = "wolfSSL-Lib_MTU.a"
+    
+                         '   -------                 ----        -------     ----  ------
+    startRegEx.Pattern = "\s+-------\s+----\s+-------\s+----\s+------"
+    steeredRegEx.Pattern = "^\s*""\w+_(TEXT|CONST|DINIT|INIT|BSS)"
+    steered = False
+    
+    ' Search for the detailed load information section
+    Do
+'        Line Input #fileNumber, LineData
+        GetLine fileNumber, LineData    ' Use local sub to handle unix style line endings
+        
+        If steeredRegEx.Test(LineData) And InStr(LineData, "BOOT") = 0 And InStr(LineData, "app_entry") = 0 Then
+            steered = True
+        End If
+    Loop Until EOF(fileNumber) Or startRegEx.Test(LineData)
+    ' Loop through all the pertinent lines of the linker map file
+    exitCriteria = False
+    
+    ' Find first line with ":" in it, e.g. "BOOT":
+    Do
+'        Line Input #fileNumber, LineData
+        GetLine fileNumber, LineData    ' Use local sub to handle unix style line endings
+
+    Loop Until EOF(fileNumber) Or InStr(LineData, """:") <> 0  ' Find Placement details section
+    If EOF(fileNumber) Then Exit Sub
+    
+    curCell = LineData
+    
+    ' Read the lines from here until line with "****" in it (or EOF)
+    Do
+ '        Line Input #fileNumber, LineData
+        GetLine fileNumber, LineData    ' Use local sub to handle unix style line endings
+   
+        If InStr(LineData, """:") <> 0 Then
+            curCell = LineData
+            
+        ElseIf ProjectRegEx.Test(LineData) <> 0 Then        ' Line contains [0-9]; keep it
+            LineData = Replace(LineData, ".kernel_data", ".data       ")
+            If InStr(LineData, ".noinit") <> 0 Then
+                Set Matches = AddressRegEx.Execute(LineData)
+                address = "&h" & Trim(Matches.Item(0).SubMatches(0))
+                If address <> &H14000000 Then   ' skip acceleration RAM
+                    If address >= &H1FFF0000 Then   ' Only keep RAM data
+                        curCell = LineData
+                    End If
+                End If
+            Else
+                curCell = LineData
+            End If
+            
+        ElseIf InStr(LineData, "Initializer bytes") <> 0 Then   ' needs some modifications
+            LineData = forRegEx.Replace(LineData, "")
+            LineData = rwDataRegEx.Replace(LineData, "")
+            LineData = minus1RegEx.Replace(LineData, "")
+            
+            If InStr(LineData, "DLIB_PERTHREAD") <> 0 Then
+                LineData = Replace(LineData, "__DLIB_PERTHREAD", "(__DLIB_PERTHREAD)")
+                curCell = LineData & " " & appProjStr
+                
+            ElseIf InStr(LineData, "(PSP.a)") <> 0 Or InStr(LineData, ".kernel_data") <> 0 Then
+                LineData = Replace(LineData, "(PSP.a)", "psp.a")
+                Set srchCell = Sheets("GlobalPlcmnt").Cells.Find(what:="PSP_DINIT")
+                If Not srchCell Is Nothing Then
+                    LineData = LineData & " " & srchCell.Offset(0, 1)
+                End If
+                curCell = LineData
+                
+            ElseIf InStr(LineData, "(BSP.a)") <> 0 Then
+                LineData = Replace(LineData, "(BSP.a)", "bsp.a")
+                Set srchCell = Sheets("GlobalPlcmnt").Cells.Find(what:="BSP_DINIT")
+                If Not srchCell Is Nothing Then
+                    LineData = LineData & " " & srchCell.Offset(0, 1)
+                End If
+                curCell = LineData
+            
+            ElseIf InStr(LineData, "IF_intFlash.o") <> 0 Then
+                LineData = Replace(LineData, "Initializer bytes", "appRO            ")
+                LineData = LineData & " " & appProjStr
+                curCell = LineData
+            
+            ElseIf AngleRegEx.Test(LineData) <> 0 Then
+                Set Matches = AngleRegEx.Execute(LineData)
+                module = Trim(Matches.Item(0).SubMatches(0))
+                LineData = AngleRegEx.Replace(LineData, module)
+                If InStr(LineData, "KERNEL_DATA") Then
+                    Set srchCell = Sheets("GlobalPlcmnt").Cells.Find(what:="PSP_DINIT")
+                    If Not srchCell Is Nothing Then
+                        LineData = LineData & " " & srchCell.Offset(0, 1)
+                    End If
+                Else
+                    LineData = Replace(LineData, " mid", "")
+                    Set srchCell = Sheets("Overall").Cells.Find(what:="App")
+                    If Not srchCell Is Nothing Then
+                        LineData = LineData & " " & srchCell.Offset(0, 2)
+                    End If
+                End If
+                curCell = LineData
+            
+            Else        ' e.g. "  Initializer bytes       const    0x00029d77     0x17  <for rw data object SELF_test.o section .data-1>"
+                curCell = LineData & " " & appProjStr
+            End If
+            
+        ElseIf linkerRegEx.Test(LineData) <> 0 Then
+            LineData = linkerRegEx.Replace(LineData, "-Linkercreated-")
+            If InStr(LineData, "Veneer") <> 0 Then
+                LineData = Replace(LineData, "Veneer", ".text ")
+                LineData = Replace(LineData, "-Linkercreated-", "IF_intflash.o")
+                LineData = LineData & " " & appProjStr
+            Else
+                Set srchCell = Sheets("Overall").Cells.Find(what:="Linker Gen")
+                If Not srchCell Is Nothing Then
+                    LineData = LineData & " " & srchCell.Offset(0, 2)
+                End If
+            End If
+            curCell = LineData
+        
+        ElseIf InStr(LineData, "*****") <> 0 Then
+                exitCriteria = True
+        End If
+        
+        If InStr(curCell, ":") Then ' Get rid of "empty" sections
+            curCell = ""
+        ElseIf curCell <> "" Then   ' Bump to next row for next line of input
+            Set curCell = curCell.Offset(1, 0)
+        End If
+
+    Loop Until exitCriteria Or EOF(fileNumber)
+'    Set curCell = curCell.Offset(1, 0)
+    curCell = """End"""
+End Sub
+Sub ImportMap(section As String)
+' ImportMap extracts sections from a SRFN .map file
+
+    Dim NameFound As Boolean        ' Flags whether module name in spreadsheet is found in map file
+    Dim accept As Boolean           ' Condition to accept further input lines in this "section"
+    Dim appProjStr As String        ' e.g., "[1]". This changes so look it up in the 'Overall" sheet
+    Dim appProjNum As Integer       ' extract number from appProjStr
+    Dim exitCriteria As Boolean     ' Condition to exit parsing further input lines in this "section"
+    Dim steered As Boolean          ' map file identified as output from linker with steering enabled
+    Dim project As Integer          ' Current "project" (i.e., number between [])
+    Dim curCell As Range            ' Used to step through rows of spreadsheet
+    Dim srchCell As Range
+    Dim Response As String          ' Users response to open file dialog
+    Dim LineData As String          ' Input data from map file
+    Dim sectionName As String       ' Section name extracted from input data
+    Dim sectionType As String       ' Linker native types (e.g. .bss, .text, .rodata, etc.)
+    Dim cursht As Worksheet         ' Sheet activated when this macro invoked
+    Dim SectionRegEx As Object      ' Regular expression object
+    Dim ProjectRegEx As Object      ' Regular expression object
+    Dim forRegEx As Object          ' Regular expression object
+    Dim rwDataRegEx As Object       ' Regular expression object
+    Dim minus1RegEx As Object       ' Regular expression object
+    Dim blockRegEx As Object        ' Regular expression object
+    Dim linkerRegEx As Object       ' Regular expression object
+    Dim projExistsRegEx As Object   ' Regular expression object
+    Dim wolfRegEx As Object         ' Regular expression object
+    Dim secTypeRegEx As Object      ' Regular expression object
+    Dim startRegEx As Object        ' Regular expression object
+    Dim steeredRegEx As Object      ' Regular expression object
+    Dim Matches As Object           ' Regular expression object
+    
+    Sheets("worksheet for .mapdata").Activate
+    project = ActiveCell.Offset(0, 1)
+    ' Create instances of RegExp
+    Set SectionRegEx = New RegExp
+    Set ProjectRegEx = New RegExp
+    Set forRegEx = New RegExp
+    Set rwDataRegEx = New RegExp
+    Set minus1RegEx = New RegExp
+    Set blockRegEx = New RegExp
+    Set projExistsRegEx = New RegExp
+    Set linkerRegEx = New RegExp
+    Set wolfRegEx = New RegExp
+    Set secTypeRegEx = New RegExp
+    Set startRegEx = New RegExp
+    Set steeredRegEx = New RegExp
+    
+    Set curCell = ActiveCell.Offset(1, 0)
+    Set srchCell = Sheets("Overall").Cells.Find(what:="App")
+    appProjStr = srchCell.Offset(0, 2)
+    appProjNum = Mid(appProjStr, InStr(appProjStr, "[") + 1, InStr(appProjStr, "]") - 2)
+    
+
+    SectionRegEx.IgnoreCase = True
+    SectionRegEx.Pattern = "(^""\w+_" & section & """:\s+)"  ' Look for '".*_section":' at the beginning of a line (e.g., "APP_BSS": )
+    If section = "INIT" Then
+        SectionRegEx.Pattern = SectionRegEx.Pattern & "|(\s+inited\s+)"     ' Look for \w+_section at the start or ' inited ' in the line
+        SectionRegEx.Pattern = SectionRegEx.Pattern & "|(^\s+__DLIB_PERTHREAD)" ' Look for '" __DLIB_PERTHREAD"' anywhere in the line
+    ElseIf section = "DINIT" Then
+        SectionRegEx.Pattern = SectionRegEx.Pattern & "|(^\s+\Initializer bytes)"   ' Look for 'Initializer bytes' at the beginning of a line
+    Else
+        SectionRegEx.Pattern = SectionRegEx.Pattern & "|(^\s+\." & section & "\s)" ' Look for '"\s+\.section "' at the beginning of a line ( e.g., "   .text " )
+        SectionRegEx.Pattern = SectionRegEx.Pattern & "|(\s" & section & "\s)" ' Look for '" section "' anywhere in the line ( e.g., "   .rodata const " )
+    End If
+    ProjectRegEx.Pattern = "\[" & ActiveCell.Offset(0, 1) & "\]"    ' e.g. [1]
+    forRegEx.Pattern = "<for rw (code|data) (object|section)"
+    rwDataRegEx.Pattern = " section \.(data|textrw)"
+    minus1RegEx.Pattern = "-1>"
+    blockRegEx.Pattern = "<(Init block|Block)>"
+    projExistsRegEx.Pattern = "\[[1-9][0-9]*\]"
+    linkerRegEx.Pattern = "- Linker created -"
+    wolfRegEx.Pattern = "wolfSSL-Lib_MTU.a"
+    secTypeRegEx.Pattern = "^\s+\.\w+"
+    
+    NameFound = False
+    sectionName = ""
+    
+    ' Find start of location information - immediately follow line containing:
+    '   -------                 ----        -------     ----  ------
+    startRegEx.Pattern = "\s+-------\s+----\s+-------\s+----\s+------"
+    steeredRegEx.Pattern = "^\s*""\w+_(TEXT|CONST|DINIT|INIT|BSS)"
+    steered = False
+    Application.StatusBar = section & " " & project
+    Do
+        Line Input #fileNumber, LineData
+'        If InStr(LineData, "PLACEMENT SUMMARY") Then
+'            Debug.Print LineData
+'        End If
+        If steeredRegEx.Test(LineData) And InStr(LineData, "BOOT") = 0 And InStr(LineData, "app_entry") = 0 Then
+            steered = True
+        End If
+    Loop Until EOF(fileNumber) Or startRegEx.Test(LineData)
+    ' Loop through all the pertinent lines of the linker map file
+    exitCriteria = False
+    While Not EOF(fileNumber) And Not NameFound And Not exitCriteria
+        Do
+            Line Input #fileNumber, LineData
+        Loop Until InStr(LineData, ":") <> 0
+        LineData = Replace(LineData, "bootLoader Debug.bin", "BL_Debug.bin")
+        If (steered And SectionRegEx.Test(LineData) And Not blockRegEx.Test(LineData)) Or _
+            Not steered Then     ' Process line with '":"'
+'If InStr(LineData, "Initializer") Then
+'    Debug.Print LineData
+'End If
+            ' Extract the section name
+            If InStr(2, LineData, ":") <> 0 Then
+                sectionName = Mid(LineData, 2, InStr(2, LineData, ":") - 3)
+                Application.StatusBar = section & " " & project & " " & sectionName
+                curCell = Left(LineData, InStr(LineData, ":"))
+                Set curCell = curCell.Offset(1, 0)
+            Else
+                If sectionName = "" And ProjectRegEx.Test(LineData) <> 0 Then
+                    Application.StatusBar = section & " " & project & " " & sectionName
+                    sectionName = """" & unsteered & "_" & section & """: " & project
+                    curCell = sectionName
+                    Set curCell = curCell.Offset(1, 0)
+                End If
+                If Not steered Then
+                    If InStr(LineData, " const ") Then
+                        sectionType = ".rodata"
+                        If section = "DINIT" Then  ' "DINIT"
+                            sectionType = "Initializer bytes"
+                            forRegEx.Pattern = "<for .*>$"
+                        End If
+                    ElseIf InStr(LineData, "__DLIB_PERTHREAD") <> 0 And section = "BSS" Then
+                        sectionType = ".bss"
+                    Else
+                        Set Matches = secTypeRegEx.Execute(LineData)
+                        sectionType = Trim(Matches.Item(0).Value)
+                    End If
+                    If InStr(LineData, "__DLIB_PERTHREAD") <> 0 And section = "BSS" And project = appProjNum Then
+                        curCell = LineData
+                    ElseIf ProjectRegEx.Test(LineData) Then
+                        curCell = LineData
+                    End If
+                End If
+            End If
+            
+            ' Loop through this sectionName (e.g. "utils_INIT"
+            Do
+                Line Input #fileNumber, LineData
+                LineData = Replace(LineData, "bootLoader Debug.bin", "BL_Debug.bin")
+
+                Set srchCell = ActiveSheet.Range("A1", curCell.Offset(-1, 0)).Find(what:=LineData)
+'If InStr(LineData, "Initializer") <> 0 Then
+'    Debug.Print LineData
+'End If
+
+                If steered Then
+                    If InStr(LineData, """:") <> 0 Then
+                        sectionName = Mid(LineData, 2, InStr(2, LineData, ":") - 3)
+                        Application.StatusBar = section & " " & project & " " & sectionName
+                    End If
+                    accept = srchCell Is Nothing And InStr(LineData, "*****") = 0 And _
+                    ( _
+                        (LineData <> "") And _
+                        Not blockRegEx.Test(LineData) And InStr(LineData, """:") = 0 And _
+                        ((InStr(LineData, "_" & section) <> 0) Or _
+                        linkerRegEx.Test(LineData) Or _
+                        (SectionRegEx.Test(LineData) And ProjectRegEx.Test(LineData)) Or _
+                        (section = "DINIT" And (forRegEx.Test(LineData) Or rwDataRegEx.Test(LineData)))) _
+                    )
+                    exitCriteria = InStr(LineData, "*****") <> 0
+
+                Else
+                    If InStr(LineData, """:") Then
+                        sectionName = Mid(LineData, 2, InStr(2, LineData, ":") - 3)
+                        Application.StatusBar = section & " " & sectionName & " " & project
+                    End If
+
+                    accept = srchCell Is Nothing And InStr(LineData, "*****") = 0 And _
+                    ( _
+                        Not blockRegEx.Test(LineData) And _
+                        (SectionRegEx.Test(LineData) And (ProjectRegEx.Test(LineData) Or section = "DINIT")) Or _
+                        (InStr(LineData, " KERNEL ") <> 0 And ProjectRegEx.Test(LineData)) Or _
+                        (InStr(LineData, "<for ") <> 0 And InStr(LineData, LCase(section)) <> 0) Or _
+                        (InStr(LineData, ".iar.") <> 0 And sectionType = ".rodata" And project = appProjNum) Or _
+                        (InStr(LineData, "Veneer") <> 0 And section = "TEXT" And project = appProjNum) Or _
+                        (section = "BSS" And InStr(LineData, "__DLIB_PERTHREAD") <> 0 And ProjectRegEx.Test(LineData)) _
+                    )
+                    exitCriteria = InStr(LineData, "*****") <> 0
+'If InStr(LineData, " - 0x") <> 0 Then
+'    Debug.Print LineData
+'End If
+                End If
+                If accept Then
+'If InStr(LineData, "DBG_SerialDebug.o") Then
+'    Debug.Print LineData
+'End If
+                    
+                    If linkerRegEx.Test(LineData) Then
+                        If InStr(LineData, ".iar.init_table") <> 0 Then
+                            LineData = linkerRegEx.Replace(LineData, "-Linkercreated-")
+                            If section = "DINIT" Then ' .iar.init_table
+                                curCell = LineData & " [xx]"
+                                Set srchCell = ActiveSheet.Range("A1", curCell.Offset(-1, 0)).Find(what:=curCell)
+                                If srchCell Is Nothing Then
+                                    Set curCell = curCell.Offset(1, 0)
+                                    NameFound = True
+                                Else
+                                    curCell = ""
+                                End If
+                            End If
+                        ElseIf project = appProjNum And section = "TEXT" Then
+                            LineData = linkerRegEx.Replace(LineData, "IF_intFlash.o")
+                            LineData = Replace(LineData, "Veneer", ".text ")
+                            curCell = LineData & " [" & project & "]"
+                            Set curCell = curCell.Offset(1, 0)
+                            NameFound = True
+                        End If
+                    ElseIf forRegEx.Test(LineData) Or Not rwDataRegEx.Test(LineData) Then
+                        ' Perform key string substitutions
+                        If forRegEx.Test(LineData) Then
+'If InStr(LineData, "IF_intFlash.o") Then
+'    Debug.Print LineData
+'End If
+                            LineData = forRegEx.Replace(LineData, "")
+                            If InStr(LineData, "Initializer bytes") And InStr(LineData, "IF_intFlash.o") <> 0 And project = appProjNum Then
+                                LineData = Replace(LineData, " Initializer bytes", " appRO            ") & " [" & project & "]"
+                                LineData = rwDataRegEx.Replace(LineData, "")
+                                LineData = minus1RegEx.Replace(LineData, "")
+                                NameFound = True
+                                Set srchCell = ActiveSheet.Range("A1", curCell.Offset(-1, 0)).Find(what:=curCell)
+                                If srchCell Is Nothing Then
+'                                    Set curCell = curCell.Offset(1, 0)
+                                    NameFound = True
+'                                    Set curCell = curCell.Offset(1, 0)
+                                End If
+                            Else    ' Initializer bytes       const    0x00029c04      0x2  <for rw data section __DLIB_PERTHREAD-1>
+                                LineData = Replace(LineData, "__DLIB_PERTHREAD", "(__DLIB_PERTHREAD)")
+                                NameFound = False
+                            End If
+                        End If
+                        LineData = rwDataRegEx.Replace(LineData, "")
+                        LineData = minus1RegEx.Replace(LineData, "")
+                        ' If [1-9] not present, find value from GlobalPlcmnt sheet
+                        If Not projExistsRegEx.Test(LineData) Then
+                            If InStr(LineData, "Initializer bytes") <> 0 Then
+                                If steered Then
+                                    If section = "DINIT" Then
+                                        curCell = LineData
+                                        If InStr(LineData, "KERNEL_DATA") <> 0 Then
+                                            Set srchCell = Sheets("GlobalPlcmnt").Cells.Find(what:="PSP_DINIT")
+                                        Else
+                                            Set srchCell = Sheets("GlobalPlcmnt").Cells.Find(what:=sectionName)
+                                        End If
+                                        If Not srchCell Is Nothing Then
+                                            curCell = curCell & " " & srchCell.Offset(0, 1)
+                                        Else
+                                            curCell = curCell & " " & appProjStr
+                                        End If
+                                        ' Prevent duplicates!
+                                        Set srchCell = ActiveSheet.Range("A1", curCell.Offset(-1, 0)).Find(what:=curCell)
+                                        If srchCell Is Nothing Then
+                                            Set curCell = curCell.Offset(1, 0)
+                                            NameFound = True
+                                        Else
+                                            curCell = ""
+                                        End If
+
+                                    End If
+                                Else    ' unsteered
+                                    If InStr(LineData, "<for KERNEL_DATA") <> 0 Then
+                                        If section = "DINIT" Then
+                                        Set srchCell = Sheets("GlobalPlcmnt").Cells.Find(what:="KERNEL_TEXT")
+                                            If Not srchCell Is Nothing Then
+                                                If ProjectRegEx.Test(srchCell.Offset(0, 1)) Then
+                                                    LineData = Replace(LineData, "<for ", "")
+                                                    LineData = minus1RegEx.Replace(LineData, "")
+                                                    curCell = LineData & " " & srchCell.Offset(0, 1)
+                                                    NameFound = True
+                                                End If
+                                            End If
+                                        End If
+                                    ElseIf section = "DINIT" And project = appProjNum Then
+                                        LineData = Replace(LineData, "<for ", "")
+                                        LineData = Replace(LineData, " mid", "")
+                                        LineData = minus1RegEx.Replace(LineData, "")
+                                        If project = appProjNum Then
+                                            curCell = LineData & " [" & project & "]"
+                                        End If
+                                        NameFound = True
+                                    End If
+                                End If
+                            End If
+                        Else    ' project number matches
+                            If InStr(LineData, ".kernel_data") <> 0 And section = "INIT" Then
+                                LineData = Replace(LineData, "  .kernel_data", ".data         ")
+                            End If
+                            curCell = LineData
+                            NameFound = True
+                        End If
+                        If Not steered And InStr(LineData, "__DLIB_PERTHREAD") <> 0 Then
+                            curCell = LineData
+                            NameFound = True
+                        End If
+                        
+                        If curCell <> "" Then Set curCell = curCell.Offset(1, 0)
+                    End If
+                End If
+                If InStr(LineData, """:") Then
+                    If InStr(curCell.Offset(-1, 0), """:") Then
+                        Set curCell = curCell.Offset(-1, 0)
+                    End If
+                    curCell = Left(LineData, InStr(LineData, ":"))
+                    Set curCell = curCell.Offset(1, 0)
+                End If
+            Loop Until EOF(fileNumber) Or exitCriteria
+            ' Remove empty section titles
+            If Not NameFound And curCell = "" Then
+                While InStr(curCell.Offset(-1, 0), ":") <> 0
+                    Set curCell = curCell.Offset(-1, 0)
+                    curCell = ""
+                Wend
+            Else
+'Debug.Print sectionName
+            End If
+            If Not steered Then sectionName = ""
+        End If
+    Wend    ' while not eof and not NameFound
+    ' Remove blank lines at or above curCell
+    While curCell = "" And curCell.Offset(-1, 0) = ""
+        Set curCell = curCell.Offset(-1, 0)
+    Wend
+    ' Remove empty section titles
+    If curCell = "" Then
+        While InStr(curCell.Offset(-1, 0), ":") <> 0
+            Set curCell = curCell.Offset(-1, 0)
+            curCell = ""
+        Wend
+    End If
+'    Set curCell = curCell.Offset(1, 0)  ' Ensure 1 blank line between import sections
+'    Application.ScreenUpdating = True
+    curCell.Select
+'    Application.ScreenUpdating = False
+End Sub
+Public Sub SortImport()
+Attribute SortImport.VB_ProcData.VB_Invoke_Func = "s\n14"
+' SortImport Macro
+'
+' Keyboard Shortcut: Ctrl+s
+'
+    Dim sortRange As Range
+    Dim keyRange As Range
+    Dim lastRow As Long
+    
+    Sheets("worksheet for .mapdata").Activate
+    lastRow = ActiveCell.SpecialCells(xlLastCell).Row
+    
+    Set sortRange = Range("A1", ActiveCell.SpecialCells(xlLastCell))
+    sortRange.Select
+    ActiveWorkbook.Worksheets("worksheet for .mapdata").Sort.SortFields.Clear
+    Set keyRange = Range("A1")
+    Set keyRange = Range("A1", Cells(lastRow, Range("A1").Column))
+    ActiveWorkbook.Worksheets("worksheet for .mapdata").Sort.SortFields.Add Key:= _
+        keyRange, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption _
+        :=xlSortNormal
+
+    Set keyRange = Range("F1")
+    Set keyRange = Range("F1", Cells(lastRow, Range("F1").Column))
+   
+    ActiveWorkbook.Worksheets("worksheet for .mapdata").Sort.SortFields.Add Key:= _
+        keyRange, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption _
+        :=xlSortNormal
+    
+    Set keyRange = Range("E1")
+    Set keyRange = Range("E1", Cells(lastRow, Range("E1").Column))
+    ActiveWorkbook.Worksheets("worksheet for .mapdata").Sort.SortFields.Add Key:= _
+        keyRange, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption _
+        :=xlSortNormal
+    
+    With ActiveWorkbook.Worksheets("worksheet for .mapdata").Sort
+        .SetRange sortRange
+        .Header = xlGuess
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    Range("A1").Select
+End Sub
+Public Sub subtotalImport()
+    Dim subRange As Range
+    
+    Sheets("worksheet for .mapdata").Activate
+    Range("A1").EntireRow.Insert
+    
+    Range("A1") = "Section"
+    Range("B1") = "Name"
+    Range("C1") = "Start"
+    Range("D1") = "Size"
+    Range("E1") = "Module"
+    Range("F1") = "Project"
+    GroupImport
+    Cells.EntireColumn.AutoFit
+End Sub
+Sub TextToColumns()
+Attribute TextToColumns.VB_ProcData.VB_Invoke_Func = "W\n14"
+'
+' TextToColumns Macro - Used for converting map lines to columns
+'
+' Keyboard Shortcut: Ctrl+Shift+W
+'
+    Dim startCell As Range
+    Dim endCell As Range
+    Dim firstCell As Range
+    Dim cMode As XlCalculation
+    Dim alerts As Boolean
+    
+    alerts = Application.DisplayAlerts
+    Application.DisplayAlerts = False
+    
+    'Make sure this maro only runs on the right sheet
+    If ActiveSheet.Name <> "worksheet for .mapdata" Then
+        MsgBox "Macro only functional on ""worksheet for .mapdata"" sheet"
+        Exit Sub
+    End If
+    
+    
+    cMode = Application.Calculation
+    Application.Calculation = xlCalculationManual
+    
+    Set startCell = Cells.Find(what:="""", lookat:=xlPart)
+    If startCell Is Nothing Then Exit Sub
+    
+    Set firstCell = startCell
+    
+    Do
+        startCell.Offset(1, 0).Select
+        If startCell.Offset(1, 0) = "" Then Exit Do
+        Set endCell = Range(startCell.Offset(1, 0), startCell.End(xlDown)).Find("""")
+'        Set endCell = Range(Selection.Offset(1, 0), startCell.End(xlDown)).Find("""")
+        If endCell Is Nothing Then Set endCell = startCell.End(xlDown)
+        Range(Selection, endCell).Select
+        If Mid(ActiveCell, 23, 1) = " " Then
+            Selection.TextToColumns Destination:=ActiveCell, DataType:=xlFixedWidth, _
+                FieldInfo:=Array(Array(0, 1), Array(26, 1), Array(35, 1), Array(45, 1), Array(54, 1)) _
+                , TrailingMinusNumbers:=True
+        Else
+            Selection.TextToColumns Destination:=ActiveCell, DataType:=xlFixedWidth, FieldInfo:=Array(Array(0, 1), Array(22, 1), Array(31, 1), Array(41, 1), Array(50, 1)), TrailingMinusNumbers:=True
+        End If
+        ActiveCell.Offset(0, 4).Range("A1").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.Replace what:="-1>", replacement:="", lookat:= _
+            xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+            ReplaceFormat:=False
+        Selection.TextToColumns Destination:=ActiveCell, DataType:=xlDelimited, _
+            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=True, Tab:=True, _
+            Semicolon:=False, Comma:=False, Space:=True, Other:=False, FieldInfo _
+            :=Array(Array(1, 1), Array(2, 1)), TrailingMinusNumbers:=True
+
+'        Set startCell = Cells.Find(what:="""", after:=ActiveCell)
+        Set startCell = Cells.Find(what:="""", after:=startCell)
+    Loop While startCell.address <> firstCell.address
+    
+    Application.Calculation = cMode
+    Application.DisplayAlerts = alerts
+    
+    
+' need to add actions to now sort the section
+End Sub
+Public Sub transfer()
+' Copies entries from the "worksheet fo .mapdata" to the ".mapdata" sheet
+    Dim copyRange As Range
+    Dim endRange As Range
+    Dim rowsNeeded As Long
+    Dim rowsAvailable As Long
+    Dim answer As Integer
+    
+    Sheets("worksheet for .mapdata").Activate
+    Set copyRange = Cells.Find(what:="Section", LookIn:=xlValues, lookat:=xlWhole).Offset(1, 0)
+    copyRange.Select
+    
+    While copyRange <> ""
+        Set endRange = Range("A:A").Find(what:="Count", LookIn:=xlValues, lookat:=xlPart, after:=copyRange).Offset(-1, 0)
+        Set copyRange = Range(copyRange, endRange.End(xlToRight).Offset(0, -1))
+        rowsNeeded = copyRange.Rows.Count
+        
+'        Debug.Print "From: " & copyRange.Address
+        
+        copyRange.Copy
+        rowsAvailable = gotoMapData
+        
+'        Debug.Print "To: " & Selection.Address
+        If rowsAvailable < rowsNeeded Then
+            answer = MsgBox("Not enough rows in destination( " & Selection.address & ": need " & rowsNeeded & vbCrLf & "Continue?", vbYesNo)
+            If answer = vbNo Then
+                Application.CutCopyMode = False
+                Sheets(".map data").Activate
+                Selection.Activate
+                Exit Sub
+            End If
+        End If
+        
+        Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+            :=False, Transpose:=False
+            
+        Sheets("worksheet for .mapdata").Activate
+        
+        Set copyRange = endRange.Offset(1, 0)
+        If copyRange.Offset(1, 0) = "" Then
+            Set copyRange = copyRange.End(xlDown)
+        Else
+            Set copyRange = copyRange.Offset(1, 0)
+        End If
+            
+        copyRange.Select
+    Wend
+    Application.CutCopyMode = False
+    Sheets(".map data").Activate
+    Cells(1, 1).Select
+End Sub
+Sub UndoTextToColumns()
+'
+' UndoTextToColumns Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+C
+'
+    Dim curCell As Range
+    Dim col As Integer
+    
+    Set curCell = Range("A1")
+    For col = 1 To 6
+        curCell = 1
+        curCell.Select
+        Selection.TextToColumns Destination:=curCell, DataType:=xlDelimited, _
+            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+            Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
+            :=Array(1, 1), TrailingMinusNumbers:=True
+            
+        curCell = ""
+        Set curCell = curCell.Offset(0, 1)
+    Next
+    Range("A1").Select
+End Sub

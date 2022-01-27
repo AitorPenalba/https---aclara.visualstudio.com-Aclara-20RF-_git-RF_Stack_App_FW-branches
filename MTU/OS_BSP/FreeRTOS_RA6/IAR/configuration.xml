@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<raConfiguration version="7">
+  <generalSettings>
+    <option key="#Board#" value="board.custom"/>
+    <option key="CPU" value="RA6E1"/>
+    <option key="#TargetName#" value="R7FA6E10F2CFP"/>
+    <option key="#TargetARCHITECTURE#" value="cortex-m33"/>
+    <option key="#DeviceCommand#" value="R7FA6E10F"/>
+    <option key="#RTOS#" value="rtos.awsfreertos"/>
+    <option key="#pinconfiguration#" value="R7FA6E10F2CFP.pincfg"/>
+    <option key="#FSPVersion#" value="3.4.0"/>
+    <option key="#SELECTED_TOOLCHAIN#" value="iar.arm.toolchain"/>
+  </generalSettings>
+  <raBspConfiguration>
+    <config id="config.bsp.ra6e1.R7FA6E10F2CFP">
+      <property id="config.bsp.part_number" value="config.bsp.part_number.value"/>
+      <property id="config.bsp.rom_size_bytes" value="config.bsp.rom_size_bytes.value"/>
+      <property id="config.bsp.rom_size_bytes_hidden" value="1048576"/>
+      <property id="config.bsp.ram_size_bytes" value="config.bsp.ram_size_bytes.value"/>
+      <property id="config.bsp.data_flash_size_bytes" value="config.bsp.data_flash_size_bytes.value"/>
+      <property id="config.bsp.package_style" value="config.bsp.package_style.value"/>
+      <property id="config.bsp.package_pins" value="config.bsp.package_pins.value"/>
+    </config>
+    <config id="config.bsp.ra6e1">
+      <property id="config.bsp.series" value="config.bsp.series.value"/>
+    </config>
+    <config id="config.bsp.ra6e1.fsp">
+      <property id="config.bsp.fsp.tz.exception_response" value="config.bsp.fsp.tz.exception_response.nmi"/>
+      <property id="config.bsp.fsp.tz.cmsis.bfhfnmins" value="config.bsp.fsp.tz.cmsis.bfhfnmins.nonsecure"/>
+      <property id="config.bsp.fsp.tz.cmsis.sysresetreqs" value="config.bsp.fsp.tz.cmsis.sysresetreqs.secure_only"/>
+      <property id="config.bsp.fsp.tz.cmsis.s_priority_boost" value="config.bsp.fsp.tz.cmsis.s_priority_boost.disabled"/>
+      <property id="config.bsp.fsp.tz.csar" value="config.bsp.fsp.tz.csar.both"/>
+      <property id="config.bsp.fsp.tz.rstsar" value="config.bsp.fsp.tz.rstsar.both"/>
+      <property id="config.bsp.fsp.tz.bbfsar" value="config.bsp.fsp.tz.bbfsar.both"/>
+      <property id="config.bsp.fsp.tz.sramsar.sramprcr" value="config.bsp.fsp.tz.sramsar.sramprcr.both"/>
+      <property id="config.bsp.fsp.tz.sramsar.sramecc" value="config.bsp.fsp.tz.sramsar.sramecc.both"/>
+      <property id="config.bsp.fsp.tz.stbramsar" value="config.bsp.fsp.tz.stbramsar.both"/>
+      <property id="config.bsp.fsp.tz.bussara" value="config.bsp.fsp.tz.bussara.both"/>
+      <property id="config.bsp.fsp.tz.bussarb" value="config.bsp.fsp.tz.bussarb.both"/>
+      <property id="config.bsp.fsp.cache_line_size" value="config.bsp.fsp.cache_line_size.32"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_start_mode" value="config.bsp.fsp.OFS0.iwdt_start_mode.disabled"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_timeout" value="config.bsp.fsp.OFS0.iwdt_timeout.2048"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_divisor" value="config.bsp.fsp.OFS0.iwdt_divisor.128"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_window_end" value="config.bsp.fsp.OFS0.iwdt_window_end.0"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_window_start" value="config.bsp.fsp.OFS0.iwdt_window_start.100"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_reset_interrupt" value="config.bsp.fsp.OFS0.iwdt_reset_interrupt.Reset"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_stop_control" value="config.bsp.fsp.OFS0.iwdt_stop_control.stops"/>
+      <property id="config.bsp.fsp.OFS0.wdt_start_mode" value="config.bsp.fsp.OFS0.wdt_start_mode.register"/>
+      <property id="config.bsp.fsp.OFS0.wdt_timeout" value="config.bsp.fsp.OFS0.wdt_timeout.16384"/>
+      <property id="config.bsp.fsp.OFS0.wdt_divisor" value="config.bsp.fsp.OFS0.wdt_divisor.128"/>
+      <property id="config.bsp.fsp.OFS0.wdt_window_end" value="config.bsp.fsp.OFS0.wdt_window_end.0"/>
+      <property id="config.bsp.fsp.OFS0.wdt_window_start" value="config.bsp.fsp.OFS0.wdt_window_start.100"/>
+      <property id="config.bsp.fsp.OFS0.wdt_reset_interrupt" value="config.bsp.fsp.OFS0.wdt_reset_interrupt.Reset"/>
+      <property id="config.bsp.fsp.OFS0.wdt_stop_control" value="config.bsp.fsp.OFS0.wdt_stop_control.stops"/>
+      <property id="config.bsp.fsp.OFS1.voltage_detection0.start" value="config.bsp.fsp.OFS1.voltage_detection0.start.disabled"/>
+      <property id="config.bsp.fsp.OFS1.voltage_detection0_level" value="config.bsp.fsp.OFS1.voltage_detection0_level.280"/>
+      <property id="config.bsp.fsp.OFS1.hoco_osc" value="config.bsp.fsp.OFS1.hoco_osc.enabled"/>
+      <property id="config.bsp.fsp.BPS.BPS0" value=""/>
+      <property id="config.bsp.fsp.BPS.BPS1" value=""/>
+      <property id="config.bsp.fsp.BPS.BPS2" value=""/>
+      <property id="config.bsp.fsp.PBPS.PBPS0" value=""/>
+      <property id="config.bsp.fsp.PBPS.PBPS1" value=""/>
+      <property id="config.bsp.fsp.PBPS.PBPS2" value=""/>
+      <property id="config.bsp.fsp.dual_bank" value="config.bsp.fsp.dual_bank.disabled"/>
+      <property id="config.bsp.fsp.hoco_fll" value="config.bsp.fsp.hoco_fll.disabled"/>
+      <property id="config.bsp.common.main_osc_wait" value="config.bsp.common.main_osc_wait.wait_8163"/>
+      <property id="config.bsp.fsp.mcu.adc.max_freq_hz" value="50000000"/>
+      <property id="config.bsp.fsp.mcu.sci_uart.max_baud" value="16666667"/>
+      <property id="config.bsp.fsp.mcu.adc.sample_and_hold" value="0"/>
+      <property id="config.bsp.fsp.mcu.sci_spi.max_bitrate" value="25000000"/>
+      <property id="config.bsp.fsp.mcu.spi.max_bitrate" value="50000000"/>
+      <property id="config.bsp.fsp.mcu.iic_master.rate.rate_fastplus" value="1"/>
+      <property id="config.bsp.fsp.mcu.sci_uart.cstpen_channels" value="0x0219"/>
+    </config>
+    <config id="config.bsp.ra">
+      <property id="config.bsp.common.main" value="0x400"/>
+      <property id="config.bsp.common.heap" value="0"/>
+      <property id="config.bsp.common.vcc" value="3300"/>
+      <property id="config.bsp.common.checking" value="config.bsp.common.checking.disabled"/>
+      <property id="config.bsp.common.assert" value="config.bsp.common.assert.none"/>
+      <property id="config.bsp.common.error_log" value="config.bsp.common.error_log.none"/>
+      <property id="config.bsp.common.soft_reset" value="config.bsp.common.soft_reset.disabled"/>
+      <property id="config.bsp.common.main_osc_populated" value="config.bsp.common.main_osc_populated.enabled"/>
+      <property id="config.bsp.common.pfs_protect" value="config.bsp.common.pfs_protect.enabled"/>
+      <property id="config.bsp.common.c_runtime_init" value="config.bsp.common.c_runtime_init.enabled"/>
+      <property id="config.bsp.common.main_osc_clock_source" value="config.bsp.common.main_osc_clock_source.crystal"/>
+      <property id="config.bsp.common.subclock_populated" value="config.bsp.common.subclock_populated.enabled"/>
+      <property id="config.bsp.common.subclock_drive" value="config.bsp.common.subclock_drive.standard"/>
+      <property id="config.bsp.common.subclock_stabilization_ms" value="1000"/>
+    </config>
+  </raBspConfiguration>
+  <raClockConfiguration>
+    <node id="board.clock.xtal.freq" mul="24000000" option="_edit"/>
+    <node id="board.clock.hoco.freq" option="board.clock.hoco.freq.20m"/>
+    <node id="board.clock.loco.freq" option="board.clock.loco.freq.32768"/>
+    <node id="board.clock.moco.freq" option="board.clock.moco.freq.8m"/>
+    <node id="board.clock.subclk.freq" option="board.clock.subclk.freq.32768"/>
+    <node id="board.clock.pll.source" option="board.clock.pll.source.hoco"/>
+    <node id="board.clock.pll.div" option="board.clock.pll.div.2"/>
+    <node id="board.clock.pll.mul" option="board.clock.pll.mul.200"/>
+    <node id="board.clock.pll.display" option="board.clock.pll.display.value"/>
+    <node id="board.clock.pll2.source" option="board.clock.pll2.source.disabled"/>
+    <node id="board.clock.pll2.div" option="board.clock.pll2.div.2"/>
+    <node id="board.clock.pll2.mul" option="board.clock.pll2.mul.200"/>
+    <node id="board.clock.pll2.display" option="board.clock.pll2.display.value"/>
+    <node id="board.clock.clock.source" option="board.clock.clock.source.pll"/>
+    <node id="board.clock.clkout.source" option="board.clock.clkout.source.disabled"/>
+    <node id="board.clock.uclk.source" option="board.clock.uclk.source.disabled"/>
+    <node id="board.clock.iclk.div" option="board.clock.iclk.div.1"/>
+    <node id="board.clock.pclka.div" option="board.clock.pclka.div.2"/>
+    <node id="board.clock.pclkb.div" option="board.clock.pclkb.div.4"/>
+    <node id="board.clock.pclkc.div" option="board.clock.pclkc.div.4"/>
+    <node id="board.clock.pclkd.div" option="board.clock.pclkd.div.2"/>
+    <node id="board.clock.fclk.div" option="board.clock.fclk.div.4"/>
+    <node id="board.clock.clkout.div" option="board.clock.clkout.div.1"/>
+    <node id="board.clock.uclk.div" option="board.clock.uclk.div.5"/>
+    <node id="board.clock.iclk.display" option="board.clock.iclk.display.value"/>
+    <node id="board.clock.pclka.display" option="board.clock.pclka.display.value"/>
+    <node id="board.clock.pclkb.display" option="board.clock.pclkb.display.value"/>
+    <node id="board.clock.pclkc.display" option="board.clock.pclkc.display.value"/>
+    <node id="board.clock.pclkd.display" option="board.clock.pclkd.display.value"/>
+    <node id="board.clock.fclk.display" option="board.clock.fclk.display.value"/>
+    <node id="board.clock.clkout.display" option="board.clock.clkout.display.value"/>
+    <node id="board.clock.uclk.display" option="board.clock.uclk.display.value"/>
+  </raClockConfiguration>
+  <raComponentSelection>
+    <component apiversion="" class="Common" condition="" group="all" subgroup="fsp_common" variant="" vendor="Renesas" version="3.4.0">
+      <description>Board Support Package Common Files</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_ioport" variant="" vendor="Renesas" version="3.4.0">
+      <description>I/O Port</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="RTOS" condition="" group="FreeRTOS" subgroup="all" variant="" vendor="AWS" version="10.4.3+fsp.3.4.0">
+      <description>FreeRTOS</description>
+      <originalPack>Amazon.FreeRTOS-Kernel.10.4.3+fsp.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="CMSIS" condition="" group="CMSIS5" subgroup="CoreM" variant="" vendor="Arm" version="5.7.0+fsp.3.4.0">
+      <description>Arm CMSIS Version 5 - Core (M)</description>
+      <originalPack>Arm.CMSIS5.5.7.0+fsp.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="Middleware" condition="" group="all" subgroup="rm_freertos_port" variant="" vendor="Renesas" version="3.4.0">
+      <description>FreeRTOS Port</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="BSP" condition="" group="Board" subgroup="custom" variant="" vendor="Renesas" version="3.4.0">
+      <description>Custom Board Support Files</description>
+      <originalPack>Renesas.RA_board_custom.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="BSP" condition="" group="ra6e1" subgroup="device" variant="R7FA6E10F2CFP" vendor="Renesas" version="3.4.0">
+      <description>Board support package for R7FA6E10F2CFP</description>
+      <originalPack>Renesas.RA_mcu_ra6e1.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="BSP" condition="" group="ra6e1" subgroup="device" variant="" vendor="Renesas" version="3.4.0">
+      <description>Board support package for RA6E1</description>
+      <originalPack>Renesas.RA_mcu_ra6e1.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="BSP" condition="" group="ra6e1" subgroup="fsp" variant="" vendor="Renesas" version="3.4.0">
+      <description>Board support package for RA6E1 - FSP Data</description>
+      <originalPack>Renesas.RA_mcu_ra6e1.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="Heaps" condition="" group="FreeRTOS" subgroup="heap_5" variant="" vendor="AWS" version="10.4.3+fsp.3.4.0">
+      <description>FreeRTOS - Memory Management - Heap 5</description>
+      <originalPack>Amazon.FreeRTOS-Kernel.10.4.3+fsp.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="Libraries" condition="" group="FreeRTOS" subgroup="BufferAllocation2" variant="" vendor="AWS" version="2.3.2+fsp.3.4.0">
+      <description>FreeRTOS - Buffer Allocation 2</description>
+      <originalPack>Amazon.FreeRTOS-Plus-TCP.2.3.2+fsp.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_adc" variant="" vendor="Renesas" version="3.4.0">
+      <description>A/D Converter</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_agt" variant="" vendor="Renesas" version="3.4.0">
+      <description>Asynchronous General Purpose Timer</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_cgc" variant="" vendor="Renesas" version="3.4.0">
+      <description>Clock Generation Circuit</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_crc" variant="" vendor="Renesas" version="3.4.0">
+      <description>Cyclic Redundancy Check</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_dmac" variant="" vendor="Renesas" version="3.4.0">
+      <description>Direct Memory Access Controller</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_flash_hp" variant="" vendor="Renesas" version="3.4.0">
+      <description>Flash Memory High Performance</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_flash_lp" variant="" vendor="Renesas" version="3.4.0">
+      <description>Flash Memory Low Power</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_gpt" variant="" vendor="Renesas" version="3.4.0">
+      <description>General PWM Timer</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_icu" variant="" vendor="Renesas" version="3.4.0">
+      <description>External Interrupt</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_iic_master" variant="" vendor="Renesas" version="3.4.0">
+      <description>I2C Master Interface</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_lpm" variant="" vendor="Renesas" version="3.4.0">
+      <description>Low Power Modes</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_lvd" variant="" vendor="Renesas" version="3.4.0">
+      <description>Low Voltage Detection</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_ospi" variant="" vendor="Renesas" version="3.4.0">
+      <description>Octa Serial Peripheral Interface Flash</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_poeg" variant="" vendor="Renesas" version="3.4.0">
+      <description>Port Output Enable for GPT</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_qspi" variant="" vendor="Renesas" version="3.4.0">
+      <description>Quad Serial Peripheral Interface Flash</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_rtc" variant="" vendor="Renesas" version="3.4.0">
+      <description>Real Time Clock</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_sci_spi" variant="" vendor="Renesas" version="3.4.0">
+      <description>Serial Peripheral Interface on Serial Communications Interface</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_sci_uart" variant="" vendor="Renesas" version="3.4.0">
+      <description>SCI UART</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_wdt" variant="" vendor="Renesas" version="3.4.0">
+      <description>Watchdog Timer</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="Middleware" condition="" group="all" subgroup="rm_comms_i2c" variant="" vendor="Renesas" version="3.4.0">
+      <description>I2C Communications Implementation</description>
+      <originalPack>Renesas.RA.3.4.0.pack</originalPack>
+    </component>
+  </raComponentSelection>
+  <raElcConfiguration>
+    <eventConsumed event="event.ioport.event.1" link="link.gptb"/>
+  </raElcConfiguration>
+  <raIcuConfiguration>
+    <interrupt event="event.dmac0.int" isr="DMA0_complete_isr"/>
+  </raIcuConfiguration>
+  <raModuleConfiguration>
+    <module id="module.driver.ioport_on_ioport.0">
+      <property id="module.driver.ioport.name" value="g_ioport"/>
+      <property id="module.driver.ioport.elc_trigger_ioport1" value="_disabled"/>
+      <property id="module.driver.ioport.elc_trigger_ioport2" value="_disabled"/>
+      <property id="module.driver.ioport.elc_trigger_ioport3" value="_disabled"/>
+      <property id="module.driver.ioport.elc_trigger_ioport4" value="_disabled"/>
+      <property id="module.driver.ioport.pincfg" value="g_bsp_pin_cfg"/>
+    </module>
+    <module id="module.middleware.rm_freertos_port.0"/>
+    <module id="module.driver.uart_on_sci_uart.795696210">
+      <property id="module.driver.uart.name" value="g_uart0"/>
+      <property id="module.driver.uart.channel" value="0"/>
+      <property id="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
+      <property id="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
+      <property id="module.driver.uart.stop_bits" value="module.driver.uart.stop_bits.stop_bits_1"/>
+      <property id="module.driver.uart.baud" value="115200"/>
+      <property id="module.driver.uart.baudrate_modulation" value="module.driver.uart.baudrate_modulation.disabled"/>
+      <property id="module.driver.uart.baudrate_max_err" value="2"/>
+      <property id="module.driver.uart.flow_control" value="module.driver.uart.flow_control.rts"/>
+      <property id="module.driver.uart.pin_control_port" value="module.driver.uart.pin_control_port.PORT_DISABLE"/>
+      <property id="module.driver.uart.pin_control_pin" value="module.driver.uart.pin_control_pin.PIN_DISABLE"/>
+      <property id="module.driver.uart.clk_src" value="module.driver.uart.clk_src.int_clk"/>
+      <property id="module.driver.uart.rx_edge_start" value="module.driver.uart.rx_edge_start.falling_edge"/>
+      <property id="module.driver.uart.noisecancel_en" value="module.driver.uart.noisecancel_en.disabled"/>
+      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.max"/>
+      <property id="module.driver.uart.callback" value="user_uart_callback"/>
+      <property id="module.driver.uart.rxi_ipl" value="board.icu.common.irq.priority12"/>
+      <property id="module.driver.uart.txi_ipl" value="board.icu.common.irq.priority12"/>
+      <property id="module.driver.uart.tei_ipl" value="board.icu.common.irq.priority12"/>
+      <property id="module.driver.uart.eri_ipl" value="board.icu.common.irq.priority12"/>
+    </module>
+    <module id="module.driver.crc_on_crc.351022434">
+      <property id="module.driver.crc.name" value="g_crc0"/>
+      <property id="module.driver.crc.crc_polynomial" value="module.driver.crc.crc_polynomial.gps_crc_32c"/>
+      <property id="module.driver.crc.crc_bit_order" value="module.driver.crc.crc_bit_order.lms_msb"/>
+      <property id="module.driver.crc.snoop_address" value="module.driver.crc.snoop_address.no_address"/>
+    </module>
+    <module id="module.driver.i2c_on_iic_master.1500010294">
+      <property id="module.driver.i2c_master.name" value="g_i2c_master0"/>
+      <property id="module.driver.i2c_master.channel" value="0"/>
+      <property id="module.driver.i2c_master.rate" value="module.driver.i2c_master.rate.rate_fastplus"/>
+      <property id="module.driver.i2c_master.rise_time_ns" value="120"/>
+      <property id="module.driver.i2c_master.fall_time_ns" value="120"/>
+      <property id="module.driver.i2c_master.duty" value="50"/>
+      <property id="module.driver.i2c_master.slave" value="0x00"/>
+      <property id="module.driver.i2c_master.addr_mode" value="module.driver.i2c_master.addr_mode.addr_mode_7bit"/>
+      <property id="module.driver.i2c_master.timeout_mode" value="module.driver.i2c_master.timeout_mode.short_mode"/>
+      <property id="module.driver.i2c_master.timeout_scl_low" value="module.driver.i2c_master.timeout_scl_low.enabled"/>
+      <property id="module.driver.i2c_master.p_callback" value="NULL"/>
+      <property id="module.driver.i2c_master.ipl" value="board.icu.common.irq.priority12"/>
+    </module>
+    <object id="rtos.awsfreertos.object.semaphore.313835820">
+      <property id="rtos.awsfreertos.object.semaphore.symbol" value="g_new_counting_semaphore0"/>
+      <property id="rtos.awsfreertos.object.semaphore.count" value="0"/>
+      <property id="rtos.awsfreertos.object.semaphore.count_max" value="256"/>
+      <property id="rtos.awsfreertos.object.semaphore.allocation" value="rtos.awsfreertos.object.semaphore.allocation.static"/>
+    </object>
+    <object id="rtos.awsfreertos.object.message_buffer.999750824">
+      <property id="rtos.awsfreertos.object.message_buffer.symbol" value="g_new_message_buffer0"/>
+      <property id="rtos.awsfreertos.object.message_buffer.size_bytes" value="512"/>
+      <property id="rtos.awsfreertos.object.message_buffer.allocation" value="rtos.awsfreertos.object.message_buffer.allocation.static"/>
+    </object>
+    <object id="rtos.awsfreertos.object.mutex.1748609433">
+      <property id="rtos.awsfreertos.object.mutex.symbol" value="g_new_mutex0"/>
+      <property id="rtos.awsfreertos.object.mutex.type" value="rtos.awsfreertos.object.mutex.type.mutex"/>
+      <property id="rtos.awsfreertos.object.mutex.allocation" value="rtos.awsfreertos.object.mutex.allocation.static"/>
+    </object>
+    <object id="rtos.awsfreertos.object.queue.285651304">
+      <property id="rtos.awsfreertos.object.queue.symbol" value="g_new_queue0"/>
+      <property id="rtos.awsfreertos.object.queue.item_size" value="4"/>
+      <property id="rtos.awsfreertos.object.queue.queue_length" value="20"/>
+      <property id="rtos.awsfreertos.object.queue.allocation" value="rtos.awsfreertos.object.queue.allocation.static"/>
+    </object>
+    <object id="rtos.awsfreertos.object.timer.2089052009">
+      <property id="rtos.awsfreertos.object.timer.name" value="New Timer 0"/>
+      <property id="rtos.awsfreertos.object.timer.symbol" value="g_new_timer0"/>
+      <property id="rtos.awsfreertos.object.timer.period" value="100"/>
+      <property id="rtos.awsfreertos.object.timer.autoreload" value="rtos.awsfreertos.object.timer.autoreload.disabled"/>
+      <property id="rtos.awsfreertos.object.timer.timerid" value="NULL"/>
+      <property id="rtos.awsfreertos.object.timer.p_callback" value="g_new_timer0_callback"/>
+      <property id="rtos.awsfreertos.object.timer.allocation" value="rtos.awsfreertos.object.timer.allocation.static"/>
+    </object>
+    <context id="_hal.0">
+      <stack module="module.driver.ioport_on_ioport.0"/>
+      <stack module="module.middleware.rm_freertos_port.0"/>
+      <stack module="module.driver.uart_on_sci_uart.795696210"/>
+      <stack module="module.driver.crc_on_crc.351022434"/>
+      <stack module="module.driver.i2c_on_iic_master.1500010294"/>
+    </context>
+    <config id="config.driver.wdt">
+      <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>
+      <property id="config.driver.wdt.register_start_nmi_supported" value="config.driver.wdt.register_start_nmi_supported.disabled"/>
+    </config>
+    <config id="config.driver.flash_hp">
+      <property id="config.driver.flash_hp.param_checking_enable" value="config.flash_hp.param_checking_enable.bsp"/>
+      <property id="config.driver.flash_hp.param_code_flash_programming_enable" value="config.driver.flash_hp.param_code_flash_programming_enable.disabled"/>
+      <property id="config.driver.flash_hp.param_data_flash_programming_enable" value="config.driver.flash_hp.param_data_flash_programming_enable.enabled"/>
+    </config>
+    <config id="config.driver.lpm">
+      <property id="config.driver.lpm.param_checking_enable" value="config.driver.lpm.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.cgc">
+      <property id="config.driver.cgc.param_checking_enable" value="config.driver.cgc.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.ioport">
+      <property id="config.driver.ioport.checking" value="config.driver.ioport.checking.system"/>
+    </config>
+    <config id="config.driver.adc">
+      <property id="config.driver.adc.param_checking_enable" value="config.driver.adc.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.poeg">
+      <property id="config.driver.poeg.param_checking_enable" value="config.driver.poeg.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.lvd">
+      <property id="config.driver.lvd.param_checking_enable" value="config.driver.lvd.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.icu">
+      <property id="config.driver.icu.param_checking_enable" value="config.driver.icu.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.crc">
+      <property id="config.driver.crc.checking" value="config.driver.crc.checking.system"/>
+    </config>
+    <config id="config.driver.agt">
+      <property id="config.driver.agt.param_checking_enable" value="config.driver.agt.param_checking_enable.bsp"/>
+      <property id="config.driver.agt.output_support_enable" value="config.driver.agt.output_support_enable.disabled"/>
+      <property id="config.driver.agt.input_support_enable" value="config.driver.agt.input_support_enable.disabled"/>
+    </config>
+    <config id="config.driver.sci_spi">
+      <property id="config.driver.sci_spi.param_checking_enable" value="config.driver.sci_spi.param_checking_enable.bsp"/>
+      <property id="config.driver.sci_spi.dtc_support_enable" value="config.driver.sci_spi.dtc_support_enable.enabled"/>
+    </config>
+    <config id="config.awsfreertos.thread">
+      <property id="config.awsfreertos.custom_freertosconfig" value=""/>
+      <property id="config.awsfreertos.thread.configuse_preemption" value="config.awsfreertos.thread.configuse_preemption.enabled"/>
+      <property id="config.awsfreertos.thread.configuse_port_optimised_task_selection" value="config.awsfreertos.thread.configuse_port_optimised_task_selection.disabled"/>
+      <property id="config.awsfreertos.thread.configuse_tickless_idle" value="config.awsfreertos.thread.configuse_tickless_idle.disabled"/>
+      <property id="config.awsfreertos.thread.configuse_idle_hook" value="config.awsfreertos.thread.configuse_idle_hook.enabled"/>
+      <property id="config.awsfreertos.thread.configuse_malloc_failed_hook" value="config.awsfreertos.thread.configuse_malloc_failed_hook.disabled"/>
+      <property id="config.awsfreertos.thread.configuse_daemon_task_startup_hook" value="config.awsfreertos.thread.configuse_daemon_task_startup_hook.disabled"/>
+      <property id="config.awsfreertos.thread.configuse_tick_hook" value="config.awsfreertos.thread.configuse_tick_hook.disabled"/>
+      <property id="config.awsfreertos.thread.configcpu_clock_hz" value="SystemCoreClock"/>
+      <property id="config.awsfreertos.thread.configtick_rate_hz" value="200"/>
+      <property id="config.awsfreertos.thread.configmax_priorities" value="32"/>
+      <property id="config.awsfreertos.thread.configminimal_stack_size" value="128"/>
+      <property id="config.awsfreertos.thread.configmax_task_name_len" value="24"/>
+      <property id="config.awsfreertos.thread.configuse_trace_facility" value="config.awsfreertos.thread.configuse_trace_facility.disabled"/>
+      <property id="config.awsfreertos.thread.configuse_stats_formatting_functions" value="config.awsfreertos.thread.configuse_stats_formatting_functions.disabled"/>
+      <property id="config.awsfreertos.thread.configuse_16_bit_ticks" value="config.awsfreertos.thread.configuse_16_bit_ticks.disabled"/>
+      <property id="config.awsfreertos.thread.configidle_should_yield" value="config.awsfreertos.thread.configidle_should_yield.enabled"/>
+      <property id="config.awsfreertos.thread.configuse_task_notifications" value="config.awsfreertos.thread.configuse_task_notifications.enabled"/>
+      <property id="config.awsfreertos.thread.configuse_mutexes" value="config.awsfreertos.thread.configuse_mutexes.enabled"/>
+      <property id="config.awsfreertos.thread.configuse_recursive_mutexes" value="config.awsfreertos.thread.configuse_recursive_mutexes.disabled"/>
+      <property id="config.awsfreertos.thread.configuse_counting_semaphores" value="config.awsfreertos.thread.configuse_counting_semaphores.enabled"/>
+      <property id="config.awsfreertos.thread.configcheck_for_stack_overflow" value="config.awsfreertos.thread.configcheck_for_stack_overflow.disabled"/>
+      <property id="config.awsfreertos.thread.configqueue_registry_size" value="10"/>
+      <property id="config.awsfreertos.thread.configuse_queue_sets" value="config.awsfreertos.thread.configuse_queue_sets.enabled"/>
+      <property id="config.awsfreertos.thread.configuse_time_slicing" value="config.awsfreertos.thread.configuse_time_slicing.enabled"/>
+      <property id="config.awsfreertos.thread.configuse_newlib_reentrant" value="config.awsfreertos.thread.configuse_newlib_reentrant.disabled"/>
+      <property id="config.awsfreertos.thread.configenable_backward_compatibility" value="config.awsfreertos.thread.configenable_backward_compatibility.disabled"/>
+      <property id="config.awsfreertos.thread.confignum_thread_local_storage_pointers" value="5"/>
+      <property id="config.awsfreertos.thread.configstack_depth_type" value="uint32_t"/>
+      <property id="config.awsfreertos.thread.configmessage_buffer_length_type" value="size_t"/>
+      <property id="config.awsfreertos.thread.configsupport_static_allocation" value="config.awsfreertos.thread.configsupport_static_allocation.enabled"/>
+      <property id="config.awsfreertos.thread.configsupport_dynamic_allocation" value="config.awsfreertos.thread.configsupport_dynamic_allocation.enabled"/>
+      <property id="config.awsfreertos.thread.configtotal_heap_size" value="65536"/>
+      <property id="config.awsfreertos.thread.configapplication_allocated_heap" value="config.awsfreertos.thread.configapplication_allocated_heap.disabled"/>
+      <property id="config.awsfreertos.thread.configgenerate_run_time_stats" value="config.awsfreertos.thread.configgenerate_run_time_stats.disabled"/>
+      <property id="config.awsfreertos.thread.configuse_timers" value="config.awsfreertos.thread.configuse_timers.enabled"/>
+      <property id="config.awsfreertos.thread.configtimer_task_priority" value="3"/>
+      <property id="config.awsfreertos.thread.configtimer_queue_length" value="10"/>
+      <property id="config.awsfreertos.thread.configtimer_task_stack_depth" value="128"/>
+      <property id="config.awsfreertos.thread.configlibrary_max_syscall_interrupt_priority" value="board.icu.common.irq.priority1"/>
+      <property id="config.awsfreertos.thread.configassert" value="assert(x)"/>
+      <property id="config.awsfreertos.thread.configinclude_application_defined_privileged_functions" value="config.awsfreertos.thread.configinclude_application_defined_privileged_functions.disabled"/>
+      <property id="config.awsfreertos.thread.include_vtaskpriorityset" value="config.awsfreertos.thread.include_vtaskpriorityset.enabled"/>
+      <property id="config.awsfreertos.thread.include_uxtaskpriorityget" value="config.awsfreertos.thread.include_uxtaskpriorityget.enabled"/>
+      <property id="config.awsfreertos.thread.include_vtaskdelete" value="config.awsfreertos.thread.include_vtaskdelete.enabled"/>
+      <property id="config.awsfreertos.thread.include_vtasksuspend" value="config.awsfreertos.thread.include_vtasksuspend.enabled"/>
+      <property id="config.awsfreertos.thread.include_xresumefromisr" value="config.awsfreertos.thread.include_xresumefromisr.enabled"/>
+      <property id="config.awsfreertos.thread.include_vtaskdelayuntil" value="config.awsfreertos.thread.include_vtaskdelayuntil.enabled"/>
+      <property id="config.awsfreertos.thread.include_vtaskdelay" value="config.awsfreertos.thread.include_vtaskdelay.enabled"/>
+      <property id="config.awsfreertos.thread.include_xtaskgetschedulerstate" value="config.awsfreertos.thread.include_xtaskgetschedulerstate.enabled"/>
+      <property id="config.awsfreertos.thread.include_xtaskgetcurrenttaskhandle" value="config.awsfreertos.thread.include_xtaskgetcurrenttaskhandle.enabled"/>
+      <property id="config.awsfreertos.thread.include_uxtaskgetstackhighwatermark" value="config.awsfreertos.thread.include_uxtaskgetstackhighwatermark.disabled"/>
+      <property id="config.awsfreertos.thread.include_xtaskgetidletaskhandle" value="config.awsfreertos.thread.include_xtaskgetidletaskhandle.disabled"/>
+      <property id="config.awsfreertos.thread.include_etaskgetstate" value="config.awsfreertos.thread.include_etaskgetstate.disabled"/>
+      <property id="config.awsfreertos.thread.include_xeventgroupsetbitfromisr" value="config.awsfreertos.thread.include_xeventgroupsetbitfromisr.enabled"/>
+      <property id="config.awsfreertos.thread.include_xtimerpendfunctioncall" value="config.awsfreertos.thread.include_xtimerpendfunctioncall.disabled"/>
+      <property id="config.awsfreertos.thread.include_xtaskabortdelay" value="config.awsfreertos.thread.include_xtaskabortdelay.disabled"/>
+      <property id="config.awsfreertos.thread.include_xtaskgethandle" value="config.awsfreertos.thread.include_xtaskgethandle.disabled"/>
+      <property id="config.awsfreertos.thread.include_xtaskresumefromisr" value="config.awsfreertos.thread.include_xtaskresumefromisr.enabled"/>
+      <property id="config.awsfreertos.thread.include_hw_stack_monitor" value="config.awsfreertos.thread.include_hw_stack_monitor.enabled"/>
+      <property id="config.awsfreertos.thread.print_function" value="printf(x)"/>
+      <property id="config.awsfreertos.thread.max_length" value="192"/>
+      <property id="config.awsfreertos.thread.include_time_and_task" value="config.awsfreertos.thread.include_time_and_task.disabled"/>
+    </config>
+    <config id="config.driver.comms_i2c">
+      <property id="config.driver.comms_i2c.param_checking_enable" value="config.driver.comms_i2c.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.dmac">
+      <property id="config.driver.dmac.param_checking_enable" value="config.driver.dmac.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.iic_master">
+      <property id="config.driver.iic_master.param_checking_enable" value="config.driver.iic_master.param_checking_enable.bsp"/>
+      <property id="config.driver.iic_master.dtc_enable" value="config.driver.iic_master.dtc_enable.disabled"/>
+      <property id="config.driver.iic_master.addr_mode_10_bit_enable" value="config.driver.iic_master.addr_mode_10_bit_enable.disabled"/>
+    </config>
+    <config id="config.driver.flash_lp">
+      <property id="config.driver.flash_lp.param_checking_enable" value="config.flash_lp.param_checking_enable.bsp"/>
+      <property id="config.driver.flash_lp.param_code_flash_programming_enable" value="config.driver.flash_lp.param_code_flash_programming_enable.disabled"/>
+      <property id="config.driver.flash_lp.param_data_flash_programming_enable" value="config.driver.flash_lp.param_data_flash_programming_enable.enabled"/>
+    </config>
+    <config id="config.driver.sci_uart">
+      <property id="config.driver.sci_uart.param_checking_enable" value="config.driver.sci_uart.param_checking_enable.bsp"/>
+      <property id="config.driver.sci_uart.fifo_support" value="config.driver.sci_uart.fifo_support.disabled"/>
+      <property id="config.driver.sci_uart.dtc_support" value="config.driver.sci_uart.dtc_support.enabled"/>
+      <property id="config.driver.sci_uart.flow_control" value="config.driver.sci_uart.flow_control.disabled"/>
+    </config>
+    <config id="config.driver.ospi">
+      <property id="config.driver.ospi.param_checking_enable" value="config.driver.ospi.param_checking_enable.bsp"/>
+      <property id="config.driver.ospi.dmac_support" value="config.driver.ospi.dmac_support.disabled"/>
+    </config>
+    <config id="config.driver.gpt">
+      <property id="config.driver.gpt.param_checking_enable" value="config.driver.gpt.param_checking_enable.bsp"/>
+      <property id="config.driver.gpt.output_support_enable" value="config.driver.gpt.output_support_enable.disabled"/>
+      <property id="config.driver.gpt.write_protect_enable" value="config.driver.gpt.write_protect_enable.disabled"/>
+    </config>
+    <config id="config.driver.rtc">
+      <property id="config.driver.rtc.param_checking_enable" value="config.driver.rtc.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.qspi">
+      <property id="config.driver.qspi.param_checking_enable" value="config.driver.qspi.param_checking_enable.bsp"/>
+      <property id="config.driver.qspi.extended_spi_multi_line_program" value="config.driver.qspi.extended_spi_multi_line_program.disabled"/>
+    </config>
+  </raModuleConfiguration>
+  <raPinConfiguration>
+    <pincfg active="true" name="R7FA6E10F2CFP.pincfg" selected="true" symbol="g_bsp_pin_cfg">
+      <configSetting altId="adc0.an000.p000" configurationId="adc0.an000"/>
+      <configSetting altId="adc0.an003.p003" configurationId="adc0.an003"/>
+      <configSetting altId="adc0.mode.custom.free" configurationId="adc0.mode"/>
+      <configSetting altId="gpt2.gtioc2b.p114" configurationId="gpt2.gtioc2b"/>
+      <configSetting altId="gpt2.mode.gtiocaorgtiocb.free" configurationId="gpt2.mode"/>
+      <configSetting altId="iic0.mode.enabled.free" configurationId="iic0.mode"/>
+      <configSetting altId="iic0.scl0.p400" configurationId="iic0.scl0"/>
+      <configSetting altId="iic0.sda0.p401" configurationId="iic0.sda0"/>
+      <configSetting altId="irq.mode.custom.free" configurationId="irq.mode"/>
+      <configSetting altId="jtag_fslash_swd.mode.jtag.free" configurationId="jtag_fslash_swd.mode"/>
+      <configSetting altId="jtag_fslash_swd.tck.p300" configurationId="jtag_fslash_swd.tck"/>
+      <configSetting altId="jtag_fslash_swd.tdi.p110" configurationId="jtag_fslash_swd.tdi"/>
+      <configSetting altId="jtag_fslash_swd.tdo.p109" configurationId="jtag_fslash_swd.tdo"/>
+      <configSetting altId="jtag_fslash_swd.tms.p108" configurationId="jtag_fslash_swd.tms"/>
+      <configSetting altId="p000.adc0.an000" configurationId="p000"/>
+      <configSetting altId="p000.gpio_mode.gpio_mode_an" configurationId="p000.gpio_mode"/>
+      <configSetting altId="p003.adc0.an003" configurationId="p003"/>
+      <configSetting altId="p003.gpio_mode.gpio_mode_an" configurationId="p003.gpio_mode"/>
+      <configSetting altId="p100.qspi.qspclk" configurationId="p100"/>
+      <configSetting altId="p100.gpio_mode.gpio_mode_peripheral" configurationId="p100.gpio_mode"/>
+      <configSetting altId="p101.qspi.qio1" configurationId="p101"/>
+      <configSetting altId="p101.gpio_mode.gpio_mode_peripheral" configurationId="p101.gpio_mode"/>
+      <configSetting altId="p102.qspi.qio0" configurationId="p102"/>
+      <configSetting altId="p102.gpio_mode.gpio_mode_peripheral" configurationId="p102.gpio_mode"/>
+      <configSetting altId="p103.spi1.sslb0" configurationId="p103"/>
+      <configSetting altId="p103.gpio_speed.gpio_speed_m" configurationId="p103.gpio_drivecapacity"/>
+      <configSetting altId="p103.gpio_mode.gpio_mode_peripheral" configurationId="p103.gpio_mode"/>
+      <configSetting altId="p108.jtag_fslash_swd.tms" configurationId="p108"/>
+      <configSetting altId="p108.gpio_mode.gpio_mode_peripheral" configurationId="p108.gpio_mode"/>
+      <configSetting altId="p109.jtag_fslash_swd.tdo" configurationId="p109"/>
+      <configSetting altId="p109.gpio_mode.gpio_mode_peripheral" configurationId="p109.gpio_mode"/>
+      <configSetting altId="p110.jtag_fslash_swd.tdi" configurationId="p110"/>
+      <configSetting altId="p110.gpio_mode.gpio_mode_peripheral" configurationId="p110.gpio_mode"/>
+      <configSetting altId="p112.qspi.qssl" configurationId="p112"/>
+      <configSetting altId="p112.gpio_mode.gpio_mode_peripheral" configurationId="p112.gpio_mode"/>
+      <configSetting altId="p114.gpt2.gtioc2b" configurationId="p114"/>
+      <configSetting altId="p114.gpio_mode.gpio_mode_peripheral" configurationId="p114.gpio_mode"/>
+      <configSetting altId="p300.jtag_fslash_swd.tck" configurationId="p300"/>
+      <configSetting altId="p300.gpio_mode.gpio_mode_peripheral" configurationId="p300.gpio_mode"/>
+      <configSetting altId="p400.iic0.scl0" configurationId="p400"/>
+      <configSetting altId="p400.gpio_speed.gpio_speed_m" configurationId="p400.gpio_drivecapacity"/>
+      <configSetting altId="p400.gpio_mode.gpio_mode_peripheral" configurationId="p400.gpio_mode"/>
+      <configSetting altId="p401.iic0.sda0" configurationId="p401"/>
+      <configSetting altId="p401.gpio_speed.gpio_speed_m" configurationId="p401.gpio_drivecapacity"/>
+      <configSetting altId="p401.gpio_mode.gpio_mode_peripheral" configurationId="p401.gpio_mode"/>
+      <configSetting altId="p407.rtc.rtcout" configurationId="p407"/>
+      <configSetting altId="p407.gpio_mode.gpio_mode_peripheral" configurationId="p407.gpio_mode"/>
+      <configSetting altId="p410.spi1.miso1" configurationId="p410"/>
+      <configSetting altId="p410.gpio_speed.gpio_speed_m" configurationId="p410.gpio_drivecapacity"/>
+      <configSetting altId="p410.gpio_mode.gpio_mode_peripheral" configurationId="p410.gpio_mode"/>
+      <configSetting altId="p411.spi1.mosi1" configurationId="p411"/>
+      <configSetting altId="p411.gpio_speed.gpio_speed_m" configurationId="p411.gpio_drivecapacity"/>
+      <configSetting altId="p411.gpio_mode.gpio_mode_peripheral" configurationId="p411.gpio_mode"/>
+      <configSetting altId="p412.spi1.rspck1" configurationId="p412"/>
+      <configSetting altId="p412.gpio_mode.gpio_mode_peripheral" configurationId="p412.gpio_mode"/>
+      <configSetting altId="qspi.mode.standardread.free" configurationId="qspi.mode"/>
+      <configSetting altId="qspi.qio0.p102" configurationId="qspi.qio0"/>
+      <configSetting altId="qspi.qio1.p101" configurationId="qspi.qio1"/>
+      <configSetting altId="qspi.qspclk.p100" configurationId="qspi.qspclk"/>
+      <configSetting altId="qspi.qssl.p112" configurationId="qspi.qssl"/>
+      <configSetting altId="rtc.mode.custom.free" configurationId="rtc.mode"/>
+      <configSetting altId="rtc.rtcout.p407" configurationId="rtc.rtcout"/>
+      <configSetting altId="spi1.miso1.p410" configurationId="spi1.miso1"/>
+      <configSetting altId="spi1.mode.enabled.free" configurationId="spi1.mode"/>
+      <configSetting altId="spi1.mosi1.p411" configurationId="spi1.mosi1"/>
+      <configSetting altId="spi1.rspck1.p412" configurationId="spi1.rspck1"/>
+      <configSetting altId="spi1.sslb0.p103" configurationId="spi1.sslb0"/>
+    </pincfg>
+  </raPinConfiguration>
+</raConfiguration>

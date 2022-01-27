@@ -1,0 +1,50 @@
+/*
+    env-iar.lnt:  environment options for IAR Workbench
+
+    If you are using the IAR Embedded workbench and you wish to invoke
+    PC-lint from that environment then do the following.
+
+// todo
+
+    1) create a new project by selecting the new/open option
+       from the project menu.  type lint.vpj at the filename and
+       click on NEW
+    2) edit the project by selecting the Project Properties option from
+       the Project menu.  In order to set up PC-lint for C/C++,
+
+       a) Click on the "Directories" tab.  To change the Include directory
+                  place either the path or the include environment variable which
+                  contains the path to header files.  for example
+
+            %(INCLUDE)
+
+          or
+
+            c:\compiler\include
+
+       b) at compile text box enter the following
+
+            lint -ic:\lint std.lnt %f
+
+          Replace "c:\lint" by the appropriate lint directory if
+          necessary.  Ensure the capture output check box is checked
+          (recommended).
+
+    PC-lint is now able to be invoked as you would a compiler;
+    just select the compile option from the project menu.
+
+*/
+
+// Message hight
+-hsb^3
+
+// define the tab size as 4 characters
+-t4
+
+// Build Window output format for IAR Embedded Workbench
+-format="LINT: <SRCREF line=%l file="%f">%f (%l, %C)</SRCREF > %t %n: %m"
+
+// Don't break lines
+-width(0,10)
+
+

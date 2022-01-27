@@ -1,0 +1,1 @@
+Just there to force TFS to create the "lib" subfolder

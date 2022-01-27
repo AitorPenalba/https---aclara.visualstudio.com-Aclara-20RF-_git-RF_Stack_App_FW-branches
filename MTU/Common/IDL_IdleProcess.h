@@ -1,0 +1,38 @@
+/******************************************************************************
+ *
+ * Filename: IDL_IdleProcess.h
+ *
+ * Global Designator:
+ *
+ * Contents:
+ *
+ ******************************************************************************
+ * Copyright (c) 2012 ACLARA.  All rights reserved.
+ * This program may not be reproduced, in whole or in part, in any form or by
+ * any means whatsoever without the written permission of:
+ *    ACLARA, ST. LOUIS, MISSOURI USA
+ *****************************************************************************/
+#ifndef IDL_IdleProcess_H
+#define IDL_IdleProcess_H
+
+/* INCLUDE FILES */
+
+/* #DEFINE DEFINITIONS */
+
+/* MACRO DEFINITIONS */
+
+/* TYPE DEFINITIONS */
+
+/* CONSTANTS */
+
+/* FILE VARIABLE DEFINITIONS */
+
+/* FUNCTION PROTOTYPES */
+#ifdef __mqx_h__
+void IDL_IdleTask ( uint32_t Arg0 );
+#endif /* __mqx_h__ */
+uint32_t IDL_Get_IdleCounter ( void );
+
+/* FUNCTION DEFINITIONS */
+
+#endif /* this must be the last line of the file */

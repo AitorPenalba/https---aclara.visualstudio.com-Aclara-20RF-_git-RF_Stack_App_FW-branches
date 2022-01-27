@@ -1,0 +1,35 @@
+/* Actions to take each time the Debugger stops execution */
+execUserExecutionStopped()
+{
+   // If the RTC peripheral clock is enabled...
+   __var sim_scgc6;
+   sim_scgc6 = __readMemory32(0x4004803C, "Memory");
+   if ( sim_scgc6 & 0x20000000 )  //Read SIM_SCGC6 and with RTC enable bit
+   {
+      __var regValue;
+      regValue  = __readMemory32(0x4003D014, "Memory");  // Read RTC_SR Register
+      if ( regValue & 0x00000010 )
+      {
+         regValue &= ~0x00000010;                           // Clear the TCE bit to disable the RTC
+//       __writeMemory32(regValue, 0x4003D014, "Memory");   // RTC_SR Register
+//       __message "RTC disabled";
+      }
+   }
+}
+
+/* Actions to take each time the Debugger starts execution */
+execUserExecutionStarted()
+{
+   // If the RTC peripheral clock is enabled...
+   __var sim_scgc6;
+   sim_scgc6 = __readMemory32(0x4004803C, "Memory");
+   if ( sim_scgc6 & 0x20000000 )  //Read SIM_SCGC6 and with RTC enable bit
+   {
+      __var regValue;
+      regValue  = __readMemory32(0x4003D014, "Memory");  // Read RTC_SR register
+      regValue |= 0x00000010;                            // Set the TCE bit to enable the RTC
+      __writeMemory32(regValue, 0x4003D014, "Memory");   // RTC_SR Register
+      __message "RTC enabled";
+   }
+}
+

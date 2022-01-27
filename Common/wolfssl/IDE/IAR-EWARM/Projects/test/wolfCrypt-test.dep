@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>4059921946</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs>
+      <file>$PROJ_DIR$\..\..\..\..\wolfssl\wolfcrypt\visibility.h</file>
+      <file>$PROJ_DIR$\..\..\..\..\wolfssl\wolfcrypt\settings.h</file>
+      <file>$PROJ_DIR$\..\common\minimum-startup.c</file>
+      <file>$PROJ_DIR$\test-main.c</file>
+      <file>$PROJ_DIR$\..\..\..\..\wolfcrypt\test\test.c</file>
+      <file>$PROJ_DIR$\ewarm\Obj\test-main.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\ewarm\Obj\test.o</file>
+      <file>$PROJ_DIR$\ewarm\Exe\test.out</file>
+      <file>$PROJ_DIR$\ewarm\Obj\minimum-startup.o</file>
+      <file>$PROJ_DIR$\ewarm\Exe\wolfCrypt-test.bin</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+    </outputs>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 10</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\common\minimum-startup.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 11</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 13 16 14 15 6 8 7 17</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\test-main.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 5</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\..\wolfcrypt\test\test.c</name>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 1 0</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\ewarm\Exe\test.out</name>
+      <outputs>
+        <tool>
+          <name>OBJCOPY</name>
+          <file> 12</file>
+        </tool>
+      </outputs>
+    </file>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>ILINK</tool>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+

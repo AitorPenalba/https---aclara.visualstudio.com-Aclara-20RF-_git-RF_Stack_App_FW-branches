@@ -1,0 +1,1139 @@
+if (TARGET == APP)
+{
+define symbol LINKER_STEERING_ENABLED=0;
+define symbol STEER_LIB_TEXT=1;
+define symbol STEER_APP_TEXT=1;
+define symbol STEER_LIB_CONST=1;
+define symbol STEER_APP_CONST=1;
+define symbol STEER_LIB_INIT=1;
+define symbol STEER_APP_INIT=1;
+define symbol STEER_LIB_BSS=1;
+define symbol STEER_APP_BSS=1;
+define symbol STEER_COMPILER_GEN=1;
+define symbol STEER_COMMAND_LINE=0;
+
+if (LINKER_STEERING_ENABLED==1)
+{
+/* ================================================================================================================== */
+/*   Sections commented out because zero size is causing warnings/errors ============================================ */
+/* ================================================================================================================== */
+
+/* ================================================================================================================== */
+/*  Object Location by section ====================================================================================== */
+/* ================================================================================================================== */
+if (STEER_LIB_TEXT==1)
+{
+define symbol dl7M_tln_TEXT        = 0x00004400;
+define symbol m7M_tls_TEXT         = 0x00006E60;
+define symbol rt7M_tl_TEXT         = 0x00009B10;
+define symbol shb_l_TEXT           = 0x0000A170;
+define symbol PSP_TEXT             = 0x0000A220;
+define symbol KERNEL_TEXT          = 0x0000FCB0;
+define symbol BSP_TEXT             = 0x00010260;
+define symbol wolfSSL_Lib_MTU_TEXT = 0x00016950;
+}
+
+/* ================================================================================================================== */
+if (STEER_APP_TEXT==1)
+{
+define symbol utils_TEXT       = 0x0004B310;
+define symbol dfw_TEXT         = 0x0004C3A0;
+define symbol driver_TEXT      = 0x00051570;
+define symbol stack_TEXT       = 0x00053470;
+define symbol OS_API_TEXT      = 0x00064AA0;
+define symbol radio_TEXT       = 0x00064FE0;
+define symbol security_TEXT    = 0x00068C90;
+define symbol AclaraBSP_TEXT   = 0x0006BB00;
+define symbol Common_TEXT      = 0x00080000;
+define symbol HMC_TEXT         = 0x00097D30;
+define symbol AclaraLC_TEXT    = 0x00097D80;
+define symbol MTU_Common_TEXT  = 0x00099150;
+}
+
+/* ================================================================================================================== */
+if (STEER_LIB_CONST==1)
+{
+//define symbol dl7M_tln_CONST        = 0x00004400;
+//define symbol m7M_tls_CONST         = 0x00006E60;
+define symbol rt7M_tl_CONST         = 0x00009B00;
+//define symbol shb_l_CONST           = 0x0000A170;
+define symbol BSP_CONST             = 0x0001003C;
+define symbol PSP_CONST             = 0x0000A1B8;
+define symbol wolfSSL_Lib_MTU_CONST = 0x000148B8;
+}
+
+/* ================================================================================================================== */
+if (STEER_APP_CONST==1)
+{
+define symbol utils_CONST      = 0x00033E4C;
+define symbol dfw_CONST        = 0x00033EAC;
+define symbol driver_CONST     = 0x00034C60;
+define symbol stack_CONST      = 0x0003502C;
+define symbol OS_API_CONST     = 0x0003A314;
+define symbol radio_CONST      = 0x0003A684;
+define symbol security_CONST   = 0x0003B600;
+define symbol AclaraBSP_CONST  = 0x0003CB98;
+define symbol Common_CONST     = 0x0003CF2C;
+//define symbol HMC_CONST        = 0x00048B6C;
+define symbol AclaraLC_CONST    = 0x00048B6C;
+define symbol MTU_Common_CONST = 0x00049798;
+}
+
+/* ================================================================================================================== */
+if (STEER_COMPILER_GEN==1)
+{
+define symbol IAR_DINIT = 0x000337C0;
+}
+
+/* ================================================================================================================== */
+if (STEER_COMMAND_LINE==1)
+{
+define symbol COMMAND_LINE_DUMMY_1=1;  /* Dummy symbol to keep linker happy when no directives in {block} */
+//define symbol CommandLine_TEXT  = 0x0009D6C0;
+//define symbol CommandLine_CONST = 0x0009D6C0;
+//define symbol CommandLine_DINIT = 0x0009D6C0;
+//define symbol CommandLine_INIT  = 0x1FFF0878;
+//define symbol CommandLine_BSS   = 0x1FFFC920;
+}
+
+/* ================================================================================================================== */
+if (STEER_LIB_INIT==1)
+{
+//define symbol dl7M_tln_DINIT        = 0x00004400;
+//define symbol m7M_tls_DINIT         = 0x00006E60;
+//define symbol rt7M_tl_DINIT         = 0x00009B00;
+//define symbol shb_l_DINIT           = 0x0000A170;
+define symbol PSP_DINIT             = 0x0000A1B0;
+define symbol BSP_DINIT             = 0x0000FFF0;
+define symbol wolfSSL_Lib_MTU_DINIT = 0x000148B0;
+
+define symbol DLIB_DINIT            = 0x00033B84;
+
+define symbol DLIB_INIT            = 0x1FFF0000;
+//define symbol dl7M_tln_INIT        = 0x1FFF0008;
+//define symbol m7M_tls_INIT         = 0x1FFF0008;
+//define symbol rt7M_tl_INIT         = 0x1FFF0008;
+//define symbol shb_l_INIT           = 0x1FFF0018;
+define symbol PSP_INIT             = 0x1FFF0018;
+define symbol BSP_INIT             = 0x1FFF0028;
+define symbol wolfSSL_Lib_MTU_INIT = 0x1FFF0190;
+
+define symbol KERNEL_DATA_INIT     = 0x1FFFC920;
+}
+
+/* ================================================================================================================== */
+if (STEER_APP_INIT==1)
+{
+define symbol utils_DINIT      = 0x00033B88;
+define symbol dfw_DINIT        = 0x00033BD0;
+define symbol driver_DINIT     = 0x00033BD4;
+define symbol stack_DINIT      = 0x00033C20;
+//define symbol OS_API_DINIT     = 0x00033D98;
+define symbol radio_DINIT      = 0x00033D98;
+//define symbol security_DINIT   = 0x00033DD8;
+define symbol AclaraBSP_DINIT  = 0x00033DD8;
+define symbol Common_DINIT     = 0x00033DE8;
+//define symbol HMC_DINIT        = 0x00033E38;
+define symbol AclaraLC_DINIT    = 0x00033E38;
+define symbol MTU_Common_DINIT = 0x00033E3C;
+
+define symbol APP_RO_TEXT      = 0x00033BE0;
+
+define symbol utils_INIT      = 0x1FFF0508;
+define symbol dfw_INIT        = 0x1FFF0550;
+define symbol driver_INIT     = 0x1FFF0558;
+define symbol stack_INIT      = 0x1FFF0568;
+//define symbol OS_API_INIT     = 0x1FFF0790;
+define symbol radio_INIT      = 0x1FFF0790;
+//define symbol security_INIT   = 0x1FFF07D0;
+define symbol AclaraBSP_INIT  = 0x1FFF07D0;
+define symbol Common_INIT     = 0x1FFF07E8;
+//define symbol HMC_INIT        = 0x1FFF0858;
+define symbol AclaraLC_INIT    = 0x1FFF0858;
+define symbol MTU_Common_INIT = 0x1FFF0860;
+
+define symbol APP_RW_TEXT     = 0x1FFF0878;
+
+define symbol APP_NOINIT      = 0x1FFF08C0;
+}
+
+/* ================================================================================================================== */
+if (STEER_LIB_BSS==1)
+{
+//define symbol dl7M_tln_BSS        = 0x1FFF0008;
+//define symbol m7M_tls_BSS         = 0x1FFF0008;
+define symbol rt7M_tl_BSS         = 0x1FFF0008;
+//define symbol shb_l_BSS           = 0x1FFF0018;
+define symbol PSP_BSS             = 0x1FFF0020;
+define symbol BSP_BSS             = 0x1FFF00E0;
+define symbol wolfSSL_Lib_MTU_BSS = 0x1FFF0198;
+}
+
+/* ================================================================================================================== */
+if (STEER_APP_BSS==1)
+{
+define symbol utils_BSS      = 0x1FFF10C0;
+define symbol dfw_BSS        = 0x1FFF1868;
+define symbol driver_BSS     = 0x1FFF19A8;
+define symbol stack_BSS      = 0x1FFF1CF8;
+//define symbol OS_API_BSS     = 0x1FFF8BC0;
+define symbol radio_BSS      = 0x1FFF8BC0;
+define symbol security_BSS   = 0x1FFF98E8;
+define symbol AclaraBSP_BSS  = 0x1FFF99C0;
+define symbol Common_BSS     = 0x1FFF9A78;
+//define symbol HMC_BSS        = 0x1FFFBE10;
+define symbol AclaraLC_BSS   = 0x1FFFBE10;
+define symbol MTU_Common_BSS = 0x1FFFBEF0;
+}
+
+/* ================================================================================================================== */
+/*  Object Placement by section ===================================================================================== */
+/* ================================================================================================================== */
+if (STEER_LIB_TEXT==1)
+{
+"dl7M_tln_TEXT":        place at address mem: dl7M_tln_TEXT        { ro code section .text object *(dl7M_tln.a) };
+"m7M_tls_TEXT":         place at address mem: m7M_tls_TEXT         { ro code section .text object *(m7M_tls.a) };
+"rt7M_tl_TEXT":         place at address mem: rt7M_tl_TEXT         { ro code section .text object *(rt7M_tl.a) };
+"shb_l_TEXT":           place at address mem: shb_l_TEXT           { ro code section .text object *(shb_l.a) };
+"BSP_TEXT":             place at address mem: BSP_TEXT             { ro code section .text object *(BSP.a),
+                                                                     ro code section .text object adc.o(BSP.a) };
+"PSP_TEXT":             place at address mem: PSP_TEXT             { ro code section .text object *(PSP.a),
+                                                                     ro code section .text object mutex.o(PSP.a),
+                                                                     ro code section .text object queue.o(PSP.a),
+                                                                     ro code section .text object task.o(PSP.a) };
+"KERNEL_TEXT":          place at address mem: KERNEL_TEXT          { ro code section KERNEL object * };
+"wolfSSL_Lib_MTU_TEXT": place at address mem: wolfSSL_Lib_MTU_TEXT { ro code section .text object *(wolfSSL-Lib_MTU.a) };
+}
+
+/* ================================================================================================================== */
+if (STEER_APP_TEXT==1)
+{
+"utils_TEXT":      place at address mem: utils_TEXT      { ro code section .text object ascii.o,
+                                                           ro code section .text object bcd.o,
+                                                           ro code section .text object bit_util.o,
+                                                           ro code section .text object byteswap.o,
+                                                           ro code section .text object crc16_m.o,
+                                                           ro code section .text object crc32.o,
+                                                           ro code section .text object invert_bits.o,
+                                                           ro code section .text object pack.o,
+                                                           ro code section .text object rand.o,
+                                                           ro code section .text object time_util.o,
+                                                           ro code section .text object timer_util.o };
+"dfw_TEXT":        place at address mem: dfw_TEXT        { ro code section .text object dfw_app.o,
+                                                           ro code section .text object dfw_interface.o,
+                                                           ro code section .text object dfw_pckt.o,
+                                                           ro code section .text object dfwtd_config.o };
+"driver_TEXT":     place at address mem: driver_TEXT     { ro code section .text object dvr_banked.o,
+                                                           ro code section .text object dvr_cache.o,
+                                                           ro code section .text object dvr_extflash.o,
+                                                           ro code section .text object dvr_sectPreErase.o,
+                                                           ro code section .text object dvr_sharedMem.o,
+                                                           ro code section .text object IF_intFlash.o,
+                                                           ro code section .text object spi_mstr.o };
+"stack_TEXT":      place at address mem: stack_TEXT      { ro code section .text object COMM.o,
+                                                           ro code section .text object SM.o,
+                                                           ro code section .text object smtd_config.o,
+                                                           ro code section .text object dtls.o,
+                                                           ro code section .text object mtls.o,
+                                                           ro code section .text object STACK.o,
+                                                           ro code section .text object MAC.o,
+                                                           ro code section .text object MAC_FrameEncoder.o,
+                                                           ro code section .text object MAC_FrameManagement.o,
+                                                           ro code section .text object MAC_PacketManagement.o,
+                                                           ro code section .text object PHY.o,
+                                                           ro code section .text object EstimateCarrierFrequencyOffset.o,
+                                                           ro code section .text object MaximizeEyeOpening.o,
+                                                           ro code section .text object PerformCFOCompensation.o,
+                                                           ro code section .text object preamble_detect.o,
+                                                           ro code section .text object preambleDetector.o,
+                                                           ro code section .text object preambleDetector_Data.o,
+                                                           ro code section .text object preambleDetector_initialize.o,
+                                                           ro code section .text object processDerotatedSamples.o,
+                                                           ro code section .text object ScaleClipFreq2phase.o,
+                                                           ro code section .text object sign.o,
+                                                           ro code section .text object fir_filt_circ_buff.o,
+                                                           ro code section .text object gresample.o,
+                                                           ro code section .text object phase2freq_wi_unwrap.o,
+                                                           ro code section .text object findSYNC.o,
+                                                           ro code section .text object FreqDomMlseP4GfskStruct2.o,
+                                                           ro code section .text object processDerotatedSPDSamples.o,
+                                                           ro code section .text object SyncAndPayloadDemodulator.o,
+                                                           ro code section .text object SoftDemodulator.o,
+                                                           ro code section .text object rs.o,
+                                                           ro code section .text object galois.o,
+                                                           ro code section .text object rsdec.o,
+                                                           ro code section .text object rsenc.o,
+                                                           ro code section .text object indication.o };
+"OS_API_TEXT":     place at address mem: OS_API_TEXT     { ro code section .text object Event.o,
+                                                           ro code section .text object MessageQ.o,
+                                                           ro code section .text object Mutex.o,
+                                                           ro code section .text object Queue.o,
+                                                           ro code section .text object Semaphore.o,
+                                                           ro code section .text object TickTime.o };
+"radio_TEXT":      place at address mem: radio_TEXT      { ro code section .text object radio.o,
+                                                           ro code section .text object radio_comm.o,
+                                                           ro code section .text object si446x_api_lib.o,
+                                                           ro code section .text object radio_config_normal.o,
+                                                           ro code section .text object radio_config_cw.o,
+                                                           ro code section .text object radio_config_PN9.o,
+                                                           ro code section .text object radio_config_2GFSK_BER.o,
+                                                           ro code section .text object radio_config_4GFSK_BER.o,
+                                                           ro code section .text object radio_TCXO.o };
+"security_TEXT":   place at address mem: security_TEXT   { ro code section .text object cert-builder.o,
+                                                           ro code section .text object ecc108_apps.o,
+                                                           ro code section .text object ecc108_comm.o,
+                                                           ro code section .text object ecc108_comm_marshaling.o,
+                                                           ro code section .text object ecc108_i2c.o,
+                                                           ro code section .text object ecc108_mqx.o };
+"AclaraBSP_TEXT":  place at address mem: AclaraBSP_TEXT  { ro code section .text object ADC.o,
+                                                           ro code section .text object BSP_aclara.o,
+                                                           ro code section .text object CRC.o,
+                                                           ro code section .text object gpio.o,
+                                                           ro code section .text object LED.o,
+                                                           ro code section .text object radio_hal.o,
+                                                           ro code section .text object rng.o,
+                                                           ro code section .text object RTC.o,
+                                                           ro code section .text object sys_clock.o,
+                                                           ro code section .text object UART.o,
+                                                           ro code section .text object WDOG.o };
+"Common_TEXT":     place at address mem: Common_TEXT     { ro code section .text object alarm_task.o,
+                                                           ro code section .text object ALRM_Handler.o,
+                                                           ro code section .text object BUF_MemoryBuffers.o,
+                                                           ro code section .text object buffer.o,
+                                                           ro code section .text object DBG_CommandLine.o,
+                                                           ro code section .text object DBG_SerialDebug.o,
+                                                           ro code section .text object eng_res.o,
+                                                           ro code section .text object EVL_event_log.o,
+                                                           ro code section .text object exe_list.o,
+                                                           ro code section .text object file_io.o,
+                                                           ro code section .text object HEEP_util.o,
+                                                           ro code section .text object mem_chk.o,
+                                                           ro code section .text object MFG_Dtls.o,
+                                                           ro code section .text object MFG_Port.o,
+                                                           ro code section .text object MIMT_info.o,
+                                                           ro code section .text object mode_config.o,
+                                                           ro code section .text object object_list.o,
+                                                           ro code section .text object partitions.o,
+                                                           ro code section .text object runTimeInit.o,
+                                                           ro code section .text object SELF_test.o,
+                                                           ro code section .text object stack_check.o,
+                                                           ro code section .text object sys_busy.o,
+                                                           ro code section .text object temperature.o,
+                                                           ro code section .text object time_DST.o,
+                                                           ro code section .text object time_sync.o,
+                                                           ro code section .text object time_sys.o,
+                                                           ro code section .text object virgin_device.o,
+                                                           ro code section .text object FTM0.o,
+                                                           ro code section .text object FTM1.o,
+                                                           ro code section .text object FMT2.o,
+                                                           ro code section .text object FTM3.o };
+"HMC_TEXT":        place at address mem: HMC_TEXT        { ro code section .text object hmc_app.o,
+                                                           ro code section .text object hmc_demand.o,
+                                                           ro code section .text object hmc_diags.o,
+                                                           ro code section .text object hmc_ds.o,
+                                                           ro code section .text object hmc_eng.o,
+                                                           ro code section .text object hmc_finish.o,
+                                                           ro code section .text object hmc_msg.o,
+                                                           ro code section .text object hmc_mtr_info.o,
+                                                           ro code section .text object hmc_mtr_lp.o,
+                                                           ro code section .text object hmc_prot.o,
+                                                           ro code section .text object hmc_request.o,
+                                                           ro code section .text object hmc_seq_id.o,
+                                                           ro code section .text object hmc_snapshot.o,
+                                                           ro code section .text object hmc_start.o,
+                                                           ro code section .text object hmc_sync.o,
+                                                           ro code section .text object hmc_time.o,
+                                                           ro code section .text object hmc_tsk_lst.o,
+                                                           ro code section .text object intf_cim_cmd.o,
+                                                           ro code section .text object hmc_prg_mtr.o,
+                                                           ro code section .text object hmc_display.o };
+"AclaraLC_TEXT":   place at address mem: AclaraLC_TEXT   { ro code section .text object ilc_dru_driver.o,
+                                                           ro code section .text object ilc_srfn_reg.o,
+                                                           ro code section .text object ilc_time_sync_handler.o,
+                                                           ro code section .text object ilc_tunneling_handler.o };
+"MTU_Common_TEXT": place at address mem: MTU_Common_TEXT { ro code section .text object APP_MSG_Handler.o,
+                                                           ro code section .text object demand.o,
+                                                           ro code section .text object ed_config.o,
+                                                           ro code section .text object endpt_cim_cmd.o,
+                                                           ro code section .text object historyd.o,
+                                                           ro code section .text object ID_intervalTask.o,
+                                                           ro code section .text object IDL_IdleProcess.o,
+                                                           ro code section .text object OR_MR_Handler.o,
+                                                           ro code section .text object pwr_config.o,
+                                                           ro code section .text object pwr_last_gasp.o,
+                                                           ro code section .text object pwr_restore.o,
+                                                           ro code section .text object pwr_task.o,
+                                                           ro code section .text object RG_CF_Handler.o,
+                                                           ro code section .text object RG_MD_Handler.o,
+                                                           ro code section .text object STRT_Startup.o,
+                                                           ro code section .text object Task.o,
+                                                           ro code section .text object vbat_reg.o,
+                                                           ro code section .text object version.o };
+}
+
+/* ================================================================================================================== */
+if (STEER_LIB_CONST==1)
+{
+//"dl7M_tln_CONST":        place at address mem: dl7M_tln_CONST        { ro data section .rodata object *(dl7M_tln.a) };
+//"m7M_tls_CONST":         place at address mem: m7M_tls_CONST         { ro data section .rodata object *(m7M_tls.a) };
+"rt7M_tl_CONST":         place at address mem: rt7M_tl_CONST         { ro data section .rodata object *(rt7M_tl.a) };
+//"shb_l_CONST":           place at address mem: shb_l_CONST           { ro data section .rodata object *(shb_l.a) };
+"BSP_CONST":             place at address mem: BSP_CONST             { ro data section .rodata object *(BSP.a) };
+"PSP_CONST":             place at address mem: PSP_CONST             { ro data section .rodata object *(PSP.a) };
+"wolfSSL_Lib_MTU_CONST": place at address mem: wolfSSL_Lib_MTU_CONST { ro data section .rodata object *(wolfSSL-Lib_MTU.a) };
+}
+
+/* ================================================================================================================== */
+if (STEER_APP_CONST==1)
+{
+"utils_CONST":      place at address mem: utils_CONST      { ro data section .rodata object ascii.o,
+                                                             ro data section .rodata object bcd.o,
+                                                             ro data section .rodata object bit_util.o,
+                                                             ro data section .rodata object byteswap.o,
+                                                             ro data section .rodata object crc16_m.o,
+                                                             ro data section .rodata object crc32.o,
+                                                             ro data section .rodata object invert_bits.o,
+                                                             ro data section .rodata object pack.o,
+                                                             ro data section .rodata object rand.o,
+                                                             ro data section .rodata object time_util.o,
+                                                             ro data section .rodata object timer_util.o };
+"dfw_CONST":        place at address mem: dfw_CONST        { ro data section .rodata object dfw_app.o,
+                                                             ro data section .rodata object dfw_interface.o,
+                                                             ro data section .rodata object dfw_pckt.o,
+                                                             ro data section .rodata object dfwtd_config.o };
+"driver_CONST":     place at address mem: driver_CONST     { ro data section .rodata object dvr_banked.o,
+                                                             ro data section .rodata object dvr_cache.o,
+                                                             ro data section .rodata object dvr_extflash.o,
+                                                             ro data section .rodata object dvr_sectPreErase.o,
+                                                             ro data section .rodata object dvr_sharedMem.o,
+                                                             ro data section .rodata object IF_intFlash.o,
+                                                             ro data section .rodata object spi_mstr.o };
+"stack_CONST":      place at address mem: stack_CONST      { ro data section .rodata object COMM.o,
+                                                             ro data section .rodata object SM.o,
+                                                             ro data section .rodata object smtd_config.o,
+                                                             ro data section .rodata object dtls.o,
+                                                             ro data section .rodata object mtls.o,
+                                                             ro data section .rodata object STACK.o,
+                                                             ro data section .rodata object MAC.o,
+                                                             ro data section .rodata object MAC_FrameEncoder.o,
+                                                             ro data section .rodata object MAC_FrameManagement.o,
+                                                             ro data section .rodata object MAC_PacketManagement.o,
+                                                             ro data section .rodata object PHY.o,
+                                                             ro data section .rodata object EstimateCarrierFrequencyOffset.o,
+                                                             ro data section .rodata object MaximizeEyeOpening.o,
+                                                             ro data section .rodata object PerformCFOCompensation.o,
+                                                             ro data section .rodata object preamble_detect.o,
+                                                             ro data section .rodata object preambleDetector.o,
+                                                             ro data section .rodata object preambleDetector_Data.o,
+                                                             ro data section .rodata object preambleDetector_initialize.o,
+                                                             ro data section .rodata object processDerotatedSamples.o,
+                                                             ro data section .rodata object ScaleClipFreq2phase.o,
+                                                             ro data section .rodata object sign.o,
+                                                             ro data section .rodata object fir_filt_circ_buff.o,
+                                                             ro data section .rodata object gresample.o,
+                                                             ro data section .rodata object phase2freq_wi_unwrap.o,
+                                                             ro data section .rodata object findSYNC.o,
+                                                             ro data section .rodata object FreqDomMlseP4GfskStruct2.o,
+                                                             ro data section .rodata object processDerotatedSPDSamples.o,
+                                                             ro data section .rodata object SyncAndPayloadDemodulator.o,
+                                                             ro data section .rodata object SoftDemodulator.o,
+                                                             ro data section .rodata object rs.o,
+                                                             ro data section .rodata object galois.o,
+                                                             ro data section .rodata object rsdec.o,
+                                                             ro data section .rodata object rsenc.o,
+                                                             ro data section .rodata object indication.o };
+"OS_API_CONST":     place at address mem: OS_API_CONST     { ro data section .rodata object Event.o,
+                                                             ro data section .rodata object MessageQ.o,
+                                                             ro data section .rodata object Mutex.o,
+                                                             ro data section .rodata object Queue.o,
+                                                             ro data section .rodata object Semaphore.o,
+                                                             ro data section .rodata object TickTime.o };
+"radio_CONST":      place at address mem: radio_CONST      { ro data section .rodata object radio.o,
+                                                             ro data section .rodata object radio_comm.o,
+                                                             ro data section .rodata object si446x_api_lib.o,
+                                                             ro data section .rodata object radio_config_normal.o,
+                                                             ro data section .rodata object radio_config_cw.o,
+                                                             ro data section .rodata object radio_config_PN9.o,
+                                                             ro data section .rodata object radio_config_2GFSK_BER.o,
+                                                             ro data section .rodata object radio_config_4GFSK_BER.o,
+                                                             ro data section .rodata object radio_TCXO.o };
+"security_CONST":   place at address mem: security_CONST   { ro data section .rodata object cert-builder.o,
+                                                             ro data section .rodata object ecc108_apps.o,
+                                                             ro data section .rodata object ecc108_comm.o,
+                                                             ro data section .rodata object ecc108_comm_marshaling.o,
+                                                             ro data section .rodata object ecc108_i2c.o,
+                                                             ro data section .rodata object ecc108_mqx.o };
+"AclaraBSP_CONST":  place at address mem: AclaraBSP_CONST  { ro data section .rodata object ADC.o,
+                                                             ro data section .rodata object BSP_aclara.o,
+                                                             ro data section .rodata object CRC.o,
+                                                             ro data section .rodata object gpio.o,
+                                                             ro data section .rodata object LED.o,
+                                                             ro data section .rodata object radio_hal.o,
+                                                             ro data section .rodata object rng.o,
+                                                             ro data section .rodata object RTC.o,
+                                                             ro data section .rodata object sys_clock.o,
+                                                             ro data section .rodata object UART.o,
+                                                             ro data section .rodata object WDOG.o };
+"Common_CONST":     place at address mem: Common_CONST     { ro data section .rodata object alarm_task.o,
+                                                             ro data section .rodata object ALRM_Handler.o,
+                                                             ro data section .rodata object BUF_MemoryBuffers.o,
+                                                             ro data section .rodata object buffer.o,
+                                                             ro data section .rodata object DBG_CommandLine.o,
+                                                             ro data section .rodata object DBG_SerialDebug.o,
+                                                             ro data section .rodata object eng_res.o,
+                                                             ro data section .rodata object EVL_event_log.o,
+                                                             ro data section .rodata object exe_list.o,
+                                                             ro data section .rodata object file_io.o,
+                                                             ro data section .rodata object HEEP_util.o,
+                                                             ro data section .rodata object mem_chk.o,
+                                                             ro data section .rodata object MFG_Dtls.o,
+                                                             ro data section .rodata object MFG_Port.o,
+                                                             ro data section .rodata object MIMT_info.o,
+                                                             ro data section .rodata object mode_config.o,
+                                                             ro data section .rodata object object_list.o,
+                                                             ro data section .rodata object partitions.o,
+                                                             ro data section .rodata object runTimeInit.o,
+                                                             ro data section .rodata object SELF_test.o,
+                                                             ro data section .rodata object stack_check.o,
+                                                             ro data section .rodata object sys_busy.o,
+                                                             ro data section .rodata object temperature.o,
+                                                             ro data section .rodata object time_DST.o,
+                                                             ro data section .rodata object time_sync.o,
+                                                             ro data section .rodata object time_sys.o,
+                                                             ro data section .rodata object virgin_device.o,
+                                                             ro data section .rodata object FTM0.o,
+                                                             ro data section .rodata object FTM1.o,
+                                                             ro data section .rodata object FMT2.o,
+                                                             ro data section .rodata object FTM3.o };
+//"HMC_CONST":        place at address mem: HMC_CONST        { ro data section .rodata object hmc_app.o,
+//                                                             ro data section .rodata object hmc_demand.o,
+//                                                             ro data section .rodata object hmc_diags.o,
+//                                                             ro data section .rodata object hmc_ds.o,
+//                                                             ro data section .rodata object hmc_eng.o,
+//                                                             ro data section .rodata object hmc_finish.o,
+//                                                             ro data section .rodata object hmc_msg.o,
+//                                                             ro data section .rodata object hmc_mtr_info.o,
+//                                                             ro data section .rodata object hmc_mtr_lp.o,
+//                                                             ro data section .rodata object hmc_prot.o,
+//                                                             ro data section .rodata object hmc_request.o,
+//                                                             ro data section .rodata object hmc_seq_id.o,
+//                                                             ro data section .rodata object hmc_snapshot.o,
+//                                                             ro data section .rodata object hmc_start.o,
+//                                                             ro data section .rodata object hmc_sync.o,
+//                                                             ro data section .rodata object hmc_time.o,
+//                                                             ro data section .rodata object hmc_tsk_lst.o,
+//                                                             ro data section .rodata object intf_cim_cmd.o,
+//                                                             ro data section .rodata object hmc_prg_mtr.o,
+//                                                             ro data section .rodata object hmc_display.o };
+"AclaraLC_CONST":   place at address mem: AclaraLC_CONST   { ro data section .rodata object ilc_dru_driver.o,
+                                                             ro data section .rodata object ilc_srfn_reg.o,
+                                                             ro data section .rodata object ilc_time_sync_handler.o,
+                                                             ro data section .rodata object ilc_tunneling_handler.o };
+"MTU_Common_CONST": place at address mem: MTU_Common_CONST { ro data section .rodata object APP_MSG_Handler.o,
+                                                             ro data section .rodata object demand.o,
+                                                             ro data section .rodata object ed_config.o,
+                                                             ro data section .rodata object endpt_cim_cmd.o,
+                                                             ro data section .rodata object historyd.o,
+                                                             ro data section .rodata object ID_intervalTask.o,
+                                                             ro data section .rodata object IDL_IdleProcess.o,
+                                                             ro data section .rodata object OR_MR_Handler.o,
+                                                             ro data section .rodata object pwr_config.o,
+                                                             ro data section .rodata object pwr_last_gasp.o,
+                                                             ro data section .rodata object pwr_restore.o,
+                                                             ro data section .rodata object pwr_task.o,
+                                                             ro data section .rodata object RG_CF_Handler.o,
+                                                             ro data section .rodata object RG_MD_Handler.o,
+                                                             ro data section .rodata object STRT_Startup.o,
+                                                             ro data section .rodata object Task.o,
+                                                             ro data section .rodata object vbat_reg.o,
+                                                             ro data section .rodata object version.o };
+}
+
+/* ================================================================================================================== */
+if (STEER_LIB_INIT==1)
+{
+//"dl7M_tln_DINIT":        place at address mem: dl7M_tln_DINIT        { ro data section *_init object *(dl7M_tln.a) };
+//"m7M_tls_DINIT":         place at address mem: m7M_tls_DINIT         { ro data section *_init object *(m7M_tls.a) };
+//"rt7M_tl_DINIT":         place at address mem: rt7M_tl_DINIT         { ro data section *_init object *(rt7M_tl.a) };
+//"shb_l_DINIT":           place at address mem: shb_l_DINIT           { ro data section *_init object *(shb_l.a) };
+"BSP_DINIT":             place at address mem: BSP_DINIT             { ro data section *_init object *(BSP.a) };
+"PSP_DINIT":             place at address mem: PSP_DINIT             { ro data section *_init object *(PSP.a) };
+"wolfSSL_Lib_MTU_DINIT": place at address mem: wolfSSL_Lib_MTU_DINIT { ro data section *_init object *(wolfSSL-Lib_MTU.a) };
+
+"DLIB_DINIT":            place at address mem: DLIB_DINIT            { ro data section __DLIB_PERTHREAD_init object * };
+
+"DLIB_INIT":            place at address mem: DLIB_INIT            { rw data section __DLIB_PERTHREAD object * };
+//"dl7M_tln_INIT":        place at address mem: dl7M_tln_INIT        { rw data section .data object *(dl7M_tln.a) };
+//"m7M_tls_INIT":         place at address mem: m7M_tls_INIT         { rw data section .data object *(m7M_tls.a) };
+//"rt7M_tl_INIT":         place at address mem: rt7M_tl_INIT         { rw data section .data object *(rt7M_tl.a) };
+//"shb_l_INIT":           place at address mem: shb_l_INIT           { rw data section .data object *(shb_l.a) };
+"BSP_INIT":             place at address mem: BSP_INIT             { rw data section .data object *(BSP.a) };
+"PSP_INIT":             place at address mem: PSP_INIT             { rw data section .data object *(PSP.a) };
+"wolfSSL_Lib_MTU_INIT": place at address mem: wolfSSL_Lib_MTU_INIT { rw data section .data object *(wolfSSL-Lib_MTU.a) };
+
+"KERNEL_DATA_INIT":     place at address mem: KERNEL_DATA_INIT     { rw data section .kernel_data object * };
+}
+
+/* ================================================================================================================== */
+if (STEER_APP_INIT==1)
+{
+"utils_DINIT":      place at address mem: utils_DINIT      { ro data section *_init object ascii.o,
+                                                             ro data section *_init object bcd.o,
+                                                             ro data section *_init object bit_util.o,
+                                                             ro data section *_init object byteswap.o,
+                                                             ro data section *_init object crc16_m.o,
+                                                             ro data section *_init object crc32.o,
+                                                             ro data section *_init object invert_bits.o,
+                                                             ro data section *_init object pack.o,
+                                                             ro data section *_init object rand.o,
+                                                             ro data section *_init object time_util.o,
+                                                             ro data section *_init object timer_util.o };
+"dfw_DINIT":        place at address mem: dfw_DINIT        { ro data section *_init object dfw_app.o,
+                                                             ro data section *_init object dfw_interface.o,
+                                                             ro data section *_init object dfw_pckt.o,
+                                                             ro data section *_init object dfwtd_config.o };
+"driver_DINIT":     place at address mem: driver_DINIT     { ro data section *_init object dvr_banked.o,
+                                                             ro data section *_init object dvr_cache.o,
+                                                             ro data section *_init object dvr_extflash.o,
+                                                             ro data section *_init object dvr_sectPreErase.o,
+                                                             ro data section *_init object dvr_sharedMem.o,
+                                                             ro data section *_init object IF_intFlash.o,
+                                                             ro data section *_init object spi_mstr.o };
+"stack_DINIT":      place at address mem: stack_DINIT      { ro data section *_init object COMM.o,
+                                                             ro data section *_init object SM.o,
+                                                             ro data section *_init object smtd_config.o,
+                                                             ro data section *_init object dtls.o,
+                                                             ro data section *_init object mtls.o,
+                                                             ro data section *_init object STACK.o,
+                                                             ro data section *_init object MAC.o,
+                                                             ro data section *_init object MAC_FrameEncoder.o,
+                                                             ro data section *_init object MAC_FrameManagement.o,
+                                                             ro data section *_init object MAC_PacketManagement.o,
+                                                             ro data section *_init object PHY.o,
+                                                             ro data section *_init object EstimateCarrierFrequencyOffset.o,
+                                                             ro data section *_init object MaximizeEyeOpening.o,
+                                                             ro data section *_init object PerformCFOCompensation.o,
+                                                             ro data section *_init object preamble_detect.o,
+                                                             ro data section *_init object preambleDetector.o,
+                                                             ro data section *_init object preambleDetector_Data.o,
+                                                             ro data section *_init object preambleDetector_initialize.o,
+                                                             ro data section *_init object processDerotatedSamples.o,
+                                                             ro data section *_init object ScaleClipFreq2phase.o,
+                                                             ro data section *_init object sign.o,
+                                                             ro data section *_init object fir_filt_circ_buff.o,
+                                                             ro data section *_init object gresample.o,
+                                                             ro data section *_init object phase2freq_wi_unwrap.o,
+                                                             ro data section *_init object findSYNC.o,
+                                                             ro data section *_init object FreqDomMlseP4GfskStruct2.o,
+                                                             ro data section *_init object processDerotatedSPDSamples.o,
+                                                             ro data section *_init object SyncAndPayloadDemodulator.o,
+                                                             ro data section *_init object SoftDemodulator.o,
+                                                             ro data section *_init object rs.o,
+                                                             ro data section *_init object galois.o,
+                                                             ro data section *_init object rsdec.o,
+                                                             ro data section *_init object rsenc.o,
+                                                             ro data section *_init object indication.o };
+//"OS_API_DINIT":     place at address mem: OS_API_DINIT     { ro data section *_init object Event.o,
+//                                                             ro data section *_init object MessageQ.o,
+//                                                             ro data section *_init object Mutex.o,
+//                                                             ro data section *_init object Queue.o,
+//                                                             ro data section *_init object Semaphore.o,
+//                                                             ro data section *_init object TickTime.o };
+"radio_DINIT":      place at address mem: radio_DINIT      { ro data section *_init object radio.o,
+                                                             ro data section *_init object radio_comm.o,
+                                                             ro data section *_init object si446x_api_lib.o,
+                                                             ro data section *_init object radio_config_normal.o,
+                                                             ro data section *_init object radio_config_cw.o,
+                                                             ro data section *_init object radio_config_PN9.o,
+                                                             ro data section *_init object radio_config_2GFSK_BER.o,
+                                                             ro data section *_init object radio_config_4GFSK_BER.o,
+                                                             ro data section *_init object radio_TCXO.o };
+//"security_DINIT":   place at address mem: security_DINIT   { ro data section *_init object cert-builder.o,
+//                                                             ro data section *_init object ecc108_apps.o,
+//                                                             ro data section *_init object ecc108_comm.o,
+//                                                             ro data section *_init object ecc108_comm_marshaling.o,
+//                                                             ro data section *_init object ecc108_i2c.o,
+//                                                             ro data section *_init object ecc108_mqx.o };
+"AclaraBSP_DINIT":  place at address mem: AclaraBSP_DINIT  { ro data section *_init object ADC.o,
+                                                             ro data section *_init object BSP_aclara.o,
+                                                             ro data section *_init object CRC.o,
+                                                             ro data section *_init object gpio.o,
+                                                             ro data section *_init object LED.o,
+                                                             ro data section *_init object radio_hal.o,
+                                                             ro data section *_init object rng.o,
+                                                             ro data section *_init object RTC.o,
+                                                             ro data section *_init object sys_clock.o,
+                                                             ro data section *_init object UART.o,
+                                                             ro data section *_init object WDOG.o };
+"Common_DINIT":     place at address mem: Common_DINIT     { ro data section *_init object alarm_task.o,
+                                                             ro data section *_init object ALRM_Handler.o,
+                                                             ro data section *_init object BUF_MemoryBuffers.o,
+                                                             ro data section *_init object buffer.o,
+                                                             ro data section *_init object DBG_CommandLine.o,
+                                                             ro data section *_init object DBG_SerialDebug.o,
+                                                             ro data section *_init object eng_res.o,
+                                                             ro data section *_init object EVL_event_log.o,
+                                                             ro data section *_init object exe_list.o,
+                                                             ro data section *_init object file_io.o,
+                                                             ro data section *_init object HEEP_util.o,
+                                                             ro data section *_init object mem_chk.o,
+                                                             ro data section *_init object MFG_Dtls.o,
+                                                             ro data section *_init object MFG_Port.o,
+                                                             ro data section *_init object MIMT_info.o,
+                                                             ro data section *_init object mode_config.o,
+                                                             ro data section *_init object object_list.o,
+                                                             ro data section *_init object partitions.o,
+                                                             ro data section *_init object runTimeInit.o,
+                                                             ro data section *_init object SELF_test.o,
+                                                             ro data section *_init object stack_check.o,
+                                                             ro data section *_init object sys_busy.o,
+                                                             ro data section *_init object temperature.o,
+                                                             ro data section *_init object time_DST.o,
+                                                             ro data section *_init object time_sync.o,
+                                                             ro data section *_init object time_sys.o,
+                                                             ro data section *_init object virgin_device.o,
+                                                             ro data section *_init object FTM0.o,
+                                                             ro data section *_init object FTM1.o,
+                                                             ro data section *_init object FMT2.o,
+                                                             ro data section *_init object FTM3.o };
+//"HMC_DINIT":        place at address mem: HMC_DINIT        { ro data section *_init object hmc_app.o,
+//                                                             ro data section *_init object hmc_demand.o,
+//                                                             ro data section *_init object hmc_demand.o,
+//                                                             ro data section *_init object hmc_diags.o,
+//                                                             ro data section *_init object hmc_ds.o,
+//                                                             ro data section *_init object hmc_eng.o,
+//                                                             ro data section *_init object hmc_finish.o,
+//                                                             ro data section *_init object hmc_msg.o,
+//                                                             ro data section *_init object hmc_mtr_info.o,
+//                                                             ro data section *_init object hmc_mtr_lp.o,
+//                                                             ro data section *_init object hmc_prot.o,
+//                                                             ro data section *_init object hmc_request.o,
+//                                                             ro data section *_init object hmc_seq_id.o,
+//                                                             ro data section *_init object hmc_snapshot.o,
+//                                                             ro data section *_init object hmc_start.o,
+//                                                             ro data section *_init object hmc_sync.o,
+//                                                             ro data section *_init object hmc_time.o,
+//                                                             ro data section *_init object hmc_tsk_lst.o,
+//                                                             ro data section *_init object intf_cim_cmd.o,
+//                                                             ro data section *_init object hmc_prg_mtr.o,
+//                                                             ro data section *_init object hmc_display.o };
+"AclaraLC_DINIT":   place at address mem: AclaraLC_DINIT   { ro data section *_init object ilc_dru_driver.o,
+                                                             ro data section *_init object ilc_srfn_reg.o,
+                                                             ro data section *_init object ilc_time_sync_handler.o,
+                                                             ro data section *_init object ilc_tunneling_handler.o };
+"MTU_Common_DINIT": place at address mem: MTU_Common_DINIT { ro data section *_init object APP_MSG_Handler.o,
+                                                             ro data section *_init object demand.o,
+                                                             ro data section *_init object ed_config.o,
+                                                             ro data section *_init object endpt_cim_cmd.o,
+                                                             ro data section *_init object historyd.o,
+                                                             ro data section *_init object ID_intervalTask.o,
+                                                             ro data section *_init object IDL_IdleProcess.o,
+                                                             ro data section *_init object OR_MR_Handler.o,
+                                                             ro data section *_init object pwr_config.o,
+                                                             ro data section *_init object pwr_last_gasp.o,
+                                                             ro data section *_init object pwr_restore.o,
+                                                             ro data section *_init object pwr_task.o,
+                                                             ro data section *_init object RG_CF_Handler.o,
+                                                             ro data section *_init object RG_MD_Handler.o,
+                                                             ro data section *_init object STRT_Startup.o,
+                                                             ro data section *_init object Task.o,
+                                                             ro data section *_init object vbat_reg.o,
+                                                             ro data section *_init object version.o };
+
+"utils_INIT":      place at address mem: utils_INIT      { rw data section .data object ascii.o,
+                                                           rw data section .data object bcd.o,
+                                                           rw data section .data object bit_util.o,
+                                                           rw data section .data object byteswap.o,
+                                                           rw data section .data object crc16_m.o,
+                                                           rw data section .data object crc32.o,
+                                                           rw data section .data object invert_bits.o,
+                                                           rw data section .data object pack.o,
+                                                           rw data section .data object rand.o,
+                                                           rw data section .data object time_util.o,
+                                                           rw data section .data object timer_util.o };
+"dfw_INIT":        place at address mem: dfw_INIT        { rw data section .data object dfw_app.o,
+                                                           rw data section .data object dfw_interface.o,
+                                                           rw data section .data object dfw_pckt.o,
+                                                           rw data section .data object dfwtd_config.o };
+"driver_INIT":     place at address mem: driver_INIT     { rw data section .data object dvr_banked.o,
+                                                           rw data section .data object dvr_cache.o,
+                                                           rw data section .data object dvr_extflash.o,
+                                                           rw data section .data object dvr_sectPreErase.o,
+                                                           rw data section .data object dvr_sharedMem.o,
+                                                           rw data section .data object IF_intFlash.o,
+                                                           rw data section .data object spi_mstr.o };
+"stack_INIT":      place at address mem: stack_INIT      { rw data section .data object COMM.o,
+                                                           rw data section .data object SM.o,
+                                                           rw data section .data object smtd_config.o,
+                                                           rw data section .data object dtls.o,
+                                                           rw data section .data object mtls.o,
+                                                           rw data section .data object STACK.o,
+                                                           rw data section .data object MAC.o,
+                                                           rw data section .data object MAC_FrameEncoder.o,
+                                                           rw data section .data object MAC_FrameManagement.o,
+                                                           rw data section .data object MAC_PacketManagement.o,
+                                                           rw data section .data object PHY.o,
+                                                           rw data section .data object EstimateCarrierFrequencyOffset.o,
+                                                           rw data section .data object MaximizeEyeOpening.o,
+                                                           rw data section .data object PerformCFOCompensation.o,
+                                                           rw data section .data object preamble_detect.o,
+                                                           rw data section .data object preambleDetector.o,
+                                                           rw data section .data object preambleDetector_Data.o,
+                                                           rw data section .data object preambleDetector_initialize.o,
+                                                           rw data section .data object processDerotatedSamples.o,
+                                                           rw data section .data object ScaleClipFreq2phase.o,
+                                                           rw data section .data object sign.o,
+                                                           rw data section .data object fir_filt_circ_buff.o,
+                                                           rw data section .data object gresample.o,
+                                                           rw data section .data object phase2freq_wi_unwrap.o,
+                                                           rw data section .data object findSYNC.o,
+                                                           rw data section .data object FreqDomMlseP4GfskStruct2.o,
+                                                           rw data section .data object processDerotatedSPDSamples.o,
+                                                           rw data section .data object SyncAndPayloadDemodulator.o,
+                                                           rw data section .data object SoftDemodulator.o,
+                                                           rw data section .data object rs.o,
+                                                           rw data section .data object galois.o,
+                                                           rw data section .data object rsdec.o,
+                                                           rw data section .data object rsenc.o,
+                                                           rw data section .data object indication.o };
+//"OS_API_INIT":     place at address mem: OS_API_INIT     { rw data section .data object Event.o,
+//                                                           rw data section .data object MessageQ.o,
+//                                                           rw data section .data object Mutex.o,
+//                                                           rw data section .data object Queue.o,
+//                                                           rw data section .data object Semaphore.o,
+//                                                           rw data section .data object TickTime.o };
+"radio_INIT":      place at address mem: radio_INIT      { rw data section .data object radio.o,
+                                                           rw data section .data object radio_comm.o,
+                                                           rw data section .data object si446x_api_lib.o,
+                                                           rw data section .data object radio_config_normal.o,
+                                                           rw data section .data object radio_config_cw.o,
+                                                           rw data section .data object radio_config_PN9.o,
+                                                           rw data section .data object radio_config_2GFSK_BER.o,
+                                                           rw data section .data object radio_config_4GFSK_BER.o,
+                                                           rw data section .data object radio_TCXO.o };
+//"security_INIT":   place at address mem: security_INIT   { rw data section .data object cert-builder.o,
+//                                                           rw data section .data object ecc108_apps.o,
+//                                                           rw data section .data object ecc108_comm.o,
+//                                                           rw data section .data object ecc108_comm_marshaling.o,
+//                                                           rw data section .data object ecc108_i2c.o,
+//                                                           rw data section .data object ecc108_mqx.o };
+"AclaraBSP_INIT":  place at address mem: AclaraBSP_INIT  { rw data section .data object ADC.o,
+                                                           rw data section .data object BSP_aclara.o,
+                                                           rw data section .data object CRC.o,
+                                                           rw data section .data object gpio.o,
+                                                           rw data section .data object LED.o,
+                                                           rw data section .data object radio_hal.o,
+                                                           rw data section .data object rng.o,
+                                                           rw data section .data object RTC.o,
+                                                           rw data section .data object sys_clock.o,
+                                                           rw data section .data object UART.o,
+                                                           rw data section .data object WDOG.o };
+"Common_INIT":     place at address mem: Common_INIT     { rw data section .data object alarm_task.o,
+                                                           rw data section .data object ALRM_Handler.o,
+                                                           rw data section .data object BUF_MemoryBuffers.o,
+                                                           rw data section .data object buffer.o,
+                                                           rw data section .data object DBG_CommandLine.o,
+                                                           rw data section .data object DBG_SerialDebug.o,
+                                                           rw data section .data object eng_res.o,
+                                                           rw data section .data object EVL_event_log.o,
+                                                           rw data section .data object exe_list.o,
+                                                           rw data section .data object file_io.o,
+                                                           rw data section .data object HEEP_util.o,
+                                                           rw data section .data object mem_chk.o,
+                                                           rw data section .data object MFG_Dtls.o,
+                                                           rw data section .data object MFG_Port.o,
+                                                           rw data section .data object MIMT_info.o,
+                                                           rw data section .data object mode_config.o,
+                                                           rw data section .data object object_list.o,
+                                                           rw data section .data object partitions.o,
+                                                           rw data section .data object runTimeInit.o,
+                                                           rw data section .data object SELF_test.o,
+                                                           rw data section .data object stack_check.o,
+                                                           rw data section .data object sys_busy.o,
+                                                           rw data section .data object temperature.o,
+                                                           rw data section .data object time_DST.o,
+                                                           rw data section .data object time_sync.o,
+                                                           rw data section .data object time_sys.o,
+                                                           rw data section .data object virgin_device.o,
+                                                           rw data section .data object FTM0.o,
+                                                           rw data section .data object FTM1.o,
+                                                           rw data section .data object FMT2.o,
+                                                           rw data section .data object FTM3.o };
+//"HMC_INIT":        place at address mem: HMC_INIT        { rw data section .data object hmc_app.o,
+//                                                           rw data section .data object hmc_demand.o,
+//                                                           rw data section .data object hmc_demand.o,
+//                                                           rw data section .data object hmc_diags.o,
+//                                                           rw data section .data object hmc_ds.o,
+//                                                           rw data section .data object hmc_eng.o,
+//                                                           rw data section .data object hmc_finish.o,
+//                                                           rw data section .data object hmc_msg.o,
+//                                                           rw data section .data object hmc_mtr_info.o,
+//                                                           rw data section .data object hmc_mtr_lp.o,
+//                                                           rw data section .data object hmc_prot.o,
+//                                                           rw data section .data object hmc_request.o,
+//                                                           rw data section .data object hmc_seq_id.o,
+//                                                           rw data section .data object hmc_snapshot.o,
+//                                                           rw data section .data object hmc_start.o,
+//                                                           rw data section .data object hmc_sync.o,
+//                                                           rw data section .data object hmc_time.o,
+//                                                           rw data section .data object hmc_tsk_lst.o,
+//                                                           rw data section .data object intf_cim_cmd.o,
+//                                                           rw data section .data object hmc_prg_mtr.o,
+//                                                           rw data section .data object hmc_display.o };
+"AclaraLC_INIT":   place at address mem: AclaraLC_INIT   { rw data section .data object ilc_dru_driver.o,
+                                                           rw data section .data object ilc_srfn_reg.o,
+                                                           rw data section .data object ilc_time_sync_handler.o,
+                                                           rw data section .data object ilc_tunneling_handler.o };
+"MTU_Common_INIT": place at address mem: MTU_Common_INIT { rw data section .data object APP_MSG_Handler.o,
+                                                           rw data section .data object demand.o,
+                                                           rw data section .data object ed_config.o,
+                                                           rw data section .data object endpt_cim_cmd.o,
+                                                           rw data section .data object historyd.o,
+                                                           rw data section .data object ID_intervalTask.o,
+                                                           rw data section .data object IDL_IdleProcess.o,
+                                                           rw data section .data object OR_MR_Handler.o,
+                                                           rw data section .data object pwr_config.o,
+                                                           rw data section .data object pwr_last_gasp.o,
+                                                           rw data section .data object pwr_restore.o,
+                                                           rw data section .data object pwr_task.o,
+                                                           rw data section .data object RG_CF_Handler.o,
+                                                           rw data section .data object RG_MD_Handler.o,
+                                                           rw data section .data object STRT_Startup.o,
+                                                           rw data section .data object Task.o,
+                                                           rw data section .data object vbat_reg.o,
+                                                           rw data section .data object version.o };
+
+"APP_RO_TEXT": place at address mem: APP_RO_TEXT { ro code section .textrw_init object IF_intFlash.o };
+
+"APP_RW_TEXT":     place at address mem: APP_RW_TEXT     { rw code section .textrw object IF_intFlash.o };
+
+"APP_NOINIT": place at address mem: APP_NOINIT { rw data section .noinit object partitions.o };
+}
+
+/* ================================================================================================================== */
+if (STEER_LIB_BSS==1)
+{
+//"dl7M_tln_BSS":        place at address mem: dl7M_tln_BSS        { rw data section .bss object *(dl7M_tln.a) };
+//"m7M_tls_BSS":         place at address mem: m7M_tls_BSS         { rw data section .bss object *(m7M_tls.a) };
+"rt7M_tl_BSS":         place at address mem: rt7M_tl_BSS         { rw data section .bss object *(rt7M_tl.a) };
+//"shb_l_BSS":           place at address mem: shb_l_BSS           { rw data section .bss object *(shb_l.a) };
+"BSP_BSS":             place at address mem: BSP_BSS             { rw data section .bss object *(BSP.a) };
+"PSP_BSS":             place at address mem: PSP_BSS             { rw data section .bss object *(PSP.a) };
+"wolfSSL_Lib_MTU_BSS": place at address mem: wolfSSL_Lib_MTU_BSS { rw data section .bss object *(wolfSSL-Lib_MTU.a) };
+}
+
+/* ================================================================================================================== */
+if (STEER_APP_BSS==1)
+{
+/* Current method - Allows each block to be initialized to zero as a whole
+   Initial method (similar to other placement methods) - Caused gaps in the zero initializer */
+define block utils_BSS_BLK with alignment = 4      { section .bss object ascii.o,
+                                                     section .bss object bcd.o,
+                                                     section .bss object bit_util.o,
+                                                     section .bss object byteswap.o,
+                                                     section .bss object crc16_m.o,
+                                                     section .bss object crc32.o,
+                                                     section .bss object invert_bits.o,
+                                                     section .bss object pack.o,
+                                                     section .bss object rand.o,
+                                                     section .bss object time_util.o,
+                                                     section .bss object timer_util.o };
+define block dfw_BSS_BLK with alignment = 4        { section .bss object dfw_app.o,
+                                                     section .bss object dfw_interface.o,
+                                                     section .bss object dfw_pckt.o,
+                                                     section .bss object dfwtd_config.o };
+define block driver_BSS_BLK with alignment = 4     { section .bss object dvr_banked.o,
+                                                     section .bss object dvr_cache.o,
+                                                     section .bss object dvr_extflash.o,
+                                                     section .bss object dvr_sectPreErase.o,
+                                                     section .bss object dvr_sharedMem.o,
+                                                     section .bss object IF_intFlash.o,
+                                                     section .bss object spi_mstr.o };
+define block stack_BSS_BLK with alignment = 4      { section .bss object COMM.o,
+                                                     section .bss object SM.o,
+                                                     section .bss object smtd_config.o,
+                                                     section .bss object dtls.o,
+                                                     section .bss object mtls.o,
+                                                     section .bss object STACK.o,
+                                                     section .bss object MAC.o,
+                                                     section .bss object MAC_FrameEncoder.o,
+                                                     section .bss object MAC_FrameManagement.o,
+                                                     section .bss object MAC_PacketManagement.o,
+                                                     section .bss object PHY.o,
+                                                     section .bss object EstimateCarrierFrequencyOffset.o,
+                                                     section .bss object MaximizeEyeOpening.o,
+                                                     section .bss object PerformCFOCompensation.o,
+                                                     section .bss object preamble_detect.o,
+                                                     section .bss object preambleDetector.o,
+                                                     section .bss object preambleDetector_Data.o,
+                                                     section .bss object preambleDetector_initialize.o,
+                                                     section .bss object processDerotatedSamples.o,
+                                                     section .bss object ScaleClipFreq2phase.o,
+                                                     section .bss object sign.o,
+                                                     section .bss object fir_filt_circ_buff.o,
+                                                     section .bss object gresample.o,
+                                                     section .bss object phase2freq_wi_unwrap.o,
+                                                     section .bss object findSYNC.o,
+                                                     section .bss object FreqDomMlseP4GfskStruct2.o,
+                                                     section .bss object processDerotatedSPDSamples.o,
+                                                     section .bss object SyncAndPayloadDemodulator.o,
+                                                     section .bss object SoftDemodulator.o,
+                                                     section .bss object rs.o,
+                                                     section .bss object galois.o,
+                                                     section .bss object rsdec.o,
+                                                     section .bss object rsenc.o,
+                                                     section .bss object indication.o };
+//define block OS_API_BSS_BLK with alignment = 4     { section .bss object Event.o,
+//                                                     section .bss object MessageQ.o,
+//                                                     section .bss object Mutex.o,
+//                                                     section .bss object Queue.o,
+//                                                     section .bss object Semaphore.o,
+//                                                     section .bss object TickTime.o };
+define block radio_BSS_BLK with alignment = 4      { section .bss object radio.o,
+                                                     section .bss object radio_comm.o,
+                                                     section .bss object si446x_api_lib.o,
+                                                     section .bss object radio_config_normal.o,
+                                                     section .bss object radio_config_cw.o,
+                                                     section .bss object radio_config_PN9.o,
+                                                     section .bss object radio_config_2GFSK_BER.o,
+                                                     section .bss object radio_config_4GFSK_BER.o,
+                                                     section .bss object radio_TCXO.o };
+define block security_BSS_BLK with alignment = 4   { section .bss object cert-builder.o,
+                                                     section .bss object ecc108_apps.o,
+                                                     section .bss object ecc108_comm.o,
+                                                     section .bss object ecc108_comm_marshaling.o,
+                                                     section .bss object ecc108_i2c.o,
+                                                     section .bss object ecc108_mqx.o };
+define block AclaraBSP_BSS_BLK with alignment = 4  { section .bss object ADC.o,
+                                                     section .bss object BSP_aclara.o,
+                                                     section .bss object CRC.o,
+                                                     section .bss object gpio.o,
+                                                     section .bss object LED.o,
+                                                     section .bss object radio_hal.o,
+                                                     section .bss object rng.o,
+                                                     section .bss object RTC.o,
+                                                     section .bss object sys_clock.o,
+                                                     section .bss object UART.o,
+                                                     section .bss object WDOG.o };
+define block Common_BSS_BLK with alignment = 4     { section .bss object alarm_task.o,
+                                                     section .bss object ALRM_Handler.o,
+                                                     section .bss object BUF_MemoryBuffers.o,
+                                                     section .bss object buffer.o,
+                                                     section .bss object DBG_CommandLine.o,
+                                                     section .bss object DBG_SerialDebug.o,
+                                                     section .bss object eng_res.o,
+                                                     section .bss object EVL_event_log.o,
+                                                     section .bss object exe_list.o,
+                                                     section .bss object file_io.o,
+                                                     section .bss object HEEP_util.o,
+                                                     section .bss object mem_chk.o,
+                                                     section .bss object MFG_Dtls.o,
+                                                     section .bss object MFG_Port.o,
+                                                     section .bss object MIMT_info.o,
+                                                     section .bss object mode_config.o,
+                                                     section .bss object object_list.o,
+                                                     section .bss object partitions.o,
+                                                     section .bss object runTimeInit.o,
+                                                     section .bss object SELF_test.o,
+                                                     section .bss object stack_check.o,
+                                                     section .bss object sys_busy.o,
+                                                     section .bss object temperature.o,
+                                                     section .bss object time_DST.o,
+                                                     section .bss object time_sync.o,
+                                                     section .bss object time_sys.o,
+                                                     section .bss object virgin_device.o,
+                                                     section .bss object FTM0.o,
+                                                     section .bss object FTM1.o,
+                                                     section .bss object FMT2.o,
+                                                     section .bss object FTM3.o };
+//define block HMC_BSS_BLK with alignment = 4        { section .bss object hmc_app.o,
+//                                                     section .bss object hmc_demand.o,
+//                                                     section .bss object hmc_demand.o,
+//                                                     section .bss object hmc_diags.o,
+//                                                     section .bss object hmc_ds.o,
+//                                                     section .bss object hmc_eng.o,
+//                                                     section .bss object hmc_finish.o,
+//                                                     section .bss object hmc_msg.o,
+//                                                     section .bss object hmc_mtr_info.o,
+//                                                     section .bss object hmc_mtr_lp.o,
+//                                                     section .bss object hmc_prot.o,
+//                                                     section .bss object hmc_request.o,
+//                                                     section .bss object hmc_seq_id.o,
+//                                                     section .bss object hmc_snapshot.o,
+//                                                     section .bss object hmc_start.o,
+//                                                     section .bss object hmc_sync.o,
+//                                                     section .bss object hmc_time.o,
+//                                                     section .bss object hmc_tsk_lst.o,
+//                                                     section .bss object intf_cim_cmd.o,
+//                                                     section .bss object hmc_prg_mtr.o,
+//                                                     section .bss object hmc_display.o };
+define block AclaraLC_BSS_BLK with alignment = 4   { section .bss object ilc_dru_driver.o,
+                                                     section .bss object ilc_srfn_reg.o,
+                                                     section .bss object ilc_time_sync_handler.o,
+                                                     section .bss object ilc_tunneling_handler.o };
+define block MTU_Common_BSS_BLK with alignment = 4 { section .bss object APP_MSG_Handler.o,
+                                                     section .bss object demand.o,
+                                                     section .bss object ed_config.o,
+                                                     section .bss object endpt_cim_cmd.o,
+                                                     section .bss object historyd.o,
+                                                     section .bss object ID_intervalTask.o,
+                                                     section .bss object IDL_IdleProcess.o,
+                                                     section .bss object OR_MR_Handler.o,
+                                                     section .bss object pwr_config.o,
+                                                     section .bss object pwr_last_gasp.o,
+                                                     section .bss object pwr_restore.o,
+                                                     section .bss object pwr_task.o,
+                                                     section .bss object RG_CF_Handler.o,
+                                                     section .bss object RG_MD_Handler.o,
+                                                     section .bss object STRT_Startup.o,
+                                                     section .bss object Task.o,
+                                                     section .bss object vbat_reg.o,
+                                                     section .bss object version.o };
+"utils_BSS":      place at address mem: utils_BSS      { block utils_BSS_BLK, rw data };
+"dfw_BSS":        place at address mem: dfw_BSS        { block dfw_BSS_BLK, rw data };
+"driver_BSS":     place at address mem: driver_BSS     { block driver_BSS_BLK, rw data };
+"stack_BSS":      place at address mem: stack_BSS      { block stack_BSS_BLK, rw data };
+//"OS_API_BSS":     place at address mem: OS_API_BSS     { block OS_API_BSS_BLK, rw data };
+"radio_BSS":      place at address mem: radio_BSS      { block radio_BSS_BLK, rw data };
+"security_BSS":   place at address mem: security_BSS   { block security_BSS_BLK, rw data };
+"AclaraBSP_BSS":  place at address mem: AclaraBSP_BSS  { block AclaraBSP_BSS_BLK, rw data };
+"Common_BSS":     place at address mem: Common_BSS     { block Common_BSS_BLK, rw data };
+//"HMC_BSS":        place at address mem: HMC_BSS        { block HMC_BSS_BLK, rw data };
+"AclaraLC_BSS":   place at address mem: AclaraLC_BSS   { block AclaraLC_BSS_BLK, rw data };
+"MTU_Common_BSS": place at address mem: MTU_Common_BSS { block MTU_Common_BSS_BLK, rw data };
+}
+
+/* ================================================================================================================== */
+if (STEER_COMPILER_GEN==1)
+{
+"IAR_DINIT": place at address mem: IAR_DINIT { ro data section .iar.init_table object * };
+}
+
+/* ================================================================================================================== */
+if (STEER_COMMAND_LINE==1)
+{
+define symbol COMMAND_LINE_DUMMY_2=1;  /* Dummy symbol to keep linker happy when no directives in {block} */
+//"CommandLine_TEXT":  place at address mem: CommandLine_TEXT  { ro code section .text object *(CommandLine.a) };
+//"CommandLine_CONST": place at address mem: CommandLine_CONST { ro data section .rodata object *(CommandLine.a) };
+//"CommandLine_DINIT": place at address mem: CommandLine_DINIT { ro data section *_init object *(CommandLine.a) };
+//"CommandLine_INIT":  place at address mem: CommandLine_INIT  { rw data section .data object *(CommandLine.a) };
+//"CommandLine_BSS":   place at address mem: CommandLine_BSS   { rw data section .bss object *(CommandLine.a) };
+}
+
+} // End of if (LINKER_STEERING_ENABLED==1)
+else  // When not steering, then place all readonly in ROM, and readwrite in RAM
+{
+   /* ================================================================================================================== */
+   /* NOTE: Do NOT include these in the CommonScript or steered sections.  When not included the linker will generate    */
+   /*       an error for anything not identified in the steering scripts.  The error needs to be corrected in the linker */
+   /*       script spreadsheet.                                                                                          */
+   /* ================================================================================================================== */
+   define block TEXTSECTION with alignment = 4  { section .text };
+   "ROM":              place in ROM_region { block TEXTSECTION, readonly };
+
+   define block KERNEL_DATA with alignment = 8 { section .kernel_data };
+
+   /* Each block/segment must be in one line (association to region) because kernel data needs to start after all other datas  */
+   "RAM": place in RAM_region   { readwrite, last block KERNEL_DATA };
+}
+} // End of if (TARGET == APP)
