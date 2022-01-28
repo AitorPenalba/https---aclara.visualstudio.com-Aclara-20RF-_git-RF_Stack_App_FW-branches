@@ -2,7 +2,7 @@
 
 "C:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\bin\armSIM2.dll" 
 
-"C:\Renesas\RA\sc_v2021-10_fsp_v3.4.0\TestProjects\MultiBspAndTasks\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\RA6_FreeRTOS Debug\Exe\CyaSSL-Full.out" 
+"C:\Projects\SRFN_Branches\Temp_Branches\SRFN-EP_MCU_Replacement_Dev\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\RA6_FreeRTOS Debug\Exe\CyaSSL-Full.out" 
 
 --plugin="C:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\bin\armbat.dll" 
 

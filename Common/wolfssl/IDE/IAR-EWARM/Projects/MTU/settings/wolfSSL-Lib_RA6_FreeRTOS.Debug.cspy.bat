@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"C:\Program Files\IAR Systems\Embedded Workbench 9.0\common\bin\cspybat" -f "C:\Renesas\RA\sc_v2021-10_fsp_v3.4.0\TestProjects\MultiBspAndTasks\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\settings\wolfSSL-Lib_RA6_FreeRTOS.Debug.general.xcl" --backend -f "C:\Renesas\RA\sc_v2021-10_fsp_v3.4.0\TestProjects\MultiBspAndTasks\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\settings\wolfSSL-Lib_RA6_FreeRTOS.Debug.driver.xcl" 
+"C:\Program Files\IAR Systems\Embedded Workbench 9.0\common\bin\cspybat" -f "C:\Projects\SRFN_Branches\Temp_Branches\SRFN-EP_MCU_Replacement_Dev\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\settings\wolfSSL-Lib_RA6_FreeRTOS.Debug.general.xcl" --backend -f "C:\Projects\SRFN_Branches\Temp_Branches\SRFN-EP_MCU_Replacement_Dev\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\settings\wolfSSL-Lib_RA6_FreeRTOS.Debug.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"C:\Program Files\IAR Systems\Embedded Workbench 9.0\common\bin\cspybat" -f "C:\Renesas\RA\sc_v2021-10_fsp_v3.4.0\TestProjects\MultiBspAndTasks\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\settings\wolfSSL-Lib_RA6_FreeRTOS.Debug.general.xcl" "--debug_file=%~1" --backend -f "C:\Renesas\RA\sc_v2021-10_fsp_v3.4.0\TestProjects\MultiBspAndTasks\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\settings\wolfSSL-Lib_RA6_FreeRTOS.Debug.driver.xcl" 
+"C:\Program Files\IAR Systems\Embedded Workbench 9.0\common\bin\cspybat" -f "C:\Projects\SRFN_Branches\Temp_Branches\SRFN-EP_MCU_Replacement_Dev\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\settings\wolfSSL-Lib_RA6_FreeRTOS.Debug.general.xcl" "--debug_file=%~1" --backend -f "C:\Projects\SRFN_Branches\Temp_Branches\SRFN-EP_MCU_Replacement_Dev\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\settings\wolfSSL-Lib_RA6_FreeRTOS.Debug.driver.xcl" 
 
 @echo off 
 :end

@@ -72,3 +72,7 @@ settings
 \MTU\PCLint\sedZapzps
 \MTU\PCLint\sedzo85vi
 \MTU\PCLint\sedzxrnb5
+*.pbw
+*.ninja
+*.ninja_deps
+\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\RA6_FreeRTOS Debug\BrowseInfo
