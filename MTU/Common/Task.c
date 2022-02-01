@@ -18,17 +18,19 @@
 
 #include "project.h"
 #include <stdbool.h>
-#include <mqx.h>
-#include <fio.h>
-#include <io_prv.h>
-#include <charq.h>
-#include <serinprv.h>
-#include <bsp.h>
-#include <mqx_prv.h>
-#include "sys_clock.h"
+#include <FreeRTOS.h>
+#include "FreeRTOS.h"
+#include "task.h"
+//#include <mqx.h>
+//#include <fio.h>
+//#include <io_prv.h>
+//#include <charq.h>
+//#include <serinprv.h>
+//#include <bsp.h>
+//#include <mqx_prv.h>
+//#include "sys_clock.h"
 #include "DBG_SerialDebug.h"
-#include "psp_cpudef.h"
-
+//#include "psp_cpudef.h"
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
 #if ENABLE_ALRM_TASKS
 #include "EVL_event_log.h"
@@ -39,13 +41,13 @@
 #endif
 
 #include "DBG_CommandLine.h"
-#include "IDL_IdleProcess.h"
+//#include "IDL_IdleProcess.h"
 
 #if ENABLE_MFG_TASKS
 #include "MFG_Port.h"
 #endif
 
-#include "timer_util.h"
+//#include "timer_util.h"
 
 #if ENABLE_TIME_SYS_TASKS
 #include "time_sys.h"
@@ -69,7 +71,7 @@
 #include "host_reset.h"
 #endif
 
-#include "demand.h"
+//#include "demand.h"
 #if ENABLE_ID_TASKS
 #include "ID_intervalTask.h"
 #endif
@@ -84,8 +86,8 @@
 #include "pwr_restore.h"
 #endif
 
-#include "historyd.h"
-#include "APP_MSG_Handler.h"
+//#include "historyd.h"
+//#include "APP_MSG_Handler.h"
 #if (USE_IPTUNNEL == 1)
 #include "tunnel_msg_handler.h"
 #endif
@@ -93,18 +95,18 @@
 #include "dfw_app.h"
 #endif
 
-#include "MAC_Protocol.h"
-#include "MAC.h"
-
-#include "STACK_Protocol.h"
-#include "STACK.h"
-#include "SM.h"
-#include "PHY_Protocol.h"
-#include "PHY.h"
-#include "stack_check.h"
-
-#include "SELF_test.h"
-#include "dtls.h"
+//#include "MAC_Protocol.h"
+//#include "MAC.h"
+//
+//#include "STACK_Protocol.h"
+//#include "STACK.h"
+//#include "SM.h"
+//#include "PHY_Protocol.h"
+//#include "PHY.h"
+//#include "stack_check.h"
+//
+//#include "SELF_test.h"
+//#include "dtls.h"
 
 #if (SIGNAL_NW_STATUS == 1)
 #include "nw_connected.h"
@@ -114,12 +116,12 @@
 #include "mtls.h"
 #endif
 
-#include "mode_config.h"
-#include "user_config.h"
-#include "SoftDemodulator.h"
+//#include "mode_config.h"
+//#include "user_config.h"
+//#include "SoftDemodulator.h"
 
 /*lint -esym(526,_kuart_polled_putc)  mqx putc routine for the current stdout stream  */
-extern void    _kuart_polled_putc(KUART_INFO_STRUCT_PTR, char);
+//extern void    _kuart_polled_putc(KUART_INFO_STRUCT_PTR, char);
 
 /* ****************************************************************************************************************** */
 /* #DEFINE DEFINITIONS */
@@ -135,6 +137,27 @@ extern void    _kuart_polled_putc(KUART_INFO_STRUCT_PTR, char);
 #define RFTEST_MODE_ATTR   ((uint32_t)(1<<28))                             /* Task runs in rfTest mode, also */
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
+
+typedef void (* TASK_FPTR)(void *);
+
+typedef struct
+{
+   uint32_t         task_template_index;  /* TODO: This should be an enum*/
+
+   TASK_FPTR        pvTaskCode;
+
+   size_t           usStackDepth; /* The number of words (not Bytes!)*/
+
+   UBaseType_t      uxPriority;
+
+   char             *pcName;
+
+   uint32_t         TASK_ATTRIBUTES;
+
+   uint32_t         *pvParameters;
+
+   TaskHandle_t     *pxCreatedTask;
+} Task_Template_t, * pTask_Template_t;
 
 /*lint -esym(751,eOsTaskIndex_t) */
 /* This enum list needs to match the MQX_template_list[] below */
@@ -197,7 +220,7 @@ typedef enum
 }eOsTaskIndex_t;
 
 static uint32_t TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track of the CPU load for each task for the last 10 seconds.
-static TD_STRUCT *TASK_TD[eLAST_TSK_IDX];                       // Task descriptor list
+//static TD_STRUCT *TASK_TD[eLAST_TSK_IDX];                       // Task descriptor list
 static uint32_t cpuLoadIndex = 0;
 static uint32_t CPUTotal;
 
@@ -279,7 +302,19 @@ static const char pTskName_SdPreambleDetector[]  = "PREDET";
 static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
 static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
 
+TaskHandle_t tst_handle;
+TaskHandle_t dbg_tsk_handle;
+TaskHandle_t dbg_tx_tsk_handle;
 
+const Task_Template_t Task_template_list[] =
+{
+   /* Task Index,          Function,                    Stack,     Pri,    Name,                 Attributes,    Param,     Handle */
+   { eSTRT_TSK_IDX,         STRT_StartupTask,           512/4,      2,    (char *)pTskName_Strt,   0,            (void *)0,  &tst_handle },
+   { eDBG_TSK_IDX,          DBG_CommandLineTask,        512/4,      3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
+   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512/4,      4,   (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
+   {    0  }
+};
+#if ( RTOS == 1 ) //( RTOS == MQX_RTOS )
 /* NOTE: The Highest Priority we should use is 9.  This excerpt was taken from AN3905.pdf on freesclale.com
    Task priority. Lower number is for higher priorities.  More than one task can have the same priority level.  Having
    no gaps between priority values improves performance */
@@ -489,6 +524,8 @@ void task_exception_handler(_mqx_uint para, void * stack_ptr)
     expt_frm_dump(expt_frm_ptr);
 }
 
+#endif // ( RTOS == MQX_RTOS )
+
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_Create_All
@@ -508,26 +545,39 @@ void task_exception_handler(_mqx_uint para, void * stack_ptr)
  **********************************************************************************************************************/
 void OS_TASK_Create_All ( bool initSuccess )
 {
+#if ( RTOS == 1 ) //( RTOS == MQX_RTOS )
    TASK_TEMPLATE_STRUCT const *pTaskList; /* Pointer to task list which contains all tasks in the system */
    _task_id taskID;
-   uint8_t  quiet;
-   uint8_t  rfTest;
-
-   quiet = MODECFG_get_quiet_mode();
-   rfTest = MODECFG_get_rfTest_mode();
-   /* Install exception handler */
-   (void)_int_install_exception_isr();
+#elif (RTOS == FREE_RTOS)
+   Task_Template_t const *pTaskList;  /* Pointer to task list which contains all tasks in the system */
+#endif
+//
+//   uint8_t  quiet;
+//   uint8_t  rfTest;
+//
+//   quiet = MODECFG_get_quiet_mode();
+//   rfTest = MODECFG_get_rfTest_mode();
+//   /* Install exception handler */
+//   (void)_int_install_exception_isr();
 
    /*lint -e{641} converting enum to int  */
+#if ( RTOS == 1 ) //( RTOS == MQX_RTOS )
    for (pTaskList = &MQX_template_list[0]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++)
+#elif (RTOS == FREE_RTOS)
+   for (pTaskList = &Task_template_list[1]; 0 != pTaskList->task_template_index; pTaskList++)  /* DG: Don't include StartUp Task */
+#endif
    {  /* Create the task if the "Auto Start" attribute is NOT set */
-      if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
-      {  /* Create the task */
-         if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&
-              ( (rfTest == 0) || ((pTaskList->TASK_ATTRIBUTES & RFTEST_MODE_ATTR) != 0) ) &&
-              ( (initSuccess) || ((pTaskList->TASK_ATTRIBUTES & FAIL_INIT_MODE_ATTR) != 0) ) )
+//      if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
+//      {  /* Create the task */
+//         if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&
+//              ( (rfTest == 0) || ((pTaskList->TASK_ATTRIBUTES & RFTEST_MODE_ATTR) != 0) ) &&
+//              ( (initSuccess) || ((pTaskList->TASK_ATTRIBUTES & FAIL_INIT_MODE_ATTR) != 0) ) )
          {
+#if ( RTOS == 1 ) //( RTOS == MQX_RTOS )
             if (MQX_NULL_TASK_ID == (taskID = _task_create( 0, pTaskList->TASK_TEMPLATE_INDEX, pTaskList->CREATION_PARAMETER )))
+#elif (RTOS == FREE_RTOS)
+            if (pdPASS != xTaskCreate( pTaskList->pvTaskCode, pTaskList->pcName, pTaskList->usStackDepth, pTaskList->pvParameters, pTaskList->uxPriority, pTaskList->pxCreatedTask ))
+#endif
             {
                /* This condition should only show up in development.  This infinite loop should help someone figure out
                 * that there is an issue creating a task.  Look at pTaskList->TASK_TEMPLATE_INDEX to figure out which task
@@ -536,14 +586,16 @@ void OS_TASK_Create_All ( bool initSuccess )
                {}  /* Todo:  We may wish to discuss the definition of LEDs.  Maybe we could add code here. */
             }
             /* Set the exception handler of the task if still valid */
-            if (MQX_NULL_TASK_ID != _task_get_id_from_name(pTaskList->TASK_NAME)) {
-               (void)_task_set_exception_handler(taskID, task_exception_handler);
-               stack_check_init(taskID);
-            }
-         }
+//            if (MQX_NULL_TASK_ID != _task_get_id_from_name(pTaskList->TASK_NAME)) {
+//               (void)_task_set_exception_handler(taskID, task_exception_handler);
+//               stack_check_init(taskID);
+//            }
+//         }
       }
    }
 } /* end OS_TASK_Create_All () */
+
+#if 0
 
 /***********************************************************************************************************************
  *
@@ -623,6 +675,7 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
    return ( (uint32_t)OldPriority );
 } /* end OS_TASK_Set_Priority () */
 /* ****************************************************************************************************************** */
+#endif /* MQX_RTOS */
 
 /***********************************************************************************************************************
  *
@@ -630,24 +683,24 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
  *
  * Purpose: This function will pause the processing of the calling task by the passed in number of MilliSeconds
  *
- * Arguments: pTaskName   - The name of the task (use extern values in OS_aclara.h "pTskName_")
- *            NewPriority - new priority value for the task
+ * Arguments: MSec - Time Delay in Milliseconds
  *
- * Returns: MSec - Time Delay in Milliseconds
+ * Returns: None
  *
  * Side Effects:
  *
- * Reentrant Code:
- *
- * Notes:
  *
  **********************************************************************************************************************/
 void OS_TASK_Sleep ( uint32_t MSec )
 {
+#if (RTOS == 1)
    _time_delay ( MSec );
+#elif (RTOS == FREE_RTOS)
+   vTaskDelay(pdMS_TO_TICKS(MSec));
+#endif
 }
 /* ****************************************************************************************************************** */
-
+#if 0
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_Exit
@@ -1073,5 +1126,16 @@ void OS_TASK_Summary ( bool safePrint )
       DBG_LW_printf( str2 );
    }
 }
+#endif
+/* TODO: ADD Header
+   TODO: DG: Is this the appropriate Module? Or move it to STRT_Startup.c ? */
 
-
+void OS_TASK_Create_STRT( void )
+{
+   APP_PRINT("Create STRT");
+   if (pdPASS != xTaskCreate( STRT_StartupTask, pTskName_Strt, 512/4, (void *)0, 2, &tst_handle ))
+   {
+      APP_ERR_PRINT("Unable to create STRT");
+      /* TODO: Print Error */
+   }
+}

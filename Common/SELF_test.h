@@ -9,7 +9,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2015-2021 Aclara.  All Rights Reserved.
+ * Copyright 2015-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -29,8 +29,10 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
+#if (ENABLE_FIO_TASKS == 1)
 #include "file_io.h"
-#include "HEEP_util.h"
+#endif
+//#include "HEEP_util.h"
 
 /* ****************************************************************************************************************** */
    /* GLOBAL DEFINTION */
@@ -86,6 +88,7 @@ typedef enum
 #endif
 } SELFT_enum;
 
+#if ( ACLARA_DVR_ABSTRACTION != 0)
 typedef struct
 {
    FileHandle_t            handle;
@@ -97,7 +100,7 @@ typedef struct
    FileAttr_t        const Attr;          /*!< File Attributes     */
    uint32_t          const UpdateFreq;    /*!< Update Frequency    */
 } SELF_file_t;
-
+#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -112,15 +115,21 @@ typedef struct
 /* FUNCTION DEFINITIONS */
 
 extern returnStatus_t   SELF_init( void );
+#if ( FILE_IO !=0 )
 extern SELF_file_t      *SELF_GetTestFileHandle( void );
+#endif
+#if (RTOS == MQX_RTOS)
 extern OS_EVNT_Obj      *SELF_getEventHandle( void );
 extern void SELF_setEventNotify( OS_EVNT_Obj *handle );
+#endif
 extern returnStatus_t   SELF_UpdateTestResults( void );
 extern void             SELF_testTask( uint32_t Arg0 );
-extern returnStatus_t   SELF_testRTC( void );
-extern returnStatus_t   SELF_testSecurity( void );
-extern returnStatus_t   SELF_testNV( void );
+//extern returnStatus_t   SELF_testRTC( void );
+//extern returnStatus_t   SELF_testSecurity( void );
+//extern returnStatus_t   SELF_testNV( void );
+#if (SUPPORT_HEEP != 0)
 extern returnStatus_t   SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
+#endif
 #if ( DCU == 1 )  /* DCU will always support externam RAM */
 extern returnStatus_t   SELF_testSDRAM( uint32_t LoopCount );
 #endif

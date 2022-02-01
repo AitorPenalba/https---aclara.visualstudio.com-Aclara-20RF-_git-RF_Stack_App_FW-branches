@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2012-2020 Aclara.  All Rights Reserved.
+ * Copyright 2012-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -32,7 +32,6 @@
 /* CONSTANT DEFINITIONS */
 
 /* MACRO DEFINITIONS */
-
 #define ARRAY_IDX_CNT( x )    (sizeof(x) / sizeof(x[0]))
 #define MINIMUM(a,b)          ((a)<(b)?(a):(b))
 

@@ -76,3 +76,4 @@ settings
 *.ninja
 *.ninja_deps
 \Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\RA6_FreeRTOS Debug\BrowseInfo
+*.ninja_log

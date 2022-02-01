@@ -31,6 +31,7 @@
 #define HAL_TARGET_Y84001_REV_A        1  /* Using Y84001-1-SCH Rev A Board (I210+, KV2c K22)   */
 #define HAL_TARGET_Y84020_1_REV_A     10  /* Using Y84020-1-SCH Rev A Board (I210+ K24)         */
 #define HAL_TARGET_Y84030_1_REV_A     15  /* Using Y84030-1-SCH Rev A Board (KV2c K24)          */
+#define HAL_TARGET_RENESAS_REV_A      20  /* Using Y84020-1-SCH Rev A Board (I210+c RA6)         */
 
 /* It was decided to create a gap between metering end-points and ILC end-points */
 #define HAL_TARGET_Y99852_1_REV_A     300 /* Using Y99852-1-SCH Rev A board (ILC) */
@@ -49,7 +50,8 @@
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84020_1_REV_A )  && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84114_1_REV_A )  && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y99852_1_REV_A )  && \
-      ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84030_1_REV_A ) )
+      ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84030_1_REV_A )  && \
+      ( HAL_TARGET_HARDWARE != HAL_TARGET_RENESAS_REV_A )  )
 
 #error "Invalid HAL_TARGET_HARDWARE setting"
 #endif

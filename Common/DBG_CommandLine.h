@@ -39,6 +39,9 @@
 #ifdef __mqx_h__
 void DBG_CommandLineTask ( uint32_t Arg0 );
 #endif /* __mqx_h__ */
+#if ( RTOS == FREE_RTOS )
+void DBG_CommandLineTask (void * pvParameters);
+#endif
 uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] );
 #ifdef CompileSwitch_H
 #define ENABLE_DAC_TEST_FUNCTIONS 0

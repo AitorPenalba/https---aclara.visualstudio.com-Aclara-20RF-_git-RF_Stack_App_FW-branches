@@ -2856,7 +2856,7 @@
         <group>
             <name>Common</name>
             <group>
-                <name>OS_AL</name>
+                <name>OS_AL_FreeRTOS</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Event.c</name>
                 </file>
@@ -2893,6 +2893,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\DBG_CommandLine.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\DBG_SerialDebug.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\DBG_SerialDebug.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\SELF_test.c</name>
@@ -2933,9 +2939,12 @@
         </group>
         <group>
             <name>FSP_Gen</name>
-            <group>
-                <name>SEGGER_RTT</name>
-            </group>
+            <file>
+                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_gen\blinky_thread.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_gen\blinky_thread.h</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\src\blinky_thread_entry.c</name>
             </file>

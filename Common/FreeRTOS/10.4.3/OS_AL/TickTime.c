@@ -18,7 +18,7 @@
 /* INCLUDE FILES */
 #include <stdint.h>
 #include <stdbool.h>
-#include <mqx.h>
+//#include <mqx.h>
 #include "OS_aclara.h"
 
 /* #DEFINE DEFINITIONS */
@@ -34,7 +34,7 @@
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
-
+#if 0
 /*******************************************************************************
 
   Function name: OS_TICK_Get_CurrentElapsedTicks
@@ -215,3 +215,4 @@ void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay )
       _time_delay_until ( TickValue );
    } /* end if() */
 } /* end OS_TICK_Sleep () */
+#endif

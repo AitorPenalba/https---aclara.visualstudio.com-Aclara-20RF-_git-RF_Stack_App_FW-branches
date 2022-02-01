@@ -335,10 +335,6 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
-                    <state>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\aws</state>
-                    <state>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\driver</state>
-                    <state>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg</state>
-                    <state>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\bsp</state>
                     <state>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\aws\amazon-freertos\freertos_kernel\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\aws\amazon-freertos\libraries\freertos_plus\standard\freertos_plus_tcp\include</state>
                     <state>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include</state>
@@ -348,6 +344,12 @@
                     <state>$PROJ_DIR$\..\ra\fsp\src\rm_freertos_port</state>
                     <state>$PROJ_DIR$\..\ra_gen</state>
                     <state>$PROJ_DIR$\..\src</state>
+                    <state>$PROJ_DIR$\..\ra_cfg\aws</state>
+                    <state>$PROJ_DIR$\..\ra_cfg\driver</state>
+                    <state>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp</state>
+                    <state>$PROJ_DIR$\..\ra_cfg\fsp_cfg</state>
+                    <state>$PROJ_DIR$\..\ra\board</state>
+                    <state>$PROJ_DIR$\..\src\SEGGER_RTT</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1569,7 +1571,7 @@
                     <name>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\aws\amazon-freertos\freertos_kernel\include\FreeRTOS.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\aws\amazon-freertos\freertos_kernel\portable\MemMang\heap_5.c</name>
+                    <name>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\aws\amazon-freertos\freertos_kernel\portable\MemMang\heap_4.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\aws\amazon-freertos\LICENSE</name>
@@ -1659,6 +1661,18 @@
         </group>
         <group>
             <name>Program Entry</name>
+            <file>
+                <name>$PROJ_DIR$\..\src\SEGGER_RTT\SEGGER_RTT.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\src\SEGGER_RTT\SEGGER_RTT.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\src\SEGGER_RTT\SEGGER_RTT_Conf.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\src\SEGGER_RTT\SEGGER_RTT_printf.c</name>
+            </file>
         </group>
     </group>
 </project>

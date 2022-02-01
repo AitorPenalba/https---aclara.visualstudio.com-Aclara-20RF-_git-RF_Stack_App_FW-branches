@@ -12,7 +12,7 @@
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
  *****************************************************************************/
-
+#if 0
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdbool.h>
@@ -160,3 +160,4 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
 
    return ( SetMask );
 } /* end OS_EVNT_Wait () */
+#endif

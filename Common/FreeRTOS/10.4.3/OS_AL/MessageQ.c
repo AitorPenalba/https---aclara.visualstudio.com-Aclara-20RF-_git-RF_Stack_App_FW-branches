@@ -16,10 +16,10 @@
 /* INCLUDE FILES */
 #include <stdint.h>
 #include <stdbool.h>
-#include <mqx.h>
+//#include <mqx.h>
 #include "OS_aclara.h"
 #include "DBG_SerialDebug.h"
-#include "buffer.h"
+//#include "buffer.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -34,6 +34,7 @@
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
+#if 0
 
 /*******************************************************************************
 
@@ -176,3 +177,4 @@ bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t Time
 } /* end OS_MSGQ_Pend () */
 
 
+#endif

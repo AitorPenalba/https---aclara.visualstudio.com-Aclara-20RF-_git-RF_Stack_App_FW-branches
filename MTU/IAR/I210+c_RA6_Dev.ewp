@@ -337,10 +337,6 @@
                     <name>CCIncludePath2</name>
                     <state>$PROJ_DIR$\..\TargetBuildConfigs\I210+c</state>
                     <state>$PROJ_DIR$\..\TargetBuildConfigs\I210+c\RA6</state>
-                    <state>$PROJ_DIR$\..\TargetBuildConfigs\I210+c\RA6\ra_cfg\aws</state>
-                    <state>$PROJ_DIR$\..\TargetBuildConfigs\I210+c\RA6\ra_cfg\driver</state>
-                    <state>$PROJ_DIR$\..\TargetBuildConfigs\I210+c\RA6\ra_cfg\fsp_cfg</state>
-                    <state>$PROJ_DIR$\..\TargetBuildConfigs\I210+c\RA6\ra_cfg\fsp_cfg\bsp</state>
                     <state>$PROJ_DIR$\..\Aclara_BSP</state>
                     <state>$PROJ_DIR$\..\Common</state>
                     <state>$PROJ_DIR$\..\Common\HMC</state>
@@ -375,6 +371,12 @@
                     <state>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\Si446x</state>
                     <state>$PROJ_DIR$\..\..\Common\Security</state>
                     <state>$PROJ_DIR$\..\..\Common\wolfssl</state>
+                    <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_cfg\fsp_cfg</state>
+                    <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_cfg</state>
+                    <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_cfg\aws</state>
+                    <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_cfg\driver</state>
+                    <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_cfg\fsp_cfg\bsp</state>
+                    <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -2165,7 +2167,7 @@
         <group>
             <name>Common</name>
             <group>
-                <name>OS_AL</name>
+                <name>OS_AL_FreeRTOS</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Event.c</name>
                 </file>
@@ -2202,6 +2204,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\DBG_CommandLine.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\DBG_SerialDebug.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\DBG_SerialDebug.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\SELF_test.c</name>
@@ -2242,9 +2250,12 @@
         </group>
         <group>
             <name>FSP_Gen</name>
-            <group>
-                <name>SEGGER_RTT</name>
-            </group>
+            <file>
+                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_gen\blinky_thread.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_gen\blinky_thread.h</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\src\blinky_thread_entry.c</name>
             </file>

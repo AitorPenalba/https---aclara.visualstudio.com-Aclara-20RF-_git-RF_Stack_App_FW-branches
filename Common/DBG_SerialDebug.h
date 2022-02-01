@@ -21,7 +21,7 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #ifndef __BOOTLOADER
-#include <mqx.h>
+//#include <mqx.h>
 #include "error_codes.h"
 #endif /* __BOOTLOADER  */
 
@@ -35,6 +35,8 @@
 // Print options
 #define ADD_LF           (1<<0) // Insert \n
 #define PRINT_DATE_TIME  (1<<1) // Print date, time and taskID
+
+#define DBG_log( )    0 /* TODO: DG Remove*/
 
 // Print category, string, adds \n and time stamp
 #define DBG_logPrintf( category, fmt, ... ) DBG_log( category, ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)
@@ -64,17 +66,17 @@
 returnStatus_t DBG_init( void );
 void           DBG_lockPrintResource( void );
 void           DBG_releasePrintResource( void );
-void           DBG_TxTask( uint32_t Arg0 );
-void           DBG_LogTask( uint32_t Arg0 );
-void           DBG_log ( char category, uint8_t options, const char *fmt, ... );
+void           DBG_TxTask( taskParameter );
+void           DBG_LogTask( taskParameter );
+//void           DBG_log ( char category, uint8_t options, const char *fmt, ... );
 void           DBG_logPrintHex( char category, char const *str, const uint8_t *Data, uint16_t Length );
 void           DBG_EnableDebug ( void );
 void           DBG_DisableDebug ( void );
 bool           DBG_GetDebug ( void );
 void           DBG_processMfgPortCmd(uint8_t const *pSrc, uint16_t len);
 char          *DBG_printFloat(char *str, float f, uint32_t precision);
-void           DBG_SetTaskFilter( _task_id tid );
-_task_id       DBG_GetTaskFilter(  void );
+//void           DBG_SetTaskFilter( _task_id tid );
+//_task_id       DBG_GetTaskFilter(  void );
 void           DBG_LW_printf( char const *fmt, ... );
 #if ( PORTABLE_DCU == 1)
 void           DBG_DfwMonitorMode ( bool enable );

@@ -22,6 +22,7 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdbool.h>
+#if 0
 #include <mqx.h>
 #include <fio.h>
 #include "EVL_event_log.h"
@@ -128,7 +129,11 @@
 #endif
 #include "version.h"
 #include "FTM.h" // Used for radio interrupt (FTM1_CH0), radio TCXO (FTM1_CH1) and ZCD_METER interrupt (FTM3_CH1)
-
+#endif
+/* TODO: DG: Remove Duplicate Includes */
+#include "STRT_Startup.h"
+#include "version.h"
+#include "DBG_SerialDebug.h"
 /* #DEFINE DEFINITIONS */
 #define PRINT_CPU_STATS_IN_SEC 5 /* Print the Cpu statistics every x seconds */
 #define PRINT_STACK_USAGE_AND_TASK_SUMMARY 28 /* Print after x seconds of 100% CPU load */
@@ -156,6 +161,9 @@ static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
 /* Power Up Table - Define all modules that require initialization below. */
 const STRT_FunctionList_t startUpTbl[] =
 {
+   INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
+#if 0
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS
    INIT( PWR_waitForStablePower, STRT_FLAG_NONE ),
@@ -276,6 +284,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( PWR_printResetCause, STRT_FLAG_NONE ),                   //Prints the reset cause
 #endif
    INIT( FTM1_Init, STRT_FLAG_LAST_GASP)                           // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+#endif /* #if 0*/
 };
 
 const uint8_t uStartUpTblCnt = ARRAY_IDX_CNT( startUpTbl );
@@ -332,9 +341,16 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
 
 *******************************************************************************/
 /*lint -e{715} Arg0 not used; required by API */
+#if 0
 void STRT_StartupTask ( uint32_t Arg0 )
+#else
+//void STRT_StartupTask ( void* pvParameters ) taskParameter
+void STRT_StartupTask ( taskParameter )
+#endif
 {
-   OS_TICK_Struct       TickTime;
+   //FSP_PARAMETER_NOT_USED(taskParameter);
+//   OS_TICK_Struct       TickTime;
+   TickType_t           TickTime;
    STRT_FunctionList_t  *pFunct;
    uint32_t             CurrentIdleCount;
    uint32_t             PrevIdleCount;
@@ -345,7 +361,7 @@ void STRT_StartupTask ( uint32_t Arg0 )
    uint8_t              startUpIdx;
    uint8_t              quiet = 0;
    uint8_t              rfTest = 0;
-
+#if 0
    // Enable to use DWT module.
    // This is needed for DWT_CYCCNT to work properly when the debugger (I-jet) is not plugged in.
    // When the debugger is plugged in, the following registers are programmed by the IAR environment.
@@ -353,7 +369,7 @@ void STRT_StartupTask ( uint32_t Arg0 )
 
    // Enable cycle counter
    DWT_CTRL = DWT_CTRL | 1 ;
-
+#endif
 #if ( MQX_USE_LOGS == 1 )
    /* Create kernel log */
    if ( _klog_create( 192, 1 ) != MQX_OK )
@@ -374,6 +390,7 @@ void STRT_StartupTask ( uint32_t Arg0 )
             ( ( rfTest == 0 ) || ( ( pFunct->uFlags & STRT_FLAG_RFTEST ) != 0 ) ) )
       {
          returnStatus_t response;
+#if 0
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 #pragma calls=\
           WDOG_Init, \
@@ -480,12 +497,15 @@ void STRT_StartupTask ( uint32_t Arg0 )
           FIO_init, \
           PWR_printResetCause
 #endif
+#endif // #if 0
          response = pFunct->pFxnStrt();
+#if 0
          if ( pFunct->pFxnStrt == MODECFG_init )
          {
             quiet = MODECFG_get_quiet_mode();
             rfTest = MODECFG_get_rfTest_mode();
          }
+#endif
          if ( eSUCCESS != response )
          {
             /* This condition should only show up in development.  This infinite loop should help someone figure out
@@ -497,8 +517,11 @@ void STRT_StartupTask ( uint32_t Arg0 )
          }
       }
    }
-
+#if (TM_MUTEX == 1)
+   OS_MUTEX_Test();
+#endif
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
+#if 0
    if (!initSuccess_)
    {
       //LED_setRedLedStatus(MANUAL_RED);
@@ -536,9 +559,11 @@ void STRT_StartupTask ( uint32_t Arg0 )
 
    CurrentIdleCount = IDL_Get_IdleCounter();
    PrevIdleCount = CurrentIdleCount;
-
+#endif  // #if 0
    for ( ;; )
    {
+      vTaskSuspend(NULL); // TODO: DG: Remove
+#if 0
       OS_TICK_Sleep ( &TickTime, ONE_SEC );
 
       CurrentIdleCount = IDL_Get_IdleCounter();
@@ -600,5 +625,6 @@ void STRT_StartupTask ( uint32_t Arg0 )
          }
          CpuIdx = 0;
       } /* end if() */
+#endif // #if 0
    } /* end for() */
 } /* end STRT_StartupTask () */

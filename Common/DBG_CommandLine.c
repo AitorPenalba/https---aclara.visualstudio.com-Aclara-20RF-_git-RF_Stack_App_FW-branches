@@ -29,65 +29,66 @@
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
-#include <bsp.h>
-#include "file_io.h"
-#include "SELF_test.h"
 #include "DBG_SerialDebug.h"
-#include "version.h"
-#include "dfw_app.h"
 #include "DBG_CommandLine.h"
-#include "pwr_task.h"
-#include "MIMT_info.h"
+//#include <bsp.h>
+//#include "file_io.h"
+//#include "SELF_test.h"
+//#include "version.h"
+//#include "dfw_app.h"
+
+//#include "pwr_task.h"
+//#include "MIMT_info.h"
 #if ( EP == 1 )
 #include "pwr_last_gasp.h"
 #include "vbat_reg.h"
 #include "time_DST.h"
 #include "crc16_m.h"
 #endif
-#include "mode_config.h"
-#include "MFG_Port.h"
-#include "MAC_Protocol.h"
-#include "STACK_Protocol.h"
-#include "COMM.h"
-#include "time_util.h"
-#include "radio.h"
-#include "radio_hal.h"
-#include "PHY.h"
-#include "PHY_Protocol.h"
-#include "MAC_Protocol.h"
-#include "SM_Protocol.h"     // Stack Manager
-#include "SM.h"              // Stack Manager
-#include "MAC.h"
-#include "STACK.h"
+//#include "mode_config.h"
+//#include "MFG_Port.h"
+//#include "MAC_Protocol.h"
+//#include "STACK_Protocol.h"
+//#include "COMM.h"
+//#include "time_util.h"
+//#include "radio.h"
+//#include "radio_hal.h"
+//#include "PHY.h"
+//#include "PHY_Protocol.h"
+//#include "MAC_Protocol.h"
+//#include "SM_Protocol.h"     // Stack Manager
+//#include "SM.h"              // Stack Manager
+//#include "MAC.h"
+//#include "STACK.h"
 #if ( USE_DTLS == 1 )
 #include "dtls.h"
 #endif
 #if ( USE_MTLS == 1 )
 #include "mtls.h"
 #endif
-#include "time_util.h"
-#include "partitions.h"
+//#include "time_util.h"
+//#include "partitions.h"
 #if ( DCU == 1 )
 #include "MAINBD_Handler.h"
 #include "HEEP_util.h"
 #endif //DCU
-#include "dfw_interface.h"
-#include "STRT_Startup.h"
-#include "APP_MSG_Handler.h"
+//#include "dfw_interface.h"
+//#include "STRT_Startup.h"
+//#include "APP_MSG_Handler.h"
 #ifdef TM_PARTITION_USAGE
 #include "filenames.h"
 #endif
-#include "ecc108_apps.h"
-#include "ecc108_config.h"
-#include "ecc108_mqx.h"
-#include "compiler_types.h"
-#include "si446x_cmd.h"
-#include "si446x_api_lib.h"
-#include "time_sync.h"
-#include "SELF_test.h"
-#include "mode_config.h"
-#include "EVL_event_log.h"
-#include "ascii.h"
+//#include "ecc108_apps.h"
+//#include "ecc108_config.h"
+//#include "ecc108_mqx.h"
+//#include "compiler_types.h"
+//#include "si446x_cmd.h"
+//#include "si446x_api_lib.h"
+//#include "time_sync.h"
+//#include "SELF_test.h"
+//#include "mode_config.h"
+//#include "EVL_event_log.h"
+//#include "ascii.h"
 #if (USE_DTLS==1)
 #include "dtls.h"
 #include "wolfssl/wolfcrypt/aes.h"
@@ -298,6 +299,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "help",         DBG_CommandLine_Help,            "Display list of commands" },
    { "h",            DBG_CommandLine_Help,            "help" },
    { "?",            DBG_CommandLine_Help,            "help" },
+#if 0
 #if ( FAKE_TRAFFIC == 1 )
    { "bhgencount",   DBG_CommandLine_ipBhaulGenCount, "get (no args) or set (arg1) backhaul fake record gen count" },
 #endif
@@ -662,6 +664,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( SIMULATE_POWER_DOWN == 1 )
    { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
 #endif
+#endif  // #if 0
    { 0, 0, 0 }
 };
 
@@ -685,8 +688,15 @@ static returnStatus_t atoh( uint8_t *pHex, char const *pAscii );
    Notes:
 
 *******************************************************************************/
+#if ( RTOS == 1 ) /* TODO Replace 1 with MQX_RTOS for Some reason the IDE doesn't recognize the MQX_RTOS def */
 void DBG_CommandLineTask ( uint32_t Arg0 )
+#else
+void DBG_CommandLineTask (void * pvParameters)
+#endif
 {
+#if ( RTOS == FREE_RTOS )
+   FSP_PARAMETER_NOT_USED(pvParameters);
+#endif
 #if ( BUILD_DFW_TST_LARGE_PATCH == 1 )/* Enabling this in CompileSwitch.h will shift the code down resulting in a large patch */
    NOP();
    NOP();
@@ -694,10 +704,10 @@ void DBG_CommandLineTask ( uint32_t Arg0 )
 #endif
 
    /* Print out the version information one time at power up */
-   OS_TASK_Sleep ( 100 ); /* Correct a display issue with STRT trying to print reset reason */
+//   OS_TASK_Sleep ( 100 ); /* Correct a display issue with STRT trying to print reset reason */
 #if ( ( EP == 1 ) || ( PORTABLE_DCU == 0 ) )
-   DBG_logPrintf( 'I', "############## APP STARTING ##############" );
-   (void)DBG_CommandLine_Versions ( 0, argvar );
+//   DBG_logPrintf( 'I', "############## APP STARTING ##############" );
+//   (void)DBG_CommandLine_Versions ( 0, argvar );
 #else
    DBG_logPrintf('R', "#####################MOBILE DCU TEST UNIT FIRMWARE#####################");
    (void)DBG_CommandLine_Versions ( 0, argvar );
@@ -705,10 +715,20 @@ void DBG_CommandLineTask ( uint32_t Arg0 )
 #endif
    for ( ;; )
    {
+#if (TM_SEMAPHORE == 1)
+      if( OS_SEM_TestPend() )
+      {
+         vTaskDelay(pdMS_TO_TICKS(1000));
+         vTaskSuspend(NULL);
+         break; /* Exit */
+      }
+
+#endif
 #if ( !USE_USB_MFG && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) )
-      OS_TASK_Sleep(OS_WAIT_FOREVER);
+//      OS_TASK_Sleep(OS_WAIT_FOREVER);
 #else
-      UART_fgets( UART_DEBUG_PORT, DbgCommandBuffer, MAX_DBG_COMMAND_CHARS );
+//      UART_fgets( UART_DEBUG_PORT, DbgCommandBuffer, MAX_DBG_COMMAND_CHARS );
+        vTaskSuspend(NULL); /* TODO: DG: Remove */
 #endif
       /* Check before executing; may have been disable while waiting for input   */
       if (DBG_IsPortEnabled () ) /* Only process input if the port is enabled */
@@ -717,9 +737,9 @@ void DBG_CommandLineTask ( uint32_t Arg0 )
       }
       else
       {
-         (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
-         (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
-         OS_TASK_Sleep ( TIME_TICKS_PER_SEC );     /* Check again in a second, or so...   */
+//         (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
+//         (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
+//         OS_TASK_Sleep ( TIME_TICKS_PER_SEC );     /* Check again in a second, or so...   */
       }
    } /* end for() */
 } /* end DBG_CommandLineTask () */
@@ -820,6 +840,7 @@ static void DBG_CommandLine_Process ( void )
          {
             /* This is the line of code that is actually calling the handler function
                for the command that was received */
+#if 0
 #if ( EP == 1 )
 #if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
 /* TODO: Make a group of the calls by feature set ( similar to HEEP_Util.c pragma calls ) */
@@ -977,6 +998,7 @@ static void DBG_CommandLine_Process ( void )
 #pragma  calls=DBG_CommandLine_usbaddr
 #endif
 #endif
+#endif /* #if 0*/
             (void)CmdEntry->pfnCmd( argc, argvar );
 
             /***************************************************************************
@@ -1021,7 +1043,7 @@ static void DBG_CommandLine_Process ( void )
 #endif
          {
             /* We reached the end of the list and did not find a valid command */
-            DBG_logPrintf( 'R', "%s is not a valid command!", argvar[0] );
+//            DBG_logPrintf( 'R', "%s is not a valid command!", argvar[0] );
          }
       } /* end if() */
    } /* end if() */
@@ -1045,13 +1067,13 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
 {
    struct_CmdLineEntry  const *CmdLineEntry;
 
-   DBG_printf( "\n[M]Command List:" );
+//   DBG_printf( "\n[M]Command List:" );
    CmdLineEntry = DBG_CmdTable;
    while ( CmdLineEntry->pcCmd )
    {
-      DBG_printf( "[M]%30s: %s", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
+//      DBG_printf( "[M]%30s: %s", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
       CmdLineEntry++;
-      OS_TASK_Sleep( TEN_MSEC );
+//      OS_TASK_Sleep( TEN_MSEC );
    } /* end while() */
    return ( 0 );
 } /* end DBG_CommandLine_Help () */
@@ -1165,7 +1187,6 @@ uint32_t DBG_CommandLine_DebugEnable( uint32_t argc, char *argv[] )
    }
    return ( 0 );
 } /* end DBG_CommandLine_DebugEnable () */
-#endif
 
 /*******************************************************************************
 
@@ -1204,7 +1225,7 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_CpuLoadEnable( uint32_t argc, char *argv[] )
 {
-   STRT_CpuLoadPrint ( eSTRT_CPU_LOAD_PRINT_ON );
+//   STRT_CpuLoadPrint ( eSTRT_CPU_LOAD_PRINT_ON );
 
    return ( 0 );
 } /* end DBG_CommandLine_CpuLoadEnable () */
@@ -1224,12 +1245,14 @@ uint32_t DBG_CommandLine_CpuLoadEnable( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] )
 {
+#if ( RTOS == MQX_RTOS )
    _task_id tid;
    if ( argc > 1 )
    {
       tid = strtoul( argv[1], NULL, 0 );
       DBG_SetTaskFilter( tid );
    }
+#endif
    return 0;
 }
 
@@ -1250,7 +1273,7 @@ static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_CpuLoadSmart( uint32_t argc, char *argv[] )
 {
-   STRT_CpuLoadPrint ( eSTRT_CPU_LOAD_PRINT_SMART );
+//   STRT_CpuLoadPrint ( eSTRT_CPU_LOAD_PRINT_SMART );
 
    return ( 0 );
 } /* end DBG_CommandLine_CpuLoadEnable () */
@@ -1271,7 +1294,7 @@ uint32_t DBG_CommandLine_CpuLoadSmart( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_CpuLoadDisable( uint32_t argc, char *argv[] )
 {
-   STRT_CpuLoadPrint ( eSTRT_CPU_LOAD_PRINT_OFF );
+//   STRT_CpuLoadPrint ( eSTRT_CPU_LOAD_PRINT_OFF );
 
    return ( 0 );
 } /* end DBG_CommandLine_CpuLoadDisable () */
@@ -1316,6 +1339,7 @@ uint32_t DBG_CommandLine_Partition ( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
 {
+#if ( PARTITION_MANAGER == 1 )
    char     *endptr;
    uint8_t  buffer[ 64 ];        /* Data read from NV */
    uint8_t  respDataHex[ ( sizeof( buffer ) * 3 ) + ( sizeof( buffer ) / 16 ) + 1 ];
@@ -1388,10 +1412,11 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
    {
       DBG_logPrintf( 'R', "USAGE: nvr id start len" );
    }
+#endif
    return ( 0 );
 } /* end DBG_CommandLine_NvRead () */
 
-
+#if (DBG_TESTS == 1)
 /*******************************************************************************
 
    Function name: DBG_CommandLine_NvTest
@@ -1425,8 +1450,8 @@ uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
    }
    return ( 0 );
 }
-
 /* end DBG_CommandLine_NvTest() */
+#endif
 
 #if ( SIMULATE_POWER_DOWN == 1 )
 
@@ -1859,7 +1884,8 @@ static uint32_t DBG_CommandLine_getTBslot( uint32_t argc, char *argv[] )
    DBG_logPrintf( 'I', "Slot: %c (1 based)", (char)slotID ); /* Print result      */
    return 0;
 }
-#endif
+#endif //#if ( DCU == 1 )
+#if ( INCLUDE_ECC == 1 )
 #include "ecc108_lib_return_codes.h"
 static const char checkmac_failed[] = "ECC108_CHECKMAC_FAILED";
 static const char parse_error[]  = "ECC108_PARSE_ERROR";
@@ -1992,7 +2018,8 @@ static void PrintECC_error( uint8_t ECCstatus )
       DBG_printf( "\nCode = 0x%02x, %s", ECCstatus, msg );
    }
 }
-
+#endif /* INCLUDE_ECC */
+#if 0
 /*******************************************************************************
 
    Function name: DBG_CommandLine_GenDFWkey
@@ -2054,7 +2081,7 @@ static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] )
    }
    return 0;
 }
-
+#endif // #if 0
 /*******************************************************************************
 
    Function name: DBG_CommandLine_sectest
@@ -2089,6 +2116,7 @@ static const uint8_t slot14sig[ 64 ] =
 #if 0
 static const uint8_t fwen[ 32 ] = { 0 };
 #endif
+#if (INCLUDE_ECC == 1)
 uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
 {
 #if 0
@@ -2371,8 +2399,9 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 /* end DBG_CommandLine_secConfig() */
+#endif // #if (INCLUDE_ECC == 1)
 
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+#if 0 //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 /*******************************************************************************
 
    Function name: DBG_CommandLine_clockswtest
@@ -2447,8 +2476,9 @@ static uint32_t DBG_CommandLine_clockswtest ( uint32_t argc, char *argv[] )
 
    return 0;
 }
-#endif   /* HAL_TARGET_XCVR_9985_REV_A   */
+#endif   /* HAL_TARGET_XCVR_9985_REV_A  */
 
+#if 0//(DBG_TESTS == 1)
 /*******************************************************************************
 
    Function name: DBG_CommandLine_clocktst
@@ -2514,6 +2544,7 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
    }
    return 0;
 }
+#endif //DBG_TESTS
 
 /*******************************************************************************
 
@@ -2529,10 +2560,10 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
    Notes:
 
 *******************************************************************************/
-static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
-{
-   return 0;
-}
+//static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
+//{
+//   return 0;
+//}
 
 /*******************************************************************************
 
@@ -2741,6 +2772,7 @@ uint32_t DBG_CommandLine_Delay ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_time () */
 #endif
+#if (RTC == 1)
 /*******************************************************************************
 
    Function name: DBG_CommandLine_rtcTime
@@ -2890,6 +2922,7 @@ uint32_t DBG_CommandLine_rtcCap( uint32_t argc, char *argv[] )
 
    return( 0 );
 }
+#endif
 
 #if (EP == 1)
 
@@ -3523,7 +3556,8 @@ uint32_t DBG_CommandLine_getDstParams ( uint32_t argc, char *argv[] )
    DST_PrintDSTParams();
    return ( 0 );
 }
-#endif
+#endif // (EP == 1)
+#if 0
 /*******************************************************************************
 
    Function name: DBG_CommandLine_virgin
@@ -3562,6 +3596,7 @@ uint32_t DBG_CommandLine_virgin ( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
 {
+#if ( PARTITION_MANAGER == 1 )
    PartitionData_t const * partitionData;    /* Pointer to partition information   */
    uint8_t                 erasedSignature[ 8 ];
 
@@ -3578,8 +3613,10 @@ static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
          }
       }
    }
+#endif
    return 0;
 }
+#endif // #if 0
 #if WRITE_KEY_ALLOWED
 #warning "Don't release with WRITE_KEY_ALLOWED"
 static uint32_t DBG_CommandLine_writeKey ( uint32_t argc, char *argv[] )
@@ -3809,6 +3846,7 @@ uint32_t DBG_CommandLine_ManualTemperature ( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
 {
+#if 0
    char           floatStr[PRINT_FLOAT_SIZE];
    int32_t        temperatureF, temperatureC;
    PHY_GetConf_t  GetConf;
@@ -3875,6 +3913,7 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
 #endif
 #endif
    }
+#endif
    return ( 0 );
 } /* end DBG_CommandLine_GetHWInfo () */
 
@@ -4322,6 +4361,7 @@ uint32_t DBG_CommandLine_HmcDemandCoin ( uint32_t argc, char *argv[] )
 #endif
 #endif
 
+#if ( FILE_IO == 1)
 /*******************************************************************************
 
    Function name: DBG_CommandLine_PrintFiles
@@ -4379,7 +4419,7 @@ uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
 #endif
    return ( 0 );
 }
-
+#endif // FILE_IO == 1
 #if (EP == 1)
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 /*******************************************************************************
@@ -5154,6 +5194,7 @@ static uint32_t DBG_CommandLine_dfwMonMode ( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
 {
+#if 0
    uint8_t                    string[VER_HW_STR_LEN];
    firmwareVersion_u          ver;
    const firmwareVersionDT_s *dt;
@@ -5201,6 +5242,7 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    DBG_logPrintf ('R', "HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_B");
 #endif
 
+#endif // #if 0
    return ( 0 );
 } /* end DBG_CommandLine_Versions () */
 
@@ -12123,3 +12165,4 @@ uint32_t DBG_CommandLine_EVL_UNIT_TESTING( uint32_t argc, char *argv[] )
 }
 #endif
 /*lint +esym(818, argc, argv) argc, argv could be const */
+#endif // #if 0

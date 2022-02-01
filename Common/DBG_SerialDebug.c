@@ -36,22 +36,22 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include <mqx.h>
-#include <fio.h>
-#include <io_prv.h>
-#include <charq.h>
-#include <serinprv.h>
-#include <bsp.h>
-#include <file_io.h>
-#include "timer_util.h"
-#include "time_sys.h"
+//#include <mqx.h>
+//#include <fio.h>
+//#include <io_prv.h>
+//#include <charq.h>
+//#include <serinprv.h>
+//#include <bsp.h>
+//#include <file_io.h>
+//#include "timer_util.h"
+//#include "time_sys.h"
 #include "DBG_SerialDebug.h"
-#include "ascii.h"
-#include "time_util.h"
+//#include "ascii.h"
+//#include "time_util.h"
 
-#ifndef BSP_DEFAULT_IO_CHANNEL_DEFINED
-#error This application requires BSP_DEFAULT_IO_CHANNEL to be not NULL. Please set corresponding BSPCFG_ENABLE_TTYx to non-zero in user_config.h and recompile BSP with this option.
-#endif
+//#ifndef BSP_DEFAULT_IO_CHANNEL_DEFINED
+//#error This application requires BSP_DEFAULT_IO_CHANNEL to be not NULL. Please set corresponding BSPCFG_ENABLE_TTYx to non-zero in user_config.h and recompile BSP with this option.
+//#endif
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
@@ -84,7 +84,7 @@ typedef struct
 /* FILE VARIABLE DEFINITIONS */
 
 static bool             EnableDebugPrint_ = ( bool )true;
-static FileHandle_t     dbgFileHndl_;                       //Contains the file handle information
+//static FileHandle_t     dbgFileHndl_;                       //Contains the file handle information
 #if ( PORTABLE_DCU == 1)
 /* this flag disables all debug printing but still allows debug command processing */
 static bool             EnableDfwMonMode = ( bool )false;
@@ -93,11 +93,13 @@ static bool             EnableDfwMonMode = ( bool )false;
 static OS_MUTEX_Obj     mutex_;
 static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
-static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
-static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
+//static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
+//static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
 static uint16_t         line_num_ = 0;                      /* Line number used by DBG_log */
+#if ENABLE_TMR_TASKS
 static uint16_t         PortTimerID = INVALID_TIMER_ID;     /* Debug port timeout timer ID  */
 static timer_t          PortTimerCfg;                       /* Debug port timeout Timer configuration */
+#endif
 static DBG_ConfigAttr_t ConfigAttr;                         /* Debug Configuration Attributes */
 
 static char logPrintf_buf[DEBUG_MSG_SIZE];
@@ -126,12 +128,15 @@ static void PortTimer_CallBack( uint8_t cmd, const void *pData );
 returnStatus_t DBG_init( void )
 {
    returnStatus_t retVal = eFAILURE;
+#if (FILE_IO == 1)
    FileStatus_t fileStatus;
-
-   if (  OS_MSGQ_Create( &mQueueHandle_ ) && OS_MUTEX_Create( &mutex_ ) &&
+#endif
+   if (  //OS_MSGQ_Create( &mQueueHandle_ ) &&
+         OS_MUTEX_Create( &mutex_ ) &&
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
    {
+#if (FILE_IO == 1 )
       if ( eSUCCESS == FIO_fopen(&dbgFileHndl_,                 /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,        /* Search for the best partition according to the timing. */
                                  (uint16_t) eFN_DBG_CONFIG,     /* File ID (filename) */
@@ -153,10 +158,16 @@ returnStatus_t DBG_init( void )
             retVal = FIO_fread( &dbgFileHndl_, (uint8_t *)&ConfigAttr, 0, (lCnt)sizeof(DBG_ConfigAttr_t));
          }
       }
+#else
+      retVal = eSUCCESS;
+#endif /* FILE_IO */
    }
+#if (TM_SEMAPHORE == 1)
+OS_SEM_TestCreate();
+#endif
 
-   DBG_PortTimer_Manage ( );
-   DBG_PortEcho_Set( DBG_PortEcho_Get() ); // Get the echo setting and update the current UART setting
+//   DBG_PortTimer_Manage ( );
+//   DBG_PortEcho_Set( DBG_PortEcho_Get() ); // Get the echo setting and update the current UART setting
    return( retVal );
 }
 /***********************************************************************************************************************
@@ -170,18 +181,26 @@ returnStatus_t DBG_init( void )
    Returns: None
 
  **********************************************************************************************************************/
-void DBG_TxTask( uint32_t Arg0 )
+void DBG_TxTask( taskParameter )
 {
+//   vTaskDelay(pdMS_TO_TICKS(1000));
+#if (TM_SEMAPHORE == 1)
+   OS_SEM_TestPost();
+#endif
+   vTaskSuspend(NULL);
    for ( ; ; )
    {
-      buffer_t *pBuf;
-      (void)OS_MSGQ_Pend( &mQueueHandle_, ( void * )&pBuf, OS_WAIT_FOREVER );  /* Check for message in the queue */
-      OS_MUTEX_Lock( &mutex_ ); // Function will not return if it fails
-      ( void ) puts ( (char*)&pBuf->data[0] );
-      OS_MUTEX_Unlock( &mutex_ ); // Function will not return if it fails
-      BM_free( pBuf );
+
+//      buffer_t *pBuf;
+//      (void)OS_MSGQ_Pend( &mQueueHandle_, ( void * )&pBuf, OS_WAIT_FOREVER );  /* Check for message in the queue */
+//      OS_MUTEX_Lock( &mutex_ ); // Function will not return if it fails
+//      ( void ) puts ( (char*)&pBuf->data[0] );
+//      OS_MUTEX_Unlock( &mutex_ ); // Function will not return if it fails
+//      BM_free( pBuf );
+
    }
 }  /*lint !e715 !e818  pvParameters is not used */
+#if 0
 /***********************************************************************************************************************
 
    Function name: DBG_log
@@ -212,9 +231,11 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
 #endif
       )
    {
+#if (MQX_RTOS == 1)
       if (( taskPrintFilter_ == 0 )            ||                /* Filter active? */
             taskPrintFilter_ == _task_get_id() ||                /* Filter match?  */
             _task_get_id() == _task_get_id_from_name( "DBG" ) )  /* DBG task */
+#endif
       {
          OS_MUTEX_Lock( &logPrintf_mutex_ ); // Function will not return if it fails
 
@@ -228,7 +249,7 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
             /* DEVELOPER NOTE:  Update DBG_SIZE_OF_LINE_COUNT_AND_CATEGORY #def if you modify the below line */
             len += (uint16_t)snprintf( logPrintf_buf, (int32_t)sizeof( logPrintf_buf ), "[%05d %c]", ++line_num_, category );
          }
-
+#if 0
          // Build time/data header
          if ( options & PRINT_DATE_TIME )
          {
@@ -244,7 +265,7 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
                                          RT_Clock.msec,
                                          _task_get_template_ptr( _task_get_id() )->TASK_NAME );
          }
-
+#endif
          // Format rest of the string
          va_list  ap;
          va_start( ap, fmt );
@@ -430,6 +451,8 @@ char * DBG_printFloat( char *str, float f, uint32_t precision )
 
    return str;
 }
+#endif // end of #if 0
+#if (MQX_RTOS == 1)
 /***********************************************************************************************************************
 
    Function name: DBG_SetTaskFilter()
@@ -460,6 +483,7 @@ _task_id DBG_GetTaskFilter(  void )
 {
    return ( taskPrintFilter_ );
 }
+#endif // #if (MQX_RTOS == 1)
 /*******************************************************************************
 
    Function name: DBG_PortEcho_Get
@@ -489,9 +513,10 @@ bool DBG_PortEcho_Get( void )
 void DBG_PortEcho_Set ( bool val )
 {
    ConfigAttr.echoState = val;
-
+#if (FILE_IO == 1)
    (void)FIO_fwrite( &dbgFileHndl_, 0, (uint8_t const *)&ConfigAttr, (lCnt)sizeof(DBG_ConfigAttr_t));
-   (void)UART_SetEcho( UART_DEBUG_PORT, val );
+#endif
+//   (void)UART_SetEcho( UART_DEBUG_PORT, val );
 }
 /*******************************************************************************
 
@@ -522,9 +547,9 @@ uint8_t DBG_PortTimer_Get( void )
 void DBG_PortTimer_Set ( uint8_t val )
 {
    ConfigAttr.PortTimeout_hh = val;
-
+#if (FILE_IO == 1)
    (void)FIO_fwrite( &dbgFileHndl_, 0, (uint8_t const *)&ConfigAttr, (lCnt)sizeof(DBG_ConfigAttr_t));
-
+#endif
    DBG_PortTimer_Manage ( );
 }
 /*******************************************************************************
@@ -542,7 +567,7 @@ void DBG_PortTimer_Set ( uint8_t val )
    Notes:
 
 *******************************************************************************/
-static void  PortTimer_CallBack( uint8_t cmd, const void *pData )
+static void PortTimer_CallBack( uint8_t cmd, const void *pData )
 {
    (void) cmd;
    (void) pData;
@@ -552,7 +577,9 @@ static void  PortTimer_CallBack( uint8_t cmd, const void *pData )
 
    // Disable DBG port timeout
    ConfigAttr.PortTimeout_hh = 0;
+#if (FILE_IO == 1)
    (void)FIO_fwrite( &dbgFileHndl_, 0, (uint8_t const *)&ConfigAttr, (lCnt)sizeof(DBG_ConfigAttr_t));
+#endif
 #endif
 #endif
 }  /*lint !e818 pData could be pointer to const */
@@ -572,6 +599,7 @@ void DBG_PortTimer_Manage ( void )
    /* Initialize/update timer used to automatically disable port if no activity is detected before the timer expires  */
    if(ConfigAttr.PortTimeout_hh > 0)
    {
+#if (TIMER_UTIL == 1)
       // Create timer if not already created
       if ( PortTimerID == INVALID_TIMER_ID )
       {
@@ -586,6 +614,7 @@ void DBG_PortTimer_Manage ( void )
       {
          ( void )TMR_ResetTimer( PortTimerID, TIME_TICKS_PER_HR * ConfigAttr.PortTimeout_hh );
       }
+#endif
       EnableDebugPrint_ = ( bool )true;
    }
 #if ( ENABLE_DEBUG_PORT == 0 )
@@ -632,6 +661,7 @@ bool DBG_IsPortEnabled ( void )
 *******************************************************************************/
 void DBG_LW_printf( char const *fmt, ... )
 {
+#if 0
    static char    LW_printf_str[DEBUG_MSG_SIZE];
    static int32_t len;
    static int32_t i;
@@ -662,6 +692,7 @@ void DBG_LW_printf( char const *fmt, ... )
    }
 
    OS_INT_enable( );
+#endif
 }
 
 #if ( PORTABLE_DCU == 1)
@@ -713,4 +744,3 @@ bool DBG_GetDfwMonitorMode( void )
    return EnableDfwMonMode;
 }
 #endif /* end PORTABLE_DCU section */
-

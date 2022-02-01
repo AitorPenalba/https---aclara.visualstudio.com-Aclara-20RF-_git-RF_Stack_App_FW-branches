@@ -31,4 +31,24 @@
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
+#define BARE_METAL                        0
+#ifdef __mqx_h__
+   #define MQX_RTOS                       1
+#endif
+#define FREE_RTOS                         2
+/* */
+#define ACLARA_DVR_ABSTRACTION            0
+#if ( ACLARA_DVR_ABSTRACTION != 0 )
+   #define FILE_IO                        0
+   #define PARTITION_MANAGER              0 /* 0 = No PARTITION_MANAGER, 1 = Parition Manager */
+   #define TIMER_UTIL                     0
+   #define RTC                            0
+#endif
+#define SUPPORT_HEEP                      0
+#define INCLUDE_ECC                       0
+#define RTOS                              FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
+#define DBG_TESTS                         0
+#define SEGGER_RTT                        1
+#define TM_MUTEX                          1
+#define TM_SEMAPHORE                      1
 #endif

@@ -36,7 +36,7 @@
 
 #ifndef __BOOTLOADER
 #include "error_codes.h"
-#include "user_config.h"
+//#include "user_config.h"
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */

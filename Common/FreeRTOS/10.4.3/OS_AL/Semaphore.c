@@ -1,25 +1,33 @@
-/******************************************************************************
- *
- * Filename: Semaphore.c
- *
- * Global Designator:
- *
- * Contents:
- *
- ******************************************************************************
- * Copyright (c) 2012 ACLARA.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *    ACLARA, ST. LOUIS, MISSOURI USA
- *****************************************************************************/
+/**********************************************************************************************************************
+
+   Filename: Semaphore.c
+
+   Global Designator: OS_SEM_
+
+   Contents:
+
+ **********************************************************************************************************************
+  A product of
+  Aclara Technologies LLC
+  Confidential and Proprietary
+  Copyright 2014-2022 Aclara. All Rights Reserved.
+
+  PROPRIETARY NOTICE
+  The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+  (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+  authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may
+  be used or copied only in accordance with the terms of such license.
+ ********************************************************************************************************************* */
 
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include <mqx.h>
+//#include <mqx.h>
 #include "OS_aclara.h"
-#include "EVL_event_log.h"
+//#include "FreeRTOS.h"
+//#include "semphr.h"
+//#include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -50,8 +58,9 @@
 *******************************************************************************/
 bool OS_SEM_Create ( OS_SEM_Handle SemHandle )
 {
-   uint32_t RetStatus;
    bool FuncStatus = true;
+#if 0
+   uint32_t RetStatus;
 
    RetStatus = _lwsem_create ( SemHandle, 0 ); /* Always create with initial count of 0 */
    if ( RetStatus != MQX_OK )
@@ -59,6 +68,15 @@ bool OS_SEM_Create ( OS_SEM_Handle SemHandle )
       FuncStatus = false;
    } /* end if() */
 
+#endif
+
+   *SemHandle = xSemaphoreCreateBinary();
+   if( NULL == SemHandle )
+   {
+      /* TODO: DG: Add Print */
+      /* The semaphore could not be created because there was insufficient heap memory available for FreeRTOS to allocate the semaphore data structures.*/
+      FuncStatus = false;
+   }
    return ( FuncStatus );
 } /* end OS_SEM_Create () */
 
@@ -81,8 +99,15 @@ bool OS_SEM_Create ( OS_SEM_Handle SemHandle )
 *******************************************************************************/
 void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 {
-  if ( _lwsem_post ( SemHandle ) ) {
-      EVL_FirmwareError( "OS_SEM_Post" , file, line );
+#if 0
+  if ( _lwsem_post ( SemHandle ) )
+#else
+   if( pdFAIL == xSemaphoreGive(*SemHandle) )
+#endif
+   {
+      /* TODO: */
+      APP_ERR_PRINT("OS_SEM_POST!");
+//      EVL_FirmwareError( "OS_SEM_Post" , file, line );
    }
 } /* end OS_SEM_Post () */
 
@@ -110,19 +135,21 @@ void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 *******************************************************************************/
 bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, int line )
 {
-   uint32_t RetStatus;
+   //uint32_t RetStatus;
+   BaseType_t RetStatus;
    bool FuncStatus = true;
 
-   uint32_t timeout_ticks;  // Timeout in ticks
+   TickType_t timeout_ticks;  // Timeout in ticks
 
    if ( Timeout_msec > 0 )
    {
       if ( Timeout_msec == OS_WAIT_FOREVER )
       {
-         timeout_ticks = 0; /* In MQX, 0 represents a wait forever value */
-      } /* end if() */
+         timeout_ticks = portMAX_DELAY;
+      }
       else
       {
+
          /* Convert the passed in Timeout from Milliseconds into Ticks */
          /* This is limited to a maximum of 96 hours, to prevent an overflow!
           * This is OK for 200 ticks per second.
@@ -131,34 +158,42 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
          {
             Timeout_msec = (ONE_MIN * 60 * 24 * 4);
          }
-
+#if 0
          /* Convert the Timeout from Milliseconds into Ticks */
          timeout_ticks = (uint32_t)  ((uint64_t) ((uint64_t) Timeout_msec * (uint64_t) _time_get_ticks_per_sec()) / 1000);
          if( (uint32_t) ((uint64_t) ((uint64_t) Timeout_msec * (uint64_t) _time_get_ticks_per_sec()) % 1000) > 0)
          {   /* Round the value up to ensure the time is >= the time requested */
             timeout_ticks = timeout_ticks + 1;
          } /* end if() */
-      } /* end else() */
-
-      RetStatus = _lwsem_wait_ticks ( SemHandle, timeout_ticks  );
-
-      if ( RetStatus == MQX_INVALID_LWSEM ) {
-         EVL_FirmwareError( "OS_SEM_Pend" , file, line );
+#else
+         timeout_ticks = pdMS_TO_TICKS(Timeout_msec);
+         if( ( ( TickType_t ) ( ( ( TickType_t ) ( Timeout_msec ) * ( TickType_t ) configTICK_RATE_HZ ) % ( TickType_t ) 1000U ) ) )
+         {   /* Round the value up to ensure the time is >= the time requested */
+            timeout_ticks = timeout_ticks + 1;
+         }
+#endif
       }
 
-      if ( RetStatus != MQX_OK )
+      RetStatus = xSemaphoreTake( *SemHandle, timeout_ticks );
+
+      if ( pdFAIL == RetStatus )
       {
          FuncStatus = false;
-      } /* end if() */
-   } /* end if() */
+         /* TODO: Add Print */
+         APP_ERR_PRINT("OS_SEM_PEND!");
+//         if ( RetStatus == MQX_INVALID_LWSEM ) {
+//         EVL_FirmwareError( "OS_SEM_Pend" , file, line );
+//      }
+      }
+   }
    else
    {
-      RetStatus = _lwsem_poll ( SemHandle );
-      if ( RetStatus == false )
+      RetStatus = xSemaphoreTake ( *SemHandle, ( TickType_t )0 );
+      if ( RetStatus == pdFAIL )
       {
          FuncStatus = false;
-      } /* end if() */
-   } /* end else() */
+      }
+   }
 
    return ( FuncStatus );
 } /* end OS_SEM_Pend () */
@@ -179,11 +214,54 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
 *******************************************************************************/
 void OS_SEM_Reset ( OS_SEM_Handle SemHandle )
 {
-   uint32_t RetStatus;
+   BaseType_t RetStatus;
 
    do
    {
-      RetStatus = _lwsem_poll ( SemHandle );
-   } while ( RetStatus != false );
+      RetStatus = xSemaphoreTake ( *SemHandle, ( TickType_t )0 );
+   } while ( RetStatus != pdFAIL );
 } /* end OS_SEM_Reset () */
 
+
+#if (TM_SEMAPHORE == 1)
+static OS_SEM_Obj       testSem_ = NULL;
+static volatile uint8_t counter = 0;
+void OS_SEM_TestCreate ( void )
+{
+   if( OS_SEM_Create(&testSem_) )
+   {
+      counter++;
+   }
+   else
+   {
+      counter++;
+      APP_ERR_PRINT("Unable to Create the Mutex!");
+   }
+
+}
+bool OS_SEM_TestPend( void )
+{
+   bool retVal = false;
+   if( OS_SEM_Pend(&testSem_, OS_WAIT_FOREVER) )
+   {
+      counter--;
+      retVal = true;
+   }
+
+   if( 0 == counter )
+   {
+      APP_PRINT("Success");
+   }
+   else
+   {
+      APP_ERR_PRINT("Fail");
+   }
+   return(retVal);
+}
+
+void OS_SEM_TestPost( void )
+{
+   OS_SEM_Post(&testSem_);
+}
+
+#endif

@@ -27,7 +27,7 @@
 #include <string.h>
 #include "version.h"
 #ifndef __BOOTLOADER
-#include "file_io.h"
+//#include "file_io.h"
 
 #endif   /* __BOOTLOADER   */
 /* ****************************************************************************************************************** */
@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)0)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)1)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -209,7 +209,7 @@ typedef struct
 /* FILE VARIABLE DEFINITIONS */
 #ifndef __BOOTLOADER
 static OS_MUTEX_Obj  verMutex_;                    //Serialize access to this module
-static FileHandle_t  verFileHndl_;                 //Contains the file handle information
+//static FileHandle_t  verFileHndl_;                 //Contains the file handle information
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
@@ -234,6 +234,7 @@ static FileHandle_t  verFileHndl_;                 //Contains the file handle in
  **********************************************************************************************************************/
 returnStatus_t VER_Init ( void )
 {
+#if 0
    FileStatus_t     fileStatusCfg;              /* Contains the file status */
    returnStatus_t   retVal = eFAILURE;
    HWVerString_t    hWVer;                      /* HW Version string */
@@ -264,6 +265,9 @@ returnStatus_t VER_Init ( void )
          }
       }
    }
+#else
+   returnStatus_t   retVal = eSUCCESS;
+#endif
    return(retVal);
 }
 
@@ -340,6 +344,7 @@ const firmwareVersionDT_s * VER_getFirmwareVersionDT ( void )
 returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 {
    returnStatus_t   retVal = eFAILURE;
+#if 0
    HWVerString_t    hWVer;                      /* HW Version string */
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
@@ -350,7 +355,9 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
       retVal = eSUCCESS;
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
-
+#else
+   retVal = eSUCCESS;
+#endif
    return (retVal);
 }
 
@@ -373,6 +380,7 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
 {
    returnStatus_t   retVal = eFAILURE;
+#if 0
    uint8_t          len;
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
@@ -388,7 +396,9 @@ returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
       retVal = eSUCCESS;
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
-
+#else
+   retVal = eSUCCESS;
+#endif
    return (retVal);
 }
 

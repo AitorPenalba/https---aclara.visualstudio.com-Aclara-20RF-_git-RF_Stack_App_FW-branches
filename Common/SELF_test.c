@@ -24,25 +24,25 @@
 
 #include "project.h"
 #include <stdlib.h>
-#include <mqx.h>
-#include <rtc.h>
-#include <fio.h>
-#include <bsp.h>
+//#include <mqx.h>
+//#include <rtc.h>
+//#include <fio.h>
+//#include <bsp.h>
 /*lint -esym(750,SELF_GLOBALS) not referenced   */
 #define SELF_GLOBALS
 #include "SELF_test.h"    // Include self
 #undef  SELF_GLOBALS
 
 #include "DBG_SerialDebug.h"
-#include "ascii.h"
-#include "buffer.h"
-#include "partition_cfg.h"
-#include "file_io.h"
-#include "ecc108_lib_return_codes.h"
-#include "ecc108_mqx.h"
-#include "ecc108_apps.h"
-#include "evl_event_log.h"
-#include "time_sys.h"
+//#include "ascii.h"
+//#include "buffer.h"
+//#include "partition_cfg.h"
+//#include "file_io.h"
+//#include "ecc108_lib_return_codes.h"
+//#include "ecc108_mqx.h"
+//#include "ecc108_apps.h"
+//#include "evl_event_log.h"
+//#include "time_sys.h"
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
 #endif
@@ -59,10 +59,11 @@
 static uint32_t      sdRAM[32] @ "EXTERNAL_RAM" ; /*lint !e430*/
 #endif
 
-static OS_EVNT_Obj      SELF_events;      /* Self test Events   */
-static OS_EVNT_Obj *    SELF_notify;      /* Event handler to "notify" when test results are completed.     */
+//static OS_EVNT_Obj      SELF_events;      /* Self test Events   */
+//static OS_EVNT_Obj *    SELF_notify;      /* Event handler to "notify" when test results are completed.     */
 static uint32_t         event_flags;      /* Event flags returned by self test routine.                     */
 static SELF_TestData_t  SELF_TestData;
+#if (ENABLE_FIO_TASKS == 1)
 static SELF_file_t      SELF_testFile =
 {
    .ePartition      = ePART_SEARCH_BY_TIMING,
@@ -73,7 +74,7 @@ static SELF_file_t      SELF_testFile =
    .Size            = sizeof(SELF_TestData),
    .UpdateFreq      = DVR_BANKED_MAX_UPDATE_RATE_SEC  /* Updated often enough to force into banked area. */
 }; /*lint !e785 too few initializers.  */
-
+#endif
 /* TYPE DEFINITIONS */
 
 /* ****************************************************************************************************************** */
@@ -96,6 +97,7 @@ static uint16_t RunSelfTest( void );
 returnStatus_t SELF_init( void )
 {
    returnStatus_t retVal = eFAILURE;
+#if (ENABLE_FIO_TASKS == 1)
    FileStatus_t   fileStatus;
    SELF_file_t    *pFile = &SELF_testFile;
 
@@ -125,8 +127,12 @@ returnStatus_t SELF_init( void )
          }
       }
    }
+#else
+   retVal = eSUCCESS;
+#endif
    return(retVal);
 }
+#if 0
 /***********************************************************************************************************************
    Function Name: SELF_eventHandle
 
@@ -153,7 +159,7 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 {
    SELF_notify = handle;
 }
-
+#endif
 /***********************************************************************************************************************
    Function Name: SELF_testTask
 
@@ -167,7 +173,7 @@ void SELF_testTask( uint32_t Arg0 )
 {
    uint16_t       selfTestResults;
    uint32_t       taskPriority;
-
+#if 0
    DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
    (void)Arg0;    /* Not used - avoids lint warning   */
 #if ( USE_USB_MFG == 0 )
@@ -259,6 +265,7 @@ void SELF_testTask( uint32_t Arg0 )
          (void)RunSelfTest();
       }
    }
+#endif // #if 0
 }
 
 /***********************************************************************************************************************
@@ -272,6 +279,7 @@ void SELF_testTask( uint32_t Arg0 )
 ***********************************************************************************************************************/
 static uint16_t RunSelfTest()
 {
+#if 0
    EventData_s         eventData;
    EventKeyValuePair_s keyVal;                            /* Logging only one NVP */
 
@@ -415,7 +423,11 @@ static uint16_t RunSelfTest()
 #endif
 #endif
    return SELF_TestData.lastResults.uAllResults.Bytes;
+#else
+   return 0;
+#endif
 }
+#if (FILE_IO != 0)
 /***********************************************************************************************************************
    Function Name: SELF_GetTestFileHandle
 
@@ -560,7 +572,7 @@ returnStatus_t SELF_testNV( void )
    }
    return ( ( 0 == errCount ) ? eSUCCESS : eFAILURE );
 }
-
+#endif // FILE_IO
 #if ( DCU == 1 )  /* DCU will always support externam RAM */
 /***********************************************************************************************************************
    Function Name: SELF_testSDRAM
@@ -610,8 +622,9 @@ returnStatus_t SELF_testSDRAM( uint32_t LoopCount )
    }
    return status;
 }
-#endif
+#endif // ( DCU == 1 )
 
+#if ( SUPPORT_HEEP != 0 )
 /***********************************************************************************************************************
 
    Function Name: SELF_OR_PM_Handler
@@ -719,3 +732,4 @@ returnStatus_t SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType i
    }
    return ( retVal );
 }
+#endif // SUPPORT_HEEP

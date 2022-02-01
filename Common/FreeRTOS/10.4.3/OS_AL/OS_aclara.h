@@ -7,7 +7,7 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2012-2020 ACLARA.  All rights reserved.
+ * Copyright (c) 2012-2022 ACLARA.  All rights reserved.
  * This program may not be reproduced, in whole or in part, in any form or by
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
@@ -15,6 +15,8 @@
 #ifndef OS_aclara_H
 #define OS_aclara_H
 
+#include "features.h"
+#if 0 //( RTOS == MQX_RTOS )
 /* INCLUDE FILES */
 /* General rules state that include files should not include other include files
    this rule is being broken to simplify the interface layer for the MQX specific
@@ -35,6 +37,12 @@
 #endif
 
 #endif
+
+#endif //#if (RTOS == MQX_RTOS )
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
 /* #DEFINE DEFINITIONS */
 #define OS_WAIT_FOREVER 0xFFFFFFFF
 
@@ -54,10 +62,12 @@
 #ifndef __BOOTLOADER
 #define OS_EVENT_ID 200
 
+#if 0 //( RTOS == 1 ) /* MQX */
 /* MACRO DEFINITIONS */
 #define OS_Get_OsVersion() (_mqx_version)
 #define OS_Get_OsGenRevision() (_mqx_generic_revision)
 #define OS_Get_OsLibDate() (_mqx_date)
+#endif
 
 #define OS_INT_disable()                                 _int_disable()
 #define OS_INT_enable()                                  _int_enable()
@@ -76,6 +86,7 @@
 #define OS_SEM_Post(SemHandle)                           OS_SEM_POST(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend(SemHandle, TimeoutMs)                OS_SEM_PEND(SemHandle, TimeoutMs, __FILE__, __LINE__)
 
+#if 0 //( RTOS == 1 ) /* MQX */
 /* TYPE DEFINITIONS */
 typedef LWEVENT_STRUCT        OS_EVNT_Obj, *OS_EVNT_Handle;
 typedef LWMSGQ_STRUCT         OS_MBOX_Handle;
@@ -103,7 +114,7 @@ typedef struct
 typedef struct
 {
    OS_QUEUE_Obj MSGQ_QueueObj;
-   OS_SEM_Obj MSGQ_SemObj;
+   OS_SEM_Obj   MSGQ_SemObj;
 } OS_MSGQ_Obj, *OS_MSGQ_Handle;
 
 typedef struct
@@ -112,7 +123,24 @@ typedef struct
    uint16_t    cmdCat;
    int         data[];       /* payload to the destination. */
 }msgQueueSrc_t;
+#warning "Nooo"
+#endif  //( RTOS == 1 ) /* MQX */
 
+
+#define OS_MSGQ_Create(arg)
+#define OS_TICK_Struct
+#define OS_TICK_Sleep
+#define OS_TASK_Summary
+
+#ifdef __mqx_h__
+#define taskParameter   uint32_t Arg0
+#else
+#define taskParameter   void* pvParameters
+typedef SemaphoreHandle_t     OS_SEM_Obj, OS_MUTEX_Obj, *OS_SEM_Handle, *OS_MUTEX_Handle;
+#endif
+
+
+//#endif //#if ( RTOS == MQX_RTOS )
 typedef enum
 {
   eSYSFMT_NULL = ((uint8_t)0),
@@ -207,7 +235,7 @@ extern const char pTskName_Idle[];
 extern const char pTskName_Sleep[];
 
 /* FILE VARIABLE DEFINITIONS */
-
+#if 0
 /* FUNCTION PROTOTYPES */
 bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
@@ -217,10 +245,6 @@ bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle );
 void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line );
 bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
 
-bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
-void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
-void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
-
 bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle );
 void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );
 void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
@@ -229,14 +253,23 @@ void OS_QUEUE_Remove ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
 uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
+#endif
+
+bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
+void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
+void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
 
 bool OS_SEM_Create ( OS_SEM_Handle SemHandle );
 void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line );
 bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t TimeoutMs, char *file, int line );
 void OS_SEM_Reset ( OS_SEM_Handle SemHandle );
 
+#if ( RTOS == MQX_RTOS ) /* MQX */
 void OS_TASK_Create_Idle ( void );
+#endif
 void OS_TASK_Create_All ( bool initSuccess );
+void OS_TASK_Create_STRT( void );
+#if 0
 uint32_t OS_TASK_Get_Priority ( char const *pTaskName );
 uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority );
 void OS_TASK_Sleep ( uint32_t MSec );
@@ -254,8 +287,16 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
 uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
 bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Struct *FutureTickValue );
 void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
-
+#endif
 /* FUNCTION DEFINITIONS */
 #endif   /* __BOOTLOADER */
 
 #endif /* this must be the last line of the file */
+#if (TM_MUTEX == 1)
+void OS_MUTEX_Test( void );
+#endif
+#if (TM_SEMAPHORE == 1)
+void OS_SEM_TestPost( void );
+void OS_SEM_TestCreate ( void );
+bool OS_SEM_TestPend( void );
+#endif

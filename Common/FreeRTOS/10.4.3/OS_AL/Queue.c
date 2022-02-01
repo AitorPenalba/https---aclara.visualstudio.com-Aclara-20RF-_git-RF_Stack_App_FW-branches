@@ -17,9 +17,8 @@
 #include "project.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include <mqx.h>
 #include "OS_aclara.h"
-#include "EVL_event_log.h"
+//#include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -34,7 +33,7 @@
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
-
+#if 0
 /*******************************************************************************
 
   Function name: OS_QUEUE_Create
@@ -227,3 +226,4 @@ void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement )
    return ( (void *)NextElement );
 } /* end OS_QUEUE_Next () */
 
+#endif
