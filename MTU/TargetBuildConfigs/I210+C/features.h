@@ -48,7 +48,7 @@
 #define INCLUDE_ECC                       0
 #define RTOS                              FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
 #define DBG_TESTS                         0
-#define SEGGER_RTT                        1
-#define TM_MUTEX                          1
-#define TM_SEMAPHORE                      1
+#define SEGGER_RTT                        0
+#define TM_MUTEX                          0
+#define TM_SEMAPHORE                      0
 #endif

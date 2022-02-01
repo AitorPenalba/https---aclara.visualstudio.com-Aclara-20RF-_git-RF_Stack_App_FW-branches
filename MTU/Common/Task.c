@@ -105,7 +105,7 @@
 //#include "PHY.h"
 //#include "stack_check.h"
 //
-//#include "SELF_test.h"
+#include "SELF_test.h"
 //#include "dtls.h"
 
 #if (SIGNAL_NW_STATUS == 1)
@@ -302,16 +302,19 @@ static const char pTskName_SdPreambleDetector[]  = "PREDET";
 static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
 static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
 
+/* TODO: Move the following task Handles to appropriate location */
 TaskHandle_t tst_handle;
 TaskHandle_t dbg_tsk_handle;
 TaskHandle_t dbg_tx_tsk_handle;
+TaskHandle_t self_tst_tsk_handle;
 
 const Task_Template_t Task_template_list[] =
 {
    /* Task Index,          Function,                    Stack,     Pri,    Name,                 Attributes,    Param,     Handle */
    { eSTRT_TSK_IDX,         STRT_StartupTask,           512/4,      2,    (char *)pTskName_Strt,   0,            (void *)0,  &tst_handle },
    { eDBG_TSK_IDX,          DBG_CommandLineTask,        512/4,      3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
-   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512/4,      4,   (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
+   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512/4,      4,    (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
+   { eTEST_TSK_IDX,         SELF_testTask,              512/4,      14,   (char *)pTskName_Test,   0,            (void *)0, &self_tst_tsk_handle },
    {    0  }
 };
 #if ( RTOS == 1 ) //( RTOS == MQX_RTOS )

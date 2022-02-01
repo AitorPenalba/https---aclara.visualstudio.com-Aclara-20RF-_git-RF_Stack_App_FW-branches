@@ -169,11 +169,13 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 
    Returns: none
 ***********************************************************************************************************************/
-void SELF_testTask( uint32_t Arg0 )
+void SELF_testTask( taskParameter )
 {
    uint16_t       selfTestResults;
    uint32_t       taskPriority;
-#if 0
+#if 1
+   vTaskSuspend(NULL); /* TODO: Remove*/
+#else
    DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
    (void)Arg0;    /* Not used - avoids lint warning   */
 #if ( USE_USB_MFG == 0 )
