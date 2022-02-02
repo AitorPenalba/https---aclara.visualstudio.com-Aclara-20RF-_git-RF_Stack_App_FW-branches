@@ -57,24 +57,3 @@ BSP_CMSE_NONSECURE_ENTRY void template_nonsecure_callable ()
 
 }
 #endif
-
-
-
-/***********************************************************************************************************************************
- *
- * Temporary inclusion of a (bogus) DMA isr to evaluate how the Smart Config and FreeRTOS get configured
- *
- **********************************************************************************************************************************/
-void DMA0_complete_isr (void)
-{
-    /* Save context if RTOS is used */
-    FSP_CONTEXT_SAVE
-
-    IRQn_Type irq = R_FSP_CurrentIrqGet();
-
-    /* Clear IRQ to make sure it doesn't fire again after exiting */
-    R_BSP_IrqStatusClear(irq);
-
-    /* Restore context if RTOS is used */
-    FSP_CONTEXT_RESTORE
-}

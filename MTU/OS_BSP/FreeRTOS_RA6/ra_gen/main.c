@@ -4,20 +4,6 @@
                 #include "task.h"
                 #include "semphr.h"
 #include "OS_aclara.h"
-                       /* HeapRegion_t xHeapRegions[] =
- {
- *  { ( uint8_t * ) 0x80000000UL, 0x10000 }, << Defines a block of 0x10000 bytes starting at address 0x80000000
- *  { ( uint8_t * ) 0x90000000UL, 0xa0000 }, << Defines a block of 0xa0000 bytes starting at address of 0x90000000
- *  { NULL, 0 }                << Terminates the array.
- * };
- *
- * vPortDefineHeapRegions( xHeapRegions ); << Pass the array into vPortDefineHeapRegions(). */
-//HeapRegion_t xHeapRegions[] =
-//{
-//   { ( uint8_t * ) 0x20040000UL, 0x10000 }, //<< Defines a block of 0x10000 bytes starting at address 0x80000000
-//   //{ ( uint8_t * ) 0x90000000UL, 0xa0000 }, //<< Defines a block of 0xa0000 bytes starting at address of 0x90000000
-//   { NULL, 0 }               // << Terminates the array.
-//};
 
                 extern void blinky_thread_create(void);
                 extern TaskHandle_t blinky_thread;
@@ -98,7 +84,7 @@
                 {
                     g_fsp_common_thread_count = 0;
                     g_fsp_common_initialized = false;
-//                    vPortDefineHeapRegions( xHeapRegions ); We need this for heap5
+//                    vPortDefineHeapRegions( xHeapRegions ); //TODO: We need this for heap_5
                     /* Create semaphore to make sure common init is done before threads start running. */
                     g_fsp_common_initialized_semaphore =
                     #if configSUPPORT_STATIC_ALLOCATION
