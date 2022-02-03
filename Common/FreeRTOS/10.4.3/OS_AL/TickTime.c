@@ -16,10 +16,9 @@
  *****************************************************************************/
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
+#include "project.h"
 //#include <mqx.h>
-#include "OS_aclara.h"
+//#include "OS_aclara.h"
 
 /* #DEFINE DEFINITIONS */
 

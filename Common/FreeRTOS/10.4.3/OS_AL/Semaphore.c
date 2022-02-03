@@ -21,12 +21,7 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdint.h>
-#include <stdbool.h>
 //#include <mqx.h>
-#include "OS_aclara.h"
-//#include "FreeRTOS.h"
-//#include "semphr.h"
 //#include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */

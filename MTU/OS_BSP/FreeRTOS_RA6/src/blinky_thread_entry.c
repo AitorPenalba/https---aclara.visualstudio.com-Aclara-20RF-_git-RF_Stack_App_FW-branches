@@ -19,7 +19,8 @@
  **********************************************************************************************************************/
 
 #include "blinky_thread.h"
-#include "OS_aclara.h"
+#include "project.h"
+#include <stdio.h>
 
 extern bsp_leds_t g_bsp_leds;
 
@@ -45,7 +46,9 @@ fsp_err_t user_switch_init(void)
 /* Blinky Thread entry function */
 void blinky_thread_entry (void * pvParameters)
 {
-    FSP_PARAMETER_NOT_USED(pvParameters);
+
+   FSP_PARAMETER_NOT_USED(pvParameters);
+   printf("Test\n");
 
     /* LED type structure */
     bsp_leds_t leds = g_bsp_leds;

@@ -15,13 +15,9 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdint.h>
-#include <stdbool.h>
-//#include <mqx.h>
-//#include <mutex.h>
-#include "FreeRTOS.h"
-#include "semphr.h"
-#include "OS_aclara.h"
+//#include <mqx.h>      /* TODO: RA6: DG: We might not need this as its already included in project.h */
+//#include <mutex.h>    /* TODO: RA6: DG: We might not need this as its already included in project.h */
+#include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
 //#include "DBG_SerialDebug.h"
 //#include "EVL_event_log.h"
 

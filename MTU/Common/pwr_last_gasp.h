@@ -35,16 +35,18 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-
-#include "buffer.h"
-#include "error_codes.h"
-#include "time_util.h"
-#include "MAC.h"
-#include "MAC_Protocol.h"
-
+/* TODO: RA6: DG: Not required -- Start */
+//#include <stdint.h>
+//#include <stdbool.h>
+//#include <string.h>
+/* TODO: RA6: DG: Not required -- End */
+/* TODO: RA6: Add later -- Start */
+//#include "buffer.h"
+//#include "error_codes.h"
+//#include "time_util.h"
+//#include "MAC.h"
+//#include "MAC_Protocol.h"
+/* TODO: RA6: Add later -- End */
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTIONS */
 

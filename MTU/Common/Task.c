@@ -17,10 +17,8 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-#include <stdbool.h>
-#include <FreeRTOS.h>
-#include "FreeRTOS.h"
-#include "task.h"
+
+//#include "task.h"
 //#include <mqx.h>
 //#include <fio.h>
 //#include <io_prv.h>
@@ -138,26 +136,7 @@
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
-typedef void (* TASK_FPTR)(void *);
 
-typedef struct
-{
-   uint32_t         task_template_index;  /* TODO: This should be an enum*/
-
-   TASK_FPTR        pvTaskCode;
-
-   size_t           usStackDepth; /* The number of words (not Bytes!)*/
-
-   UBaseType_t      uxPriority;
-
-   char             *pcName;
-
-   uint32_t         TASK_ATTRIBUTES;
-
-   uint32_t         *pvParameters;
-
-   TaskHandle_t     *pxCreatedTask;
-} Task_Template_t, * pTask_Template_t;
 
 /*lint -esym(751,eOsTaskIndex_t) */
 /* This enum list needs to match the MQX_template_list[] below */
@@ -302,27 +281,59 @@ static const char pTskName_SdPreambleDetector[]  = "PREDET";
 static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
 static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
 
-/* TODO: Move the following task Handles to appropriate location */
+#if ( RTOS_SELECTION == FREE_RTOS )
+/* TODO: RA6: Move the following task Handles to appropriate location */
 TaskHandle_t tst_handle;
 TaskHandle_t dbg_tsk_handle;
 TaskHandle_t dbg_tx_tsk_handle;
 TaskHandle_t self_tst_tsk_handle;
 
-const Task_Template_t Task_template_list[] =
+/* TODO: RA6: DG: Investigate if we can create one Task List that works for both FreeRTOS and MQX */
+/* TODO: RA6: FreeRTOS: Note: FreeRTOS need the Stack size in words */
+const OS_TASK_Template_t Task_template_list[] =
 {
    /* Task Index,          Function,                    Stack,     Pri,    Name,                 Attributes,    Param,     Handle */
-   { eSTRT_TSK_IDX,         STRT_StartupTask,           512/4,      2,    (char *)pTskName_Strt,   0,            (void *)0,  &tst_handle },
-   { eDBG_TSK_IDX,          DBG_CommandLineTask,        512/4,      3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
-   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512/4,      4,    (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
-   { eTEST_TSK_IDX,         SELF_testTask,              512/4,      14,   (char *)pTskName_Test,   0,            (void *)0, &self_tst_tsk_handle },
+   { eSTRT_TSK_IDX,         STRT_StartupTask,           512,      2,    (char *)pTskName_Strt,   0,            (void *)0, &tst_handle },
+   { eDBG_TSK_IDX,          DBG_CommandLineTask,        512,      3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
+   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512,      4,    (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
+   { eTEST_TSK_IDX,         SELF_testTask,              512,      14,   (char *)pTskName_Test,   0,            (void *)0, &self_tst_tsk_handle },
    {    0  }
 };
-#if ( RTOS == 1 ) //( RTOS == MQX_RTOS )
+
+#if 0
+/*lint -e{641}  Suppress the index conversion from enum to int for this section. */
+const OS_TASK_Template_t  Task_template_list_last_gasp[] =
+{
+#if ENABLE_PWR_TASKS
+   { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, 0, 0 },
+#endif
+   { eTIME_TSK_IDX,     TIME_SYS_HandlerTask,   1200,  11, (char *)pTskName_Time,   DEFAULT_ATTR, 0, 0 },
+   { eSM_TSK_IDX,       SM_Task,                1000,  12, (char *)pTskName_Sm,     DEFAULT_ATTR, 0, 0 },
+   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, 0, 0 },
+   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
+   { eSTACK_TSK_IDX,    NWK_Task,               1500,  15, (char *)pTskName_Nwk,    DEFAULT_ATTR, 0, 0 },
+
+#if ( USE_DTLS == 1 )
+   { eDTLS_TSK_IDX,     DTLS_Task,              5400,  16, (char *)pTskName_Dtls,   DEFAULT_ATTR, 0, 0 },
+#endif
+   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, 0, 0 },
+
+   { eDBG_PRNT_TSK_IDX, DBG_TxTask,              680,  18, (char *)pTskName_Print,  DEFAULT_ATTR, 0, 0 },
+#if ENABLE_PWR_TASKS
+   // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
+   { ePWRLG_IDL_TSK_IDX,PWRLG_Idle_Task,         336,  19, (char *)pTskName_Idle,   DEFAULT_ATTR, 0, 0 },
+#endif
+   { 0 }
+};
+#endif
+#endif //#if ( RTOS_SELECTION == FREE_RTOS )
+
+#if ( RTOS_SELECTION == 1 ) //( RTOS_SELECTION == MQX_RTOS )
 /* NOTE: The Highest Priority we should use is 9.  This excerpt was taken from AN3905.pdf on freesclale.com
    Task priority. Lower number is for higher priorities.  More than one task can have the same priority level.  Having
    no gaps between priority values improves performance */
 /*lint -e{641}  Suppress the index conversion from enum to int for this section. */
-const TASK_TEMPLATE_STRUCT  MQX_template_list[] =
+const OS_TASK_Template_t  Task_template_list[] =
 {
    /* Task Index,               Function,                    Stack, Pri, Name,                    Attributes,    Param, Time Slice */
    { eSTRT_TSK_IDX,             STRT_StartupTask,             1900,  13, (char *)pTskName_Strt,   DEFAULT_ATTR_STRT, 0, 0 },
@@ -527,7 +538,7 @@ void task_exception_handler(_mqx_uint para, void * stack_ptr)
     expt_frm_dump(expt_frm_ptr);
 }
 
-#endif // ( RTOS == MQX_RTOS )
+#endif // ( RTOS_SELECTION == MQX_RTOS )
 
 /***********************************************************************************************************************
  *
@@ -548,11 +559,10 @@ void task_exception_handler(_mqx_uint para, void * stack_ptr)
  **********************************************************************************************************************/
 void OS_TASK_Create_All ( bool initSuccess )
 {
-#if ( RTOS == 1 ) //( RTOS == MQX_RTOS )
-   TASK_TEMPLATE_STRUCT const *pTaskList; /* Pointer to task list which contains all tasks in the system */
+
+   OS_TASK_Template_t const *pTaskList; /* Pointer to task list which contains all tasks in the system */
+#if ( RTOS_SELECTION == 1 ) //TODO: RA6: Replace ( RTOS_SELECTION == MQX_RTOS )
    _task_id taskID;
-#elif (RTOS == FREE_RTOS)
-   Task_Template_t const *pTaskList;  /* Pointer to task list which contains all tasks in the system */
 #endif
 //
 //   uint8_t  quiet;
@@ -564,11 +574,7 @@ void OS_TASK_Create_All ( bool initSuccess )
 //   (void)_int_install_exception_isr();
 
    /*lint -e{641} converting enum to int  */
-#if ( RTOS == 1 ) //( RTOS == MQX_RTOS )
-   for (pTaskList = &MQX_template_list[0]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++)
-#elif (RTOS == FREE_RTOS)
-   for (pTaskList = &Task_template_list[1]; 0 != pTaskList->task_template_index; pTaskList++)  /* DG: Don't include StartUp Task */
-#endif
+   for (pTaskList = &Task_template_list[1]; 0 != pTaskList->task_template_index; pTaskList++)  /* TODO: RA6: DG: Don't include StartUp Task */
    {  /* Create the task if the "Auto Start" attribute is NOT set */
 //      if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
 //      {  /* Create the task */
@@ -576,10 +582,11 @@ void OS_TASK_Create_All ( bool initSuccess )
 //              ( (rfTest == 0) || ((pTaskList->TASK_ATTRIBUTES & RFTEST_MODE_ATTR) != 0) ) &&
 //              ( (initSuccess) || ((pTaskList->TASK_ATTRIBUTES & FAIL_INIT_MODE_ATTR) != 0) ) )
          {
-#if ( RTOS == 1 ) //( RTOS == MQX_RTOS )
+#if ( RTOS_SELECTION == 1 ) //( RTOS_SELECTION == MQX_RTOS )
             if (MQX_NULL_TASK_ID == (taskID = _task_create( 0, pTaskList->TASK_TEMPLATE_INDEX, pTaskList->CREATION_PARAMETER )))
-#elif (RTOS == FREE_RTOS)
-            if (pdPASS != xTaskCreate( pTaskList->pvTaskCode, pTaskList->pcName, pTaskList->usStackDepth, pTaskList->pvParameters, pTaskList->uxPriority, pTaskList->pxCreatedTask ))
+#elif (RTOS_SELECTION == FREE_RTOS)
+            /* TODO: RA6: FreeRTOS: Note: FreeRTOS need the Stack size in words */
+            if (pdPASS != xTaskCreate( pTaskList->pvTaskCode, pTaskList->pcName, pTaskList->usStackDepth/4, pTaskList->pvParameters, pTaskList->uxPriority, pTaskList->pxCreatedTask ))
 #endif
             {
                /* This condition should only show up in development.  This infinite loop should help someone figure out
@@ -696,9 +703,9 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
  **********************************************************************************************************************/
 void OS_TASK_Sleep ( uint32_t MSec )
 {
-#if (RTOS == 1)
+#if (RTOS_SELECTION == 1) /* MQX */
    _time_delay ( MSec );
-#elif (RTOS == FREE_RTOS)
+#elif (RTOS_SELECTION == FREE_RTOS)
    vTaskDelay(pdMS_TO_TICKS(MSec));
 #endif
 }

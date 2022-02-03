@@ -14,9 +14,7 @@
  *****************************************************************************/
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
-//#include <mqx.h>
+#include "project.h"
 #include "OS_aclara.h"
 #include "DBG_SerialDebug.h"
 //#include "buffer.h"

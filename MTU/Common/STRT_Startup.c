@@ -130,7 +130,7 @@
 #include "version.h"
 #include "FTM.h" // Used for radio interrupt (FTM1_CH0), radio TCXO (FTM1_CH1) and ZCD_METER interrupt (FTM3_CH1)
 #endif
-/* TODO: DG: Remove Duplicate Includes */
+/* TODO: RA6: DG: Remove Duplicate Includes */
 #include "STRT_Startup.h"
 #include "version.h"
 #include "DBG_SerialDebug.h"
@@ -341,12 +341,7 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
 
 *******************************************************************************/
 /*lint -e{715} Arg0 not used; required by API */
-#if 0
-void STRT_StartupTask ( uint32_t Arg0 )
-#else
-//void STRT_StartupTask ( void* pvParameters ) taskParameter
 void STRT_StartupTask ( taskParameter )
-#endif
 {
    //FSP_PARAMETER_NOT_USED(taskParameter);
 //   OS_TICK_Struct       TickTime;

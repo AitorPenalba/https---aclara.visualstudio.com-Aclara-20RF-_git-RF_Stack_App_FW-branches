@@ -688,15 +688,9 @@ static returnStatus_t atoh( uint8_t *pHex, char const *pAscii );
    Notes:
 
 *******************************************************************************/
-#if ( RTOS == 1 ) /* TODO Replace 1 with MQX_RTOS for Some reason the IDE doesn't recognize the MQX_RTOS def */
-void DBG_CommandLineTask ( uint32_t Arg0 )
-#else
-void DBG_CommandLineTask (void * pvParameters)
-#endif
+void DBG_CommandLineTask ( taskParameter )
 {
-#if ( RTOS == FREE_RTOS )
-   FSP_PARAMETER_NOT_USED(pvParameters);
-#endif
+
 #if ( BUILD_DFW_TST_LARGE_PATCH == 1 )/* Enabling this in CompileSwitch.h will shift the code down resulting in a large patch */
    NOP();
    NOP();
@@ -1245,7 +1239,7 @@ uint32_t DBG_CommandLine_CpuLoadEnable( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] )
 {
-#if ( RTOS == MQX_RTOS )
+#if ( RTOS_SELECTION == MQX_RTOS )
    _task_id tid;
    if ( argc > 1 )
    {

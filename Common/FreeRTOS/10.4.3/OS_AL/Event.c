@@ -12,9 +12,10 @@
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
  *****************************************************************************/
-#if 0
+
 /* INCLUDE FILES */
 #include "project.h"
+#if 0 /* TODO: RA6: */
 #include <stdbool.h>
 #include <mqx.h>
 #include <lwevent.h>

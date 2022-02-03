@@ -34,27 +34,26 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-#include <stdbool.h>
 #include <string.h>
-#include <mqx.h>
-#include <bsp.h>
-#include "compiler_types.h"
 
-#include "App_Msg_Handler.h"
-#include "DBG_SerialDebug.h"
-#include "STRT_Startup.h"
-#include "pack.h"
-#include "file_io.h"
-#include "mode_config.h"
-#include "time_sys.h"
-#include "MAC.h"
-#include "STACK.h"
-#include "radio_hal.h"
-#include "vbat_reg.h"
-#include "pwr_config.h"
-#include "pwr_task.h"
-#include "SM_Protocol.h"
-#include "SM.h"
+//#include <bsp.h>
+//#include "compiler_types.h"
+//
+//#include "App_Msg_Handler.h"
+//#include "DBG_SerialDebug.h"
+//#include "STRT_Startup.h"
+//#include "pack.h"
+//#include "file_io.h"
+//#include "mode_config.h"
+//#include "time_sys.h"
+//#include "MAC.h"
+//#include "STACK.h"
+//#include "radio_hal.h"
+//#include "vbat_reg.h"
+//#include "pwr_config.h"
+//#include "pwr_task.h"
+//#include "SM_Protocol.h"
+//#include "SM.h"
 
 #define PWRLG_GLOBALS
 #include "pwr_last_gasp.h"
@@ -63,19 +62,20 @@
 #if ( ( USE_DTLS == 1 ) && ( DTLS_FIELD_TRIAL == 0 ) )
 #include "dtls.h"
 #endif
-#include "dvr_sharedMem.h"
+//#include "dvr_sharedMem.h"
 #include "version.h"
 #if ( LAST_GASP_SIMULATION == 1 )
 #include "EVL_event_log.h"
 #endif
 
+
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTIONS */
 
-extern const TASK_TEMPLATE_STRUCT MQX_template_list_last_gasp[];
+extern const OS_TASK_Template_t OS_template_list_last_gasp[];
 
-extern const STRT_FunctionList_t startUpTbl[];
-extern const uint8_t uStartUpTblCnt;
+//extern const STRT_FunctionList_t startUpTbl[];
+//extern const uint8_t uStartUpTblCnt;
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -126,6 +126,7 @@ static const float fMinimumStartVoltage      = ( float )1.8;      /* Minimum sup
 
 static const uint32_t uMinSleepMilliseconds  = ( uint32_t )10;    /* Minimum time between message transmissions */
 static const uint32_t uTotalMilliseconds     = ( uint32_t )20 * 60 * 1000; /* 20 minutes in milliseconds */
+#if 0 /* TODO: RA6 */
 static PWRLG_SysRegisterFilePtr      const pSysMem  = PWRLG_RFSYS_BASE_PTR;
 static VBATREG_VbatRegisterFilePtr   const pVbatMem = VBATREG_RFSYS_BASE_PTR;
 
@@ -2394,3 +2395,4 @@ void PWRLG_RestLastGaspFlags( void )
    PWRLG_TIME_OUTAGE_SET( 0 );   // Clear the time of the last outage.
    RESTORATION_TIME_SET( 0 );    // Clear the Restoration time.
 }
+#endif

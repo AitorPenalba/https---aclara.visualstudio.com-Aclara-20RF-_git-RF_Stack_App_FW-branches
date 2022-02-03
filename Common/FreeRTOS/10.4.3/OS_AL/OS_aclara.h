@@ -15,8 +15,11 @@
 #ifndef OS_aclara_H
 #define OS_aclara_H
 
-#include "features.h"
-#if 0 //( RTOS == MQX_RTOS )
+#ifndef features_H
+#warning "Requires features.h"
+#endif
+
+#if ( RTOS_SELECTION == MQX_RTOS )
 /* INCLUDE FILES */
 /* General rules state that include files should not include other include files
    this rule is being broken to simplify the interface layer for the MQX specific
@@ -36,13 +39,13 @@
 #include <lwmsgq.h>
 #endif
 
-#endif
+#endif // #ifndef __BOOTLOADER
 
-#endif //#if (RTOS == MQX_RTOS )
-
+#elif( RTOS_SELECTION == FREE_RTOS )
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+#endif  // RTOS_SELECTION
 /* #DEFINE DEFINITIONS */
 #define OS_WAIT_FOREVER 0xFFFFFFFF
 
@@ -62,7 +65,7 @@
 #ifndef __BOOTLOADER
 #define OS_EVENT_ID 200
 
-#if 0 //( RTOS == 1 ) /* MQX */
+#if 0 //( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 /* MACRO DEFINITIONS */
 #define OS_Get_OsVersion() (_mqx_version)
 #define OS_Get_OsGenRevision() (_mqx_generic_revision)
@@ -86,7 +89,7 @@
 #define OS_SEM_Post(SemHandle)                           OS_SEM_POST(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend(SemHandle, TimeoutMs)                OS_SEM_PEND(SemHandle, TimeoutMs, __FILE__, __LINE__)
 
-#if 0 //( RTOS == 1 ) /* MQX */
+#if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 /* TYPE DEFINITIONS */
 typedef LWEVENT_STRUCT        OS_EVNT_Obj, *OS_EVNT_Handle;
 typedef LWMSGQ_STRUCT         OS_MBOX_Handle;
@@ -124,7 +127,7 @@ typedef struct
    int         data[];       /* payload to the destination. */
 }msgQueueSrc_t;
 #warning "Nooo"
-#endif  //( RTOS == 1 ) /* MQX */
+#endif  // ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 
 
 #define OS_MSGQ_Create(arg)
@@ -132,15 +135,37 @@ typedef struct
 #define OS_TICK_Sleep
 #define OS_TASK_Summary
 
-#ifdef __mqx_h__
-#define taskParameter   uint32_t Arg0
-#else
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define taskParameter         uint32_t Arg0
+#define OS_TASK_Template_t    TASK_TEMPLATE_STRUCT
+
+#elif ( RTOS_SELECTION == FREE_RTOS )
 #define taskParameter   void* pvParameters
 typedef SemaphoreHandle_t     OS_SEM_Obj, OS_MUTEX_Obj, *OS_SEM_Handle, *OS_MUTEX_Handle;
+typedef void (* TASK_FPTR)(void *);
+
+typedef struct
+{
+   uint32_t         task_template_index;  /* TODO: RA6: This should be an enum*/
+
+   TASK_FPTR        pvTaskCode;
+
+   size_t           usStackDepth; /* The number of words (not Bytes!)*/
+
+   UBaseType_t      uxPriority;
+
+   char             *pcName;
+
+   uint32_t         TASK_ATTRIBUTES;
+
+   uint32_t         *pvParameters;
+
+   TaskHandle_t     *pxCreatedTask;
+} OS_TASK_Template_t, * pOS_TASK_Template_t;
 #endif
 
 
-//#endif //#if ( RTOS == MQX_RTOS )
+//#endif //#if ( RTOS_SELECTION == MQX_RTOS )
 typedef enum
 {
   eSYSFMT_NULL = ((uint8_t)0),
@@ -264,7 +289,7 @@ void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line );
 bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t TimeoutMs, char *file, int line );
 void OS_SEM_Reset ( OS_SEM_Handle SemHandle );
 
-#if ( RTOS == MQX_RTOS ) /* MQX */
+#if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 void OS_TASK_Create_Idle ( void );
 #endif
 void OS_TASK_Create_All ( bool initSuccess );

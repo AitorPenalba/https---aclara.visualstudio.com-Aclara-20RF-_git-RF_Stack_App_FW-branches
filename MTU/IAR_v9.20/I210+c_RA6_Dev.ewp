@@ -2228,10 +2228,19 @@
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\cfg_hal.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\CompileSwitch.h</name>
+                </file>
             </group>
             <group>
                 <name>HMC</name>
             </group>
+            <file>
+                <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\pwr_last_gasp.h</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\STRT_Startup.c</name>
             </file>

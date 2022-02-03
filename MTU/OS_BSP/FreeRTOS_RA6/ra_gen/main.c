@@ -1,9 +1,6 @@
 /* generated main source file - do not edit */
 #include "bsp_api.h"
-                #include "FreeRTOS.h"
-                #include "task.h"
-                #include "semphr.h"
-#include "OS_aclara.h"
+#include "project.h"
 
                 extern void blinky_thread_create(void);
                 extern TaskHandle_t blinky_thread;
