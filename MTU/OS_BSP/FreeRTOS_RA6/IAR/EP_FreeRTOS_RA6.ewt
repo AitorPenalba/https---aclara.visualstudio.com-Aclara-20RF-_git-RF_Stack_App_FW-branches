@@ -1425,85 +1425,88 @@
         <group>
             <name>Build Configuration</name>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\bsp\board_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\board_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\bsp\bsp_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\board_leds.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\bsp\bsp_mcu_device_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\board_leds.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\bsp\bsp_mcu_device_pn_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\bsp\bsp_mcu_family_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_mcu_device_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\bsp\bsp_pin_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_mcu_device_pn_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\aws\FreeRTOSConfig.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_mcu_family_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_adc_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_pin_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_agt_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\aws\FreeRTOSConfig.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_cgc_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_adc_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_crc_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_agt_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_dmac_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_cgc_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_flash_hp_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_crc_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_gpt_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_dmac_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_icu_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_flash_hp_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_iic_master_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_flash_lp_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_ioport_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_gpt_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_lpm_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_icu_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_lvd_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_iic_master_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\driver\r_ospi_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_ioport_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_poeg_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_lpm_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\driver\r_qspi_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_lvd_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_rtc_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_poeg_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_sci_spi_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_rtc_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_sci_uart_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_sci_spi_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\r_wdt_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_sci_uart_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6\ra_cfg\fsp_cfg\rm_comms_i2c_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_wdt_cfg.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\rm_comms_i2c_cfg.h</name>
             </file>
         </group>
         <group>
@@ -2000,18 +2003,6 @@
         </group>
         <group>
             <name>Program Entry</name>
-            <file>
-                <name>$PROJ_DIR$\..\src\SEGGER_RTT\SEGGER_RTT.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\src\SEGGER_RTT\SEGGER_RTT.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\src\SEGGER_RTT\SEGGER_RTT_Conf.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\src\SEGGER_RTT\SEGGER_RTT_printf.c</name>
-            </file>
         </group>
     </group>
 </project>
