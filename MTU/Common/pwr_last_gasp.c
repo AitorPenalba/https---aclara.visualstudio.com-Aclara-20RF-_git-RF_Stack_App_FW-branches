@@ -250,7 +250,7 @@ void PWRLG_LLWU_ISR( void )
    Notes:
 
  **********************************************************************************************************************/
-void PWRLG_Task( uint32_t Arg0 )
+void PWRLG_Task( taskParameter )
 {
    OS_TICK_Struct             endTime;
    OS_TICK_Struct             startTime;

@@ -189,8 +189,8 @@ typedef struct PWRLG_SysRegisterFile
 /*lint -esym(765,PWRLG_Startup) PWRLG_Startup called from outside PCLint scope  */
 PWRLG_EXTERN void     PWRLG_Startup(void);
 PWRLG_EXTERN void     PWRLG_Begin( uint16_t anomalyCount );
-PWRLG_EXTERN void     PWRLG_Task(uint32_t Arg0);
-PWRLG_EXTERN void     PWRLG_Idle_Task(uint32_t Arg0);
+PWRLG_EXTERN void     PWRLG_Task(taskParameter);
+PWRLG_EXTERN void     PWRLG_Idle_Task(taskParameter);
 PWRLG_EXTERN uint8_t  PWRLG_LastGasp(void);
 PWRLG_EXTERN void     PWRLG_BSP_Setup( void );
 #if 0 // Not used
