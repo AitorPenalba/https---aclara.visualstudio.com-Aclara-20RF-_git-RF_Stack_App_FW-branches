@@ -574,7 +574,7 @@ void OS_TASK_Create_All ( bool initSuccess )
 //   (void)_int_install_exception_isr();
 
    /*lint -e{641} converting enum to int  */
-   for (pTaskList = &Task_template_list[1]; 0 != pTaskList->task_template_index; pTaskList++)  /* TODO: RA6: DG: Don't include StartUp Task */
+   for (pTaskList = &Task_template_list[1]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++)  /* TODO: RA6: DG: Don't include StartUp Task */
    {  /* Create the task if the "Auto Start" attribute is NOT set */
 //      if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
 //      {  /* Create the task */

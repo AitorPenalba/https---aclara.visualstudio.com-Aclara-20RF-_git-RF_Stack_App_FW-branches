@@ -785,11 +785,11 @@
                 </option>
                 <option>
                     <name>IlinkIcfOverride</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>$TOOLKIT_DIR$\config\linker\Renesas\r7fa6e10f.icf</state>
+                    <state>$PROJ_DIR$/script/fsp.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>
@@ -841,7 +841,7 @@
                 </option>
                 <option>
                     <name>IlinkOverrideProgramEntryLabel</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkProgramEntryLabelSelect</name>
@@ -849,7 +849,7 @@
                 </option>
                 <option>
                     <name>IlinkProgramEntryLabel</name>
-                    <state>__iar_program_start</state>
+                    <state>Reset_Handler</state>
                 </option>
                 <option>
                     <name>DoFill</name>

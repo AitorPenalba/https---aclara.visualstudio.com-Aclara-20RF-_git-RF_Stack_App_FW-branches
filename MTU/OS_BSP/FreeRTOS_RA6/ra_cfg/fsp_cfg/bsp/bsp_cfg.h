@@ -28,6 +28,7 @@
             #define BSP_CFG_PFS_PROTECT ((1))
 
             #define BSP_CFG_C_RUNTIME_INIT ((1))
+            #define BSP_CFG_EARLY_INIT     ((0))
 
             #define BSP_CFG_SOFT_RESET_SUPPORTED ((0)) // DEPRECATED, replace with BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
             #define BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET ((0))

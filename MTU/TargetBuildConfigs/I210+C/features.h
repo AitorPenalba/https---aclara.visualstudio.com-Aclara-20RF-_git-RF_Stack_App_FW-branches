@@ -95,5 +95,6 @@
 #define SEGGER_RTT                        0
 #define TM_MUTEX                          0
 #define TM_SEMAPHORE                      0
+#define INCLUDE_SRFN_STACK                0 /* This is a conditional compilation for initial dev purpose only */
 
 #endif

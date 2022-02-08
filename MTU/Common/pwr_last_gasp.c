@@ -41,7 +41,7 @@
 //
 //#include "App_Msg_Handler.h"
 //#include "DBG_SerialDebug.h"
-//#include "STRT_Startup.h"
+#include "STRT_Startup.h"
 //#include "pack.h"
 //#include "file_io.h"
 //#include "mode_config.h"
@@ -74,8 +74,8 @@
 
 extern const OS_TASK_Template_t OS_template_list_last_gasp[];
 
-//extern const STRT_FunctionList_t startUpTbl[];
-//extern const uint8_t uStartUpTblCnt;
+extern const STRT_FunctionList_t startUpTbl[];
+extern const uint8_t uStartUpTblCnt;
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -126,9 +126,11 @@ static const float fMinimumStartVoltage      = ( float )1.8;      /* Minimum sup
 
 static const uint32_t uMinSleepMilliseconds  = ( uint32_t )10;    /* Minimum time between message transmissions */
 static const uint32_t uTotalMilliseconds     = ( uint32_t )20 * 60 * 1000; /* 20 minutes in milliseconds */
+
+
 #if 0 /* TODO: RA6 */
-static PWRLG_SysRegisterFilePtr      const pSysMem  = PWRLG_RFSYS_BASE_PTR;
-static VBATREG_VbatRegisterFilePtr   const pVbatMem = VBATREG_RFSYS_BASE_PTR;
+//static PWRLG_SysRegisterFilePtr      const pSysMem  = PWRLG_RFSYS_BASE_PTR;
+//static VBATREG_VbatRegisterFilePtr   const pVbatMem = VBATREG_RFSYS_BASE_PTR;
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -166,7 +168,7 @@ static uint8_t hwRevLetter_;                  /* Used to store the HW revision l
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
 
-extern void task_exception_handler( _mqx_uint para, void * stack_ptr );
+//extern void task_exception_handler( _mqx_uint para, void * stack_ptr );
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
@@ -176,7 +178,7 @@ static void             EnterVLLS( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, 
 static void             EnterLLS( uint16_t uCounter, PWRLG_LPTMR_Units eUnits );
 static void             HardwareShutdown( void );
 static void             NextSleep( void );
-static void             TxCallback( MAC_DATA_STATUS_e status, uint16_t Req_Resp_ID );
+//static void             TxCallback( MAC_DATA_STATUS_e status, uint16_t Req_Resp_ID );
 static void             LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode );
 static void             LptmrEnable( bool bEnableInterrupt );
 static bool             powerStable( bool curState );
@@ -189,6 +191,7 @@ static void lg_init_uart( void );
 #define LG_PRNT_INFO( fmt, ... )
 #endif
 
+//#if 0 /* TODO: RA6 */
 /***********************************************************************************************************************
 
    Function Name: PWRLG_LLWU_ISR
@@ -231,6 +234,7 @@ void PWRLG_LLWU_ISR( void )
         LLWU_FILT2 |= LLWU_FILT2_FILTF_MASK;
     }
 }
+//#endif
 
 /***********************************************************************************************************************
 
@@ -252,11 +256,13 @@ void PWRLG_LLWU_ISR( void )
  **********************************************************************************************************************/
 void PWRLG_Task( taskParameter )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TICK_Struct             endTime;
    OS_TICK_Struct             startTime;
-   STRT_FunctionList_t const  *pFunct;
-   TASK_TEMPLATE_STRUCT const *pTaskList; /* Pointer to task list which contains all tasks in the system */
    _task_id                   taskID;
+#endif
+   STRT_FunctionList_t const  *pFunct;
+   OS_TASK_Template_t  const *pTaskList; /* Pointer to task list which contains all tasks in the system */
    bool                       bOverflow = ( bool )false;
    uint8_t                    startUpIdx;
    uint8_t                    hwVerString[VER_HW_STR_LEN];
@@ -265,7 +271,7 @@ void PWRLG_Task( taskParameter )
    ( void )OS_SEM_Create( &TxDoneSem );
 
    // Seed the random number generator for P persitence test in the MAC.
-   aclara_srand( PWRLG_MILLISECONDS() );
+//   aclara_srand( PWRLG_MILLISECONDS() );
 
    /* Initialize all of the modules here: */
    for ( startUpIdx = 0, pFunct = &startUpTbl[0]; startUpIdx < uStartUpTblCnt; startUpIdx++, pFunct++ )
@@ -291,6 +297,7 @@ void PWRLG_Task( taskParameter )
 #endif
    }
 
+#if ( RTOS_SELECTION == MQX_RTOS )
    /* Install exception handler */
    ( void )_int_install_exception_isr();
 
@@ -300,20 +307,31 @@ void PWRLG_Task( taskParameter )
    {
       ( void )_bsp_int_init( LLWU_LG_IRQInterruptIndex, LLWU_LG_ISR_PRI, LLWU_LG_ISR_SUB_PRI, ( bool )true );
    }
+#endif
 
    /* Create/start all the tasks */
-   for ( pTaskList = &MQX_template_list_last_gasp[0]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+   for ( pTaskList = &OS_template_list_last_gasp[0]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
-      if ( !( pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK ) )
+//      if ( !( pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK ) )
       {
-         taskID = _task_create( 0, pTaskList->TASK_TEMPLATE_INDEX, 0 );
-         ( void )_task_set_exception_handler( taskID, task_exception_handler );
+#if ( RTOS_SELECTION == 1 ) //( RTOS_SELECTION == MQX_RTOS )
+        taskID = _task_create( 0, pTaskList->TASK_TEMPLATE_INDEX, 0 );
+#elif (RTOS_SELECTION == FREE_RTOS)
+            /* TODO: RA6: FreeRTOS: Note: FreeRTOS need the Stack size in words */
+            if (pdPASS != xTaskCreate( pTaskList->pvTaskCode, pTaskList->pcName, pTaskList->usStackDepth/4, pTaskList->pvParameters, pTaskList->uxPriority, pTaskList->pxCreatedTask ))
+            {
+               /* TODO: RA6: Add Error Print?*/
+            }
+#endif
+//               ( void )_task_set_exception_handler( taskID, task_exception_handler );
       }
    }
-
+#if ( INCLUDE_SRFN_STACK == 1 )
    /* Start the communications stack in DEAF mode. */
    ( void )SM_StartRequest( eSM_START_DEAF, NULL );
+#endif
 
+#if 0 /* TODO: RA6: Enable this later */
    char  floatStr[PRINT_FLOAT_SIZE];
    float Vcap = ADC_Get_SC_Voltage();
    // Get HW revision letter
@@ -334,10 +352,12 @@ void PWRLG_Task( taskParameter )
    DBG_logPrintf( 'I', "Remaining time:  %ums", PWRLG_MILLISECONDS() );
    DBG_logPrintf( 'I', "CSMA Total/Last: %ums/%ums, TxFail: %u",
                      TOTAL_BACK_OFF_TIME(), CUR_BACK_OFF_TIME(), TX_FAILURES() );
-
+#endif
    if ( PWRLG_STATE_TRANSMIT == PWRLG_STATE() )   /* This should ALWAYS be the case.  */
    {
+#if ( RTOS_SELECTION == MQX_RTOS )
       OS_TICK_Get_CurrentElapsedTicks( &startTime );
+#endif
       PWRLG_STATE_SET( PWRLG_STATE_WAIT_FOR_RADIO );
 
       // Don't send last gasp messages when in ship mode, decommision mode or quiet mode.
@@ -345,10 +365,12 @@ void PWRLG_Task( taskParameter )
       {
          DBG_logPrintf( 'I', "Not ship mode" );
 
+#if ( INCLUDE_SRFN_STACK == 1 )
          /* Wait for the stack to be ready. Poll the stack manager for state change from "unknown".
             This also allows time for DTLS to determine if the session has been established.
          */
          SM_WaitForStackInitialized();
+#endif
 #if 0 /* This test is already made by the HEEP_MSG_Tx routine */
 #if ( USE_DTLS == 1 )
          uint8_t  securityMode;
@@ -428,6 +450,7 @@ void PWRLG_Task( taskParameter )
    }
 #endif
 } /*lint !e454 !e715 Arg0 not used; required by task template   */
+
 
 /***********************************************************************************************************************
 

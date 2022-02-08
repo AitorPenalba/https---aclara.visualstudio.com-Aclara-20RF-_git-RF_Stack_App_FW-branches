@@ -72,9 +72,9 @@ FSP Configuration
   Clocks
     XTAL 8000000Hz
     HOCO 20MHz
-    PLL Src: HOCO
-    PLL Div /2
-    PLL Mul x20.0
+    PLL Src: XTAL
+    PLL Div /1
+    PLL Mul x15.0
     PLL2 Disabled
     PLL2 Div /2
     PLL2 Mul x20.0
@@ -228,29 +228,29 @@ FSP Configuration
     Hooks: Use Tick Hook: Disabled
     General: Cpu Clock Hz: SystemCoreClock
     General: Tick Rate Hz: 1000
-    General: Max Priorities: 32
+    General: Max Priorities: 5
     General: Minimal Stack Size: 128
-    General: Max Task Name Len: 24
+    General: Max Task Name Len: 16
     Stats: Use Trace Facility: Disabled
     Stats: Use Stats Formatting Functions: Disabled
     General: Use 16-bit Ticks: Disabled
     General: Idle Should Yield: Enabled
     General: Use Task Notifications: Enabled
-    General: Use Mutexes: Enabled
+    General: Use Mutexes: Disabled
     General: Use Recursive Mutexes: Disabled
     General: Use Counting Semaphores: Enabled
     Hooks: Check For Stack Overflow: Disabled
     General: Queue Registry Size: 10
-    General: Use Queue Sets: Enabled
-    General: Use Time Slicing: Enabled
+    General: Use Queue Sets: Disabled
+    General: Use Time Slicing: Disabled
     General: Use Newlib Reentrant: Disabled
     General: Enable Backward Compatibility: Disabled
     General: Num Thread Local Storage Pointers: 5
     General: Stack Depth Type: uint32_t
     General: Message Buffer Length Type: size_t
     Memory Allocation: Support Static Allocation: Enabled
-    Memory Allocation: Support Dynamic Allocation: Enabled
-    Memory Allocation: Total Heap Size: 65536
+    Memory Allocation: Support Dynamic Allocation: Disabled
+    Memory Allocation: Total Heap Size: 1024
     Memory Allocation: Application Allocated Heap: Disabled
     Stats: Generate Run Time Stats: Disabled
     Timers: Use Timers: Enabled
@@ -277,7 +277,7 @@ FSP Configuration
     Optional Functions: xTaskAbortDelay() Function: Disabled
     Optional Functions: xTaskGetHandle() Function: Disabled
     Optional Functions: xTaskResumeFromISR() Function: Enabled
-    RA: Hardware Stack Monitor: Enabled
+    RA: Hardware Stack Monitor: Disabled
     Logging: Print String Function: printf(x)
     Logging: Logging Max Message Length: 192
     Logging: Logging Include Time and Task Name: Disabled

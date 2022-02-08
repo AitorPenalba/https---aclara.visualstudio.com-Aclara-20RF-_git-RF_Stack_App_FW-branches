@@ -146,7 +146,7 @@ typedef void (* TASK_FPTR)(void *);
 
 typedef struct
 {
-   uint32_t         task_template_index;  /* TODO: RA6: This should be an enum*/
+   uint32_t         TASK_TEMPLATE_INDEX;  /* TODO: RA6: This should be an enum*/
 
    TASK_FPTR        pvTaskCode;
 
