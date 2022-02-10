@@ -67,7 +67,11 @@
 #define PERSISTENT                  __no_init
 #define CLRWDT()                    WDOG_Kick()
 #define NOP()                       asm("nop")
+#if 0 /* TODO: RA6: Add later */
 #define RESET()                     { SCB_AIRCR = SCB_AIRCR_VECTKEY(0x5FA)| SCB_AIRCR_SYSRESETREQ_MASK; while(1){} }
+#else
+#define RESET()                     asm("nop")
+#endif
 #define DI()                        OS_INT_disable( )
 #define EI()                        ERROR! NOT DEFINED
 

@@ -100,7 +100,7 @@ FSP Configuration
       P003 97 GPIO - - - "Input mode" - - "ADC0: AN003" - IO - GPIO3_SI4460 
       P004 96 GPIO - - None "Input mode" - - "ADC0: AN004; IRQ: IRQ9-DS" - IO - MC_I-210+C_METER 
       P005 95 ADC0_AN005 - - - "Analog mode" - - "ADC0: AN005; IRQ: IRQ10-DS" - I - "Analog input with 3.3V Potential divider" 
-      P006 94 IRQ_IRQ11-DS - - IRQ11-DS "IRQ mode" - - "ADC0: AN006; IRQ: IRQ11-DS" - IO - /PF_METER 
+      P006 94 IRQ_IRQ11-DS - - IRQ11-DS "IRQ mode" - - "ADC0: AN006; IRQ: IRQ11-DS" PF_Meter IO - /PF_METER 
       P007 93 ADC0_AN007 - - - "Analog mode" - - "ADC0: AN007" - I - "ADC_SC0 / Super Cap Voltage" 
       P008 92 ADC0_AN008 - - - "Analog mode" - - "ADC0: AN008; IRQ: IRQ12-DS" - I - "ADC_4V0 / Analog input from potential divider P4V0" 
       P014 85 DAC120_DA0 - - - "Analog mode" - - "ADC0: AN012; DAC120: DA0" - O - VPC_Power_Control 
@@ -216,6 +216,9 @@ FSP Configuration
     Parameter Checking: Default (BSP)
     DTC on Transmission and Reception: Disabled
     10-bit slave addressing: Disabled
+    
+  Module "External IRQ (r_icu)"
+    Parameter Checking: Default (BSP)
     
   FreeRTOS
     General: Custom FreeRTOSConfig.h: 
@@ -337,4 +340,13 @@ FSP Configuration
       Timeout during SCL Low: Enabled
       Callback: NULL
       Interrupt Priority Level: Priority 12
+      
+    Instance "pf_meter External IRQ (r_icu)"
+      Name: pf_meter
+      Channel: 11
+      Trigger: Rising
+      Digital Filtering: Enabled
+      Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
+      Callback: isr_brownOut
+      Pin Interrupt Priority: Priority 1
       

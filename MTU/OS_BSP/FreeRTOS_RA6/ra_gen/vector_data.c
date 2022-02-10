@@ -12,7 +12,8 @@
             [5] = iic_master_txi_isr, /* IIC0 TXI (Transmit data empty) */
             [6] = iic_master_tei_isr, /* IIC0 TEI (Transmit end) */
             [7] = iic_master_eri_isr, /* IIC0 ERI (Transfer error) */
-            [8] = DMA0_complete_isr, /* DMAC0 INT (DMAC transfer end 0) */
+            [8] = r_icu_isr, /* ICU IRQ11 (External pin interrupt 11) */
+            [9] = DMA0_complete_isr, /* DMAC0 INT (DMAC transfer end 0) */
         };
         const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENTRIES] =
         {
@@ -24,6 +25,7 @@
             [5] = BSP_PRV_IELS_ENUM(EVENT_IIC0_TXI), /* IIC0 TXI (Transmit data empty) */
             [6] = BSP_PRV_IELS_ENUM(EVENT_IIC0_TEI), /* IIC0 TEI (Transmit end) */
             [7] = BSP_PRV_IELS_ENUM(EVENT_IIC0_ERI), /* IIC0 ERI (Transfer error) */
-            [8] = BSP_PRV_IELS_ENUM(EVENT_DMAC0_INT), /* DMAC0 INT (DMAC transfer end 0) */
+            [8] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ11), /* ICU IRQ11 (External pin interrupt 11) */
+            [9] = BSP_PRV_IELS_ENUM(EVENT_DMAC0_INT), /* DMAC0 INT (DMAC transfer end 0) */
         };
         #endif

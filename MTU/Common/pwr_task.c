@@ -27,40 +27,38 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
-#include <stdlib.h>
-#include <mqx.h>
+//#include <mqx.h>
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
-#include "pwr_restore.h"
-#include "pwr_config.h"
-#include "hmc_app.h"
-#include "mode_config.h"
-#include "time_util.h"
-#include "demand.h"
-#include "MAC.h"
-#include "PHY.h"
-#include "SM.h"
+//#include "pwr_restore.h"
+//#include "pwr_config.h"
+//#include "hmc_app.h"
+//#include "mode_config.h"
+//#include "time_util.h"
+//#include "demand.h"
+//#include "MAC.h"
+//#include "PHY.h"
+//#include "SM.h"
 #if (USE_MTLS == 1)
 #include "mtls.h"
 #endif
 #if ( USE_DTLS == 1)
 #include "dtls.h"
 #endif
-#include "radio_hal.h"
-#include "RG_MD_Handler.h"
-#include "buffer.h"
+//#include "radio_hal.h"
+//#include "RG_MD_Handler.h"
+//#include "buffer.h"
 
-#include "vbat_reg.h"
-#include "fio.h"           /* For ecc108_mqx.h" */
-#include "ecc108_mqx.h"    /* For the delay_xx functions */
-#include "EVL_event_log.h"
+//#include "vbat_reg.h"
+//#include "fio.h"           /* For ecc108_mqx.h" */
+//#include "ecc108_mqx.h"    /* For the delay_xx functions */
+//#include "EVL_event_log.h"
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
 #include "ALRM_Handler.h"    /* For the delay_xx functions */
 #endif
-#include "ID_intervaltask.h"
-#include "historyd.h"
-#include "EVL_event_log.h"
+//#include "ID_intervaltask.h"
+//#include "historyd.h"
+//#include "EVL_event_log.h"
 
 /* MACRO DEFINITIONS */
 #define POWER_DOWN_SIGNATURE ((uint64_t)0x01020304abcdef7A)
@@ -86,7 +84,9 @@ typedef struct
 /* CONSTANTS */
 
 /* FILE VARIABLE DEFINITIONS */
+#if ( FILE_IO == 1 )
 static FileHandle_t  fileHndlPowerDownCount = {0};       /* Contains the powerDown file handle information. */
+#endif
 static OS_MUTEX_Obj  PWR_Mutex;                          /* Serialize access to the power module */
 static OS_MUTEX_Obj  Embedded_Pwr_Mutex;                 /* Used to protect NV and last gasp updates at restoration */
 static OS_SEM_Obj    PWR_Sem;                            /* Used for the power down interrupt */
@@ -99,7 +99,11 @@ static OS_TICK_Struct   PWR_endTick_    = {0};
 /* Power Down Table - Define all modules that require a call-back for powering down below. */
 static exeTable_t powerDownTbl[] =
 {
+#if 0 /* TODO: RA6: Add later */
    ADC_ShutDown,
+#else
+   NULL
+#endif
 #if ( ENABLE_HMC_TASKS == 1 )
    HMC_APP_TaskPowerDown   /* Shut down the HMC application */
 #endif   /* end of ENABLE_HMC_TASKS  == 1 */
@@ -142,15 +146,15 @@ static returnStatus_t PowerFailDebounce( void );
    Reentrant Code: No
 
  **********************************************************************************************************************/
-void PWR_task( uint32_t Arg0 )
+void PWR_task( taskParameter )
 {
    returnStatus_t powerFail = eFAILURE;
 
-   DBG_logPrintf( 'I', "PWR_task starting." );
+//   DBG_logPrintf( 'I', "PWR_task starting." );
 #if 0
    ( void ) DBG_CommandLine_GetHWInfo ( 0, NULL );
 #endif
-
+#if 0 /* TODO: RA6: This is for K24 BSP */
    // Do ship mode processing if necessary.
    ShipMode();
 
@@ -163,12 +167,15 @@ void PWR_task( uint32_t Arg0 )
       ( void )_bsp_int_init( BRN_OUT_IRQIsrIndex, BRN_OUT_ISR_PRI, BRN_OUT_ISR_SUB_PRI, ( bool )true );
    }
    BRN_OUT_IRQ_EI();
+#else /*  RA6 */
+   // Add the Brown Out ISR
 
+#endif
    // Loop until receiving a valid PF_METER
    while ( eFAILURE == powerFail )
    {
       // Enable the Interrupt
-      BRN_OUT_IRQ_EI();
+//      BRN_OUT_IRQ_EI();
       ( void )OS_SEM_Pend( &PWR_Sem, OS_WAIT_FOREVER ); // Wait for power down semaphore!
       OS_SEM_Reset( &PWR_Sem );
 
@@ -183,6 +190,7 @@ void PWR_task( uint32_t Arg0 )
    /* Cancel if any LG Simulation is in progress during Real Last Gasp*/
    EVL_LGSimCancel();
 #endif
+#if 0 /* TODO: RA6: Add this later */
    /* If running from Boost regulator such as during the noise estimate switch back to the LDO to preserve the Super cap energy
       while preparing to shut down */
    if ( PWR_BOOST_IN_USE() )
@@ -192,7 +200,7 @@ void PWR_task( uint32_t Arg0 )
    }
    //Radio shutdown to ensure transmissions are disabled ASAP
    radio_hal_RadioImmediateSDN();
-
+#endif
    /* Before we can continue the power down process, we need to make sure no tasks are in the middle of updating
       critial information in NV or important system status flags tied to changes in NV such as last gasp flags.
       Lock the power mutex in the PWR_AND_EMBEDDED_PWR_MUTEX state.  This will ensure all NV writes have completed,
@@ -211,10 +219,12 @@ void PWR_task( uint32_t Arg0 )
       {
          if ( NULL != pFunct->fptr )
          {
+#if 0 /* TODO: RA6: Add later */
 _Pragma ( "calls = \
                  PWR_COMMON_CALLS \
                  PWR_HMC_CALLS \
                  " )
+#endif
             ( void )pFunct->fptr();
          }
       }
@@ -239,15 +249,17 @@ _Pragma ( "calls = \
       RESET(); /* PWR_SafeReset() not necessary */
    }
 #endif
-
+#if ( RTOS_SELECTION == MQX_RTOS )
    /* Increase the priority of the power and idle tasks. */
    ( void )OS_TASK_Set_Priority( pTskName_Pwr, 10 );
    ( void )OS_TASK_Set_Priority( pTskName_Idle, 11 );
-
+#endif
    pwrFileData.uPowerDownSignature = POWER_DOWN_SIGNATURE; // Write power down signature
 
-#if (ENABLE_LAST_GASP_TASK == 1)
+#if 1 // TODO: RA6: Replace (ENABLE_LAST_GASP_TASK == 1)
+#if ( FILE_IO == 1 )
    ( void )FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* ) &pwrFileData, ( lCnt )sizeof( pwrFileData ) );
+#endif
    /* TODO: Shouldn't Partition Flush be here instead of in PWRLG_Begin? */
    /********************************************************************/
    /*****               Next function never returns                *****/
@@ -290,7 +302,9 @@ _Pragma ( "calls = \
 void PWR_setPowerFailCount( uint32_t pwrFailCnt )
 {
    pwrFileData.uPowerDownCount = ( uint16_t )pwrFailCnt;
+#if ( FILE_IO == 1 ) /* TODO: RA6: */
    ( void )FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* )&pwrFileData, ( lCnt )sizeof( pwrFileData ) );
+#endif
 }
 
 /***********************************************************************************************************************
@@ -311,7 +325,9 @@ void PWR_setPowerFailCount( uint32_t pwrFailCnt )
 void PWR_setOutageTime( sysTimeCombined_t outageTime )
 {
    pwrFileData.outageTime = outageTime;
+#if ( FILE_IO == 1 ) /* TODO: RA6: */
    ( void )FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* )&pwrFileData, ( lCnt )sizeof( pwrFileData ) );
+#endif
 }
 
 /***********************************************************************************************************************
@@ -354,7 +370,9 @@ void PWR_setSpuriousResetCnt( uint32_t spurCount )
 {
    /*lint !e578 argument name same as enum is OK   */
    pwrFileData.uSpuriousResets = ( uint16_t )spurCount;
+#if ( FILE_IO == 1 ) /* TODO: RA6: */
    ( void )FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* )&pwrFileData, ( lCnt )sizeof( pwrFileData ) );
+#endif
 }
 
 /***********************************************************************************************************************
@@ -455,6 +473,7 @@ void PWR_setWatchDogResetCnt( uint16_t Count )
  **********************************************************************************************************************/
 returnStatus_t PWR_TSK_init( void )
 {
+#if 0 /* TODO: RA6: Add later */
    char                 dt[25];              /* time, in human readable format. */
    TIMESTAMP_t          t;                   /* Holds times to be printed  */
    returnStatus_t       retVal = eFAILURE;
@@ -535,7 +554,9 @@ returnStatus_t PWR_TSK_init( void )
          }
       }
    }
-
+#else
+   returnStatus_t       retVal = eSUCCESS;
+#endif
    return( retVal );
 }
 
@@ -691,7 +712,9 @@ void PWR_unlockMutex( enum_PwrMutexState_t reqMutexState )
  **********************************************************************************************************************/
 returnStatus_t PWR_waitForStablePower( void )
 {
+#if 0 /* TODO: RA6: Add later */
    BRN_OUT_TRIS();
+#endif
    PowerGoodDebounce();
 
    return( eSUCCESS );
@@ -714,8 +737,10 @@ returnStatus_t PWR_waitForStablePower( void )
  **********************************************************************************************************************/
 returnStatus_t PWR_powerUp( void )
 {
+#if 0 /* TODO: RA6: Add later */
    /* Read the Reset Status Register to find the cause of the previous restart */
    rstReason_ = BSP_Get_ResetStatus();
+#endif
    return( eSUCCESS );
 }
 
@@ -756,6 +781,7 @@ uint16_t PWR_getResetCause( void )
  **********************************************************************************************************************/
 returnStatus_t PWR_printResetCause( void )
 {
+#if 0 /* TODO: RA6: Add later */
    /* Save the reason we went through the reset vector */
    if ( ( rstReason_ & RESET_SOURCE_POWER_ON_RESET ) != 0 )
    {
@@ -805,6 +831,7 @@ returnStatus_t PWR_printResetCause( void )
    {
       DBG_logPrintf( 'I', "Last Reset was JTAG Reset" );
    } /* end if() */
+#endif
    return( eSUCCESS );
 }
 
@@ -866,7 +893,9 @@ returnStatus_t PWR_getPowerAnomalyCount( uint32_t *pValue )
 void PWR_resetCounters( void )
 {
    ( void )memset( ( uint8_t * )&pwrFileData, 0, sizeof( pwrFileData ) );
+#if 0 /* TODO: RA6: Add later */
    VBATREG_PWR_QUAL_COUNT = 0;
+#endif
 }
 
 /***********************************************************************************************************************
@@ -895,15 +924,19 @@ void PWR_SafeReset( void )
    PWR_lockMutex( PWR_AND_EMBEDDED_PWR_MUTEX );
    pwrFileData.uPowerDownSignature  = 0;  /* Clear power down signature */
    pwrFileData.outageTime           = 0;
+#if 0 /* TODO: RA6: Add later */
    VBATREG_PWR_QUAL_COUNT           = 0;  /* Clear the RAM based power quality count.      */
+#endif
+#if ( FILE_IO == 1 ) /* TODO: RA6: */
    ( void )FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* ) &pwrFileData, ( lCnt )sizeof( pwrFileData ) );
    /* Flush all partitions (only cached actually flushed) and ensures all pending writes are completed */
    ( void )PAR_partitionFptr.parFlush( NULL );
    PWRLG_SOFTWARE_RESET_SET( 1 ); // TODO 2016-02-02 SMG Change to call into PWRLG
    PWRLG_TIME_OUTAGE_SET( 0 );   /* Clear the time of the last outage.  */
+#endif
    RESET();
 }
-
+#if 0 // TODO: RA6 : DG
 /***********************************************************************************************************************
 
    Function Name: isr_brownOut
@@ -921,14 +954,16 @@ void PWR_SafeReset( void )
  **********************************************************************************************************************/
 void isr_brownOut( void )
 {
+#if 0 /* TODO: RA6: K24 Specific */
    BRN_OUT_IRQ_DI();        /* Disable the ISR */
+#endif
 #if ( SIMULATE_POWER_DOWN == 1 )
    /* Adding a semaphore to keep the ISR as short as possible */
    OS_SEM_Post( &PWR_SimulatePowerDn_Sem ); /* Post the semaphore */
 #endif
    OS_SEM_Post( &PWR_Sem ); /* Post the semaphore */
 }
-
+#endif
 /***********************************************************************************************************************
 
    Function Name: PWR_getpwrFileData
@@ -969,18 +1004,19 @@ pwrFileData_t const *  PWR_getpwrFileData( void )
  **********************************************************************************************************************/
 static void ShipMode( void )
 {
+#if 0 /* TODO: RA6: Add later */
    uint8_t meterShopModeValue = MODECFG_get_decommission_mode();
    uint8_t shipModeValue = MODECFG_get_ship_mode();
 
    if( ( meterShopModeValue > 0 )  || ( shipModeValue > 0 ) )
    {
       DBG_logPrintf('I', "PWR_task: MeterShopMode/ShipMode Set, Performing Initialization.");
-
+#if ( INCLUDE_SRFN_STACK == 1 )
       /* Wait for stack to init */
       SM_WaitForStackInitialized();
       /* Force a new registration. */
       APP_MSG_ReEnableRegistration();
-
+#endif
       if( shipModeValue > 0 ) /* if shipmode > 0, reset powerAnamolyCount #128 */
       {
          /* Reset blink counter when ship mode detected. */
@@ -996,7 +1032,7 @@ static void ShipMode( void )
 
          /* Clear the installation date and time. */
          TIME_SYS_SetInstallationDateTime( 0 );
-
+#if ( INCLUDE_SRFN_STACK == 1 )
          /* Clear network statistics. */
          (void)NWK_ResetRequest( eNWK_RESET_STATISTICS, NULL );
          (void)MAC_ResetRequest( eMAC_RESET_STATISTICS, NULL );
@@ -1009,7 +1045,7 @@ static void ShipMode( void )
 #if (USE_DTLS == 1)
          DTLS_Stats( ( bool ) true); /*resets DTLS Stats*/
 #endif
-
+#endif
          PWR_resetCounters(); /*reset all PWR counters*/
          rstReason_ = 0;      /*clear last reset reason*/
 #if 0 /* mkv 7/8/20 - These stats are cleared during BM_init. Clearing them at this time causes buffer allocation errors and eventually a fault
@@ -1027,13 +1063,16 @@ static void ShipMode( void )
 #endif
          HD_clearHistoricalData();
 #endif   /* end of ENABLE_HMC_TASKS  == 1 */
+#if 0 /* TODO: RA6: Add later */
          EVL_clearEventLog();
+#endif
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
          ( void )ALRM_clearAllAlarms ();
 #endif
          PWRLG_RestLastGaspFlags(); // coming out of shipmode or decommision mode, clear the last gasp flags
       }
 
+#if 0 /* TODO: RA6: Add later */
       /* Clear the Meter Shop Mode if necessary */
       if( meterShopModeValue != 0 )
       {
@@ -1045,8 +1084,9 @@ static void ShipMode( void )
       {
          (void)MODECFG_set_ship_mode( (uint8_t)0 );
       }
-
+#endif
    }
+#endif //#if 0
 }
 
 /***********************************************************************************************************************
@@ -1067,6 +1107,7 @@ static void ShipMode( void )
  **********************************************************************************************************************/
 static void PowerGoodDebounce( void )
 {
+#if 0 /* TODO: RA6: Add later */
    uint16_t debounceCount;
 
    debounceCount = 0;
@@ -1085,6 +1126,7 @@ static void PowerGoodDebounce( void )
          ++debounceCount;
       }
    }
+#endif
    return;
 }
 
@@ -1110,7 +1152,7 @@ static returnStatus_t PowerFailDebounce( void )
 
    debounceCount = 0;
    brownOut       = eSUCCESS;
-
+#if 0 /* TODO: RA6: Add later */
    // Make sure BRN_OUT asserted for 1ms.
    while ( ( eSUCCESS == brownOut ) && ( debounceCount < DEBOUNCE_CNT_RST_VAL ) )
    {
@@ -1124,6 +1166,7 @@ static returnStatus_t PowerFailDebounce( void )
          brownOut = eFAILURE;
       }
    }
+#endif
    return ( brownOut );
 }
 #if ( EP == 1 )

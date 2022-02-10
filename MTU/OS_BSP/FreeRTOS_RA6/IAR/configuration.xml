@@ -309,12 +309,22 @@
       <property id="module.driver.i2c_master.p_callback" value="NULL"/>
       <property id="module.driver.i2c_master.ipl" value="board.icu.common.irq.priority12"/>
     </module>
+    <module id="module.driver.external_irq_on_icu.555408435">
+      <property id="module.driver.external_irq.name" value="pf_meter"/>
+      <property id="module.driver.external_irq.channel" value="11"/>
+      <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_rising"/>
+      <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.true"/>
+      <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
+      <property id="module.driver.external_irq.p_callback" value="isr_brownOut"/>
+      <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority1"/>
+    </module>
     <context id="_hal.0">
       <stack module="module.driver.ioport_on_ioport.0"/>
       <stack module="module.middleware.rm_freertos_port.0"/>
       <stack module="module.driver.uart_on_sci_uart.795696210"/>
       <stack module="module.driver.crc_on_crc.351022434"/>
       <stack module="module.driver.i2c_on_iic_master.1500010294"/>
+      <stack module="module.driver.external_irq_on_icu.555408435"/>
     </context>
     <config id="config.driver.wdt">
       <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>
@@ -403,6 +413,7 @@
     </config>
   </raModuleConfiguration>
   <raPinConfiguration>
+    <comment propertyId="p006.comment" value="PF_Meter"/>
     <pincfg active="true" name="I-210+c_RA6" selected="true" symbol="g_bsp_pin_cfg">
       <configSetting altId="adc0.an005.p005" configurationId="adc0.an005"/>
       <configSetting altId="adc0.an007.p007" configurationId="adc0.an007"/>

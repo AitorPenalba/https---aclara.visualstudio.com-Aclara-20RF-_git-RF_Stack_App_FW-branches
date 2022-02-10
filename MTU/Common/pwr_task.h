@@ -25,8 +25,8 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-#include "time_util.h"
-#include "HEEP_util.h"
+//#include "time_util.h"
+//#include "HEEP_util.h"
 #if ( SIMULATE_POWER_DOWN == 1 )
 #include "DBG_CommandLine.h"
 #endif
@@ -41,7 +41,12 @@ extern OS_SEM_Obj    PWR_SimulatePowerDn_Sem;           /* Used for the simulati
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
+/* TODO: RA6: Remove it from this module */
+typedef uint64_t  sysTimeCombined_t;                          /*!< Time format in combined date/time format. */
+
+#if ( RTOS_SELECTION == MQX_RTOS )
 typedef void ( *vFPtr_strct )( OS_TASK_id );
+#endif
 
 PACK_BEGIN
 typedef struct
@@ -90,9 +95,8 @@ typedef enum
    @param  uint32_t Arg0
    @return None
 */
-#ifdef __mqx_h__
-void PWR_task( uint32_t Arg0 );
-#endif /* __mqx_h__ */
+
+void PWR_task( taskParameter );
 
 /*
    PWR_TSK_init - Create resources and open file
@@ -245,9 +249,11 @@ void PWR_setWatchDogResetCnt( uint16_t count );
    @param  uint32_t
    @return None
 */
+#if 0 /* TODO: RA6: Add later */
 void                    PWR_setOutageTime( sysTimeCombined_t outageTime );
 sysTimeCombined_t       PWR_getOutageTime( void );
 pwrFileData_t const *   PWR_getpwrFileData( void );
 extern returnStatus_t   PWR_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 void                    PWR_resetCounters( void );
+#endif
 #endif

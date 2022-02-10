@@ -23,6 +23,13 @@
 #include <stdio.h>
 
 extern bsp_leds_t g_bsp_leds;
+#if 1
+extern icu_instance_ctrl_t g_sw1_irq1_ctrl;
+extern icu_instance_ctrl_t pf_meter_ctrl;
+static uint8_t button_pressed = false;
+
+SemaphoreHandle_t new_Sem;
+#endif
 
 /**********************************************************************************************************************
  * @brief       This function initializes and enables the ICU module for User Push Button Switch.
@@ -39,17 +46,54 @@ fsp_err_t user_switch_init(void)
     if(FSP_SUCCESS == err)
     {
     	/* Enable ICU module */
+       printf("\nOpen IRQ");
     	err = R_ICU_ExternalIrqEnable(&g_sw1_irq1_ctrl);
+      if(FSP_SUCCESS != err)
+         printf("\nFailed:IRQEnable");
     }
     return err;
 }
+
+fsp_err_t pf_meter_isr_init(void)
+{
+    fsp_err_t err = FSP_SUCCESS;
+
+    /* Open external IRQ/ICU module */
+    err = R_ICU_ExternalIrqOpen(&pf_meter_ctrl, &pf_meter_cfg);
+    if(FSP_SUCCESS == err)
+    {
+    	/* Enable ICU module */
+       printf("\nOpen PF Meter IRQ");
+    	err = R_ICU_ExternalIrqEnable(&pf_meter_ctrl);
+      if(FSP_SUCCESS != err)
+         printf("\nFailed:IRQEnable");
+    }
+    return err;
+}
+
 /* Blinky Thread entry function */
 void blinky_thread_entry (void * pvParameters)
 {
+    FSP_PARAMETER_NOT_USED(pvParameters);
+#if 1
+    fsp_err_t err = FSP_SUCCESS;
 
-   FSP_PARAMETER_NOT_USED(pvParameters);
-   printf("Test\n");
+    vSemaphoreCreateBinary(new_Sem);
+        /* Initialize External IRQ driver/user push-button. User Push buttons are used for user input event */
+//    err = user_switch_init();
+    /* Handle error */
+    if(FSP_SUCCESS != err)
+    {
+       printf("\r\n User Push Button IRQ  Initialization Failed \r\n");
+    }
 
+    err = pf_meter_isr_init();
+    /* Handle error */
+    if(FSP_SUCCESS != err)
+    {
+       printf("\r\n PF METER IRQ  Initialization Failed \r\n");
+    }
+#endif
     /* LED type structure */
     bsp_leds_t leds = g_bsp_leds;
 
@@ -64,6 +108,13 @@ void blinky_thread_entry (void * pvParameters)
 
     /* Holds level to set for pins */
     bsp_io_level_t pin_level = BSP_IO_LEVEL_LOW;
+    if( pdPASS != xSemaphoreTake(new_Sem, portMAX_DELAY) )
+    {
+       printf("\n Failed to Take the Sem");
+    }
+    else
+    {
+       printf("\nSuccess");
 
     while (1)
     {
@@ -95,7 +146,28 @@ void blinky_thread_entry (void * pvParameters)
         {
             pin_level = BSP_IO_LEVEL_LOW;
         }
+        if(button_pressed)
+        {
+           printf("Button Pressed");
+           button_pressed = false;
+        }
 
         vTaskDelay(configTICK_RATE_HZ);
     }
+    }
+}
+
+void sw1_irq_Handler(external_irq_callback_args_t * p_args)
+{
+   (void)p_args;
+   button_pressed = true;
+   xSemaphoreGiveFromISR(new_Sem, NULL);
+}
+void isr_brownOut(external_irq_callback_args_t * p_args)
+{
+   (void)p_args;
+   button_pressed = true;
+   printf("ISR_PF_METER");
+   xSemaphoreGiveFromISR(new_Sem, NULL);
+
 }

@@ -1,11 +1,40 @@
 /* generated HAL source file - do not edit */
 #include "hal_data.h"
+icu_instance_ctrl_t pf_meter_ctrl;
+const external_irq_cfg_t pf_meter_cfg =
+{
+    .channel             = 11,
+    .trigger             = EXTERNAL_IRQ_TRIG_BOTH_EDGE,
+    .filter_enable       = true,
+    .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
+    .p_callback          = isr_brownOut,
+    /** If NULL then do not add & */
+#if defined(NULL)
+    .p_context           = NULL,
+#else
+    .p_context           = &NULL,
+#endif
+    .p_extend            = NULL,
+    .ipl                 = (1),
+#if defined(VECTOR_NUMBER_ICU_IRQ11)
+    .irq                 = VECTOR_NUMBER_ICU_IRQ11,
+#else
+    .irq                 = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const external_irq_instance_t pf_meter =
+{
+    .p_ctrl        = &pf_meter_ctrl,
+    .p_cfg         = &pf_meter_cfg,
+    .p_api         = &g_external_irq_on_icu
+};
 iic_master_instance_ctrl_t g_i2c_master0_ctrl;
 const iic_master_extended_cfg_t g_i2c_master0_extend =
 {
     .timeout_mode             = IIC_MASTER_TIMEOUT_MODE_SHORT,
     .timeout_scl_low          = IIC_MASTER_TIMEOUT_SCL_LOW_ENABLED,
-    /* Actual calculated bitrate: 1000000. Actual calculated duty cycle: 50%. */ .clock_settings.brl_value = 15, .clock_settings.brh_value = 15, .clock_settings.cks_value = 0,
+    /* Actual calculated bitrate: 993377. Actual calculated duty cycle: 52%. */ .clock_settings.brl_value = 7, .clock_settings.brh_value = 8, .clock_settings.cks_value = 0,
 };
 const i2c_master_cfg_t g_i2c_master0_cfg =
 {
@@ -77,7 +106,7 @@ sci_uart_instance_ctrl_t     g_uart0_ctrl;
 
             baud_setting_t               g_uart0_baud_setting =
             {
-                /* Baud rate calculated with 0.469% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 53, .mddr = (uint8_t) 256, .brme = false
+                /* Baud rate calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */
