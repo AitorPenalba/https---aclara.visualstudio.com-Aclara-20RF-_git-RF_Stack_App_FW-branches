@@ -45,11 +45,24 @@ void * gp_renesas_isr_context[BSP_ICU_VECTOR_MAX_ENTRIES];
 /***********************************************************************************************************************
  * Private global variables and functions
  **********************************************************************************************************************/
+/* When compiling a Product Specific RA6 project, there was an issue using WEAK references when importing the
+   WEAK reference from a seperate library.  In this case, the FREE_RTOS library.  The compiler appears to not
+   utilize the WEAK reference within the library, causing the the "g_interrupt_event_link_select" variable to be
+   initialized here within this module. Instead, the variable should be getting initialized by the definition
+   contained in vector_data.c.  If the definition from vector_data.c is not used, the interrupts references
+   contained within "g_interrupt_event_link_select" are left uninitialized preventing the ISR's from firing.
+   For now, add a conditional compile around the defaul RTOS setup, and add the change that fixes the issue
+   as an else to the conditional.  TODO: There may be other areas that could attempt to use other WEAK
+   references within FREERTOS.  Once we have determined these other references, we can possible create a
+   feature conditional/option to not use the WEAK references when utilizing the RTOS as a library. */
+#if 0
 const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENTRIES] BSP_WEAK_REFERENCE =
 {
     (bsp_interrupt_event_t) 0
 };
-
+#else
+extern const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENTRIES];
+#endif
 /*******************************************************************************************************************//**
  * @addtogroup BSP_MCU
  *

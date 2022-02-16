@@ -194,7 +194,6 @@ FSP Configuration
       XCOUT 11 SYSTEM_XCOUT - - - - - - - - IO "Read only" "8 MHz Crystal" 
     
   User Events
-    DMAC0 INT (DMAC transfer end 0): DMA0_complete_isr
     
   User Event Links
     IOPORT EVENT 1 (Port 1 event): GPT (B)

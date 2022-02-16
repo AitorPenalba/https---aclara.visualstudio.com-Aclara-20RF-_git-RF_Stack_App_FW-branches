@@ -250,9 +250,7 @@
   <raElcConfiguration>
     <eventConsumed event="event.ioport.event.1" link="link.gptb"/>
   </raElcConfiguration>
-  <raIcuConfiguration>
-    <interrupt event="event.dmac0.int" isr="DMA0_complete_isr"/>
-  </raIcuConfiguration>
+  <raIcuConfiguration/>
   <raModuleConfiguration>
     <module id="module.driver.ioport_on_ioport.0">
       <property id="module.driver.ioport.name" value="g_ioport"/>
