@@ -1467,6 +1467,12 @@
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_dmac_cfg.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_dtc_cfg.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_elc_cfg.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_flash_hp_cfg.h</name>
             </file>
             <file>
@@ -1501,6 +1507,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_sci_uart_cfg.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_spi_cfg.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_wdt_cfg.h</name>
@@ -1655,6 +1664,18 @@
                     <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_dmac.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\src\r_dtc\r_dtc.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_dtc.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\src\r_elc\r_elc.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_elc.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_elc_api.h</name>
                 </file>
                 <file>
@@ -1758,6 +1779,12 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_sci_uart.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\src\r_spi\r_spi.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_spi.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_spi_api.h</name>
