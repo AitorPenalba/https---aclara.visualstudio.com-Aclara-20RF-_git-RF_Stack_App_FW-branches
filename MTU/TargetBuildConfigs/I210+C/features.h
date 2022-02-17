@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2016 Aclara.  All Rights Reserved.
+ * Copyright 2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -96,5 +96,9 @@
 #define TM_MUTEX                          0
 #define TM_SEMAPHORE                      0
 #define INCLUDE_SRFN_STACK                0 /* This is a conditional compilation for initial dev purpose only */
-
+// TODO: RA6 [name_Balaji]: Move to Appropriate location
+#define NXP_K24                           1
+#define RA6E1                             2
+#define MCU_SELECTED                      RA6E1
+#define TM_RTC_UNIT_TEST                  1
 #endif

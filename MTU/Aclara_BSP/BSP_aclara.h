@@ -7,7 +7,7 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2020 ACLARA.  All rights reserved.
+ * Copyright (c) 2022 ACLARA.  All rights reserved.
  * This program may not be reproduced, in whole or in part, in any form or by
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
@@ -16,10 +16,15 @@
 #define BSP_aclara_H
 
 /* INCLUDE FILES */
+#if ( MCU_SELECTED == 1 )//( MCU_SELECTED == NXP_K24 ) // TODO: RA6 [name_Balaji]:Compiler is not detecting NXP_K24 here alone, error is generated
 #ifndef __BOOTLOADER
 #include "user_config.h"
 #include "psp_cpudef.h"
 #endif   /* BOOTLOADER  */
+#elif ( MCU_SELECTED == RA6E1 )
+#include "r_rtc.h"
+#include "r_rtc_api.h"
+#endif
 
 /* #DEFINE DEFINITIONS */
 #undef NULL
@@ -144,6 +149,18 @@ typedef enum
    MANUAL_RED                       /* LED is currently in manual control */
 }enum_RedLedStatus_t;
 
+#if (RTOS_SELECTION == FREE_RTOS) /* TODO: Remove this struct as this is mqx structure. For now added for successful compilation */
+typedef struct time_struct
+{
+
+/*! \brief The number of seconds in the time. */
+uint32_t SECONDS;
+
+/*! \brief The number of milliseconds in the time. */
+uint32_t MILLISECONDS;
+
+} TIME_STRUCT, * TIME_STRUCT_PTR;
+#endif
 /* CONSTANTS */
 
 /* KTL - 16 byte key: "ultrapassword123" - This is temporary and will change to an external key later */
@@ -201,6 +218,15 @@ extern bool        RTC_SetDateTime           ( const sysTime_dateFormat_t *RT_Cl
 extern bool        RTC_Valid                 ( void );
 extern void        RTC_GetTimeAtRes          ( TIME_STRUCT *ptime, uint16_t fractRes );
 extern void        RTC_GetTimeInSecMicroSec  ( uint32_t *sec, uint32_t *microSec );
+#if ( MCU_SELECTED == NXP_K24 )
+  
+#elif ( MCU_SELECTED == RA6E1 )
+extern returnStatus_t RTC_init( void );
+extern bool RTC_SetAlarmTime ( rtc_alarm_time_t * const p_alarm );
+extern void RTC_GetAlarmTime ( rtc_alarm_time_t * const p_alarm );
+extern void RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg );
+extern void rtc_callback(rtc_callback_args_t *p_args);
+#endif
 
 extern uint32_t    UART_write                ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
 extern uint32_t    UART_read                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength );

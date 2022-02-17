@@ -101,7 +101,7 @@ void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 #endif
    {
       /* TODO: */
-      APP_ERR_PRINT("OS_SEM_POST!");
+//      APP_ERR_PRINT("OS_SEM_POST!");
 //      EVL_FirmwareError( "OS_SEM_Post" , file, line );
    }
 } /* end OS_SEM_Post () */
@@ -175,7 +175,7 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
       {
          FuncStatus = false;
          /* TODO: Add Print */
-         APP_ERR_PRINT("OS_SEM_PEND!");
+//         APP_ERR_PRINT("OS_SEM_PEND!");
 //         if ( RetStatus == MQX_INVALID_LWSEM ) {
 //         EVL_FirmwareError( "OS_SEM_Pend" , file, line );
 //      }
@@ -230,7 +230,7 @@ void OS_SEM_TestCreate ( void )
    else
    {
       counter++;
-      APP_ERR_PRINT("Unable to Create the Mutex!");
+//      APP_ERR_PRINT("Unable to Create the Mutex!");
    }
 
 }
@@ -245,11 +245,11 @@ bool OS_SEM_TestPend( void )
 
    if( 0 == counter )
    {
-      APP_PRINT("Success");
+//      APP_PRINT("Success");
    }
    else
    {
-      APP_ERR_PRINT("Fail");
+//      APP_ERR_PRINT("Fail");
    }
    return(retVal);
 }

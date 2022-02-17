@@ -7,7 +7,7 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2012 ACLARA.  All rights reserved.
+ * Copyright (c) 2022 ACLARA.  All rights reserved.
  * This program may not be reproduced, in whole or in part, in any form or by
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
@@ -16,25 +16,76 @@
 /* INCLUDE FILES */
 #include <stdint.h>
 #include <stdbool.h>
-#include <mqx.h>
-#include <bsp.h>
-#include <rtc.h>
+#if ( RTOS_SELECTION == 1 ) //( RTOS_SELECTION == MQX_RTOS )
+  #include <mqx.h>
+  #include <bsp.h>
+  #include <rtc.h>
+#elif ( RTOS_SELECTION == FREE_RTOS )
+  #include "hal_data.h"
+#endif
 #include "BSP_aclara.h"
 #include "vbat_reg.h"
 
-/* #DEFINE DEFINITIONS */
+/* #DEFINE DEFINITIONS */ 
+#if ( MCU_SELECTED == RA6E1 )
+// TODO: RA6 [name_Balaji]: Move to vbat_reg.h 
+#define VBATREG_RTC_VALID                R_SYSTEM->VBTBKR[0] //0x4001_E500
+#define VBTBER_RTC_ACCESS                R_SYSTEM->VBTBER 
+#endif
 
 /* MACRO DEFINITIONS */
-
+/* Flags used for Alarm Interrupts */
+#define SET_FLAG                             1
+#define RESET_FLAG                           0
 /* TYPE DEFINITIONS */
 
 /* CONSTANTS */
 
 /* FILE VARIABLE DEFINITIONS */
-
+#if ( MCU_SELECTED == RA6E1 )
+volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrence of alarm interrupt
+#endif
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
+/*******************************************************************************
+
+  Function name: accessBackupRegister
+
+  Purpose: This function will Enable the write access to VBTBKR register
+
+  Arguments: void
+
+  Returns: void
+
+*******************************************************************************/
+static void accessBackupRegister( void )
+{
+  VBTBER_RTC_ACCESS = 1; // TODO: RA6 [name_Balaji]: Need to disable the Register Protection before we write to the protected registers
+}/* end accessBackupRegister () */
+/*******************************************************************************
+
+  Function name: RTC_Init
+
+  Purpose: This function will Initialise the Real Time Clock peripheral
+
+  Arguments: void
+
+  Returns: void
+
+*******************************************************************************/
+returnStatus_t RTC_init( void )
+{
+   returnStatus_t retVal = eFAILURE;
+   fsp_err_t err = FSP_SUCCESS;
+   err = R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );
+   assert(FSP_SUCCESS == err);// TODO: RA6 [name_Balaji]:Remove all assert and add Debug prints if Failed
+   retVal = eSUCCESS;
+#if ( TM_RTC_UNIT_TEST == 1 )
+//   RTC_UnitTest(); //TODO: Enable to test RTC
+#endif
+   return( retVal ); 
+} /* end RTC_init () */
 
 /*******************************************************************************
 
@@ -52,6 +103,7 @@
 *******************************************************************************/
 void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    DATE_STRUCT RTC_Time;
    TIME_STRUCT currentTime = { 0 };
 
@@ -67,6 +119,20 @@ void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
    RT_Clock->sec   = (uint8_t)RTC_Time.SECOND;
    RTC_Time.MILLISEC += (int16_t)SYS_TIME_TICK_IN_mS/2;  //Round up
    RT_Clock->msec  = (uint16_t)( ((uint16_t)RTC_Time.MILLISEC / SYS_TIME_TICK_IN_mS) * SYS_TIME_TICK_IN_mS ); //Normalize
+#elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err = FSP_SUCCESS;
+   rtc_time_t pTime;
+   err = R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &pTime );
+   RT_Clock->month = (uint8_t)pTime.tm_mon;
+   RT_Clock->day   = (uint8_t)pTime.tm_mday;
+   RT_Clock->year  = (uint16_t)pTime.tm_year;
+   RT_Clock->hour  = (uint8_t)pTime.tm_hour;
+   RT_Clock->min   = (uint8_t)pTime.tm_min;
+   RT_Clock->sec   = (uint8_t)pTime.tm_sec;
+// TODO: RA6 [name_Balaji]:Check the Usage of RT_Clock->msec
+   assert(FSP_SUCCESS == err);
+#endif
+
 } /* end RTC_GetDateTime () */
 
 /*******************************************************************************
@@ -85,7 +151,8 @@ void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
 *******************************************************************************/
 bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
 {
-   bool FuncStatus = true;
+#if ( MCU_SELECTED == NXP_K24 )
+     bool FuncStatus = true;
    DATE_STRUCT mqxDate;    /* Used to convert requested date/time to seconds/milliseconds*/
    TIME_STRUCT mqxTime;    /* Converted date/time sent to set RTC time func.  */
 
@@ -115,7 +182,7 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
       _time_set( &mqxTime );
 
       if (0 == mqxTime.SECONDS)
-      {
+      {  
          VBATREG_RTC_VALID = 0;
       }
       else
@@ -131,6 +198,32 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
    } /* end else() */
 
    return ( FuncStatus );
+#elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err = FSP_SUCCESS;
+   rtc_time_t getsec;
+   rtc_time_t pTime;
+   pTime.tm_sec = RT_Clock->sec;
+   pTime.tm_mon = RT_Clock->month;
+   pTime.tm_mday = RT_Clock->day;
+   pTime.tm_year = (int16_t)RT_Clock->year;
+   pTime.tm_hour = RT_Clock->hour;
+   pTime.tm_min   = RT_Clock->min;
+   // TODO: RA6 [name_Balaji]:Set Millisec to zero
+   err = R_RTC_CalendarTimeSet( &g_rtc0_ctrl, &pTime );
+   assert(FSP_SUCCESS == err);
+   getsec = pTime;
+   if( 0 == getsec.tm_sec)
+   {
+    accessBackupRegister(); 
+    VBATREG_RTC_VALID = 0; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
+   }/* end if() */
+   else
+   {
+    accessBackupRegister();
+    VBATREG_RTC_VALID = 1; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
+   }/* end else() */
+   return true;
+#endif
 } /* end RTC_SetDateTime () */
 
 /*******************************************************************************
@@ -151,7 +244,7 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
 *******************************************************************************/
 bool RTC_Valid(void)
 {
-   bool bRTCValid = false;
+  bool bRTCValid = false;
 
    if (1 == VBATREG_RTC_VALID)
    {
@@ -178,6 +271,7 @@ bool RTC_Valid(void)
 *******************************************************************************/
 void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    uint32_t       seconds;
    uint16_t       fractSeconds;
    RTC_MemMapPtr  rtc;
@@ -197,7 +291,9 @@ void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
       ptime->SECONDS      = seconds;
       ptime->MILLISECONDS = ( ( (uint32_t)fractSeconds * (uint32_t)1000 / (uint32_t)fractRes ) / 32768 ) * fractRes;
    }
-   return;
+   return;  
+#endif
+   
 } /* end RTC_GetDateTime () */
 
 
@@ -218,6 +314,7 @@ void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
 *******************************************************************************/
 void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    uint32_t       seconds;
    uint64_t       fractSeconds;
    RTC_MemMapPtr  rtc;
@@ -236,5 +333,103 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
    *microSec = (uint32_t)((fractSeconds * 1000000) / 32768);
 
    return;
-}
+#elif ( MCU_SELECTED == RA6E1 )
+    rtc_time_t getSecTime;
+    R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &getSecTime );
+    *sec = getSecTime.tm_sec;
+    rtc_instance_ctrl_t * p_instance_ctrl = ( rtc_instance_ctrl_t * ) &g_rtc0_ctrl;
+    uint8_t milliSecGet;
+    //Disable the NVIC carry interrupt request
+    NVIC_DisableIRQ( p_instance_ctrl->p_cfg->carry_irq );
+    //Enable the RTC carry interrupt request
+    R_BSP_IrqEnable( p_instance_ctrl->p_cfg->carry_irq );
 
+    /* If a carry occurs while the 64-Hz counter and time are being read, the correct time is not obtained,
+     * therefore they must be read again. 23.3.5 "Reading 64-Hz Counter and Time" of the RA6E1 manual R01UH0886EJ0100)*/
+    do
+    {
+        p_instance_ctrl->carry_isr_triggered = false; /** This flag will be set to 'true' in the carry ISR */
+        milliSecGet = (int8_t) R_RTC->R64CNT;
+        *microSec = ( (milliSecGet)*1000000 )/128;
+    } while ( p_instance_ctrl->carry_isr_triggered );
+    //TODO Add NVIC Enable
+#endif
+   
+}/* end RTC_GetTimeInSecMicroSec () */
+
+/*******************************************************************************
+
+  Function name: RTC_SetAlarmTime
+
+  Purpose: Sets the Alarm Time
+
+  Arguments: pAlarm - structure that contains the Real Time Clock Alarm 
+             configuration
+
+  Returns: None
+
+*******************************************************************************/
+bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm ){
+  fsp_err_t err = FSP_SUCCESS;
+  err = R_RTC_CalendarAlarmSet( &g_rtc0_ctrl, pAlarm );
+  assert( FSP_SUCCESS == err );
+  return true;
+}/* end RTC_SetAlarmTime () */
+
+/*******************************************************************************
+
+  Function name: RTC_GetAlarmTime
+
+  Purpose: Gets the current Alarm Time
+
+  Arguments: pAlarm - structure that contains the Real Time Clock Alarm 
+             configuration
+
+  Returns: None
+
+*******************************************************************************/
+void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm ){
+  fsp_err_t err = FSP_SUCCESS;
+  err = R_RTC_CalendarAlarmGet( &g_rtc0_ctrl, pAlarm );
+  assert( FSP_SUCCESS == err );
+}/* end RTC_GetAlarmTime () */
+
+/*******************************************************************************
+
+  Function name: RTC_ErrorAdjustmentSet
+
+  Purpose: RTC Error adjustment
+
+  Arguments: erradjcfg - structure that contains the Real Time Clock error 
+             adjustment configuration
+
+  Returns: None
+
+*******************************************************************************/
+void RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg ){
+  fsp_err_t err = FSP_SUCCESS;
+  R_RTC_ErrorAdjustmentSet( &g_rtc0_ctrl, erradjcfg );
+  assert( FSP_SUCCESS == err );
+}/* end RTC_ErrorAdjustmentSet () */
+
+
+/*******************************************************************************
+
+  Function name: rtc_callback
+
+  Purpose: Interrupt Handler for RTC Module
+
+  Arguments: rtc_callback_args_t *p_args
+
+  Returns: None
+
+  Notes: Used for Alarm Interrupt.
+
+*******************************************************************************/
+void rtc_callback( rtc_callback_args_t *p_args )
+{
+    if( RTC_EVENT_ALARM_IRQ == p_args->event )
+    {
+        g_alarm_irq_flag = SET_FLAG; //Alarm Interrupt occured
+    }/* end if */
+}/* end rtc_callback () */

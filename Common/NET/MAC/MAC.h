@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2014-2021 Aclara.  All Rights Reserved.
+ * Copyright 2014-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -173,9 +173,9 @@ uint8_t NetworkId_Get(void); // Needs to be called by MAC task only
 
 void MAC_MacAddress_Get(uint8_t       macAddress[MAC_ADDRESS_SIZE]);
 void MAC_MacAddress_Set(uint8_t const macAddress[MAC_ADDRESS_SIZE]);
-
+#if 0 /* TODO: Queue handle for FreeRTOS */
 returnStatus_t MAC_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
-
+#endif
 /* this function goes away once we have a MAC address in the security chip */
 /*lint -esym(578,macAddress)  */
 // This just gets the 40-bit extension address
@@ -194,8 +194,9 @@ void MAC_XID_Address_Set( xid_addr_t const *xid_addr );
 
 void MAC_SaveConfig_To_BkupRAM(void);
 void MAC_RestoreConfig_From_BkupRAM(void);
-
+#if 0 /* TODO: Queue handle for FreeRTOS */
 OS_MSGQ_Obj *MAC_GetMsgQueue(void);
+#endif
 void MAC_TimeSyncParameters_Print(void);
 bool MAC_TimeQueryReq(void);
 void MAC_Stats(void);
@@ -209,8 +210,9 @@ uint32_t MAC_PingRequest( uint16_t handle, eui_addr_t const dst_address, uint8_t
 uint16_t MAC_RandomChannel_Get(MAC_CHANNEL_SETS_e channelSets, MAC_CHANNEL_SET_INDEX_e channelSetIndex);
 bool     TxChannels_init(MAC_CHANNEL_SETS_e channelSets, MAC_CHANNEL_SET_INDEX_e channelSetIndex);
 #endif
+#if 0 /* TODO: Queue handle for FreeRTOS */
 returnStatus_t MAC_TimeSourceHandler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
-
+#endif
 
 
 typedef enum MAC_COUNTER_e

@@ -7,7 +7,7 @@
  * Contents:
  *
  ***********************************************************************************************************************
- * Copyright (c) 2012-2020 Aclara Power-Line Systems Inc.  All rights reserved.  This program may not be reproduced, in
+ * Copyright (c) 2012-2022 Aclara Power-Line Systems Inc.  All rights reserved.  This program may not be reproduced, in
  * whole or in part, in any form or by any means whatsoever without the written permission of:
  *                ACLARA POWER-LINE SYSTEMS INC.
  *                ST. LOUIS, MISSOURI USA
@@ -127,7 +127,11 @@
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
-#define DEFAULT_ATTR       (MQX_FLOATING_POINT_TASK)                       /* All tasks save floating point on switch */
+#if ( RTOS_SELECTION == MQX_RTOS )
+  #define DEFAULT_ATTR       (MQX_FLOATING_POINT_TASK)                       /* All tasks save floating point on switch */
+#elif (RTOS_SELECTION == FREE_RTOS)
+  #define DEFAULT_ATTR       (0)                       /* All tasks save floating point on switch */
+#endif
 #define DEFAULT_ATTR_STRT  (MQX_AUTO_START_TASK|MQX_FLOATING_POINT_TASK)   /* Add the auto start attribute */
 #define TASK_CPULOAD_SIZE  10 // Keep track of the last 10 seconds
 #define QUIET_MODE_ATTR    ((uint32_t)(1<<30))                             /* Task runs in quiet mode, also */
@@ -1142,10 +1146,10 @@ void OS_TASK_Summary ( bool safePrint )
 
 void OS_TASK_Create_STRT( void )
 {
-   APP_PRINT("Create STRT");
+//   APP_PRINT("Create STRT");
    if (pdPASS != xTaskCreate( STRT_StartupTask, pTskName_Strt, 512/4, (void *)0, 2, &tst_handle ))
    {
-      APP_ERR_PRINT("Unable to create STRT");
+//      APP_ERR_PRINT("Unable to create STRT");
       /* TODO: Print Error */
    }
 }

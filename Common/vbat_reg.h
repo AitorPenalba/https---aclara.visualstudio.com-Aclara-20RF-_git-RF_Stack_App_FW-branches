@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2015 Aclara.  All Rights Reserved.
+ * Copyright 2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -106,12 +106,12 @@ typedef struct VBATREG_VbatRegisterFile
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
-
+#if ( MCU_SELECTED == NXP_K24 )
 #define VBATREG_RFSYS_BASE_PTR            ( ( VBATREG_VbatRegisterFilePtr ) ( void * )RFVBAT_BASE_PTR )
 #define VBATREG_BIT_FIELDS                ( VBATREG_RFSYS_BASE_PTR->uBitFields )
 #define VBATREG_SIG                       ( VBATREG_RFSYS_BASE_PTR->sig )
 #define VBATREG_VALID                     ( VBATREG_RFSYS_BASE_PTR->valid )
-#define VBATREG_RTC_VALID                 ( VBATREG_RFSYS_BASE_PTR->rtc_valid )
+#define VBATREG_RTC_VALID                 ( VBATREG_RFSYS_BASE_PTR->rtc_valid ) // TODO: RA6 [name_Balaji]:REview the usage of this macro and check RTC_SR Reg of K24
 #define VBATREG_MAC_CONFIG_VALID          ( VBATREG_RFSYS_BASE_PTR->mac_config_valid )
 #define VBATREG_SHORT_OUTAGE              ( VBATREG_RFSYS_BASE_PTR->short_outage )
 #define VBATREG_SHIP_MODE                 ( VBATREG_RFSYS_BASE_PTR->ship_mode )
@@ -131,7 +131,12 @@ typedef struct VBATREG_VbatRegisterFile
 #define VBATREG_OUTAGE_DECLARATION_DELAY  ( VBATREG_RFSYS_BASE_PTR->pwrOutageTimer )
 #define VBATREG_RTC_SR()                  ( VBATREG_RFSYS_BASE_PTR->uRtcSr )
 
-#define VBATREG_VALID_SIG           ( ( uint8_t )0xA5 )
+#define VBATREG_VALID_SIG           ( ( uint8_t )0xA5 )  
+#elif ( MCU_SELECTED == RA6E1 )/*TODO: RA6: Add RA6E1's VBATREG_RTC_VALID and VBTBER_RTC_ACCESS*/
+
+#endif
+
+
 
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */

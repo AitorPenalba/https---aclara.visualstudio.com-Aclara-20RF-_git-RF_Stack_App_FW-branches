@@ -13,8 +13,9 @@
 #define _RADIO_HAL_H_
 
 #include <stdbool.h>
+#if 0 // TODO: RA6 [name_Balaji]:Support for FreeRTOS
 #include <fio.h>
-
+#endif
                 /* ======================================= *
                  *              I N C L U D E              *
                  * ======================================= */

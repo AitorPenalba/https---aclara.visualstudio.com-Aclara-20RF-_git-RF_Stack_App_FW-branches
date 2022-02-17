@@ -2854,6 +2854,12 @@
     <group>
         <name>Source</name>
         <group>
+            <name>Aclara_BSP</name>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\RTC.c</name>
+            </file>
+        </group>
+        <group>
             <name>Common</name>
             <group>
                 <name>OS_AL_FreeRTOS</name>
@@ -2929,12 +2935,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_last_gasp.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Common\pwr_task.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Common\pwr_task.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\STRT_Startup.c</name>

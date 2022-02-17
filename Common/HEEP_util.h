@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2015 Aclara.  All Rights Reserved.
+ * Copyright 2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -117,15 +117,17 @@ HEEP_UTIL_GLOBALS uint16_t HEEP_GetNextReadingInfo(void *payloadBuf, uint16_t *b
                                                         uint8_t *readingValTypecast, int8_t *readingValPow10,
                                                         uint8_t *readingFlags);
 HEEP_UTIL_GLOBALS uint8_t HEEP_getPowerOf10Code(uint8_t ch, int64_t *val);
-HEEP_UTIL_GLOBALS uint8_t HEEP_getMinByteNeeded( int64_t val, ReadingsValueTypecast typecast, uint16_t valueSizeInBytes );
 HEEP_UTIL_GLOBALS void    HEEP_initHeader(HEEP_APPHDR_t *hdr);
 HEEP_UTIL_GLOBALS void OR_PM_MsgHandler(HEEP_APPHDR_t *heepReqHdr, void *payloadBuf, uint16_t length);
+#if 0 // TODO: RA6 [name_Balaji]:Add meterReadingType for FreeRTOS
+HEEP_UTIL_GLOBALS uint8_t HEEP_getMinByteNeeded( int64_t val, ReadingsValueTypecast typecast, uint16_t valueSizeInBytes );
 HEEP_UTIL_GLOBALS returnStatus_t HEEP_util_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t NWK_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t DTLS_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr);
 returnStatus_t MAC_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t PHY_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t HMC_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
+#endif
 HEEP_UTIL_GLOBALS void HEEP_setEnableOTATest( bool enabledStatus);
 HEEP_UTIL_GLOBALS bool HEEP_getEnableOTATest( void );
 
@@ -150,7 +152,7 @@ struct ui_list_s
    uint16_t data[MAX_UI_LIST_ELEMENTS];
 };
 
-
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]:Add meterReadingType for FreeRTOS
 void HEEP_Put_Boolean( struct readings_s *p, meterReadingType ReadingType, uint8_t value);
 void HEEP_Put_HexBinary ( struct readings_s *p, meterReadingType ReadingType,  uint8_t const Data[], uint16_t  Size);
 void HEEP_Put_DateTimeValue( struct readings_s *p, meterReadingType   ReadingType,TIMESTAMP_t const *DateTime);
@@ -161,7 +163,9 @@ void HEEP_Put_U32( struct readings_s *p, meterReadingType ReadingType, uint32_t 
 void HEEP_Put_U64( struct readings_s *p, meterReadingType ReadingType, uint64_t u64_value);
 void HEEP_Add_ReadingType(struct readings_s *p,  meterReadingType ReadingType);
 void HEEP_Put_ui_list(struct readings_s *p, uint16_t ReadingType, struct ui_list_s const *ui_list);
-
+#elif (RTOS_SELECTION == FREE_RTOS)
+  
+#endif
 void HEEP_ReadingsInit(
    struct readings_s *readings,
    uint8_t  rtype,

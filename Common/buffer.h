@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2010-2014 Aclara.  All Rights Reserved.
+ * Copyright 2010-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -244,7 +244,9 @@ BM_EXTERN const bufferPoolParams_t BM_bufferPoolParams[14]   /* Note:  Must chan
  */
 typedef struct
 {
+#if 0 /* TODO: Queue handle for FreeRTOS */
     OS_QUEUE_Element x;            /*!< ! Must be here for MQX to use this buffer in messages. */
+#endif
     eSysFormat_t     eSysFmt;      /**< User filled - This is the format of the buffer */
     uint16_t         bufMaxSize;   /**< physical size of the data area */
     const char       *pfile;       /* Pointer to file name that allocated the buffer     */

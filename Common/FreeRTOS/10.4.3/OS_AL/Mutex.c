@@ -7,7 +7,7 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2012 ACLARA.  All rights reserved.
+ * Copyright (c) 2022 ACLARA.  All rights reserved.
  * This program may not be reproduced, in whole or in part, in any form or by
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
@@ -57,7 +57,7 @@ bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle )
    if ( MutexHandle == NULL )
    {
       FuncStatus = false;
-      APP_ERR_PRINT("OS_MUTEX_Create!");
+//      APP_ERR_PRINT("OS_MUTEX_Create!");
       /* TODO: DG: Add Print */
       /* There was insufficient heap memory available for the mutex to be
          created. */
@@ -90,7 +90,7 @@ void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
 
    if ( xSemaphoreTake ( *MutexHandle, portMAX_DELAY) != pdPASS ) //TODO: DG Decide on the delay; portMAX_DELAY
    {
-       APP_ERR_PRINT("OS_MUTEX_Lock!");
+//       APP_ERR_PRINT("OS_MUTEX_Lock!");
       /* TODO: DG: Print Mutex Could not be obtained */
 
 //      switch (RetStatus) {
@@ -143,7 +143,7 @@ void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
 void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
 {
    if ( pdFAIL == xSemaphoreGive ( *MutexHandle ) ) {
-      APP_ERR_PRINT("OS_MUTEX_Unlock!");
+//      APP_ERR_PRINT("OS_MUTEX_Unlock!");
       /* TODO: Add the below code */
 //      EVL_FirmwareError( "OS_MUTEX_Unlock" , file, line );
    }
@@ -167,16 +167,16 @@ void OS_MUTEX_Test( void )
    else
    {
       counter++;
-      APP_ERR_PRINT("Unable to Create the Mutex!");
+//      APP_ERR_PRINT("Unable to Create the Mutex!");
 
    }
    if( 0 == counter )
    {
-      APP_PRINT("Success");
+//      APP_PRINT("Success");
    }
    else
    {
-      APP_ERR_PRINT("Fail");
+//      APP_ERR_PRINT("Fail");
    }
 
 }
