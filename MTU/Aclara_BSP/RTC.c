@@ -215,12 +215,20 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
    if( 0 == getsec.tm_sec)
    {
     accessBackupRegister(); 
+    /* Disable write protection on battery backup function. */
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
     VBATREG_RTC_VALID = 0; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
+    /* Enable write protection on battery backup function. */
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
    }/* end if() */
    else
    {
-    accessBackupRegister();
+     accessBackupRegister();
+    /* Disable write protection on battery backup function. */
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
     VBATREG_RTC_VALID = 1; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
+    /* Enable write protection on battery backup function. */
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
    }/* end else() */
    return true;
 #endif
