@@ -22,7 +22,7 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdbool.h>
-#include "BSP_aclara.h"
+#include "BSP_aclara.h" /*In Project.h file BSP_aclara.h is commented out*/
 #if 0
 #include <mqx.h>
 #include <fio.h>
@@ -164,7 +164,8 @@ const STRT_FunctionList_t startUpTbl[] =
 {
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
-   INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ), // TODO: Move this to the necessary position        
+   INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
+   INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position        
 #if 0
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS

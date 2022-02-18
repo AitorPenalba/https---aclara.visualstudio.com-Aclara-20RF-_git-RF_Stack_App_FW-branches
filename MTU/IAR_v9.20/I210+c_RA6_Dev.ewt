@@ -2856,6 +2856,9 @@
         <group>
             <name>Aclara_BSP</name>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\ADC.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\RTC.c</name>
             </file>
         </group>

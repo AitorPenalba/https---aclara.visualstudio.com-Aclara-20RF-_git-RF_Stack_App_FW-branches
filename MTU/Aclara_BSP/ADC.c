@@ -7,7 +7,7 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2012-2020 ACLARA.  All rights reserved.
+ * Copyright (c) 2012-2022 ACLARA.  All rights reserved.
  * This program may not be reproduced, in whole or in part, in any form or by
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
@@ -16,12 +16,15 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdbool.h>
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 #include <mqx.h>
 #include <bsp.h>
+#elif (RTOS_SELECTION == FREE_RTOS) 
+#include "hal_data.h"
+#endif
 
 /* #DEFINE DEFINITIONS */
 #define USE_LWADC          1
-
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -39,6 +42,7 @@ static const ADC_INIT_STRUCT Adc_Init_Param =
 #if USE_LWADC
 
 /* ADC 0 */
+#if ( MCU_SELECTED == NXP_K24 )
 #define ADC0_NO_CH                 (ADC_SOURCE_MODULE(1) | ADC_SOURCE_MUXSEL_X | ADC_SOURCE_CHANNEL(31))
 #define ADC0_PROC_TEMPERATURE_CH    ADC0_SOURCE_AD26 // See section 3.7.1.3.1.1 for ADC0 channel assignement
 #define ADC0_SC_VOLTAGE_CH          ADC0_SOURCE_AD19
@@ -47,6 +51,12 @@ static const ADC_INIT_STRUCT Adc_Init_Param =
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A )
 #define ADC0_BOARD_TEMPERATURE_CH   ADC0_SOURCE_AD0
 #endif
+#elif ( MCU_SELECTED == RA6E1 )
+#define ADC0_HW_REV_CH              ADC_CHANNEL_5
+#define ADC0_SC_VOLTAGE_CH          ADC_CHANNEL_7
+#define ADC0_4V0_VOLTAGE_CH         ADC_CHANNEL_8
+#endif
+
 
 /* ADC 1 */
 #if ENABLE_ADC1
@@ -115,13 +125,14 @@ static bool          bIntAdcMutexCreated_ = (bool)false;
 /* FUNCTION PROTOTYPES */
 static bool setup_ADC0 ( void );
 static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx );
+#if ( MCU_SELECTED == NXP_K24 )
 #if USE_LWADC
 static uint32_t adc_calibrate(ADC_MemMapPtr adc_ptr);
 #endif   //#if USE_LWADC
 #if ENABLE_ADC1
 static bool setup_ADC1 ( void );
 #endif   //#if ENABLE_ADC1
-
+#endif
 /* FUNCTION DEFINITIONS */
 
 /*******************************************************************************
@@ -164,7 +175,9 @@ returnStatus_t ADC_init ( void )
       retVal = eFAILURE;
    }
 #endif
-
+#if ( TM_ADC_UNIT_TEST == 1 )
+//   ADC_UnitTest(); // TODO: RA6 [name_Balaji]:Move ADC_UnitTest to RunSelfTest Function
+#endif
    return ( retVal );
 } /* end ADC_init () */
 
@@ -185,6 +198,7 @@ returnStatus_t ADC_init ( void )
 static bool setup_ADC0 ( void )
 {
    bool         InitSuccessful = (bool)true; /* Start with pass status, and latch on any failure */
+#if ( MCU_SELECTED == NXP_K24 )
 #if USE_LWADC
    LWADC_STRUCT   adc = {0}; // Appease lint
 
@@ -286,7 +300,16 @@ static bool setup_ADC0 ( void )
       fclose(Adc0_File);
    }
 #endif
-
+#elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err = FSP_SUCCESS;
+   /* Initializes the module. */
+   err = R_ADC_Open( &g_adc0_ctrl, &g_adc0_cfg );
+   /* Handle any errors. This function should be defined by the user. */
+   assert(FSP_SUCCESS == err); // TODO: RA6 [name_Balaji]:Remove all BSP assert functions and add Prints if failed
+   /* Enable channels. */
+   err = R_ADC_ScanCfg( &g_adc0_ctrl, &g_adc0_channel_cfg );
+   assert(FSP_SUCCESS == err); // TODO: RA6 [name_Balaji]:Remove all BSP assert functions and add Prints if failed
+#endif
    return ( InitSuccessful );
 } /* end ADC_Setup_ADC0 () */
 
@@ -408,7 +431,7 @@ static bool setup_ADC1 ( void )
 } /* end ADC_Setup_ADC1 () */
 #endif   //#if ENABLE_ADC1
 
-
+#if ( MCU_SELECTED == NXP_K24 )
 #if USE_LWADC
 /*FUNCTION**********************************************************************
 *
@@ -507,6 +530,7 @@ static uint32_t adc_calibrate(ADC_MemMapPtr adc_ptr)
    return ADC_OK;
 }
 #endif   //#if USE_LWADC
+#endif
 
 /*******************************************************************************
 
@@ -528,10 +552,16 @@ static uint32_t adc_calibrate(ADC_MemMapPtr adc_ptr)
 *******************************************************************************/
 returnStatus_t ADC_ShutDown ( void )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    ADC0_SC1A = (ADC0_SC1A & ~ADC_SC1_ADCH_MASK) | ADC_SC1_ADCH(ADC0_DISABLED_CH);
 #if ENABLE_ADC1
    ADC1_SC1A = (ADC1_SC1A & ~ADC_SC1_ADCH_MASK) | ADC_SC1_ADCH(ADC1_DISABLED_CH);
-#endif   //#if ENABLE_ADC1
+#endif   //#if ENABLE_ADC1 
+#elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err = FSP_SUCCESS;
+   err = R_ADC_Close( &g_adc0_ctrl );
+   assert(FSP_SUCCESS == err);
+#endif
    return(eSUCCESS);
 } /* end ADC_ShutDown () */
 
@@ -555,6 +585,7 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
 
    /* Wait for mutex so multiple tasks can share the ADC */
    OS_MUTEX_Lock(&intAdcMutex_);
+#if ( MCU_SELECTED == NXP_K24 )
 #if (USE_LWADC == 1)
    LWADC_STRUCT adc;
 
@@ -587,13 +618,26 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
       result = ADC1_RA;
    }
 #endif
+#elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err = FSP_SUCCESS;
+   ( void ) R_ADC_ScanStart( &g_adc0_ctrl );
+   /* Wait for conversion to complete. */
+   adc_status_t status;
+   status.state = ADC_STATE_SCAN_IN_PROGRESS;
+   while ( ADC_STATE_SCAN_IN_PROGRESS == status.state )
+   {
+       ( void ) R_ADC_StatusGet( &g_adc0_ctrl, &status );
+   }
+   /* Read converted data. */
+   err = R_ADC_Read( &g_adc0_ctrl, adc_source_adx, (uint16_t *)&result );
+#endif
    OS_MUTEX_Unlock(&intAdcMutex_);
 
    /* Convert the raw value to voltage (voltage = (Value / ADC_ValueMax) * Vref) */
    voltage = ( ((float)result / 65535.0f) * 3.3f );
 
    return ( voltage );
-}
+}/* end ADC_Get_Ch_Voltage () */
 
 #if ( OVERRIDE_TEMPERATURE == 1 )
 /*******************************************************************************
@@ -633,7 +677,7 @@ float ADC_Get_Man_Temperature  ( void )
    return ManualTemperature_;
 }
 #endif
-
+#if ( MCU_SELECTED == NXP_K24 ) // TODO: RA6 [name_Balaji]: Support to Board temperature
 /*******************************************************************************
 
   Function name: ADC_Get_uP_Temperature
@@ -678,7 +722,7 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
 
    return ( Temperature );
 }
-
+#endif
 //K22 is the only one that supports the Board temp. sensor
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A )
 /*******************************************************************************
@@ -731,7 +775,7 @@ float ADC_Get_Board_Temperature (bool bFahrenheit)
 float ADC_Get_SC_Voltage ( void )
 {
    return ( ADC_Get_Ch_Voltage( ADC0_SC_VOLTAGE_CH ) );
-}
+}/* end ADC_Get_SC_Voltage () */
 
 /*******************************************************************************
 
@@ -749,18 +793,16 @@ float ADC_Get_SC_Voltage ( void )
 float ADC_Get_4V0_Voltage ( void )
 {
    float voltage;
-
-#if ( ( USE_LWADC == 1 ) || ( ENABLE_ADC1 == 0 ) )
+#if ( ( USE_LWADC == 1 ) || ( ENABLE_ADC1 == 0 ) || ( MCU_SELECTED == RA6E1 ) )
    voltage = ADC_Get_Ch_Voltage( ADC0_4V0_VOLTAGE_CH ) ;
 #else // LWDAC==0 && USE_ADC1==1
    voltage =  ADC_Get_Ch_Voltage( ADC1_4V0_VOLTAGE_CH ) ;
 #endif
-
    /* Adjust for circuit voltage divider */
    voltage *= UN_RDIV_4V0;
 
    return ( voltage );
-}
+}/* end ADC_Get_4V0_Voltage () */
 
 /*******************************************************************************
 
@@ -821,12 +863,12 @@ float ADC_Get_VSWR( void )
 *******************************************************************************/
 float ADC_GetHWRevVoltage ( void )
 {
-#if ( ( USE_LWADC == 1 ) || ( ENABLE_ADC1 == 0 ) )
-   return ( ADC_Get_Ch_Voltage( ADC0_HW_REV_CH ) );
+#if ( ( USE_LWADC == 1 ) || ( ENABLE_ADC1 == 0 ) || ( MCU_SELECTED == RA6E1 ) )
+   return ( ADC_Get_Ch_Voltage( ADC0_HW_REV_CH ) ); 
 #else // LWDAC==0 && USE_ADC1==1
    return ( ADC_Get_Ch_Voltage( ADC1_HW_REV_CH ) );
-#endif
-}
+#endif 
+}/* end ADC_GetHWRevVoltage () */
 
 /*******************************************************************************
 
