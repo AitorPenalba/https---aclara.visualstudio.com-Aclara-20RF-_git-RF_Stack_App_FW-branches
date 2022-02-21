@@ -15,9 +15,6 @@
                 StaticSemaphore_t g_fsp_common_initialized_semaphore_memory;
                 #endif
                 void g_hal_init(void);
-                #if ( TM_RTC_UNIT_TEST == 1 )
-                bool RTC_UnitTest(void);
-                #endif
                 #if ( TM_ADC_UNIT_TEST == 1 )
                 bool ADC_UnitTest(void);
                 #endif
@@ -150,88 +147,7 @@ bool ADC_UnitTest(void){ // TODO: RA6 [name_Balaji]:Move UnitTest to RunSelfTest
     return 0;
 }    
 #endif
-#if ( TM_RTC_UNIT_TEST == 1 )
-/*******************************************************************************
 
-  Function name: RTC_UnitTest
-
-  Purpose: This function will test RTC
-
-  Arguments: None
-
-  Returns: bool - 0 if everything was successful, 1 if something failed
-
-*******************************************************************************/
-// TODO: RA6 [name_Balaji]: Move to Unit Test Function
-bool RTC_UnitTest(void){
-   uint16_t retVal = 0;
-   uint32_t Sec = 0;
-   uint32_t MicroSec = 0;
-   sysTime_dateFormat_t set_time =
-   {
-   .sec  = 55,
-   .min  = 59,
-   .hour = 23,       //24-HOUR mode       
-   .day = 31,      //RDAYCNT
-//    .tm_wday = 5,       //RWKCNT 0-SUN, 6-SAT
-   .month  = 11,      //RMONCNT 0-Jan 11 Dec
-   .year = 121     //RYRCNT //Year SINCE 1900 (2021 = 2021-1900 = 121)
-   };
-   sysTime_dateFormat_t get_time;
-   rtc_alarm_time_t alarm_set_time =
-   {
-        .sec_match        =  true,
-        .min_match        =  true,
-        .hour_match       =  false,
-        .mday_match       =  false,
-        .mon_match        =  false,
-        .year_match       =  false,
-        .dayofweek_match  =  false
-   };
-   bool isTimeSetSuccess;
-   bool isAlarmSetSuccess;
-   bool isRTCValid;
-   isTimeSetSuccess = RTC_SetDateTime (&set_time);
-   if(isTimeSetSuccess == 0)
-   {
-     retVal = 1;
-   }
-   isRTCValid = RTC_Valid();
-   if(isRTCValid == false)
-   {
-     retVal = 1;
-   }
-   RTC_GetDateTime (&get_time);
-   if(get_time.min != 58)
-   {
-     retVal = 1;
-   }
-   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-   if(Sec == 0)
-   {
-     retVal = 1;
-   }
-   if(MicroSec == 0)
-   {
-     retVal = 1;
-   }
-   alarm_set_time.time.tm_sec = 10;
-   alarm_set_time.time.tm_min = 59;
-   isAlarmSetSuccess = RTC_SetAlarmTime (&alarm_set_time);
-   if(isAlarmSetSuccess == 0)
-   {
-     retVal = 1;
-   }
-   while(1){
-    RTC_GetDateTime (&get_time);
-    if(get_time.min != 58)
-    {
-      retVal = 1;
-    }
-    }
-   return retVal;
-}    
-#endif
                 #if configSUPPORT_STATIC_ALLOCATION
                 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer,
                 uint32_t *pulIdleTaskStackSize) BSP_WEAK_REFERENCE;

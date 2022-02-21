@@ -100,6 +100,6 @@
 #define NXP_K24                           1
 #define RA6E1                             2
 #define MCU_SELECTED                      RA6E1
-#define TM_RTC_UNIT_TEST                  0
-#define TM_ADC_UNIT_TEST                  1
+#define TM_RTC_UNIT_TEST                  1
+#define TM_ADC_UNIT_TEST                  0
 #endif

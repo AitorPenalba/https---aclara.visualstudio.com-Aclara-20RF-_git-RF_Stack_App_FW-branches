@@ -27,11 +27,6 @@
 #include "vbat_reg.h"
 
 /* #DEFINE DEFINITIONS */ 
-#if ( MCU_SELECTED == RA6E1 )
-// TODO: RA6 [name_Balaji]: Move to vbat_reg.h 
-#define VBATREG_RTC_VALID                R_SYSTEM->VBTBKR[0] //0x4001_E500
-#define VBTBER_RTC_ACCESS                R_SYSTEM->VBTBER 
-#endif
 
 /* MACRO DEFINITIONS */
 /* Flags used for Alarm Interrupts */
@@ -46,7 +41,9 @@
 volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrence of alarm interrupt
 #endif
 /* FUNCTION PROTOTYPES */
-
+#if ( TM_RTC_UNIT_TEST == 1 )
+bool RTC_UnitTest(void);
+#endif
 /* FUNCTION DEFINITIONS */
 /*******************************************************************************
 
@@ -61,7 +58,9 @@ volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrenc
 *******************************************************************************/
 static void accessBackupRegister( void )
 {
-  VBTBER_RTC_ACCESS = 1; // TODO: RA6 [name_Balaji]: Need to disable the Register Protection before we write to the protected registers
+   /*When accessed after Register Protection Enable, the entire BackUp registers are set to FF 
+   so accessing it outside Register Protection has no affects on this register*/
+   VBTBER_RTC_ACCESS = 1; 
 }/* end accessBackupRegister () */
 /*******************************************************************************
 
@@ -76,14 +75,14 @@ static void accessBackupRegister( void )
 *******************************************************************************/
 returnStatus_t RTC_init( void )
 {
-   returnStatus_t retVal = eFAILURE;
+   returnStatus_t retVal = eSUCCESS;
    fsp_err_t err = FSP_SUCCESS;
    err = R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );
-   assert(FSP_SUCCESS == err);// TODO: RA6 [name_Balaji]:Remove all assert and add Debug prints if Failed
-   retVal = eSUCCESS;
-#if ( TM_RTC_UNIT_TEST == 1 )
-//   RTC_UnitTest(); //TODO: Enable to test RTC
-#endif
+   if ( err!= FSP_SUCCESS )
+   {
+    retVal = eFAILURE;
+    (void)printf ( "ERROR - RTC failed to init\n" ); /*Change to APP_Print or Debug Print*/
+   }
    return( retVal ); 
 } /* end RTC_init () */
 
@@ -122,15 +121,21 @@ void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
 #elif ( MCU_SELECTED == RA6E1 )
    fsp_err_t err = FSP_SUCCESS;
    rtc_time_t pTime;
+   uint32_t sec = 0;
+   uint32_t microSec = 0;
    err = R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &pTime );
+   if ( err!= FSP_SUCCESS )
+   {
+    (void)printf ( "ERROR - RTC failed to Get Time\n" );
+   }
+   RTC_GetTimeInSecMicroSec ( &sec , &microSec);
    RT_Clock->month = (uint8_t)pTime.tm_mon;
    RT_Clock->day   = (uint8_t)pTime.tm_mday;
    RT_Clock->year  = (uint16_t)pTime.tm_year;
    RT_Clock->hour  = (uint8_t)pTime.tm_hour;
    RT_Clock->min   = (uint8_t)pTime.tm_min;
    RT_Clock->sec   = (uint8_t)pTime.tm_sec;
-// TODO: RA6 [name_Balaji]:Check the Usage of RT_Clock->msec
-   assert(FSP_SUCCESS == err);
+   RT_Clock->msec  = (uint16_t)(microSec/1000); //Converting Microsecond to Millisecond
 #endif
 
 } /* end RTC_GetDateTime () */
@@ -151,8 +156,8 @@ void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
 *******************************************************************************/
 bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
 {
+   bool FuncStatus = true;
 #if ( MCU_SELECTED == NXP_K24 )
-     bool FuncStatus = true;
    DATE_STRUCT mqxDate;    /* Used to convert requested date/time to seconds/milliseconds*/
    TIME_STRUCT mqxTime;    /* Converted date/time sent to set RTC time func.  */
 
@@ -197,7 +202,6 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
       FuncStatus = false;
    } /* end else() */
 
-   return ( FuncStatus );
 #elif ( MCU_SELECTED == RA6E1 )
    fsp_err_t err = FSP_SUCCESS;
    rtc_time_t getsec;
@@ -208,9 +212,13 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
    pTime.tm_year = (int16_t)RT_Clock->year;
    pTime.tm_hour = RT_Clock->hour;
    pTime.tm_min   = RT_Clock->min;
-   // TODO: RA6 [name_Balaji]:Set Millisec to zero
+   /* No Requirement for millisecond */
    err = R_RTC_CalendarTimeSet( &g_rtc0_ctrl, &pTime );
-   assert(FSP_SUCCESS == err);
+   if ( err!= FSP_SUCCESS )
+   {
+    FuncStatus = false;
+    (void)printf ( "ERROR - RTC failed to Set Time\n" );
+   }
    getsec = pTime;
    if( 0 == getsec.tm_sec)
    {
@@ -230,8 +238,8 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
     /* Enable write protection on battery backup function. */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
    }/* end else() */
-   return true;
 #endif
+   return ( FuncStatus );
 } /* end RTC_SetDateTime () */
 
 /*******************************************************************************
@@ -252,9 +260,9 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
 *******************************************************************************/
 bool RTC_Valid(void)
 {
-  bool bRTCValid = false;
+   bool bRTCValid = false;
 
-   if (1 == VBATREG_RTC_VALID)
+   if (1 == VBATREG_RTC_VALID)/*There is no RTC_SR in RA6E1*/
    {
       bRTCValid = true;
    }
@@ -342,25 +350,31 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 
    return;
 #elif ( MCU_SELECTED == RA6E1 )
-    rtc_time_t getSecTime;
-    R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &getSecTime );
-    *sec = getSecTime.tm_sec;
-    rtc_instance_ctrl_t * p_instance_ctrl = ( rtc_instance_ctrl_t * ) &g_rtc0_ctrl;
-    uint8_t milliSecGet;
-    //Disable the NVIC carry interrupt request
-    NVIC_DisableIRQ( p_instance_ctrl->p_cfg->carry_irq );
-    //Enable the RTC carry interrupt request
-    R_BSP_IrqEnable( p_instance_ctrl->p_cfg->carry_irq );
+   fsp_err_t err = FSP_SUCCESS;
+   rtc_time_t getSecTime;
+   err = R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &getSecTime );
+   if ( err!= FSP_SUCCESS )
+   {
+    (void)printf ( "ERROR - RTC failed to Get Time in RTC_GetTimeInSecMicroSec function\n" );
+   }
+   *sec = getSecTime.tm_sec;
+   rtc_instance_ctrl_t * p_instance_ctrl = ( rtc_instance_ctrl_t * ) &g_rtc0_ctrl;
+   uint8_t milliSecGet;
+   //Disable the NVIC carry interrupt request
+   NVIC_DisableIRQ( p_instance_ctrl->p_cfg->carry_irq );
+   //Enable the RTC carry interrupt request
+   R_BSP_IrqEnable( p_instance_ctrl->p_cfg->carry_irq );
 
-    /* If a carry occurs while the 64-Hz counter and time are being read, the correct time is not obtained,
-     * therefore they must be read again. 23.3.5 "Reading 64-Hz Counter and Time" of the RA6E1 manual R01UH0886EJ0100)*/
-    do
-    {
-        p_instance_ctrl->carry_isr_triggered = false; /** This flag will be set to 'true' in the carry ISR */
-        milliSecGet = (int8_t) R_RTC->R64CNT;
-        *microSec = ( (milliSecGet)*1000000 )/128;
-    } while ( p_instance_ctrl->carry_isr_triggered );
-    //TODO Add NVIC Enable
+   /* If a carry occurs while the 64-Hz counter and time are being read, the correct time is not obtained,
+    * therefore they must be read again. 23.3.5 "Reading 64-Hz Counter and Time" of the RA6E1 manual R01UH0930EJ0100)*/
+   do
+   {
+       p_instance_ctrl->carry_isr_triggered = false; /** This flag will be set to 'true' in the carry ISR */
+       milliSecGet = (int8_t) R_RTC->R64CNT;
+       *microSec = ( (milliSecGet)*1000000 )/128;
+   } while ( p_instance_ctrl->carry_isr_triggered );
+   //Enable the NVIC carry interrupt request
+   NVIC_EnableIRQ( p_instance_ctrl->p_cfg->carry_irq );
 #endif
    
 }/* end RTC_GetTimeInSecMicroSec () */
@@ -377,11 +391,17 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
   Returns: None
 
 *******************************************************************************/
-bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm ){
-  fsp_err_t err = FSP_SUCCESS;
-  err = R_RTC_CalendarAlarmSet( &g_rtc0_ctrl, pAlarm );
-  assert( FSP_SUCCESS == err );
-  return true;
+bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm )
+{
+   bool FuncStatus = true;
+   fsp_err_t err = FSP_SUCCESS;
+   err = R_RTC_CalendarAlarmSet( &g_rtc0_ctrl, pAlarm );
+   if ( err!= FSP_SUCCESS )
+   {
+    FuncStatus = false;
+    (void)printf ( "ERROR - RTC failed to Set Alarm\n" );
+   }
+   return ( FuncStatus );
 }/* end RTC_SetAlarmTime () */
 
 /*******************************************************************************
@@ -396,10 +416,14 @@ bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm ){
   Returns: None
 
 *******************************************************************************/
-void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm ){
-  fsp_err_t err = FSP_SUCCESS;
-  err = R_RTC_CalendarAlarmGet( &g_rtc0_ctrl, pAlarm );
-  assert( FSP_SUCCESS == err );
+void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm )
+{
+   fsp_err_t err = FSP_SUCCESS;
+   err = R_RTC_CalendarAlarmGet( &g_rtc0_ctrl, pAlarm );
+   if ( err!= FSP_SUCCESS )
+   {
+    (void)printf ( "ERROR - RTC failed to Get Alarm\n" );
+   }
 }/* end RTC_GetAlarmTime () */
 
 /*******************************************************************************
@@ -414,10 +438,14 @@ void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm ){
   Returns: None
 
 *******************************************************************************/
-void RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg ){
-  fsp_err_t err = FSP_SUCCESS;
-  R_RTC_ErrorAdjustmentSet( &g_rtc0_ctrl, erradjcfg );
-  assert( FSP_SUCCESS == err );
+void RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg )
+{
+   fsp_err_t err = FSP_SUCCESS;
+   err = R_RTC_ErrorAdjustmentSet( &g_rtc0_ctrl, erradjcfg );
+   if ( err!= FSP_SUCCESS )
+   {
+    (void)printf ( "ERROR - RTC failed to Set Error Adjustment\n" );
+   }
 }/* end RTC_ErrorAdjustmentSet () */
 
 
@@ -436,8 +464,85 @@ void RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg 
 *******************************************************************************/
 void rtc_callback( rtc_callback_args_t *p_args )
 {
-    if( RTC_EVENT_ALARM_IRQ == p_args->event )
-    {
-        g_alarm_irq_flag = SET_FLAG; //Alarm Interrupt occured
-    }/* end if */
+   if( RTC_EVENT_ALARM_IRQ == p_args->event )
+   {
+       g_alarm_irq_flag = SET_FLAG; //Alarm Interrupt occured
+   }/* end if */
 }/* end rtc_callback () */
+
+
+   #if ( TM_RTC_UNIT_TEST == 1 )
+/*******************************************************************************
+
+  Function name: RTC_UnitTest
+
+  Purpose: This function will test RTC
+
+  Arguments: None
+
+  Returns: bool - 0 if everything was successful, 1 if something failed
+
+*******************************************************************************/
+// TODO: RA6 [name_Balaji]: Move to SelfTest Task
+bool RTC_UnitTest(void)
+{
+   uint16_t retVal = 0;
+   uint32_t Sec = 0;
+   uint32_t MicroSec = 0;
+   sysTime_dateFormat_t set_time =
+   {
+   .sec  = 55,
+   .min  = 59,
+   .hour = 23,       //24-HOUR mode       
+   .day = 31,        //RDAYCNT
+   .month  = 11,     //RMONCNT 0-Jan 11 Dec
+   .year = 121       //RYRCNT //Year SINCE 1900 (2021 = 2021-1900 = 121)
+   };
+   sysTime_dateFormat_t get_time;
+   rtc_alarm_time_t alarm_set_time =
+   {
+        .sec_match        =  true,
+        .min_match        =  true,
+        .hour_match       =  false,
+        .mday_match       =  false,
+        .mon_match        =  false,
+        .year_match       =  false,
+        .dayofweek_match  =  false
+   };
+   bool isTimeSetSuccess;
+   bool isAlarmSetSuccess;
+   bool isRTCValid;
+   isTimeSetSuccess = RTC_SetDateTime (&set_time);
+   if(isTimeSetSuccess == 0)
+   {
+     retVal = 1;
+   }
+   isRTCValid = RTC_Valid();
+   if(isRTCValid == false)
+   {
+     retVal = 1;
+   }
+   RTC_GetDateTime (&get_time);
+   if(get_time.min != 59)
+   {
+     retVal = 1;
+   }
+   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
+   if(Sec == 0)
+   {
+     retVal = 1;
+   }
+   if(MicroSec == 0)
+   {
+     retVal = 1;
+   }
+   alarm_set_time.time.tm_sec = 10;
+   alarm_set_time.time.tm_min = 59;
+   isAlarmSetSuccess = RTC_SetAlarmTime (&alarm_set_time);
+   if(isAlarmSetSuccess == 0)
+   {
+     retVal = 1;
+   }
+   return retVal;
+}    
+#endif

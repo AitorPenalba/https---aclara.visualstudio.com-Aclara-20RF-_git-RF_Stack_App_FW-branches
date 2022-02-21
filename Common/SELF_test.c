@@ -173,6 +173,14 @@ void SELF_testTask( taskParameter )
 {
    uint16_t       selfTestResults;
    uint32_t       taskPriority;
+#if ( TM_RTC_UNIT_TEST == 1 )
+   bool isRTCUnitTestFailed;
+   isRTCUnitTestFailed = RTC_UnitTest();
+   if (isRTCUnitTestFailed == 1)
+   {
+     (void)printf ( "ERROR - RTC failed to Set Error Adjustment\n" );// TODO: RA6 [name_Balaji]: Change to DBG_logPrintf
+   }
+#endif
 #if 1
    vTaskSuspend(NULL); /* TODO: Remove*/
 #else

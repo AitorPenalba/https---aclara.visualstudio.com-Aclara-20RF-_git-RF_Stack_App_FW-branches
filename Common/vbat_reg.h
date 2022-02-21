@@ -132,8 +132,9 @@ typedef struct VBATREG_VbatRegisterFile
 #define VBATREG_RTC_SR()                  ( VBATREG_RFSYS_BASE_PTR->uRtcSr )
 
 #define VBATREG_VALID_SIG           ( ( uint8_t )0xA5 )  
-#elif ( MCU_SELECTED == RA6E1 )/*TODO: RA6: Add RA6E1's VBATREG_RTC_VALID and VBTBER_RTC_ACCESS*/
-
+#elif ( MCU_SELECTED == RA6E1 )
+#define VBATREG_RTC_VALID                R_SYSTEM->VBTBKR[0] //Address: 0x4001_E500
+#define VBTBER_RTC_ACCESS                R_SYSTEM->VBTBER 
 #endif
 
 
