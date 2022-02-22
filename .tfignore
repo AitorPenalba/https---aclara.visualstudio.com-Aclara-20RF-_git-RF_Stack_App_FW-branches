@@ -77,3 +77,21 @@ settings
 *.ninja_deps
 \Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\RA6_FreeRTOS Debug\BrowseInfo
 *.ninja_log
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra_gen
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\src
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra_cfg\fsp_cfg\bsp
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra_cfg\fsp_cfg
+*.prefs
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\arm\CMSIS_5\CMSIS\Core\Include
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\aws\amazon-freertos
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\board\ra6e1_fpb
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\fsp\inc
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\fsp\src\bsp\cmsis\Device\RENESAS\Source
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\fsp\src\bsp\mcu\all
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\fsp\src\bsp\mcu\ra6e1
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\fsp\src\r_adc
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra\fsp\src\r_agt
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra_cfg\aws
+\MTU\OS_BSP\FreeRTOS_RA6\IAR\ra_cfg\driver

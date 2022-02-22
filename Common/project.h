@@ -56,7 +56,7 @@
 //#include "heep.h"
 #include "BSP_aclara.h"
 
-/* TODO: DG: Move these to appropriate place */
+/* TODO: RA6: DG: Move these to appropriate place */
 //#include "SEGGER_RTT/SEGGER_RTT.h"
 #define SEGGER_INDEX            (0)
 #define LVL_ERR      (1u)       /* error conditions   */

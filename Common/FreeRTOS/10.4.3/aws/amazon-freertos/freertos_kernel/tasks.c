@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel V10.4.3
+ * FreeRTOS Kernel V10.4.3 LTS Patch 2
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1216,7 +1216,6 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             {
                 --uxCurrentNumberOfTasks;
                 traceTASK_DELETE( pxTCB );
-                prvDeleteTCB( pxTCB );
 
                 /* Reset the next expected unblock time in case it referred to
                  * the task that has just been deleted. */
@@ -1224,6 +1223,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
             }
         }
         taskEXIT_CRITICAL();
+
+        /* If the task is not deleting itself, call prvDeleteTCB from outside of
+         * critical section. If a task deletes itself, prvDeleteTCB is called
+         * from prvCheckTasksWaitingTermination which is called from Idle task. */
+        if( pxTCB != pxCurrentTCB )
+        {
+            prvDeleteTCB( pxTCB );
+        }
 
         /* Force a reschedule if it is the currently running task that has just
          * been deleted. */
@@ -1784,9 +1791,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB )
                 /* The scheduler is not running, but the task that was pointed
                  * to by pxCurrentTCB has just been suspended and pxCurrentTCB
                  * must be adjusted to point to a different task. */
-#pragma diag_suppress=Pa082 // Order of volatile access is undefined OK here
                 if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == uxCurrentNumberOfTasks ) /*lint !e931 Right has no side effect, just volatile. */
-#pragma diag_warning=Pa082
                 {
                     /* No other tasks are ready, so set pxCurrentTCB back to
                      * NULL so when the next task is created pxCurrentTCB will
@@ -4658,9 +4663,7 @@ TickType_t uxTaskResetEventItemValue( void )
 
     /* Reset the event list item to its normal value - so it can be used with
      * queues and semaphores. */
-#pragma diag_suppress=Pa082 // Order of volatile access is undefined OK here
     listSET_LIST_ITEM_VALUE( &( pxCurrentTCB->xEventListItem ), ( ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) pxCurrentTCB->uxPriority ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
-#pragma diag_warning=Pa082
 
     return uxReturn;
 }
@@ -4775,9 +4778,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 /* Clear bits in the task's notification value as bits may get
                  * set  by the notifying task or interrupt.  This can be used to
                  * clear the value to zero. */
-#pragma diag_suppress=Pa082 // Order of volatile access is undefined OK here
                 pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ] &= ~ulBitsToClearOnEntry;
-#pragma diag_warning=Pa082
 
                 /* Mark this task as waiting for a notification. */
                 pxCurrentTCB->ucNotifyState[ uxIndexToWait ] = taskWAITING_NOTIFICATION;
@@ -4829,9 +4830,7 @@ TickType_t uxTaskResetEventItemValue( void )
             {
                 /* A notification was already pending or a notification was
                  * received while the task was waiting. */
-#pragma diag_suppress=Pa082 // Order of volatile access is undefined OK here
                 pxCurrentTCB->ulNotifiedValue[ uxIndexToWait ] &= ~ulBitsToClearOnExit;
-#pragma diag_warning=Pa082
                 xReturn = pdTRUE;
             }
 
@@ -5319,17 +5318,13 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
                 {
                     /* Wake time has overflowed.  Place this item in the overflow
                      * list. */
-#pragma diag_suppress=Pa082 // Order of volatile access is undefined OK here
                     vListInsert( pxOverflowDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
-#pragma diag_warning=Pa082
                 }
                 else
                 {
                     /* The wake time has not overflowed, so the current block list
                      * is used. */
-#pragma diag_suppress=Pa082 // Order of volatile access is undefined OK here
                     vListInsert( pxDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
-#pragma diag_warning=Pa082
 
                     /* If the task entering the blocked state was placed at the
                      * head of the list of blocked tasks then xNextTaskUnblockTime
