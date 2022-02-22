@@ -37,7 +37,9 @@
 
 #include "project.h"
 #ifndef __BOOTLOADER
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 #include <mqx.h>
+#endif
 #else
 #include <string.h>
 #endif   /* BOOTLOADER  */
@@ -438,7 +440,7 @@ static returnStatus_t bnk_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
             }
          }
 #if RTOS
-         OS_MUTEX_Unlock(&bankMutex_); // Function will not return if it fails
+       OS_MUTEX_Unlock(&bankMutex_); // Function will not return if it fails
 #endif
       }
    } /*lint !e456 Mutex unlocked if successfully locked */

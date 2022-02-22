@@ -182,6 +182,8 @@ void SELF_testTask( taskParameter )
    }
 #endif
 #if 1
+   // TODO: Use line 192 once complete implementation is available
+   selfTestResults = RunSelfTest();       /* Run once during the init phase   */
    vTaskSuspend(NULL); /* TODO: Remove*/
 #else
    DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
@@ -289,7 +291,7 @@ void SELF_testTask( taskParameter )
 ***********************************************************************************************************************/
 static uint16_t RunSelfTest()
 {
-#if 0
+#if 0 // TODO: RA6 Melvin: EVL module to be added
    EventData_s         eventData;
    EventKeyValuePair_s keyVal;                            /* Logging only one NVP */
 
@@ -298,16 +300,22 @@ static uint16_t RunSelfTest()
 #endif
 
 #if ( EP == 1 )
+#if ( MCU_SELECTED == NXP_K24 )
+   // TODO: RA6 Melvin: LED Module not available
    LED_setRedLedStatus(SELFTEST_RUNNING);
+#endif
 #endif
 
    (void)memset( ( uint8_t * )&eventData, 0, sizeof( eventData ) );
    (void)memset( ( uint8_t * )&keyVal, 0, sizeof( keyVal ) );
+#endif
    /* Test external NV memory */
    if( eSUCCESS == SELF_testNV() )
    {
+#if 0 // TODO: RA6 Melvin: EVL module to be added
       if ( SELF_TestData.lastResults.uAllResults.Bits.nvFail )  //If this had failed...
       {
+
          SELF_TestData.lastResults.uAllResults.Bits.nvFail = 0;
          eventData.markSent                    = (bool)false;
          eventData.eventId                     = (uint16_t)comDeviceMemoryNVramSucceeded;
@@ -327,7 +335,9 @@ static uint16_t RunSelfTest()
          *( uint16_t * )keyVal.Value           = SELF_TestData.nvFail;
          (void)EVL_LogEvent( 180, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
       }
+#endif
    }
+#if 0 // TODO: RA6 Melvin: new self test modules to be added
 
    /* Test the security device   */
    if( eSUCCESS == SELF_testSecurity() )
@@ -553,6 +563,8 @@ returnStatus_t SELF_testSecurity( void )
    }
    return retVal;
 }
+#endif // FILE_IO TODO:Check why FILE_IO is not included
+
 /***********************************************************************************************************************
    Function Name: SELF_testNV
 
@@ -566,7 +578,9 @@ returnStatus_t SELF_testNV( void )
 {
    uint32_t errCount;         /* Number of failures reported by DVR_EFL_unitTest */
 
+#if 0 // TODO: RA6 Melvin: DBG Module to be added
    DBG_logPrintf( 'I', "SELF_testNV: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
+#endif
    errCount = DVR_EFL_UnitTest(1L); //External-FLash UnitTest
    if( errCount != 0 )     /* Need to update the failure counter? */
    {
@@ -582,7 +596,7 @@ returnStatus_t SELF_testNV( void )
    }
    return ( ( 0 == errCount ) ? eSUCCESS : eFAILURE );
 }
-#endif // FILE_IO
+
 #if ( DCU == 1 )  /* DCU will always support externam RAM */
 /***********************************************************************************************************************
    Function Name: SELF_testSDRAM

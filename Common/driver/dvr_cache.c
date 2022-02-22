@@ -170,7 +170,11 @@ static returnStatus_t open( PartitionData_t const *pParData, DeviceDriverMem_t c
    if ( eSUCCESS == eRetVal ) /* If the driver opened properly, restore the cache. */
    {
       /* Compute CRC on the whole chache area */
+#if ( MCU_SELECTED == NXP_K24 )
       uint16_t crc = CRC_16_Calculate(pParData->sAttributes.pCachedData, pParData->lDataSize);
+#elif ( MCU_SELECTED == RA6E1 )  //TODO Melvin: Replace with RA6E1 CRC module
+      uint16_t crc; //= CRC_16_Calculate(pParData->sAttributes.pCachedData, pParData->lDataSize);
+#endif
       (void)memcpy( ( uint8_t *)&sCache, pParData->sAttributes.pCachedData + pParData->lDataSize, sizeof(sCache));
 
       if ( sCache.crc16 != crc )
@@ -274,7 +278,7 @@ static returnStatus_t write( const dSize DestOffset, uint8_t const *pSrc, const 
    OS_MUTEX_Lock(&cacheMutex_);
    (void)memcpy(pParData->sAttributes.pCachedData + DestOffset, pSrc, cnt); /* Write the data to the RAM */
    /* Compute CRC on the whole cache area */
-   sCache.crc16 = CRC_16_Calculate(pParData->sAttributes.pCachedData, pParData->lDataSize);
+   //sCache.crc16 = CRC_16_Calculate(pParData->sAttributes.pCachedData, pParData->lDataSize);
    (void)memcpy(pParData->sAttributes.pCachedData + pParData->lDataSize, ( uint8_t *)&sCache, sizeof(sCache));
    OS_MUTEX_Unlock(&cacheMutex_);
 

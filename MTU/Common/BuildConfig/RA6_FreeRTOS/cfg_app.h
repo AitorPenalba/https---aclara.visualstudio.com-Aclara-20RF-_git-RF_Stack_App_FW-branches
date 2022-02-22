@@ -83,7 +83,7 @@
 #endif
 
 /* user_config.h defines the BSP_ALARM_FREQUENCY; use this to derive the OS_TICK values   */
-
+#define BSP_ALARM_FREQUENCY            (200)
 #define OS_TICK_mS                     ((uint32_t)1000/BSP_ALARM_FREQUENCY)
 #define OS_TICK_uS                     ((uint32_t)OS_TICK_mS * 1000)
 

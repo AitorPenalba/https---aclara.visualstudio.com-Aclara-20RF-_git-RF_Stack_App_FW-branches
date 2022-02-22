@@ -25,6 +25,7 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
+#include "project.h"
 #include "meter.h"
 
 /* Define all supported target hardware here. */
@@ -65,7 +66,11 @@
 /* MACRO DEFINITIONS */
 
 #define PERSISTENT                  __no_init
+#if ( MCU_SELECTED == NXP_K24 )
 #define CLRWDT()                    WDOG_Kick()
+#elif ( MCU_SELECTED == RA6E1 )
+#define CLRWDT()                    1   //TODO Melvin: add RA6E1 equivalent for the same
+#endif
 #define NOP()                       asm("nop")
 #if 0 /* TODO: RA6: Add later */
 #define RESET()                     { SCB_AIRCR = SCB_AIRCR_VECTKEY(0x5FA)| SCB_AIRCR_SYSRESETREQ_MASK; while(1){} }
@@ -331,13 +336,22 @@
 #define NV_SPI_PORT_NUM                ((uint8_t)0)            /* SPI Port # used in the Micro. */
 #define NV_SPI_PORT_CONTROLS_CS        0                       /* 1 = SPI port controls the CS line */
 
+#if ( MCU_SELECTED == NXP_K24 )
 #define NV_SPI_PORT_INIT               SPI_initPort
 #define NV_SPI_PORT_OPEN               SPI_OpenPort
 #define NV_SPI_PORT_CLOSE              SPI_ClosePort
 #define NV_SPI_PORT_WRITE              SPI_WritePort
 #define NV_SPI_PORT_READ               SPI_ReadPort
+#elif ( MCU_SELECTED == RA6E1 )
+#define NV_SPI_PORT_INIT               R_QSPI_Open
+#define NV_SPI_PORT_OPEN               //open and init happens in the same routine
+#define NV_SPI_PORT_CLOSE              R_QSPI_Close
+#define NV_SPI_PORT_WRITE              R_QSPI_DirectWrite
+#define NV_SPI_PORT_READ               R_QSPI_DirectRead
+#endif
 
 /* Set PCR for GPIO, high drive strength, Make Output */
+#if ( MCU_SELECTED  != RA6E1 )
 #define NV_CS_TRIS()                   { PORTA_PCR14 = 0x100; GPIOA_PDDR |= 1<<14; }
 /* For Last Gasp recovery from low power, Set PCR MUX for GPIO, Make Output, Chip Not Selected */
 #define NV_CS_TRIS_LG()                { PORTA_PCR14 = 0x100; GPIOA_PDDR |= 1<<14; NV_CS_INACTIVE(); }
@@ -345,6 +359,15 @@
 #define NV_CS_INACTIVE()               (GPIOA_PSOR = 1<<14)    /* NV memory chip select pin */
 #define NV_BUSY()                      (~(GPIOA_PDIR >> 17) & 1)/* NV memory chip busy pin */
 #define NV_MISO_CFG(port, cfg)         SPI_misoCfg(port, cfg)
+#else
+#define NV_CS_ACTIVE()
+#define NV_CS_TRIS()
+#define NV_CS_TRIS_LG()
+#define NV_CS_ACTIVE()
+#define NV_CS_INACTIVE()
+#define NV_BUSY()           1 // return always true
+#define NV_MISO_CFG(port, cfg)         eSUCCESS
+#endif
 
 /* Set PCR for GPIO, Make Output */
 #define NV_WP_TRIS()                   { PORTB_PCR18 = 0x100; GPIOB_PDDR |= 1<<18; }
@@ -362,8 +385,12 @@
 #define DVR_EFL_BUSY_IRQ_EI()          { PORTA_ISFR = (1 << 17); PORTA_PCR17 |= PORT_PCR_IRQC(0x9); } /*  IRQ on risiing
                                                                                                           edge */
 #else
+#if ( MCU_SELECTED == NXP_K24 ) // IRQ not available for QSPI on RA6E1
 #define DVR_EFL_BUSY_IRQ_EI()          { PORTA_ISFR = (1 << 17); PORTA_PCR17 |= PORT_PCR_IRQC(0xc); } /* IRQ on high
                                                                                                          level  */
+#else
+#define DVR_EFL_BUSY_IRQ_EI()
+#endif
 #endif
 /* Disable flash busy IRQ and reset IRQ flag */
 #define DVR_EFL_BUSY_IRQ_DI()          { PORTA_PCR17 &= ~PORT_PCR_IRQC(0xf); PORTA_ISFR = ( 1 << 17 ); }
@@ -403,7 +430,11 @@
 
 /* General settings for SPI and DMA */
 #ifndef __BOOTLOADER
+#if ( MCU_SELECTED == NXP_K24 )
 #define SPI_USES_DMA                      1                      /* 0 = Don't Use DMA (slower), 1 = use DMA */
+#elif ( MCU_SELECTED == RA6E1 ) //TODO Melvin: This has to be changed back to DMA for RADIO SPI
+#define SPI_USES_DMA                      0                      /* 0 = Don't Use DMA (slower), 1 = use DMA */
+#endif
 #else
 #define SPI_USES_DMA                      0                      /* 0 = Don't Use DMA (slower), 1 = use DMA */
 #endif

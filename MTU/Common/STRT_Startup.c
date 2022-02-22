@@ -504,6 +504,7 @@ void STRT_StartupTask ( taskParameter )
 #endif
 #endif // #if 0
          response = pFunct->pFxnStrt();
+         FIO_finit(); //TODO Melvin: move this to the init routine
 #if 0
          if ( pFunct->pFxnStrt == MODECFG_init )
          {

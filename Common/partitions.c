@@ -27,7 +27,9 @@
 #include <stdbool.h>
 #include <string.h>
 #ifndef __BOOTLOADER
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 #include <mqx.h>
+#endif 
 #endif /* __BOOTLOADER  */
 #define partitions_GLOBAL
 #include "partitions.h"

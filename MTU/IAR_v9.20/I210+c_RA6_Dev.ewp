@@ -696,7 +696,7 @@
             <data>
                 <extensions></extensions>
                 <cmdline></cmdline>
-                <hasPrio>0</hasPrio>
+                <hasPrio>224</hasPrio>
                 <buildSequence>inputOutputBased</buildSequence>
             </data>
         </settings>
@@ -2176,6 +2176,57 @@
         <group>
             <name>Common</name>
             <group>
+                <name>Driver</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_banked.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_banked.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_cache.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_cache.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_sectPreErase.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_sectPreErase.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\spi_mstr.c</name>
+                    <excluded>
+                        <configuration>Debug</configuration>
+                    </excluded>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\spi_mstr.h</name>
+                    <excluded>
+                        <configuration>Debug</configuration>
+                    </excluded>
+                </file>
+            </group>
+            <group>
                 <name>OS_AL_FreeRTOS</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Event.c</name>
@@ -2211,6 +2262,12 @@
             <group>
                 <name>Util</name>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\byteswap.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\byteswap.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\time_util.c</name>
                 </file>
                 <file>
@@ -2228,6 +2285,24 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\DBG_SerialDebug.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\file_io.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\file_io.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\invert_bits.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\partitions.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\partitions.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\SELF_test.c</name>
@@ -2258,6 +2333,33 @@
             </group>
             <group>
                 <name>HMC</name>
+            </group>
+            <group>
+                <name>Include</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\alarm_cfg.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\dvr_banked_cfg.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\dvr_intFlash_cfg.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\filenames.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\partition_cfg.h</name>
+                    <excluded>
+                        <configuration>Debug</configuration>
+                    </excluded>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\user_settings.h</name>
+                </file>
             </group>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>

@@ -87,7 +87,9 @@ returnStatus_t dvr_shm_init( void )
 #ifndef __BOOTLOADER
    returnStatus_t retVal = eFAILURE;
 
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: Melvin: revist once the critical section is completed
    OS_INT_disable( ); // critical section
+#endif
    if (dvrShmMutexCreated_ == true)
    {
       retVal = eSUCCESS;
@@ -100,8 +102,10 @@ returnStatus_t dvr_shm_init( void )
          retVal = eSUCCESS;
       } /* end if() */
    } /* end if() */
-   OS_INT_enable( );
 
+#if ( RTOS_SELECTION == MQX_RTOS ) 
+   OS_INT_enable( );
+#endif
    return retVal;
 #else
    return eSUCCESS;

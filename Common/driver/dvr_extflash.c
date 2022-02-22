@@ -41,9 +41,13 @@
 #include "dvr_extflash.h"
 #undef  dvr_eflash_GLOBAL
 #ifndef __BOOTLOADER
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
 #include "sys_clock.h"
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "hal_data.h"
+#endif
 #else
 #include <string.h>
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
@@ -75,11 +79,20 @@
 #endif   /* __BOOTLOADER   */
 
 #ifdef EXT_FLASH_WP_USED
+#if ( MCU_SELECTED == NXP_K24 )
 #define WRITE_PROTECT_PIN_ON()      { NV_WP_TRIS(); NV_WP_ACTIVE(); }    /* Sets WP Pin on flash active (not writable) */
 #define WRITE_PROTECT_PIN_OFF()     { NV_WP_TRIS(); NV_WP_INACTIVE(); }  /* Sets WP pin on flash inactive (writable) */
+#elif ( MCU_SELECTED == RA6E1 )
+#define WRITE_PROTECT_PIN_ON()      R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_HIGH);
+#define WRITE_PROTECT_PIN_OFF()     R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_LOW);
+#endif
 #define WRITE_PROTECT_PIN_SPI()
 #ifndef __BOOTLOADER
+#if ( MCU_SELECTED == NXP_K24 )
 #define WRITE_PROTECT_PIN_GPIO()    NV_WP_TRIS()      /* Set to GPIO Mode */
+#elif ( MCU_SELECTED == RA6E1 )
+#define WRITE_PROTECT_PIN_GPIO()
+#endif
 #endif   /* __BOOTLOADER   */
 #else
 #define WRITE_PROTECT_PIN_ON()
@@ -158,6 +171,7 @@
 #undef ASSERT
 #define ASSERT(__e) if (!(__e)) return(eFAILURE)
 #endif
+
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 /*lint -esym(749,eERASE_32K)  The symbols below may not be referenced! */
@@ -253,6 +267,9 @@ static void           enableWrites( uint8_t port );
 static void           isr_busy( void );
 static void           isr_tmr( void );
 #endif
+
+static OS_MUTEX_Obj qspiMutex_;        /* Mutex Lock for QSPI channel */
+
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
@@ -329,6 +346,7 @@ static const spiCfg_t _NV_spiCfg =
    EXT_FLASH_SPI_MODE            /* SPI Mode */
 };
 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #ifndef __BOOTLOADER
 #define NV_SPI_ChkSharedPortCfg(...)   SPI_ChkSharedPortCfg(__VA_ARGS__, &_NV_spiCfg)
 #define NV_SPI_MutexLock(...)          SPI_MutexLock(__VA_ARGS__)
@@ -337,6 +355,7 @@ static const spiCfg_t _NV_spiCfg =
 #define NV_SPI_ChkSharedPortCfg(...)
 #define NV_SPI_MutexLock(...)
 #define NV_SPI_MutexUnlock(...)
+#endif
 #endif
 
 /* ****************************************************************************************************************** */
@@ -401,6 +420,7 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
       {
          flashSemCreated_ = true;
       } /* end if() */
+#if ( MCU_SELECTED == NXP_K24 )
       /* Set up the ISR for MISO busy signal.  This is only used for the SST device. */
       if ( NULL != _int_install_isr( DVR_EFL_BUSY_IRQIsrIndex, (INT_ISR_FPTR)isr_busy, NULL ) )
       {
@@ -418,13 +438,24 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
       {
          (void)_bsp_int_init( (int)INT_LPTimer, 2, 0, (bool)true );
       }
+#elif ( MCU_SELECTED == RA6E1 )
+      OS_MUTEX_Create( &qspiMutex_);
+      /* Initializes the timer module. */
+      R_AGT_Open(&g_timer0_ctrl, &g_timer0_cfg);
+      NV_SPI_PORT_INIT( &g_qspi0_ctrl, &g_qspi0_cfg );
+      R_QSPI_SpiProtocolSet(&g_qspi0_ctrl, SPI_FLASH_PROTOCOL_EXTENDED_SPI);
+#endif
    }
 #if ( (DEBUG_HARDWARE_BUSY == 1) || (DEBUG_POLL_BUSY == 1 ) ) /* For NV device ready */
    PORTE_PCR24 = PORT_PCR_MUX(1);   /* Make GPIO   */
    GPIOE_PDDR |= ( 1 << 24 );       /* Make output */
    GPIOE_PCOR = ( 1 << 24 );        /* Set output low */
 #endif
+#if ( MCU_SELECTED == NXP_K24 )
    return ( NV_SPI_PORT_INIT( ((SpiFlashDevice_t*)pPartitionData->pDriverCfg)->port ) );
+#else
+   return ( eSUCCESS );
+#endif
 #else
    return ( eSUCCESS );
 #endif
@@ -465,9 +496,17 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
       NV_CS_TRIS();
 
       /* Initialize the SPI Driver */
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexLock(pDevice->port);
+#else
+      OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
       eRetVal = NV_SPI_PORT_OPEN( pDevice->port, &_NV_spiCfg, SPI_MASTER );
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
+#else
+      OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
 
       if ( eSUCCESS == eRetVal )
       {
@@ -502,12 +541,25 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
                enableWrites( pDevice->port ); /* Enable Writes. */
                instrData[0] = FL_INSTR_WRITE_STATUS_REG;
                instrData[1] = 0;
+#if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexLock(pDevice->port);
                NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+               OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
                NV_CS_ACTIVE();   /* Need to send instruction to Write the Flash with address byte */
+#if ( MCU_SELECTED == NXP_K24 )
                (void)NV_SPI_PORT_WRITE( pDevice->port, &instrData[0], sizeof(instrData) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+               (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instrData[0], sizeof(instrData), false); /* WR the Instr to the chip */
+#endif
+
                NV_CS_INACTIVE();
+#if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexUnlock(pDevice->port);
+#else
+               OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
             }
             /* Id the Flash Memory */
             eRetVal = IdNvMemory( pParData->pDriverCfg );
@@ -518,12 +570,24 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
                   ( (pChipId_->u8DeviceID == SST_GBP_DEVICE_ID_16) || (pChipId_->u8DeviceID == SST_GBP_DEVICE_ID_32) ) )
             {
                uint8_t instr = FL_INTSR_BLOCK_PRTC_UNLOCK;
+#if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexLock(pDevice->port);
                NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+               OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
                NV_CS_ACTIVE();
+#if ( MCU_SELECTED == NXP_K24 )
                (void)NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof(instr));
+#elif ( MCU_SELECTED == RA6E1 )
+               (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false);
+#endif
                NV_CS_INACTIVE();
+#if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexUnlock(pDevice->port);
+#else
+               OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
             }
 
 #endif
@@ -564,7 +628,11 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
    }
    if ( 0 == dvrOpenCnt_ ) /* If driver has been closed the same number of times it has been opened, close it. */
    {
+#if ( MCU_SELECTED == NXP_K24 )
       (void)SPI_ClosePort( ((SpiFlashDevice_t*)pParData->pDriverCfg)->port );
+#elif ( MCU_SELECTED == RA6E1 )
+      NV_SPI_PORT_CLOSE( &g_qspi0_ctrl );
+#endif
 
       HOLD_PIN_GPIO();
       WRITE_PROTECT_PIN_GPIO();
@@ -596,9 +664,11 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
 static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData,
                                DeviceDriverMem_t const * const * pNextDvr )
 {
+#if ( MCU_SELECTED == NXP_K24 ) // feature not used in RA6E1
 #if ( USE_POWER_MODE == 1 )
    ePwrMode_ = ePwrMode;
    SPI_pwrMode( ePwrMode );
+#endif
 #endif
    return ( eSUCCESS );
 }
@@ -907,11 +977,14 @@ static returnStatus_t dvr_ioctl( const void *pCmd, void *pData, PartitionData_t 
 {
    returnStatus_t retVal = eSUCCESS;
 
+#if ( MCU_SELECTED == NXP_K24 ) /* Allows driver to use a different drive strength; slew rate is not controllable by RA6E1 but the driver capcity
+                                   is controllable which can be changed from the RASC Configurator */
    if ( eRtosCmds == *( eDVR_EFL_Cmd_t * )pCmd )
    {
       rtosCmds_ = ( eDVR_EFL_IoctlRtosCmds_t ) * ( eDVR_EFL_IoctlRtosCmds_t * )pData;
       SPI_RtosEnable( ( bool )rtosCmds_ );
    }
+#endif
    return ( retVal );
 }
 #endif
@@ -953,10 +1026,18 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
       if ( eERASE_CHIP == eCmd )
       {
          uint8_t instr = (uint8_t)eCmd;
+#if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+         OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
          NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof(instr) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+         eRetVal = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false ); /* WR the Instr to the chip */
+#endif
       }
       else
       {
@@ -964,13 +1045,25 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
          sIA.instr = (uint8_t)eCmd;
          (void)memcpy( &sIA.address[0], (uint8_t*)&nAddr, sizeof(sIA.address) );
          Byte_Swap( (uint8_t*)&sIA.address[0], sizeof(sIA.address) );
+#if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+         OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
          NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_WRITE( pDevice->port, (uint8_t*)&sIA, sizeof(sIA) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+         eRetVal = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, (uint8_t*)&sIA, sizeof(sIA), false ); /* WR the Instr to the chip */
+#endif
       }
       NV_CS_INACTIVE(); /* Release the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
+#else
+      OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
       //WRITE_PROTECT_PIN_ON();
    }
    /* In case this is an erase resulting from a flush (especially during power down), wait for the erase to complete
@@ -1022,12 +1115,20 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
          {
 #if ( DVR_EFL_BUSY_EDGE_TRIGGERED != 0 ) /* Edge triggered */
             DVR_EFL_BUSY_IRQ_EI();                          /* Enable the ISR on MISO. */
+#if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexLock(pDevice->port);
             NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+            OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
             NV_CS_ACTIVE();                                 /* Activate the chip select  */
 #else /* Level triggered   */
+#if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexLock(pDevice->port);
             NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+            OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
             NV_CS_ACTIVE();                                 /* Activate the chip select  */
             DVR_EFL_BUSY_IRQ_EI();                          /* Enable the ISR on MISO. */
 #endif
@@ -1075,12 +1176,20 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
          setBusyTimer( 2000 );
 #if ( DVR_EFL_BUSY_EDGE_TRIGGERED != 0 ) /* Edge triggered */
          DVR_EFL_BUSY_IRQ_EI();                             /* Enable the ISR on MISO. */
+#if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+         OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
          NV_CS_ACTIVE();                                    /* Activate the chip select  */
 #else /* Level triggered   */
+#if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+         OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
          NV_CS_ACTIVE();                                    /* Activate the chip select  */
          DVR_EFL_BUSY_IRQ_EI();                             /* Enable the ISR on MISO. */
 #endif
@@ -1088,12 +1197,18 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if USE_POWER_MODE
          if ( !bTmrIsrTriggered_ )
          {
+#if ( MCU_SELECTED == NXP_K24 ) //TODO Melvin: Need to identify the freeRTOS equivalent
             SLEEP_CPU_IDLE();   /*lint !e522 function has no side effects; OK   */
+#endif
          }
 #endif
       }
       NV_CS_INACTIVE();                                     /* Deactivate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
+#else
+      OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_SPI_e );   /* Make pin SPI again MISO */
    }
    else
@@ -1102,13 +1217,22 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       uint8_t nvStatus;                                       /* Contains the Flash nvStatus. */
       uint8_t instr = FL_INSTR_READ_STATUS_REG;               /* Instruction to send to the flash device. */
 
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexLock(pDevice->port);
       NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+      OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
       NV_CS_ACTIVE();                           /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
       (void)NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof(instr) ); /* write the read command to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+      (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false ); /* write the read command to the chip */
+#endif
       nvStatus = STATUS_BUSY_MASK;                /* Set to true, it should be overwritten below. */
 
 #ifndef __BOOTLOADER
+#if ( RTOS_SELECTION == MQX_RTOS )
       /* create start and end struct to maintain elapsed time during busy loop */
       MQX_TICK_STRUCT startTime, endTime;
       bool overflow = false;
@@ -1118,12 +1242,16 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       /* Calculate sleep time to be 20 percent of busy time, we don't want to sleep entire busyTime */
       OS_TICK_Struct TickTime;
       uint32_t sleepTime = u32BusyTime_uS / ( uint32_t )( 1000 * 5 );
+#else
+      // TODO: RA6 Melvin : timers has to be introduced
+#endif
 #endif   /* BOOTLOADER  */
 
       do /* Spin here until the chip returns a nvStatus of NOT busy. */
       {
 
 #ifndef __BOOTLOADER
+#if ( RTOS_SELECTION == MQX_RTOS )
          /* Break out of loop if max write execution time of part has expired */
          if ( (uint32_t)_time_diff_microseconds(&endTime, &startTime, &overflow) > u32BusyTime_uS )
          {
@@ -1137,11 +1265,22 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 
          _time_get_ticks(&endTime); /* update endtime to the latest ticktime */
 
+#else
+         // TODO: RA6 Melvin : timers has to be introduced
+#endif
 #endif   /* BOOTLOADER  */
+#if ( MCU_SELECTED == NXP_K24 )
          (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus) ); /* check nvStatus for busy */
+#elif ( MCU_SELECTED == RA6E1 )
+         (void)NV_SPI_PORT_READ( &g_qspi0_ctrl, &nvStatus, sizeof(nvStatus) ); /* check nvStatus for busy */
+#endif
       } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
       NV_CS_INACTIVE(); /* Activate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
+#else
+      OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
    }
 #ifndef __BOOTLOADER
    busyTime_uS_ = 0;
@@ -1312,13 +1451,26 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
             sIA.instr = FL_INSTR_BYTE_PROGRAM; /* Initialize the instruction to byte program. */
             (void)memcpy( &sIA.address[0], (uint8_t*)&nDest, sizeof(sIA.address) );
             Byte_Swap( (uint8_t*)&sIA.address[0], sizeof(sIA.address) );
+#if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexLock(pDevice->port);
             NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+            OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
             NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
             (void)NV_SPI_PORT_WRITE(pDevice->port, (uint8_t*)&sIA, sizeof(sIA.instr) + sizeof(sIA.address)); /* Send instr, addr */
             (void)NV_SPI_PORT_WRITE(pDevice->port, pSrc, (uint16_t)actualBytesToWrite); /* Send data */
+#elif ( MCU_SELECTED == RA6E1 )
+            (void)NV_SPI_PORT_WRITE(&g_qspi0_ctrl, (uint8_t*)&sIA, sizeof(sIA.instr) + sizeof(sIA.address),false); /* Send instr, addr */
+            (void)NV_SPI_PORT_WRITE(&g_qspi0_ctrl, pSrc, (uint16_t)actualBytesToWrite, false); /* Send data */
+#endif
             NV_CS_INACTIVE(); /* Deactivate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexUnlock(pDevice->port);
+#else
+            OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
             setBusyTimer( pChipId_->u32PgmTimeByte_uS * actualBytesToWrite );
             eRetVal = busyCheck( pDevice, busyTime_uS_ );
          }
@@ -1340,12 +1492,24 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
                if ( pChipId_->bBusyOnSiPin ) /* Is this a 'special' part that we can check for busy the MISO pin? */
                {
                   uint8_t instr = FL_INSTR_ENABLE_SO_BUSY; /* Send instruction to Read the Flash with address byte */
+#if ( RTOS_SELECTION == MQX_RTOS )
                   NV_SPI_MutexLock(pDevice->port);
                   NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+                  OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
                   NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
                   (void)NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof(instr) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+                  (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false ); /* WR the Instr to the chip */
+#endif
                   NV_CS_INACTIVE(); /* Deactivate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
                   NV_SPI_MutexUnlock(pDevice->port);
+#else
+                  OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
                   bUseHardwareBsy_ = 1;
                }
 
@@ -1357,10 +1521,18 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
                (void)memcpy( &sIA.address[0], (uint8_t*)&nDest, sizeof(sIA.address) );
                Byte_Swap( (uint8_t*)&sIA.address[0], sizeof(sIA.address) );
                (void)memcpy( &sIA.data[0], pSrc, sizeof(sIA.data) );
+#if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexLock(pDevice->port);
                NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+               OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
                NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
                (void)NV_SPI_PORT_WRITE( pDevice->port, (uint8_t*)&sIA, sizeof(sIA) ); /* instr/addr to chip */
+#elif ( MCU_SELECTED == RA6E1 )
+               (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, (uint8_t*)&sIA, sizeof(sIA),false ); /* instr/addr to chip */
+#endif
                bWriteAaiCmd = 0;
             }
             else
@@ -1368,16 +1540,29 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
                /* This is a continuation of an AAI stream; AD, address, data, were sent previously. sIA.instr is set. Now
                   use two bytes of address field in structure to send data.   */
                (void)memcpy( &sIA.address[0], pSrc, sizeof(sIA.data) );  /* AAI command followed by 2 bytes of data   */
+#if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexLock(pDevice->port);
                NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+               OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
                NV_CS_ACTIVE(); /* Activate the chip select  */
                /* Write instr, data to the device */
                //lint -e{603,645} sIA is always set prior to executing the following line.
+#if ( MCU_SELECTED == NXP_K24 )
                (void)NV_SPI_PORT_WRITE( pDevice->port, (uint8_t*)&sIA.instr,
                                              sizeof(sIA.instr) + sizeof(sIA.data) );
+#elif ( MCU_SELECTED == RA6E1 )
+               (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, (uint8_t*)&sIA.instr,
+                                             sizeof(sIA.instr) + sizeof(sIA.data), false );
+#endif
             }
             NV_CS_INACTIVE(); /* Deactivate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexUnlock(pDevice->port);
+#else
+            OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
             setBusyTimer( pChipId_->u32PgmTimeByte_uS );
             eRetVal = busyCheck( pDevice, busyTime_uS_ );
             if ( Cnt <= 1 ) /* If there are 0-1 bytes left, need to disable the AAI function. */
@@ -1419,14 +1604,22 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 #ifndef __BOOTLOADER
 static void setBusyTimer( uint32_t busyTimer_uS )
 {
-   EXT_FLASH_TIMER_DIS();
    busyTime_uS_ = busyTimer_uS;
+#if 0 // Melvin: revist with a OS Timer
+   EXT_FLASH_TIMER_DIS();
    EXT_FLASH_TIMER_COMPARE = busyTimer_uS / 1000;  /* 1mS timer, so convert to mS */
    EXT_FLASH_TIMER_RST();               /* Reset the timer */
 #if USE_POWER_MODE
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
    EXT_FLASH_TIMER_EN();                /* Enable Interrupt & Start the timer. */
+#endif
+
+   /* Set the period of the AGT Timer. The timer is configured in microseconds in RASC Configurator */
+   R_AGT_PeriodSet( &g_timer0_ctrl, busyTimer_uS );
+
+   /* Start the timer. */
+   (void) R_AGT_Start(&g_timer0_ctrl);
 }
 #endif
 /***********************************************************************************************************************
@@ -1452,12 +1645,24 @@ static void enableWrites( uint8_t port )
 #if USE_POWER_MODE
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
+#if ( RTOS_SELECTION == MQX_RTOS )
    NV_SPI_MutexLock(port);
    NV_SPI_ChkSharedPortCfg(port);
+#else
+               OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
    NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
    ( void )NV_SPI_PORT_WRITE( port, &instr, sizeof ( instr ) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+   ( void )NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof ( instr ), false ); /* WR the Instr to the chip */
+#endif
    NV_CS_INACTIVE(); /* Activate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
    NV_SPI_MutexUnlock(port);
+#else
+   OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
    bWrEnabled_ = 1;
 }
 #endif
@@ -1481,22 +1686,46 @@ static void disableWrites( uint8_t port )
    if ( bWrEnabled_ )
    {
       uint8_t instr = FL_INSTR_WRITE_DISABLE; /* Disable the write commands in the device */
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexLock(port);
       NV_SPI_ChkSharedPortCfg(port);
+#else
+      OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
       NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
       (void)NV_SPI_PORT_WRITE( port, &instr, sizeof(instr) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+      (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false ); /* WR the Instr to the chip */
+#endif
       NV_CS_INACTIVE(); /* Activate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(port);
+#else
+      OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
 #ifndef __BOOTLOADER
       if ( bUseHardwareBsy_ && pChipId_->bBusyOnSiPin )
       {
          instr = FL_INSTR_DISABLE_SO_BUSY;
+#if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(port);
          NV_SPI_ChkSharedPortCfg(port);
+#else
+         OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
          NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
          (void)NV_SPI_PORT_WRITE( port, &instr, sizeof(instr) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+         (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false ); /* WR the Instr to the chip */
+#endif
          NV_CS_INACTIVE(); /* Activate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexUnlock(port);
+#else
+      OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
          bUseHardwareBsy_ = 0;
       }
 #endif
@@ -1533,22 +1762,38 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
       sIA.dummyByte = 0;
       (void)memcpy( &sIA.address[0], (uint8_t*)&nSrc, sizeof(sIA.address) );
       Byte_Swap( (uint8_t*)&sIA.address[0], sizeof(sIA.address) );
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexLock(pDevice->port);
       NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+      OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
       NV_CS_ACTIVE(); /* Assert the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
       eRetVal = NV_SPI_PORT_WRITE( pDevice->port, ( uint8_t * ) & sIA, sizeof ( sIA ) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+      eRetVal = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, ( uint8_t * ) & sIA, sizeof ( sIA ), true); /* WR the Instr to the chip */
+#endif
 
       if ( eSUCCESS == eRetVal )
       {
          /* Read from the SPI port */
+#if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_READ( pDevice->port, pDest, (uint16_t)Cnt ); /* Read the data back */
+#elif ( MCU_SELECTED == RA6E1 )
+         eRetVal = NV_SPI_PORT_READ( &g_qspi0_ctrl, pDest, (uint16_t)Cnt ); /* Read the data back */
+#endif
          if ( eSUCCESS == eRetVal )
          {
             INVB_invertBits( pDest, (uint16_t)Cnt ); /* Invert Every Byte Read */
          }
       }
       NV_CS_INACTIVE(); /* Release the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
+#else
+      OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
    }
    return ( eRetVal );
 }
@@ -1583,10 +1828,18 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
       if ( eSUCCESS == eRetVal )
       {
          /* Need to send instruction to Read the Flash with address byte */
+#if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
+#else
+         OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#endif
          NV_CS_ACTIVE(); /* Activate the chip select  */
+#if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof ( instr ) ); /* WR the Instr to the chip */
+#elif ( MCU_SELECTED == RA6E1 )
+         eRetVal = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof ( instr ), true ); /* WR the Instr to the chip */
+#endif
 
          if ( eSUCCESS == eRetVal )
          {
@@ -1594,7 +1847,11 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
             uint8_t index;    /* Used to index through the sDeviceId table to find a match */
 
             /* Read the Device ID */
+#if ( MCU_SELECTED == NXP_K24 )
             eRetVal = NV_SPI_PORT_READ( pDevice->port, &mfgId[0], sizeof(mfgId) ); /* Read the data back */
+#elif ( MCU_SELECTED == RA6E1 )
+            eRetVal = NV_SPI_PORT_READ( &g_qspi0_ctrl, &mfgId[0], sizeof(mfgId) ); /* Read the data back */
+#endif
             if ( eSUCCESS == eRetVal )
             {
                /* Search for the device ID in the table. */
@@ -1612,7 +1869,11 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
             }
          }
          NV_CS_INACTIVE(); /* Activate the chip select  */
+#if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexUnlock(pDevice->port);
+#else
+         OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
+#endif
       }
    } while ( !found );
    return ( eRetVal );
@@ -1685,6 +1946,7 @@ static bool timeSlice( PartitionData_t const *pParData, DeviceDriverMem_t const 
 
  **********************************************************************************************************************/
 #ifndef __BOOTLOADER
+#if 0 // TODO: RA6 Melvin
 static void isr_busy( void )
 {
    DVR_EFL_BUSY_IRQ_DI();              /* Disable the ISR */
@@ -1696,7 +1958,9 @@ static void isr_busy( void )
    bBusyIsr_ = true;
 #endif
 }
+#endif
 #endif   /* BOOTLOADER  */
+#if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
 
    Function Name: isr_tmr
@@ -1722,9 +1986,34 @@ static void isr_tmr( void )
    LPTMR0_CSR &= ~( LPTMR_CSR_TEN_MASK | LPTMR_CSR_TIE_MASK );
 }
 #endif
+#elif ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: g_timer0_callback
+
+   Purpose: Timer ISR callback for AGT timer 0
+
+   Arguments:  None
+
+   Returns: None
+
+   Side Effects: N/A
+
+   Reentrant Code: No
+
+ **********************************************************************************************************************/
+void g_timer0_callback (timer_callback_args_t * p_args)
+{
+    if (TIMER_EVENT_CYCLE_END == p_args->event)
+    {
+        bTmrIsrTriggered_ = 1;
+    }
+}
+#endif
 /* ****************************************************************************************************************** */
 /* Unit Test Code */
 
+#define TM_DVR_EXT_FL_UNIT_TEST 1  //TODO: remove this after #include "CompileSwitch.h" is included in project.h
 #ifdef TM_DVR_EXT_FL_UNIT_TEST
 #include "partitions.h"
 #include "partition_cfg.h"
@@ -1766,7 +2055,11 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
    PartitionData_t const * partitionData;    /* Pointer to partition information   */
    uint8_t                 startPattern;
 
+#if 0 //TODO Melvin: random number generator to be implemented
    startPattern = ( uint8_t )aclara_rand();
+#else
+   startPattern = 0x00;
+#endif
    /* Find the NV test partition - don't care about update rate   */
    retVal = PAR_partitionFptr.parOpen( &partitionData, ePART_NV_TEST, 0xffffffff );
    if ( eSUCCESS == retVal )
@@ -1787,7 +2080,9 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
                failCount = incCountLimit( failCount, 0xffff );
             }
 #ifndef __BOOTLOADER
+#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
             DBG_printf( "NV Test - Write failed at 0x%x, len = 0x%x", 0, partitionData->lDataSize );
+#endif
 #endif   /* BOOTLOADER  */
          }
       }
@@ -1803,20 +2098,24 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
 
                if ( eSUCCESS != PAR_partitionFptr.parRead( &unitTestBuf[0], 0, sizeof( unitTestBuf ), partitionData ))
                {
+#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
                   DBG_printf( "NV Test - Read failed at 0x%x, len = 0x%x", 0, sizeof( unitTestBuf ) );
+#endif
                }
                for ( uint32_t j = 0; j < sizeof( unitTestBuf ); j++ )
                {
                   if( unitTestBuf[j] != (uint8_t)( startPattern + j ) )
                   {
                      failCount = incCountLimit( failCount, 0xffff );
+#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
                      DBG_printf( "NV Test - Compare failed at 0x%x, is = 0x%02x, s/b 0x%02x\n",
                                  partitionData->PhyStartingAddress + j,
                                  unitTestBuf[j], (uint8_t)( startPattern + j ) );
+#endif
+                   }
                   }
                }
             }
-         }
 #if 0 /* DG: Dead Code */
          else
          {

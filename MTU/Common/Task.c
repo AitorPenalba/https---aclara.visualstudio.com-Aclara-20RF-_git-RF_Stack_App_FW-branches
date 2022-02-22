@@ -304,7 +304,7 @@ const OS_TASK_Template_t Task_template_list[] =
    { eSTRT_TSK_IDX,         STRT_StartupTask,           512,      2,    (char *)pTskName_Strt,   0,            (void *)0, &tst_handle },
    { eDBG_TSK_IDX,          DBG_CommandLineTask,        512,      3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
    { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512,      4,    (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
-   { eTEST_TSK_IDX,         SELF_testTask,              512,      14,   (char *)pTskName_Test,   0,            (void *)0, &self_tst_tsk_handle },
+   { eTEST_TSK_IDX,         SELF_testTask,              1024,      14,   (char *)pTskName_Test,   0,            (void *)0, &self_tst_tsk_handle },
    { eTIME_TSK_IDX,         TIME_SYS_HandlerTask,       512,      15,   (char *)pTskName_TimeSys, 0,         (void *)0, &time_sys_tsk_handle },
    {    0  }
 };
