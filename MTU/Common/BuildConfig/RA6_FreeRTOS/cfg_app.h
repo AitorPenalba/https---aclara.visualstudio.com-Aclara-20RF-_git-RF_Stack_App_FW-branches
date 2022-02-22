@@ -273,7 +273,9 @@ typedef enum
    eKV
 } eMeterType_t;   /* If only one meter is supported, it should be the first in the list. */
 
+#if 0 // TODO: RA6E1 - Meter time support
 #define SUPPORT_METER_TIME_FORMAT      1              /* Time conversion utilities should support meter time   */
+#endif
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* Meter Interface Definitions */
@@ -349,7 +351,9 @@ typedef enum
 #define REV_TC_TAMPER_TRIP_POINT   ((int64_t)-255)     /* Maximum reverse energy before setting the tamper flag. */
 #define REV_TC_TAMPER_FLAG_MASK    ((uint16_t)0x8000)  /* Bytes are swapped! Sets bit 7 over TWACS */
 
+#if 0 // TODO: RA6E1 - Event logging support
 #define ENABLE_METER_EVENT_LOGGING 1     /* Set non-zero to support meter event logs in meters that are capable.  */
+#endif
 
 /* ****************************************************************************************************************** */
 #endif
@@ -477,7 +481,9 @@ enum HMC_APP_API_RPLY
    The exception is specialized modules like buffer management */
 typedef struct
 {
+#if 0 // TODO: RA6E1 - Queue handling
    OS_QUEUE_Element  QueueElement;  /* QueueElement as defined by MQX */
+#endif
    uint8_t           msgType;       // Type of message
    void              *pData;
 } sysQueueEntry_t;
@@ -515,7 +521,9 @@ typedef enum
 /* Data format to pass to the Any Application - This is the 'Standard' Queue Format */
 typedef struct
 {
+#if 0 // TODO: RA6E1 - Queue handling
    OS_QUEUE_Element  QueueElement;   /* QueueElement as defined by MQX */
+#endif
    uint8_t ucPacketFormat; /* Pointer style or Structure, 0 = Pointers, 1 = Structure */
    uint8_t ucMsgType; /* Type of message */
 

@@ -117,10 +117,12 @@ HEEP_UTIL_GLOBALS uint16_t HEEP_GetNextReadingInfo(void *payloadBuf, uint16_t *b
                                                         uint8_t *readingValTypecast, int8_t *readingValPow10,
                                                         uint8_t *readingFlags);
 HEEP_UTIL_GLOBALS uint8_t HEEP_getPowerOf10Code(uint8_t ch, int64_t *val);
+#if 0 // TODO: RA6E1 - Heep support
+HEEP_UTIL_GLOBALS uint8_t HEEP_getMinByteNeeded( int64_t val, ReadingsValueTypecast typecast, uint16_t valueSizeInBytes );
+#endif
 HEEP_UTIL_GLOBALS void    HEEP_initHeader(HEEP_APPHDR_t *hdr);
 HEEP_UTIL_GLOBALS void OR_PM_MsgHandler(HEEP_APPHDR_t *heepReqHdr, void *payloadBuf, uint16_t length);
-#if 0 // TODO: RA6 [name_Balaji]:Add meterReadingType for FreeRTOS
-HEEP_UTIL_GLOBALS uint8_t HEEP_getMinByteNeeded( int64_t val, ReadingsValueTypecast typecast, uint16_t valueSizeInBytes );
+#if 0 // TODO: RA6E1 - Heep support
 HEEP_UTIL_GLOBALS returnStatus_t HEEP_util_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t NWK_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t DTLS_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr);
@@ -152,7 +154,7 @@ struct ui_list_s
    uint16_t data[MAX_UI_LIST_ELEMENTS];
 };
 
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]:Add meterReadingType for FreeRTOS
+#if 0 // TODO: RA6E1 - Heep support
 void HEEP_Put_Boolean( struct readings_s *p, meterReadingType ReadingType, uint8_t value);
 void HEEP_Put_HexBinary ( struct readings_s *p, meterReadingType ReadingType,  uint8_t const Data[], uint16_t  Size);
 void HEEP_Put_DateTimeValue( struct readings_s *p, meterReadingType   ReadingType,TIMESTAMP_t const *DateTime);
@@ -163,8 +165,6 @@ void HEEP_Put_U32( struct readings_s *p, meterReadingType ReadingType, uint32_t 
 void HEEP_Put_U64( struct readings_s *p, meterReadingType ReadingType, uint64_t u64_value);
 void HEEP_Add_ReadingType(struct readings_s *p,  meterReadingType ReadingType);
 void HEEP_Put_ui_list(struct readings_s *p, uint16_t ReadingType, struct ui_list_s const *ui_list);
-#elif (RTOS_SELECTION == FREE_RTOS)
-  
 #endif
 void HEEP_ReadingsInit(
    struct readings_s *readings,
@@ -174,7 +174,7 @@ void HEEP_ReadingsInit(
 // todo: 1/18/2016 4:18:10 PM [BAH] - These should be somewhere else!
 uint64_t htonll(uint64_t value);
 uint64_t ntohll(uint64_t value);
-#if ( MAC_LINK_PARAMETERS == 1 ) 
+#if ( MAC_LINK_PARAMETERS == 1 )
 uint8_t  HEEP_scaleNumber( double Input, int16_t InputLow, int16_t InputHigh );
 float    HEEP_UnscaleNumber( uint8_t ScaledNum, int16_t InputLow, int16_t InputHigh );
 #endif

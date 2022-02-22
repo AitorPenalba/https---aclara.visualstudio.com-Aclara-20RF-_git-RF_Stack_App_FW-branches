@@ -193,6 +193,60 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
    return ( FuncStatus );
 } /* end OS_SEM_Pend () */
 
+#if (RTOS_SELECTION == FREE_RTOS)
+/*******************************************************************************
+
+  Function name: OS_SEM_POST_fromISR
+
+  Purpose: This function will post to the passed in Semaphore
+
+  Arguments: SemHandle - pointer to the Handle structure of the Semaphore
+
+  Returns: None
+
+  Notes:
+
+*******************************************************************************/
+void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
+{
+   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+   if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
+   {
+      /* TODO: */
+//      APP_ERR_PRINT("OS_SEM_POST!");
+//      EVL_FirmwareError( "OS_SEM_Post" , file, line );
+   }
+
+   /* If xHigherPriorityTaskWoken was set to true you we should yield.  The actual macro used here is port specific. */
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+} /* end OS_SEM_POST_fromISR () */
+
+/*******************************************************************************
+
+  Function name: OS_SEM_PEND_fromISR
+
+  Purpose: This function will wait for the passed in Semaphore in ISR context
+
+  Arguments: SemHandle - pointer to the Handle structure of the Semaphore
+
+  Returns: FuncStatus - True if Semaphore pended successfully, False if error or if timed out.
+
+  Notes:
+
+*******************************************************************************/
+void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
+{
+   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+   if( pdFAIL == xSemaphoreTakeFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
+   {
+      /* TODO: */
+//      APP_ERR_PRINT("OS_SEM_PEND!");
+//      EVL_FirmwareError( "OS_SEM_Pend" , file, line );
+   }
+} /* end OS_SEM_PEND_fromISR () */
+
+#endif
+
 /*******************************************************************************
 
   Function name: OS_SEM_Reset

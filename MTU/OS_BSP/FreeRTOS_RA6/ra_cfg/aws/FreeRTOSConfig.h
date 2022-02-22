@@ -33,7 +33,7 @@
             #define configUSE_DAEMON_TASK_STARTUP_HOOK (0)
             #endif
             #ifndef configUSE_TICK_HOOK
-            #define configUSE_TICK_HOOK (0)
+            #define configUSE_TICK_HOOK (1)
             #endif
             #ifndef configCPU_CLOCK_HZ
             #define configCPU_CLOCK_HZ (SystemCoreClock)

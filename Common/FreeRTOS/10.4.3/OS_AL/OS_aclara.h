@@ -89,6 +89,11 @@
 #define OS_SEM_Post(SemHandle)                           OS_SEM_POST(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend(SemHandle, TimeoutMs)                OS_SEM_PEND(SemHandle, TimeoutMs, __FILE__, __LINE__)
 
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+#define OS_SEM_Post_fromISR(SemHandle)                   OS_SEM_POST_fromISR(SemHandle, __FILE__, __LINE__)
+#define OS_SEM_Pend_fromISR(SemHandle)                   OS_SEM_PEND_fromISR(SemHandle, __FILE__, __LINE__)
+#endif
+
 #if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 /* TYPE DEFINITIONS */
 typedef LWEVENT_STRUCT        OS_EVNT_Obj, *OS_EVNT_Handle;
@@ -288,6 +293,11 @@ bool OS_SEM_Create ( OS_SEM_Handle SemHandle );
 void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line );
 bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t TimeoutMs, char *file, int line );
 void OS_SEM_Reset ( OS_SEM_Handle SemHandle );
+
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line );
+void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line );
+#endif
 
 #if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 void OS_TASK_Create_Idle ( void );

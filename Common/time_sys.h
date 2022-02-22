@@ -28,10 +28,12 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #include "project.h"
+#if 0 // TODO: RA6E1 - Support to DST and mac modules - Porting for Systick timer
 #include "HEEP_util.h"
 #if ( EP == 1 )
 #include "buffer.h"
 #include "MAC_Protocol.h"
+#endif
 #endif
 
 #ifdef TIME_SYS_GLOBAL
@@ -121,8 +123,10 @@ typedef struct
 
 typedef struct
 {
+#if 0 // TODO: RA6E1 - Queue handling in FreeRTOS
    OS_QUEUE_Handle pQueueHandle;   /* Queue handle, if not NULL, send message */
    OS_MSGQ_Obj     *pMQueueHandle; /* Message Queue handle, if not NULL, send message */
+#endif
    uint32_t ulAlarmDate;           /* Alarm Date, if this value = 0, it is a daily alarm */
    uint32_t ulAlarmTime;           /* Alarm Time */
    uint8_t ucAlarmId;              /* Alarm Id */
@@ -146,8 +150,10 @@ typedef struct
 
 typedef struct
 {  //Only one of the handles below should be valid.
+#if 0 // TODO: RA6E1 - Queue handling in FreeRTOS
    OS_QUEUE_Handle pQueueHandle;  /* Queue handle, if not NULL, send message */
    OS_MSGQ_Handle  pMQueueHandle; /* Message Queue handle, if not NULL, send message */
+#endif
    uint32_t ulPeriod;             /* Period */
    uint32_t ulOffset;             /* Offset or local shift time in system ticks */
    uint8_t ucAlarmId;             /* Alarm Id */
@@ -166,9 +172,16 @@ returnStatus_t TIME_SYS_Init(void);
 #ifdef __mqx_h__
 void TIME_SYS_HandlerTask(uint32_t Arg0);
 #endif /* __mqx_h__ */
+// TODO: RA6E1 - Single declaration to support both
+#if (RTOS_SELECTION == FREE_RTOS)
+void TIME_SYS_HandlerTask( taskParameter );
+#endif
+
 #if ( EP == 1 )
 void           TIME_SYS_SetDSTAlarm(uint32_t date, uint32_t time);
+#if 0 // TODO: RA6E1 - Not ported for now
 returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd);
+#endif
 uint32_t       TIME_SYS_GetInstallationDateTime(void);
 void           TIME_SYS_SetInstallationDateTime(uint32_t dateTime);
 uint16_t       TIME_SYS_GetTimeAcceptanceDelay( void );
@@ -204,7 +217,9 @@ returnStatus_t TIME_SYS_GetPeriodicAlarm( tTimeSysPerAlarm *pData, uint8_t alarm
 returnStatus_t TIME_SYS_AddPerAlarm(tTimeSysPerAlarm *pData);
 returnStatus_t TIME_SYS_DeleteAlarm(uint8_t alarmId);
 
+#if 0 // TODO: RA6E1 Support OR_PM functionalities - Support only to Systick basic functionalities
 returnStatus_t TIME_SYS_OR_PM_Handler(enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr);
+#endif
 
 uint8_t TIME_SYS_TimeState(void);
 void    TIME_SYS_SetTimeState(uint8_t state);

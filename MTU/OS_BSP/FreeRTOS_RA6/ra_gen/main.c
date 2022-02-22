@@ -110,7 +110,7 @@
 //                    SampleTST_create();
 //                    OS_TASK_Create_All ( true );
                     OS_TASK_Create_STRT();
-                    
+
                     /* Start the scheduler. */
                     vTaskStartScheduler();
                     return 0;
@@ -145,7 +145,7 @@ bool ADC_UnitTest(void){ // TODO: RA6 [name_Balaji]:Move UnitTest to RunSelfTest
      return 1;
    }
     return 0;
-}    
+}
 #endif
 
                 #if configSUPPORT_STATIC_ALLOCATION

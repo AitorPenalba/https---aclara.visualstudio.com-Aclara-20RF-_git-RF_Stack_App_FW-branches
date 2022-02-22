@@ -26,12 +26,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#if 0 // TODO: RA6E1 - Support PHY
 #include "PHY_Protocol.h"
+#endif
 #define TIME_UTIL_GLOBAL
 #include "time_util.h"
 #undef  TIME_UTIL_GLOBAL
 #if ( EP == 1 )
+#if 0 // TODO: RA6E1 -  DST support to be added
 #include "time_DST.h"
+#endif
 #endif
 
 /* CONSTANTS */
@@ -608,8 +612,14 @@ returnStatus_t TIME_UTIL_GetTimeInDateFormat(sysTime_dateFormat_t *pDateTime)
    // would have been the place to do it but too much code call this function to convert between formats and I can't
    // garantee that .tictoc and .elapsedCycle would be properly initialized without doing an audit of every call.
    // I can however garantee that TIME_SYS_GetSysDateTime initialized those 2 fields properly.
+#if (RTOS_SELECTION == MQX_RTOS)
    freq = ((SYST_RVR + 1) * BSP_ALARM_FREQUENCY)/1000; // Adjust for msec
    additionalMsec = ((currentSysTime.tictoc * (SYST_RVR + 1)) + currentSysTime.elapsedCycle) / freq; // This increases the time resolution from 10msec to msec
+#elif (RTOS_SELECTION == FREE_RTOS)
+   // TODO: RA6E1 - remove hardcoding of BSP_ALARM_FREQUENCY
+   freq = ((SysTick->LOAD + 1) * 200)/1000; // Adjust for msec
+   additionalMsec = ((currentSysTime.tictoc * (SysTick->LOAD + 1)) + currentSysTime.elapsedCycle) / freq; // This increases the time resolution from 10msec to msec
+#endif
    pDateTime->msec += (uint16_t)additionalMsec;
 
    return(retVal == true?eSUCCESS:eFAILURE);
@@ -768,6 +778,7 @@ returnStatus_t TIME_UTIL_SetTimeFromSeconds( uint32_t seconds, uint32_t fraction
 
 }
 
+#if 0 // TODO: RA6E1 Support to OR_PM handler
 /***********************************************************************************************************************
 
    Function Name: TIME_UTIL_OR_PM_Handler
@@ -819,7 +830,7 @@ returnStatus_t TIME_UTIL_OR_PM_Handler( enum_MessageMethod action, meterReadingT
    }
    return ( retVal );
 }
-
+#endif
 
 /***********************************************************************************************************************
 
@@ -906,15 +917,24 @@ uint64_t TIME_UTIL_GetTimeInQSecFracFormat(void)
 
       msInFracSeconds =  ((uint64_t)(currentSysTime.time % TIME_TICKS_PER_SEC) << 32) / 1000; // Convert msec in fractional second
 
+#if (RTOS_SELECTION == MQX_RTOS)
       syst_rvr = SYST_RVR+1;
+#elif (RTOS_SELECTION == FREE_RTOS)
+      syst_rvr = SysTick->LOAD+1;
+#endif
       // Sanity check in case RVR changed after elapsed time was computed.
       // This should be very rare and might not even happen but elapsedCycle should never be larger than SYST_RVR
       if ( currentSysTime.elapsedCycle > syst_rvr ) {
          currentSysTime.elapsedCycle = syst_rvr;
       }
+#if (RTOS_SELECTION == MQX_RTOS)
       elapsedCycle = ((((uint64_t)currentSysTime.tictoc * (uint64_t)syst_rvr) + (uint64_t)currentSysTime.elapsedCycle) << 32) /
                        (uint64_t)((uint64_t)syst_rvr * (uint64_t)BSP_ALARM_FREQUENCY); // Convert the time spend between Systick in fractional second
-
+#elif (RTOS_SELECTION == FREE_RTOS)
+      // TODO: RA6E1 - remove hardcoding of BSP_ALARM_FREQUENCY
+      elapsedCycle = ((((uint64_t)currentSysTime.tictoc * (uint64_t)syst_rvr) + (uint64_t)currentSysTime.elapsedCycle) << 32) /
+                       (uint64_t)((uint64_t)syst_rvr * (uint64_t)200); // Convert the time spend between Systick in fractional second
+#endif
       // Avoid overflow. That should not happen but better be safe.
       // If it does, saturate.
       if ( ((uint64_t)msInFracSeconds + (uint64_t)elapsedCycle) > 0xFFFFFFFF ) {
@@ -983,6 +1003,8 @@ void TIME_UTIL_PrintQSecFracFormat(char const * str, uint64_t QSecFrac)
 
    sec  = (uint32_t)(QSecFrac >> 32);
    usec = (uint32_t)(((QSecFrac & 0xFFFFFFFF) * 1000000ULL) >> 32);
+#if 0 // TODO: RA6E1 - Support prints functionalities
    INFO_printf("%s fracFormat: %llu %u.%06u", str, QSecFrac, sec, usec);
+#endif
 }
 

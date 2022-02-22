@@ -39,12 +39,15 @@
 
 //#include "pwr_task.h"
 //#include "MIMT_info.h"
+#if 0 // TODO: RA6: Add later
 #if ( EP == 1 )
 #include "pwr_last_gasp.h"
 #include "vbat_reg.h"
 #include "time_DST.h"
 #include "crc16_m.h"
 #endif
+#endif
+
 //#include "mode_config.h"
 //#include "MFG_Port.h"
 //#include "MAC_Protocol.h"
@@ -109,6 +112,7 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 //uint32_t DBG_CommandLine_SM_Set(    uint32_t argc, char *argv[] );
 //uint32_t DBG_CommandLine_SM_Get(    uint32_t argc, char *argv[] );
 
+#if 0 // TODO: RA6: Add later
 #if (EP == 1)
 #include "smtd_config.h"
 #include "dfwtd_config.h"
@@ -133,6 +137,8 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #include "hmc_time.h"
 #endif
 #endif
+#endif // #if 0
+
 #if ( NOISE_HIST_ENABLED == 1 )
 #include "NH_NoiseHistData.h"
 #endif
@@ -1005,11 +1011,13 @@ static void DBG_CommandLine_Process ( void )
             /***************************************************************************
                Reset the rfTestmode timer upon execution of a valid command
             ****************************************************************************/
+#if 0 // TODO: RA6: Add later
 #if ( EP == 1 )
             if ( MODECFG_get_rfTest_mode() != 0 )
             {
                MFGP_rfTestTimerReset();
             }
+#endif
 #endif
             break;
          } /* end if() */

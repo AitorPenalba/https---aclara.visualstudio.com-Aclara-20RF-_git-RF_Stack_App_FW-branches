@@ -135,6 +135,8 @@
 #include "STRT_Startup.h"
 #include "version.h"
 #include "DBG_SerialDebug.h"
+#include "time_sys.h"
+
 /* #DEFINE DEFINITIONS */
 #define PRINT_CPU_STATS_IN_SEC 5 /* Print the Cpu statistics every x seconds */
 #define PRINT_STACK_USAGE_AND_TASK_SUMMARY 28 /* Print after x seconds of 100% CPU load */
@@ -165,7 +167,12 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
    INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
-   INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position        
+   INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
+   INIT( TIME_SYS_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),   // NOTE: This needs to be called as soon as possible in order to create the time mutexes early on
+                                                                                    //       because the error logging (ERR_printf, DBG_logPrintf, etc) uses the clock
+                                                                                    //       to time stamp the message and, in the process, uses the time mutex.
+                                                                                    // NOTE2: This needs to be after FIO_init since it uses the file system.
+   INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
 #if 0
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS

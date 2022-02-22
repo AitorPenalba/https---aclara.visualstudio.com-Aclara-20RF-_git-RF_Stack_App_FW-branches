@@ -47,6 +47,8 @@
 
 //#include "timer_util.h"
 
+// TODO: RA6E1 - Set inside ENABLE_TIME_SYS_TASKS macro
+#include "time_sys.h"
 #if ENABLE_TIME_SYS_TASKS
 #include "time_sys.h"
 #endif
@@ -284,6 +286,7 @@ static const char pTskName_SdPsListener[]        = "PSLSNR";
 static const char pTskName_SdPreambleDetector[]  = "PREDET";
 static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
 static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
+static const char pTskName_TimeSys[]             = "TIMESYS";
 
 #if ( RTOS_SELECTION == FREE_RTOS )
 /* TODO: RA6: Move the following task Handles to appropriate location */
@@ -291,6 +294,7 @@ TaskHandle_t tst_handle;
 TaskHandle_t dbg_tsk_handle;
 TaskHandle_t dbg_tx_tsk_handle;
 TaskHandle_t self_tst_tsk_handle;
+TaskHandle_t time_sys_tsk_handle;
 
 /* TODO: RA6: DG: Investigate if we can create one Task List that works for both FreeRTOS and MQX */
 /* TODO: RA6: FreeRTOS: Note: FreeRTOS need the Stack size in words */
@@ -301,6 +305,7 @@ const OS_TASK_Template_t Task_template_list[] =
    { eDBG_TSK_IDX,          DBG_CommandLineTask,        512,      3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
    { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512,      4,    (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
    { eTEST_TSK_IDX,         SELF_testTask,              512,      14,   (char *)pTskName_Test,   0,            (void *)0, &self_tst_tsk_handle },
+   { eTIME_TSK_IDX,         TIME_SYS_HandlerTask,       512,      15,   (char *)pTskName_TimeSys, 0,         (void *)0, &time_sys_tsk_handle },
    {    0  }
 };
 

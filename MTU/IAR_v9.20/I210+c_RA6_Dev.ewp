@@ -2208,6 +2208,15 @@
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\TickTime.c</name>
                 </file>
             </group>
+            <group>
+                <name>Util</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\time_util.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\time_util.h</name>
+                </file>
+            </group>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\DBG_CommandLine.c</name>
             </file>
@@ -2225,6 +2234,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\SELF_test.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\time_sys.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\time_sys.h</name>
             </file>
         </group>
         <group>

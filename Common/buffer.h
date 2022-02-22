@@ -244,7 +244,7 @@ BM_EXTERN const bufferPoolParams_t BM_bufferPoolParams[14]   /* Note:  Must chan
  */
 typedef struct
 {
-#if 0 /* TODO: Queue handle for FreeRTOS */
+#if 0 // TODO: RA6E1 - Queue support
     OS_QUEUE_Element x;            /*!< ! Must be here for MQX to use this buffer in messages. */
 #endif
     eSysFormat_t     eSysFmt;      /**< User filled - This is the format of the buffer */

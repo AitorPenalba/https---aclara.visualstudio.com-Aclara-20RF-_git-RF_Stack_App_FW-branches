@@ -46,7 +46,7 @@
 
 #include "features.h"   /* Need bootloader defined (or not) before cfg_app.h  */
 #include "cfg_hal.h"
-//#include "cfg_app.h"
+#include "cfg_app.h"
 
 //#include "CompileSwitch.h" /* MUST come AFTER cfg_app.h which influences choices in CompileSwitch.h   */
 #ifndef __BOOTLOADER
@@ -54,7 +54,7 @@
 #endif
 #include "error_codes.h"
 //#include "heep.h"
-//#include "BSP_aclara.h"
+#include "BSP_aclara.h"
 
 /* TODO: DG: Move these to appropriate place */
 //#include "SEGGER_RTT/SEGGER_RTT.h"

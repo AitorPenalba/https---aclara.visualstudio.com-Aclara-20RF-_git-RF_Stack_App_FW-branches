@@ -1169,6 +1169,8 @@ static returnStatus_t PowerFailDebounce( void )
 #endif
    return ( brownOut );
 }
+
+#if 0 // TODO: RA6: Add later
 #if ( EP == 1 )
 /***********************************************************************************************************************
 
@@ -1275,4 +1277,5 @@ returnStatus_t PWR_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
    }
    return ( retVal );
 }
+#endif
 #endif
