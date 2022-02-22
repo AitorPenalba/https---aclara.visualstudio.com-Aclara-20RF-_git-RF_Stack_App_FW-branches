@@ -21,7 +21,7 @@ const agt_extended_cfg_t g_timer0_extend =
 const timer_cfg_t g_timer0_cfg =
 {
     .mode                = TIMER_MODE_ONE_SHOT,
-    /* Actual period: 0.0021845333333333334 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x10000, .duty_cycle_counts = 0x8000, .source_div = (timer_source_div_t)0,
+    /* Actual period: 0.00001 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x12c, .duty_cycle_counts = 0x96, .source_div = (timer_source_div_t)0,
     .channel             = 0,
     .p_callback          = g_timer0_callback,
     /** If NULL then do not add & */
@@ -31,7 +31,7 @@ const timer_cfg_t g_timer0_cfg =
     .p_context           = &NULL,
 #endif
     .p_extend            = &g_timer0_extend,
-    .cycle_end_ipl       = (BSP_IRQ_DISABLED),
+    .cycle_end_ipl       = (10),
 #if defined(VECTOR_NUMBER_AGT0_INT)
     .cycle_end_irq       = VECTOR_NUMBER_AGT0_INT,
 #else

@@ -35,6 +35,7 @@
             [28] = spi_eri_isr, /* SPI1 ERI (Error) */
             [29] = fcu_frdyi_isr, /* FCU FRDYI (Flash ready interrupt) */
             [30] = fcu_fiferr_isr, /* FCU FIFERR (Flash access error interrupt) */
+            [31] = agt_int_isr, /* AGT0 INT (AGT interrupt) */
         };
         const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENTRIES] =
         {
@@ -69,5 +70,6 @@
             [28] = BSP_PRV_IELS_ENUM(EVENT_SPI1_ERI), /* SPI1 ERI (Error) */
             [29] = BSP_PRV_IELS_ENUM(EVENT_FCU_FRDYI), /* FCU FRDYI (Flash ready interrupt) */
             [30] = BSP_PRV_IELS_ENUM(EVENT_FCU_FIFERR), /* FCU FIFERR (Flash access error interrupt) */
+            [31] = BSP_PRV_IELS_ENUM(EVENT_AGT0_INT), /* AGT0 INT (AGT interrupt) */
         };
         #endif

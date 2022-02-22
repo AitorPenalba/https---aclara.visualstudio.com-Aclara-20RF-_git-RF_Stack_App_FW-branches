@@ -3,7 +3,7 @@
         #define VECTOR_DATA_H
                 /* Number of interrupts allocated */
         #ifndef VECTOR_DATA_IRQ_COUNT
-        #define VECTOR_DATA_IRQ_COUNT    (31)
+        #define VECTOR_DATA_IRQ_COUNT    (32)
         #endif
         /* ISR prototypes */
         void sci_uart_rxi_isr(void);
@@ -89,4 +89,6 @@
         #define FCU_FRDYI_IRQn          ((IRQn_Type) 29) /* FCU FRDYI (Flash ready interrupt) */
         #define VECTOR_NUMBER_FCU_FIFERR ((IRQn_Type) 30) /* FCU FIFERR (Flash access error interrupt) */
         #define FCU_FIFERR_IRQn          ((IRQn_Type) 30) /* FCU FIFERR (Flash access error interrupt) */
+        #define VECTOR_NUMBER_AGT0_INT ((IRQn_Type) 31) /* AGT0 INT (AGT interrupt) */
+        #define AGT0_INT_IRQn          ((IRQn_Type) 31) /* AGT0 INT (AGT interrupt) */
         #endif /* VECTOR_DATA_H */

@@ -660,8 +660,8 @@ FSP Configuration
       General: Name: g_timer0
       General: Channel: 0
       General: Mode: One-Shot
-      General: Period: 0x10000
-      General: Period Unit: Raw Counts
+      General: Period: 10
+      General: Period Unit: Microseconds
       Output: Duty Cycle Percent (only applicable in PWM mode): 50
       General: Count Source: PCLKB
       Output: AGTOA Output: Disabled
@@ -672,5 +672,5 @@ FSP Configuration
       Input: Enable Pin: Enable Pin Not Used
       Input: Trigger Edge: Trigger Edge Rising
       Interrupts: Callback: g_timer0_callback
-      Interrupts: Underflow Interrupt Priority: Disabled
+      Interrupts: Underflow Interrupt Priority: Priority 10
       
