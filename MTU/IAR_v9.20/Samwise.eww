@@ -22,6 +22,9 @@
         <path>$WS_DIR$\I210+c_RA6_Dev.ewp</path>
     </project>
     <project>
+        <path>$WS_DIR$\I210+c_RA6_Dev_all.ewp</path>
+    </project>
+    <project>
         <path>$WS_DIR$\KV2c_K24.ewp</path>
     </project>
     <project>
@@ -38,7 +41,14 @@
     </project>
     <batchBuild>
         <batchDefinition>
-            <name>GE_KV2c_Debug</name>
+            <name>Bootloader K24</name>
+            <member>
+                <project>bootLoader_K24</project>
+                <configuration>Debug</configuration>
+            </member>
+        </batchDefinition>
+        <batchDefinition>
+            <name>EdgeGateway K24</name>
             <member>
                 <project>bsp_ep_k24f120m</project>
                 <configuration>Debug</configuration>
@@ -48,69 +58,20 @@
                 <configuration>debug</configuration>
             </member>
             <member>
-                <project>wolfSSL-Lib_MTU</project>
+                <project>wolfSSL-Lib_K24_MQX</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>bootLoader</project>
+                <project>bootLoader_K24</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>GE_KV2c</project>
-                <configuration>Debug</configuration>
-            </member>
-        </batchDefinition>
-        <batchDefinition>
-            <name>GE_KV2c_Release</name>
-            <member>
-                <project>bsp_twrk24f120m</project>
-                <configuration>Release</configuration>
-            </member>
-            <member>
-                <project>psp_twrk24f120m</project>
-                <configuration>Release</configuration>
-            </member>
-            <member>
-                <project>wolfSSL-Lib</project>
-                <configuration>Release</configuration>
-            </member>
-            <member>
-                <project>GE_KV2c</project>
-                <configuration>Release</configuration>
-            </member>
-        </batchDefinition>
-        <batchDefinition>
-            <name>Libs - Debug</name>
-            <member>
-                <project>bsp_ep_k24f120m</project>
-                <configuration>debug</configuration>
-            </member>
-            <member>
-                <project>psp_ep_k24f120m</project>
-                <configuration>debug</configuration>
-            </member>
-            <member>
-                <project>wolfSSL-Lib_MTU</project>
+                <project>EdgeGateway_K24</project>
                 <configuration>Debug</configuration>
             </member>
         </batchDefinition>
         <batchDefinition>
-            <name>Libs - Release</name>
-            <member>
-                <project>bsp_ep_k24f120m</project>
-                <configuration>release</configuration>
-            </member>
-            <member>
-                <project>psp_ep_k24f120m</project>
-                <configuration>release</configuration>
-            </member>
-            <member>
-                <project>wolfSSL-Lib_MTU</project>
-                <configuration>Release</configuration>
-            </member>
-        </batchDefinition>
-        <batchDefinition>
-            <name>Debug</name>
+            <name>I210+c K24</name>
             <member>
                 <project>bsp_ep_k24f120m</project>
                 <configuration>Debug</configuration>
@@ -120,32 +81,20 @@
                 <configuration>debug</configuration>
             </member>
             <member>
-                <project>wolfSSL-Lib_MTU</project>
+                <project>wolfSSL-Lib_K24_MQX</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>bootLoader</project>
+                <project>bootLoader_K24</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>Aclara_DA</project>
-                <configuration>Debug</configuration>
-            </member>
-            <member>
-                <project>Aclara_LC</project>
-                <configuration>Debug</configuration>
-            </member>
-            <member>
-                <project>GE_I210+c</project>
-                <configuration>Debug</configuration>
-            </member>
-            <member>
-                <project>GE_KV2c</project>
+                <project>I210+c_K24</project>
                 <configuration>Debug</configuration>
             </member>
         </batchDefinition>
         <batchDefinition>
-            <name>GE_i210+c_Debug</name>
+            <name>KV2c K24</name>
             <member>
                 <project>bsp_ep_k24f120m</project>
                 <configuration>Debug</configuration>
@@ -155,23 +104,20 @@
                 <configuration>debug</configuration>
             </member>
             <member>
-                <project>wolfSSL-Lib_MTU</project>
+                <project>wolfSSL-Lib_K24_MQX</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>bootLoader</project>
+                <project>bootLoader_K24</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>GE_I210+c</project>
+                <project>KV2c_K24</project>
                 <configuration>Debug</configuration>
             </member>
         </batchDefinition>
         <batchDefinition>
-            <name>Bootloader- Debug</name>
-        </batchDefinition>
-        <batchDefinition>
-            <name>Aclara_LC - Debug</name>
+            <name>Libs K24</name>
             <member>
                 <project>bsp_ep_k24f120m</project>
                 <configuration>Debug</configuration>
@@ -181,20 +127,12 @@
                 <configuration>debug</configuration>
             </member>
             <member>
-                <project>wolfSSL-Lib_MTU</project>
-                <configuration>Debug</configuration>
-            </member>
-            <member>
-                <project>bootLoader</project>
-                <configuration>Debug</configuration>
-            </member>
-            <member>
-                <project>Aclara_LC</project>
+                <project>wolfSSL-Lib_K24_MQX</project>
                 <configuration>Debug</configuration>
             </member>
         </batchDefinition>
         <batchDefinition>
-            <name>Aclara_DA</name>
+            <name>LoadControl K24</name>
             <member>
                 <project>bsp_ep_k24f120m</project>
                 <configuration>Debug</configuration>
@@ -204,15 +142,41 @@
                 <configuration>debug</configuration>
             </member>
             <member>
-                <project>wolfSSL-Lib_MTU</project>
+                <project>wolfSSL-Lib_K24_MQX</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>bootLoader</project>
+                <project>bootLoader_K24</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>Aclara_DA</project>
+                <project>LoadControl_K24</project>
+                <configuration>Debug</configuration>
+            </member>
+        </batchDefinition>
+        <batchDefinition>
+            <name>I210+c RA6 - Debug</name>
+            <member>
+                <project>EP_FreeRTOS_RA6</project>
+                <configuration>Debug</configuration>
+            </member>
+            <member>
+                <project>wolfSSL-Lib_RA6_FreeRTOS</project>
+                <configuration>Debug</configuration>
+            </member>
+            <member>
+                <project>I210+c_RA6</project>
+                <configuration>Debug</configuration>
+            </member>
+        </batchDefinition>
+        <batchDefinition>
+            <name>Libs RA6</name>
+            <member>
+                <project>EP_FreeRTOS_RA6</project>
+                <configuration>Debug</configuration>
+            </member>
+            <member>
+                <project>wolfSSL-Lib_RA6_FreeRTOS</project>
                 <configuration>Debug</configuration>
             </member>
         </batchDefinition>

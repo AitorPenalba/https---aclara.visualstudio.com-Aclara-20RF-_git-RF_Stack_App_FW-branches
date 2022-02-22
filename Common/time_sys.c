@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <intrinsics.h>
 #define TIME_SYS_GLOBAL
 #include "time_sys.h"
 #undef  TIME_SYS_GLOBAL
