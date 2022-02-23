@@ -93,13 +93,9 @@
 #define RTOS_SELECTION                    FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
 #define DBG_TESTS                         0
 #define SEGGER_RTT                        0
-#define TM_MUTEX                          0
-#define TM_SEMAPHORE                      0
 #define INCLUDE_SRFN_STACK                0 /* This is a conditional compilation for initial dev purpose only */
 // TODO: RA6 [name_Balaji]: Move to Appropriate location
 #define NXP_K24                           1
 #define RA6E1                             2
 #define MCU_SELECTED                      RA6E1
-#define TM_RTC_UNIT_TEST                  1
-#define TM_ADC_UNIT_TEST                  0
 #endif

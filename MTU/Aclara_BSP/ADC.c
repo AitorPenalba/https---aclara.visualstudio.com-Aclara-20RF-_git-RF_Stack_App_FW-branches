@@ -16,6 +16,7 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdbool.h>
+#include "DBG_SerialDebug.h"
 #if ( RTOS_SELECTION == MQX_RTOS ) 
 #include <mqx.h>
 #include <bsp.h>
@@ -175,9 +176,6 @@ returnStatus_t ADC_init ( void )
       retVal = eFAILURE;
    }
 #endif
-#if ( TM_ADC_UNIT_TEST == 1 )
-//   ADC_UnitTest(); // TODO: RA6 [name_Balaji]:Move ADC_UnitTest to RunSelfTest Function
-#endif
    return ( retVal );
 } /* end ADC_init () */
 
@@ -304,11 +302,18 @@ static bool setup_ADC0 ( void )
    fsp_err_t err = FSP_SUCCESS;
    /* Initializes the module. */
    err = R_ADC_Open( &g_adc0_ctrl, &g_adc0_cfg );
-   /* Handle any errors. This function should be defined by the user. */
-   assert(FSP_SUCCESS == err); // TODO: RA6 [name_Balaji]:Remove all BSP assert functions and add Prints if failed
+   if ( err != FSP_SUCCESS )
+   {
+      InitSuccessful = ( bool )false;
+//    DBG_printf( "ERROR - ADC failed to Open\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+   }
    /* Enable channels. */
    err = R_ADC_ScanCfg( &g_adc0_ctrl, &g_adc0_channel_cfg );
-   assert(FSP_SUCCESS == err); // TODO: RA6 [name_Balaji]:Remove all BSP assert functions and add Prints if failed
+   if ( err != FSP_SUCCESS )
+   {
+      InitSuccessful = ( bool )false;
+//    DBG_printf( "ERROR - ADC failed to Set the Channel Configuration\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+   }
 #endif
    return ( InitSuccessful );
 } /* end ADC_Setup_ADC0 () */
@@ -552,6 +557,7 @@ static uint32_t adc_calibrate(ADC_MemMapPtr adc_ptr)
 *******************************************************************************/
 returnStatus_t ADC_ShutDown ( void )
 {
+   returnStatus_t retVal = eSUCCESS; /* Start with pass status, and latch on any failure */
 #if ( MCU_SELECTED == NXP_K24 )
    ADC0_SC1A = (ADC0_SC1A & ~ADC_SC1_ADCH_MASK) | ADC_SC1_ADCH(ADC0_DISABLED_CH);
 #if ENABLE_ADC1
@@ -560,9 +566,13 @@ returnStatus_t ADC_ShutDown ( void )
 #elif ( MCU_SELECTED == RA6E1 )
    fsp_err_t err = FSP_SUCCESS;
    err = R_ADC_Close( &g_adc0_ctrl );
-   assert(FSP_SUCCESS == err);
+   if ( err != FSP_SUCCESS )
+   {
+      retVal = eFAILURE;
+//    DBG_printf( "ERROR - ADC failed to Shutdown\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+   }
 #endif
-   return(eSUCCESS);
+   return ( retVal );
 } /* end ADC_ShutDown () */
 
 /*******************************************************************************
@@ -620,16 +630,28 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
    fsp_err_t err = FSP_SUCCESS;
-   ( void ) R_ADC_ScanStart( &g_adc0_ctrl );
+   err = R_ADC_ScanStart( &g_adc0_ctrl );
+   if ( err != FSP_SUCCESS )
+   {
+//    DBG_printf( "ERROR - ADC failed to Start Scan\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+   }
    /* Wait for conversion to complete. */
    adc_status_t status;
    status.state = ADC_STATE_SCAN_IN_PROGRESS;
    while ( ADC_STATE_SCAN_IN_PROGRESS == status.state )
    {
-       ( void ) R_ADC_StatusGet( &g_adc0_ctrl, &status );
+       err = R_ADC_StatusGet( &g_adc0_ctrl, &status );
+       if ( err != FSP_SUCCESS )
+       {
+//        DBG_printf( "ERROR - ADC failed to Get Status Scan\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+       }
    }
    /* Read converted data. */
    err = R_ADC_Read( &g_adc0_ctrl, adc_source_adx, (uint16_t *)&result );
+   if ( err != FSP_SUCCESS )
+   {
+//    DBG_printf( "ERROR - ADC failed to Read\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+   }
 #endif
    OS_MUTEX_Unlock(&intAdcMutex_);
 

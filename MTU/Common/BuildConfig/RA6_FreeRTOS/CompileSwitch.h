@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2013-2021 Aclara.  All Rights Reserved.
+ * Copyright 2013-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -272,7 +272,7 @@
 /**** Various Test Modes available in the Project ****/
 
 /* Set to true to enable unit/integration test code */
-#define TEST_MODE_ENABLE                  0     /* Set to 0 before releasing production code! */
+#define TEST_MODE_ENABLE                  1     /* Set to 0 before releasing production code! */
 
 // NOTE: 0=Production mode, !0=Enable the respective feature
 #define TEST_QUIET_MODE                   0     /* Enable Debug output during quiet mode */
@@ -293,6 +293,9 @@
 
 /* All unit/integration defines MUST code inside the #if below! */
 #if (TEST_MODE_ENABLE == 1)
+#define TM_MUTEX                          0
+#define TM_SEMAPHORE                      0
+#define TM_RTC_UNIT_TEST                  1
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

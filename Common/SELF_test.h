@@ -124,7 +124,7 @@ extern void SELF_setEventNotify( OS_EVNT_Obj *handle );
 #endif
 extern returnStatus_t   SELF_UpdateTestResults( void );
 extern void             SELF_testTask( taskParameter );
-//extern returnStatus_t   SELF_testRTC( void );
+extern returnStatus_t   SELF_testRTC( void );
 //extern returnStatus_t   SELF_testSecurity( void );
 extern returnStatus_t   SELF_testNV( void );
 #if (SUPPORT_HEEP != 0)

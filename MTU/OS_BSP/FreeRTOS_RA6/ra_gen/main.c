@@ -15,9 +15,6 @@
                 StaticSemaphore_t g_fsp_common_initialized_semaphore_memory;
                 #endif
                 void g_hal_init(void);
-                #if ( TM_ADC_UNIT_TEST == 1 )
-                bool ADC_UnitTest(void);
-                #endif
                 /** Weak reference for tx_err_callback */
                 #if defined(__ICCARM__)
                 #define rtos_startup_err_callback_WEAK_ATTRIBUTE
@@ -115,39 +112,6 @@
                     vTaskStartScheduler();
                     return 0;
                 }
-#if ( TM_ADC_UNIT_TEST == 1 )
-float NonZeroValue = 0;
-/*******************************************************************************
-
-   Function name: ADC_UnitTest
-
-   Purpose: This function will test all 3 ADC channel
-
-   Arguments: None
-
-   Returns: bool - 0 if everything was successful, 1 if something failed
-
-*******************************************************************************/
-bool ADC_UnitTest(void){ // TODO: RA6 [name_Balaji]:Move UnitTest to RunSelfTest Function
-   NonZeroValue = ADC_GetHWRevVoltage();// TODO: RA6 [name_Balaji]:Check the configuration for average mode
-   if(NonZeroValue == 0)
-   {
-     return 1;
-   }
-   NonZeroValue = ADC_Get_SC_Voltage();// TODO: RA6 [name_Balaji]:Check the configuration for average mode
-   if(NonZeroValue == 0)
-   {
-     return 1;
-   }
-   NonZeroValue = ADC_Get_4V0_Voltage(); /*Requires External 4V Power Supply*/
-   if(NonZeroValue != 0)
-   {
-     return 1;
-   }
-    return 0;
-}
-#endif
-
                 #if configSUPPORT_STATIC_ALLOCATION
                 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer,
                 uint32_t *pulIdleTaskStackSize) BSP_WEAK_REFERENCE;

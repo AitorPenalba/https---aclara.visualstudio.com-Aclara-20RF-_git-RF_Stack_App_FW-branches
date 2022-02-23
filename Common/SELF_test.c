@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2012-2021 Aclara.  All Rights Reserved.
+ * Copyright 2012-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -34,6 +34,8 @@
 #undef  SELF_GLOBALS
 
 #include "DBG_SerialDebug.h"
+#include "CompileSwitch.h"
+#include "hal_data.h"
 //#include "ascii.h"
 //#include "buffer.h"
 //#include "partition_cfg.h"
@@ -173,14 +175,6 @@ void SELF_testTask( taskParameter )
 {
    uint16_t       selfTestResults;
    uint32_t       taskPriority;
-#if ( TM_RTC_UNIT_TEST == 1 )
-   bool isRTCUnitTestFailed;
-   isRTCUnitTestFailed = RTC_UnitTest();
-   if (isRTCUnitTestFailed == 1)
-   {
-     (void)printf ( "ERROR - RTC failed to Set Error Adjustment\n" );// TODO: RA6 [name_Balaji]: Change to DBG_logPrintf
-   }
-#endif
 #if 1
    // TODO: Use line 192 once complete implementation is available
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
@@ -394,7 +388,8 @@ static uint16_t RunSelfTest()
       }
    }
 #endif
-
+#endif
+#if ( TM_RTC_UNIT_TEST == 1 )
    /* Execute the RTC Test last (to allow sufficient time for VBAT to come up and the OSC to start?)
       otherwise if the RTC SuperCap is completely discharged on the T-board the RTC test may fail on
       first time from power up.  The EP's are OK when in a meter or if powered up standalone and
@@ -405,9 +400,11 @@ static uint16_t RunSelfTest()
       if ( SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had failed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 0;
+#if 0         
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOSucceeded;
          (void)EVL_LogEvent( 45, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
+#endif
       }
    }
    else
@@ -415,6 +412,7 @@ static uint16_t RunSelfTest()
       if ( !SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had passed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 1;
+#if 0
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOFailed;
          eventData.eventKeyValuePairsCount      = 1;
@@ -422,12 +420,13 @@ static uint16_t RunSelfTest()
          *( uint16_t * )keyVal.Key              = stRTCFailCount;
          *( uint16_t * )keyVal.Value            = SELF_TestData.RTCFail;
          (void)EVL_LogEvent( 86, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
+#endif
       }
    }
-
+#endif
    /* Update the number of times self test has run */
    SELF_TestData.selfTestCount++;
-
+#if 0
    /* Update all the counters in the file */
    (void)FIO_fwrite( &SELF_testFile.handle, 0, (uint8_t *)SELF_testFile.Data, SELF_testFile.Size);
 
@@ -480,7 +479,8 @@ returnStatus_t SELF_UpdateTestResults( void )
    }
    return retVal;
 }
-
+#endif
+#if ( TM_RTC_UNIT_TEST == 1 )
 /***********************************************************************************************************************
    Function Name: SELF_testRTC
 
@@ -497,13 +497,13 @@ returnStatus_t SELF_UpdateTestResults( void )
 ***********************************************************************************************************************/
 returnStatus_t SELF_testRTC( void )
 {
-   uint16_t       RTC_time_1; /* Used for difference in RTC prescalar   */
-   uint16_t       RTC_time_2; /* Used for difference in RTC prescalar   */
    uint16_t       tries = 0;  /* Total number of attempts before exiting the loop.  */
    returnStatus_t retVal;
 
-   DBG_logPrintf( 'I', "SELF_testRTC: Start - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
-
+//   DBG_logPrintf( 'I', "SELF_testRTC: Start - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+#if ( MCU_SELECTED == NXP_K24 )
+   uint16_t       RTC_time_1; /* Used for difference in RTC prescalar   */
+   uint16_t       RTC_time_2; /* Used for difference in RTC prescalar   */
    do
    {
       retVal = eSUCCESS;                        /* Assume success */
@@ -519,6 +519,41 @@ returnStatus_t SELF_testRTC( void )
          retVal = eFAILURE;
       }
    } while ( ( retVal == eFAILURE ) && ( OS_TICK_Get_ElapsedMilliseconds() < 1200 ) );
+#elif ( MCU_SELECTED == RA6E1 )
+   sysTime_dateFormat_t setTime =
+   {
+   .sec  = 55,
+   .min  = 59,
+   .hour = 23,       //24-HOUR mode       
+   .day = 31,        //RDAYCNT
+   .month  = 11,     //RMONCNT 0-Jan 11 Dec
+   .year = 121       //RYRCNT //Year SINCE 1900 (2021 = 2021-1900 = 121)
+   };
+   sysTime_dateFormat_t getTime1;
+   sysTime_dateFormat_t getTime2;
+   bool isTimeSetSuccess;
+   isTimeSetSuccess = RTC_SetDateTime (&setTime);// TODO: RA6 [name_Balaji]: Remove Set Time as this is not a valid method
+   if(isTimeSetSuccess == 0)
+   {
+     retVal = eFAILURE;
+   }
+   do
+   {
+      retVal = eSUCCESS;                        /* Assume success */
+      tries++;
+
+      RTC_GetDateTime (&getTime1);              /* Record RTC milliseconds, at entry.    */
+      OS_TASK_Sleep( 10 );                      /* Wait for 10ms.                   */
+      RTC_GetDateTime (&getTime2);              /* Record RTC millliseconds after wait.   */
+
+      /* If readings don't change, then not running.  */
+      if ( getTime1.msec == getTime2.msec )
+      {
+         retVal = eFAILURE;
+      }
+   } while ( ( retVal == eFAILURE ) );// TODO: RA6 [name_Balaji]: Need to test after OS_TICK_Get_ElapsedMilliseconds integration
+   R_RTC_Close (&g_rtc0_ctrl);// TODO: RA6 [name_Balaji]: Closing RTC, for now as there is no other known method to check the RTC valid or not
+#endif
 
    if ( retVal == eFAILURE )
    {
@@ -528,10 +563,11 @@ returnStatus_t SELF_testRTC( void )
       }
    }
 
-   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );
+//   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    return retVal;
 }
-
+#endif
+#if 0
 /***********************************************************************************************************************
    Function Name: SELF_testSecurity
 

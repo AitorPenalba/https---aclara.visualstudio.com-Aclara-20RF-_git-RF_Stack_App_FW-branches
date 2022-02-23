@@ -25,7 +25,7 @@
 #endif
 #include "BSP_aclara.h"
 #include "vbat_reg.h"
-
+#include "CompileSwitch.h"
 /* #DEFINE DEFINITIONS */ 
 
 /* MACRO DEFINITIONS */
@@ -80,8 +80,8 @@ returnStatus_t RTC_init( void )
    err = R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );
    if ( err!= FSP_SUCCESS )
    {
-    retVal = eFAILURE;
-    (void)printf ( "ERROR - RTC failed to init\n" ); /*Change to APP_Print or Debug Print*/
+      retVal = eFAILURE;
+//      DBG_printf( "ERROR - RTC failed to init\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
    return( retVal ); 
 } /* end RTC_init () */
@@ -126,7 +126,7 @@ void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
    err = R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &pTime );
    if ( err!= FSP_SUCCESS )
    {
-    (void)printf ( "ERROR - RTC failed to Get Time\n" );
+//      DBG_printf( "ERROR - RTC failed to Get Time\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
    RTC_GetTimeInSecMicroSec ( &sec , &microSec);
    RT_Clock->month = (uint8_t)pTime.tm_mon;
@@ -216,27 +216,27 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
    err = R_RTC_CalendarTimeSet( &g_rtc0_ctrl, &pTime );
    if ( err!= FSP_SUCCESS )
    {
-    FuncStatus = false;
-    (void)printf ( "ERROR - RTC failed to Set Time\n" );
+      FuncStatus = false;
+//      DBG_printf( "ERROR - RTC failed to Set Time\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
    getsec = pTime;
-   if( 0 == getsec.tm_sec)
+   if( 0 == getsec.tm_sec)  // TODO: RA6 [name_Balaji]:Need a Better Check like RTC_SR in K24
    {
-    accessBackupRegister(); 
-    /* Disable write protection on battery backup function. */
-    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
-    VBATREG_RTC_VALID = 0; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
-    /* Enable write protection on battery backup function. */
-    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
+      accessBackupRegister(); 
+      /* Disable write protection on battery backup function. */
+      R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
+      VBATREG_RTC_VALID = 0; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
+      /* Enable write protection on battery backup function. */
+      R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
    }/* end if() */
    else
    {
-     accessBackupRegister();
-    /* Disable write protection on battery backup function. */
-    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
-    VBATREG_RTC_VALID = 1; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
-    /* Enable write protection on battery backup function. */
-    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
+      accessBackupRegister();
+      /* Disable write protection on battery backup function. */
+      R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
+      VBATREG_RTC_VALID = 1; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
+      /* Enable write protection on battery backup function. */
+      R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
    }/* end else() */
 #endif
    return ( FuncStatus );
@@ -355,7 +355,7 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
    err = R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &getSecTime );
    if ( err!= FSP_SUCCESS )
    {
-    (void)printf ( "ERROR - RTC failed to Get Time in RTC_GetTimeInSecMicroSec function\n" );
+//      DBG_printf( "ERROR - RTC failed to Get Time in RTC_GetTimeInSecMicroSec function\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
    *sec = getSecTime.tm_sec;
    rtc_instance_ctrl_t * p_instance_ctrl = ( rtc_instance_ctrl_t * ) &g_rtc0_ctrl;
@@ -398,8 +398,8 @@ bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm )
    err = R_RTC_CalendarAlarmSet( &g_rtc0_ctrl, pAlarm );
    if ( err!= FSP_SUCCESS )
    {
-    FuncStatus = false;
-    (void)printf ( "ERROR - RTC failed to Set Alarm\n" );
+      FuncStatus = false;
+//      DBG_printf( "ERROR - RTC failed to Set Alarm\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
    return ( FuncStatus );
 }/* end RTC_SetAlarmTime () */
@@ -422,7 +422,7 @@ void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm )
    err = R_RTC_CalendarAlarmGet( &g_rtc0_ctrl, pAlarm );
    if ( err!= FSP_SUCCESS )
    {
-    (void)printf ( "ERROR - RTC failed to Get Alarm\n" );
+//      DBG_printf( "ERROR - RTC failed to Get Alarm\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
 }/* end RTC_GetAlarmTime () */
 
@@ -444,7 +444,7 @@ void RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg 
    err = R_RTC_ErrorAdjustmentSet( &g_rtc0_ctrl, erradjcfg );
    if ( err!= FSP_SUCCESS )
    {
-    (void)printf ( "ERROR - RTC failed to Set Error Adjustment\n" );
+//      DBG_printf( "ERROR - RTC failed to Set Error Adjustment\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
 }/* end RTC_ErrorAdjustmentSet () */
 
