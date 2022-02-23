@@ -51,7 +51,7 @@
 //#include "radio_hal.h"
 //#include "vbat_reg.h"
 //#include "pwr_config.h"
-//#include "pwr_task.h"
+#include "pwr_task.h"
 //#include "SM_Protocol.h"
 //#include "SM.h"
 
@@ -450,7 +450,6 @@ void PWRLG_Task( taskParameter )
    }
 #endif
 } /*lint !e454 !e715 Arg0 not used; required by task template   */
-
 
 /***********************************************************************************************************************
 

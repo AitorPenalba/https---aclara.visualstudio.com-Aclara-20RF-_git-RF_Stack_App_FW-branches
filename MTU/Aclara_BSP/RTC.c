@@ -14,9 +14,8 @@
  *****************************************************************************/
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
-#if ( RTOS_SELECTION == 1 ) //( RTOS_SELECTION == MQX_RTOS )
+#include "project.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
   #include <mqx.h>
   #include <bsp.h>
   #include <rtc.h>
@@ -26,7 +25,7 @@
 #include "BSP_aclara.h"
 #include "vbat_reg.h"
 #include "CompileSwitch.h"
-/* #DEFINE DEFINITIONS */ 
+/* #DEFINE DEFINITIONS */
 
 /* MACRO DEFINITIONS */
 /* Flags used for Alarm Interrupts */
@@ -45,23 +44,7 @@ volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrenc
 bool RTC_UnitTest(void);
 #endif
 /* FUNCTION DEFINITIONS */
-/*******************************************************************************
 
-  Function name: accessBackupRegister
-
-  Purpose: This function will Enable the write access to VBTBKR register
-
-  Arguments: void
-
-  Returns: void
-
-*******************************************************************************/
-static void accessBackupRegister( void )
-{
-   /*When accessed after Register Protection Enable, the entire BackUp registers are set to FF 
-   so accessing it outside Register Protection has no affects on this register*/
-   VBTBER_RTC_ACCESS = 1; 
-}/* end accessBackupRegister () */
 /*******************************************************************************
 
   Function name: RTC_Init
@@ -83,7 +66,7 @@ returnStatus_t RTC_init( void )
       retVal = eFAILURE;
 //      DBG_printf( "ERROR - RTC failed to init\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
-   return( retVal ); 
+   return( retVal );
 } /* end RTC_init () */
 
 /*******************************************************************************
@@ -187,7 +170,7 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
       _time_set( &mqxTime );
 
       if (0 == mqxTime.SECONDS)
-      {  
+      {
          VBATREG_RTC_VALID = 0;
       }
       else
@@ -220,24 +203,16 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
 //      DBG_printf( "ERROR - RTC failed to Set Time\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    }
    getsec = pTime;
+   VBATREG_EnableRegisterAccess();
    if( 0 == getsec.tm_sec)  // TODO: RA6 [name_Balaji]:Need a Better Check like RTC_SR in K24
    {
-      accessBackupRegister(); 
-      /* Disable write protection on battery backup function. */
-      R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
       VBATREG_RTC_VALID = 0; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
-      /* Enable write protection on battery backup function. */
-      R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
    }/* end if() */
    else
    {
-      accessBackupRegister();
-      /* Disable write protection on battery backup function. */
-      R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
       VBATREG_RTC_VALID = 1; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
-      /* Enable write protection on battery backup function. */
-      R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_OM_LPC_BATT);
    }/* end else() */
+   VBATREG_DisableRegisterAccess();
 #endif
    return ( FuncStatus );
 } /* end RTC_SetDateTime () */
@@ -307,9 +282,9 @@ void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
       ptime->SECONDS      = seconds;
       ptime->MILLISECONDS = ( ( (uint32_t)fractSeconds * (uint32_t)1000 / (uint32_t)fractRes ) / 32768 ) * fractRes;
    }
-   return;  
+   return;
 #endif
-   
+
 } /* end RTC_GetDateTime () */
 
 
@@ -376,7 +351,7 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
    //Enable the NVIC carry interrupt request
    NVIC_EnableIRQ( p_instance_ctrl->p_cfg->carry_irq );
 #endif
-   
+
 }/* end RTC_GetTimeInSecMicroSec () */
 
 /*******************************************************************************
@@ -385,7 +360,7 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 
   Purpose: Sets the Alarm Time
 
-  Arguments: pAlarm - structure that contains the Real Time Clock Alarm 
+  Arguments: pAlarm - structure that contains the Real Time Clock Alarm
              configuration
 
   Returns: None
@@ -410,7 +385,7 @@ bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm )
 
   Purpose: Gets the current Alarm Time
 
-  Arguments: pAlarm - structure that contains the Real Time Clock Alarm 
+  Arguments: pAlarm - structure that contains the Real Time Clock Alarm
              configuration
 
   Returns: None
@@ -432,7 +407,7 @@ void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm )
 
   Purpose: RTC Error adjustment
 
-  Arguments: erradjcfg - structure that contains the Real Time Clock error 
+  Arguments: erradjcfg - structure that contains the Real Time Clock error
              adjustment configuration
 
   Returns: None
@@ -493,7 +468,7 @@ bool RTC_UnitTest(void)
    {
    .sec  = 55,
    .min  = 59,
-   .hour = 23,       //24-HOUR mode       
+   .hour = 23,       //24-HOUR mode
    .day = 31,        //RDAYCNT
    .month  = 11,     //RMONCNT 0-Jan 11 Dec
    .year = 121       //RYRCNT //Year SINCE 1900 (2021 = 2021-1900 = 121)
@@ -544,5 +519,5 @@ bool RTC_UnitTest(void)
      retVal = 1;
    }
    return retVal;
-}    
+}
 #endif

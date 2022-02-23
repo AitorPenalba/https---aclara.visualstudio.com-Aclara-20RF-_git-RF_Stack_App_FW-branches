@@ -47,6 +47,7 @@
 //#include "MAC.h"
 //#include "MAC_Protocol.h"
 /* TODO: RA6: Add later -- End */
+#include "vbat_reg.h"
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTIONS */
 
@@ -112,7 +113,13 @@ typedef struct PWRLG_SysRegisterFile
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
+#if ( MCU_SELECTED  == NXP_K24 )
 #define PWRLG_RFSYS_BASE_PTR        ((PWRLG_SysRegisterFilePtr) (void *)RFSYS_BASE_PTR)
+#elif ( MCU_SELECTED  == RA6E1 )
+/* Note: In RA6E1 we use the Battery Backup Register to store Last Gasp related information */
+#define PWRLG_RFSYS_BASE_PTR        ((PWRLG_SysRegisterFilePtr) (void *)(R_SYSTEM->VBTBKR + VBATREG_FILE_SIZE) )
+#endif
+
 
 #define PWRLG_FLAGS()               (PWRLG_RFSYS_BASE_PTR->flags)
 

@@ -36,7 +36,6 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 
-#include "project.h"
 #include "buffer.h"
 #include "MAC.h"
 
@@ -108,6 +107,10 @@ typedef struct VBATREG_VbatRegisterFile
 /* MACRO DEFINITIONS */
 #if ( MCU_SELECTED == NXP_K24 )
 #define VBATREG_RFSYS_BASE_PTR            ( ( VBATREG_VbatRegisterFilePtr ) ( void * )RFVBAT_BASE_PTR )
+#elif ( MCU_SELECTED  == RA6E1 )
+#define VBATREG_RFSYS_BASE_PTR            ( ( VBATREG_VbatRegisterFilePtr ) ( void * )R_SYSTEM->VBTBKR )
+#define VBATREG_FILE_SIZE                 (sizeof(VBATREG_VbatRegisterFile))
+#endif
 #define VBATREG_BIT_FIELDS                ( VBATREG_RFSYS_BASE_PTR->uBitFields )
 #define VBATREG_SIG                       ( VBATREG_RFSYS_BASE_PTR->sig )
 #define VBATREG_VALID                     ( VBATREG_RFSYS_BASE_PTR->valid )
@@ -131,12 +134,7 @@ typedef struct VBATREG_VbatRegisterFile
 #define VBATREG_OUTAGE_DECLARATION_DELAY  ( VBATREG_RFSYS_BASE_PTR->pwrOutageTimer )
 #define VBATREG_RTC_SR()                  ( VBATREG_RFSYS_BASE_PTR->uRtcSr )
 
-#define VBATREG_VALID_SIG           ( ( uint8_t )0xA5 )  
-#elif ( MCU_SELECTED == RA6E1 )
-#define VBATREG_RTC_VALID                R_SYSTEM->VBTBKR[0] //Address: 0x4001_E500
-#define VBTBER_RTC_ACCESS                R_SYSTEM->VBTBER 
-#endif
-
+#define VBATREG_VALID_SIG           ( ( uint8_t )0xA5 )
 
 
 /* ****************************************************************************************************************** */
@@ -145,7 +143,8 @@ typedef struct VBATREG_VbatRegisterFile
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
-
+void VBATREG_EnableRegisterAccess( void );
+void VBATREG_DisableRegisterAccess( void );
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */

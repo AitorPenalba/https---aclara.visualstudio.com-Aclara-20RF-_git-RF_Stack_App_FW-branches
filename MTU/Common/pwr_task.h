@@ -181,7 +181,7 @@ returnStatus_t PWR_getPowerAnomalyCount( uint32_t *pValue );
    @param  None
    @return None
 */
-void isr_brownOut( void );
+//void isr_brownOut( void );
 
 /*
    PWR_setPowerFailCount - Sets power fail count.

@@ -2142,6 +2142,12 @@
             <file>
                 <name>$PROJ_DIR$\..\..\Common\time_sys.h</name>
             </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\vbat_reg.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\vbat_reg.h</name>
+            </file>
         </group>
         <group>
             <name>EP_Common</name>

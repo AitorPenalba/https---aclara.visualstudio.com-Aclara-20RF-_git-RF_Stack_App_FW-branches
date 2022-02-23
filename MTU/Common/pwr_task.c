@@ -556,6 +556,10 @@ returnStatus_t PWR_TSK_init( void )
    }
 #else
    returnStatus_t       retVal = eSUCCESS;
+   if ( OS_MUTEX_Create( &PWR_Mutex ) && OS_MUTEX_Create(&Embedded_Pwr_Mutex) && OS_SEM_Create( &PWR_Sem ) )
+   {
+      DBG_printf("Created");
+   }
 #endif
    return( retVal );
 }
