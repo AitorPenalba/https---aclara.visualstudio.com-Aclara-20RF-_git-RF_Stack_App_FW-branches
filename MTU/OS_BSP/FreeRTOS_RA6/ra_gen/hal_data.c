@@ -510,7 +510,7 @@ const adc_channel_cfg_t g_adc0_channel_cfg =
     .scan_mask           = ADC_MASK_CHANNEL_5 | ADC_MASK_CHANNEL_7 | ADC_MASK_CHANNEL_8 |  0,
     .scan_mask_group_b   =  0,
     .priority_group_a    = ADC_GROUP_A_PRIORITY_OFF,
-    .add_mask            = ADC_MASK_CHANNEL_5 | ADC_MASK_CHANNEL_7 | ADC_MASK_CHANNEL_8 |  0,
+    .add_mask            =  0,
     .sample_hold_mask    =  0,
     .sample_hold_states  = 24,
 #if ((0) | (0))
