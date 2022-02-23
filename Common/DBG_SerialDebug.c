@@ -131,7 +131,7 @@ returnStatus_t DBG_init( void )
 #if (FILE_IO == 1)
    FileStatus_t fileStatus;
 #endif
-   if (  //OS_MSGQ_Create( &mQueueHandle_ ) &&
+   if (  //OS_MSGQ_Create( &mQueueHandle_,0 ) &&
          OS_MUTEX_Create( &mutex_ ) &&
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
@@ -165,6 +165,9 @@ returnStatus_t DBG_init( void )
 #if (TM_SEMAPHORE == 1)
 OS_SEM_TestCreate();
 #endif
+#if (TM_MSGQ == 1)
+OS_MSGQ_TestCreate();
+#endif
 
 //   DBG_PortTimer_Manage ( );
 //   DBG_PortEcho_Set( DBG_PortEcho_Get() ); // Get the echo setting and update the current UART setting
@@ -186,6 +189,9 @@ void DBG_TxTask( taskParameter )
 //   vTaskDelay(pdMS_TO_TICKS(1000));
 #if (TM_SEMAPHORE == 1)
    OS_SEM_TestPost();
+#endif
+#if (TM_MSGQ == 1)
+   OS_MSGQ_TestPost();
 #endif
    vTaskSuspend(NULL);
    for ( ; ; )

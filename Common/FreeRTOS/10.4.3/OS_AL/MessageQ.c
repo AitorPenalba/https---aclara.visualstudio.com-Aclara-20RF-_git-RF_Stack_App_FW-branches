@@ -20,7 +20,7 @@
 //#include "buffer.h"
 
 /* #DEFINE DEFINITIONS */
-
+#define DEFAULT_NUM_ITEMS_MSGQ 10
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -32,7 +32,7 @@
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
-#if 0
+
 
 /*******************************************************************************
 
@@ -47,11 +47,13 @@
   Notes: Calling function must pass in an allocated OS_MSGQ_Obj
 
 *******************************************************************************/
-bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle )
+
+bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
 {
    bool RetStatus = true;
+   uint32_t numItems = ( NumMessages == 0) ? DEFAULT_NUM_ITEMS_MSGQ : NumMessages;
 
-   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj)) )
+   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), numItems) )
    {
       RetStatus = false;
    } /* end if() */
@@ -62,7 +64,6 @@ bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle )
 
    return ( RetStatus );
 } /* end OS_MSGQ_Create () */
-
 /*******************************************************************************
 
   Function name: OS_MSGQ_POST
@@ -70,7 +71,7 @@ bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle )
   Purpose: This function is used to Post a message into a MessageQ structure
 
   Arguments: MsgqHandle - pointer to the MessageQ object
-             MessageData - pointer to the location of the Message data to post (see Notes below)
+             MessageData - pointer to the pointer of the Message data to post (see Notes below)
              ErrorCheck - flag to check some errors or not. This is need when BM post a free buffer.
 
   Returns: None
@@ -82,33 +83,31 @@ bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle )
          This OS_MSGQ module does not allocate, nor free any memory, and just deals
          with a pointer to the memory location
 
-         The first element of the MessageData must be an OS_QUEUE_Element
-
          Function will not return if it fails
 
 *******************************************************************************/
-void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line )
+void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void **MessageData, bool ErrorCheck, char *file, int line )
 {
-   OS_QUEUE_Element *ptr = MessageData;
+   OS_QUEUE_Element_Handle * ptr = (OS_QUEUE_Element_Handle * )MessageData;
 
    // Sanity check
-   if (ErrorCheck && ptr->flag.isFree) {
+   if (ErrorCheck && (*ptr)->flag.isFree) {
       // The buffer was freed
       DBG_LW_printf("\nERROR: OS_MSGQ_POST got a buffer marked as free. Size: %u, pool = %u, addr=0x%p\n",
-                    ptr->dataLen, ptr->bufPool, MessageData);
+                    (*ptr)->dataLen, (*ptr)->bufPool, MessageData);
       DBG_LW_printf("ERROR: OS_MSGQ_POST called from %s:%d\n", file, line);
    }
-   if (ptr->flag.inQueue) {
+   if ((*ptr)->flag.inQueue) {
       // The buffer is already in use.
       DBG_LW_printf("\nERROR: OS_MSGQ_POST got a buffer marked as in used by another queue. Size: %u, pool = %u, addr=0x%p\n",
-                    ptr->dataLen, ptr->bufPool, MessageData);
+                    (*ptr)->dataLen, (*ptr)->bufPool, MessageData);
       DBG_LW_printf("ERROR: OS_MSGQ_POST called from %s:%d\n", file, line);
    }
 
    // Mark as on queue
-   ptr->flag.inQueue++;
+   (*ptr)->flag.inQueue++;
 
-   OS_QUEUE_ENQUEUE(&(MsgqHandle->MSGQ_QueueObj), MessageData, file, line); // Function will not return if it fails
+   OS_QUEUE_ENQUEUE(&(MsgqHandle->MSGQ_QueueObj), ptr, file, line); // Function will not return if it fails
 
    OS_SEM_POST(&(MsgqHandle->MSGQ_SemObj), file, line); // Function will not return if it fails
 } /* end OS_MSGQ_Post () */
@@ -136,12 +135,12 @@ void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorChec
 bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line )
 {
    bool RetStatus = true;
-   OS_QUEUE_Element *ptr;
+   OS_QUEUE_Element_Handle ptr;
 
    if ( true == OS_SEM_Pend(&(MsgqHandle->MSGQ_SemObj), TimeoutMs) )
    {
-      *MessageData = OS_QUEUE_Dequeue(&(MsgqHandle->MSGQ_QueueObj));
-      ptr = *MessageData;
+      ptr = OS_QUEUE_Dequeue(&(MsgqHandle->MSGQ_QueueObj));
+      *MessageData = ptr;
 
       // Sanity check
       if (ErrorCheck && ptr->flag.isFree) {
@@ -174,5 +173,60 @@ bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t Time
    return ( RetStatus );
 } /* end OS_MSGQ_Pend () */
 
+#if (TM_MSGQ ==1 )
+static OS_MSGQ_Obj      testMsgQueue_;
+static OS_QUEUE_Element_Handle             tx_msg_handle = NULL;
+static volatile OS_QUEUE_Element_Handle    rx_msg_handle = NULL;
+static volatile OS_QUEUE_Element_Handle *  rx_msg_handle_ptr = &rx_msg_handle;
+static volatile uint8_t counter = 0;
+static OS_QUEUE_Element txMsg1;
 
+void OS_MSGQ_TestCreate ( void )
+{
+   if( OS_MSGQ_Create(&testMsgQueue_, 0) )
+   {
+      counter++;
+   }
+   else
+   {
+      counter++;
+      APP_ERR_PRINT("Unable to Create the Message Queue!");
+   }
+   /*initialize static message*/
+   txMsg1.flag.isFree = false;
+   txMsg1.dataLen = 11;
+   tx_msg_handle = &txMsg1;
+   if( 11 == tx_msg_handle->dataLen )
+   {
+      APP_PRINT("Success MSGQ Test ");
+   }
+
+}
+bool OS_MSGQ_TestPend( void )
+{
+   bool retVal = false;
+   
+   if( OS_MSGQ_Pend(&testMsgQueue_, (void **)rx_msg_handle_ptr, OS_WAIT_FOREVER) )
+   {
+      counter--;
+      retVal = true;
+   }
+
+   if( 11 ==  rx_msg_handle->dataLen)
+   {
+      APP_PRINT("Success MSGQ Test ");
+   }
+   else if( 0 != counter )
+   {
+      APP_PRINT("Fail MSGQ Test");
+   }
+   APP_PRINT("Complete MSGQ Test");
+   return(retVal);
+}
+
+void OS_MSGQ_TestPost( void )
+{
+   //post address of the txMsg to the Queue
+   OS_MSGQ_Post(&testMsgQueue_, (void *)&tx_msg_handle);
+}
 #endif

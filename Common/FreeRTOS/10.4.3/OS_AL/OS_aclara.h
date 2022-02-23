@@ -135,7 +135,7 @@ typedef struct
 #endif  // ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 
 
-#define OS_MSGQ_Create(arg)
+//#define OS_MSGQ_Create(arg)
 #define OS_TICK_Struct
 #define OS_TICK_Sleep
 #define OS_TASK_Summary
@@ -147,8 +147,28 @@ typedef struct
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #define taskParameter   void* pvParameters
 typedef SemaphoreHandle_t     OS_SEM_Obj, OS_MUTEX_Obj, *OS_SEM_Handle, *OS_MUTEX_Handle;
-typedef void (* TASK_FPTR)(void *);
+typedef QueueHandle_t         OS_QUEUE_Obj, *OS_QUEUE_Handle;
+typedef struct
+{
+   uint16_t  dataLen;      /**< User filled - # of bytes in data[] (initialized with requested buf size) */
+   struct {
+      uint8_t isFree:   1; /**< buffer was freed through BM_free */
+      uint8_t isStatic: 1; /**< buffer was statically allocated */
+      uint8_t inQueue:  2; /**< used to detect msg is queued. Used as a counter */
+//      uint8_t checksum: 4; /**< used to help with validation */
+   } flag;
+   uint8_t bufPool       ; /**< identifies source buffer pool */
+} OS_QUEUE_Element, *OS_QUEUE_Element_Handle;
+#define DEFAULT_NUM_QUEUE_ITEMS          10
+#define QUEUE_ITEM_SIZE sizeof( OS_QUEUE_Element_Handle )
+typedef struct
+{
+   OS_QUEUE_Obj MSGQ_QueueObj;
+   OS_SEM_Obj MSGQ_SemObj;
+} OS_MSGQ_Obj, *OS_MSGQ_Handle;
 
+typedef void (* TASK_FPTR)(void *);
+//typedef void QueueMsgPtr  void *;
 typedef struct
 {
    uint32_t         TASK_TEMPLATE_INDEX;  /* TODO: RA6: This should be an enum*/
@@ -167,6 +187,7 @@ typedef struct
 
    TaskHandle_t     *pxCreatedTask;
 } OS_TASK_Template_t, * pOS_TASK_Template_t;
+
 #endif
 
 
@@ -271,19 +292,25 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
 
-bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle );
-void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line );
-bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
 
-bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle );
-void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );
-void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
+
+/*queue items to complete*/
 bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *QueueElement );
 void OS_QUEUE_Remove ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
+void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
+
+#endif
+
+bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages);
+void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void **MessageData, bool ErrorCheck, char *file, int line );
+bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
+
+
+bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength );
+void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );
+void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
 uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle );
-void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
-#endif
 
 bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
 void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
@@ -330,8 +357,16 @@ void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
 #if (TM_MUTEX == 1)
 void OS_MUTEX_Test( void );
 #endif
+#if (TM_QUEUE == 1)
+void OS_QUEUE_Test( void );
+#endif
 #if (TM_SEMAPHORE == 1)
 void OS_SEM_TestPost( void );
 void OS_SEM_TestCreate ( void );
 bool OS_SEM_TestPend( void );
+#endif
+#if (TM_MSGQ == 1)
+void OS_MSGQ_TestPost( void );
+void OS_MSGQ_TestCreate ( void );
+bool OS_MSGQ_TestPend( void );
 #endif
