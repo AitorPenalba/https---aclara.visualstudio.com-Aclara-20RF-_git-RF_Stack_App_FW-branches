@@ -218,6 +218,7 @@ If we do move the Encrypt Key partition and remove the swap indicator sector:
 #define BL_CODE_START           BL_VECTOR_TABLE_START
 #define BL_CODE_SIZE            ((lCnt)0x00004000)
 
+#if ( MCU_SELECTED == NXP_K24 )
 #define APP_VECTOR_TABLE_START  (BL_CODE_START + BL_CODE_SIZE)
 #define APP_VECTOR_TABLE_END    ((flAddr)0x000003FF)
 #define APP_VECTOR_TABLE_SIZE   ((lCnt)0x00000400)
@@ -251,6 +252,27 @@ If we do move the Encrypt Key partition and remove the swap indicator sector:
 /* This is an absolute/fixed address - Last Sector in internal Flash (high 512K bank) */
 #define DFW_BL_INFO_START       (INTERNAL_FLASH_SIZE - INTERNAL_FLASH_SECTOR_SIZE)   /* 0x000FF000 */
 #define DFW_BL_INFO_SIZE        INTERNAL_FLASH_SECTOR_SIZE
+
+#elif ( MCU_SELECTED == RA6E1 ) /* Defines specific for RA6E1 with respect to the memory locations */
+
+/* Starts BL_BACKUP after BL */
+#define BL_BACKUP_START         ( BL_CODE_START + BL_CODE_SIZE )         /* (0x00004000) */
+#define BL_BACKUP_SIZE          BL_CODE_SIZE                             /* MUST be same size as BL */
+
+/* Starts App code after BL backup */
+#define APP_CODE_START          ( BL_BACKUP_START + BL_CODE_SIZE )       /* 0x00008000 */
+#define APP_CODE_SIZE           ( INTERNAL_FLASH_SIZE - APP_CODE_START )
+
+/* This is an absolute/fixed address - Start from the DataFlash region - 0x08000000 */
+#define ENCRYPT_KEY_START       ( ( flAddr ) 0x08000000 )  /* This is an absolute/fixed address */
+#define ENCRYPT_KEY_SIZE        INTERNAL_FLASH_SECTOR_SIZE
+
+/* BL Info starts after encrypt key partition */
+#define DFW_BL_INFO_START       ( ENCRYPT_KEY_START + ENCRYPT_KEY_SIZE )   /* 0x08001000 */
+#define DFW_BL_INFO_SIZE        INTERNAL_FLASH_SECTOR_SIZE
+
+#endif
+
 /***************************************************************************
   End of symbols for BL and App internal Flash location coordination
  **************************************************************************/
@@ -1421,6 +1443,7 @@ partitions_EXTERN const PartitionData_t sPartitionData[]
          0                                   /* Number of banks (Must have at least 1 bank!) */
       }
    },// </editor-fold>
+#if ( MCU_SELECTED == NXP_K24 )
    {
       ePART_SWAP_STATE,                      /* Partition Name */
       PART_SWAP_STATE_OFFSET,                /* Start Offset */
@@ -1471,6 +1494,7 @@ partitions_EXTERN const PartitionData_t sPartitionData[]
          0                                   /* Number of banks (Must have at least 1 bank!) */
       }
    },
+#endif
    {
       ePART_BL_BACKUP,                       /* Partition Name */
       PART_BL_BACKUP_OFFSET,                 /* Start Offset */

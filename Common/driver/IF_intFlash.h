@@ -43,6 +43,29 @@
 #define ERASE_SECTOR_SIZE_BYTES     ((uint16_t)4096)                 /* Sector Size in Bytes */
 #define ERASE_BLOCK_SIZE_BYTES      ((uint32_t)0x80000)              /* Block Size in Bytes */
 
+#if ( MCU_SELECTED == RA6E1 )
+#define FLASH_HP_DATAFLASH_START_ADDRESS               0x08000000U
+#define FLASH_HP_DATAFLASH_END_ADDRESS                 0x08001FFFU
+
+/* Considering the code flash configured in linear mode */
+#define FLASH_HP_CODEFLASH_START_ADDRESS               0x00000000U
+#define FLASH_HP_CODEFLASH_END_ADDRESS                 0x000FFFFFU
+
+#define FLASH_HP_CODEFLASH_BLOCK8_START_ADDRESS        0x00010000U
+
+/* Code and Data flash minimal write size bytes */
+#define FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE          128
+#define FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE          4
+
+/* Code and Data flash minimal erase size bytes */
+#define FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE          8192
+#define FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE          64
+
+/* Code flash block size */
+#define FLASH_HP_CODEFLASH_SIZE_BELOW_BLOCK8           8192
+#define FLASH_HP_CODEFLASH_SIZE_FROM_BLOCK8            32768
+#endif
+
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 

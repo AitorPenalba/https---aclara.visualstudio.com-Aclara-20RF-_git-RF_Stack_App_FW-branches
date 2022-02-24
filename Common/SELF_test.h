@@ -127,6 +127,7 @@ extern void             SELF_testTask( taskParameter );
 extern returnStatus_t   SELF_testRTC( void );
 //extern returnStatus_t   SELF_testSecurity( void );
 extern returnStatus_t   SELF_testNV( void );
+extern returnStatus_t   SELF_testInternalFlash( void );
 #if (SUPPORT_HEEP != 0)
 extern returnStatus_t   SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 #endif

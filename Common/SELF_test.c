@@ -38,7 +38,7 @@
 #include "hal_data.h"
 //#include "ascii.h"
 //#include "buffer.h"
-//#include "partition_cfg.h"
+#include "partition_cfg.h"
 //#include "file_io.h"
 //#include "ecc108_lib_return_codes.h"
 //#include "ecc108_mqx.h"
@@ -77,6 +77,11 @@ static SELF_file_t      SELF_testFile =
    .UpdateFreq      = DVR_BANKED_MAX_UPDATE_RATE_SEC  /* Updated often enough to force into banked area. */
 }; /*lint !e785 too few initializers.  */
 #endif
+
+// For internal flash checking
+uint8_t flashBuffer[512];
+uint8_t checkFlashBuffer[512];
+
 /* TYPE DEFINITIONS */
 
 /* ****************************************************************************************************************** */
@@ -389,6 +394,11 @@ static uint16_t RunSelfTest()
    }
 #endif
 #endif
+   // Can be removed if not required - Currently in place for testing
+   if( eSUCCESS != SELF_testInternalFlash() )
+   {
+      // TODO: Error handling
+   }
 #if ( TM_RTC_UNIT_TEST == 1 )
    /* Execute the RTC Test last (to allow sufficient time for VBAT to come up and the OSC to start?)
       otherwise if the RTC SuperCap is completely discharged on the T-board the RTC test may fail on
@@ -400,7 +410,7 @@ static uint16_t RunSelfTest()
       if ( SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had failed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 0;
-#if 0         
+#if 0
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOSucceeded;
          (void)EVL_LogEvent( 45, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
@@ -480,6 +490,62 @@ returnStatus_t SELF_UpdateTestResults( void )
    return retVal;
 }
 #endif
+
+/***********************************************************************************************************************
+   Function Name: SELF_testInternalFlash
+
+   Purpose: Test the Internal flash
+
+   Arguments: none
+
+   Note:
+
+   Returns: Internal flash test success/failure
+***********************************************************************************************************************/
+returnStatus_t SELF_testInternalFlash( void )
+{
+   returnStatus_t retVal;
+   static PartitionData_t const *pDFWBLInfoPar_;
+   static PartitionData_t const *pDFWAppCode_;
+
+   /* Test Internal flash mechanism */
+   for (uint32_t index = 0; index < 512; index++)
+   {
+       flashBuffer[index] = 100;
+   }
+
+   /* BL Info partition test - BL info is stored in data flash */
+   (void)PAR_partitionFptr.parInit();  // FileIO init has been done here
+   retVal = PAR_partitionFptr.parOpen(&pDFWBLInfoPar_, ePART_DFW_BL_INFO, 0L);
+   retVal |= PAR_partitionFptr.parErase(0, 4096, pDFWBLInfoPar_);
+   retVal |= PAR_partitionFptr.parWrite( 0, ( uint8_t * )&flashBuffer[0], ( lCnt )sizeof( flashBuffer ), pDFWBLInfoPar_ );
+   retVal |= PAR_partitionFptr.parRead(checkFlashBuffer, 0, ( lCnt ) sizeof( checkFlashBuffer ), pDFWBLInfoPar_ );
+   if ( 0 != memcmp( flashBuffer, checkFlashBuffer, sizeof( flashBuffer ) ) )
+   {
+      retVal |= eFAILURE;
+   }
+
+   memset(checkFlashBuffer, 0, sizeof(checkFlashBuffer));
+
+   /* App partition test - App code is stored in code flash */
+   retVal |= PAR_partitionFptr.parOpen( &pDFWAppCode_, ePART_APP_CODE, 0L );
+   /* TODO: ******** Remove ***********
+    *       This write will write the data at the location mentioned.
+    *       Hence it may lead to a crash of a system when the
+    *       code exists that location. Hence it should be removed later. Only added now for testing */
+   retVal |= PAR_partitionFptr.parWrite( 65536, ( uint8_t * ) &flashBuffer[0], ( lCnt )sizeof( flashBuffer ), pDFWAppCode_ );
+   retVal |= PAR_partitionFptr.parRead( checkFlashBuffer, 65536, ( lCnt )sizeof( checkFlashBuffer ), pDFWAppCode_ );
+   if ( 0 != memcmp( flashBuffer, checkFlashBuffer, sizeof( flashBuffer ) ) )
+   {
+      retVal |= eFAILURE;
+   }
+
+   memset( flashBuffer, 0, sizeof( flashBuffer ) );
+   memset( checkFlashBuffer, 0, sizeof( checkFlashBuffer ) );
+
+   return retVal;
+}
+
 #if ( TM_RTC_UNIT_TEST == 1 )
 /***********************************************************************************************************************
    Function Name: SELF_testRTC
@@ -524,7 +590,7 @@ returnStatus_t SELF_testRTC( void )
    {
    .sec  = 55,
    .min  = 59,
-   .hour = 23,       //24-HOUR mode       
+   .hour = 23,       //24-HOUR mode
    .day = 31,        //RDAYCNT
    .month  = 11,     //RMONCNT 0-Jan 11 Dec
    .year = 121       //RYRCNT //Year SINCE 1900 (2021 = 2021-1900 = 121)
