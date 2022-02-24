@@ -526,7 +526,7 @@
       <property id="module.driver.spi.mode_fault" value="module.driver.spi.mode_fault.mode_fault_error_disable"/>
       <property id="module.driver.spi.bit_order" value="module.driver.spi.bit_order.bit_order_msb_first"/>
       <property id="module.driver.spi.p_callback" value="spi_callback"/>
-      <property id="module.driver.spi.spi_clksyn" value="module.driver.spi.spi_clksyn.spi_clksyn"/>
+      <property id="module.driver.spi.spi_clksyn" value="module.driver.spi.spi_clksyn.spi_operation"/>
       <property id="module.driver.spi.spi_comm" value="module.driver.spi.spi_comm.full_duplex"/>
       <property id="module.driver.spi.ssl_polarity" value="module.driver.spi.ssl_polarity.low"/>
       <property id="module.driver.spi.ssl_select" value="module.driver.spi.ssl_select.zero"/>
@@ -800,9 +800,8 @@
       <configSetting altId="p101.gpio_mode.gpio_mode_peripheral" configurationId="p101.gpio_mode"/>
       <configSetting altId="p102.spi1.rspck1" configurationId="p102"/>
       <configSetting altId="p102.gpio_mode.gpio_mode_peripheral" configurationId="p102.gpio_mode"/>
-      <configSetting altId="p103.spi1.sslb0" configurationId="p103"/>
-      <configSetting altId="p103.gpio_speed.gpio_speed_m" configurationId="p103.gpio_drivecapacity"/>
-      <configSetting altId="p103.gpio_mode.gpio_mode_peripheral" configurationId="p103.gpio_mode"/>
+      <configSetting altId="p103.output.high" configurationId="p103"/>
+      <configSetting altId="p103.gpio_mode.gpio_mode_out.high" configurationId="p103.gpio_mode"/>
       <configSetting altId="p104.output.low" configurationId="p104"/>
       <configSetting altId="p104.gpio_speed.gpio_speed_h" configurationId="p104.gpio_drivecapacity"/>
       <configSetting altId="p104.gpio_mode.gpio_mode_out.low" configurationId="p104.gpio_mode"/>
@@ -912,7 +911,6 @@
       <configSetting altId="spi1.mode.enabled.free" configurationId="spi1.mode"/>
       <configSetting altId="spi1.mosi1.p101" configurationId="spi1.mosi1"/>
       <configSetting altId="spi1.rspck1.p102" configurationId="spi1.rspck1"/>
-      <configSetting altId="spi1.sslb0.p103" configurationId="spi1.sslb0"/>
       <pinNumberSetting comment="I2C0_SCL" pinNumber="1"/>
       <pinNumberSetting comment="I2C0_SDA" pinNumber="2"/>
       <pinNumberSetting comment="3V6LDO_EN" pinNumber="5"/>

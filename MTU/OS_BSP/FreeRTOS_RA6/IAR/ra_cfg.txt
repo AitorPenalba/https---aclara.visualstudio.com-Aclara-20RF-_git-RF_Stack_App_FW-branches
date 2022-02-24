@@ -108,7 +108,7 @@ FSP Configuration
       P100 75 SPI1_MISO1 - M None "Peripheral mode" - - "AGT0: AGTIO0; GPT5: GTIOC5B; GPT_POEG: GTETRGA; IRQ: IRQ2; QSPI: QSPCLK; SCI0: RXD0; SCI1: SCK1; SPI1: MISO1" - IO - SPI1_MISO 
       P101 74 SPI1_MOSI1 - M None "Peripheral mode" - - "AGT0: AGTEE0; GPT5: GTIOC5A; GPT_POEG: GTETRGB; IRQ: IRQ1; QSPI: QIO1; SCI0: TXD0; SCI1: CTS_RTS1; SPI1: MOSI1" - IO - SPI1_MOSI 
       P102 73 SPI1_RSPCK1 - L - "Peripheral mode" - - "ADC0: ADTRG0; AGT0: AGTO0; CAN0: CRX0; GPT2: GTIOC2B; QSPI: QIO0; SCI0: SCK0; SPI1: RSPCK1" - IO - SPI1_SCK 
-      P103 72 SPI1_SSLB0 - M - "Peripheral mode" - - "AGT2: AGTIO2; CAN0: CTX0; GPT2: GTIOC2A; QSPI: QIO3; SCI0: CTS_RTS0; SPI1: SSLB0" - IO - /SPI1_CS_SI4460 
+      P103 72 GPIO - L - "Output mode (Initial High)" - - "AGT2: AGTIO2; CAN0: CTX0; GPT2: GTIOC2A; QSPI: QIO3; SCI0: CTS_RTS0; SPI1: SSLB0" - IO - /SPI1_CS_SI4460 
       P104 71 GPIO - H None "Output mode (Initial Low)" - - "AGT2: AGTEE2; GPT1: GTIOC1B; GPT_POEG: GTETRGB; IRQ: IRQ1; QSPI: QIO2; SPI1: SSLB1" - IO - SDN_SI4460 
       P105 70 GPIO - H None "Output mode (Initial Low)" - - "AGT2: AGTO2; GPT1: GTIOC1A; GPT_POEG: GTETRGA; IRQ: IRQ0; SPI1: SSLB2" - IO - /OSC_EN 
       P106 69 GPIO - H - "Output mode (Initial Low)" - - "AGT0: AGTOB0; SPI1: SSLB3" - IO - GPIO1_SI4460 
@@ -585,7 +585,7 @@ FSP Configuration
       Mode Fault Error: Disable
       Bit Order: MSB First
       Callback: spi_callback
-      SPI Mode: Clock Synchronous Operation
+      SPI Mode: SPI Operation
       Full or Transmit Only Mode: Full Duplex
       Slave Select Polarity: Active Low
       Select SSL(Slave Select): SSL0

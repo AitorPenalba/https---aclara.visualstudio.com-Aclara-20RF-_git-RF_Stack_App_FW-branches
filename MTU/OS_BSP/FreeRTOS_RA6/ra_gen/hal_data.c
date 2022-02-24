@@ -189,7 +189,7 @@ spi_instance_ctrl_t g_spi1_ctrl;
 /** SPI extended configuration for SPI HAL driver */
 const spi_extended_cfg_t g_spi1_ext_cfg =
 {
-    .spi_clksyn         = SPI_SSL_MODE_CLK_SYN,
+    .spi_clksyn         = SPI_SSL_MODE_SPI,
     .spi_comm           = SPI_COMMUNICATION_FULL_DUPLEX,
     .ssl_polarity        = SPI_SSLP_LOW,
     .ssl_select          = SPI_SSL_SELECT_SSL0,
