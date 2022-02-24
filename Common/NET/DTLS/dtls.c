@@ -129,7 +129,11 @@
 */
 
 /* MACRO DEFINITIONS */
-
+#if( RTOS_SELECTION == FREE_RTOS )
+#define DTLS_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define DTLS_NUM_MSGQ_ITEMS 0 
+#endif
 /* TYPE DEFINITIONS */
 /* An indicator of which pipe the DTLS is connected to */
 typedef enum
@@ -474,7 +478,7 @@ returnStatus_t DTLS_init( void )
 {
    returnStatus_t ret = eFAILURE; /* Return Value */
 
-   if (  ( !OS_MSGQ_Create( &_dtlsMSGQ ) )         || ( !OS_EVNT_Create ( &_dtlsEvent ) ) ||
+   if (  ( !OS_MSGQ_Create( &_dtlsMSGQ, DTLS_NUM_MSGQ_ITEMS ) )         || ( !OS_EVNT_Create ( &_dtlsEvent ) ) ||
          ( !OS_MUTEX_Create( &dtlsConfigMutex_ ) ) || ( eSUCCESS != DtlsInitializeSessionCache() ) )
    {
       return eFAILURE;

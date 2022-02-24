@@ -130,6 +130,12 @@
 #define RPT_PRNT_INFO( category, fmt, ... )
 #endif
 
+#if( RTOS_SELECTION == FREE_RTOS )
+#define PHY_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define PHY_NUM_MSGQ_ITEMS 0 
+#endif
+
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -501,7 +507,7 @@ returnStatus_t PHY_init( void )
    uint32_t i;
 
    if ( OS_SEM_Create(&PHY_AttributeSem_) && OS_MUTEX_Create(&PHY_AttributeMutex_) && OS_MUTEX_Create(&PHY_Mutex_) &&
-        OS_EVNT_Create(&events) && OS_MSGQ_Create(&PHY_msgQueue) )
+        OS_EVNT_Create(&events) && OS_MSGQ_Create(&PHY_msgQueue, PHY_NUM_MSGQ_ITEMS) )
    {
       // Open PHY cached data (mainly counters)
       if ( eSUCCESS == FIO_fopen(&PHYcachedFileHndl_,              /* File Handle so that PHY access the file. */

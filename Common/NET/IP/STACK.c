@@ -114,6 +114,13 @@
 // List of suppported next header subtype
 #define NEXT_HEADER_NEXT_HOP_LIST_SUBTYPE 0
 
+#if( RTOS_SELECTION == FREE_RTOS )
+#define NWK_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define NWK_NUM_MSGQ_ITEMS 0 
+#endif
+
+
 /* TYPE DEFINITIONS */
 
 
@@ -385,7 +392,7 @@ returnStatus_t NWK_init ( void )
 #if ( FAKE_TRAFFIC == 1 )
    tTimeSysPerAlarm alarmSettings;
 #endif
-   if (OS_SEM_Create(&NWK_AttributeSem_) && OS_MUTEX_Create(&NWK_AttributeMutex_) && OS_MSGQ_Create(&NWK_msgQueue))
+   if (OS_SEM_Create(&NWK_AttributeSem_) && OS_MUTEX_Create(&NWK_AttributeMutex_) && OS_MSGQ_Create(&NWK_msgQueue, NWK_NUM_MSGQ_ITEMS))
    {
       // Reset the configuration attributes to default values
       ConfigAttr_Init((bool) false);

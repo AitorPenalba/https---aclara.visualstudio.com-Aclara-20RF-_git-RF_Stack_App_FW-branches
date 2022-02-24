@@ -48,12 +48,10 @@
 
 *******************************************************************************/
 
-bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
+bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
 {
    bool RetStatus = true;
-   uint32_t numItems = ( NumMessages == 0) ? DEFAULT_NUM_ITEMS_MSGQ : NumMessages;
-
-   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), numItems) )
+   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), NumMessages) )
    {
       RetStatus = false;
    } /* end if() */
@@ -77,39 +75,41 @@ bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
   Returns: None
 
   Notes: The memory for MessageData must be allocated by the calling function and
-         this function does not copy the data, so it it retained in the original
-         allocated memory location.  Allocation and De-allocation must be handled
-         by the application calling these OS_MSGQ_xxx functions
-         This OS_MSGQ module does not allocate, nor free any memory, and just deals
+         and is retained in the original allocated memory location. 
+         Allocation and De-allocation must be handled by the application calling 
+         these OS_MSGQ_xxx functions This OS_MSGQ module does not allocate, 
+         nor free any memory, and just deals
          with a pointer to the memory location
 
          Function will not return if it fails
 
 *******************************************************************************/
-void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void **MessageData, bool ErrorCheck, char *file, int line )
+void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line )
 {
-   OS_QUEUE_Element_Handle * ptr = (OS_QUEUE_Element_Handle * )MessageData;
-
-   // Sanity check
-   if (ErrorCheck && (*ptr)->flag.isFree) {
-      // The buffer was freed
-      DBG_LW_printf("\nERROR: OS_MSGQ_POST got a buffer marked as free. Size: %u, pool = %u, addr=0x%p\n",
-                    (*ptr)->dataLen, (*ptr)->bufPool, MessageData);
-      DBG_LW_printf("ERROR: OS_MSGQ_POST called from %s:%d\n", file, line);
-   }
-   if ((*ptr)->flag.inQueue) {
-      // The buffer is already in use.
-      DBG_LW_printf("\nERROR: OS_MSGQ_POST got a buffer marked as in used by another queue. Size: %u, pool = %u, addr=0x%p\n",
-                    (*ptr)->dataLen, (*ptr)->bufPool, MessageData);
-      DBG_LW_printf("ERROR: OS_MSGQ_POST called from %s:%d\n", file, line);
-   }
-
-   // Mark as on queue
-   (*ptr)->flag.inQueue++;
-
-   OS_QUEUE_ENQUEUE(&(MsgqHandle->MSGQ_QueueObj), ptr, file, line); // Function will not return if it fails
-
-   OS_SEM_POST(&(MsgqHandle->MSGQ_SemObj), file, line); // Function will not return if it fails
+  OS_QUEUE_Element *ptr = MessageData;
+  
+  // Sanity check
+  if (ErrorCheck && ptr->flag.isFree) {
+    // The buffer was freed
+    DBG_LW_printf("\nERROR: OS_MSGQ_POST got a buffer marked as free. Size: %u, pool = %u, addr=0x%p\n",
+                  ptr->dataLen, ptr->bufPool, MessageData);
+    DBG_LW_printf("ERROR: OS_MSGQ_POST called from %s:%d\n", file, line);
+  }
+  if (ptr->flag.inQueue) {
+    // The buffer is already in use.
+    DBG_LW_printf("\nERROR: OS_MSGQ_POST got a buffer marked as in used by another queue. Size: %u, pool = %u, addr=0x%p\n",
+                  ptr->dataLen, ptr->bufPool, MessageData);
+    DBG_LW_printf("ERROR: OS_MSGQ_POST called from %s:%d\n", file, line);
+  }
+  
+  // Mark as on queue
+  ptr->flag.inQueue++;
+  
+  OS_QUEUE_ENQUEUE(&(MsgqHandle->MSGQ_QueueObj), MessageData, file, line); // Function will not return if it fails
+  
+  OS_SEM_POST(&(MsgqHandle->MSGQ_SemObj), file, line); // Function will not return if it fails
+   
+   
 } /* end OS_MSGQ_Post () */
 
 /*******************************************************************************
@@ -183,7 +183,7 @@ static OS_QUEUE_Element txMsg1;
 
 void OS_MSGQ_TestCreate ( void )
 {
-   if( OS_MSGQ_Create(&testMsgQueue_, 0) )
+   if( OS_MSGQ_Create(&testMsgQueue_, 10) )
    {
       counter++;
    }

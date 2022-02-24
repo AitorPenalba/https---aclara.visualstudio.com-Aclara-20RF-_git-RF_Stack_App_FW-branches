@@ -66,6 +66,12 @@
 #define MIN_REGISTRATION_TIMEOUT_MIN_VALUE        30
 #define MAX_REGISTRATION_TIMEOUT_MAX_VALUE        172800
 #define MAX_REGISTRATION_TIMEOUT_MIN_VALUE        43200
+#if( RTOS_SELECTION == FREE_RTOS )
+#define APP_MSG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define APP_MSG_NUM_MSGQ_ITEMS 0 
+#endif
+
 
 /* TYPE DEFINITIONS */
 
@@ -273,7 +279,7 @@ returnStatus_t APP_MSG_init ( void )
    returnStatus_t retVal = eFAILURE  ; //Return status
    FileStatus_t fileStatus;
 
-   if ( OS_MSGQ_Create( &AppMsgHandler_MsgQ_ ) )
+   if ( OS_MSGQ_Create( &AppMsgHandler_MsgQ_, APP_MSG_NUM_MSGQ_ITEMS ) )
    {
       appMsgHandlerReady = true; //Let apps know handler is ready to accept messages
 

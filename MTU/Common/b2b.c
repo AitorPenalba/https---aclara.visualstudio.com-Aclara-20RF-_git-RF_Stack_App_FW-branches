@@ -26,7 +26,11 @@ Copyright 2018 Aclara.  All Rights Reserved.
 /*******************************************************************************
 Local #defines (Object-like macros)
 *******************************************************************************/
-
+#if( RTOS_SELECTION == FREE_RTOS )
+#define B2B_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define B2B_NUM_MSGQ_ITEMS 0 
+#endif
 /*******************************************************************************
 Local #defines (Function-like macros)
 *******************************************************************************/
@@ -88,7 +92,7 @@ returnStatus_t B2BInit(void)
       return eFAILURE;
    }
 
-   if (!OS_MSGQ_Create(&respQueue))
+   if (!OS_MSGQ_Create(&respQueue, B2B_NUM_MSGQ_ITEMS))
    {
       ERR_printf("Error creating B2B response queue");
       return eFAILURE;

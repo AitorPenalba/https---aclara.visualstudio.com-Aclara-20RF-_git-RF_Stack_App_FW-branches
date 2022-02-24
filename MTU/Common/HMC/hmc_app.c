@@ -77,6 +77,11 @@
 #define NULL 0
 
 #define APPLET_IDLE_COUNT  (uint8_t)20
+#if( RTOS_SELECTION == FREE_RTOS )
+#define HMC_APP_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
+#else
+#define HMC_APP_QUEUE_SIZE 0 
+#endif
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -167,7 +172,7 @@ returnStatus_t HMC_APP_RTOS_Init( void )
    returnStatus_t retVal = eSUCCESS;   /* Return value */
 
    /* Create queue needed for Meter Applets */
-   if ( !OS_QUEUE_Create( &HMC_APP_QueueHandle ) )
+   if ( !OS_QUEUE_Create( &HMC_APP_QueueHandle, HMC_APP_QUEUE_SIZE ) )
    {
       /* Queue create failed */
       retVal = eFAILURE;

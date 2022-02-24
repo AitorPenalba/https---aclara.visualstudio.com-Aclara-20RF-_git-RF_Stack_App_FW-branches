@@ -169,7 +169,11 @@
    /* Interval preset to emmulate useage over the period that would result in TX_THROTTLE_INIT_CAPACITY */
 #define TX_THROTTLE_INTV_INIT       ( ( TX_THROTTLE_MAX_CAPACITY - TX_THROTTLE_INIT_CAPACITY ) / ( TX_THROTTLE_INTERVALS - 1 ) )
 #endif
-
+#if( RTOS_SELECTION == FREE_RTOS )
+#define MAC_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define MAC_NUM_MSGQ_ITEMS 0 
+#endif
 
 /* TYPE DEFINITIONS */
 
@@ -975,7 +979,7 @@ returnStatus_t MAC_init ( void )
       return eFAILURE;
    }
 
-   if (OS_SEM_Create(&MAC_AttributeSem_) && OS_MUTEX_Create(&MAC_AttributeMutex_) && OS_MSGQ_Create(&MAC_msgQueue) && OS_MUTEX_Create(&MAC_TimeSyncAttributeMutex_) &&
+   if (OS_SEM_Create(&MAC_AttributeSem_) && OS_MUTEX_Create(&MAC_AttributeMutex_) && OS_MSGQ_Create(&MAC_msgQueue, MAC_NUM_MSGQ_ITEMS) && OS_MUTEX_Create(&MAC_TimeSyncAttributeMutex_) &&
        (eSUCCESS == MAC_FrameManag_init()) && (eSUCCESS == MAC_PacketManag_init()) )
    {
       // Register the message handler

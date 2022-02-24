@@ -92,6 +92,11 @@
 #else
 #define EVENT_RECOVERY_BUFF_SIZE                  ( 1155 )
 #endif
+#if( RTOS_SELECTION == FREE_RTOS )
+#define EVL_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define EVL_NUM_MSGQ_ITEMS 0 
+#endif
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -1533,9 +1538,9 @@ returnStatus_t EVL_Initalize( void )
    if ( rVal == eSUCCESS )
    {
 #if ( LAST_GASP_SIMULATION == 1 ) && ( EP == 1 )
-      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_) && OS_SEM_Create( &SimLGTxDoneSem ) )
+      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS) && OS_SEM_Create( &SimLGTxDoneSem ) )
 #else
-      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_) )
+      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS) )
 #endif
       {
          ( void )memset( &tmrSettings, 0, sizeof( tmrSettings ) );

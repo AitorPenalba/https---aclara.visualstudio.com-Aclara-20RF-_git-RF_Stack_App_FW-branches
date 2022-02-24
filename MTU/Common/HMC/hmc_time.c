@@ -162,6 +162,12 @@ static uint8_t                bigEndian_;                      /* Indicator of m
 #define HMC_TIME_PRNT_ERROR( a, fmt,... ) ( void )0
 #endif
 
+#if( RTOS_SELECTION == FREE_RTOS )
+#define HMC_TIME_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
+#else
+#define HMC_TIME_QUEUE_SIZE 0 
+#endif
+
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
@@ -775,7 +781,7 @@ uint8_t HMC_TIME_Set_Time( uint8_t ucCmd, void *pData )
                      offsetLocal += (int32_t)(TIME_TICKS_PER_HR * 12); //Local noon
                      offsetLocal %= (int32_t)TIME_TICKS_PER_DAY; //Local noon, same day
 
-                     ( void )OS_QUEUE_Create( &hmcTimeQueueHandle );
+                     ( void )OS_QUEUE_Create( &hmcTimeQueueHandle, HMC_TIME_QUEUE_SIZE );
                      alarmSettings.pMQueueHandle = NULL;             /* Don't use the message queue */
                      alarmSettings.bOnInvalidTime = false;           /* Only alarmed on valid time, not invalid */
                      alarmSettings.bOnValidTime = true;              /* Alarmed on valid time */

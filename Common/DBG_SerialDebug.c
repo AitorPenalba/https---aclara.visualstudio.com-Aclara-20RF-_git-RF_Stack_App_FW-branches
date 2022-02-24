@@ -68,6 +68,11 @@
 /* TYPE DEFINITIONS */
 
 #define DBG_RSVD_SIZE 30
+#if( RTOS_SELECTION == FREE_RTOS )
+#define SERIAL_DBG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define SERIAL_DBG_NUM_MSGQ_ITEMS 0 
+#endif
 
 typedef struct
 {
@@ -93,7 +98,7 @@ static bool             EnableDfwMonMode = ( bool )false;
 static OS_MUTEX_Obj     mutex_;
 static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
-//static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
+static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
 //static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
 static uint16_t         line_num_ = 0;                      /* Line number used by DBG_log */
 #if ENABLE_TMR_TASKS
@@ -131,7 +136,7 @@ returnStatus_t DBG_init( void )
 #if (FILE_IO == 1)
    FileStatus_t fileStatus;
 #endif
-   if (  //OS_MSGQ_Create( &mQueueHandle_,0 ) &&
+   if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS ) &&
          OS_MUTEX_Create( &mutex_ ) &&
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )

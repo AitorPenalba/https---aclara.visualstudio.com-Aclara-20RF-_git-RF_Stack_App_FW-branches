@@ -125,6 +125,11 @@ static volatile bool dmdResetDone_;                //Indicates demand reset comp
 #endif
 
 /* MACRO DEFINITIONS */
+#if( RTOS_SELECTION == FREE_RTOS )
+#define DEMAND_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define DEMAND_NUM_MSGQ_ITEMS 0 
+#endif
 // make sure the size of the reading Quality is still 1 bytes for this application
 #define READING_QTY_MAX_SIZE                 25                       // Worst case size of the ReadingQty field for this application
 #define DEMAND_PER_BIN_IN_TICKS              (TIME_TICKS_PER_5MIN)
@@ -314,7 +319,7 @@ returnStatus_t DEMAND_init( void )
    FileStatus_t     fileStatusCfg;                /* Contains the file status */
    returnStatus_t   retVal = eFAILURE;
 
-   if ( OS_MUTEX_Create(&dmdMutex_) && OS_MSGQ_Create(&mQueueHandle_) )
+   if ( OS_MUTEX_Create(&dmdMutex_) && OS_MSGQ_Create(&mQueueHandle_, DEMAND_NUM_MSGQ_ITEMS) )
    {
       if (eSUCCESS == FIO_fopen(  &demandFileHndl_,                /* File Handle */
                                   ePART_SEARCH_BY_TIMING,          /* Search for the best paritition according to the timing. */

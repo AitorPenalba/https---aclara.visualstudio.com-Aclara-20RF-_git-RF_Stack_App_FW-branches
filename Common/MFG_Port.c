@@ -169,6 +169,12 @@
 #define MFG_puts( port, msg, len ) (void)UART_write( port, msg, len )
 #endif
 
+#if( RTOS_SELECTION == FREE_RTOS )
+#define MFG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define MFG_NUM_MSGQ_ITEMS 0 
+#endif
+
 /* Temporary definition of MFG_logPrintf()   */
 #if (USE_DTLS == 1)
 #define MFG_logPrintf MFG_printf
@@ -1600,7 +1606,7 @@ returnStatus_t MFGP_cmdInit( void )
 {
    returnStatus_t retVal = eFAILURE;
 
-   if ( OS_EVNT_Create(&_MfgpUartEvent) && OS_MSGQ_Create(&_CommandReceived_MSGQ) )
+   if ( OS_EVNT_Create(&_MfgpUartEvent) && OS_MSGQ_Create(&_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS) )
    {
       retVal = eSUCCESS;
    }

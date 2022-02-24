@@ -47,6 +47,12 @@
 #define REPLAY_BUFFERS            50
 #define MTLS_AUTH_WINDOW         300
 #define MTLS_NET_TIME_VARIATION    5
+#if( RTOS_SELECTION == FREE_RTOS )
+#define MTLS_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define MTLS_NUM_MSGQ_ITEMS 0 
+#endif
+
 
 /***********************************************************************************************************************
    MACRO DEFINITIONS
@@ -580,7 +586,7 @@ returnStatus_t MTLS_init( void )
    returnStatus_t ret = eSUCCESS; /* Return Value */
    mtlsFile_s     *pFile;
 
-   if ( false == OS_MSGQ_Create( &mtlsMSGQ ) )
+   if ( false == OS_MSGQ_Create( &mtlsMSGQ, MTLS_NUM_MSGQ_ITEMS ) )
    {
       ret = eFAILURE;
    }

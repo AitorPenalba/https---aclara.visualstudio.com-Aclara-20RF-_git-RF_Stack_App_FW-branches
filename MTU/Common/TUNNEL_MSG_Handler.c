@@ -29,7 +29,11 @@ Copyright 2018 Aclara.  All Rights Reserved.
 /*******************************************************************************
 Local #defines (Object-like macros)
 *******************************************************************************/
-
+#if( RTOS_SELECTION == FREE_RTOS )
+#define TUNNEL_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define TUNNEL_NUM_MSGQ_ITEMS 0 
+#endif
 /*******************************************************************************
 Local #defines (Function-like macros)
 *******************************************************************************/
@@ -71,7 +75,7 @@ Create queue for messages and register functions with lower layers
 */
 returnStatus_t TUNNEL_MSG_init(void)
 {
-   if (!OS_MSGQ_Create(&tunnelMsgQueue))
+   if (!OS_MSGQ_Create(&tunnelMsgQueue, TUNNEL_NUM_MSGQ_ITEMS))
    {
       return eFAILURE;
    }

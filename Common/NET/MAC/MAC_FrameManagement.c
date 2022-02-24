@@ -59,7 +59,17 @@
 #define NUM_CONCURRENT_RX_BUFFERS ((uint16_t)5)
 #define SEGMENT_STORAGE_POOL_SIZE ((uint16_t)26)
 #endif
-
+#if( RTOS_SELECTION == FREE_RTOS )
+#define RX_BUF_EXPIRE_NUM_MSGQ_ITEMS  10 //NRJ: TODO Figure out sizing
+#define RX_FRAME_QUEUE_SIZE           10
+#define TX_FRAME_QUEUE_SIZE           10
+#else
+#define RX_BUF_EXPIRE_NUM_MSGQ_ITEMS  0
+#define RX_FRAME_QUEUE_SIZE           0
+#define TX_FRAME_QUEUE_SIZE           0
+#endif
+   
+   
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -182,12 +192,12 @@ returnStatus_t MAC_FrameManag_init ( void )
    returnStatus_t RetVal = eSUCCESS;
    uint16_t i;
 
-   if ( ! OS_QUEUE_Create(&MAC_FrameTxQueueHandle) )
+   if ( ! OS_QUEUE_Create(&MAC_FrameTxQueueHandle, TX_FRAME_QUEUE_SIZE) )
    {
       RetVal = eFAILURE;
    }
 
-   if ( ! OS_QUEUE_Create(&RxAssemblyTimeoutQueue) )
+   if ( ! OS_QUEUE_Create(&RxAssemblyTimeoutQueue, RX_FRAME_QUEUE_SIZE) )
    {
       RetVal = eFAILURE;
    }
@@ -202,7 +212,7 @@ returnStatus_t MAC_FrameManag_init ( void )
       RetVal = eFAILURE;
    }
 
-   if ( ! OS_MSGQ_Create(&RxBufferExpiredQueue) )
+   if ( ! OS_MSGQ_Create(&RxBufferExpiredQueue, RX_BUF_EXPIRE_NUM_MSGQ_ITEMS) )
    {
       RetVal = eFAILURE;
    }

@@ -34,7 +34,11 @@
 #include <assert.h>
 #include "DBG_SerialDebug.h"
 #include "pack.h"
-
+#if( RTOS_SELECTION == FREE_RTOS )
+#define ILC_DRIVER_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
+#else
+#define ILC_DRIVER_QUEUE_SIZE 0 
+#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -1218,7 +1222,7 @@ returnStatus_t ILC_DRU_DRIVER_Init ( void )
 {
    returnStatus_t retVal = eFAILURE;
 
-   if ( true == OS_QUEUE_Create( &ILC_DRU_DRIVER_QueueHandle ) )
+   if ( true == OS_QUEUE_Create( &ILC_DRU_DRIVER_QueueHandle, ILC_DRIVER_QUEUE_SIZE ) )
    {
       if ( true == OS_MUTEX_Create( &ILC_DRU_DRIVER_Mutex_ ) )
       {

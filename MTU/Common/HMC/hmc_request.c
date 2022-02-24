@@ -73,6 +73,13 @@ static HMC_REQ_queue_t     *pQueue_;
 
 #define HMC_REQ_RETRIES          ((uint8_t)0)         /* Number of times to retry on an error */
 /*lint -esym(750, HMC_REQ_PRNT_WARN, HMC_REQ_PRNT_HEX_WARN, HMC_REQ_PRNT_HEX_ERROR) */
+#define APPLET_IDLE_COUNT  (uint8_t)20
+#if( RTOS_SELECTION == FREE_RTOS )
+#define HMC_REQ_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
+#else
+#define HMC_REQ_QUEUE_SIZE 0 
+#endif
+
 
 #if ENABLE_PRNT_HMC_REQ_INFO
 #define HMC_REQ_PRNT_INFO( a, fmt,... )      DBG_logPrintf ( a, fmt, ##__VA_ARGS__ )
@@ -186,7 +193,7 @@ uint8_t HMC_REQ_applet( uint8_t ucCmd, void *pData )
       {
          if ( !HMC_REQ_queueCreated ) // RCZ added for second instance of this applet
          {
-            HMC_REQ_queueCreated = OS_QUEUE_Create( &HMC_REQ_queueHandle );
+            HMC_REQ_queueCreated = OS_QUEUE_Create( &HMC_REQ_queueHandle, HMC_REQ_QUEUE_SIZE );
          }
 
          totalBytesToRead_ = 0;

@@ -89,6 +89,11 @@
 #define HD_CHAN_ERROR_GET(x) ( ( hdFileData_.Data.histDataChErrors  &  ((uint64_t) 1 << x) ) ? (bool)true : (bool)false )
 #define HD_CHAN_ERROR_SET(x)   ( hdFileData_.Data.histDataChErrors |=  ((uint64_t) 1 << x) )
 
+#if( RTOS_SELECTION == FREE_RTOS )
+#define HD_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define HD_NUM_MSGQ_ITEMS 0 
+#endif
 
 
 /* TYPE DEFINITIONS */
@@ -176,7 +181,7 @@ returnStatus_t HD_init( void )
    FileStatus_t fileStatus;  //Indicates if the file is created or already exists
    returnStatus_t retVal = eFAILURE;
 
-   if ( !(OS_MSGQ_Create(&HD_MsgQ_) && (OS_MUTEX_Create(&HD_Mutex_))) )
+   if ( !(OS_MSGQ_Create(&HD_MsgQ_) && (OS_MUTEX_Create(&HD_Mutex_, HD_NUM_MSGQ_ITEMS))) )
    {
       return eFAILURE;
    }

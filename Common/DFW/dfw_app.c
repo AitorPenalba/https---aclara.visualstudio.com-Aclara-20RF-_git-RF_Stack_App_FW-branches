@@ -188,6 +188,13 @@
 #define UPDATE_FREQUENTLY (0)     // update rate for dfw counters in cache
 #endif
 
+#if( RTOS_SELECTION == FREE_RTOS )
+#define DFWA_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define DFWA_DBG_NUM_MSGQ_ITEMS 0 
+#endif
+
+
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
@@ -548,7 +555,7 @@ returnStatus_t DFWA_init( void )
                        eSUCCESS == (eStatus = PAR_partitionFptr.parOpen(&pAppCodePart_, ePART_APP_CODE, 0L)) )
 #endif
                   {
-                     if ((bool)true == OS_MSGQ_Create(&DFWA_MQueueHandle))
+                     if ((bool)true == OS_MSGQ_Create(&DFWA_MQueueHandle, DFWA_NUM_MSGQ_ITEMS))
                      {
                         /* Semaphore correctly created, initialize the DFW packet module. */
                         eStatus = DFWP_init();

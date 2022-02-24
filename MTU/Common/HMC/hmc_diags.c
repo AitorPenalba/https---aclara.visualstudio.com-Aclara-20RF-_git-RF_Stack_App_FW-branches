@@ -74,6 +74,13 @@
 #define HMC_DIAGS_PRNT_ERROR(a,fmt,...)
 #endif
 
+#if( RTOS_SELECTION == FREE_RTOS )
+#define HMC_DIAG_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
+#else
+#define HMC_DIAG_QUEUE_SIZE 0 
+#endif
+
+
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -245,7 +252,7 @@ uint8_t HMC_DIAGS_DoDiags( uint8_t cmd, void *pData )
             returnStatus_t   resFileOpen;
             returnStatus_t   resAddTimer;
             tTimeSysPerAlarm alarmSettings;                    /* Configure the periodic alarm for time */
-            ( void )OS_QUEUE_Create( &hmcDiagQueueHandle_ );
+            ( void )OS_QUEUE_Create( &hmcDiagQueueHandle_, HMC_DIAG_QUEUE_SIZE );
             alarmSettings.pMQueueHandle = NULL;                /* Don't use the message queue */
             alarmSettings.bOnInvalidTime = false;              /* Only alarmed on valid time, not invalid */
             alarmSettings.bOnValidTime = true;                 /* Alarmed on valid time */

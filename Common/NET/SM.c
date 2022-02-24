@@ -46,6 +46,14 @@
 
 #define MAX_ACTIVE_TO SECONDS_PER_DAY
 #define MAX_PASS_TO SECONDS_PER_MINUTE
+#if( RTOS_SELECTION == FREE_RTOS )
+#define INT_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#define EXT_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define INT_NUM_MSGQ_ITEMS 0 //NRJ: TODO Figure out sizing
+#define EXT_NUM_MSGQ_ITEMS 0 //NRJ: TODO Figure out sizing
+#endif
+
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -201,8 +209,8 @@ returnStatus_t SM_init( void )
    smMode_ = eSM_MODE_UNKNOWN;
 
    // Create the external and internal message queues and other resources
-   if (OS_MSGQ_Create(&SM_externalMsgQueue)
-      && OS_MSGQ_Create(&SM_internalMsgQueue)
+   if (OS_MSGQ_Create(&SM_externalMsgQueue, EXT_NUM_MSGQ_ITEMS)
+      && OS_MSGQ_Create(&SM_internalMsgQueue, INT_NUM_MSGQ_ITEMS)
       && OS_MUTEX_Create(&SM_AttributeMutex_)
       && OS_SEM_Create(&SM_AttributeSem_)
       && IndicationCreate(&smEventIndication)

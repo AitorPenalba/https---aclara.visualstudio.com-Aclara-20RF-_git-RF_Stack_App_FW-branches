@@ -170,6 +170,12 @@ typedef struct
 #define LP_BU_MAX_TIME_DIVERSITY_MAX      ((uint8_t)60)
 #define ID_MAX_BYTES_PER_ALL_CHANNELS     ((uint16_t)256)
 
+#if( RTOS_SELECTION == FREE_RTOS )
+#define INTERVAL_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define INTERVAL_NUM_MSGQ_ITEMS 0 
+#endif
+
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 #if ( LP_IN_METER == 0 )
@@ -279,7 +285,7 @@ returnStatus_t ID_init( void )
    LP_Config_.loadTables = true;      /* load the tables on power-up */
 #endif
 
-   if ( ( OS_MUTEX_Create( &idMutex_ ) ) && ( OS_MSGQ_Create( &mQueueHandle_ ) ) &&
+   if ( ( OS_MUTEX_Create( &idMutex_ ) ) && ( OS_MSGQ_Create( &mQueueHandle_, INTERVAL_NUM_MSGQ_ITEMS) ) &&
 #if ( LP_IN_METER == 0 )
          ( eSUCCESS == FIO_fopen( &fileHndlMeta_,                       /* File Handle so that Interval Data can get meta data. */
                                   ePART_SEARCH_BY_TIMING,               /* Search for best partition according to the timing.*/

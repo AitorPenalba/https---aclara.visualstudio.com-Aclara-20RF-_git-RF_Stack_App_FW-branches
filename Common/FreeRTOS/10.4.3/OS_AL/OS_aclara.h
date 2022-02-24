@@ -61,6 +61,7 @@
 #define ONE_HOUR    (ONE_MIN * 60)
 #define ONE_DAY     (ONE_HOUR * 24)
 #define ONE_WEEK    (ONE_DAY * 7)
+#define DEFAULT_NUM_ITEMS_MSGQ 10
 
 #ifndef __BOOTLOADER
 #define OS_EVENT_ID 200
@@ -77,7 +78,7 @@
 
 #define OS_EVNT_Set(EventHandle, EventMask)              OS_EVNT_SET(EventHandle, EventMask, __FILE__, __LINE__)
 #define OS_EVNT_Wait(EventHandle, EventMask, WaitForAll, Timeout) OS_EVNT_WAIT(EventHandle, EventMask, WaitForAll, Timeout, __FILE__, __LINE__)
-
+#define OS_MSGQ_Create( MsgqHandle, numItems )           OS_MSGQ_CREATE( MsgqHandle, numItems)
 #define OS_MSGQ_Post(MsgqHandle, MessageData)            OS_MSGQ_POST(MsgqHandle, MessageData, (bool)true, __FILE__, __LINE__)
 #define OS_MSGQ_Pend(MsgqHandle, MessageData, TimeoutMs) OS_MSGQ_PEND(MsgqHandle, MessageData, TimeoutMs, (bool)true, __FILE__, __LINE__)
 
@@ -295,14 +296,14 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
 
 
 /*queue items to complete*/
+
+
+#endif
 bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *QueueElement );
 void OS_QUEUE_Remove ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
 void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
-
-#endif
-
-bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages);
-void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void **MessageData, bool ErrorCheck, char *file, int line );
+bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages);
+void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line );
 bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
 
 

@@ -76,7 +76,11 @@
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 #define ALLOC_WATCHDOG_TIMEOUT 15 // Reset in 15 minutes if we can't get buffers
-
+#if( RTOS_SELECTION == FREE_RTOS )
+#define BUFFERS_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#else
+#define BUFFERS_NUM_MSGQ_ITEMS 0 
+#endif
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
@@ -210,7 +214,7 @@ returnStatus_t BM_init( void )
          for ( pool = 0; ( eSUCCESS == retVal ) && ( pool < BUFFER_N_POOLS ); pool++ )
          {
             // Create a queue to hold the buffer pointers for this pool
-            if ( OS_MSGQ_Create( &bufferPools_[pool] ) == false )
+            if ( OS_MSGQ_Create( &bufferPools_[pool], BUFFERS_NUM_MSGQ_ITEMS ) == false )
             {
                //Message queue creation failed
                return eFAILURE;
