@@ -1209,6 +1209,51 @@
                 </file>
             </group>
             <group>
+                <name>Security</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\cert-builder.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\cert-builder.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_apps.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_apps.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_comm.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_comm.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_comm_marshaling.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_comm_marshaling.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_config.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_i2c.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_lib_return_codes.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_physical.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\i2c_hal.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\i2c_hal.h</name>
+                </file>
+            </group>
+			<group>
                 <name>Radio</name>
                 <group>
                     <name>Si446x_Radio</name>

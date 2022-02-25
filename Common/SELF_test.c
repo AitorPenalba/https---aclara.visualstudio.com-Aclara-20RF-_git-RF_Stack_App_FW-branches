@@ -42,7 +42,7 @@
 //#include "file_io.h"
 //#include "ecc108_lib_return_codes.h"
 //#include "ecc108_mqx.h"
-//#include "ecc108_apps.h"
+#include "ecc108_apps.h"
 //#include "evl_event_log.h"
 //#include "time_sys.h"
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
@@ -396,6 +396,12 @@ static uint16_t RunSelfTest()
 #endif
    // Can be removed if not required - Currently in place for testing
    if( eSUCCESS != SELF_testInternalFlash() )
+   {
+      // TODO: Error handling
+   }
+
+   // TODO: RA6E1 [name_Suriya] - Remove this call and add SelfTestSecurity to do complete SelfTest. Will be done once WolfSSL is done.
+   if( eSUCCESS != SEC_init() )
    {
       // TODO: Error handling
    }

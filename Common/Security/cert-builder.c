@@ -18,8 +18,10 @@
 #include <windows.h>
 #include <wincrypt.h>
 #else
+#if 0 // TODO: RA6E1 - WolfSSL integration
 #include "wolfssl/wolfcrypt/sha.h"
 #include "wolfssl/wolfcrypt/sha256.h"
+#endif
 #endif
 
 /**
@@ -469,6 +471,7 @@ static int16_t sha1(const uint8_t* msg, int16_t msg_size, uint8_t* hash, int16_t
    return wincryptHash(CALG_SHA1, msg, msg_size, hash, &dw_hash_size);
 #else
    int16_t retval;
+#if 0 // TODO: RA6E1 - WolfSSL integration
    Sha sha;
 
    retval = (int16_t)wc_InitSha( &sha );
@@ -480,6 +483,7 @@ static int16_t sha1(const uint8_t* msg, int16_t msg_size, uint8_t* hash, int16_t
          retval = (int16_t)wc_ShaFinal( &sha, hash );
       }
    }
+#endif
    return retval;
 #endif
 }
@@ -503,6 +507,7 @@ static int16_t sha256(const uint8_t* msg, int16_t msg_size, uint8_t* hash, int16
    return wincryptHash(CALG_SHA_256, msg, msg_size, hash, &dw_hash_size);
 #else
    int16_t retval;
+#if 0 // TODO: RA6E1 - WolfSSL integration
    Sha256 sha;
 
    retval = (int16_t)wc_InitSha256( &sha );
@@ -514,6 +519,7 @@ static int16_t sha256(const uint8_t* msg, int16_t msg_size, uint8_t* hash, int16
          retval = (int16_t)wc_Sha256Final( &sha, hash );
       }
    }
+#endif
    return retval;
 #endif
 }

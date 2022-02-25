@@ -85,6 +85,11 @@ uint8_t ecc108p_sleep(void);
 uint8_t ecc108p_reset_io(void);
 uint8_t ecc108p_resync(uint8_t size, uint8_t *response);
 
+#if ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+uint8_t ecc108_open( void );
+void ecc108_close( void );
+#endif
+
 /** @} */
 
 #endif
