@@ -100,7 +100,7 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
 {
 
 #if( RTOS_SELECTION == FREE_RTOS )
-   if (pdPASS != xQueueSend ( *QueueHandle, (void *)&QueueElement, 0 ) )
+   if (pdPASS != xQueueSend ( *QueueHandle, QueueElement, 0 ) )
    {
      APP_PRINT("Could not add item to queue");
    }
@@ -136,7 +136,7 @@ void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle )
 {
   OS_QUEUE_Element_Handle QueueElement;
 #if( RTOS_SELECTION == FREE_RTOS )
-  if( pdPASS != xQueueReceive ( *QueueHandle, (void *) &QueueElement, 0))
+  if( pdPASS != xQueueReceive ( *QueueHandle, (void *) QueueElement, 0))
   {
     QueueElement = NULL;
   }/*lint !e816 area too small   */
@@ -330,12 +330,12 @@ void OS_QUEUE_Test( void )
      for(int i = 0; i<DEFAULT_NUM_QUEUE_ITEMS; i++)
      {
        //enqueue elements one greater than the total length
-       OS_QUEUE_Enqueue( msgQueueHandle, &elementTx);
+       OS_QUEUE_Enqueue( msgQueueHandle, (void **) &elementTx);
      }
-     OS_QUEUE_Enqueue( msgQueueHandle, &elementTx); // this should fail
+     OS_QUEUE_Enqueue( msgQueueHandle, (void **) elementTx); // this should fail
      rxMsg = OS_QUEUE_Dequeue( msgQueueHandle );
      elementTx = (void *)&txMsg2;
-     OS_QUEUE_Enqueue( msgQueueHandle, &elementTx); // this should succeed
+     OS_QUEUE_Enqueue( msgQueueHandle, (void **)elementTx); // this should succeed
 
      //dequeue all elements and print there msg length as ID
      for(int i = 0; i<DEFAULT_NUM_QUEUE_ITEMS; i++)
