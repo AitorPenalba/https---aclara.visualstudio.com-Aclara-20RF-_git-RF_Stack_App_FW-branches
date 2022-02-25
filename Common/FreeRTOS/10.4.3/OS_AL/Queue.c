@@ -100,8 +100,8 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
 {
 
 #if( RTOS_SELECTION == FREE_RTOS )
-   QueueElement * ptr = &QueueElement
-   if (pdPASS != xQueueSend ( *QueueHandle, ptr, 0 ) )
+   OS_QUEUE_Handle ptr = (OS_QUEUE_Handle)QueueElement;
+   if (pdPASS != xQueueSend ( *QueueHandle, (void *) &ptr, 0 ) )
    {
      APP_PRINT("Could not add item to queue");
    }
