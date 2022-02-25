@@ -136,6 +136,7 @@
 #include "version.h"
 #include "DBG_SerialDebug.h"
 #include "time_sys.h"
+#include "file_io.h"
 
 /* #DEFINE DEFINITIONS */
 #define PRINT_CPU_STATS_IN_SEC 5 /* Print the Cpu statistics every x seconds */
@@ -173,6 +174,8 @@ const STRT_FunctionList_t startUpTbl[] =
                                                                                     //       to time stamp the message and, in the process, uses the time mutex.
                                                                                     // NOTE2: This needs to be after FIO_init since it uses the file system.
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
+
 #if 0
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS
@@ -504,7 +507,6 @@ void STRT_StartupTask ( taskParameter )
 #endif
 #endif // #if 0
          response = pFunct->pFxnStrt();
-         FIO_finit(); //TODO Melvin: move this to the init routine
 #if 0
          if ( pFunct->pFxnStrt == MODECFG_init )
          {
@@ -523,6 +525,8 @@ void STRT_StartupTask ( taskParameter )
          }
       }
    }
+
+   vRadio_Init(0);  // This is a test code
 #if (TM_MUTEX == 1)
    OS_MUTEX_Test();
 #endif

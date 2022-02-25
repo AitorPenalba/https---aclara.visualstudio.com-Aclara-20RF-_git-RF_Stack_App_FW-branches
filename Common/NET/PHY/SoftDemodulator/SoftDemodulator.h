@@ -56,7 +56,7 @@ typedef struct
 {
    volatile bool available;
    OS_SEM_Obj semaphore;
-   OS_EVNT_Obj sync_payload_event;
+   int sync_payload_event;  //TODO Melvin: OS_EVNT_Obj has to be introduced
 } filteredPhaseSamples_sem_t ;
 
 typedef struct //Used in fir_filt_circ_buff also
@@ -67,7 +67,7 @@ typedef struct //Used in fir_filt_circ_buff also
    uint32_t size;
 } unProcessedData_t ;
 
-extern OS_EVNT_Obj SD_Events;
+extern int SD_Events;  //TODO Melvin: OS_EVNT_Obj has to be introduced
 extern OS_MUTEX_Obj SD_Payload_Mutex;
 extern float filteredPhaseSamplesBuffer[FILTERED_PHASE_SAMPLES_BUFFER_SIZE];
 extern uint16_t filteredPhaseSamplesBufferWriteIndex;

@@ -501,7 +501,9 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
 #else
       OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
+#if ( RTOS_SELECTION == MQX_RTOS )
       eRetVal = NV_SPI_PORT_OPEN( pDevice->port, &_NV_spiCfg, SPI_MASTER );
+#endif
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
 #else

@@ -37,12 +37,21 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 #define SIG_RELEASE              ((uint8_t)1)
 
 #define RADIO_0_SPI_PORT_NUM     ((uint8_t)1)            /* SPI Port # used in the Micro.       */
+#if ( MCU_SELECTED == NXP_K24 )
 #define RADIO_0_CS_ACTIVE()      GPIOB_PCOR = 1<<10      /* Radio chip select pin asserted      */
 #define RADIO_0_CS_INACTIVE()    GPIOB_PSOR = 1<<10      /* Radio chip select pin released      */
 #define RADIO_0_CS_TRIS()        { RADIO_0_CS_INACTIVE(); PORTB_PCR10 = 0x100; GPIOB_PDDR |= 1<<10;}
 #define RADIO_0_SDN_ACTIVE()     GPIOB_PSOR = 1<<19      /* Radio powered OFF      */
 #define RADIO_0_SDN_INACTIVE()   GPIOB_PCOR = 1<<19      /* Radio powered ON      */
 #define RADIO_0_SDN_TRIS()       { RADIO_0_SDN_ACTIVE(); PORTB_PCR19 = 0x100; GPIOB_PDDR |= (1<<19);}
+#elif ( MCU_SELECTED == RA6E1 )
+#define RADIO_0_CS_ACTIVE()     R_BSP_PinWrite(BSP_IO_PORT_01_PIN_03, BSP_IO_LEVEL_LOW)
+#define RADIO_0_CS_INACTIVE()   R_BSP_PinWrite(BSP_IO_PORT_01_PIN_03, BSP_IO_LEVEL_HIGH)
+#define RADIO_0_CS_TRIS()
+#define RADIO_0_SDN_ACTIVE()    R_BSP_PinWrite(BSP_IO_PORT_01_PIN_04, BSP_IO_LEVEL_HIGH)
+#define RADIO_0_SDN_INACTIVE()  R_BSP_PinWrite(BSP_IO_PORT_01_PIN_04, BSP_IO_LEVEL_LOW)
+#define RADIO_0_SDN_TRIS()
+#endif
 #define RADIO_0_WP_USED          0                       /* Set to 1 if WP pin is used */
 
 // Maximum SPIspeed needed for soft-demodulator
@@ -62,35 +71,64 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 #define RDO_SDN_TRIS()           RADIO_0_SDN_TRIS()
 
 // /OSC_EN Pin
+#if ( MCU_SELECTED == NXP_K24 )
 #define RDO_OSC_EN_OFF()         GPIOC_PSOR = 1<<7       /* Radio OSC Off */
 #define RDO_OSC_EN_ON()          GPIOC_PCOR = 1<<7       /* Radio OSC On  */
+#elif ( MCU_SELECTED == RA6E1 )
+#define RDO_OSC_EN_OFF()      R_BSP_PinWrite(BSP_IO_PORT_01_PIN_05, BSP_IO_LEVEL_HIGH)
+#define RDO_OSC_EN_ON()       R_BSP_PinWrite(BSP_IO_PORT_01_PIN_05, BSP_IO_LEVEL_LOW)
+#endif
 /* Set PCR MUX for GPIO, Make Output, Disable OSC */
+#if ( MCU_SELECTED == NXP_K24 )
 #define RDO_OSC_EN_TRIS()        { RDO_OSC_EN_OFF(); PORTC_PCR7 = 0x100; GPIOC_PDDR |= (1<<7);}
 /* For Last Gasp recovery from low power, Set PCR MUX for GPIO, Make Output, Disable OSC */
 #define RDO_OSC_EN_TRIS_LG()     { RDO_OSC_EN_OFF(); PORTC_PCR7 = 0x100; GPIOC_PDDR |= (1<<7);}
+#endif
 
 // RX0TX1 Pin
+#if ( MCU_SELECTED == NXP_K24 )
 #define RDO_RX0TX1_RX()          GPIOC_PCOR = 1<<10       /* Radio RX\TX to RX */
 #define RDO_RX0TX1_TX()          GPIOC_PSOR = 1<<10       /* Radio RX\TX to TX */
+#elif ( MCU_SELECTED == RA6E1 )
+#define RDO_RX0TX1_RX()          R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_LOW) /* Radio RX\TX to RX */
+#define RDO_RX0TX1_TX()          R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_HIGH) /* Radio RX\TX to TX */
+#endif
 /* Set PCR MUX for GPIO, Make Output, RX */
 #define RDO_RX0TX1_TRIS()        { RDO_RX0TX1_RX(); PORTC_PCR10 = 0x100; GPIOC_PDDR |= (1<<10);}
 /* For Last Gasp recovery from low power, Set PCR MUX for GPIO, Make Output, RX */
 #define RDO_RX0TX1_TRIS_LG()     { RDO_RX0TX1_RX(); PORTC_PCR10 = 0x100; GPIOC_PDDR |= (1<<10);}
 
 // PA_EN Pin
+#if ( MCU_SELECTED == NXP_K24 )
 #define RDO_PA_EN_OFF()          GPIOC_PCOR = 1<<8       /* Radio PA Off */
 #define RDO_PA_EN_ON()           GPIOC_PSOR = 1<<8       /* Radio PA On  */
+#elif ( MCU_SELECTED == RA6E1 )
+#define RDO_PA_EN_OFF()          R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_LOW)   /* Radio PA Off */
+#define RDO_PA_EN_ON()           R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_HIGH)  /* Radio PA On  */
+#endif
 /* Set PCR MUX for GPIO, Make Output, PA Off */
+#if ( MCU_SELECTED == NXP_K24 )
 #define RDO_PA_EN_TRIS()         { RDO_PA_EN_OFF(); PORTC_PCR8 = 0x100; GPIOC_PDDR |= (1<<8);}
+#endif
 
 // /IRQ_SI4460 Pin
+#if ( MCU_SELECTED == NXP_K24 )
 #define RDO_0_IRQ()              (GPIOB_PDIR & 1)         /* /IRQ signal from the Radio */
 #define RDO_0_IRQ_TRIS()         ( PORTB_PCR0 = 0x300 )   /* Set PCR for FTM1_CH0. Make Input */
+#elif ( MCU_SELECTED == RA6E1 )
+#define RDO_0_IRQ()        0 //TODO Melvin: implement read here
+#define RDO_0_IRQ_TRIS()
+#endif
 
 // GPIO0 Pin
 #define RDO_0_GPIO0_Bit           5
+#if ( MCU_SELECTED == NXP_K24 )
 #define RDO_0_GPIO0()            ((GPIOC_PDIR >> RDO_0_GPIO0_Bit) & 1)  /* GPIO0 level from radio */
 #define RDO_0_GPIO0_TRIS()       { PORTC_PCR5 = 0x100;    GPIOC_PDDR &= ~(1<<RDO_0_GPIO0_Bit); } /* Set PCR for GPIO0, Make Input */
+#elif ( MCU_SELECTED == RA6E1 )
+#define RDO_0_GPIO0()            R_BSP_PinRead(BSP_IO_PORT_06_PIN_00)
+#define RDO_0_GPIO0_TRIS()
+#endif
 
 // GPIO1 Pin
 #define RDO_0_GPIO1_Bit           6

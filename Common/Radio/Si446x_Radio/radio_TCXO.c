@@ -20,8 +20,10 @@
 
 #include <stdlib.h>
 #include "project.h"
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 #include <bsp.h>
 #include <mqx_prv.h>
+#endif
 #include "PHY_Protocol.h"
 #include "phy.h"
 #include "time_sys.h"
@@ -76,6 +78,7 @@ static uint32_t freqFilter[FREQUENCY_MOVING_WINDOW] = {0}; // Initialize with ba
 static uint64_t coreToBusClockRatio;
        uint32_t DMAint;                            // When the DMA interrupt happened in CYCCNT units
 
+#if ( MCU_SELECTED == NXP_K24 ) // GPIO configuration is done in RASC configurator for RA6E1
 typedef struct{
    PORT_MemMapPtr portAddr;           /* PORTA_BASE_PTR PORTB_BASE_PTR etc. */
    uint32_t       pin;                /* GPIO_PIN1   GPIO_PIN2 ....  GPIO_PIN31 */
@@ -101,6 +104,7 @@ static const GPIO0_CONFIG_t radioGpioConfig[] = { // Radio GPIO 0 with DMA enabl
 #error "unsuported hardware in radio_TCXO.c"
 #endif
 };
+#endif
 
 /*****************************************************************************
  *  Local Function Declarations
@@ -123,10 +127,12 @@ static void Disable_DMA_Reset_Filter( void )
 {
    uint32_t i; // Loop counter
 
+#if ( MCU_SELECTED == NXP_K24 ) //TODO Melvin: need to find am equivalent
    // Disable all DMA configuration
    for ( i=0; i<(sizeof(radioGpioConfig)/sizeof(GPIO0_CONFIG_t)); i++) {
       PORT_PCR_REG( radioGpioConfig[i].portAddr, radioGpioConfig[i].pin ) &= ~PORT_PCR_IRQC_MASK; // Interrupt/DMA request disabled
    }
+#endif
    // Reset all filters
    (void)memset( freqFilter, 0, sizeof(freqFilter) );
    (void)memset( FTM,     0, sizeof(FTM) );
@@ -168,7 +174,9 @@ static void DMA_Complete_IRQ_ISR( void )
           uint32_t prevMovingWindowPos;
           uint32_t sum;
 
+#if ( MCU_SELECTED == NXP_K24 ) //TODO Melvin: DMA interrupts has to be replaced
    DMA_CINT = RADIO_CLK_DMA_CH; // Ack interrupt
+#endif
 
    // Handle FTM timer wrap around
    if ( FTMcount[RADIO_CLK_BUFFER_SIZE] < prevTime ) {
@@ -182,8 +190,10 @@ static void DMA_Complete_IRQ_ISR( void )
    // Capture end of frequency counting
    if ( DMAcntr >= DMA_CNTR ) {
 
+#if ( MCU_SELECTED == NXP_K24 ) //TODO Melvin: DMA interrupts has to be replaced
       KERNEL_DATA_STRUCT_PTR  kd_ptr = _mqx_get_kernel_data();
       DMAint = kd_ptr->CYCCNT; // Increment system and power-up time
+#endif
 
       coreToBusClockRatio = getCoreClock()/getBusClock(); // Always reload that value because it can change on the 9985T during DFW.
       FTM[movingWindowPos] = extend + FTMcount[RADIO_CLK_BUFFER_SIZE];
@@ -302,7 +312,9 @@ static void DMA_Complete_IRQ_ISR( void )
    }
    DMAcntr++;
 
+#if ( MCU_SELECTED == NXP_K24 )  //TODO Melvin: DMA interrupts has to be replaced
    DMA_Complete_IRQ_ISR_Timestamp = DWT_CYCCNT;
+#endif
 }
 
 /******************************************************************************
@@ -324,6 +336,7 @@ void RADIO_Update_Freq( void )
 
    DMAcntr  = 0; // Reset DMA Major loop counter
 
+#if ( MCU_SELECTED == NXP_K24 ) // TODO Melvin: need to find an equivalent
    // Disable DMA channel before configuration
    DMA_CERQ = RADIO_CLK_DMA_CH; // Disable DMA channel before programming
    DMA_CINT = RADIO_CLK_DMA_CH; // Clear any pending interrupts
@@ -371,5 +384,6 @@ void RADIO_Update_Freq( void )
 
    // Enable DMA transfer
    DMA_SERQ = RADIO_CLK_DMA_CH;
+#endif
 }
 

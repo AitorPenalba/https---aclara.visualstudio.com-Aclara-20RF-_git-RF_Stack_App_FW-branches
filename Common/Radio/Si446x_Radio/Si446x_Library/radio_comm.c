@@ -15,8 +15,10 @@
 
 #include "project.h"
 #include <stdbool.h>
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 #include <mqx.h>
 #include <bsp.h>
+#endif
 #include "compiler_types.h"
 #include "radio.h"
 #include "radio_hal.h"
@@ -242,12 +244,15 @@ U8 radio_comm_PollCTS( uint8_t radioNum )
    static const uint32_t defaultDelay = 5000;   /*  Delay 5ms after/between polling CTS      */
    static bool firstPollDone[ MAX_RADIO ] = {(bool)false};
    uint8_t retVal;
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: replace it with the RTOS timers
    MQX_TICK_STRUCT   startTime;              /* Used to delay sub-tick time               */
    MQX_TICK_STRUCT   endTime;                /* Used to delay sub-tick time               */
    bool              overflow=(bool)false;   /* required by tick to microsecond function  */
+#endif
 
    retVal = radio_comm_GetResp(radioNum, 0, 0);
 
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: replace it with the RTOS timers
    if ( !firstPollDone[ radioNum ] )
    {
       _time_get_ticks(&startTime);
@@ -259,6 +264,7 @@ U8 radio_comm_PollCTS( uint8_t radioNum )
       }
       firstPollDone[ radioNum ] = (bool)true;
    }
+#endif
    return retVal;
 #endif
 }

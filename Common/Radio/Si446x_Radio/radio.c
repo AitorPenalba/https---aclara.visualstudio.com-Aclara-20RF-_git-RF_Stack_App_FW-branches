@@ -22,8 +22,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
+#endif
 #include "compileswitch.h"
 #include "compiler_types.h"
 #include "buffer.h"
@@ -40,7 +42,9 @@
 #include "DBG_SerialDebug.h"
 #include "time_util.h"
 #include "ascii.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "gpio.h"
+#endif
 #include "rs.h"
 #include "rsfec.h"
 #include "sys_clock.h" //DCU2+ or EP
@@ -219,8 +223,10 @@ static RADIO_MODE_t currentTxMode;
 
 static struct
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TICK_Struct CallibrationTime;     // Time for next calibration
    OS_TICK_Struct TxWatchDog;           // Time when TX was started.  Used as a watch dog.
+#endif
    TIMESTAMP_t syncTime;                // Sync word interrupt dectection timestamp
    TIMESTAMP_t tentativeSyncTime;       // Tentative Sync word dectection timestamp
    float32_t   error;                   // Frequency offset error
@@ -679,8 +685,8 @@ static bool ValidateGenI(uint8_t radioNum);
 static bool Radio_RX_FIFO_Almost_Full(uint8_t radioNum);
 static void processRadioInt(uint8_t radioNum);
 
-static bool Init(RadioEvent_Fxn pCallbackFxn );
-static RX_FRAME_t *ReadData(uint8_t radioNum);
+bool Init(RadioEvent_Fxn pCallbackFxn );
+RX_FRAME_t *ReadData(uint8_t radioNum);
 static void wait_us(uint32_t time);
 static uint8_t RADIO_Do_CCA(uint8_t radioNum, uint16_t chan);
 
@@ -691,7 +697,7 @@ static void StandbyTx(void);
 static bool RADIO_Is_RX(uint8_t radioNum);
 
 /*lint -esym(401,SendData) not the same routine as in the wolfssl library  */
-static PHY_DATA_STATUS_e SendData( uint8_t radioNum, uint16_t chan, PHY_MODE_e mode, PHY_DETECTION_e detection, const void *payload, uint32_t TxTime, PHY_TX_CONSTRAIN_e priority, float32_t
+PHY_DATA_STATUS_e SendData( uint8_t radioNum, uint16_t chan, PHY_MODE_e mode, PHY_DETECTION_e detection, const void *payload, uint32_t TxTime, PHY_TX_CONSTRAIN_e priority, float32_t
                                     power, uint16_t payload_len );
 
 static OS_MUTEX_Obj radioMutex;
@@ -751,6 +757,7 @@ void RADIO_TX_Watchdog(void)
    uint32_t       TimeDiff;
    bool           Overflow;
 
+#if 0 //TODO Melvin: include the code after dependent modules integrated
    // Only valid if TX is active
 #if ( PORTABLE_DCU == 1)
    if ((radio[RADIO_0].isDeviceTX) && ((currentTxMode == eRADIO_MODE_NORMAL) || (currentMode == eRADIO_MODE_NORMAL_DEV_600))) {
@@ -777,6 +784,7 @@ void RADIO_TX_Watchdog(void)
 #endif
       }
    }
+#endif
 }
 
 /******************************************************************************
@@ -794,9 +802,11 @@ void RADIO_TX_Watchdog(void)
 ******************************************************************************/
 void RADIO_RX_WatchdogService(uint8_t radioNum)
 {
+#if 0 //TODO Melvin: include the code after dependent modules integrated
    OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
    radio[radioNum].lastFIFOFullTimeStamp = DWT_CYCCNT;
    OS_INT_enable( ); // Enable interrupts.
+#endif
 }
 
 /******************************************************************************
@@ -814,6 +824,7 @@ void RADIO_RX_WatchdogService(uint8_t radioNum)
 ******************************************************************************/
 void RADIO_RX_Watchdog(void)
 {
+#if 0  //TODO Melvin: include the code after dependent modules integrated
 #if ( EP == 1 )
    uint8_t  temp[129]; //64 in each RX/TX buffer, plus the unused TX shift barrel
    uint32_t timeStamp;
@@ -832,6 +843,7 @@ void RADIO_RX_Watchdog(void)
          RADIO_RX_WatchdogService((uint8_t)RADIO_0); // Reset time stamp to avoid being called again.
       }
    }
+#endif
 #endif
 }
 
@@ -856,6 +868,7 @@ void RADIO_Update_Freq_Watchdog(void)
 {
    uint32_t timeStamp;
 
+#if 0  //TODO Melvin: include the code after dependent modules integrated
    // Make sure radio 0 is initialized because we won't get TCXO output until it is done
    if ( radio[(uint8_t)RADIO_0].configured ) {
       OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
@@ -865,6 +878,8 @@ void RADIO_Update_Freq_Watchdog(void)
          RADIO_Update_Freq();
       }
    }
+#endif
+
 }
 
 /*!
@@ -899,7 +914,11 @@ static void vRadio_PowerUp(void)
    OS_TASK_Sleep(TEN_MSEC); // Give some time to radio to get all out of reset
 
    // Monitor GPIO0 of radio 0 for power on reset
+#if ( RTOS_SELECTION == MQX_RTOS )  //TODO Melvin: need to replace LWGPIO_VALUE_LOW with BSP_IO_LEVEL_LOW
    while( RDO_0_GPIO0() == (uint32_t)LWGPIO_VALUE_LOW ) {
+#elif (RTOS_SELECTION == FREE_RTOS)
+   while( RDO_0_GPIO0() == (uint32_t)BSP_IO_LEVEL_LOW  ) {
+#endif
       INFO_printf("Waiting on radio 0 to get out of reset");
       OS_TASK_Sleep(TEN_MSEC);
    }
@@ -956,7 +975,9 @@ static void vRadio_PowerUp(void)
 static void Radio0_IRQ_ISR(void)
 {
    uint32_t primask = __get_PRIMASK();
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: include the code once interrupt enable/disable added
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+#endif
 
    // There is no guarantee that this interrupt was from a time sync (it could be from preamble or FIFO almost full) but only the time sync interrupt will validate this value
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
@@ -969,6 +990,7 @@ static void Radio0_IRQ_ISR(void)
    uint16_t delayFTM;
    uint32_t delayCore;
 
+#if 0 //TODO Melvin: include the code after dependent modules integrated
    // Need to read those 3 counters together so disable interrupts if they are not disabled already
    cycleCounter   = DWT_CYCCNT;
    currentFTM     = (uint16_t)FTM1_CNT; // Connected to radio interrupt
@@ -1008,6 +1030,7 @@ static void Radio0_IRQ_ISR(void)
 #else
    __set_PRIMASK(primask); // Restore interrupts
    RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_0);
+#endif
 #endif
 }
 
@@ -1337,15 +1360,21 @@ static void setPA(RADIO_PA_MODE_t mode)
    // For EP
    // Set to RX
    if (mode == eRADIO_PA_MODE_RX) {
+#if ( MCU_SELECTED == NXP_K24 ) // SPI Slewrate cannot be adjusted in RA6E1 instead drive capcity settings can be done
       SPI_SetFastSlewRate(RADIO_0_SPI_PORT_NUM, (bool)false); // This reduces the noise floor while receiving.
+#endif
       RDO_RX0TX1_RX();
       RDO_PA_EN_ON();
       radio[RADIO_0].isDeviceTX = false;
    } else if (mode == eRADIO_PA_MODE_TX) {
+#if ( MCU_SELECTED == NXP_K24 )// SPI Slewrate cannot be adjusted in RA6E1 instead drive capcity settings can be done
       SPI_SetFastSlewRate(RADIO_0_SPI_PORT_NUM, (bool)true); // This increase the SPI strength and prevent errors.
+#endif
       RDO_RX0TX1_TX();
       RDO_PA_EN_ON();
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add the below code once module inserted
       _time_get_elapsed_ticks(&radio[RADIO_0].TxWatchDog);
+#endif
       radio[RADIO_0].isDeviceTX = true;
    }
 #else
@@ -1915,7 +1944,9 @@ bool RADIO_TCXO_Get ( uint8_t radioNum, uint32_t *TCXOfreq, TIME_SYS_SOURCE_e *s
    uint32_t lastUpdate;
 
    uint32_t primask = __get_PRIMASK();
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add the below code once the disable interrupt is added
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+#endif
    *TCXOfreq  = radio[radioNum].TCXOFreq;
    lastUpdate = radio[radioNum].TCXOLastUpdate;
    if ( source != NULL ) {
@@ -1960,7 +1991,9 @@ bool RADIO_TCXO_Set ( uint8_t radioNum, uint32_t TCXOfreq, TIME_SYS_SOURCE_e sou
    // Make sure radio TCXO is within expected values (30MHz +/-25ppm)
    if ( (TCXOfreq > RADIO_TCXO_MIN) && (TCXOfreq < RADIO_TCXO_MAX) ) {
       uint32_t primask = __get_PRIMASK();
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add the below code once disable interrupt is added
       __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+#endif
 
       // Check if the new TCXO frequency is different than the current one.
       if ( radio[radioNum].TCXOFreq != TCXOfreq ) {
@@ -1972,7 +2005,9 @@ bool RADIO_TCXO_Set ( uint8_t radioNum, uint32_t TCXOfreq, TIME_SYS_SOURCE_e sou
 
       // Update AFC error if TCXO frequency was changed
       if ( retVal ) {
+#if 0  //TODO Melvin: add the below code once PHY  module is added
          PHY_AfcAdjustment_Set_By_Radio(radioNum, (int16_t)((int32_t)TCXOfreq-(int32_t)RADIO_TCXO_NOMINAL));
+#endif
       }
 
       // Update timestamp even if the frequency wasn't updated.
@@ -2010,7 +2045,9 @@ static uint16_t checkRadioPart( uint8_t radioNum, uint32_t checkNum )
    if ( error || ((Si446xCmd.PART_INFO.PART != 0x4460) && (Si446xCmd.PART_INFO.PART != 0x4467) && (Si446xCmd.PART_INFO.PART != 0x4468)) ) {
       ERR_printf("Unsupported radio %u is Si%04X or radio error. Check #%u. Rebooting...", radioNum, Si446xCmd.PART_INFO.PART, checkNum);
       OS_TASK_Sleep(ONE_SEC); // Give time to print message
+#if 0 //TODO Melvin: add this section once PWR_ module is added
       PWR_SafeReset();        // Execute Software Reset, with cache flush
+#endif
    }
    return Si446xCmd.PART_INFO.PART;
 }
@@ -2061,6 +2098,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Clear all variables
    (void)memset(radio, 0, sizeof(radio));
 
+#if 0  //TODO Melvin: add the below code once PHY  module is added
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&RssiJumpThreshold);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
 
@@ -2108,6 +2146,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 
    // Turn on radio oscillator effectively starting the radio
    RDO_OSC_EN_TRIS(); // On Samwise only
+#endif
    RDO_OSC_EN_ON();
    OS_TASK_Sleep( FIVE_MSEC ); // Wait at least 3 ms as per datasheet
 
@@ -2230,7 +2269,9 @@ void vRadio_Init(RADIO_MODE_t radioMode)
       // Set power level
       if (radioNum == (uint8_t)RADIO_0) {
          GetReq.eAttribute = ePhyAttr_PowerSetting;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
          (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&PowerSetting); //lint !e826   Suspicious pointer-to-pointer conversion
+#endif
          RADIO_Power_Level_Set(PowerSetting);
       }
 
@@ -2400,7 +2441,11 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    RDO_0_IRQ_TRIS(); // Make CPU pin IRQ_Si4460 into FTM1_CH0 to capture when a radio interrupt happens
 
    // Configure FTM1_CH0 to capture timer when radio IRQ is detected.
+#if ( MCU_SELECTED == NXP_K24 ) //TODO: Add the AGT Timer module for input capture
    (void)FTM1_Channel_Enable( 0, FTM_CnSC_CHIE_MASK | FTM_CnSC_ELSB_MASK, Radio0_IRQ_ISR ); // Capture on falling edge
+#elif ( MCU_SELECTED == RA6E1 )
+//TODO Melvin: Add AGT Timer
+#endif
 #endif
 #if 0
    for (radioNum=(uint8_t)RADIO_0; radioNum<(uint8_t)MAX_RADIO; radioNum++) {
@@ -2462,7 +2507,9 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 #endif
 
    // Start triming CPU or TCXO frequency
+#if 0  //TODO Melvin: add the below code once PHY  module is added
    RADIO_Update_Freq();
+#endif
 }
 
 #if 0
@@ -2515,6 +2562,7 @@ void printHex ( char const *rawStr, const uint8_t *str, uint16_t num_bytes )
    }
    usb_putc( '\n' );
 #else
+#if 0 //TODO: is this file pointer needed 
    MQX_FILE_PTR stdout_ptr;       /* mqx file pointer for UART  */
    stdout_ptr = fopen("ittya:", NULL);
 
@@ -2531,6 +2579,7 @@ void printHex ( char const *rawStr, const uint8_t *str, uint16_t num_bytes )
    // Close port
    (void)fflush( stdout_ptr );
    (void)fclose( stdout_ptr );
+#endif
 #endif
 }
 
@@ -3161,7 +3210,9 @@ static void validatePhyPayload(uint8_t radioNum)
 
       // Get AFC enable setting
       GetReq.eAttribute = ePhyAttr_AfcEnable;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
       (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&AfcEnable);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#endif
 
 #if ( EP == 1 )
       // Skip AFC adjustment for now when doing soft-demod because this needs to be looked into and properly integrated.
@@ -3176,7 +3227,9 @@ static void validatePhyPayload(uint8_t radioNum)
 
             // Get temperature variable
             GetReq.eAttribute = ePhyAttr_AfcTemperatureRange;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
             (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)AfcTemperatureRange);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#endif
 
             if ((Temperature >= AfcTemperatureRange[0]) && (Temperature <= AfcTemperatureRange[1])) {
                // Clip frequency if needed
@@ -3446,7 +3499,9 @@ uint8_t RADIO_Get_CurrentRSSI(uint8_t radioNum)
    // Adjust RSSI to compensate for front end gain
    PHY_GetReq_t GetReq;
    GetReq.eAttribute = ePhyAttr_FrontEndGain;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)&FrontEndGain);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#endif
    rssi += FrontEndGain;
    if ( rssi < MINIMUM_RSSI_VALUE ){
       rssi = MINIMUM_RSSI_VALUE;
@@ -3584,7 +3639,9 @@ static void processRadioInt(uint8_t radioNum)
 
             // Retrieve PHY state
             GetReq.eAttribute = ePhyAttr_State;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
             (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&state); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#endif
 
             if (state == ePHY_STATE_READY_TX) {
                // Keep FEM in TX mode and shutdown PA to save power until next transmission
@@ -3693,7 +3750,9 @@ static void updateTCXO ( uint8_t radioNum )
    union si446x_cmd_reply_union Si446xCmd;
 
    uint32_t primask = __get_PRIMASK();
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO: add the below line once the disable interrupt is added
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+#endif
    freq = radio[radioNum].TCXOFreq;
    __set_PRIMASK(primask); // Restore interrupts
 
@@ -3739,6 +3798,7 @@ static void updateTCXO ( uint8_t radioNum )
  */
 void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 {
+#if 0  //TODO Melvin: add the below module once the timer module is added
    OS_TICK_Struct CurrentTime;
    PHY_GetReq_t   GetReq;
    uint8_t        CurrentRssiJumpThreshold;
@@ -3782,6 +3842,7 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 
    INFO_printf("Start RX radio %hu on channel = %hu (%u Hz)", radioNum, chan, CHANNEL_TO_FREQ(chan));
 
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: timer module
    // Get current time
    OS_TICK_Get_CurrentElapsedTicks(&CurrentTime);
 
@@ -3799,11 +3860,14 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 
       // Set next refresh in 4 hours
       radio[radioNum].CallibrationTime = CurrentTime;
-   }
+    }
 
+#endif
    // Update RSSI jump threshold if it changed
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&CurrentRssiJumpThreshold);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#endif
    if (radio[radioNum].RssiJumpThreshold != CurrentRssiJumpThreshold) {
       radio[radioNum].RssiJumpThreshold = CurrentRssiJumpThreshold;
       // Configure RSSI jump threshold
@@ -3976,7 +4040,9 @@ void RADIO_SetPower( uint32_t frequency, float powerOutput)
    uint8_t PowerSetting;
 
    GetReq.eAttribute = ePhyAttr_PowerSetting;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&PowerSetting); //lint !e826   Suspicious pointer-to-pointer conversion
+#endif
    RADIO_Power_Level_Set( PowerSetting );       /* Radio chip internal gain setting. Default 20 for 9975T and 60 for 9985T.   */
    (void)BSP_PaDAC_Set_dBm_Out( powerOutput );
 #endif
@@ -4273,10 +4339,14 @@ static PHY_DATA_STATUS_e SendData(uint8_t radioNum, uint16_t chan, PHY_MODE_e mo
       EventData_s  progEvent;     /* Event info */
 
       getReq.eAttribute = ePhyAttr_fngVswrNotificationSet;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&notifySetPoint);   //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#endif
 
       getReq.eAttribute = ePhyAttr_fngVswrShutdownSet;
+#if 0  //TODO Melvin: add the below code once PHY  module is added
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&shutDownSetPoint); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#endif
 
       getReq.eAttribute = ePhyAttr_fngFowardPowerLowSet;
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&lowPowerSetPoint); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
@@ -4542,6 +4612,7 @@ void SetFreq(uint8_t radioNum, uint32_t freq)
                                 fc_fraq_1,
                                 fc_fraq_2,
                                 fc_fraq_3 );
+#endif
 }
 
 /***********************************************************************************************************************
@@ -4561,6 +4632,7 @@ void SetFreq(uint8_t radioNum, uint32_t freq)
  **********************************************************************************************************************/
 static void wait_us(uint32_t time)
 {
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO: Add once the timer module is added
    OS_TICK_Struct time1,time2;
    uint32_t       TimeDiff;
    bool           Overflow;
@@ -4575,6 +4647,7 @@ static void wait_us(uint32_t time)
       TimeDiff = (uint32_t)_time_diff_microseconds ( &time2, &time1, &Overflow );
    }
    while (TimeDiff < time);
+#endif
 }
 #if ( NOISE_HIST_ENABLED == 1 )
 /***********************************************************************************************************************
@@ -4732,22 +4805,28 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
    uint32_t  minValue, maxValue;
    float32_t sum=0;
    float32_t currentRSSI;
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add once the timer module is added
    OS_TICK_Struct time1,time2;
+#endif
    uint32_t TimeDiff;
    bool Overflow;
    PHY_GetReq_t GetReq;
    int8_t       FrontEndGain;
    union si446x_cmd_reply_union Si446xCmd;
 
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add once the timer module is added
    _time_get_elapsed_ticks(&time1);
+#endif
 
    // Poll RSSI until valid
    do {
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.  get_int_status needs those.
       currentRSSI = Si446xCmd.GET_MODEM_STATUS.LATCH_RSSI;
 
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add once the timer module is added
       _time_get_elapsed_ticks(&time2);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
+#endif
 
       // Get out if we have been stuck here more than 10 ms.
       if (TimeDiff > 10) {

@@ -36,10 +36,9 @@
 #define ADD_LF           (1<<0) // Insert \n
 #define PRINT_DATE_TIME  (1<<1) // Print date, time and taskID
 
-#define DBG_log( )    0 /* TODO: DG Remove*/
+#define DBG_log     /* TODO: DG Remove*/
 
 // Print category, string, adds \n and time stamp
-#if 0 /* TODO: RA6: Use printf till we have DBG Port */
 #define DBG_logPrintf( category, fmt, ... ) DBG_log( category, ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)
 // Print string, adds \n
 #define DBG_printf(fmt, ... )               DBG_log( 0, ADD_LF, fmt, ##__VA_ARGS__)
@@ -51,11 +50,6 @@
 #define INFO_printf( fmt, ... )             DBG_log( 'I', ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)
 // Print 'I', string (and HEX payload), adds \n and time stamp
 #define INFO_printHex(str, data, len)       DBG_logPrintHex ( 'I', str, data, len)
-
-#else
-#define DBG_logPrintf( category, fmt, ... ) printf( fmt );
-#define DBG_printf(fmt, ... )               printf( fmt );
-#endif
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
