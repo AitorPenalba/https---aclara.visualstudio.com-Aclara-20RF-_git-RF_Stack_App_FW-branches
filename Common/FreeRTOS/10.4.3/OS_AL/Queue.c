@@ -226,17 +226,8 @@ uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle )
 {
   uint16_t NumElements;
 #if( RTOS_SELECTION == FREE_RTOS )
-   UBaseType_t QueueEmpty;
-   QueueEmpty = xQueueIsQueueEmptyFromISR( *QueueHandle );
-
-   if ( QueueEmpty != pdFALSE )
-   {
-      NumElements = (uint16_t) uxQueueMessagesWaiting( *QueueHandle );
-   } /* end if() */
-   else
-   {
-      NumElements = 0;
-   } /* end else() */
+  
+  NumElements = (uint16_t) uxQueueMessagesWaiting( *QueueHandle );
 #elif( RTOS_SELECTION == MQX_RTOS )
    bool QueueEmpty;
    QueueEmpty = (bool)_queue_is_empty ( QueueHandle );
