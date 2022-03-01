@@ -52,12 +52,19 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 {
    uint32_t RetStatus;
    bool FuncStatus = true;
-
+#if( RTOS_SELECTION == FREE_RTOS )
+   EventHandle = xEventGroupCreate();  
+   if ( NULL == EventHandle )
+   {
+     FuncStatus = false;
+   }
+#elif( RTOS_SELECTION == MQX_RTOS )
    RetStatus = _lwevent_create ( EventHandle, 0 );
    if ( RetStatus != MQX_OK )
    {
       FuncStatus = false;
    } /* end if() */
+#endif
 
    return ( FuncStatus );
 } /* end OS_EVNT_Create () */
@@ -82,9 +89,14 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 *******************************************************************************/
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line )
 {
+#if( RTOS_SELECTION == FREE_RTOS )
+      //TODO Error Handling, return value
+      xEventGroupSetBits( EventHandle , EventMask); 
+#elif( RTOS_SELECTION == MQX_RTOS )
    if ( _lwevent_set ( EventHandle, EventMask ) ) {
       EVL_FirmwareError( "OS_EVNT_Set" , file, line );
    }
+#endif
 } /* end OS_EVNT_Set () */
 
 /*******************************************************************************
@@ -120,7 +132,11 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
    {
       if ( Timeout_msec == OS_WAIT_FOREVER )
       {
-         timeout_ticks = 0; /* In MQX, 0 represents a wait forever value */
+#if( RTOS_SELECTION == FREE_RTOS )
+        timeout_ticks = portMAX_DELAY;
+#elif( RTOS_SELECTION == MQX_RTOS )
+        timeout_ticks = 0; /* In MQX, 0 represents a wait forever value */
+#endif
       } /* end if() */
       else
       {
@@ -145,7 +161,9 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
       /* just use the minimum value cause we don't want to wait */
       timeout_ticks = 1;
    } /* end else() */
-
+#if( RTOS_SELECTION == FREE_RTOS )  
+   SetMask = EventGroupWaitBits(EventHandle, EventMask, (bool)WaitForAll, pdTRUE, timeout_ticks ); //clears bits after event                             
+#elif( RTOS_SELECTION == MQX_RTOS )
    RetStatus = _lwevent_wait_ticks ( EventHandle, EventMask, (bool)WaitForAll, timeout_ticks );
    if ( RetStatus == MQX_LWEVENT_INVALID ) {
       EVL_FirmwareError( "OS_EVNT_Wait" , file, line );
@@ -158,7 +176,21 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
       /* Clear only the events that were set */
       (void)_lwevent_clear ( EventHandle, SetMask );
    } /* end if() */
-
+#endif
    return ( SetMask );
 } /* end OS_EVNT_Wait () */
+#endif
+#if( TM_EVENTS == 1 )
+void OS_EVENT_TestCreate(void)
+{
+  return;
+}
+void OS_EVENT_TestWait(void)
+{
+  return;
+}
+void OS_EVENT_TestSet(void)
+{
+  return;
+}
 #endif
