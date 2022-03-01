@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Common/wolfssl/IDE/IAR-EWARM/Projects/MTU
+/MTU/IAR_v9.20
+/MTU/OS_BSP
