@@ -15,11 +15,14 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#if 0 /* TODO: RA6: */
 #include <stdbool.h>
+#if( RTOS_SELECTION == FREE_RTOS )
+#elif( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <lwevent.h>
 #include "EVL_event_log.h"
+#endif
+
 
 /* #DEFINE DEFINITIONS */
 
@@ -50,7 +53,6 @@
 *******************************************************************************/
 bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 {
-   uint32_t RetStatus;
    bool FuncStatus = true;
 #if( RTOS_SELECTION == FREE_RTOS )
    EventHandle = xEventGroupCreate();  
@@ -124,8 +126,6 @@ void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, i
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout_msec, char *file, int line )
 {
    uint32_t SetMask = 0;
-   uint32_t RetStatus;
-
    uint32_t timeout_ticks;  // Timeout in ticks
 
    if ( Timeout_msec > 0 )
@@ -148,12 +148,20 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
             Timeout_msec = (ONE_MIN * 60 * 24 * 4);
          }
 
+#if 0
          /* Convert the Timeout from Milliseconds into Ticks */
          timeout_ticks = (uint32_t)  ((uint64_t) ((uint64_t) Timeout_msec * (uint64_t) _time_get_ticks_per_sec()) / 1000);
          if( (uint32_t) ((uint64_t) ((uint64_t) Timeout_msec * (uint64_t) _time_get_ticks_per_sec()) % 1000) > 0)
          {   /* Round the value up to ensure the time is >= the time requested */
             timeout_ticks = timeout_ticks + 1;
          } /* end if() */
+#else
+         timeout_ticks = pdMS_TO_TICKS(Timeout_msec);
+         if( ( ( TickType_t ) ( ( ( TickType_t ) ( Timeout_msec ) * ( TickType_t ) configTICK_RATE_HZ ) % ( TickType_t ) 1000U ) ) )
+         {   /* Round the value up to ensure the time is >= the time requested */
+            timeout_ticks = timeout_ticks + 1;
+         }
+#endif
       } /* end else() */
    } /* end if() */
    else
@@ -162,7 +170,7 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
       timeout_ticks = 1;
    } /* end else() */
 #if( RTOS_SELECTION == FREE_RTOS )  
-   SetMask = EventGroupWaitBits(EventHandle, EventMask, (bool)WaitForAll, pdTRUE, timeout_ticks ); //clears bits after event                             
+   SetMask = xEventGroupWaitBits(EventHandle, EventMask, (bool)WaitForAll, pdTRUE, timeout_ticks ); //clears bits after event                             
 #elif( RTOS_SELECTION == MQX_RTOS )
    RetStatus = _lwevent_wait_ticks ( EventHandle, EventMask, (bool)WaitForAll, timeout_ticks );
    if ( RetStatus == MQX_LWEVENT_INVALID ) {
@@ -179,18 +187,49 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
 #endif
    return ( SetMask );
 } /* end OS_EVNT_Wait () */
-#endif
 #if( TM_EVENTS == 1 )
+static OS_EVNT_Handle eventHandle;
+#define BIT_0 ( 1 << 0 )
+#define BIT_4 ( 1 << 4 )
 void OS_EVENT_TestCreate(void)
 {
+  bool status;
+  status = OS_EVNT_Create(eventHandle);
+  if( status )
+  {
+    APP_PRINT("Created Event Object");
+  }
+  else
+  {
+    APP_PRINT("Failed to create Event Object");
+  }
   return;
 }
 void OS_EVENT_TestWait(void)
 {
+  EventBits_t recv;
+  recv = OS_EVNT_Wait(eventHandle, BIT_4 | BIT_0 , false, OS_WAIT_FOREVER);
+  if( recv & BIT_4 )
+  {
+    APP_PRINT("Received Event 4 );
+  }
+  else if( recv & BIT_0 )
+  {
+    APP_PRINT("Received Event 0 );
+  }
+  else if( ( recv & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 ) )
+  {
+     APP_PRINT("Received both Event 0 and Event 4 );
+  }
+  else
+  {
+    APP_PRINT("Timeout");
+  }
   return;
 }
 void OS_EVENT_TestSet(void)
 {
+  OS_EVNT_SeteventHandle, BIT_4 );
   return;
 }
 #endif

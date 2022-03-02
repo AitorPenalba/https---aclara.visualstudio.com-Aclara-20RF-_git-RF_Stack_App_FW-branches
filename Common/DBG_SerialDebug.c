@@ -173,6 +173,9 @@ OS_SEM_TestCreate();
 #if (TM_MSGQ == 1)
 OS_MSGQ_TestCreate();
 #endif
+#if( TM_EVENTS == 1 )
+OS_EVENT_TestCreate();
+#endif
 
 //   DBG_PortTimer_Manage ( );
 //   DBG_PortEcho_Set( DBG_PortEcho_Get() ); // Get the echo setting and update the current UART setting
@@ -197,6 +200,9 @@ void DBG_TxTask( taskParameter )
 #endif
 #if (TM_MSGQ == 1)
    OS_MSGQ_TestPost();
+#endif
+#if( TM_EVENTS == 1 )
+   OS_EVENT_TestSet();
 #endif
    vTaskSuspend(NULL);
    for ( ; ; )

@@ -293,7 +293,7 @@
 
 /* All unit/integration defines MUST code inside the #if below! */
 #if (TEST_MODE_ENABLE == 1)
-#define TM_MUTEX                          1
+#define TM_MUTEX                          0
 #define TM_SEMAPHORE                      0
 #define TM_RTC_UNIT_TEST                  0
 #define TM_QUEUE                          0

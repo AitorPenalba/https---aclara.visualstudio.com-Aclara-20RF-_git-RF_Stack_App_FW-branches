@@ -150,7 +150,7 @@ typedef struct
 #define taskParameter   void* pvParameters
 typedef SemaphoreHandle_t     OS_SEM_Obj, OS_MUTEX_Obj, *OS_SEM_Handle, *OS_MUTEX_Handle;
 typedef QueueHandle_t         OS_QUEUE_Obj, *OS_QUEUE_Handle;
-typedef EventGroupHandle_t    OS_EVNT_Obj,  *OS_EVNT_Handle;
+typedef EventGroupHandle_t    OS_EVNT_Handle;
 typedef struct
 {
    uint16_t  dataLen;      /**< User filled - # of bytes in data[] (initialized with requested buf size) */
