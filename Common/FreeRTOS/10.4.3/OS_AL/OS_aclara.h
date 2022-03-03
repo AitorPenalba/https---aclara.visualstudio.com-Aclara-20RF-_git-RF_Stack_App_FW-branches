@@ -355,12 +355,10 @@ void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
 #endif
 /* FUNCTION DEFINITIONS */
 #endif   /* __BOOTLOADER */
-
-#endif /* this must be the last line of the file */
 #if (TM_MUTEX == 1)
 void OS_MUTEX_Test( void );
 #endif
-#if (TM_QUEUE == 1)
+#if( TM_QUEUE == 1)
 void OS_QUEUE_Test( void );
 #endif
 #if (TM_SEMAPHORE == 1)
@@ -378,3 +376,4 @@ void OS_EVENT_TestCreate(void);
 void OS_EVENT_TestWait(void);
 void OS_EVENT_TestSet(void);
 #endif
+#endif /* this must be the last line of the file */
