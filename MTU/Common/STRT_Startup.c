@@ -526,9 +526,12 @@ void STRT_StartupTask ( taskParameter )
       }
    }
 
-   vRadio_Init(0);  // This is a test code
+   //vRadio_Init(0);  // This is a test code
 #if (TM_MUTEX == 1)
    OS_MUTEX_Test();
+#endif
+#if (TM_QUEUE == 1)
+   OS_QUEUE_Test();
 #endif
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
 #if 0

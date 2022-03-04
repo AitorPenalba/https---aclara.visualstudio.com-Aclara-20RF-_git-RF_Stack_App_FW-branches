@@ -214,7 +214,7 @@ returnStatus_t BM_init( void )
          for ( pool = 0; ( eSUCCESS == retVal ) && ( pool < BUFFER_N_POOLS ); pool++ )
          {
             // Create a queue to hold the buffer pointers for this pool
-            if ( OS_MSGQ_Create( &bufferPools_[pool], BUFFERS_NUM_MSGQ_ITEMS ) == false )
+            if ( OS_MSGQ_Create( &bufferPools_[pool], BM_bufferPoolParams[pool].cnt ) == false )
             {
                //Message queue creation failed
                return eFAILURE;

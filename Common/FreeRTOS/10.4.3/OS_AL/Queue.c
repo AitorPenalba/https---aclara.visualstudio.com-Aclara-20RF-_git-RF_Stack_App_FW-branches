@@ -16,6 +16,7 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
+#include "buffer.h"
 //#include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
@@ -100,8 +101,8 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
 {
 
 #if( RTOS_SELECTION == FREE_RTOS )
-   OS_QUEUE_Handle ptr = (OS_QUEUE_Handle)QueueElement;
-   if (pdPASS != xQueueSend ( *QueueHandle, (void *) &ptr, 0 ) )
+   OS_QUEUE_Element_Handle ptr = ( OS_QUEUE_Element_Handle )QueueElement;
+   if (pdPASS != xQueueSend ( *QueueHandle, (void *)&ptr, 0 ) )
    {
      APP_PRINT("Could not add item to queue");
    }
@@ -137,7 +138,7 @@ void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle )
 {
   OS_QUEUE_Element_Handle QueueElement;
 #if( RTOS_SELECTION == FREE_RTOS )
-  if( pdPASS != xQueueReceive ( *QueueHandle, (void *) QueueElement, 0))
+  if( pdPASS != xQueueReceive ( *QueueHandle, (void *) &QueueElement, 0))
   {
     QueueElement = NULL;
   }/*lint !e816 area too small   */
@@ -226,17 +227,8 @@ uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle )
 {
   uint16_t NumElements;
 #if( RTOS_SELECTION == FREE_RTOS )
-   UBaseType_t QueueEmpty;
-   QueueEmpty = xQueueIsQueueEmptyFromISR( *QueueHandle );
-
-   if ( QueueEmpty != pdFALSE )
-   {
-      NumElements = (uint16_t) uxQueueMessagesWaiting( *QueueHandle );
-   } /* end if() */
-   else
-   {
-      NumElements = 0;
-   } /* end else() */
+  
+  NumElements = (uint16_t) uxQueueMessagesWaiting( *QueueHandle );
 #elif( RTOS_SELECTION == MQX_RTOS )
    bool QueueEmpty;
    QueueEmpty = (bool)_queue_is_empty ( QueueHandle );
@@ -308,53 +300,67 @@ void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement )
 
 } /* end OS_QUEUE_Next () */
 
-#if (TM_QUEUE == 1)
+#if( TM_QUEUE == 1)
+#define NUM_ITEMS 10
+bool retVal = false;
+static buffer_t payload1;
+static buffer_t payload2;
+static buffer_t *ptr1 = &payload1;
+static buffer_t *ptr2 = &payload2;
+static OS_QUEUE_Obj msgQueueObj;
+static OS_QUEUE_Handle msgQueueHandle = &msgQueueObj;
+static buffer_t *rxMsg;
+
 void OS_QUEUE_Test( void )
 {
-   bool retVal = false;
-   static OS_QUEUE_Element txMsg1;
-   static OS_QUEUE_Element txMsg2;
-   static OS_QUEUE_Obj msgQueueObj;
-   OS_QUEUE_Handle msgQueueHandle = &msgQueueObj;
+   
+   uint32_t length;
+   payload1.bufMaxSize = 250;
+   payload2.bufMaxSize = 100;
 
-   txMsg1.flag.isFree = false;
-   txMsg1.dataLen = 11;
-   txMsg2.flag.isFree = false;
-   txMsg2.dataLen = 22;
-
-   OS_QUEUE_Element_Handle elementTx = (void *)&txMsg1; //message is at static address
-   OS_QUEUE_Element_Handle rxMsg;
-   retVal = OS_QUEUE_Create( (void *) msgQueueHandle, 0);
+   retVal = OS_QUEUE_Create( (void *) msgQueueHandle, NUM_ITEMS);
    if(true == retVal)
    {
-     //queue the pointer to the element
-     for(int i = 0; i<DEFAULT_NUM_QUEUE_ITEMS; i++)
-     {
-       //enqueue elements one greater than the total length
-       OS_QUEUE_Enqueue( msgQueueHandle, (void **) &elementTx);
-     }
-     OS_QUEUE_Enqueue( msgQueueHandle, (void **) elementTx); // this should fail
-     rxMsg = OS_QUEUE_Dequeue( msgQueueHandle );
-     elementTx = (void *)&txMsg2;
-     OS_QUEUE_Enqueue( msgQueueHandle, (void **)elementTx); // this should succeed
-
-     //dequeue all elements and print there msg length as ID
-     for(int i = 0; i<DEFAULT_NUM_QUEUE_ITEMS; i++)
-     {
-       rxMsg = OS_QUEUE_Dequeue( msgQueueHandle );
-       if(rxMsg->dataLen == 11)
+       OS_QUEUE_Enqueue( msgQueueHandle, (void *)ptr1);
+       rxMsg = (buffer_t * )OS_QUEUE_Dequeue(msgQueueHandle);
+       if( rxMsg->bufMaxSize == 250 )
        {
-         APP_PRINT("Message 1");
-       }
-       else if (rxMsg->dataLen == 22)
-       {
-         APP_PRINT("Message 2");
+         APP_PRINT(" Success");
        }
        else
        {
-         APP_PRINT("Unknown Message");
+         APP_PRINT(" Fail");
        }
-     }
+     
+
+     //queue the pointer to the element
+//     for(int i = 0; i< NUM_ITEMS; i++)
+//     {
+//       //enqueue elements one greater than the total length
+//       OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg);
+//     }
+//     OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg); //this should fail
+//     OS_QUEUE_Dequeue( msgQueueHandle );
+//     txMsg = &payload2;
+//     OS_QUEUE_Enqueue( msgQueueHandle, (void *) txMsg); // this should succeed
+//     length = OS_QUEUE_NumElements(msgQueueHandle);
+//     //dequeue all elements and print there msg length as ID
+//     for(int i = 0; i<length; i++)
+//     {
+//       rxMsg = (OS_QUEUE_Element*) OS_QUEUE_Dequeue( msgQueueHandle );
+//       if(rxMsg->dataLen == 200)
+//       {
+//         APP_PRINT("Message 1");
+//       }
+//       else if (rxMsg->dataLen == 100)
+//       {
+//         APP_PRINT("Message 2");
+//       }
+//       else
+//       {
+//         APP_PRINT("Unknown Message");
+//       }
+//     }
 
 
    }

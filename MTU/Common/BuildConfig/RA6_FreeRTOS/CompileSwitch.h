@@ -295,7 +295,10 @@
 #if (TEST_MODE_ENABLE == 1)
 #define TM_MUTEX                          0
 #define TM_SEMAPHORE                      0
-#define TM_RTC_UNIT_TEST                  1
+#define TM_RTC_UNIT_TEST                  0
+#define TM_QUEUE                          0
+#define TM_MSGQ                           0
+#define TM_EVENTS                         1
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

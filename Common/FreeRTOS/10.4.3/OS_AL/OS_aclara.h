@@ -45,6 +45,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+#include "event_groups.h"
 #endif  // RTOS_SELECTION
 /* #DEFINE DEFINITIONS */
 #define OS_WAIT_FOREVER 0xFFFFFFFF
@@ -149,6 +150,7 @@ typedef struct
 #define taskParameter   void* pvParameters
 typedef SemaphoreHandle_t     OS_SEM_Obj, OS_MUTEX_Obj, *OS_SEM_Handle, *OS_MUTEX_Handle;
 typedef QueueHandle_t         OS_QUEUE_Obj, *OS_QUEUE_Handle;
+typedef EventGroupHandle_t    OS_EVNT_Handle;
 typedef struct
 {
    uint16_t  dataLen;      /**< User filled - # of bytes in data[] (initialized with requested buf size) */
@@ -353,12 +355,10 @@ void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
 #endif
 /* FUNCTION DEFINITIONS */
 #endif   /* __BOOTLOADER */
-
-#endif /* this must be the last line of the file */
 #if (TM_MUTEX == 1)
 void OS_MUTEX_Test( void );
 #endif
-#if (TM_QUEUE == 1)
+#if( TM_QUEUE == 1)
 void OS_QUEUE_Test( void );
 #endif
 #if (TM_SEMAPHORE == 1)
@@ -371,3 +371,9 @@ void OS_MSGQ_TestPost( void );
 void OS_MSGQ_TestCreate ( void );
 bool OS_MSGQ_TestPend( void );
 #endif
+#if( TM_EVENTS == 1)
+void OS_EVENT_TestCreate(void);
+void OS_EVENT_TestWait(void);
+void OS_EVENT_TestSet(void);
+#endif
+#endif /* this must be the last line of the file */

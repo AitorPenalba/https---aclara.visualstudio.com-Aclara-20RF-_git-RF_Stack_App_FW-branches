@@ -17,7 +17,7 @@
 #include "project.h"
 #include "OS_aclara.h"
 #include "DBG_SerialDebug.h"
-//#include "buffer.h"
+#include "buffer.h"
 
 /* #DEFINE DEFINITIONS */
 #define DEFAULT_NUM_ITEMS_MSGQ 10
@@ -174,12 +174,16 @@ bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t Time
 } /* end OS_MSGQ_Pend () */
 
 #if (TM_MSGQ ==1 )
-static OS_MSGQ_Obj      testMsgQueue_;
-static OS_QUEUE_Element_Handle             tx_msg_handle = NULL;
-static volatile OS_QUEUE_Element_Handle    rx_msg_handle = NULL;
-static volatile OS_QUEUE_Element_Handle *  rx_msg_handle_ptr = &rx_msg_handle;
+static OS_MSGQ_Obj             testMsgQueue_;
+bool retVal = false;
+static uint8_t value = 94;
+static buffer_t payload1;
+static buffer_t payload2;
+static buffer_t *ptr1 = &payload1;
+static buffer_t *ptr2 = &payload2;
+static buffer_t *rx_msg;
+
 static volatile uint8_t counter = 0;
-static OS_QUEUE_Element txMsg1;
 
 void OS_MSGQ_TestCreate ( void )
 {
@@ -193,26 +197,20 @@ void OS_MSGQ_TestCreate ( void )
       APP_ERR_PRINT("Unable to Create the Message Queue!");
    }
    /*initialize static message*/
-   txMsg1.flag.isFree = false;
-   txMsg1.dataLen = 11;
-   tx_msg_handle = &txMsg1;
-   if( 11 == tx_msg_handle->dataLen )
-   {
-      APP_PRINT("Success MSGQ Test ");
-   }
-
+   payload1.data = &value;
+  
 }
 bool OS_MSGQ_TestPend( void )
 {
    bool retVal = false;
    
-   if( OS_MSGQ_Pend(&testMsgQueue_, (void **)rx_msg_handle_ptr, OS_WAIT_FOREVER) )
+   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, OS_WAIT_FOREVER) )
    {
       counter--;
       retVal = true;
    }
 
-   if( 11 ==  rx_msg_handle->dataLen)
+   if( 94 ==  *(rx_msg->data))
    {
       APP_PRINT("Success MSGQ Test ");
    }
@@ -227,6 +225,6 @@ bool OS_MSGQ_TestPend( void )
 void OS_MSGQ_TestPost( void )
 {
    //post address of the txMsg to the Queue
-   OS_MSGQ_Post(&testMsgQueue_, (void *)&tx_msg_handle);
+   OS_MSGQ_Post(&testMsgQueue_, (void *)ptr1);
 }
 #endif
