@@ -42,8 +42,7 @@ settings
 \DCU\Common\Include\partition_cfg - problem.h
 *.bin
 *.lnt
-*.ewd
-*.icf
+*.ewd  
 \MTU\PCLint\sed3ibKwb
 \MTU\PCLint\sed7zbT5A
 \MTU\PCLint\sedBaHnKP
@@ -72,33 +71,27 @@ settings
 \MTU\PCLint\sedZapzps
 \MTU\PCLint\sedzo85vi
 \MTU\PCLint\sedzxrnb5
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL_CSharp/obj/x64/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL_CSharp/obj/x64/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL_CSharp/obj/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL_CSharp/obj/Debug/wolfSSL_CSharp.csproj.AssemblyReference.cache
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL_CSharp/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-Server/obj/x64/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-Server/obj/x64/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-Server/obj/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-Server/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-PSK-Server/obj/x64/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-PSK-Server/obj/x64/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-PSK-Server/obj/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-PSK-Server/obj/Debug/wolfSSL-TLS-PSK-Server.csproj.AssemblyReference.cache
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-TLS-PSK-Server/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-Example-IOCallbacks/obj/x64/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-Example-IOCallbacks/obj/x64/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-Example-IOCallbacks/obj/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-Example-IOCallbacks/obj/Debug/wolfSSL-Example-IOCallbacks.csproj.AssemblyReference.cache
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-Example-IOCallbacks/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-Server/obj/x64/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-Server/obj/x64/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-Server/obj/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-Server/obj/Debug/wolfSSL-DTLS-Server.csproj.AssemblyReference.cache
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-Server/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-PSK-Server/obj/x64/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-PSK-Server/obj/x64/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-PSK-Server/obj/Release/.NETFramework,Version=v4.5.AssemblyAttributes.cs
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-PSK-Server/obj/Debug/wolfSSL-DTLS-PSK-Server.csproj.AssemblyReference.cache
-/Common/wolfssl-4.3.0-commercial/wrapper/CSharp/wolfSSL-DTLS-PSK-Server/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
 /.vs
+# IAR Settings  
+**/settings/*.crun 
+**/settings/*.dbgdt  
+**/settings/*.cspy  
+**/settings/*.cspy.*  
+**/settings/*.xcl  
+**/settings/*.dni  
+**/settings/*.wsdt  
+**/settings/*.wspos 
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+_build/
+# Python Tools for Visual Studio (PTVS)
+__pycache__/
+*.pyc
+## This is in Next Gen CCA, and Alger delta.100 
