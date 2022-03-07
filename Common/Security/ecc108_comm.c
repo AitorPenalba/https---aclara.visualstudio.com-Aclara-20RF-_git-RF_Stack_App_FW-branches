@@ -309,8 +309,7 @@ uint8_t ecc108c_send_and_receive(uint8_t *tx_buffer, uint8_t rx_size, uint8_t *r
 
          if (ret_code == ECC108_RX_NO_RESPONSE)
          {
-#if ( ( MCU_SELECTED == NXP_K24 ) && ( RTOS_SELECTION == MQX_RTOS ) )
-           // We did not receive a response. Re-synchronize and send command again.
+            // We did not receive a response. Re-synchronize and send command again.
             if (ecc108c_resync(rx_size, rx_buffer) == ECC108_RX_NO_RESPONSE)
             {
                return ret_code;  // The device seems to be dead in the water.
@@ -319,22 +318,13 @@ uint8_t ecc108c_send_and_receive(uint8_t *tx_buffer, uint8_t rx_size, uint8_t *r
             {
                break;
             }
-#elif ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-			    uint8_t resetValue = 0;
-			    R_IIC_MASTER_Write(&g_i2c_master0_ctrl, &resetValue, 1, false); // For now reset command
-#endif
          }
 
          // Check whether we received a valid response.
          if (ret_code == ECC108_INVALID_SIZE)
          {
             // We see 0xFF for the count when communication got out of sync.
-#if ( ( MCU_SELECTED == NXP_K24 ) && ( RTOS_SELECTION == MQX_RTOS ) )
            ret_code_resync = ecc108c_resync(rx_size, rx_buffer);
-#elif ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-           uint8_t resetValue = 0;
-			  ret_code_resync = R_IIC_MASTER_Write(&g_i2c_master0_ctrl, &resetValue, 1, false); // For now reset command
-#endif
            if (ret_code_resync == ECC108_SUCCESS)
             {
                continue;   // We did not have to wake up the device. Try receiving response again.

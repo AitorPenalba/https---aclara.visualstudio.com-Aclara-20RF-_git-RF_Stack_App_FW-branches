@@ -40,9 +40,7 @@
 #include <mqx.h>
 #include <bsp.h>
 #endif
-#if 0 // TODO: RA6E1 - Support serial debug
 #include "DBG_SerialDebug.h"
-#endif
 #else
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 #include <MK66F18.h>
@@ -141,7 +139,7 @@ static bool             timeSlice(PartitionData_t const *pParData, DeviceDriverM
 
 static returnStatus_t   flashErase( uint32_t dest, uint32_t numBytes );
 static returnStatus_t   flashWrite( uint32_t address, uint32_t cnt, uint8_t const *pSrc );
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED != RA6E1 )
 static returnStatus_t   exeFlashCmdSeq( uint32_t dest );
 static returnStatus_t   exeFlashCmdSeqSameBank( void );
 #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( ( DCU == 1 ) && ( HAL_TARGET_HARDWARE != HAL_TARGET_XCVR_9985_REV_A ) ) )
@@ -183,12 +181,10 @@ const DeviceDriverMem_t IF_deviceDriver =
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
-#if ( MCU_SELECTED == NXP_K24 )
 #ifndef __BOOTLOADER
 static bool       bIntSemCreated_ = (bool)false;
 static OS_SEM_Obj intFlashSem_    = {0};                 /* Semaphore given when flash access completed */
 #endif   /* BOOTLOADER  */
-#endif   /* MCU selected */
 
 #if ( MCU_SELECTED == RA6E1 )
 static bool bInternalFlashOpened = false;
@@ -198,6 +194,8 @@ static volatile bool g_b_flash_event_not_blank = false;
 static volatile bool g_b_flash_event_blank = false;
 static volatile bool g_b_flash_event_erase_complete = false;
 static volatile bool g_b_flash_event_write_complete = false;
+
+uint8_t localVar[FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE];
 #endif
 
 /* ****************************************************************************************************************** */
@@ -243,6 +241,15 @@ void dataBgoCallback( flash_callback_args_t *p_args )
    {
       /*No operation */
    }
+
+   // Post the semaphore from ISR context
+   if ( g_b_flash_event_write_complete || g_b_flash_event_erase_complete )
+   {
+      if ( bIntSemCreated_ == (bool)true )
+      {
+         OS_SEM_Post_fromISR( &intFlashSem_ );
+      }
+   }
 }
 #endif
 
@@ -274,7 +281,7 @@ static returnStatus_t init( PartitionData_t const *pParData, DeviceDriverMem_t c
    /* Create share memory */
    (void)dvr_shm_init();
 
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED != RA6E1 )
    if ( !bIntSemCreated_ ) /* If the semaphore has not been created, create it. */
    {  /* Install ISRs and create sem & mutex to protect the banked driver modules critical section */
       if (NULL != _int_install_isr((int)INT_FTFE, (INT_ISR_FPTR)ISR_InternalFlash, NULL))
@@ -288,11 +295,22 @@ static returnStatus_t init( PartitionData_t const *pParData, DeviceDriverMem_t c
       }
    }
    else
+#else
+   if ( !bIntSemCreated_ ) /* If the semaphore has not been created, create it. */
+   {
+      if ( OS_SEM_Create( &intFlashSem_ ) )
+      {
+         eRetVal = eSUCCESS;
+         bIntSemCreated_ = (bool)true;
+      }
+   }
+   else
 #endif
 #endif   /* BOOTLOADER  */
    {
       eRetVal = eSUCCESS;
    }
+
    return (eRetVal);
 } /*lint !e715 !e818  Parameters passed in may not be used */
 /***********************************************************************************************************************
@@ -431,7 +449,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
    ASSERT(Cnt <= INTERNAL_FLASH_SIZE);    /* Count must be <= the sector size. */
    dvr_shm_lock();
 
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED != RA6E1 )
 #if !defined( __BOOTLOADER ) && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_3 )
    {
@@ -497,7 +515,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
       retVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
    }
 #endif
-#elif ( MCU_SELECTED == RA6E1 )
+#else
    if ( 0 != memcmp( ( uint8_t * ) destAddr, pSrc, cnt ) ) /* Does flash need to be updated? */
    {  /* Flash has to be updated */
       if ( eSUCCESS != flashWrite( destAddr, cnt, pSrc ) )
@@ -559,7 +577,7 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
    /*lint -efunc( 715, erase ) : pNextDvr is not used.  It is a part of the common API. */
    /*lint -efunc( 818, erase ) : pNextDvr is declared correctly.  It is a part of the common API. */
 
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED != RA6E1 )
 #if !defined( __BOOTLOADER ) && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_3 )
    {
@@ -623,7 +641,7 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
       eRetVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
    }
 #endif
-#elif ( MCU_SELECTED == RA6E1 )
+#else
    lCnt destAddr = destOffset + pParData->PhyStartingAddress; /* Get the actual address in NV. */
    eRetVal = eSUCCESS; /* Assume Success */
    dvr_shm_lock(); /* Take mutex, critical section */
@@ -774,7 +792,7 @@ static bool timeSlice(PartitionData_t const *pParData, DeviceDriverMem_t const *
 static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 {
    returnStatus_t eRetVal = eFAILURE;
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED != RA6E1 )
    /* Make sure the dest is on boundary & cnt is a x sector */
    if ( (0 == (numBytes % ERASE_SECTOR_SIZE_BYTES)) && (0 == (dest % ERASE_SECTOR_SIZE_BYTES)) )
    {
@@ -812,7 +830,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 //      _ICACHE_ENABLE();
 #endif   /* BOOTLOADER  */
    }
-#elif ( MCU_SELECTED == RA6E1 )
+#else
    lCnt blockCount;
    fsp_err_t retVal;
    if( dest < FLASH_HP_CODEFLASH_END_ADDRESS )
@@ -868,7 +886,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
             /* Wait for the write complete event flag, if BGO is SET  */
             if (true == g_flash0_cfg.data_flash_bgo)
             {
-               while ( !g_b_flash_event_erase_complete ); // TODO: RA6E1 [name_Suriya] Add some counts with error to return as it should struck here forever.
+               (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                g_b_flash_event_erase_complete = false;
             }
          }
@@ -908,7 +926,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const *pSrc )
 {
    returnStatus_t retVal = eFAILURE;
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED != RA6E1 )
    /* Erased state are all 8 bytes of 0xFF */
    static const uint8_t erasedState_[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
@@ -940,41 +958,86 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
       _ICACHE_ENABLE();
 #endif   /* BOOTLOADER  */
    }
-#elif ( MCU_SELECTED == RA6E1 )
+#else
     uint32_t srcAddr = ( uint32_t ) pSrc;
     if( address < FLASH_HP_CODEFLASH_END_ADDRESS )
     {
-       /* Write supports when it is a multiply of 128 bytes */
-       /* TODO: If required, the flash write will be modified by not writing complete value of cnt, instead having a while loop
-          to write minimal bytes in a loop to accomodate other tasks in that time */
+       /* Write supports when it is a multiply of 128 bytes - If not handle it accordingly */
        if( ( cnt % FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE ) == 0 )
        {
-          retVal = R_FLASH_HP_Write(&g_flash0_ctrl, srcAddr, address, cnt);
+          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
        }
        else
        {
-          retVal = ( returnStatus_t ) eFAILURE;
+          uint32_t localSrcAddr, localDstAddr, remainingByte;
+          uint32_t localCnt = FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE * ( cnt / FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE );
+          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
+          remainingByte = cnt - localCnt;
+          if ( ( address + localCnt + FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE ) < FLASH_HP_CODEFLASH_END_ADDRESS )
+          {
+             memcpy( localVar, ( uint8_t * )srcAddr + localCnt, remainingByte );
+             memcpy( &localVar[remainingByte], ( uint8_t * )( address + cnt ), ( FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE - remainingByte ) );
+             retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( address + localCnt ), FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE );
+          }
+          else
+          {
+             if ( localCnt )
+             {
+                // TODO: RA6E1 [name_Suriya] Wait until the Write is completed by using callbacks/interrupts (which is not supported now)
+               vTaskDelay( 500 ); // For now, delay 500 ticks
+             }
+
+             localDstAddr = ( address + localCnt ) - ( FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE - remainingByte );
+             memcpy( localVar, ( uint8_t * )localDstAddr, ( FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE - remainingByte ) );
+             memcpy( &localVar[FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE - remainingByte], ( uint8_t * )( srcAddr + localCnt ), remainingByte);
+             retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( uint32_t )localDstAddr, FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE );
+          }
        }
     }
     else if( ( address >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( address < FLASH_HP_DATAFLASH_END_ADDRESS ) )
     {
        if( ( cnt % FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE ) == 0 )
        {
-          retVal = R_FLASH_HP_Write(&g_flash0_ctrl, srcAddr, address, cnt);
+          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
           /* Error Handle */
           if (FSP_SUCCESS == retVal)
           {
              /* Wait for the write complete event flag, if BGO is SET  */
              if (true == g_flash0_cfg.data_flash_bgo)
              {
-                while ( !g_b_flash_event_write_complete ); // TODO: Add some counts with error to return as it should struck here forever.
+                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                 g_b_flash_event_write_complete = false;
              }
           }
        }
        else
        {
-          retVal = ( returnStatus_t ) eFAILURE;
+          uint32_t localSrcAddr, localDstAddr, remainingByte;
+          uint32_t localCnt = FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE * ( cnt / FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE );
+          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
+          if ( FSP_SUCCESS == retVal )
+          {
+             /* Wait for the write complete event flag, if BGO is SET  */
+             if ( true == g_flash0_cfg.data_flash_bgo )
+             {
+                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+                g_b_flash_event_write_complete = false;
+             }
+          }
+
+          remainingByte = cnt - localCnt;
+          localSrcAddr = srcAddr - ( FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE - remainingByte );
+          localDstAddr = address - ( FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE - remainingByte );
+          retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, localSrcAddr, localDstAddr, FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE );
+          if ( FSP_SUCCESS == retVal )
+          {
+             /* Wait for the write complete event flag, if BGO is SET  */
+             if ( true == g_flash0_cfg.data_flash_bgo )
+             {
+                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+                g_b_flash_event_write_complete = false;
+             }
+          }
        }
     }
     else
@@ -986,7 +1049,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
    return(retVal);
 }
 
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED != RA6E1 )
 #ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
@@ -1164,7 +1227,7 @@ static returnStatus_t exeFlashCmdSeqDifBank( void )
    FTFE_BASE_PTR->FCNFG |= FTFE_FCNFG_CCIE_MASK;  /* Enable the interrupts */
 
 #ifndef __BOOTLOADER
-   if (0)!OS_SEM_Pend(&intFlashSem_, MAX_SEM_WAIT_mS))  /* Pend on flash execution completion */
+   if (!OS_SEM_Pend(&intFlashSem_, MAX_SEM_WAIT_mS))  /* Pend on flash execution completion */
    {
       retVal = eFAILURE;   /* Sem time-out, return w/error */
    }
