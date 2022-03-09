@@ -12,7 +12,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2014 Aclara.  All Rights Reserved.
+ * Copyright 2014-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -188,18 +188,18 @@ uint8_t MFGP_getQuietMode( void );
 /**
  * MFGP_uartRecvTask - Manufacturing port UART task
  *
- * @param  uint32_t Arg0 - Not used
+ * @param  taskParameter - Not used
  * @return None
  */
-void           MFGP_uartRecvTask ( uint32_t Arg0 );
+void           MFGP_uartRecvTask ( taskParameter );
 
 /**
  * MFGP_uartCmdTask - Manufacturing port command task
  *
- * @param  uint32_t Arg0 - Not used
+ * @param  taskParameter - Not used
  * @return None
  */
-void           MFGP_uartCmdTask ( uint32_t Arg0 );
+void           MFGP_uartCmdTask ( taskParameter );
 
 /**
  * MFGP_AllowDtlsConnect - Allow UART traffic

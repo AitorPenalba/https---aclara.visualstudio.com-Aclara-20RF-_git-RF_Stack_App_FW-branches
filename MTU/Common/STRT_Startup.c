@@ -22,7 +22,7 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdbool.h>
-#include "BSP_aclara.h" /*In Project.h file BSP_aclara.h is commented out*/
+#include "MFG_Port.h"
 #if 0
 #include <mqx.h>
 #include <fio.h>
@@ -165,7 +165,9 @@ static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
 /* Power Up Table - Define all modules that require initialization below. */
 const STRT_FunctionList_t startUpTbl[] =
 {
+   INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
    INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
    INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
    INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
@@ -175,7 +177,7 @@ const STRT_FunctionList_t startUpTbl[] =
                                                                                     // NOTE2: This needs to be after FIO_init since it uses the file system.
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
-
+   INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
 #if 0
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS

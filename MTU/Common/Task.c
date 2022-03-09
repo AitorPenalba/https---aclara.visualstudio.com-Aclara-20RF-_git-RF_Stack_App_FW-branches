@@ -39,6 +39,7 @@
 #endif
 
 #include "DBG_CommandLine.h"
+#include "MFG_Port.h"
 //#include "IDL_IdleProcess.h"
 
 #if ENABLE_MFG_TASKS
@@ -295,17 +296,21 @@ TaskHandle_t dbg_tsk_handle;
 TaskHandle_t dbg_tx_tsk_handle;
 TaskHandle_t self_tst_tsk_handle;
 TaskHandle_t time_sys_tsk_handle;
+TaskHandle_t mfg_recv_tsk_handle;
+TaskHandle_t mfg_cmd_tsk_handle;
 
 /* TODO: RA6: DG: Investigate if we can create one Task List that works for both FreeRTOS and MQX */
 /* TODO: RA6: FreeRTOS: Note: FreeRTOS need the Stack size in words */
 const OS_TASK_Template_t Task_template_list[] =
 {
-   /* Task Index,          Function,                    Stack,     Pri,    Name,                 Attributes,    Param,     Handle */
+   /* Task Index,          Function,                    Stack,     Pri,  Name,                 Attributes,    Param,     Handle */
    { eSTRT_TSK_IDX,         STRT_StartupTask,           1900,      2,    (char *)pTskName_Strt,   0,            (void *)0, &tst_handle },
-   { eDBG_TSK_IDX,          DBG_CommandLineTask,        512,      3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
-   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512,      4,    (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
+   { eDBG_TSK_IDX,          DBG_CommandLineTask,        512,       3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
+   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512,       4,    (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
    { eTEST_TSK_IDX,         SELF_testTask,              1024,      14,   (char *)pTskName_Test,   0,            (void *)0, &self_tst_tsk_handle },
-   { eTIME_TSK_IDX,         TIME_SYS_HandlerTask,       512,      15,   (char *)pTskName_TimeSys, 0,         (void *)0, &time_sys_tsk_handle },
+   { eTIME_TSK_IDX,         TIME_SYS_HandlerTask,       512,       15,   (char *)pTskName_TimeSys, 0,         (void *)0, &time_sys_tsk_handle },
+   { eMFGP_CMD_TSK_IDX,     MFGP_uartCmdTask,           2000,      14,   (char *)pTskName_MfgUartCmd, DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR,  (void *)0, &mfg_cmd_tsk_handle},
+   { eMFGP_RECV_TSK_IDX,    MFGP_uartRecvTask,          700,       19,   (char *)pTskName_MfgUartRecv, DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR,  (void *)0, &mfg_recv_tsk_handle },
    {    0  }
 };
 
