@@ -53,7 +53,7 @@
 #include "OS_aclara.h"
 #endif
 #include "error_codes.h"
-//#include "heep.h"
+#include "heep.h"
 #include "BSP_aclara.h"
 
 /* TODO: RA6: DG: Move these to appropriate place */

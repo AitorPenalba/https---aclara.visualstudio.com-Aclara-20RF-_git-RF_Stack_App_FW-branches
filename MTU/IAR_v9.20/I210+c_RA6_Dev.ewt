@@ -1431,6 +1431,9 @@
                 </file>
             </group>
         </group>
+        <group>
+            <name>RA6_FreeRTOS_WolfSSL</name>
+        </group>
     </group>
     <group>
         <name>Source</name>
@@ -1494,6 +1497,12 @@
                 </file>
             </group>
             <group>
+                <name>Include</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\heep.h</name>
+                </file>
+            </group>
+            <group>
                 <name>OS_AL_FreeRTOS</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Event.c</name>
@@ -1524,6 +1533,36 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\TickTime.c</name>
+                </file>
+            </group>
+            <group>
+                <name>Radio</name>
+                <group>
+                    <name>Si446x_Radio</name>
+                    <group>
+                        <name>Si446x_Library</name>
+                        <group>
+                            <name>Si446x</name>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.h</name>
+                            </file>
+                        </group>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\radio_comm.c</name>
+                        </file>
+                    </group>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_config_normal.c</name>
+                    </file>
+                </group>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Radio\radio.h</name>
                 </file>
             </group>
             <group>
@@ -1563,42 +1602,6 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\Security\ecc108_physical.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\Common\Security\i2c_hal.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\Common\Security\i2c_hal.h</name>
-                </file>
-            </group>
-			<group>
-                <name>Radio</name>
-                <group>
-                    <name>Si446x_Radio</name>
-                    <group>
-                        <name>Si446x_Library</name>
-                        <group>
-                            <name>Si446x</name>
-                            <file>
-                                <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.c</name>
-                            </file>
-                            <file>
-                                <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\Si446x\si446x_api_lib.h</name>
-                            </file>
-                        </group>
-                        <file>
-                            <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\radio_comm.c</name>
-                        </file>
-                    </group>
-                    <file>
-                        <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio.c</name>
-                    </file>
-                    <file>
-                        <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_config_normal.c</name>
-                    </file>
-                </group>
-                <file>
-                    <name>$PROJ_DIR$\..\..\Common\Radio\radio.h</name>
                 </file>
             </group>
             <group>
@@ -1651,6 +1654,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\SELF_test.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\time_DST.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\time_DST.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\time_sys.c</name>

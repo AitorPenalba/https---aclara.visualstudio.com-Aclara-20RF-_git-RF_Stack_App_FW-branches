@@ -33,9 +33,7 @@
 #include "time_util.h"
 #undef  TIME_UTIL_GLOBAL
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 -  DST support to be added
 #include "time_DST.h"
-#endif
 #endif
 
 /* CONSTANTS */
@@ -616,8 +614,7 @@ returnStatus_t TIME_UTIL_GetTimeInDateFormat(sysTime_dateFormat_t *pDateTime)
    freq = ((SYST_RVR + 1) * BSP_ALARM_FREQUENCY)/1000; // Adjust for msec
    additionalMsec = ((currentSysTime.tictoc * (SYST_RVR + 1)) + currentSysTime.elapsedCycle) / freq; // This increases the time resolution from 10msec to msec
 #elif (RTOS_SELECTION == FREE_RTOS)
-   // TODO: RA6E1 - remove hardcoding of BSP_ALARM_FREQUENCY
-   freq = ((SysTick->LOAD + 1) * 200)/1000; // Adjust for msec
+   freq = ( ( SysTick->LOAD + 1 ) * BSP_ALARM_FREQUENCY ) / 1000; // Adjust for msec
    additionalMsec = ((currentSysTime.tictoc * (SysTick->LOAD + 1)) + currentSysTime.elapsedCycle) / freq; // This increases the time resolution from 10msec to msec
 #endif
    pDateTime->msec += (uint16_t)additionalMsec;
@@ -778,7 +775,6 @@ returnStatus_t TIME_UTIL_SetTimeFromSeconds( uint32_t seconds, uint32_t fraction
 
 }
 
-#if 0 // TODO: RA6E1 Support to OR_PM handler
 /***********************************************************************************************************************
 
    Function Name: TIME_UTIL_OR_PM_Handler
@@ -830,7 +826,6 @@ returnStatus_t TIME_UTIL_OR_PM_Handler( enum_MessageMethod action, meterReadingT
    }
    return ( retVal );
 }
-#endif
 
 /***********************************************************************************************************************
 
@@ -931,9 +926,8 @@ uint64_t TIME_UTIL_GetTimeInQSecFracFormat(void)
       elapsedCycle = ((((uint64_t)currentSysTime.tictoc * (uint64_t)syst_rvr) + (uint64_t)currentSysTime.elapsedCycle) << 32) /
                        (uint64_t)((uint64_t)syst_rvr * (uint64_t)BSP_ALARM_FREQUENCY); // Convert the time spend between Systick in fractional second
 #elif (RTOS_SELECTION == FREE_RTOS)
-      // TODO: RA6E1 - remove hardcoding of BSP_ALARM_FREQUENCY
       elapsedCycle = ((((uint64_t)currentSysTime.tictoc * (uint64_t)syst_rvr) + (uint64_t)currentSysTime.elapsedCycle) << 32) /
-                       (uint64_t)((uint64_t)syst_rvr * (uint64_t)200); // Convert the time spend between Systick in fractional second
+                       (uint64_t)((uint64_t)syst_rvr * (uint64_t) BSP_ALARM_FREQUENCY); // Convert the time spend between Systick in fractional second
 #endif
       // Avoid overflow. That should not happen but better be safe.
       // If it does, saturate.

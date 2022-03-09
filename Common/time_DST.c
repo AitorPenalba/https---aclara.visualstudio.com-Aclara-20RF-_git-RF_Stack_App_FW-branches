@@ -23,16 +23,20 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stddef.h>
-#include <mqx.h>
 #include "portable_freescale.h"
 #include "project.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include <mqx.h>
+#endif
 #include "file_io.h"
 #include "time_sys.h"
 #include "time_util.h"
 #include "DBG_SerialDebug.h"
 #include "time_DST.h"
 #include "byteswap.h"
+#if 0 // TODO: RA6E1 - WolfSSL integration
 #include "wolfssl/wolfcrypt/sha256.h"
+#endif
 
 /* CONSTANTS */
 
@@ -680,7 +684,7 @@ PACK_END
       &calcTimeZoneHash.endOccOfDay,
       &calcTimeZoneHash.endHour,
       &calcTimeZoneHash.endMinute);
-
+#if 0 // TODO: RA6E1 - WolfSSL integration
    Sha256  sha;                                 // sha256 working area
    uint8_t TempKey[SHA256_DIGEST_SIZE];
 
@@ -692,7 +696,7 @@ PACK_END
                        (((uint32_t) TempKey[1]) << 16) |
                        (((uint32_t) TempKey[2]) << 8) |
                         ((uint32_t) TempKey[3]));
-
+#endif
    /*lint +esym(529,tzOffset,dstEnable,dstOffset,startMonth,startDayOfWeek,startOccOfDay,startHour,startMinute)   */
    /*lint +esym(529,endMonth,endDayOfWeek,endOccOfDay,endHour,endMinute)   */
 }

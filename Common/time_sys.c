@@ -31,8 +31,8 @@
 #undef  TIME_SYS_GLOBAL
 #include "time_util.h"
 #include "BSP_aclara.h"
-#if 0 // TODO: RA6E1 - Support to DST and mac modules - Porting for Systick timer
 #include "time_DST.h"
+#if 0 // TODO: RA6E1 - Support to mac module - Porting for Systick timer
 #include "mac.h"
 #endif
 #include "DBG_SerialDebug.h"
@@ -98,11 +98,13 @@
 #define FREQUENCY_FILTER_LEN                          5 // Length of the frequency filter
 #endif
 
+#define TICK_DIVISOR                      200   // Configure this value to modify the SysTick timer frequency in RA6E1 - FreeRTOS (200 divisor gives 5ms tick value)
+
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
 /* The folloing structure is taken from an MQX example showing how to use the system tick.  */
-#if (RTOS_SELECTION == MQX_RTOS) /* TODO: Handling in FreeRTOS */
+#if (RTOS_SELECTION == MQX_RTOS) // TODO: RA6E1 - Handling in FreeRTOS
 typedef struct my_isr_struct_mqx
 {
    void *         OLD_ISR_DATA;
@@ -113,7 +115,7 @@ typedef struct my_isr_struct_mqx
 
 typedef struct
 {
-#if (RTOS_SELECTION == MQX_RTOS) /* TODO: Queue handling in FreeRTOS */
+#if (RTOS_SELECTION == MQX_RTOS) // TODO: RA6E1 - Queue handling in FreeRTOS
    OS_QUEUE_Handle pQueueHandle;    /* Queue handle, if not NULL, send message */
    OS_MSGQ_Handle  pMQueueHandle;   /* Message handle, if not NULL, send message */
 #endif
@@ -210,7 +212,7 @@ STATIC tTimeSys      _sTimeSys[MAX_ALARMS];              /* Manage alarm request
 static time_vars_t   timeVars_;                          /* Time related variable */
 
 #if ( EP == 1 )
-#if 0 /* File access not supported now */
+#if 0 // TODO: RA6E1 - File access not supported now
 static FileHandle_t  fileHndlTimeSys_ = {0};             /* Contains the file handle information */
 #endif
 static uint8_t       statusTimeRequest_;                 /* State variable to track get time */
@@ -267,7 +269,7 @@ STATIC void getSysTime( sysTime_t *sysTime )
    uint32_t primask = __get_PRIMASK();
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
    (void)memcpy( sysTime, &_timeSys, sizeof(sysTime_t) );
-#if (RTOS_SELECTION == MQX_RTOS)
+#if ( MCU_SELECTED == NXP_K24 )
    sysTime->elapsedCycle = SYST_RVR+1; // Retrieve current SYST_RVR because it can change when tracking GPS UTC
    /* Check systick pending interrupt flag */
    if (SCB_ICSR & SCB_ICSR_PENDSTSET_MASK)
@@ -276,7 +278,7 @@ STATIC void getSysTime( sysTime_t *sysTime )
       sysTime->elapsedCycle *= 2;
    }
    sysTime->elapsedCycle -= SYST_CVR;
-#elif (RTOS_SELECTION == FREE_RTOS)
+#elif ( MCU_SELECTED == RA6E1 )
    sysTime->elapsedCycle = SysTick->LOAD+1;
    if ( SCB->ICSR & SCB_ICSR_PENDSTSET_Msk)
    {
@@ -383,7 +385,7 @@ returnStatus_t TIME_SYS_Init( void )
             }
          }
 #endif
-         retVal = eSUCCESS;
+         retVal = eSUCCESS; // TODO: RA6E1 - Remove this once file support added. Handle #if and #else cases accordingly
 #else
          timeVars_.timeLastUpdated = 0;
          timeVars_.timeState       = TIME_STATE_INVALID;
@@ -544,7 +546,7 @@ returnStatus_t TIME_SYS_SetTimeFromRTC(void)
    TIME_SYS_SetSysDateTime(&sysTime);
 
 #if ( EP == 1 )
-#if 0 /* TODO: File support to be added */
+#if 0 // TODO: RA6E1 - File support to be added
    //Write the time state variable
    retVal = FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t, timeState),
                     (uint8_t *)&timeVars_.timeState, (lCnt)sizeof(timeVars_.timeState));
@@ -1568,11 +1570,7 @@ STATIC bool isTimeForPeriodicAlarm ( uint8_t alarmId )
    {  /* Operate on valid time and system time is valid */
       offset = TIME_TICKS_PER_DAY;  // Add 1 day to keep ticks positive
 #if (EP == 1)
-#if 0 // TODO: RA6E1 - DST support to be added
       offset += ( (signed)pTimeSys->bUseLocalTime * DST_GetLocalOffset() ); // Add local and DST offset
-#else
-      offset += ( (signed)pTimeSys->bUseLocalTime * 1 ); // TODO: DST local offset
-#endif
 #endif
       getSysTime( &timeSys );
       if ( pTimeSys->ulOffset == ((timeSys.time + (uint32_t)offset) % pTimeSys->ulAlarmTime_Period) )
@@ -1701,7 +1699,6 @@ STATIC void processSysTick( void )
 
    getSysTime( &timeSys );
 
-#if 0 // TODO: RA6E1 - DST support to be added
    /* Handle DST/Offset computation. This should be handled as a special case, before handling other alarms */
    if ( _nuDST_TimeChanged || /* Time changed */
         ( TIME_SYS_IsTimeValid() && DST_IsEnable() &&
@@ -1713,7 +1710,6 @@ STATIC void processSysTick( void )
       DST_ComputeDSTParams(TIME_SYS_IsTimeValid(), timeSys.date, timeSys.time);
       _nuDST_TimeChanged = (bool)false;
    }
-#endif
 #endif
 
    for ( index = 0, pTimeSys = &_sTimeSys[0]; index < ARRAY_IDX_CNT(_sTimeSys); index++, pTimeSys++ )
@@ -1750,9 +1746,7 @@ STATIC void processSysTick( void )
 #if (EP == 1)  /* Local time adjustment when requested by alarm */
             if (pTimeSys->bUseLocalTime)
             {
-#if 0 // TODO: RA6E1 - DST support to be added
                DST_ConvertUTCtoLocal(&calTimeSys);
-#endif
             }
 #endif
             if ( ((pTimeSys->ulAlarmDate == calTimeSys.date) && (calTimeSys.time >= pTimeSys->ulAlarmTime_Period)) ||
@@ -2193,7 +2187,7 @@ static void GPS_PPS_IRQ_ISR( void )
  ******************************************************************************************************************/
 void TIME_SYS_HandlerTask( taskParameter )
 {
-#if 0 // TODO: RA6E1 - ISR control for FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
    MY_ISR_STRUCT_PTR_MQX  isr_ptr;    /* */
 #endif
    uint16_t     cnt;        /* Number of semaphores before the tick is processed. */
@@ -2221,13 +2215,13 @@ void TIME_SYS_HandlerTask( taskParameter )
 #endif
    /* The following code was taken from MQX example code for adding our timer code to the RTOS tick interrupt.  So, the
       following code will replace the RTOS tick interrupt with our own and then our ISR will call the RTOS tick. */
-#if 0 // TODO: RA6E1 - ISR control for FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
    isr_ptr               = (MY_ISR_STRUCT_PTR_MQX)_mem_alloc_zero(sizeof(MY_ISR_STRUCT_MQX));
    isr_ptr->OLD_ISR_DATA = _int_get_isr_data(INT_SysTick);                 /*lint !e641 */
    isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                      /*lint !e641 */
    _int_install_isr(INT_SysTick, TIME_SYS_vApplicationTickHook, isr_ptr);  /*lint !e641 !e64 !e534 */
-#else
-   ( void ) SysTick_Config(SystemCoreClock / 200);      /* Configure SysTick to generate an interrupt every 5ms - TODO: This can be modified to 10ms */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   ( void ) SysTick_Config( SystemCoreClock / TICK_DIVISOR );      /* Configure SysTick to generate an interrupt every 5ms - TODO: This can be modified to 10ms */
 #endif
    cnt = (uint16_t)(SYS_TIME_TICK_IN_mS / portTICK_RATE_MS);
 
@@ -2242,9 +2236,7 @@ void TIME_SYS_HandlerTask( taskParameter )
 #endif
 #if (EP == 1)
    getSysTime( &timeSys );
-#if 0 // TODO: RA6E1 -  DST support to be added
    DST_ComputeDSTParams(TIME_SYS_IsTimeValid(), timeSys.date, timeSys.time); // Compute the DST dates on power-up
-#endif
    RTC_GetTimeInSecMicroSec( &sec, &usec); // Get RTC time and store the current time
 //TODO: Used when RTC crystal is source for Sys Tick adjustment.  Remove when using TCXO.
    lastTime = ((uint64_t)sec * 1000000) + usec;
