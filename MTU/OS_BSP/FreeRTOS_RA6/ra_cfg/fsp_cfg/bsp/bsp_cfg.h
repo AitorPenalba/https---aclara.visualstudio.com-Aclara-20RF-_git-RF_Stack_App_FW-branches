@@ -20,9 +20,7 @@
             #endif
             #define BSP_CFG_MCU_VCC_MV (3300)
             #define BSP_CFG_STACK_MAIN_BYTES (0x400)
-//            #define BSP_CFG_HEAP_BYTES (0)
-//            #define BSP_CFG_HEAP_BYTES (236*20)
-            #define BSP_CFG_HEAP_BYTES (1024*75)
+            #define BSP_CFG_HEAP_BYTES (1024*75) /* From .map file: 224,698 bytes of readwrite data memory */
             #define BSP_CFG_PARAM_CHECKING_ENABLE (0)
             #define BSP_CFG_ASSERT (0)
             #define BSP_CFG_ERROR_LOG (0)

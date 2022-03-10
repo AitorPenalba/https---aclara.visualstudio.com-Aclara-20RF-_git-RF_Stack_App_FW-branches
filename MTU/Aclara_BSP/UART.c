@@ -68,26 +68,27 @@ static const struct_UART_Setup UartSetup[MAX_UART_ID] =
 #elif (RTOS_SELECTION == FREE_RTOS)
 const sci_uart_instance_ctrl_t *UartCtrl[4] =
 {
-   &g_uart2_ctrl, //Meter Port
    &g_uart3_ctrl, //MFG Port
+#if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
+   &g_uart9_ctrl, //Optical Port
+#endif
    &g_uart4_ctrl, //DBG Port
-   &g_uart9_ctrl  //Optical Port
+   &g_uart2_ctrl  //Meter Port
 };
 
 const uart_cfg_t *UartCfg[4] =
 {
-   &g_uart2_cfg,
    &g_uart3_cfg,
+#if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
+   &g_uart9_cfg,
+#endif
    &g_uart4_cfg,
-   &g_uart9_cfg
+   &g_uart2_cfg
 };
 #endif
 /* FILE VARIABLE DEFINITIONS */
 #if ( RTOS_SELECTION == MQX_RTOS )
 static MQX_FILE_PTR UartHandle[MAX_UART_ID];
-
-#elif (RTOS_SELECTION == FREE_RTOS)
-   // TODO: RA6 [name_Balaji]: Add UART channel support for RA6E1
 #endif
 /* FUNCTION PROTOTYPES */
 
@@ -163,19 +164,16 @@ returnStatus_t UART_init ( void )
       }
    }
 #elif (RTOS_SELECTION == FREE_RTOS)
-#if 0 // TODO: RA6 [name_Balaji]: Add all UART channel for RA6E1
-   for(int UartChannelNum=0;UartChannelNum<4;UartChannelNum++)
+   for(int UartChannelNum=0;UartChannelNum<MAX_UART_ID;UartChannelNum++)
    {
-      (void)R_SCI_UART_Open((void *)UartCtrl[UartChannelNum], (void *)UartCfg[UartChannelNum]);    
+      (void)R_SCI_UART_Open((void *)UartCtrl[UartChannelNum], (void *)UartCfg[UartChannelNum]);
    }
-#endif
-   (void)R_SCI_UART_Open((void *)UartCtrl[2], (void *)UartCfg[2]);//Opens only DBG Port
 #endif
 
    return ( retVal );
 }
 
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: UART_reset is done in UART_close for RA6E1
 /*******************************************************************************
 
   Function name: UART_reset
@@ -189,7 +187,7 @@ returnStatus_t UART_init ( void )
   Notes:
 
 *******************************************************************************/
-returnStatus_t UART_reset ( enum_UART_ID i )// TODO: RA6 [name_Balaji]: UART_reset is done in UART_close for RA6E1
+returnStatus_t UART_reset ( enum_UART_ID i )
 {
    uint32_t Flags = 0;
    returnStatus_t retVal = eSUCCESS; /* Start with pass status, and latch on any failure */
@@ -245,9 +243,8 @@ returnStatus_t UART_reset ( enum_UART_ID i )// TODO: RA6 [name_Balaji]: UART_res
 *******************************************************************************/
 uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength )
 {
-   uint32_t DataSent;
-
 #if ( MCU_SELECTED == NXP_K24 )
+   uint32_t DataSent;
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    if ( UartId == UART_OPTICAL_PORT )
    {
@@ -263,11 +260,12 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
       ( void )UART_ioctl( UartId, IO_IOCTL_SERIAL_DISABLE_TX, NULL );
    }
 #endif
-#elif ( MCU_SELECTED == RA6E1 )
-// TODO: RA6 [name_Balaji]: Add UART channel support
-    DataSent = R_SCI_UART_Write((void *)UartCtrl[2], DataBuffer, DataLength );//Write only on DBG port
-#endif
    return ( DataSent );
+#elif ( MCU_SELECTED == RA6E1 )
+   (void)R_SCI_UART_Write((void *)UartCtrl[UartId], DataBuffer, DataLength );
+   return DataLength;//R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength
+#endif
+
 }
 
 /*******************************************************************************
@@ -301,13 +299,12 @@ uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 
    return ( DataReceived );
 #elif ( MCU_SELECTED == RA6E1 )
-   // TODO: RA6 [name_Balaji]: Add UART channel support
-   (void)R_SCI_UART_Read((void *)UartCtrl[2], DataBuffer, DataLength );//DBG port
-   return ( DataLength ); //Returning the DataLength
+   (void)R_SCI_UART_Read((void *)UartCtrl[UartId], DataBuffer, DataLength );
+   return DataLength;//R_SCI_UART_Read does not return the no. of valid read bytes, returning DataLength
 #endif
 }
 
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED == NXP_K24 )//The Below API are implemented by Renesas FSP itself
 /*******************************************************************************
 
   Function name: UART_fgets
@@ -486,19 +483,12 @@ uint8_t UART_close ( enum_UART_ID UartId )
 #if ( MCU_SELECTED == NXP_K24 )
    return (uint8_t)fclose( UartHandle[ UartId  ] );
 #elif ( MCU_SELECTED == RA6E1 )
-#if 0
-   for(int UartChannelNum=0;UartChannelNum<4;UartChannelNum++)
-   {
-      (void)R_SCI_UART_Close((void *)UartCtrl[UartChannelNum]);
-   }
-#endif
-   // TODO: RA6 [name_Balaji]: Add UART channel support
-   (void)R_SCI_UART_Close((void *)UartCtrl[2]);
+   (void)R_SCI_UART_Close((void *)UartCtrl[UartId]);
    return 1;
 #endif
 }
 
-#if ( MCU_SELECTED == NXP_K24 )
+
 /*******************************************************************************
 
   Function name: UART_getHandle
@@ -512,11 +502,15 @@ uint8_t UART_close ( enum_UART_ID UartId )
   Notes:
 
 *******************************************************************************/
-void * UART_getHandle ( enum_UART_ID UartId )// TODO: RA6 [name_Balaji]: Add support for RA6E1
+void * UART_getHandle ( enum_UART_ID UartId )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    return ( (void *)UartHandle[ UartId  ] );
+#elif ( MCU_SELECTED == RA6E1 )
+   return ( (void *)UartCtrl[ UartId ] );
+#endif
 }
-
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_open

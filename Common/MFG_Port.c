@@ -231,7 +231,9 @@ static uint32_t         event_flags;                     /* Event flags returned
 #error "USE_USB_MFG need to be set to 1 for this board"
 #endif
 #else
-static const enum_UART_ID mfgUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
+//static const enum_UART_ID mfgUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
+// TODO: RA6 [name_Balaji]: Change configuration back to UART_MANUF_TEST once MFG Port's UART_read issue is cleared
+static const enum_UART_ID mfgUart = UART_DEBUG_PORT;     /* UART used for MFG port operations   */
 #endif
 #if ( EP == 1 )
 static uint16_t         stP0LoopbackFailCount = 0;       /* HEEP required port 0 loopback test failure counter */
@@ -253,8 +255,7 @@ static const char       mfgpLockInEffect[] = {"LOCK IN EFFECT\n\r"}; /* When por
 static OS_EVNT_Obj      _MfgpUartEvent;
 #endif 
 static OS_MSGQ_Obj      _CommandReceived_MSGQ;
-static OS_SEM_Obj    _Mfgp_SEM;                        /* TODO: Balaji */
-#if 0
+#if 0 // TODO: RA6 [name_Balaji]: Add support for RA6E1
 #if ( EP == 1 )
 static timer_t          rfTestModeTimerCfg;              /* rfTestMode timeout Timer configuration */
 #endif
@@ -936,7 +937,6 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    { 0, 0, 0 }
 };
 #if ( RTOS_SELECTION == MQX_RTOS )
-#error
 #if ( EP == 1 )
 /* The following commands are only valid on and endpoint not on frodo */
 static const struct_CmdLineEntry MFGP_EpCmdTable[] =
@@ -1666,7 +1666,6 @@ returnStatus_t MFGP_cmdInit( void )
 ***********************************************************************************************************************/
 static void mfgpReadByte( uint8_t rxByte )
 {
-#if ( MCU_SELECTED == NXP_K24 )
    buffer_t *commandBuf;
 
    if (  ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
@@ -1675,12 +1674,14 @@ static void mfgpReadByte( uint8_t rxByte )
    {
       /* user canceled the in progress command */
       MFGP_numBytes = 0;
+#if ( MCU_SELECTED == NXP_K24 )
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
       (void)UART_flush ( mfgUart  );
 #else
       usb_send( CRLF, sizeof( CRLF ) );
       usb_flush();
+#endif
 #endif
    }
    else if( rxByte == BACKSPACE_CHAR || rxByte == 0x7f )
@@ -1773,81 +1774,6 @@ static void mfgpReadByte( uint8_t rxByte )
          MFGP_CommandBuffer[ MFGP_numBytes++] = rxByte;
       }
    }
-#elif ( MCU_SELECTED == RA6E1 )
-   buffer_t *commandBuf;
-   if (  ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
-         ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
-         ( rxByte == 0xC0 ))           /* Left over SLIP protocol characters in buffer */
-   {
-      /* user canceled the in progress command */
-      MFGP_numBytes = 0;
-   }
-   else if( rxByte == BACKSPACE_CHAR || rxByte == 0x7f )
-   {
-      if( MFGP_numBytes != 0 )
-      {
-         /* buffer contains at least one character, remove the last one entered */
-         MFGP_numBytes -= 1;
-      }
-   }
-#if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
-   else if( rxByte == UART_SWITCH_CHAR ) /* Signal to switch to optical port.   */
-   {
-      int32_t flags;                /* Settings for the UART */
-      if ( mfgUart == UART_MANUF_TEST )
-      {
-         flags = IO_SERIAL_TRANSLATION | IO_SERIAL_ECHO; /* Settings for the UART */
-      }
-      else
-      {
-         flags = IO_SERIAL_TRANSLATION; /* Settings for the UART */
-      }
-
-#if !USE_USB_MFG
-      ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
-#else
-      usb_ioctl( (MQX_FILE_PTR)(uint32_t)mfgUart, IO_IOCTL_SERIAL_SET_FLAGS, &flags );
-#endif
-      commandBuf = ( buffer_t * )BM_alloc(  1 );
-      if (commandBuf != NULL)
-      {
-         commandBuf->data[ 0 ] = rxByte;
-         OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
-      }
-   }
-#endif
-   else
-   {
-      if( (rxByte == LINE_FEED_CHAR) || (rxByte == CARRIAGE_RETURN_CHAR) )
-      {
-         commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
-         if ( commandBuf != NULL )
-         {
-            commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
-            ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
-            /* Call the command */
-            OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
-            MFGP_numBytes = 0;
-         }
-         else
-         {
-            MFGP_numBytes = 0;
-         }
-
-      }
-      else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
-      {
-         /* buffer is full */
-         MFGP_numBytes = 0;
-      }
-      else
-      {
-         // Save character in buffer (space is available)
-         MFGP_CommandBuffer[ MFGP_numBytes++] = rxByte;
-      }
-   }
-#endif
-
 }
 
 /***********************************************************************************************************************
@@ -1928,6 +1854,7 @@ void MFGP_uartRecvTask( taskParameter )
       //MFG_printf("MFGP_uartTask: _io_set_handle SUCCESS!\n");
    }
 #endif
+#endif
 #if (USE_DTLS == 1)
    _MfgPortState = MFG_SERIAL_IO_e;
    MFGP_DtlsInit( mfgUart );
@@ -1983,27 +1910,25 @@ void MFGP_uartRecvTask( taskParameter )
 #else
    for( ;; )
    {
-      while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) )
-      {
-         mfgpReadByte( rxByte );
-      }
-   }
+#if (RTOS_SELECTION == FREE_RTOS)
+      OS_TASK_Sleep(500);
 #endif
-   
-#elif (RTOS_SELECTION == FREE_RTOS)
-   for(;;)
-   {
-     OS_TASK_Sleep(500);
-      while (  0 != UART_read( 0, &rxByte, 1 )// TODO: RA6 [name_Balaji]: Add UART Channel control
-               && (rxByte !=  (uint8_t)0x00) )
+      while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) 
+#if ( MCU_SELECTED == RA6E1 )
+               && (rxByte !=  (uint8_t)0x00)
+#endif             
+             )
       {
-         UART_write(0,&rxByte,1);
          mfgpReadByte( rxByte );
+         #if ( MCU_SELECTED == RA6E1 )
+         UART_write( mfgUart, &rxByte, sizeof( rxByte ) );
          rxByte = 0x00;
+         #endif
       }
    }
 #endif
 }
+#if ( MCU_SELECTED == RA6E1 )
 /*******************************************************************************
 
   Function name: user_uart_callback
@@ -2024,18 +1949,19 @@ void user_uart_callback( uart_callback_args_t *p_args )
         /* Receive complete */
         case UART_EVENT_RX_COMPLETE:
         {
-           break;
+            break;
         }
         /* Transmit complete */
         case UART_EVENT_TX_COMPLETE:
         {
-           break;
+            break;
         }
         default:
         {
         }
     }
 }/* end user_uart_callback () */
+#endif
 #if ( RTOS_SELECTION == MQX_RTOS )
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 /*******************************************************************************
@@ -2528,7 +2454,7 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
       MFG_printf( "%32s: %s\r\n", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
       CmdLineEntry++;
       OS_TASK_Sleep( TEN_MSEC );
-#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add support for RA6E1
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add other menu support
       if ( CmdLineEntry->pcCmd == NULL )
       {
          menu = (menuType)((uint8_t)menu + 1);
@@ -2541,7 +2467,7 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
    }
 }
 
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if 0 // TODO: RA6 [name_Balaji]: Add Support for RA6E1
 /***********************************************************************************************************************
    Function Name: MFGP_firmwareVersion
 

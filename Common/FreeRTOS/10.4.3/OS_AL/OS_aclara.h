@@ -73,6 +73,7 @@
 #define OS_Get_OsGenRevision() (_mqx_generic_revision)
 #define OS_Get_OsLibDate() (_mqx_date)
 #endif
+
 #define OS_INT_disable()                                 _int_disable()
 #define OS_INT_enable()                                  _int_enable()
 
