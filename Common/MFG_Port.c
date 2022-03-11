@@ -231,9 +231,7 @@ static uint32_t         event_flags;                     /* Event flags returned
 #error "USE_USB_MFG need to be set to 1 for this board"
 #endif
 #else
-//static const enum_UART_ID mfgUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
-// TODO: RA6 [name_Balaji]: Change configuration back to UART_MANUF_TEST once MFG Port's UART_read issue is cleared
-static const enum_UART_ID mfgUart = UART_DEBUG_PORT;     /* UART used for MFG port operations   */
+static const enum_UART_ID mfgUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
 #endif
 #if ( EP == 1 )
 static uint16_t         stP0LoopbackFailCount = 0;       /* HEEP required port 0 loopback test failure counter */
@@ -2453,7 +2451,7 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
    {
       MFG_printf( "%32s: %s\r\n", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
       CmdLineEntry++;
-      OS_TASK_Sleep( TEN_MSEC );
+      OS_TASK_Sleep( 20 );
 #if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add other menu support
       if ( CmdLineEntry->pcCmd == NULL )
       {

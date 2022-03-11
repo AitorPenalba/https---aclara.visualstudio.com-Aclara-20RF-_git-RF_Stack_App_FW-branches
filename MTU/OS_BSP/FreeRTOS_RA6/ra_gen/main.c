@@ -103,7 +103,7 @@
                     }
 
                     /* Init RTOS tasks. */
-                    blinky_thread_create();
+//                    blinky_thread_create();// TODO: RA6 [name_Balaji]: Remove Completely if not required
 //                    SampleTST_create();
 //                    OS_TASK_Create_All ( true );
                     OS_TASK_Create_STRT();
