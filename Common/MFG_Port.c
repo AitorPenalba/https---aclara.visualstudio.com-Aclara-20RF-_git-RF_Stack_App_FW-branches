@@ -6516,7 +6516,6 @@ static void MFGP_stSecurityFailCount( uint32_t argc, char *argv[] )
 ***********************************************************************************************************************/
 static void MFGP_stSecurityFailTest( uint32_t argc, char *argv[] )
 {
-#if ( RTOS_SELECTION == 1 )
    uint32_t          LoopCount;           /* User supplied number of runs           */
    char              *endptr;             /* Used with strtoul                      */
    uint32_t          event_flags;         /*lint !e578 local variable same name as global is OK here. */
@@ -6555,9 +6554,6 @@ static void MFGP_stSecurityFailTest( uint32_t argc, char *argv[] )
       ( void )SELF_UpdateTestResults();   /* Update the file values  */
    }
    MFG_logPrintf( "%s %d\n", argv[0], SelfTestData->securityFail );
-#elif (RTOS_SELECTION == FREE_RTOS)
-   //Do Nothing
-#endif
 }
 
 #if ( EP == 1 )
