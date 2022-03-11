@@ -398,6 +398,11 @@ static uint16_t RunSelfTest()
       // TODO: Error handling
    }
 
+   if( eSUCCESS != SELF_testTimeCompound() )
+   {
+      // TODO: Error handling
+   }
+
    // TODO: RA6E1 [name_Suriya] - Remove this call and add SelfTestSecurity to do complete SelfTest. Will be done once WolfSSL is done.
    if( eSUCCESS != SEC_init() )
    {
@@ -547,6 +552,68 @@ returnStatus_t SELF_testInternalFlash( void )
    memset( flashBuffer, 0, sizeof( flashBuffer ) );
    memset( checkFlashBuffer, 0, sizeof( checkFlashBuffer ) );
 
+   return retVal;
+}
+
+/***********************************************************************************************************************
+   Function Name: SELF_testTimeCompound
+
+   Purpose: Test the time compound API
+
+   Arguments: none
+
+   Note:
+
+   Returns: success/failure
+***********************************************************************************************************************/
+
+returnStatus_t SELF_testTimeCompound( void )
+{
+   returnStatus_t retVal;
+   uint8_t loopCnt = 20;
+   OS_TICK_Struct startTick, currentTick;
+   OS_TICK_Get_ElapsedTicks( &startTick );
+   while ( loopCnt-- > 0 )
+   {
+      OS_TICK_Get_ElapsedTicks( &currentTick );
+      if ( OS_TICK_Get_Diff_InMilliseconds( &startTick, &currentTick ) > 100 )
+      {
+         break;
+      }
+
+      OS_TASK_Sleep( 10 );
+   }
+
+   if ( ( loopCnt >= 8 ) && ( loopCnt < 11 ) )
+   {
+      retVal = eSUCCESS;
+   }
+   else
+   {
+      retVal = eFAILURE;
+   }
+
+   loopCnt = 20;
+   OS_TICK_Get_ElapsedTicks( &startTick );
+   while ( loopCnt-- > 0 )
+   {
+      OS_TICK_Get_ElapsedTicks( &currentTick );
+      if ( OS_TICK_Get_Diff_InMicroseconds( &startTick, &currentTick ) > 100000 )
+      {
+         break;
+      }
+
+      OS_TASK_Sleep( 10 );
+   }
+
+   if ( ( loopCnt >= 8 ) && ( loopCnt < 11 ) )
+   {
+      retVal = eSUCCESS;
+   }
+   else
+   {
+      retVal = eFAILURE;
+   }
    return retVal;
 }
 

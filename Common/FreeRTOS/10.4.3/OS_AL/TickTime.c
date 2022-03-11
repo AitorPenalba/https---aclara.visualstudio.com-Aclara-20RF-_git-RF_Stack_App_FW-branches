@@ -17,6 +17,7 @@
 
 /* INCLUDE FILES */
 #include "project.h"
+#include "hal_data.h"
 //#include <mqx.h>
 //#include "OS_aclara.h"
 
@@ -33,12 +34,12 @@
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
-#if 0
 /*******************************************************************************
 
-  Function name: OS_TICK_Get_CurrentElapsedTicks
+  Function name: OS_TICK_Get_TickCount_HWTicks
 
-  Purpose: This function will return the current Tick count value
+  Purpose: This function will return the load the current Tick count value and the HW ticks
+           in the OS_TICK_Struct sructure
 
   Arguments: TickValue - pointer to the current value of the OS Tick counter (populated by this function)
 
@@ -47,9 +48,69 @@
   Notes:
 
 *******************************************************************************/
-void OS_TICK_Get_CurrentElapsedTicks ( OS_TICK_Struct *TickValue )
+void OS_TICK_Get_TickCount_HWTicks( OS_TICK_Struct *TickValue )
 {
+   taskENTER_CRITICAL( );
+   TickValue->HW_TICKS = SysTick->VAL;
+   taskEXIT_CRITICAL( );
+   TimeOut_t pxTimeOut;
+   vTaskSetTimeOutState( &pxTimeOut );
+   TickValue->tickCount = pxTimeOut.xTimeOnEntering;
+   TickValue->xNumOfOverflows = pxTimeOut.xOverflowCount;
+
+}
+
+/*******************************************************************************
+
+  Function name: OS_TICK_Get_ElapsedTicks
+
+  Purpose: This function will return the elapsed ticks from power up
+
+  Arguments: TickValue - pointer to the current value of the OS Tick counter (populated by this function)
+
+  Returns:
+
+  Notes:
+
+*******************************************************************************/
+void OS_TICK_Get_ElapsedTicks ( OS_TICK_Struct *TickValue )
+{
+#if ( RTOS_SELECTION == MQX_RTOS )
    _time_get_elapsed_ticks ( TickValue );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_TICK_Get_TickCount_HWTicks ( TickValue );
+#endif
+}
+
+/*******************************************************************************
+
+  Function name: OS_Tick_Get_TimeElapsed
+
+  Purpose: This function will return the number of seconds and milliseconds from powerup in time structure
+
+  Arguments: TIME_STRUCT *time_ptr
+
+  Returns: Nothing
+
+  Notes:
+
+*******************************************************************************/
+void OS_Tick_Get_TimeElapsed ( TIME_STRUCT *time_ptr )
+{
+   OS_TICK_Struct TickValue;
+   uint64_t sec, msec;
+   uint32_t tmp;
+   OS_TICK_Get_ElapsedTicks ( &TickValue );
+   msec = ( TickValue.tickCount + ( UINT32_MAX * TickValue.xNumOfOverflows ) ) * portTICK_RATE_MS ;
+   sec = msec / 1000; // Get the second value from msec
+   msec = msec % 1000;
+   taskENTER_CRITICAL( );
+   tmp = SysTick->LOAD + 1;   // Get the current load value to get the exact CPU frequency
+   taskEXIT_CRITICAL( );
+   msec += ( tmp - TickValue.HW_TICKS ) / ( tmp / portTICK_RATE_MS );  // Add to the ms fields by modifying the tick value with respect to tick rate
+
+   time_ptr->SECONDS = sec;
+   time_ptr->MILLISECONDS = msec;
 }
 
 /*******************************************************************************
@@ -70,9 +131,12 @@ uint32_t OS_TICK_Get_ElapsedMilliseconds ( void )
 {
    uint32_t Msec;
    TIME_STRUCT time_ptr;
-
+#if ( RTOS_SELECTION == MQX_RTOS )
    _time_get_elapsed ( &time_ptr );
-   Msec = ((time_ptr.SECONDS*1000)+time_ptr.MILLISECONDS);
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_Tick_Get_TimeElapsed ( &time_ptr );
+#endif
+   Msec = ( ( time_ptr.SECONDS * 1000 ) + time_ptr.MILLISECONDS );
 
    return ( Msec );
 }
@@ -94,6 +158,7 @@ uint32_t OS_TICK_Get_ElapsedMilliseconds ( void )
 uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue )
 {
    uint32_t TimeDiff;
+#if ( RTOS_SELECTION == MQX_RTOS )
    bool     Overflow;
 
    TimeDiff = (uint32_t)_time_diff_microseconds ( CurrTickValue, PrevTickValue, &Overflow );
@@ -102,6 +167,44 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
    {
       TimeDiff = 0;
    }
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   bool isTimeValid = true;
+   uint32_t ticksPerMicrosec;
+   uint32_t diffTicksCount, diffHWTicks;
+   if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
+   {
+      diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
+   }
+   else
+   {
+      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = UINT32_MAX - PrevTickValue->tickCount + CurrTickValue->tickCount;
+   }
+
+   if( isTimeValid )
+   {
+      taskENTER_CRITICAL( );
+      uint32_t tmp = SysTick->LOAD + 1;   // Get the current load value to get the exact CPU frequency
+      taskEXIT_CRITICAL( );
+      ticksPerMicrosec = ( tmp / ( portTICK_RATE_MS * 1000 ) );
+      if ( CurrTickValue->HW_TICKS < PrevTickValue->HW_TICKS )
+      {
+         diffHWTicks = ( PrevTickValue->HW_TICKS - CurrTickValue->HW_TICKS ) / ticksPerMicrosec;
+         TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS * 1000 ) + diffHWTicks );
+      }
+      else
+      {
+         // Handle hw ticks overflow
+         diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerMicrosec;
+         TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS * 1000 ) - diffHWTicks );
+      }
+   }
+#endif
 
    return ( TimeDiff );
 }
@@ -123,6 +226,7 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
 uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue )
 {
    uint32_t TimeDiff;
+#if ( RTOS_SELECTION == MQX_RTOS )
    bool     Overflow;
 
    TimeDiff = (uint32_t)_time_diff_nanoseconds ( CurrTickValue, PrevTickValue, &Overflow );
@@ -131,7 +235,207 @@ uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK
    {
       TimeDiff = 0;
    } /* end if() */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   bool isTimeValid = true;
+   uint32_t ticksPerTenNanoSec;
+   uint32_t diffTicksCount, diffHWTicks;
+   if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
+   {
+      diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
+   }
+   else
+   {
+      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
 
+      diffTicksCount = UINT32_MAX - PrevTickValue->tickCount + CurrTickValue->tickCount;
+   }
+
+   if( isTimeValid )
+   {
+      taskENTER_CRITICAL( );
+      uint32_t tmp = SysTick->LOAD + 1;   // Get the current load value to get the exact CPU frequency
+      taskEXIT_CRITICAL( );
+      ticksPerTenNanoSec = ( tmp / ( portTICK_RATE_MS * 1000 * 100 ) );
+      if ( CurrTickValue->HW_TICKS < PrevTickValue->HW_TICKS )
+      {
+         diffHWTicks = ( PrevTickValue->HW_TICKS - CurrTickValue->HW_TICKS ) / ticksPerTenNanoSec; // Difference HW ticks per ten nano second
+         TimeDiff = ( uint32_t ) ( ( ( diffTicksCount * portTICK_RATE_MS * 1000 * 100 ) + diffHWTicks ) * 10 ); // Convert to once nano second
+      }
+      else
+      {
+         // Handle hw ticks overflow
+         diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerTenNanoSec; // Difference HW ticks per ten nano second
+         TimeDiff = ( uint32_t ) ( ( ( diffTicksCount * portTICK_RATE_MS * 1000 * 100 ) - diffHWTicks ) * 10 ); // Convert to once nano second
+      }
+   }
+#endif
+   return ( TimeDiff );
+}
+
+/*******************************************************************************
+
+  Function name: OS_TICK_Get_Diff_InMilliseconds
+
+  Purpose: This function will return the number of millisecond difference between
+           the two passed in Tick Structure values
+
+  Arguments:
+
+  Returns: TimeDiff - difference in milliseconds
+
+  Notes:
+
+*******************************************************************************/
+uint32_t OS_TICK_Get_Diff_InMilliseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue )
+{
+   uint32_t TimeDiff;
+#if ( RTOS_SELECTION == MQX_RTOS )
+   bool     Overflow;
+
+   TimeDiff = (uint32_t)_time_diff_milliseconds ( CurrTickValue, PrevTickValue, &Overflow );
+
+   if ( Overflow == true )
+   {
+      TimeDiff = 0;
+   } /* end if() */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   bool isTimeValid = true;
+   uint32_t ticksPerMillisec;
+   uint32_t diffTicksCount, diffHWTicks;
+   if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
+   {
+      diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
+   }
+   else
+   {
+      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = UINT32_MAX - PrevTickValue->tickCount + CurrTickValue->tickCount;
+   }
+
+   if( isTimeValid )
+   {
+      taskENTER_CRITICAL( );
+      uint32_t tmp = SysTick->LOAD + 1;   // Get the current load value to get the exact CPU frequency
+      taskEXIT_CRITICAL( );
+      ticksPerMillisec = ( tmp / portTICK_RATE_MS );
+      if ( CurrTickValue->HW_TICKS < PrevTickValue->HW_TICKS )
+      {
+         diffHWTicks = ( PrevTickValue->HW_TICKS - CurrTickValue->HW_TICKS ) / ticksPerMillisec;
+         TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS ) + diffHWTicks );
+      }
+      else
+      {
+         // Handle hw ticks overflow
+         diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerMillisec;
+         TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS ) - diffHWTicks );
+      }
+   }
+#endif
+   return ( TimeDiff );
+}
+
+/*******************************************************************************
+
+  Function name: OS_TICK_Get_Diff_InSeconds
+
+  Purpose: This function will return the number of second difference between
+           the two passed in Tick Structure values
+
+  Arguments:
+
+  Returns: TimeDiff - difference in seconds
+
+  Notes:
+
+*******************************************************************************/
+uint32_t OS_TICK_Get_Diff_InSeconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue )
+{
+   uint32_t TimeDiff;
+#if ( RTOS_SELECTION == MQX_RTOS )
+   bool     Overflow;
+
+   TimeDiff = (uint32_t)_time_diff_seconds ( CurrTickValue, PrevTickValue, &Overflow );
+
+   if ( Overflow == true )
+   {
+      TimeDiff = 0;
+   } /* end if() */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   TimeDiff = OS_TICK_Get_Diff_InMilliseconds( PrevTickValue, CurrTickValue ) / 1000; // Convert to sec
+#endif
+   return ( TimeDiff );
+}
+
+/*******************************************************************************
+
+  Function name: OS_TICK_Get_Diff_InMinutes
+
+  Purpose: This function will return the number of minute difference between
+           the two passed in Tick Structure values
+
+  Arguments:
+
+  Returns: TimeDiff - difference in minutes
+
+  Notes:
+
+*******************************************************************************/
+uint32_t OS_TICK_Get_Diff_InMinutes ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue )
+{
+   uint32_t TimeDiff;
+#if ( RTOS_SELECTION == MQX_RTOS )
+   bool     Overflow;
+
+   TimeDiff = (uint32_t)_time_diff_minutes ( CurrTickValue, PrevTickValue, &Overflow );
+
+   if ( Overflow == true )
+   {
+      TimeDiff = 0;
+   } /* end if() */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   TimeDiff = OS_TICK_Get_Diff_InSeconds( PrevTickValue, CurrTickValue ) / 60; // Convert to min
+#endif
+   return ( TimeDiff );
+}
+
+/*******************************************************************************
+
+  Function name: OS_TICK_Get_Diff_InHours
+
+  Purpose: This function will return the number of hour difference between
+           the two passed in Tick Structure values
+
+  Arguments:
+
+  Returns: TimeDiff - difference in hours
+
+  Notes:
+
+*******************************************************************************/
+uint32_t OS_TICK_Get_Diff_InHours ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue )
+{
+   uint32_t TimeDiff;
+#if ( RTOS_SELECTION == MQX_RTOS )
+   bool     Overflow;
+
+   TimeDiff = (uint32_t)_time_diff_hours ( CurrTickValue, PrevTickValue, &Overflow );
+
+   if ( Overflow == true )
+   {
+      TimeDiff = 0;
+   } /* end if() */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   TimeDiff = OS_TICK_Get_Diff_InMinutes( PrevTickValue, CurrTickValue ) / 60; // Convert to hours
+#endif
    return ( TimeDiff );
 }
 
@@ -155,6 +459,7 @@ uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK
 bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Struct *FutureTickValue )
 {
    bool TimeGreater;
+#if ( RTOS_SELECTION == MQX_RTOS )
    bool Overflow;
 
    (void)_time_diff_microseconds ( FutureTickValue, CurrTickValue, &Overflow );
@@ -167,7 +472,26 @@ bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Stru
    {
       TimeGreater = true;
    } /* end else() */
-
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   if ( ( FutureTickValue->xNumOfOverflows > CurrTickValue->xNumOfOverflows ) ||
+        ( ( FutureTickValue->xNumOfOverflows == CurrTickValue->xNumOfOverflows ) &&
+          ( FutureTickValue->tickCount > CurrTickValue->tickCount ) ) )
+   {
+      TimeGreater = true;
+   }
+   else
+   {
+      if ( ( FutureTickValue->tickCount == CurrTickValue->tickCount ) &&
+           ( FutureTickValue->HW_TICKS < CurrTickValue->HW_TICKS ) )
+      {
+         TimeGreater = true;
+      }
+      else
+      {
+         TimeGreater = false;
+      }
+   }
+#endif
    return ( TimeGreater );
 } /* end OS_TICK_Is_FutureTime_Greater () */
 
@@ -188,7 +512,7 @@ bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Stru
   Notes: The TickValue that is passed in should be a Tick Time from the past,
          This function will add the TimeDelay to the passed in TickValue and then
          only wake up when this computed Tick time has passed
-         This function is useful (with OS_TICK_Get_CurrentElapsedTicks) to wake
+         This function is useful (with OS_TICK_Get_ElapsedTicks) to wake
          up a process exactly every XX period of time.
          The calling function should guarantee that the TickValue + TimeDelay
          is going to be a Tick Time in the future.  (Code has been added to try
@@ -198,6 +522,7 @@ bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Stru
 *******************************************************************************/
 void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TICK_Struct TempTickValue;
    uint32_t TimeDiff;
    bool     Overflow;
@@ -213,5 +538,65 @@ void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay )
    {
       _time_delay_until ( TickValue );
    } /* end if() */
-} /* end OS_TICK_Sleep () */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   /* NOTE: This works in portTICK_RATE_MS accuracy. For better accuracy, need to modify the algorithm */
+   uint32_t ticksToDelay = pdMS_TO_TICKS( TimeDelay );
+   uint32_t previousTick = TickValue->tickCount;
+   // Convert to ticks from the structure
+   if ( ticksToDelay > 0 )
+   {
+      xTaskDelayUntil ( &previousTick, ticksToDelay );
+   }
 #endif
+
+} /* end OS_TICK_Sleep () */
+
+/*******************************************************************************
+
+  Function name: OS_TICK_Add_msec_to_ticks
+
+  Purpose: This function will add the msec value converted and add it to tickCount
+
+  Arguments:
+
+  Returns: OS_TICK_Struct_Ptr
+
+  Notes:
+
+*******************************************************************************/
+OS_TICK_Struct_Ptr OS_TICK_Add_msec_to_ticks ( OS_TICK_Struct *TickValue, uint32_t TimeDelay )
+{
+#if ( RTOS_SELECTION == MQX_RTOS )
+   /* We always want to add the TimeDelay to the tick structure, so do it here */
+   TickValue = _time_add_msec_to_ticks ( TickValue, TimeDelay );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   /* NOTE: This works in portTICK_RATE_MS accuracy. For better accuracy, need to modify the algorithm */
+   uint32_t ticksToDelay = pdMS_TO_TICKS( TimeDelay );
+   TickValue->tickCount += ticksToDelay;
+#endif
+   return ( TickValue );
+}
+
+/*******************************************************************************
+
+  Function name: OS_TICK_Get_Ticks_per_sec
+
+  Purpose: This function will return the ticks per second
+
+  Arguments:
+
+  Returns: uint32_t - ticks per sec
+
+  Notes:
+
+*******************************************************************************/
+uint32_t OS_TICK_Get_Ticks_per_sec ( void )
+{
+   uint32_t ticksPerSec;
+#if ( RTOS_SELECTION == MQX_RTOS )
+   ticksPerSec = _time_get_ticks_per_sec ();
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   ticksPerSec = 1000 / portTICK_RATE_MS;
+#endif
+   return ( ticksPerSec );
+}

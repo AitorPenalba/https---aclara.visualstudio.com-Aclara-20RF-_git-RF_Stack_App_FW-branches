@@ -15,7 +15,7 @@
 
 #include "project.h"
 #include <stdbool.h>
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
 #endif
@@ -248,6 +248,9 @@ U8 radio_comm_PollCTS( uint8_t radioNum )
    MQX_TICK_STRUCT   startTime;              /* Used to delay sub-tick time               */
    MQX_TICK_STRUCT   endTime;                /* Used to delay sub-tick time               */
    bool              overflow=(bool)false;   /* required by tick to microsecond function  */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_TICK_Struct   startTime;              /* Used to delay sub-tick time               */
+   OS_TICK_Struct   endTime;                /* Used to delay sub-tick time               */
 #endif
 
    retVal = radio_comm_GetResp(radioNum, 0, 0);
@@ -261,6 +264,18 @@ U8 radio_comm_PollCTS( uint8_t radioNum )
       while ( (uint32_t)_time_diff_microseconds(&endTime, &startTime, &overflow) < defaultDelay)
       {
          _time_get_ticks(&endTime);
+      }
+      firstPollDone[ radioNum ] = (bool)true;
+   }
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   if ( !firstPollDone[ radioNum ] )
+   {
+      OS_TICK_Get_ElapsedTicks(&startTime); // TODO: Check working of having elapsed ticks instead get ticks
+      endTime = startTime;
+
+      while ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds( &endTime, &startTime ) < defaultDelay)
+      {
+         OS_TICK_Get_ElapsedTicks(&endTime);
       }
       firstPollDone[ radioNum ] = (bool)true;
    }

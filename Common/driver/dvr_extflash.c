@@ -1234,42 +1234,32 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       nvStatus = STATUS_BUSY_MASK;                /* Set to true, it should be overwritten below. */
 
 #ifndef __BOOTLOADER
-#if ( RTOS_SELECTION == MQX_RTOS )
       /* create start and end struct to maintain elapsed time during busy loop */
-      MQX_TICK_STRUCT startTime, endTime;
-      bool overflow = false;
-      _time_get_ticks(&startTime);
+      OS_TICK_Struct startTime, endTime;
+      OS_TICK_Get_ElapsedTicks(&startTime);
       endTime = startTime;
 
       /* Calculate sleep time to be 20 percent of busy time, we don't want to sleep entire busyTime */
       OS_TICK_Struct TickTime;
       uint32_t sleepTime = u32BusyTime_uS / ( uint32_t )( 1000 * 5 );
-#else
-      // TODO: RA6 Melvin : timers has to be introduced
-#endif
 #endif   /* BOOTLOADER  */
 
       do /* Spin here until the chip returns a nvStatus of NOT busy. */
       {
 
 #ifndef __BOOTLOADER
-#if ( RTOS_SELECTION == MQX_RTOS )
          /* Break out of loop if max write execution time of part has expired */
-         if ( (uint32_t)_time_diff_microseconds(&endTime, &startTime, &overflow) > u32BusyTime_uS )
+         if ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds(&endTime, &startTime) > u32BusyTime_uS )
          {
             retVal = eFAILURE;
             break;
          }
 
          /* Get current Ticktime and put the task to sleep 20 percent of busyTime */
-         OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
+         OS_TICK_Get_ElapsedTicks ( &TickTime );
          OS_TICK_Sleep ( &TickTime, sleepTime );
 
-         _time_get_ticks(&endTime); /* update endtime to the latest ticktime */
-
-#else
-         // TODO: RA6 Melvin : timers has to be introduced
-#endif
+         OS_TICK_Get_ElapsedTicks(&endTime); /* update endtime to the latest ticktime */
 #endif   /* BOOTLOADER  */
 #if ( MCU_SELECTED == NXP_K24 )
          (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus) ); /* check nvStatus for busy */

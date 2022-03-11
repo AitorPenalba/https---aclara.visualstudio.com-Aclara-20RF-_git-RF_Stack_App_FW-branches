@@ -174,8 +174,16 @@ typedef struct
 
 
 //#define OS_MSGQ_Create(arg)
-#define OS_TICK_Struct
-#define OS_TICK_Sleep
+typedef struct
+{
+   uint32_t   HW_TICKS;    // CYCCNT value
+
+   uint32_t   tickCount;   // Tick count from xTaskGetTickCount();
+
+   uint32_t   xNumOfOverflows; // Tick count overflow
+} OS_TICK_Struct, * OS_TICK_Struct_Ptr;
+
+//#define OS_TICK_Sleep
 #define OS_TASK_Summary
 
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -385,14 +393,19 @@ bool OS_TASK_IsCurrentTask ( char const *pTaskName );
 uint32_t OS_TASK_UpdateCpuLoad ( void );
 void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
 void OS_TASK_Summary ( bool safePrint );
+#endif
 
-void OS_TICK_Get_CurrentElapsedTicks ( OS_TICK_Struct *TickValue );
+void OS_TICK_Get_ElapsedTicks ( OS_TICK_Struct *TickValue );
 uint32_t OS_TICK_Get_ElapsedMilliseconds ( void );
 uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
 uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
+uint32_t OS_TICK_Get_Diff_InMilliseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
+uint32_t OS_TICK_Get_Diff_InSeconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
+uint32_t OS_TICK_Get_Diff_InMinutes ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
+uint32_t OS_TICK_Get_Diff_InHours ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
 bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Struct *FutureTickValue );
+OS_TICK_Struct_Ptr OS_TICK_Add_msec_to_ticks ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
 void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
-#endif // #if 0
 /* FUNCTION DEFINITIONS */
 #endif   /* __BOOTLOADER */
 #if (TM_MUTEX == 1)
