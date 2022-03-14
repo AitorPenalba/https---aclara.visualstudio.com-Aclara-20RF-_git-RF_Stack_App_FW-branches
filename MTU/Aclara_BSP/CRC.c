@@ -65,8 +65,8 @@ returnStatus_t CRC_initialize ( void )
 #if ( MCU_SELECTED == NXP_K24 )
    (void)CRC_init();
 #elif ( MCU_SELECTED == RA6E1 )
-//    /* Open CRC module with 8 bit polynomial */
-//    R_CRC_Open(&g_crc1_ctrl, &g_crc1_cfg);
+   /* Open CRC module with 8 bit polynomial */
+   R_CRC_Open(&g_crc1_ctrl, &g_crc1_cfg);
 #endif
    if ( OS_MUTEX_Create(&CRC_Mutex) == false )
    {
@@ -100,15 +100,15 @@ uint16_t CRC_16_Calculate ( uint8_t *Data, uint32_t Length )
    (void)CRC_Config( 0x00001021, 0, 0, 0, 0 );
    CRC16_Result = (uint16_t)CRC_Cal_16 ( 0x00000000, Data, Length );
 #elif ( MCU_SELECTED == RA6E1 )
-//    crc_input_t crcInputConfig =
-//    {
-//        .p_input_buffer = Data,
-//        .num_bytes      = Length,
-//        .crc_seed       = 0,
-//    };
-//
-//    /* 16-bit CRC calculation with RA6E1 MCU. The poly:0x1021 is configured in the RASC */
-//    R_CRC_Calculate(&g_crc1_ctrl, &crcInputConfig, &CRC16_Result);
+   crc_input_t crcInputConfig =
+   {
+       .p_input_buffer = Data,
+       .num_bytes      = Length,
+       .crc_seed       = 0,
+   };
+
+   /* 16-bit CRC calculation with RA6E1 MCU. The poly:0x1021 is configured in the RASC */
+   R_CRC_Calculate(&g_crc1_ctrl, &crcInputConfig, &CRC16_Result);
 #endif
    OS_MUTEX_Unlock(&CRC_Mutex); // Function will not return if it fails
 
