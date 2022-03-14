@@ -10,7 +10,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2012-2021 Aclara.  All Rights Reserved.
+   Copyright 2012-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -173,6 +173,15 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define EXTERNAL_NV           (bool)false
 #endif
 
+#if ( MCU_SELECTED == RA6E1 )  //To process the input byte in RA6E1
+#define ESCAPE_CHAR           0x1B
+#define LINE_FEED_CHAR        0x0A
+#define CARRIAGE_RETURN_CHAR  0x0D
+#define BACKSPACE_CHAR        0x08
+#define TILDA_CHAR            0x7E
+#define WHITE_SPACE_CHAR      0x20
+#define CTRL_C_CHAR 0x03
+#endif
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -213,7 +222,9 @@ static PartitionData_t const  *pTestPartition_;    /* Pointer to partition infor
 
 static char                   DbgCommandBuffer[MAX_DBG_COMMAND_CHARS + 1];
 static char                   *argvar[MAX_CMDLINE_ARGS + 1];
-
+#if ( MCU_SELECTED == RA6E1 )
+static uint16_t         DBGP_numBytes = 0;               /* Number of bytes currently in the command buffer */
+#endif
 static void PrintECC_error( uint8_t ECCstatus );
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
@@ -678,7 +689,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 
 static void DBG_CommandLine_Process ( void );
 static returnStatus_t atoh( uint8_t *pHex, char const *pAscii );
-
+#if ( MCU_SELECTED == RA6E1 ) //Process the receieved byte from Uart read
+static void dbgpReadByte( uint8_t rxByte ); 
+#endif
 /* FUNCTION DEFINITIONS */
 /*******************************************************************************
 
@@ -689,14 +702,16 @@ static returnStatus_t atoh( uint8_t *pHex, char const *pAscii );
 
    Arguments: Arg0 - Not used, but required here because this is a task
 
-   Returns:
+   Returns:void
 
    Notes:
 
 *******************************************************************************/
 void DBG_CommandLineTask ( taskParameter )
 {
-
+#if ( MCU_SELECTED == RA6E1 )
+   uint8_t rxByte = 0; //Used to receieve from Uartread
+#endif
 #if ( BUILD_DFW_TST_LARGE_PATCH == 1 )/* Enabling this in CompileSwitch.h will shift the code down resulting in a large patch */
    NOP();
    NOP();
@@ -744,22 +759,82 @@ void DBG_CommandLineTask ( taskParameter )
 #if ( !USE_USB_MFG && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) )
 //      OS_TASK_Sleep(OS_WAIT_FOREVER);
 #else
-//      UART_fgets( UART_DEBUG_PORT, DbgCommandBuffer, MAX_DBG_COMMAND_CHARS );
-        vTaskSuspend(NULL); /* TODO: DG: Remove */
+#if ( MCU_SELECTED == NXP_K24 )
+      UART_fgets( UART_DEBUG_PORT, DbgCommandBuffer, MAX_DBG_COMMAND_CHARS ); 
 #endif
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+   OS_TASK_Sleep(500);
+   while ( 0 != UART_read ( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) )//Uart Read is done in bytes
+            && (rxByte !=  (uint8_t)0x00))
+   {
       /* Check before executing; may have been disable while waiting for input   */
       if (DBG_IsPortEnabled () ) /* Only process input if the port is enabled */
       {
-         DBG_CommandLine_Process();
+//         DBG_CommandLine_Process();
+        dbgpReadByte( rxByte );// TODO: RA6 [name_Balaji]: As there is no IOCTL for RA6E1 processing the information by byte
       }
       else
       {
-//         (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
+         (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
 //         (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
-//         OS_TASK_Sleep ( TIME_TICKS_PER_SEC );     /* Check again in a second, or so...   */
+         OS_TASK_Sleep ( 10 );     /* Check again in a second, or so...   */
       }
+      UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
+      rxByte = 0x00; //resets the rxByte
+   }
+#endif
    } /* end for() */
 } /* end DBG_CommandLineTask () */
+// TODO: RA6 [name_Balaji]: Revert dbgpReadByte function once file io is integrated
+/***********************************************************************************************************************
+   Function Name: dbgpReadByte
+
+   Purpose: This function is called to process a byte received from the uart in DBG serial mode
+
+   Arguments:  uint8_t rxByte      - Byte read from the port
+
+   Returns: None
+***********************************************************************************************************************/
+static void dbgpReadByte( uint8_t rxByte )
+{
+//   buffer_t *commandBuf;
+
+   if (  ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
+         ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
+         ( rxByte == 0xC0 ))           /* Left over SLIP protocol characters in buffer */
+   {
+      /* user canceled the in progress command */
+      DBGP_numBytes = 0;
+   }
+   else if( rxByte == BACKSPACE_CHAR || rxByte == 0x7f )
+   {
+      if( DBGP_numBytes != 0 )
+      {
+         /* buffer contains at least one character, remove the last one entered */
+         DBGP_numBytes -= 1;
+      }
+   }
+   else
+   {
+      if( (rxByte == LINE_FEED_CHAR) || (rxByte == CARRIAGE_RETURN_CHAR) )
+      {
+            /* Call the command */
+            DBG_CommandLine_Process();
+            DBGP_numBytes = 0;
+      }
+      else if( ( DBGP_numBytes ) >= MAX_DBG_COMMAND_CHARS )
+      {
+         /* buffer is full */
+         DBGP_numBytes = 0;
+      }
+      else
+      {
+         // Save character in buffer (space is available)
+         DbgCommandBuffer[ DBGP_numBytes++] = rxByte;
+      }
+   }
+}
 
 /*******************************************************************************
 
@@ -769,9 +844,9 @@ void DBG_CommandLineTask ( taskParameter )
             it up to the pre-defined list of commands in this file.  if a match
             is found, the corresponding function handler is called
 
-   Arguments:
+   Arguments: None
 
-   Returns:
+   Returns: Void
 
    Notes:
 
@@ -1085,14 +1160,17 @@ static void DBG_CommandLine_Process ( void )
 uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
 {
    struct_CmdLineEntry  const *CmdLineEntry;
-
-//   DBG_printf( "\n[M]Command List:" );
+//Added Carriage return to follow Printing standard
+   DBG_printf( "\r\n[M]Command List:\r" );
+//Added a delay to make the print visible
+   OS_TASK_Sleep( TEN_MSEC );
    CmdLineEntry = DBG_CmdTable;
    while ( CmdLineEntry->pcCmd )
    {
-//      DBG_printf( "[M]%30s: %s", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
+     //Added Carriage return to follow Printing standard
+      DBG_printf( "[M]%30s: %s\r", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
       CmdLineEntry++;
-//      OS_TASK_Sleep( TEN_MSEC );
+      OS_TASK_Sleep( TEN_MSEC );
    } /* end while() */
    return ( 0 );
 } /* end DBG_CommandLine_Help () */
@@ -1206,7 +1284,7 @@ uint32_t DBG_CommandLine_DebugEnable( uint32_t argc, char *argv[] )
    }
    return ( 0 );
 } /* end DBG_CommandLine_DebugEnable () */
-
+#endif
 /*******************************************************************************
 
    Function name: DBG_CommandLine_DebugDisable
@@ -1227,7 +1305,7 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
    DBG_PortTimer_Set ( 0 );
    return ( 0 );
 } /* end DBG_CommandLine_DebugDisable () */
-
+#if 0
 /*******************************************************************************
 
    Function name: DDBG_CommandLine_CpuLoadEnable

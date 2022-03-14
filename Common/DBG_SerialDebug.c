@@ -9,7 +9,7 @@
  ***********************************************************************************************************************
    A product of Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2012-2014 Aclara.  All Rights Reserved.
+   Copyright 2012-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -48,7 +48,7 @@
 #include "DBG_SerialDebug.h"
 //#include "ascii.h"
 //#include "time_util.h"
-
+#include "buffer.h"
 //#ifndef BSP_DEFAULT_IO_CHANNEL_DEFINED
 //#error This application requires BSP_DEFAULT_IO_CHANNEL to be not NULL. Please set corresponding BSPCFG_ENABLE_TTYx to non-zero in user_config.h and recompile BSP with this option.
 //#endif
@@ -204,20 +204,25 @@ void DBG_TxTask( taskParameter )
 #if( TM_EVENTS == 1 )
    OS_EVENT_TestSet();
 #endif
-   vTaskSuspend(NULL);
+//   vTaskSuspend(NULL);
    for ( ; ; )
    {
 
-//      buffer_t *pBuf;
-//      (void)OS_MSGQ_Pend( &mQueueHandle_, ( void * )&pBuf, OS_WAIT_FOREVER );  /* Check for message in the queue */
-//      OS_MUTEX_Lock( &mutex_ ); // Function will not return if it fails
-//      ( void ) puts ( (char*)&pBuf->data[0] );
-//      OS_MUTEX_Unlock( &mutex_ ); // Function will not return if it fails
-//      BM_free( pBuf );
+      buffer_t *pBuf;
+      (void)OS_MSGQ_Pend( &mQueueHandle_, ( void * )&pBuf, OS_WAIT_FOREVER );  /* Check for message in the queue */
+      OS_MUTEX_Lock( &mutex_ ); // Function will not return if it fails
+#if ( MCU_SELECTED == NXP_K24 )
+      ( void ) puts ( (char*)&pBuf->data[0] );
+#elif ( MCU_SELECTED == RA6E1 )
+      // TODO: RA6 [name_Balaji]: Integrate puts once file io is integrated
+      ( void )UART_write( UART_DEBUG_PORT, (char*)&pBuf->data[0], pBuf->x.dataLen );
+#endif
+      OS_MUTEX_Unlock( &mutex_ ); // Function will not return if it fails
+      BM_free( pBuf );
 
    }
 }  /*lint !e715 !e818  pvParameters is not used */
-#if 0
+
 /***********************************************************************************************************************
 
    Function name: DBG_log
@@ -396,6 +401,8 @@ static uint16_t addLogPrefixToString ( char category, char *pDst )
    sysTime_dateFormat_t RT_Clock;
    uint16_t len;
    (void)TIME_UTIL_GetTimeInDateFormat( &RT_Clock );
+// TODO: RA6 [name_Balaji]: Integrate once _task API's are done
+#if ( MCU_SELECTED == NXP_K24 )
    len = ( uint16_t )sprintf(   pDst, "%04u/%02u/%02u %02u:%02u:%02u.%03u %s_TSK ",
                                 RT_Clock.year,
                                 RT_Clock.month,
@@ -405,6 +412,7 @@ static uint16_t addLogPrefixToString ( char category, char *pDst )
                                 RT_Clock.sec,
                                 RT_Clock.msec,
                                 _task_get_template_ptr( _task_get_id() )->TASK_NAME );
+#endif
    return( len );
 }  /*lint +esym(715,category) not referenced */
 /***********************************************************************************************************************
@@ -468,7 +476,7 @@ char * DBG_printFloat( char *str, float f, uint32_t precision )
 
    return str;
 }
-#endif // end of #if 0
+
 #if (MQX_RTOS == 1)
 /***********************************************************************************************************************
 
