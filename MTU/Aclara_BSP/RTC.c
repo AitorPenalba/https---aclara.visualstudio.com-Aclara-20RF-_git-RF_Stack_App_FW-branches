@@ -44,7 +44,7 @@ volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrenc
 bool RTC_UnitTest(void);
 #endif
 /* FUNCTION DEFINITIONS */
-
+#if ( MCU_SELECTED == RA6E1 )
 /*******************************************************************************
 
   Function name: RTC_Init
@@ -59,16 +59,10 @@ bool RTC_UnitTest(void);
 returnStatus_t RTC_init( void )
 {
    returnStatus_t retVal = eSUCCESS;
-   fsp_err_t err = FSP_SUCCESS;
-   err = R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );
-   if ( err!= FSP_SUCCESS )
-   {
-      retVal = eFAILURE;
-//      DBG_printf( "ERROR - RTC failed to init\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
-   }
+   ( void )R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );
    return( retVal );
 } /* end RTC_init () */
-
+#endif
 /*******************************************************************************
 
   Function name: RTC_GetDateTime
@@ -102,19 +96,14 @@ void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
    RTC_Time.MILLISEC += (int16_t)SYS_TIME_TICK_IN_mS/2;  //Round up
    RT_Clock->msec  = (uint16_t)( ((uint16_t)RTC_Time.MILLISEC / SYS_TIME_TICK_IN_mS) * SYS_TIME_TICK_IN_mS ); //Normalize
 #elif ( MCU_SELECTED == RA6E1 )
-   fsp_err_t err = FSP_SUCCESS;
    rtc_time_t pTime;
    uint32_t sec = 0;
    uint32_t microSec = 0;
-   err = R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &pTime );
-   if ( err!= FSP_SUCCESS )
-   {
-//      DBG_printf( "ERROR - RTC failed to Get Time\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
-   }
+   (void)R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &pTime );
    RTC_GetTimeInSecMicroSec ( &sec , &microSec);
    RT_Clock->month = (uint8_t)pTime.tm_mon;
    RT_Clock->day   = (uint8_t)pTime.tm_mday;
-   RT_Clock->year  = (uint16_t)pTime.tm_year;
+   RT_Clock->year  = (uint16_t)pTime.tm_year + 1900;//In RA6E1, Years SINCE 1900 (2021 = 2021-1900 = 121)
    RT_Clock->hour  = (uint8_t)pTime.tm_hour;
    RT_Clock->min   = (uint8_t)pTime.tm_min;
    RT_Clock->sec   = (uint8_t)pTime.tm_sec;
@@ -186,33 +175,52 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
    } /* end else() */
 
 #elif ( MCU_SELECTED == RA6E1 )
-   fsp_err_t err = FSP_SUCCESS;
-   rtc_time_t getsec;
+   rtc_time_t checkTime;
    rtc_time_t pTime;
-   pTime.tm_sec = RT_Clock->sec;
-   pTime.tm_mon = RT_Clock->month;
-   pTime.tm_mday = RT_Clock->day;
-   pTime.tm_year = (int16_t)RT_Clock->year;
-   pTime.tm_hour = RT_Clock->hour;
-   pTime.tm_min   = RT_Clock->min;
-   /* No Requirement for millisecond */
-   err = R_RTC_CalendarTimeSet( &g_rtc0_ctrl, &pTime );
-   if ( err!= FSP_SUCCESS )
+      /* Validate the input date/time  */
+   if ( (RT_Clock->month >= MIN_RTC_MONTH)
+     && (RT_Clock->month <= MAX_RTC_MONTH)
+     && (RT_Clock->day   >= MIN_RTC_DAY)
+     && (RT_Clock->day   <= MAX_RTC_DAY)
+     && (RT_Clock->year  >= MIN_RTC_YEAR)
+     && (RT_Clock->year  <= MAX_RTC_YEAR)
+     && (RT_Clock->hour  <= MAX_RTC_HOUR)
+     /*lint -e{123} min element same name as macro elsewhere is OK */
+     && (RT_Clock->min   <= MAX_RTC_MINUTE)
+     && (RT_Clock->sec   <= MAX_RTC_SECOND) )
    {
-      FuncStatus = false;
-//      DBG_printf( "ERROR - RTC failed to Set Time\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
-   }
-   getsec = pTime;
-   VBATREG_EnableRegisterAccess();
-   if( 0 == getsec.tm_sec)  // TODO: RA6 [name_Balaji]:Need a Better Check like RTC_SR in K24
-   {
-      VBATREG_RTC_VALID = 0; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
-   }/* end if() */
+      pTime.tm_sec = RT_Clock->sec;
+      pTime.tm_mon = RT_Clock->month;
+      pTime.tm_mday = RT_Clock->day;
+      pTime.tm_year = (int16_t)RT_Clock->year - 1900; //In RA6E1, Year SINCE 1900 (2021 = 2021-1900 = 121)
+      pTime.tm_hour = RT_Clock->hour;
+      pTime.tm_min   = RT_Clock->min;
+      /* No Requirement for millisecond */
+      (void)R_RTC_CalendarTimeSet( &g_rtc0_ctrl, &pTime );
+      checkTime = pTime;
+      VBATREG_EnableRegisterAccess();
+      /*Validates if the time set is not all zero*/
+      if( (0 == checkTime.tm_sec)
+         && (0 == checkTime.tm_mon )
+         && (0 == checkTime.tm_mday )
+         && (0 == checkTime.tm_year)
+         && (0 == checkTime.tm_hour)
+         && (0 == checkTime.tm_min) )
+      {
+         VBATREG_RTC_VALID = 0; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
+      }/* end if() */
+      else
+      {
+         VBATREG_RTC_VALID = 1; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
+      }/* end else() */
+      VBATREG_DisableRegisterAccess();
+   } /* end if() */
    else
    {
-      VBATREG_RTC_VALID = 1; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
-   }/* end else() */
-   VBATREG_DisableRegisterAccess();
+      /* Invalid Parameter passed in */
+      (void)printf ( "ERROR - RTC invalid RT_Clock value passed into Set function\n" );
+      FuncStatus = false;
+   } /* end else() */
 #endif
    return ( FuncStatus );
 } /* end RTC_SetDateTime () */
@@ -325,13 +333,8 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 
    return;
 #elif ( MCU_SELECTED == RA6E1 )
-   fsp_err_t err = FSP_SUCCESS;
    rtc_time_t getSecTime;
-   err = R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &getSecTime );
-   if ( err!= FSP_SUCCESS )
-   {
-//      DBG_printf( "ERROR - RTC failed to Get Time in RTC_GetTimeInSecMicroSec function\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
-   }
+   (void)R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &getSecTime );
    *sec = getSecTime.tm_sec;
    rtc_instance_ctrl_t * p_instance_ctrl = ( rtc_instance_ctrl_t * ) &g_rtc0_ctrl;
    uint8_t milliSecGet;
@@ -353,7 +356,7 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 #endif
 
 }/* end RTC_GetTimeInSecMicroSec () */
-
+#if ( MCU_SELECTED == RA6E1 )
 /*******************************************************************************
 
   Function name: RTC_SetAlarmTime
@@ -369,13 +372,7 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm )
 {
    bool FuncStatus = true;
-   fsp_err_t err = FSP_SUCCESS;
-   err = R_RTC_CalendarAlarmSet( &g_rtc0_ctrl, pAlarm );
-   if ( err!= FSP_SUCCESS )
-   {
-      FuncStatus = false;
-//      DBG_printf( "ERROR - RTC failed to Set Alarm\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
-   }
+   (void)R_RTC_CalendarAlarmSet( &g_rtc0_ctrl, pAlarm );
    return ( FuncStatus );
 }/* end RTC_SetAlarmTime () */
 
@@ -393,12 +390,7 @@ bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm )
 *******************************************************************************/
 void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm )
 {
-   fsp_err_t err = FSP_SUCCESS;
-   err = R_RTC_CalendarAlarmGet( &g_rtc0_ctrl, pAlarm );
-   if ( err!= FSP_SUCCESS )
-   {
-//      DBG_printf( "ERROR - RTC failed to Get Alarm\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
-   }
+   (void)R_RTC_CalendarAlarmGet( &g_rtc0_ctrl, pAlarm );
 }/* end RTC_GetAlarmTime () */
 
 /*******************************************************************************
@@ -415,12 +407,7 @@ void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm )
 *******************************************************************************/
 void RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg )
 {
-   fsp_err_t err = FSP_SUCCESS;
-   err = R_RTC_ErrorAdjustmentSet( &g_rtc0_ctrl, erradjcfg );
-   if ( err!= FSP_SUCCESS )
-   {
-//      DBG_printf( "ERROR - RTC failed to Set Error Adjustment\n" );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
-   }
+   (void)R_RTC_ErrorAdjustmentSet( &g_rtc0_ctrl, erradjcfg );
 }/* end RTC_ErrorAdjustmentSet () */
 
 
@@ -446,7 +433,7 @@ void rtc_callback( rtc_callback_args_t *p_args )
 }/* end rtc_callback () */
 
 
-   #if ( TM_RTC_UNIT_TEST == 1 )
+#if ( TM_RTC_UNIT_TEST == 1 )
 /*******************************************************************************
 
   Function name: RTC_UnitTest
@@ -520,4 +507,5 @@ bool RTC_UnitTest(void)
    }
    return retVal;
 }
+#endif
 #endif
