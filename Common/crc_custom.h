@@ -1,6 +1,6 @@
 /**********************************************************************************************************************
 
-  Filename: crc16_PHY.h
+  Filename: crc16_custom.h
 
   Global Designator: CRC16PHY_
 
@@ -22,8 +22,8 @@
    @author
 
  ****************************************************************************************************************** */
-#ifndef CRC16_PHY_H
-#define CRC16_PHY_H
+#ifndef CRC16_CUSTOM_H
+#define CRC16_CUSTOM_H
 /* INCLUDE FILES */
 
 /* ****************************************************************************************************************** */
@@ -45,6 +45,7 @@
 /* ****************************************************************************************************************** */
 
 /* FUNCTION PROTOTYPES */
-uint16_t CRC16PHY_calculate( uint16_t crc16Polynomial, uint16_t seed, const void *data, size_t length );
+uint16_t CRC_CUSTOM_16cal( uint16_t crc16Polynomial, uint16_t seed, const void *data, size_t length );
+uint32_t CRC_CUSTOM_32cal(uint32_t crc16Polynomial, uint32_t seed, const void *data, size_t length);
 
-#endif /* CRC16_PHY_H */
+#endif /* CRC16_CUSTOM_H */

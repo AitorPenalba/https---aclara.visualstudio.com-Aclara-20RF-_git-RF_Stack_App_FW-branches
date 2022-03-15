@@ -26,7 +26,7 @@
 #if ( MCU_SELECTED == NXP_K24 )
 #include "crc_kn.h"
 #elif( MCU_SELECTED == RA6E1 )
-#include "crc16_PHY.h"
+#include "crc_custom.h"
 #include "crc16.h"
 #include "hal_data.h"
 #endif
@@ -93,7 +93,7 @@ returnStatus_t CRC_initialize ( void )
 *******************************************************************************/
 uint16_t CRC_16_Calculate ( uint8_t *Data, uint32_t Length )
 {
-   uint16_t CRC16_Result;
+   uint32_t CRC16_Result;
 
    OS_MUTEX_Lock(&CRC_Mutex); // Function will not return if it fails
 #if ( MCU_SELECTED == NXP_K24 )
@@ -168,8 +168,8 @@ uint16_t CRC_16_PhyHeader ( uint8_t *Data, uint32_t Length )
 #if ( MCU_SELECTED == NXP_K24 )
    (void)CRC_Config( 0x000053EB, 0, 0, 0, 0 );
    CRC16_Result = (uint16_t)CRC_Cal_16 ( 0x000098FD, Data, Length );
-#elif ( MCU_SELECTED == NXP_K24 )
-   CRC16_Result = CRC16PHY_calculate( 0x53EB, 0x98FD, Data, Length);
+#elif ( MCU_SELECTED == RA6E1 )
+   CRC16_Result = CRC_CUSTOM_16cal( 0x53EB, 0x98FD, Data, Length);
 #endif
 
    OS_MUTEX_Unlock(&CRC_Mutex); // Function will not return if it fails
@@ -197,10 +197,12 @@ uint32_t CRC_32_Calculate ( uint8_t *Data, uint32_t Length )
    uint32_t CRC32_Result;
 
    OS_MUTEX_Lock(&CRC_Mutex); // Function will not return if it fails
-
+#if ( MCU_SELECTED == NXP_K24 )
    (void)CRC_Config( 0xF4ACFB13, 0, 0, 0, 1 );
    CRC32_Result = CRC_Cal_32 ( 0xFDBB3209, Data, Length );
-
+#elif ( MCU_SELECTED == RA6E1 )
+   CRC32_Result = CRC_CUSTOM_32cal( 0xF4ACFB13, 0xFDBB3209, Data, Length);
+#endif
    OS_MUTEX_Unlock(&CRC_Mutex); // Function will not return if it fails
 
    return ( CRC32_Result );

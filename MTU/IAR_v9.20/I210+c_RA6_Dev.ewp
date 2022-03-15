@@ -1304,10 +1304,10 @@
                     <name>$PROJ_DIR$\..\..\Common\crc16.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\crc16_PHY.c</name>
+                    <name>$PROJ_DIR$\..\..\Common\crc_custom.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\crc16_PHY.h</name>
+                    <name>$PROJ_DIR$\..\..\Common\crc_custom.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\time_util.c</name>
