@@ -2,7 +2,7 @@
  *
  * Filename: OS_aclara.h
  *
- * Global Designator: Nathan
+ * Global Designator:
  *
  * Contents:
  *
