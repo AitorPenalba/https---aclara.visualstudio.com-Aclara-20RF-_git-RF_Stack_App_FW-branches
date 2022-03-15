@@ -55,7 +55,7 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 {
    bool FuncStatus = true;
 #if( RTOS_SELECTION == FREE_RTOS )
-   EventHandle = xEventGroupCreate();  
+   *EventHandle = xEventGroupCreate();  
    if ( NULL == EventHandle )
    {
      FuncStatus = false;
@@ -93,7 +93,7 @@ void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, i
 {
 #if( RTOS_SELECTION == FREE_RTOS )
       //TODO Error Handling, return value
-      xEventGroupSetBits( EventHandle , EventMask); 
+      xEventGroupSetBits( *EventHandle , EventMask); 
 #elif( RTOS_SELECTION == MQX_RTOS )
    if ( _lwevent_set ( EventHandle, EventMask ) ) {
       EVL_FirmwareError( "OS_EVNT_Set" , file, line );
@@ -170,7 +170,7 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
       timeout_ticks = 1;
    } /* end else() */
 #if( RTOS_SELECTION == FREE_RTOS )  
-   SetMask = xEventGroupWaitBits(EventHandle, EventMask, (bool)WaitForAll, pdTRUE, timeout_ticks ); //clears bits after event                             
+   SetMask = xEventGroupWaitBits(*EventHandle, EventMask, pdTRUE, (bool)WaitForAll, timeout_ticks ); //clears bits after event                             
 #elif( RTOS_SELECTION == MQX_RTOS )
    RetStatus = _lwevent_wait_ticks ( EventHandle, EventMask, (bool)WaitForAll, timeout_ticks );
    if ( RetStatus == MQX_LWEVENT_INVALID ) {
@@ -188,7 +188,8 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
    return ( SetMask );
 } /* end OS_EVNT_Wait () */
 #if( TM_EVENTS == 1 )
-static OS_EVNT_Handle eventHandle;
+static OS_EVNT_Obj eventObj;
+static OS_EVNT_Handle eventHandle = &eventObj;
 #define BIT_0 ( 1 << 0 )
 #define BIT_4 ( 1 << 4 )
 void OS_EVENT_TestCreate(void)
@@ -205,31 +206,31 @@ void OS_EVENT_TestCreate(void)
   }
   return;
 }
-void OS_EVENT_TestWait(void)
+bool OS_EVENT_TestWait(void)
 {
   EventBits_t recv;
   recv = OS_EVNT_Wait(eventHandle, BIT_4 | BIT_0 , false, OS_WAIT_FOREVER);
   if( recv & BIT_4 )
   {
-    APP_PRINT("Received Event 4 );
+    APP_PRINT("Received Event 4" );
   }
   else if( recv & BIT_0 )
   {
-    APP_PRINT("Received Event 0 );
+    APP_PRINT("Received Event 0" );
   }
   else if( ( recv & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 ) )
   {
-     APP_PRINT("Received both Event 0 and Event 4 );
+     APP_PRINT("Received both Event 0 and Event 4");
   }
   else
   {
     APP_PRINT("Timeout");
   }
-  return;
+  return true;
 }
 void OS_EVENT_TestSet(void)
 {
-  OS_EVNT_SeteventHandle, BIT_4 );
+  OS_EVNT_Set(eventHandle, BIT_4 );
   return;
 }
 #endif
