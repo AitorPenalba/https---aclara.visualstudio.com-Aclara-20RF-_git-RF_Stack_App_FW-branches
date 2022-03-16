@@ -97,3 +97,4 @@ _build/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/Common/wolfssl/IDE/IAR-EWARM/Projects/MTU/RA6_FreeRTOS Debug

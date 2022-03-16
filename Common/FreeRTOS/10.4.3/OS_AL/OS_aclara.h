@@ -74,8 +74,17 @@
 #define OS_Get_OsLibDate() (_mqx_date)
 #endif
 
-#define OS_INT_disable()                                 _int_disable()
-#define OS_INT_enable()                                  _int_enable()
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define OS_INT_disable()                                     _int_disable()
+#define OS_INT_enable()                                       _int_enable()
+#define OS_INT_ISR_disable()                                 _int_disable()
+#define OS_INT_ISR_enable()                                   _int_enable()
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define OS_INT_disable()                               taskENTER_CRITICAL()
+#define OS_INT_enable()                                 taskEXIT_CRITICAL()
+#define OS_INT_ISR_disable()                  taskENTER_CRITICAL_FROM_ISR()
+#define OS_INT_ISR_enable()                    taskEXIT_CRITICAL_FROM_ISR()
+#endif
 
 #define OS_EVNT_Set(EventHandle, EventMask)              OS_EVNT_SET(EventHandle, EventMask, __FILE__, __LINE__)
 #define OS_EVNT_Wait(EventHandle, EventMask, WaitForAll, Timeout) OS_EVNT_WAIT(EventHandle, EventMask, WaitForAll, Timeout, __FILE__, __LINE__)
@@ -147,6 +156,7 @@ typedef struct
 #define OS_TASK_Template_t    TASK_TEMPLATE_STRUCT
 
 #elif ( RTOS_SELECTION == FREE_RTOS )
+typedef UBaseType_t           OS_TASK_id;
 #define taskParameter   void* pvParameters
 typedef SemaphoreHandle_t     OS_SEM_Obj, OS_MUTEX_Obj, *OS_SEM_Handle, *OS_MUTEX_Handle;
 typedef QueueHandle_t         OS_QUEUE_Obj, *OS_QUEUE_Handle;
@@ -334,14 +344,16 @@ void OS_TASK_Create_Idle ( void );
 #endif
 void OS_TASK_Create_All ( bool initSuccess );
 void OS_TASK_Create_STRT( void );
-#if 0
+
 uint32_t OS_TASK_Get_Priority ( char const *pTaskName );
 uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority );
+void OS_TASK_Set_Above_Idle ( char const *pTaskName );
 void OS_TASK_Sleep ( uint32_t MSec );
 void OS_TASK_Exit ( void );
 void OS_TASK_ExitId ( char const *pTaskName );
 OS_TASK_id OS_TASK_GetId (void);
 bool OS_TASK_IsCurrentTask ( char const *pTaskName );
+#if 0  //TODO: need to still get updated to RA6
 uint32_t OS_TASK_UpdateCpuLoad ( void );
 void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
 void OS_TASK_Summary ( bool safePrint );
@@ -352,7 +364,7 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
 uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
 bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Struct *FutureTickValue );
 void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
-#endif
+#endif // #if 0
 /* FUNCTION DEFINITIONS */
 #endif   /* __BOOTLOADER */
 #if (TM_MUTEX == 1)

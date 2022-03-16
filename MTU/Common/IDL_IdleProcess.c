@@ -16,7 +16,9 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdbool.h>
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
+#endif
 #include "IDL_IdleProcess.h"
 
 /* #DEFINE DEFINITIONS */
@@ -50,7 +52,12 @@ static volatile uint32_t IdleCounter = 0;
          and should not share a task priority with any other tasks.
 
 *******************************************************************************/
+//TODO: adhere to new task parameter macro
+#if ( RTOS_SELECTION == MQX_RTOS )
 void IDL_IdleTask ( uint32_t Arg0 )
+#elif ( RTOS_SELECTION == FREE_RTOS )
+void IDL_IdleTask ( void* pvParameters )
+#endif
 {
    for ( ;; )
    {

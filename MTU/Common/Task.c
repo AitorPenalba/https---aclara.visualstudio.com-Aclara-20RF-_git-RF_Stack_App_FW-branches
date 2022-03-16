@@ -19,13 +19,17 @@
 #include "project.h"
 
 //#include "task.h"
-//#include <mqx.h>
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include <mqx.h>
+#endif
 //#include <fio.h>
 //#include <io_prv.h>
 //#include <charq.h>
 //#include <serinprv.h>
 //#include <bsp.h>
-//#include <mqx_prv.h>
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include <mqx_prv.h>
+#endif
 //#include "sys_clock.h"
 #include "DBG_SerialDebug.h"
 //#include "psp_cpudef.h"
@@ -39,7 +43,7 @@
 #endif
 
 #include "DBG_CommandLine.h"
-//#include "IDL_IdleProcess.h"
+#include "IDL_IdleProcess.h"
 
 #if ENABLE_MFG_TASKS
 #include "MFG_Port.h"
@@ -139,10 +143,17 @@
 #define QUIET_MODE_ATTR    ((uint32_t)(1<<30))                             /* Task runs in quiet mode, also */
 #define FAIL_INIT_MODE_ATTR ((uint32_t)(1<<29))                            /* Task runs even if init fails */
 #define RFTEST_MODE_ATTR   ((uint32_t)(1<<28))                             /* Task runs in rfTest mode, also */
+
+// TODO: possibly move this definition to be used as a feature tied to each operating system
+// Indicates the order in which task priority values run in the RTOS
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define TASK_PRIORITY_DESCENDING   1
+#else
+#define TASK_PRIORITY_DESCENDING   0
+#endif
+
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
-
-
 
 /*lint -esym(751,eOsTaskIndex_t) */
 /* This enum list needs to match the MQX_template_list[] below */
@@ -289,55 +300,67 @@ static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
 static const char pTskName_TimeSys[]             = "TIMESYS";
 
 #if ( RTOS_SELECTION == FREE_RTOS )
-/* TODO: RA6: Move the following task Handles to appropriate location */
+/* TODO: RA6: Move the following task Handles to appropriate location, maybe the can stay in here
+because the existing OS_aclara api uses the task name.  The task name can be used to get the task ID(mqx)
+or task handle(freeRtos). Many FREERTOS api calls use this handle.  */
 TaskHandle_t tst_handle;
 TaskHandle_t dbg_tsk_handle;
 TaskHandle_t dbg_tx_tsk_handle;
 TaskHandle_t self_tst_tsk_handle;
 TaskHandle_t time_sys_tsk_handle;
+TaskHandle_t idle_tsk_handle;
+TaskHandle_t pwrlg_tsk_handle;
+TaskHandle_t sm_tsk_handle;
+TaskHandle_t phy_tsk_handle;
+TaskHandle_t mac_tsk_handle;
+TaskHandle_t nwk_tsk_handle;
+TaskHandle_t dtls_tsk_handle;
+TaskHandle_t appmsg_tsk_handle;
+TaskHandle_t pwrlg_idle_tsk_handle;
 
 /* TODO: RA6: DG: Investigate if we can create one Task List that works for both FreeRTOS and MQX */
 /* TODO: RA6: FreeRTOS: Note: FreeRTOS need the Stack size in words */
 const OS_TASK_Template_t Task_template_list[] =
 {
    /* Task Index,          Function,                    Stack,     Pri,    Name,                 Attributes,    Param,     Handle */
-   { eSTRT_TSK_IDX,         STRT_StartupTask,           1900,      2,    (char *)pTskName_Strt,   0,            (void *)0, &tst_handle },
-   { eDBG_TSK_IDX,          DBG_CommandLineTask,        512,      3,    (char *)pTskName_Dbg,    0,            (void *)0, &dbg_tsk_handle },
-   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512,      4,    (char *)pTskName_Print,  0,            (void *)0, &dbg_tx_tsk_handle },
-   { eTEST_TSK_IDX,         SELF_testTask,              1024,      14,   (char *)pTskName_Test,   0,            (void *)0, &self_tst_tsk_handle },
-   { eTIME_TSK_IDX,         TIME_SYS_HandlerTask,       512,      15,   (char *)pTskName_TimeSys, 0,         (void *)0, &time_sys_tsk_handle },
+   { eSTRT_TSK_IDX,         STRT_StartupTask,           1900,       2,   (char *)pTskName_Strt,    0,           (void *)0, &tst_handle },
+   { eDBG_TSK_IDX,          DBG_CommandLineTask,        512,        3,   (char *)pTskName_Dbg,     0,           (void *)0, &dbg_tsk_handle },
+   { eDBG_PRNT_TSK_IDX,     DBG_TxTask,                 512,        4,   (char *)pTskName_Print,   0,           (void *)0, &dbg_tx_tsk_handle },
+   { eTEST_TSK_IDX,         SELF_testTask,              1024,      14,   (char *)pTskName_Test,    0,           (void *)0, &self_tst_tsk_handle },
+   { eTIME_TSK_IDX,         TIME_SYS_HandlerTask,       512,       15,   (char *)pTskName_TimeSys, 0,           (void *)0, &time_sys_tsk_handle },
+   { eIDL_TSK_IDX,          IDL_IdleTask,               512,        1,   (char *)pTskName_Idle,    0,           (void *)0, &idle_tsk_handle },
    {    0  }
 };
 
-#if 0
+#if 0   //TODO : Remove this compile swith once tasks have been included to support last gasp
 /*lint -e{641}  Suppress the index conversion from enum to int for this section. */
 const OS_TASK_Template_t  Task_template_list_last_gasp[] =
 {
 #if ENABLE_PWR_TASKS
-   { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, 0, 0 },
+   { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, (void *)0, &pwrlg_tsk_handle },
 #endif
-   { eTIME_TSK_IDX,     TIME_SYS_HandlerTask,   1200,  11, (char *)pTskName_Time,   DEFAULT_ATTR, 0, 0 },
-   { eSM_TSK_IDX,       SM_Task,                1000,  12, (char *)pTskName_Sm,     DEFAULT_ATTR, 0, 0 },
-   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, 0, 0 },
-   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
-   { eSTACK_TSK_IDX,    NWK_Task,               1500,  15, (char *)pTskName_Nwk,    DEFAULT_ATTR, 0, 0 },
+   { eTIME_TSK_IDX,     TIME_SYS_HandlerTask,   1200,  11, (char *)pTskName_Time,   DEFAULT_ATTR, (void *)0, &time_sys_tsk_handle },
+   { eSM_TSK_IDX,       SM_Task,                1000,  12, (char *)pTskName_Sm,     DEFAULT_ATTR, (void *)0, &sm_tsk_handle },
+   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, (void *)0, &phy_tsk_handle },
+   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, (void *)0, &mac_tsk_handle },
+   { eSTACK_TSK_IDX,    NWK_Task,               1500,  15, (char *)pTskName_Nwk,    DEFAULT_ATTR, (void *)0, &nwk_tsk_handle },
 
 #if ( USE_DTLS == 1 )
-   { eDTLS_TSK_IDX,     DTLS_Task,              5400,  16, (char *)pTskName_Dtls,   DEFAULT_ATTR, 0, 0 },
+   { eDTLS_TSK_IDX,     DTLS_Task,              5400,  16, (char *)pTskName_Dtls,   DEFAULT_ATTR, (void *), &dtls_tsk_handle },
 #endif
-   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, 0, 0 },
+   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, (void *)0, &appmsg_tsk_handle },
 
-   { eDBG_PRNT_TSK_IDX, DBG_TxTask,              680,  18, (char *)pTskName_Print,  DEFAULT_ATTR, 0, 0 },
+   { eDBG_PRNT_TSK_IDX, DBG_TxTask,              680,  18, (char *)pTskName_Print,  DEFAULT_ATTR, (void *)0, &dbg_tx_tsk_handle },
 #if ENABLE_PWR_TASKS
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
-   { ePWRLG_IDL_TSK_IDX,PWRLG_Idle_Task,         336,  19, (char *)pTskName_Idle,   DEFAULT_ATTR, 0, 0 },
+   { ePWRLG_IDL_TSK_IDX,PWRLG_Idle_Task,         336,  19, (char *)pTskName_Idle,   DEFAULT_ATTR, (void *)0, &pwrlg_idle_tsk_handle },
 #endif
    { 0 }
 };
-#endif
+#endif  // #if 0
 #endif //#if ( RTOS_SELECTION == FREE_RTOS )
 
-#if ( RTOS_SELECTION == 1 ) //( RTOS_SELECTION == MQX_RTOS )
+#if ( RTOS_SELECTION == MQX_RTOS )
 /* NOTE: The Highest Priority we should use is 9.  This excerpt was taken from AN3905.pdf on freesclale.com
    Task priority. Lower number is for higher priorities.  More than one task can have the same priority level.  Having
    no gaps between priority values improves performance */
@@ -470,18 +493,22 @@ const TASK_TEMPLATE_STRUCT  MQX_template_list_last_gasp[] =
 #endif
    { 0 }
 };
-
+#endif // ( RTOS_SELECTION == MQX_RTOS )
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
-
+#if ( RTOS_SELECTION == MQX_RTOS )
 void task_exception_handler( _mqx_uint para, void * stack_ptr );
+#endif // ( RTOS_SELECTION == MQX_RTOS )
+#if (RTOS_SELECTION == FREE_RTOS)
+static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName );
+#endif
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
-
+#if ( RTOS_SELECTION == MQX_RTOS )
 static void expt_frm_dump(void const * ext_frm_ptr)
 {
    static const char * const expt_name[] =
@@ -570,28 +597,35 @@ void OS_TASK_Create_All ( bool initSuccess )
 {
 
    OS_TASK_Template_t const *pTaskList; /* Pointer to task list which contains all tasks in the system */
-#if ( RTOS_SELECTION == 1 ) //TODO: RA6: Replace ( RTOS_SELECTION == MQX_RTOS )
+#if ( RTOS_SELECTION == MQX_RTOS )
    _task_id taskID;
 #endif
-//
+//  TODO: uncomment the following once required modules are available
 //   uint8_t  quiet;
 //   uint8_t  rfTest;
 //
 //   quiet = MODECFG_get_quiet_mode();
 //   rfTest = MODECFG_get_rfTest_mode();
-//   /* Install exception handler */
-//   (void)_int_install_exception_isr();
+
+#if ( RTOS_SELECTION == MQX_RTOS )
+   /* Install exception handler */
+   (void)_int_install_exception_isr();  TODO:  What is the equivalent opertion in FREE RTOS
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   // TODO: What is the equivalent operation for FreeRTOS?
+#endif
 
    /*lint -e{641} converting enum to int  */
    for (pTaskList = &Task_template_list[1]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++)  /* TODO: RA6: DG: Don't include StartUp Task */
    {  /* Create the task if the "Auto Start" attribute is NOT set */
+
+// TODO: uncomment the following once required modules are available
 //      if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
 //      {  /* Create the task */
 //         if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&
 //              ( (rfTest == 0) || ((pTaskList->TASK_ATTRIBUTES & RFTEST_MODE_ATTR) != 0) ) &&
 //              ( (initSuccess) || ((pTaskList->TASK_ATTRIBUTES & FAIL_INIT_MODE_ATTR) != 0) ) )
-         {
-#if ( RTOS_SELECTION == 1 ) //( RTOS_SELECTION == MQX_RTOS )
+      {
+#if ( RTOS_SELECTION == MQX_RTOS )
             if (MQX_NULL_TASK_ID == (taskID = _task_create( 0, pTaskList->TASK_TEMPLATE_INDEX, pTaskList->CREATION_PARAMETER )))
 #elif (RTOS_SELECTION == FREE_RTOS)
             /* TODO: RA6: FreeRTOS: Note: FreeRTOS need the Stack size in words */
@@ -604,17 +638,20 @@ void OS_TASK_Create_All ( bool initSuccess )
                while(true) /*lint !e716  */
                {}  /* Todo:  We may wish to discuss the definition of LEDs.  Maybe we could add code here. */
             }
+
+#if ( RTOS_SELECTION == MQX_RTOS )
             /* Set the exception handler of the task if still valid */
-//            if (MQX_NULL_TASK_ID != _task_get_id_from_name(pTaskList->TASK_NAME)) {
-//               (void)_task_set_exception_handler(taskID, task_exception_handler);
-//               stack_check_init(taskID);
-//            }
-//         }
-      }
+            if (MQX_NULL_TASK_ID != _task_get_id_from_name(pTaskList->TASK_NAME)) {
+               (void)_task_set_exception_handler(taskID, task_exception_handler);
+               stack_check_init(taskID);
+            }
+#elif (RTOS_SELECTION == FREE_RTOS)
+            // TODO: What is the equivalent operation for FreeRTOS, still need to investigate further?
+#endif
+         }
+      //} TODO: uncomment the following once required modules are available, quiet, rftest, etc.
    }
 } /* end OS_TASK_Create_All () */
-
-#if 0
 
 /***********************************************************************************************************************
  *
@@ -635,7 +672,9 @@ void OS_TASK_Create_All ( bool initSuccess )
  **********************************************************************************************************************/
 uint32_t OS_TASK_Get_Priority ( char const *pTaskName )
 {
-   uint32_t Priority;
+   uint32_t Priority = 0;
+
+#if (RTOS_SELECTION == MQX_RTOS)
    uint32_t RetStatus;
 
    if (NULL != pTaskName)
@@ -650,6 +689,25 @@ uint32_t OS_TASK_Get_Priority ( char const *pTaskName )
    {
       Priority = 0;
    } /* end if() */
+#elif (RTOS_SELECTION == FREE_RTOS) //TODO: RA6: need to fix the caller to this, comment added at caller location
+   if (NULL != pTaskName)
+   {  // specific task requested
+      TaskHandle_t *taskHandle = NULL;
+      taskHandle = getFreeRtosTaskHandle( pTaskName );
+      if( NULL != taskHandle )
+      {  // found the task handle get the priority
+         Priority = (uint32_t)uxTaskPriorityGet(*taskHandle);
+      }
+      else
+      {  // handle could not be found task template table, return 0
+         Priority = (uint32_t)0;
+      }
+   }
+   else
+   {  // get info for current task
+      Priority = (uint32_t)uxTaskPriorityGet(NULL);
+   }
+#endif
 
    return ( (uint32_t)Priority );
 } /* end OS_TASK_Get_Priority () */
@@ -676,6 +734,7 @@ uint32_t OS_TASK_Get_Priority ( char const *pTaskName )
 uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
 {
    uint32_t OldPriority;
+#if (RTOS_SELECTION == MQX_RTOS)
    uint32_t RetStatus;
 
    if (NULL != pTaskName)
@@ -690,11 +749,90 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
    {
       OldPriority = 0;
    } /* end if() */
-
+#elif (RTOS_SELECTION == FREE_RTOS) //TODO: priority value needs to be accomadated between the different RTOS
+   if(NULL != pTaskName)
+   {  // specific task requested
+      TaskHandle_t *taskHandle = NULL;
+      taskHandle = getFreeRtosTaskHandle( pTaskName );
+      OldPriority = (uint32_t)uxTaskPriorityGet(*taskHandle);
+      vTaskPrioritySet( *taskHandle, (UBaseType_t)NewPriority);
+   }
+   else
+   {  // get info for current task
+      OldPriority = (uint32_t)uxTaskPriorityGet(NULL);
+      vTaskPrioritySet( NULL, (UBaseType_t)NewPriority);
+   }
+#endif /* MQX_RTOS */
    return ( (uint32_t)OldPriority );
 } /* end OS_TASK_Set_Priority () */
 /* ****************************************************************************************************************** */
-#endif /* MQX_RTOS */
+
+/***********************************************************************************************************************
+ *
+ * Function Name: OS_TASK_Set_Above_Idle
+ *
+ * Purpose: This function set the request task, one priority value above the idle task
+ *
+ * Arguments: pTaskName   - The name of the task (use extern values in OS_aclara.h "pTskName_")
+ *
+ * Returns: None
+ *
+ * Side Effects:
+ *
+ * Reentrant Code:
+ *
+ * Notes:
+ *
+ **********************************************************************************************************************/
+void OS_TASK_Set_Above_Idle ( char const *pTaskName )
+{
+   uint32_t       taskPriority;
+
+   //TODO: RA6: May need to add additional safety check to test the IDLE value
+   // lower the task priority to just higher than the IDLE task
+   taskPriority  = OS_TASK_Get_Priority ( pTskName_Idle ); /* Start with getting the IDLE task priority */
+   if( TASK_PRIORITY_DESCENDING )
+   {
+      taskPriority -= 1; // RTOS has descending priority values, lower task priority by one
+   }
+   else
+   {
+      taskPriority += 1; // RTOS has ascending priority values, raise task priority by one
+   }
+
+   (void)OS_TASK_Set_Priority ( pTaskName, taskPriority ); // set the new priority value
+}
+
+/***********************************************************************************************************************
+ *
+ * Function Name: getFreeRtosTaskHandle
+ *
+ * Purpose: This function will return a pointer to the task handle located in the task template.  This handle is
+ *          is used many calls into the Free RTOS task handling API.
+ *
+ * Arguments: pTaskName - string representing the name of a task
+ *
+ * Returns: TaskHandle_t * - pointer to the task handle reference from the task template
+ *
+ * Side Effects:
+ *
+ **********************************************************************************************************************/
+#if (RTOS_SELECTION == FREE_RTOS)
+static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName )
+{
+   TaskHandle_t *retTaskHandle = NULL; // return value, initialize to NULL and will get updated later
+
+   for( const OS_TASK_Template_t *listPtr = &Task_template_list[0]; listPtr != NULL; listPtr++)
+   {  // loop through the task template list looking for a matching task name
+      if( strcmp(listPtr->pcName, pTaskName) == 0)
+      {  // we found a matching task name, assign the return value and break out of loop
+         retTaskHandle = listPtr->pxCreatedTask;
+         break;
+      }
+   }
+   return retTaskHandle;
+}
+#endif
 
 /***********************************************************************************************************************
  *
@@ -712,14 +850,14 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
  **********************************************************************************************************************/
 void OS_TASK_Sleep ( uint32_t MSec )
 {
-#if (RTOS_SELECTION == 1) /* MQX */
+#if (RTOS_SELECTION == MQX_RTOS)
    _time_delay ( MSec );
 #elif (RTOS_SELECTION == FREE_RTOS)
    vTaskDelay(pdMS_TO_TICKS(MSec));
 #endif
 }
 /* ****************************************************************************************************************** */
-#if 0
+
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_Exit
@@ -730,7 +868,9 @@ void OS_TASK_Sleep ( uint32_t MSec )
  *
  * Returns: None
  *
- * Side Effects:
+ * Side Effects: FREE_RTOS - Only memory allocated to a task by the kernel itself will be freed automatically
+ * when the task is deleted. Any memory or other resource that the implementation of the task allocated must be
+ * freed explicitly.
  *
  * Reentrant Code:
  *
@@ -739,7 +879,11 @@ void OS_TASK_Sleep ( uint32_t MSec )
  **********************************************************************************************************************/
 void OS_TASK_Exit ( void )
 {
-  (void)_task_destroy ( MQX_NULL_TASK_ID );
+#if (RTOS_SELECTION == MQX_RTOS) /* MQX */
+   (void)_task_destroy ( MQX_NULL_TASK_ID );
+#elif (RTOS_SELECTION == FREE_RTOS)
+   vTaskDelete(xTaskGetCurrentTaskHandle());
+#endif
 }
 /* ****************************************************************************************************************** */
 
@@ -753,7 +897,9 @@ void OS_TASK_Exit ( void )
  *
  * Returns: None
  *
- * Side Effects:
+ * Side Effects: FREE_RTOS - Only memory allocated to a task by the kernel itself will be freed automatically
+ * when the task is deleted. Any memory or other resource that the implementation of the task allocated must be
+ * freed explicitly.
  *
  * Reentrant Code:
  *
@@ -762,7 +908,16 @@ void OS_TASK_Exit ( void )
  **********************************************************************************************************************/
 void OS_TASK_ExitId ( char const *pTaskName )
 {
+#if (RTOS_SELECTION == MQX_RTOS) /* MQX */
    (void)_task_destroy ( _task_get_id_from_name((char *)pTaskName) );
+#elif (RTOS_SELECTION == FREE_RTOS)
+   TaskHandle_t *taskHandle = NULL;
+   taskHandle = getFreeRtosTaskHandle( pTaskName );
+   if(NULL != taskHandle)
+   {  // we found a task handle, delete the task
+   	  vTaskDelete(*taskHandle);
+   }
+#endif
 } /* end OS_TASK_ExitId () */
 /* ****************************************************************************************************************** */
 
@@ -785,7 +940,13 @@ void OS_TASK_ExitId ( char const *pTaskName )
  **********************************************************************************************************************/
 OS_TASK_id OS_TASK_GetId (void)
 {
+#if (RTOS_SELECTION == MQX_RTOS) /* MQX */
    return(_task_get_id ());
+#elif (RTOS_SELECTION == FREE_RTOS)
+   TaskStatus_t taskStatusInfo;
+   vTaskGetInfo(NULL, &taskStatusInfo, pdFALSE, eRunning );
+   return taskStatusInfo.xTaskNumber;
+#endif
 } /* end OS_TASK_GetId () */
 
 /***********************************************************************************************************************
@@ -808,14 +969,23 @@ OS_TASK_id OS_TASK_GetId (void)
 bool OS_TASK_IsCurrentTask ( char const *pTaskName )
 {
    bool retVal = false;
-
+#if (RTOS_SELECTION == MQX_RTOS) /* MQX */
    if ( OS_TASK_GetId() == _task_get_id_from_name( (char *)pTaskName ) )
    {
       retVal = true;
    }
+#elif (RTOS_SELECTION == FREE_RTOS)
+   TaskHandle_t taskHandle;
+   taskHandle = xTaskGetCurrentTaskHandle();
+   if( strcmp(pcTaskGetName(taskHandle) , pTaskName) == 0)
+   {
+      retVal = true;
+   }
+#endif
    return( retVal );
 } /* end OS_TASK_IsCurrentTask () */
 
+#if 0
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_UpdateCpuLoad

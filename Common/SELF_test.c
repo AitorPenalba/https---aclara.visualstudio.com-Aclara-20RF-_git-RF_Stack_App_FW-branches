@@ -179,7 +179,7 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 void SELF_testTask( taskParameter )
 {
    uint16_t       selfTestResults;
-   uint32_t       taskPriority;
+
 #if 1
    // TODO: Use line 192 once complete implementation is available
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
@@ -224,9 +224,7 @@ void SELF_testTask( taskParameter )
 #endif
 
    /* Now, lower the task priority to just higher than the IDLE task.  */
-   taskPriority  = OS_TASK_Get_Priority ( pTskName_Idle ); /* Start with the IDLE task   */
-   taskPriority -= 1;                                      /* Make it one step higher    */
-   (void)OS_TASK_Set_Priority ( pTskName_Test, taskPriority );
+   OS_TASK_Set_Above_Idle( pTskName_Test );
 
    for (;;)                                                    /* Task Loop */
    {
