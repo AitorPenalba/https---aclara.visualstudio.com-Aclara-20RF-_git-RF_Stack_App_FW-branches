@@ -212,7 +212,9 @@ typedef struct {
 /* CONSTANTS */
 
 /* FILE VARIABLE DEFINITIONS */
-extern OS_SEM_Obj       _ReceiveDbg_SEM;
+#if ( MCU_SELECTED == RA6E1 )    
+extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+#endif
 #if ENABLE_HMC_TASKS
 static OS_SEM_Obj HMC_CMD_SEM;
 static bool       HmcCmdSemCreated = ( bool )false;
@@ -768,23 +770,35 @@ void DBG_CommandLineTask ( taskParameter )
 #endif
 #endif
 #if ( MCU_SELECTED == RA6E1 )
-      (void)UART_read ( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ));
-      (void)OS_SEM_Pend( &_ReceiveDbg_SEM, OS_WAIT_FOREVER );
+      /* Instead of Polling metod, Interrupt routine method is used in RA6E1 which
+       * reads byte-by-byte and stors the data in an array */
+      ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ));
+      ( void )OS_SEM_Pend( &dbgReceiveSem_, OS_WAIT_FOREVER );
       if(rxByte !=  (uint8_t)0x00)
       {
          /* Check before executing; may have been disable while waiting for input   */
-         if (DBG_IsPortEnabled () ) /* Only process input if the port is enabled */
+         if ( DBG_IsPortEnabled () ) /* Only process input if the port is enabled */
          {
-//        DBG_CommandLine_Process();
-         dbgpReadByte( rxByte );// TODO: RA6 [name_Balaji]: As there is no IOCTL for RA6E1 processing the information by byte
+#endif
+#if ( MCU_SELECTED == NXP_K24 )
+        DBG_CommandLine_Process();
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+         /* As there is no IOCTL for RA6E1 processing the information by bytes like MFG_Port's mfgpReadByte */
+         dbgpReadByte( rxByte );
          }
          else
          {
             (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
-//          (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
-            OS_TASK_Sleep ( 10 );     /* Check again in a second, or so...   */
+#if ( MCU_SELECTED == NXP_K24 )
+            (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
+#endif
+            // TODO: RA6 [name_Balaji]: Add delay once integrated to main branch
+#if 0
+            OS_TASK_Sleep ( TIME_TICKS_PER_SEC  );     /* Check again in a second, or so...   */
+#endif
          }
-         UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
+         ( void )UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
          rxByte = 0x00; //resets the rxByte
       }
 #endif
@@ -802,7 +816,6 @@ void DBG_CommandLineTask ( taskParameter )
 ***********************************************************************************************************************/
 static void dbgpReadByte( uint8_t rxByte )
 {
-//   buffer_t *commandBuf;
 
    if (  ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
          ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
@@ -810,45 +823,44 @@ static void dbgpReadByte( uint8_t rxByte )
    {
       /* user canceled the in progress command */
       DBGP_numBytes = 0;
-   }
+   }/* end if () */
    else if( rxByte == BACKSPACE_CHAR || rxByte == 0x7f )
    {
       if( DBGP_numBytes != 0 )
       {
          /* buffer contains at least one character, remove the last one entered */
          DBGP_numBytes -= 1;
-      }
-   }
+      }/* end if () */
+   }/* end else if () */
    else
    {
-      if( (rxByte == LINE_FEED_CHAR) || (rxByte == CARRIAGE_RETURN_CHAR) )
+      if( ( rxByte == LINE_FEED_CHAR ) || ( rxByte == CARRIAGE_RETURN_CHAR ) )
       {
             /* Call the command */
             DBG_CommandLine_Process();
             DBGP_numBytes = 0;
-      }
+      }/* end if () */
       else if( ( DBGP_numBytes ) >= MAX_DBG_COMMAND_CHARS )
       {
          /* buffer is full */
          DBGP_numBytes = 0;
-      }
+      }/* end else if () */
       else
       {
          // Save character in buffer (space is available)
          DbgCommandBuffer[ DBGP_numBytes++] = rxByte;
-      }
-   }
-}
+      }/* end else () */
+   }/* end else () */
+}/* end dbgpReadByte () */
 #if ( MCU_SELECTED == RA6E1 )
 /*******************************************************************************
 
   Function name: dbg_uart_callback
 
-  Purpose: Interrupt Handler for UART Module
+  Purpose: Interrupt Handler for Debug UART Module,Postponds the semaphore wait
+            once one byte of data is read in SCI Channel 4 (DBG port)
 
   Returns: None
-
-  Notes: Can be used if required
 
 *******************************************************************************/
 void dbg_uart_callback( uart_callback_args_t *p_args )
@@ -860,7 +872,7 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
         /* Receive complete */
         case UART_EVENT_RX_COMPLETE:
         {
-            OS_SEM_Post_fromISR( &_ReceiveDbg_SEM );
+            OS_SEM_Post_fromISR( &dbgReceiveSem_ );
             break;
         }
         /* Transmit complete */
@@ -871,7 +883,7 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
         default:
         {
         }
-    }
+    }/* end switch () */
 }/* end user_uart_callback () */
 #endif
 /*******************************************************************************
@@ -1198,14 +1210,14 @@ static void DBG_CommandLine_Process ( void )
 uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
 {
    struct_CmdLineEntry  const *CmdLineEntry;
-//Added Carriage return to follow Printing standard
+/* Added carriage return to follow printing standard */
    DBG_printf( "\r\n[M]Command List:\r" );
-//Added a delay to make the print visible
+/* Added a delay to make the print visible */
    OS_TASK_Sleep( TEN_MSEC );
    CmdLineEntry = DBG_CmdTable;
    while ( CmdLineEntry->pcCmd )
    {
-     //Added Carriage return to follow Printing standard
+     /* Added carriage return to follow printing standard */
       DBG_printf( "[M]%30s: %s\r", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
       CmdLineEntry++;
       OS_TASK_Sleep( TEN_MSEC );
@@ -1322,7 +1334,7 @@ uint32_t DBG_CommandLine_DebugEnable( uint32_t argc, char *argv[] )
    }
    return ( 0 );
 } /* end DBG_CommandLine_DebugEnable () */
-#endif
+#endif   /* end of #if 0 */
 /*******************************************************************************
 
    Function name: DBG_CommandLine_DebugDisable
@@ -1343,6 +1355,7 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
    DBG_PortTimer_Set ( 0 );
    return ( 0 );
 } /* end DBG_CommandLine_DebugDisable () */
+// TODO: RA6 [name_Balaji]: Add support to the following function in RA6E1
 #if 0
 /*******************************************************************************
 

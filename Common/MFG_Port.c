@@ -207,6 +207,7 @@
 #define MFG_logPrintf MFG_printf
 #define MFG_printf (void)DBG_printfNoCr
 #endif
+// TODO: RA6 [name_Balaji]:Check for _mqx_int once integrated
 #define MFG_logPrintf MFG_printf
 #define MFG_printf(fmt, args...) \
 { \
@@ -254,7 +255,8 @@ static OS_EVNT_Obj      _MfgpUartEvent;
 #endif 
 static OS_MSGQ_Obj      _CommandReceived_MSGQ;
 #if ( MCU_SELECTED == RA6E1 )
-static OS_SEM_Obj       _ReceiveMfg_SEM; 
+/* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+static OS_SEM_Obj       mfgReceiveSem_; 
 #endif
 #if 0 // TODO: RA6 [name_Balaji]: Add support for RA6E1
 #if ( EP == 1 )
@@ -507,6 +509,7 @@ static void MFGP_MacChannelSetsSTAR          ( uint32_t argc, char *argv[] );
 #endif
 #endif
 static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
+// TODO: RA6 [name_Balaji]: Support functions below for RA6E1
 #if 0
 static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
@@ -530,6 +533,7 @@ static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
 static void MFGP_nvtest                      ( uint32_t argc, char *argv[] );
 #endif
 static void MFGP_ProcessCommand( char *command, uint16_t numBytes );
+// TODO: RA6 [name_Balaji]:Support below functions for RA6E1
 #if 0
 static void MFGP_shipMode                    ( uint32_t argc, char *argv[] );
 static void MFGP_SpuriousResetCount          ( uint32_t argc, char *argv[] );
@@ -713,7 +717,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "help",                       MFGP_CommandLine_Help,           "Display list of commands" },
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
-#if ( RTOS_SELECTION == MQX_RTOS )// TODO: RA6 [name_Balaji]: Add Comments once the respective module is integrated
+#if 0 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
    // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
    {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
    {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
@@ -1183,8 +1187,8 @@ static const struct_CmdLineEntry * const cmdTables[ ( uint16_t )menuLastValid ] 
 #endif
 #endif
 };
-
-#if ( RTOS_SELECTION == MQX_RTOS )
+// TODO: RA6 [name_Balaji]: Add functions once integrated for RA6E1
+#if 0
 static const char CRLF[] = { '\r', '\n' };
 
 //lint -e750    Lint is complaining about macro not referenced
@@ -1647,8 +1651,9 @@ returnStatus_t MFGP_cmdInit( void )
       retVal = eSUCCESS;
    } 
 #elif ( MCU_SELECTED == RA6E1 )
+   // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
    // TODO: RA6 [name_Balaji]: Check the number of messages
-   if ( OS_MSGQ_Create(&_CommandReceived_MSGQ,20) && OS_SEM_Create(&_ReceiveMfg_SEM) )// TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
+   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_ ) )
    {
       retVal = eSUCCESS;
    }
@@ -1917,16 +1922,18 @@ void MFGP_uartRecvTask( taskParameter )
          mfgpReadByte( rxByte );
       } 
 #elif ( MCU_SELECTED == RA6E1 )
-     (void)UART_read ( mfgUart, &rxByte, sizeof( rxByte ) );
-     (void)OS_SEM_Pend( &_ReceiveMfg_SEM, OS_WAIT_FOREVER );
+      /* Instead of Polling metod, Interrupt routine method is used in RA6E1 which
+       * reads byte-by-byte and stors the data in an array */
+     ( void )UART_read( mfgUart, &rxByte, sizeof( rxByte ) );
+     ( void )OS_SEM_Pend( &mfgReceiveSem_, OS_WAIT_FOREVER );
      if(rxByte !=  (uint8_t)0x00)
      {
          mfgpReadByte( rxByte );
-         UART_write( mfgUart, &rxByte, sizeof( rxByte ) );
+         ( void )UART_write( mfgUart, &rxByte, sizeof( rxByte ) );
          rxByte = 0x00;
-     }
+     }/* end if () */
 #endif
-   }
+   }/* end for () */
 #endif
 }
 #if ( MCU_SELECTED == RA6E1 )
@@ -1934,11 +1941,10 @@ void MFGP_uartRecvTask( taskParameter )
 
   Function name: mfg_uart_callback
 
-  Purpose: Interrupt Handler for UART Module
+  Purpose: Interrupt Handler for MFG UART Module,Postponds the semaphore wait
+            once one byte of data is read in SCI Channel 3 (MFG port)
 
   Returns: None
-
-  Notes: Can be used if required
 
 *******************************************************************************/
 void mfg_uart_callback( uart_callback_args_t *p_args )
@@ -1950,7 +1956,7 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
         /* Receive complete */
         case UART_EVENT_RX_COMPLETE:
         {
-            OS_SEM_Post_fromISR( &_ReceiveMfg_SEM );
+            OS_SEM_Post_fromISR( &mfgReceiveSem_ );
             break;
         }
         /* Transmit complete */
@@ -1961,10 +1967,11 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
         default:
         {
         }
-    }
-}/* end user_uart_callback () */
+    }/* end switch () */
+}/* end mfg_uart_callback () */
 #endif
-#if ( RTOS_SELECTION == MQX_RTOS )
+// TODO: RA6 [name_Balaji]:Support below functions for RA6E1
+#if 0
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 /*******************************************************************************
 
@@ -2277,7 +2284,8 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
 
       if ( argc > 0 )
       {
-#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add support for RA6E1
+// TODO: RA6 [name_Balaji]: Add all menu support for RA6E1
+#if 0 
          uint8_t  securityMode;
 
          ( void )APP_MSG_SecurityHandler( method_get, appSecurityAuthMode, &securityMode, NULL );
@@ -2411,7 +2419,7 @@ _Pragma ( "calls = \
       }
    }
 } /* end  */
-#if ( RTOS_SELECTION == MQX_RTOS )
+
 /***********************************************************************************************************************
    Function Name: Service_Unavailable
 
@@ -2425,7 +2433,7 @@ static void Service_Unavailable( void )
 {
    MFG_logPrintf( "Service unavailable\n" );
 }
-#endif
+
 /***********************************************************************************************************************
    Function Name: MFGP_CommandLine_Help
 
@@ -2447,15 +2455,25 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
 #else
    menu = menuStd;
 #endif
-
+#if ( MCU_SELECTED == NXP_K24 )
+   MFG_printf( "\nCommand List:\n" );   
+#elif ( MCU_SELECTED == RA6E1 )
+   /* Added carriage return to follow printing standard */
    MFG_printf( "\r\nCommand List:\r\n" );
+   /* Added a delay to make the print visible */
    OS_TASK_Sleep( TEN_MSEC );
+#endif
    CmdLineEntry = cmdTables[ menu ];
    while ( CmdLineEntry->pcCmd )
    {
+#if ( MCU_SELECTED == NXP_K24 )
+      MFG_printf( "%32s: %s\n", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
+#elif ( MCU_SELECTED == RA6E1 )
+      /* Added Carriage return to follow Printing standard */
       MFG_printf( "%32s: %s\r\n", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
+#endif 
       CmdLineEntry++;
-      OS_TASK_Sleep( 20 );
+      OS_TASK_Sleep( TEN_MSEC + TEN_MSEC );    /* Delay of 20millisecond makes all prints visible */
 #if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add other menu support
       if ( CmdLineEntry->pcCmd == NULL )
       {
@@ -2464,10 +2482,10 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
          {
             CmdLineEntry = cmdTables[ menu ];
          }
-      }
+      }/* end if() */
 #endif
-   }
-}
+   }/* end while() */
+}/* end MFGP_CommandLine_Help () */
 
 #if 0 // TODO: RA6 [name_Balaji]: Add Support for RA6E1
 /***********************************************************************************************************************

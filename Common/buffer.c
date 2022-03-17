@@ -530,8 +530,8 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
       if ( ( eBM_APP == type ) || ( eBM_STACK == type ) )
       {
          // Get current time
-#if ( RTOS_SELECTION == MQX_RTOS ) 
-         OS_TICK_Get_CurrentElapsedTicks( &CurrentTime );// TODO: RA6 [name_Balaji]: Add support for RA6E1
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1 once OS_TICK_Get_CurrentElapsedTicks is integrated
+         OS_TICK_Get_CurrentElapsedTicks( &CurrentTime );
 #endif
 
          // Is this the first time we run out of buffers?

@@ -25,7 +25,6 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#include "psp_cpudef.h"
 #elif (RTOS_SELECTION == FREE_RTOS)
 #include "BSP_aclara.h"
 #include "hal_data.h"
@@ -66,14 +65,15 @@ static const struct_UART_Setup UartSetup[MAX_UART_ID] =
 #endif
 };  
 #elif (RTOS_SELECTION == FREE_RTOS)
+/* Baud rate and other configurations are done in RASC configurator */
 const sci_uart_instance_ctrl_t *UartCtrl[4] =
 {
-   &g_uart3_ctrl, //MFG Port
+   &g_uart3_ctrl, /* MFG Port */
 #if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
-   &g_uart9_ctrl, //Optical Port
+   &g_uart9_ctrl, /* Optical Port */
 #endif
-   &g_uart4_ctrl, //DBG Port
-   &g_uart2_ctrl  //Meter Port
+   &g_uart4_ctrl, /* DBG Port */
+   &g_uart2_ctrl  /* Meter Port */
 };
 
 const uart_cfg_t *UartCfg[4] =
@@ -164,16 +164,16 @@ returnStatus_t UART_init ( void )
       }
    }
 #elif (RTOS_SELECTION == FREE_RTOS)
-   for(int UartChannelNum=0;UartChannelNum<MAX_UART_ID;UartChannelNum++)
+   for( int uartChannelNum = 0; uartChannelNum < MAX_UART_ID; uartChannelNum++ )
    {
-      (void)R_SCI_UART_Open((void *)UartCtrl[UartChannelNum], (void *)UartCfg[UartChannelNum]);
+      ( void )R_SCI_UART_Open( (void *)UartCtrl[ uartChannelNum ], (void *)UartCfg[ uartChannelNum ] );
    }
 #endif
 
    return ( retVal );
 }
-
-#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: UART_reset is done in UART_close for RA6E1
+/* No function calls for UART_reset */
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_reset
@@ -262,8 +262,8 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 #endif
    return ( DataSent );
 #elif ( MCU_SELECTED == RA6E1 )
-   (void)R_SCI_UART_Write((void *)UartCtrl[UartId], DataBuffer, DataLength );
-   return DataLength;//R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength
+   ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+   return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif
 
 }
@@ -299,12 +299,12 @@ uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 
    return ( DataReceived );
 #elif ( MCU_SELECTED == RA6E1 )
-   (void)R_SCI_UART_Read((void *)UartCtrl[UartId], DataBuffer, DataLength );
-   return DataLength;//R_SCI_UART_Read does not return the no. of valid read bytes, returning DataLength
+   ( void )R_SCI_UART_Read( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+   return DataLength;/* R_SCI_UART_Read does not return the no. of valid read bytes, returning DataLength */
 #endif
 }
 
-#if ( MCU_SELECTED == NXP_K24 )//The Below API are implemented by Renesas FSP itself
+#if ( MCU_SELECTED == NXP_K24 )/* The Below API are implemented by Renesas FSP itself */
 /*******************************************************************************
 
   Function name: UART_fgets
@@ -465,6 +465,7 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
 }
 
 #endif
+/* No function calls for UART_close */
 /*******************************************************************************
 
   Function name: UART_close
@@ -510,7 +511,7 @@ void * UART_getHandle ( enum_UART_ID UartId )
    return ( (void *)UartCtrl[ UartId ] );
 #endif
 }
-#if ( MCU_SELECTED == NXP_K24 )
+
 /*******************************************************************************
 
   Function name: UART_open
@@ -524,8 +525,9 @@ void * UART_getHandle ( enum_UART_ID UartId )
   Notes:
 
 *******************************************************************************/
-uint8_t UART_open ( enum_UART_ID UartId )// TODO: RA6 [name_Balaji]: UART Open is done in UART_Init for RA6E1
+uint8_t UART_open ( enum_UART_ID UartId )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    uint32_t Flags;
    uint8_t  retVal = (uint8_t)eFAILURE;
 
@@ -553,10 +555,15 @@ uint8_t UART_open ( enum_UART_ID UartId )// TODO: RA6 [name_Balaji]: UART Open i
                                     (void *)&Flags); /*lint !e835 !e845 !e64 */
       }
    }
-   return retVal;
-}
+   return retVal; 
+#elif ( MCU_SELECTED == RA6E1 )
+   /*Uart Open for RA6E1 is done in Uart Init*/
+   return ( uint8_t )eSUCCESS;
 #endif
+}
+
 #if ( MCU_SELECTED == RA6E1 )
+/* Configured in RASC for future use of Optical port and Meter port integration */
 /*******************************************************************************
 
   Function name: user_uart_callback
@@ -564,8 +571,6 @@ uint8_t UART_open ( enum_UART_ID UartId )// TODO: RA6 [name_Balaji]: UART Open i
   Purpose: Interrupt Handler for UART Module
 
   Returns: None
-
-  Notes: Can be used if required
 
 *******************************************************************************/
 void user_uart_callback( uart_callback_args_t *p_args )
@@ -582,6 +587,7 @@ void user_uart_callback( uart_callback_args_t *p_args )
         /* Transmit complete */
         case UART_EVENT_TX_COMPLETE:
         {
+            // TODO: RA6 [name_Balaji]: Discuss requirement for feature - print is completed or not
             break;
         }
         default:

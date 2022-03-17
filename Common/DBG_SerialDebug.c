@@ -100,7 +100,7 @@ static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
 static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
 #if ( MCU_SELECTED == RA6E1 )
-OS_SEM_Obj       _ReceiveDbg_SEM; 
+OS_SEM_Obj       dbgReceiveSem_;                           /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */ 
 #endif
 //static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
 static uint16_t         line_num_ = 0;                      /* Line number used by DBG_log */
@@ -142,7 +142,7 @@ returnStatus_t DBG_init( void )
    if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS ) &&
          OS_MUTEX_Create( &mutex_ ) &&
 #if ( MCU_SELECTED == RA6E1 )
-         OS_SEM_Create(&_ReceiveDbg_SEM) &&
+         OS_SEM_Create( &dbgReceiveSem_ ) &&
 #endif
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
@@ -407,8 +407,8 @@ static uint16_t addLogPrefixToString ( char category, char *pDst )
    sysTime_dateFormat_t RT_Clock;
    uint16_t len;
    (void)TIME_UTIL_GetTimeInDateFormat( &RT_Clock );
-// TODO: RA6 [name_Balaji]: Integrate once _task API's are done
-#if ( MCU_SELECTED == NXP_K24 )
+   // TODO: RA6 [name_Balaji]: Integrate once _task API's are done
+#if 0
    len = ( uint16_t )sprintf(   pDst, "%04u/%02u/%02u %02u:%02u:%02u.%03u %s_TSK ",
                                 RT_Clock.year,
                                 RT_Clock.month,
