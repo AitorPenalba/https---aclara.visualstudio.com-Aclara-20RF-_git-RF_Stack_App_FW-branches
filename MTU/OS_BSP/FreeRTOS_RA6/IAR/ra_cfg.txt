@@ -403,7 +403,7 @@ FSP Configuration
       Extra: Start bit detection: Falling Edge
       Extra: Noise Filter: Disable
       Extra: Receive FIFO Trigger Level: Max
-      Interrupts: Callback: user_uart_callback
+      Interrupts: Callback: mfg_uart_callback
       Interrupts: Receive Interrupt Priority: Priority 12
       Interrupts: Transmit Data Empty Interrupt Priority: Priority 12
       Interrupts: Transmit End Interrupt Priority: Priority 12
@@ -425,7 +425,7 @@ FSP Configuration
       Extra: Start bit detection: Falling Edge
       Extra: Noise Filter: Disable
       Extra: Receive FIFO Trigger Level: Max
-      Interrupts: Callback: user_uart_callback
+      Interrupts: Callback: dbg_uart_callback
       Interrupts: Receive Interrupt Priority: Priority 12
       Interrupts: Transmit Data Empty Interrupt Priority: Priority 12
       Interrupts: Transmit End Interrupt Priority: Priority 12

@@ -556,4 +556,37 @@ uint8_t UART_open ( enum_UART_ID UartId )// TODO: RA6 [name_Balaji]: UART Open i
    return retVal;
 }
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
 
+  Function name: user_uart_callback
+
+  Purpose: Interrupt Handler for UART Module
+
+  Returns: None
+
+  Notes: Can be used if required
+
+*******************************************************************************/
+void user_uart_callback( uart_callback_args_t *p_args )
+{
+  
+    /* Handle the UART event */
+     switch (p_args->event)
+    {
+        /* Receive complete */
+        case UART_EVENT_RX_COMPLETE:
+        {
+            break;
+        }
+        /* Transmit complete */
+        case UART_EVENT_TX_COMPLETE:
+        {
+            break;
+        }
+        default:
+        {
+        }
+    }
+}/* end user_uart_callback () */
+#endif

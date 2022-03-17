@@ -185,9 +185,10 @@
 #endif
 
 /* Temporary definition of MFG_logPrintf()   */
-#if 0
+// TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if (USE_DTLS == 1)
 #define MFG_logPrintf MFG_printf
+// TODO: RA6 [name_Balaji]: Need to be reevaluate for code effiency
 #define MFG_printf(fmt, args...) \
 { \
    if ((_MfgPortState == DTLS_SERIAL_IO_e) && (DTLS_GetSessionState() == DTLS_SESSION_CONNECTED_e)) \
@@ -206,8 +207,7 @@
 #define MFG_logPrintf MFG_printf
 #define MFG_printf (void)DBG_printfNoCr
 #endif
-#endif
-// TODO: RA6 [name_Balaji]:  Definition of MFG_logPrinf()
+#define MFG_logPrintf MFG_printf
 #define MFG_printf(fmt, args...) \
 { \
       MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (int32_t)sizeof(MFGP_CommandBuffer), fmt, ##args); \
@@ -249,10 +249,13 @@ static OS_EVNT_Obj      MFG_notify;                      /* Event handler to "no
 static mfgPortState_e   _MfgPortState;                   /* Port state */
 static const char       mfgpLockInEffect[] = {"LOCK IN EFFECT\n\r"}; /* When port is in tarpit this msg is returned  */
 #endif
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( RTOS_SELECTION == MQX_RTOS )// TODO: RA6 [name_Balaji]: Integrate _MfgpUartEvent once integrated
 static OS_EVNT_Obj      _MfgpUartEvent;
 #endif 
 static OS_MSGQ_Obj      _CommandReceived_MSGQ;
+#if ( MCU_SELECTED == RA6E1 )
+static OS_SEM_Obj       _ReceiveMfg_SEM; 
+#endif
 #if 0 // TODO: RA6 [name_Balaji]: Add support for RA6E1
 #if ( EP == 1 )
 static timer_t          rfTestModeTimerCfg;              /* rfTestMode timeout Timer configuration */
@@ -1645,7 +1648,7 @@ returnStatus_t MFGP_cmdInit( void )
    } 
 #elif ( MCU_SELECTED == RA6E1 )
    // TODO: RA6 [name_Balaji]: Check the number of messages
-   if ( OS_MSGQ_Create(&_CommandReceived_MSGQ,20) )// TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
+   if ( OS_MSGQ_Create(&_CommandReceived_MSGQ,20) && OS_SEM_Create(&_ReceiveMfg_SEM) )// TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
    {
       retVal = eSUCCESS;
    }
@@ -1908,28 +1911,28 @@ void MFGP_uartRecvTask( taskParameter )
 #else
    for( ;; )
    {
-#if (RTOS_SELECTION == FREE_RTOS)
-      OS_TASK_Sleep(500);
-#endif
-      while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) 
-#if ( MCU_SELECTED == RA6E1 )
-               && (rxByte !=  (uint8_t)0x00)
-#endif             
-             )
+#if ( MCU_SELECTED == NXP_K24 )
+      while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) )
       {
          mfgpReadByte( rxByte );
-         #if ( MCU_SELECTED == RA6E1 )
+      } 
+#elif ( MCU_SELECTED == RA6E1 )
+     (void)UART_read ( mfgUart, &rxByte, sizeof( rxByte ) );
+     (void)OS_SEM_Pend( &_ReceiveMfg_SEM, OS_WAIT_FOREVER );
+     if(rxByte !=  (uint8_t)0x00)
+     {
+         mfgpReadByte( rxByte );
          UART_write( mfgUart, &rxByte, sizeof( rxByte ) );
          rxByte = 0x00;
-         #endif
-      }
+     }
+#endif
    }
 #endif
 }
 #if ( MCU_SELECTED == RA6E1 )
 /*******************************************************************************
 
-  Function name: user_uart_callback
+  Function name: mfg_uart_callback
 
   Purpose: Interrupt Handler for UART Module
 
@@ -1938,7 +1941,7 @@ void MFGP_uartRecvTask( taskParameter )
   Notes: Can be used if required
 
 *******************************************************************************/
-void user_uart_callback( uart_callback_args_t *p_args )
+void mfg_uart_callback( uart_callback_args_t *p_args )
 {
   
     /* Handle the UART event */
@@ -1947,6 +1950,7 @@ void user_uart_callback( uart_callback_args_t *p_args )
         /* Receive complete */
         case UART_EVENT_RX_COMPLETE:
         {
+            OS_SEM_Post_fromISR( &_ReceiveMfg_SEM );
             break;
         }
         /* Transmit complete */

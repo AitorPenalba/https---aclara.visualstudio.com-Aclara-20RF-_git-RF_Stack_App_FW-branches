@@ -226,7 +226,7 @@
 #define ENABLE_PRNT_ALRM_ERROR         1
 
 /* ------------------------------------------------------------------------------------------------------------------ */
-#define USE_DTLS                       1
+#define USE_DTLS                       0     // TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if ( ACLARA_LC == 1 ) || (ACLARA_DA == 1)
 #define DTLS_FIELD_TRIAL               0     /* Disable feature to allows unsecured comm. until session established   */
 #else

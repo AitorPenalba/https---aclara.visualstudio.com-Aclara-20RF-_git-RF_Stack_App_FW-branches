@@ -99,6 +99,9 @@ static OS_MUTEX_Obj     mutex_;
 static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
 static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
+#if ( MCU_SELECTED == RA6E1 )
+OS_SEM_Obj       _ReceiveDbg_SEM; 
+#endif
 //static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
 static uint16_t         line_num_ = 0;                      /* Line number used by DBG_log */
 #if ENABLE_TMR_TASKS
@@ -138,6 +141,9 @@ returnStatus_t DBG_init( void )
 #endif
    if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS ) &&
          OS_MUTEX_Create( &mutex_ ) &&
+#if ( MCU_SELECTED == RA6E1 )
+         OS_SEM_Create(&_ReceiveDbg_SEM) &&
+#endif
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
    {

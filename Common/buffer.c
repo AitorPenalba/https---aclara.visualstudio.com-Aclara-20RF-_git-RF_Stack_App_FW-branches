@@ -460,7 +460,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
    uint8_t pool;
    buffer_t *pBuf = NULL;
 #if ( RTOS_SELECTION == MQX_RTOS ) 
-   OS_TICK_Struct CurrentTime;// TODO: RA6 [name_Balaji]: Add support for RA6E1
+   OS_TICK_Struct CurrentTime;// TODO: RA6 [name_Balaji]: Check removing Conditional compiler once in main branch
 #endif
    bool           overflow;
    static bool outOfBuffErrorLogged_ = false; //To restrict logging out of buffers event/error once per power up

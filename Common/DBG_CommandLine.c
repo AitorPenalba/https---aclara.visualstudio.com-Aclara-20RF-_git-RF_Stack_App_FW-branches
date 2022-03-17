@@ -31,6 +31,9 @@
 #include <ctype.h>
 #include "DBG_SerialDebug.h"
 #include "DBG_CommandLine.h"
+#if ( MCU_SELECTED == RA6E1 )
+#include "hal_data.h"
+#endif
 //#include <bsp.h>
 //#include "file_io.h"
 //#include "SELF_test.h"
@@ -209,6 +212,7 @@ typedef struct {
 /* CONSTANTS */
 
 /* FILE VARIABLE DEFINITIONS */
+extern OS_SEM_Obj       _ReceiveDbg_SEM;
 #if ENABLE_HMC_TASKS
 static OS_SEM_Obj HMC_CMD_SEM;
 static bool       HmcCmdSemCreated = ( bool )false;
@@ -764,25 +768,25 @@ void DBG_CommandLineTask ( taskParameter )
 #endif
 #endif
 #if ( MCU_SELECTED == RA6E1 )
-   OS_TASK_Sleep(500);
-   while ( 0 != UART_read ( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) )//Uart Read is done in bytes
-            && (rxByte !=  (uint8_t)0x00))
-   {
-      /* Check before executing; may have been disable while waiting for input   */
-      if (DBG_IsPortEnabled () ) /* Only process input if the port is enabled */
+      (void)UART_read ( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ));
+      (void)OS_SEM_Pend( &_ReceiveDbg_SEM, OS_WAIT_FOREVER );
+      if(rxByte !=  (uint8_t)0x00)
       {
-//         DBG_CommandLine_Process();
-        dbgpReadByte( rxByte );// TODO: RA6 [name_Balaji]: As there is no IOCTL for RA6E1 processing the information by byte
+         /* Check before executing; may have been disable while waiting for input   */
+         if (DBG_IsPortEnabled () ) /* Only process input if the port is enabled */
+         {
+//        DBG_CommandLine_Process();
+         dbgpReadByte( rxByte );// TODO: RA6 [name_Balaji]: As there is no IOCTL for RA6E1 processing the information by byte
+         }
+         else
+         {
+            (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
+//          (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
+            OS_TASK_Sleep ( 10 );     /* Check again in a second, or so...   */
+         }
+         UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
+         rxByte = 0x00; //resets the rxByte
       }
-      else
-      {
-         (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
-//         (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
-         OS_TASK_Sleep ( 10 );     /* Check again in a second, or so...   */
-      }
-      UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
-      rxByte = 0x00; //resets the rxByte
-   }
 #endif
    } /* end for() */
 } /* end DBG_CommandLineTask () */
@@ -835,7 +839,41 @@ static void dbgpReadByte( uint8_t rxByte )
       }
    }
 }
+#if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
 
+  Function name: dbg_uart_callback
+
+  Purpose: Interrupt Handler for UART Module
+
+  Returns: None
+
+  Notes: Can be used if required
+
+*******************************************************************************/
+void dbg_uart_callback( uart_callback_args_t *p_args )
+{
+  
+    /* Handle the UART event */
+     switch (p_args->event)
+    {
+        /* Receive complete */
+        case UART_EVENT_RX_COMPLETE:
+        {
+            OS_SEM_Post_fromISR( &_ReceiveDbg_SEM );
+            break;
+        }
+        /* Transmit complete */
+        case UART_EVENT_TX_COMPLETE:
+        {
+            break;
+        }
+        default:
+        {
+        }
+    }
+}/* end user_uart_callback () */
+#endif
 /*******************************************************************************
 
    Function name: DBG_CommandLine_Process
@@ -1098,7 +1136,7 @@ static void DBG_CommandLine_Process ( void )
             ****************************************************************************/
             if ( DBG_IsPortEnabled () )
             {
-               DBG_PortTimer_Manage ( );
+//               DBG_PortTimer_Manage ( );// TODO: RA6 [name_Balaji]: Integrate Timer for DBG module
             }
             /***************************************************************************
                Reset the rfTestmode timer upon execution of a valid command
