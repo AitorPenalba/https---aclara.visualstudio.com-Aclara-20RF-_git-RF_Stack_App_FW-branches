@@ -97,7 +97,7 @@ uint16_t CRC_CUSTOM_16cal( uint16_t crc16Polynomial, uint16_t seed, const void *
 
    Purpose: Calculates crc16 for the given Poly and there is no refin/refout support available
 
-   Arguments: uint32_t crc16Polynomial - Polynomial for the crc16 calculation
+   Arguments: uint32_t crc132Polynomial - Polynomial for the crc16 calculation
               uint32_t seed - inital value of the CRC
               const void *data - data buffer
               size_t length  - size of the data buffer
@@ -105,11 +105,11 @@ uint16_t CRC_CUSTOM_16cal( uint16_t crc16Polynomial, uint16_t seed, const void *
    Returns: calculated CRC16 value
 
    Notes: Use the following link http://www.sunshine2k.de/coding/javascript/crc/crc_js.html to
-          test the functionality of the CRC32. Input reflected:should be unchecked, 
+          test the functionality of the CRC32. Input reflected:should be unchecked,
           Result reflected:should be unchecked and Final Xor Value should be 0
 
 *******************************************************************************/
-uint32_t CRC_CUSTOM_32cal(uint32_t crc16Polynomial, uint32_t seed, const void *data, size_t length)
+uint32_t CRC_CUSTOM_32cal(uint32_t crc32Polynomial, uint32_t seed, const void *data, size_t length)
 {
    uint32_t calculatedCRC = seed;
 
@@ -122,7 +122,7 @@ uint32_t CRC_CUSTOM_32cal(uint32_t crc16Polynomial, uint32_t seed, const void *d
        for( j = 0; j < 8; j++ )
        {
            if( calculatedCRC  & 0x80000000 )
-               calculatedCRC = ( calculatedCRC << 1 ) ^ crc16Polynomial;
+               calculatedCRC = ( calculatedCRC << 1 ) ^ crc32Polynomial;
            else
                calculatedCRC <<= 1;
        }

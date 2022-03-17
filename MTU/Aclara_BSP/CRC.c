@@ -112,7 +112,7 @@ uint16_t CRC_16_Calculate ( uint8_t *Data, uint32_t Length )
 #endif
    OS_MUTEX_Unlock(&CRC_Mutex); // Function will not return if it fails
 
-   return ( CRC16_Result );
+   return ( (uint16_t) CRC16_Result );
 } /* end CRC_16_Calculate () */
 
 /*******************************************************************************

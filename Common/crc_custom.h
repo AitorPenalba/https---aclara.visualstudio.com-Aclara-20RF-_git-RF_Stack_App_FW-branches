@@ -46,6 +46,6 @@
 
 /* FUNCTION PROTOTYPES */
 uint16_t CRC_CUSTOM_16cal( uint16_t crc16Polynomial, uint16_t seed, const void *data, size_t length );
-uint32_t CRC_CUSTOM_32cal(uint32_t crc16Polynomial, uint32_t seed, const void *data, size_t length);
+uint32_t CRC_CUSTOM_32cal(uint32_t crc32Polynomial, uint32_t seed, const void *data, size_t length);
 
 #endif /* CRC16_CUSTOM_H */
