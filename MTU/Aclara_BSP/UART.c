@@ -90,6 +90,9 @@ const uart_cfg_t *UartCfg[4] =
 #if ( RTOS_SELECTION == MQX_RTOS )
 static MQX_FILE_PTR UartHandle[MAX_UART_ID];
 #endif
+
+extern OS_SEM_Obj       mfgTransferSem_;
+extern OS_SEM_Obj       dbgTransferSem_;
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
@@ -263,6 +266,13 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
    return ( DataSent );
 #elif ( MCU_SELECTED == RA6E1 )
    ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+//   ( void )OS_SEM_Pend( &dbgTransferSem_, OS_WAIT_FOREVER );
+      if ( OS_SEM_Pend( &mfgTransferSem_, OS_WAIT_FOREVER ) || OS_SEM_Pend( &dbgTransferSem_, OS_WAIT_FOREVER )  )
+      {
+       //Do Nothing 
+      }
+//   while(OS_SEM_Pend( &mfgTransferSem_, OS_WAIT_FOREVER )); 
+//         || OS_SEM_Pend( &dbgTransferSem_, OS_WAIT_FOREVER )        
    return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif
 

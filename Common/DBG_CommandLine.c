@@ -214,6 +214,7 @@ typedef struct {
 /* FILE VARIABLE DEFINITIONS */
 #if ( MCU_SELECTED == RA6E1 )    
 extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+extern OS_SEM_Obj       dbgTransferSem_;           
 #endif
 #if ENABLE_HMC_TASKS
 static OS_SEM_Obj HMC_CMD_SEM;
@@ -798,7 +799,7 @@ void DBG_CommandLineTask ( taskParameter )
             OS_TASK_Sleep ( TIME_TICKS_PER_SEC  );     /* Check again in a second, or so...   */
 #endif
          }
-         ( void )UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
+//         ( void )UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
          rxByte = 0x00; //resets the rxByte
       }
 #endif
@@ -848,6 +849,7 @@ static void dbgpReadByte( uint8_t rxByte )
       else
       {
          // Save character in buffer (space is available)
+        ( void )UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
          DbgCommandBuffer[ DBGP_numBytes++] = rxByte;
       }/* end else () */
    }/* end else () */
@@ -878,6 +880,7 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
         /* Transmit complete */
         case UART_EVENT_TX_COMPLETE:
         {
+            OS_SEM_Post_fromISR( &dbgTransferSem_ );
             break;
         }
         default:
@@ -1213,7 +1216,7 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
 /* Added carriage return to follow printing standard */
    DBG_printf( "\r\n[M]Command List:\r" );
 /* Added a delay to make the print visible */
-   OS_TASK_Sleep( TEN_MSEC );
+//   OS_TASK_Sleep( TEN_MSEC );
    CmdLineEntry = DBG_CmdTable;
    while ( CmdLineEntry->pcCmd )
    {

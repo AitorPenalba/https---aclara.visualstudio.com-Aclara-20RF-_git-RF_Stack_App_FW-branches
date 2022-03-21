@@ -256,7 +256,8 @@ static OS_EVNT_Obj      _MfgpUartEvent;
 static OS_MSGQ_Obj      _CommandReceived_MSGQ;
 #if ( MCU_SELECTED == RA6E1 )
 /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
-static OS_SEM_Obj       mfgReceiveSem_; 
+static OS_SEM_Obj       mfgReceiveSem_;
+OS_SEM_Obj       mfgTransferSem_;
 #endif
 #if 0 // TODO: RA6 [name_Balaji]: Add support for RA6E1
 #if ( EP == 1 )
@@ -1653,7 +1654,7 @@ returnStatus_t MFGP_cmdInit( void )
 #elif ( MCU_SELECTED == RA6E1 )
    // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
    // TODO: RA6 [name_Balaji]: Check the number of messages
-   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_ ) )
+   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_ ) && OS_SEM_Create( &mfgTransferSem_ ) )
    {
       retVal = eSUCCESS;
    }
@@ -1777,6 +1778,7 @@ static void mfgpReadByte( uint8_t rxByte )
       else
       {
          // Save character in buffer (space is available)
+        ( void )UART_write( mfgUart, &rxByte, sizeof( rxByte ) );
          MFGP_CommandBuffer[ MFGP_numBytes++] = rxByte;
       }
    }
@@ -1929,7 +1931,6 @@ void MFGP_uartRecvTask( taskParameter )
      if(rxByte !=  (uint8_t)0x00)
      {
          mfgpReadByte( rxByte );
-         ( void )UART_write( mfgUart, &rxByte, sizeof( rxByte ) );
          rxByte = 0x00;
      }/* end if () */
 #endif
@@ -1962,6 +1963,7 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
         /* Transmit complete */
         case UART_EVENT_TX_COMPLETE:
         {
+            OS_SEM_Post_fromISR( &mfgTransferSem_ );
             break;
         }
         default:
@@ -2460,8 +2462,10 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
 #elif ( MCU_SELECTED == RA6E1 )
    /* Added carriage return to follow printing standard */
    MFG_printf( "\r\nCommand List:\r\n" );
+//   MFG_puts( mfgUart, (uint8_t *)"\r\nCommand List:\r\n", 17 );
    /* Added a delay to make the print visible */
-   OS_TASK_Sleep( TEN_MSEC );
+//   OS_TASK_Sleep( TEN_MSEC );
+//      OS_TASK_Sleep( 10 );
 #endif
    CmdLineEntry = cmdTables[ menu ];
    while ( CmdLineEntry->pcCmd )
