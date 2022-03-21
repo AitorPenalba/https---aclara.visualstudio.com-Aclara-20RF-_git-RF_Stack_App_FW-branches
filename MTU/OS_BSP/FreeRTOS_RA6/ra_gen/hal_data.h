@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "bsp_api.h"
 #include "common_data.h"
+#include "r_crc.h"
+#include "r_crc_api.h"
 #include "r_agt.h"
 #include "r_timer_api.h"
 #include "r_flash_hp.h"
@@ -25,9 +27,10 @@
 #include "r_external_irq_api.h"
 #include "r_iic_master.h"
 #include "r_i2c_master_api.h"
-#include "r_crc.h"
-#include "r_crc_api.h"
 FSP_HEADER
+extern const crc_instance_t g_crc1;
+extern crc_instance_ctrl_t g_crc1_ctrl;
+extern const crc_cfg_t g_crc1_cfg;
 /** AGT Timer Instance */
 extern const timer_instance_t g_timer0;
 

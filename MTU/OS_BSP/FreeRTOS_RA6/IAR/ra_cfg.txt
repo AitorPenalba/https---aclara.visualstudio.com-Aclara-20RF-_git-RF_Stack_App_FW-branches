@@ -674,3 +674,9 @@ FSP Configuration
       Interrupts: Callback: g_timer0_callback
       Interrupts: Underflow Interrupt Priority: Priority 10
       
+    Instance "g_crc1 CRC (r_crc)"
+      Name: g_crc1
+      CRC Polynomial: CRC-16
+      Bit Order: MSB
+      Snoop Address: NONE
+      

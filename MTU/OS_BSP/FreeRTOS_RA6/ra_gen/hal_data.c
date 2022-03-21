@@ -6,6 +6,22 @@
 #define ADC_TRIGGER_ADC0_B      ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1        ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1_B      ADC_TRIGGER_SYNC_ELC
+crc_instance_ctrl_t g_crc1_ctrl;
+const crc_cfg_t g_crc1_cfg =
+{
+    .polynomial      = CRC_POLYNOMIAL_CRC_16,
+    .bit_order       = CRC_BIT_ORDER_LMS_MSB,
+    .snoop_address   = CRC_SNOOP_ADDRESS_NONE,
+    .p_extend        = NULL,
+};
+
+/* Instance structure to use this module. */
+const crc_instance_t g_crc1 =
+{
+    .p_ctrl        = &g_crc1_ctrl,
+    .p_cfg         = &g_crc1_cfg,
+    .p_api         = &g_crc_on_crc
+};
 agt_instance_ctrl_t g_timer0_ctrl;
 const agt_extended_cfg_t g_timer0_extend =
 {

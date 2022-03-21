@@ -99,10 +99,8 @@ void ecc108c_calculate_crc( uint16_t length, uint8_t *data, uint8_t *crc )
    }
    crc[0] = (uint8_t) (crc_register & 0x00FF);
    crc[1] = (uint8_t) (crc_register >> 8);
-#if 0 // TODO: RA6E1 - For now, using local routine CRC as CRC engine does not implemented
    CRC_ecc108_crc( length, data, (uint8_t *)&engine_crc, 0, (bool)false );
    assert ( crc_register == engine_crc );
-#endif
 #else
    /* Use CRC engine */
    CRC_ecc108_crc( (uint8_t)length, data, crc, 0, (bool)false );
