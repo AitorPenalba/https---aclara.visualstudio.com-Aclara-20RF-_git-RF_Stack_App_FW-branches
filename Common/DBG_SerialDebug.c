@@ -101,7 +101,7 @@ static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
 static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
 #if ( MCU_SELECTED == RA6E1 )
 OS_SEM_Obj       dbgReceiveSem_;                           /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */ 
-OS_SEM_Obj       dbgTransferSem_;
+extern OS_SEM_Obj       transferSem[MAX_UART_ID];
 #endif
 //static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
 static uint16_t         line_num_ = 0;                      /* Line number used by DBG_log */
@@ -144,7 +144,7 @@ returnStatus_t DBG_init( void )
          OS_MUTEX_Create( &mutex_ ) &&
 #if ( MCU_SELECTED == RA6E1 )
          OS_SEM_Create( &dbgReceiveSem_ ) &&
-         OS_SEM_Create( &dbgTransferSem_ ) &&
+         OS_SEM_Create( &transferSem[UART_DEBUG_PORT] ) &&
 #endif
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )

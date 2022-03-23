@@ -258,6 +258,7 @@ static OS_MSGQ_Obj      _CommandReceived_MSGQ;
 /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
 static OS_SEM_Obj       mfgReceiveSem_;
 OS_SEM_Obj       mfgTransferSem_;
+OS_SEM_Obj       transferSem[MAX_UART_ID];
 #endif
 #if 0 // TODO: RA6 [name_Balaji]: Add support for RA6E1
 #if ( EP == 1 )
@@ -1188,9 +1189,9 @@ static const struct_CmdLineEntry * const cmdTables[ ( uint16_t )menuLastValid ] 
 #endif
 #endif
 };
+static const char CRLF[] = { '\r', '\n' };
 // TODO: RA6 [name_Balaji]: Add functions once integrated for RA6E1
 #if 0
-static const char CRLF[] = { '\r', '\n' };
 
 //lint -e750    Lint is complaining about macro not referenced
 #define MFG_COMMON_CALLS \
@@ -1654,7 +1655,7 @@ returnStatus_t MFGP_cmdInit( void )
 #elif ( MCU_SELECTED == RA6E1 )
    // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
    // TODO: RA6 [name_Balaji]: Check the number of messages
-   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_ ) && OS_SEM_Create( &mfgTransferSem_ ) )
+   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_ ) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ] ) )
    {
       retVal = eSUCCESS;
    }
@@ -1697,6 +1698,7 @@ static void mfgpReadByte( uint8_t rxByte )
       {
          /* buffer contains at least one character, remove the last one entered */
          MFGP_numBytes -= 1;
+         ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b", 3 );
       }
    }
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -1741,34 +1743,40 @@ static void mfgpReadByte( uint8_t rxByte )
             return;
          }
 #endif
-         commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
-         if ( commandBuf != NULL )
+         if ( MFGP_numBytes == 0)
          {
-            commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
-
-#if ( DTLS_DEBUG == 1 )
-            INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
-            OS_TASK_Sleep( 50U );
-#endif
-            ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
-            /* Call the command */
-            OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
-#if ( USE_USB_MFG != 0 )
-            event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
-            if ( event_flags == 0 )    /* Check for time-out.  */
-            {
-               /* Unblock task(s) waiting on USB output  */
-               USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
-            }
-#endif
-            MFGP_numBytes = 0;
+            (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
          }
          else
          {
-            ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
-            MFGP_numBytes = 0;
-         }
+            commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
+            if ( commandBuf != NULL )
+            {
+               commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
 
+#if ( DTLS_DEBUG == 1 )
+               INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
+               OS_TASK_Sleep( 50U );
+#endif
+               ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
+               /* Call the command */
+               OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
+#if ( USE_USB_MFG != 0 )
+               event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
+               if ( event_flags == 0 )    /* Check for time-out.  */
+               {
+                  /* Unblock task(s) waiting on USB output  */
+                  USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
+               }
+#endif
+               MFGP_numBytes = 0;
+            }
+            else
+            {
+               ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
+               MFGP_numBytes = 0;
+            }
+         }
       }
       else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
       {
@@ -1928,10 +1936,10 @@ void MFGP_uartRecvTask( taskParameter )
        * reads byte-by-byte and stors the data in an array */
      ( void )UART_read( mfgUart, &rxByte, sizeof( rxByte ) );
      ( void )OS_SEM_Pend( &mfgReceiveSem_, OS_WAIT_FOREVER );
-     if(rxByte !=  (uint8_t)0x00)
+     if( rxByte != (uint8_t)0x00 )
      {
-         mfgpReadByte( rxByte );
-         rxByte = 0x00;
+        mfgpReadByte( rxByte );
+        rxByte = 0x00;     /* resets the rxByte */
      }/* end if () */
 #endif
    }/* end for () */
@@ -1952,23 +1960,23 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
 {
   
     /* Handle the UART event */
-     switch (p_args->event)
+     switch ( p_args->event )
     {
-        /* Receive complete */
-        case UART_EVENT_RX_COMPLETE:
-        {
-            OS_SEM_Post_fromISR( &mfgReceiveSem_ );
-            break;
-        }
-        /* Transmit complete */
-        case UART_EVENT_TX_COMPLETE:
-        {
-            OS_SEM_Post_fromISR( &mfgTransferSem_ );
-            break;
-        }
-        default:
-        {
-        }
+       /* Receive complete */
+       case UART_EVENT_RX_COMPLETE:
+       {
+          OS_SEM_Post_fromISR( &mfgReceiveSem_ );
+          break;
+       }
+       /* Transmit complete */
+       case UART_EVENT_TX_COMPLETE:
+       {
+          OS_SEM_Post_fromISR( &transferSem[ UART_MANUF_TEST ] );
+          break;
+       }
+       default:
+       {
+       }
     }/* end switch () */
 }/* end mfg_uart_callback () */
 #endif
@@ -2462,10 +2470,6 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
 #elif ( MCU_SELECTED == RA6E1 )
    /* Added carriage return to follow printing standard */
    MFG_printf( "\r\nCommand List:\r\n" );
-//   MFG_puts( mfgUart, (uint8_t *)"\r\nCommand List:\r\n", 17 );
-   /* Added a delay to make the print visible */
-//   OS_TASK_Sleep( TEN_MSEC );
-//      OS_TASK_Sleep( 10 );
 #endif
    CmdLineEntry = cmdTables[ menu ];
    while ( CmdLineEntry->pcCmd )
