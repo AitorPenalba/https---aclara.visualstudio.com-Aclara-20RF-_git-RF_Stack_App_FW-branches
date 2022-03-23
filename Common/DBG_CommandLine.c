@@ -210,12 +210,14 @@ typedef struct {
 } NOISEBAND_Stats_t;
 
 /* CONSTANTS */
-static const char CRLF[] = { '\r', '\n' };
+#if ( MCU_SELECTED == RA6E1 )
+static const char CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
+#endif
 
 /* FILE VARIABLE DEFINITIONS */
 #if ( MCU_SELECTED == RA6E1 )    
 extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
-extern OS_SEM_Obj       transferSem[MAX_UART_ID];
+extern OS_SEM_Obj       transferSem[MAX_UART_ID]; /* For RA6E1, UART_write process is used in Semaphore method */
 #endif
 #if ENABLE_HMC_TASKS
 static OS_SEM_Obj HMC_CMD_SEM;
@@ -831,9 +833,13 @@ static void dbgpReadByte( uint8_t rxByte )
       if( DBGP_numBytes != 0 )
       {
          /* buffer contains at least one character, remove the last one entered */
-         DbgCommandBuffer[ DBGP_numBytes] = 0x00;
          DBGP_numBytes -= 1;
+#if ( MCU_SELECTED == RA6E1 )
+         /* Resets the last entered character */
+         DbgCommandBuffer[ DBGP_numBytes] = 0x00;
+         /* Gives GUI effect in Terminal for Backspace */
          ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)"\b\x20\b", 3 );
+#endif
       }/* end if () */
    }/* end else if () */
    else
@@ -842,7 +848,8 @@ static void dbgpReadByte( uint8_t rxByte )
       {
          if ( DBGP_numBytes == 0)
          {
-             ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
+            /* Gives GUI in Terminal for Carriage Return */
+            ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
          }
          else
          {

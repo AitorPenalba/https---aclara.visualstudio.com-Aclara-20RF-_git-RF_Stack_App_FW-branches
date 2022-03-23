@@ -91,7 +91,7 @@ const uart_cfg_t *UartCfg[4] =
 static MQX_FILE_PTR UartHandle[MAX_UART_ID];
 #endif
 
-extern OS_SEM_Obj       transferSem[MAX_UART_ID];
+extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */

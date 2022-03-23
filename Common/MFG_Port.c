@@ -257,7 +257,7 @@ static OS_MSGQ_Obj      _CommandReceived_MSGQ;
 #if ( MCU_SELECTED == RA6E1 )
 /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
 static OS_SEM_Obj       mfgReceiveSem_;
-OS_SEM_Obj       mfgTransferSem_;
+/* For RA6E1, UART_write process is used in Semaphore method */
 OS_SEM_Obj       transferSem[MAX_UART_ID];
 #endif
 #if 0 // TODO: RA6 [name_Balaji]: Add support for RA6E1
@@ -1698,7 +1698,10 @@ static void mfgpReadByte( uint8_t rxByte )
       {
          /* buffer contains at least one character, remove the last one entered */
          MFGP_numBytes -= 1;
+#if ( MCU_SELECTED == RA6E1 )
+         /* Gives GUI effect in Terminal for Backspace */
          ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b", 3 );
+#endif
       }
    }
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -1743,12 +1746,15 @@ static void mfgpReadByte( uint8_t rxByte )
             return;
          }
 #endif
+#if ( MCU_SELECTED == RA6E1 )
          if ( MFGP_numBytes == 0)
          {
+            /* Gives GUI in Terminal for Carriage Return */
             (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
          }
          else
          {
+#endif
             commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
             if ( commandBuf != NULL )
             {
@@ -1776,7 +1782,9 @@ static void mfgpReadByte( uint8_t rxByte )
                ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
                MFGP_numBytes = 0;
             }
+#if ( MCU_SELECTED == RA6E1 )
          }
+#endif
       }
       else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
       {
