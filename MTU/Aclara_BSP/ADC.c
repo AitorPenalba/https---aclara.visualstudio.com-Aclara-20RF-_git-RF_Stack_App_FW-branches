@@ -303,7 +303,7 @@ static bool setup_ADC0 ( void )
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
    /* Initializes the module. */
-   (void)R_ADC_Open( &g_adc0_ctrl, &g_adc0_cfg );
+   (void)R_ADC_Open( &g_adc0_ctrl, &g_adc0_cfg );  /* Renesas's FSP function returns are removed */
    /* Enable channels. */
    (void)R_ADC_ScanCfg( &g_adc0_ctrl, &g_adc0_channel_cfg );
 #endif

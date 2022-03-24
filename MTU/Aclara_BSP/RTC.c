@@ -101,9 +101,9 @@ void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
    uint32_t microSec = 0;
    (void)R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &pTime );
    RTC_GetTimeInSecMicroSec ( &sec , &microSec);
-   RT_Clock->month = (uint8_t)pTime.tm_mon;
+   RT_Clock->month = (uint8_t)pTime.tm_mon + 1;  //In RA6E1, Jan- 0 and Dec- 11
    RT_Clock->day   = (uint8_t)pTime.tm_mday;
-   RT_Clock->year  = (uint16_t)pTime.tm_year + 1900;//In RA6E1, Years SINCE 1900 (2021 = 2021-1900 = 121)
+   RT_Clock->year  = (uint16_t)pTime.tm_year + 1900;  //In RA6E1, Years SINCE 1900 (2021 = 2021-1900 = 121)
    RT_Clock->hour  = (uint8_t)pTime.tm_hour;
    RT_Clock->min   = (uint8_t)pTime.tm_min;
    RT_Clock->sec   = (uint8_t)pTime.tm_sec;
@@ -190,7 +190,7 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
      && (RT_Clock->sec   <= MAX_RTC_SECOND) )
    {
       pTime.tm_sec = RT_Clock->sec;
-      pTime.tm_mon = RT_Clock->month;
+      pTime.tm_mon = RT_Clock->month - 1;  //In RA6E1, Jan- 0 and Dec- 11
       pTime.tm_mday = RT_Clock->day;
       pTime.tm_year = (int16_t)RT_Clock->year - 1900; //In RA6E1, Year SINCE 1900 (2021 = 2021-1900 = 121)
       pTime.tm_hour = RT_Clock->hour;

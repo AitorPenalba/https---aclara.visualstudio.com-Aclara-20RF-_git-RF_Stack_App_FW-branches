@@ -416,7 +416,7 @@ static uint16_t RunSelfTest()
       if ( SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had failed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 0;
-#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event module is ready
+#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event Log module is ready
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOSucceeded;
          (void)EVL_LogEvent( 45, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
@@ -428,7 +428,7 @@ static uint16_t RunSelfTest()
       if ( !SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had passed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 1;
-#if 0
+#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event Log module is ready
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOFailed;
          eventData.eventKeyValuePairsCount      = 1;
@@ -595,10 +595,10 @@ returnStatus_t SELF_testRTC( void )
    {
    .sec  = 55,
    .min  = 59,
-   .hour = 23,       //24-HOUR mode
-   .day = 31,        //RDAYCNT
-   .month  = 11,     //RMONCNT 0-Jan 11 Dec
-   .year = 2021       //RYRCNT //Year SINCE 1900 (2021 = 2021-1900 = 121)
+   .hour = 23,       /* 24-HOUR mode */
+   .day = 31,
+   .month  = 12,
+   .year = 2021
    };
    sysTime_dateFormat_t getTime1;
    sysTime_dateFormat_t getTime2;
