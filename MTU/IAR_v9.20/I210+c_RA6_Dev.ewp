@@ -1431,6 +1431,12 @@
                 </file>
             </group>
             <file>
+                <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>
             </file>
             <file>
