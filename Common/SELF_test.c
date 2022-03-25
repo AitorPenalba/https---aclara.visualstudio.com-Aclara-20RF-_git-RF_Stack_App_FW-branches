@@ -224,7 +224,7 @@ void SELF_testTask( taskParameter )
 #endif
 
    /* Now, lower the task priority to just higher than the IDLE task.  */
-   OS_TASK_Set_Above_Idle( pTskName_Test );
+   (void)OS_TASK_Set_Priority ( pTskName_Test, LOWEST_TASK_PRIORITY_ABOVE_IDLE() );
 
    for (;;)                                                    /* Task Loop */
    {

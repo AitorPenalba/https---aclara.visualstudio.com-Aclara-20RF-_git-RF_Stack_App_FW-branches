@@ -28,11 +28,8 @@
 /* FILE VARIABLE DEFINITIONS */
 
 /* FUNCTION PROTOTYPES */
-//TODO: adhere to new task parameter macro
 #if ( RTOS_SELECTION == MQX_RTOS )
 void IDL_IdleTask ( uint32_t Arg0 );
-#elif ( RTOS_SELECTION == FREE_RTOS )
-void IDL_IdleTask ( void* pvParameters );
 #endif
 uint32_t IDL_Get_IdleCounter ( void );
 
