@@ -155,8 +155,8 @@ void NULL(adc_callback_args_t * p_args);
             extern const uart_cfg_t g_uart4_cfg;
             extern const sci_uart_extended_cfg_t g_uart4_cfg_extend;
 
-            #ifndef user_uart_callback
-            void user_uart_callback(uart_callback_args_t * p_args);
+            #ifndef dbg_uart_callback
+            void dbg_uart_callback(uart_callback_args_t * p_args);
             #endif
 /** UART on SCI Instance. */
             extern const uart_instance_t      g_uart3;
@@ -166,8 +166,8 @@ void NULL(adc_callback_args_t * p_args);
             extern const uart_cfg_t g_uart3_cfg;
             extern const sci_uart_extended_cfg_t g_uart3_cfg_extend;
 
-            #ifndef user_uart_callback
-            void user_uart_callback(uart_callback_args_t * p_args);
+            #ifndef mfg_uart_callback
+            void mfg_uart_callback(uart_callback_args_t * p_args);
             #endif
 /** External IRQ on ICU Instance. */
 extern const external_irq_instance_t pf_meter;

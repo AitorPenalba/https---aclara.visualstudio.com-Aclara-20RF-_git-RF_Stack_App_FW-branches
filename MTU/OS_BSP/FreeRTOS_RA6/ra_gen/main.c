@@ -4,8 +4,7 @@
 #include "hal_data.h"
 #include "BSP_aclara.h"
 
-                extern void blinky_thread_create(void);
-                extern TaskHandle_t blinky_thread;
+
 //					 extern void SampleTST_create(void);
 //                extern TaskHandle_t SampleTST;
                 uint32_t g_fsp_common_thread_count;
@@ -103,7 +102,6 @@
                     }
 
                     /* Init RTOS tasks. */
-                    blinky_thread_create();
 //                    SampleTST_create();
 //                    OS_TASK_Create_All ( true );
                     OS_TASK_Create_STRT();

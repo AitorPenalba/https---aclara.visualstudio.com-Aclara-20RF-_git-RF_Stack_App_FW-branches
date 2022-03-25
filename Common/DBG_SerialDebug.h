@@ -7,7 +7,7 @@
  * Contents: Contains prototypes for the debugger port
  *
  ***********************************************************************************************************************
- * A product of Aclara Technologies LLC Confidential and Proprietary, Copyright 2012-2014 Aclara.  All Rights Reserved.
+ * A product of Aclara Technologies LLC Confidential and Proprietary, Copyright 2012-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -36,7 +36,6 @@
 #define ADD_LF           (1<<0) // Insert \n
 #define PRINT_DATE_TIME  (1<<1) // Print date, time and taskID
 
-#define DBG_log     /* TODO: DG Remove*/
 
 // Print category, string, adds \n and time stamp
 #define DBG_logPrintf( category, fmt, ... ) DBG_log( category, ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)

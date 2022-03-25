@@ -9,7 +9,7 @@
  ******************************************************************************
    A product of Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2012-2021 Aclara.  All Rights Reserved.
+   Copyright 2012-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -22,10 +22,17 @@
 #include "project.h"
 #include "meter.h"
 #include <stdbool.h>
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
+#elif (RTOS_SELECTION == FREE_RTOS)
+#include "BSP_aclara.h"
+#include "hal_data.h"
+#endif
 #include "pwr_last_gasp.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "psp_cpudef.h"
+#endif
 
 /* #DEFINE DEFINITIONS */
 
@@ -40,6 +47,7 @@ typedef struct
 } struct_UART_Setup;
 
 /* CONSTANTS */
+#if ( RTOS_SELECTION == MQX_RTOS )
 static const struct_UART_Setup UartSetup[MAX_UART_ID] =
 {
    /* This data structure must match the listing in BSP_aclara.h enum_UART_ID */
@@ -55,11 +63,35 @@ static const struct_UART_Setup UartSetup[MAX_UART_ID] =
 #else
    {   2400,   IO_SERIAL_NON_BLOCKING,                HOST_PORT_IO_CHANNEL    }  /* DRU Port */
 #endif
+};  
+#elif (RTOS_SELECTION == FREE_RTOS)
+/* Baud rate and other configurations are done in RASC configurator */
+const sci_uart_instance_ctrl_t *UartCtrl[MAX_UART_ID] =
+{
+   &g_uart3_ctrl, /* MFG Port */
+#if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
+   &g_uart9_ctrl, /* Optical Port */
+#endif
+   &g_uart4_ctrl, /* DBG Port */
+   &g_uart2_ctrl  /* Meter Port */
 };
 
+const uart_cfg_t *UartCfg[MAX_UART_ID] =
+{
+   &g_uart3_cfg,
+#if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
+   &g_uart9_cfg,
+#endif
+   &g_uart4_cfg,
+   &g_uart2_cfg
+};
+#endif
 /* FILE VARIABLE DEFINITIONS */
+#if ( RTOS_SELECTION == MQX_RTOS )
 static MQX_FILE_PTR UartHandle[MAX_UART_ID];
-
+#endif
+// TODO: RA6 [name_Balaji]: Make the transferSem work without extern
+extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
@@ -81,7 +113,9 @@ static MQX_FILE_PTR UartHandle[MAX_UART_ID];
 returnStatus_t UART_init ( void )
 {
    returnStatus_t retVal = eSUCCESS; /* Start with pass status, and latch on any failure */
+#if ( RTOS_SELECTION == MQX_RTOS )
    uint8_t i;
+
    uint32_t Flags = 0;
 
    for ( i=0; i<(uint8_t)MAX_UART_ID; i++ )
@@ -131,10 +165,17 @@ returnStatus_t UART_init ( void )
          }
       }
    }
+#elif (RTOS_SELECTION == FREE_RTOS)
+   for( int uartChannelNum = 0; uartChannelNum < MAX_UART_ID; uartChannelNum++ )
+   {
+      ( void )R_SCI_UART_Open( (void *)UartCtrl[ uartChannelNum ], (void *)UartCfg[ uartChannelNum ] );
+   }
+#endif
 
    return ( retVal );
 }
-
+/* No function calls for UART_reset */
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_reset
@@ -182,6 +223,7 @@ returnStatus_t UART_reset ( enum_UART_ID i )
    }
    return retVal;
 }
+#endif
 /*******************************************************************************
 
   Function name: UART_write
@@ -203,8 +245,8 @@ returnStatus_t UART_reset ( enum_UART_ID i )
 *******************************************************************************/
 uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    uint32_t DataSent;
-
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    if ( UartId == UART_OPTICAL_PORT )
    {
@@ -220,8 +262,13 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
       ( void )UART_ioctl( UartId, IO_IOCTL_SERIAL_DISABLE_TX, NULL );
    }
 #endif
-
    return ( DataSent );
+#elif ( MCU_SELECTED == RA6E1 )
+   ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+   ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+   return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
+#endif
+
 }
 
 /*******************************************************************************
@@ -247,14 +294,20 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 
 *******************************************************************************/
 uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength )
-{
+{ 
+#if ( MCU_SELECTED == NXP_K24 )
    uint32_t DataReceived;
 
    DataReceived = (uint32_t)read ( UartHandle[UartId], DataBuffer, (int32_t)DataLength ); /*lint !e64 */
 
    return ( DataReceived );
+#elif ( MCU_SELECTED == RA6E1 )
+   ( void )R_SCI_UART_Read( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+   return DataLength;/* R_SCI_UART_Read does not return the no. of valid read bytes, returning DataLength */
+#endif
 }
 
+#if ( MCU_SELECTED == NXP_K24 )/* The Below API are implemented by Renesas FSP itself */
 /*******************************************************************************
 
   Function name: UART_fgets
@@ -414,6 +467,8 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
    return UART_ioctl ( UartId, IO_IOCTL_SERIAL_SET_FLAGS, &flags ); // Update settings
 }
 
+#endif
+/* No function calls for UART_close */
 /*******************************************************************************
 
   Function name: UART_close
@@ -429,8 +484,14 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
 *******************************************************************************/
 uint8_t UART_close ( enum_UART_ID UartId )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    return (uint8_t)fclose( UartHandle[ UartId  ] );
+#elif ( MCU_SELECTED == RA6E1 )
+   (void)R_SCI_UART_Close((void *)UartCtrl[UartId]);
+   return 1;
+#endif
 }
+
 
 /*******************************************************************************
 
@@ -447,7 +508,11 @@ uint8_t UART_close ( enum_UART_ID UartId )
 *******************************************************************************/
 void * UART_getHandle ( enum_UART_ID UartId )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    return ( (void *)UartHandle[ UartId  ] );
+#elif ( MCU_SELECTED == RA6E1 )
+   return ( (void *)UartCtrl[ UartId ] );
+#endif
 }
 
 /*******************************************************************************
@@ -465,6 +530,7 @@ void * UART_getHandle ( enum_UART_ID UartId )
 *******************************************************************************/
 uint8_t UART_open ( enum_UART_ID UartId )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    uint32_t Flags;
    uint8_t  retVal = (uint8_t)eFAILURE;
 
@@ -492,6 +558,44 @@ uint8_t UART_open ( enum_UART_ID UartId )
                                     (void *)&Flags); /*lint !e835 !e845 !e64 */
       }
    }
-   return retVal;
+   return retVal; 
+#elif ( MCU_SELECTED == RA6E1 )
+   /*Uart Open for RA6E1 is done in Uart Init*/
+   return ( uint8_t )eSUCCESS;
+#endif
 }
 
+#if ( MCU_SELECTED == RA6E1 )
+/* Configured in RASC for future use of Optical port and Meter port integration */
+/*******************************************************************************
+
+  Function name: user_uart_callback
+
+  Purpose: Interrupt Handler for UART Module
+
+  Returns: None
+
+*******************************************************************************/
+void user_uart_callback( uart_callback_args_t *p_args )
+{
+  
+    /* Handle the UART event */
+     switch (p_args->event)
+    {
+        /* Receive complete */
+        case UART_EVENT_RX_COMPLETE:
+        {
+            break;
+        }
+        /* Transmit complete */
+        case UART_EVENT_TX_COMPLETE:
+        {
+            // TODO: RA6 [name_Balaji]: Discuss requirement for feature - print is completed or not
+            break;
+        }
+        default:
+        {
+        }
+    }
+}/* end user_uart_callback () */
+#endif

@@ -10,7 +10,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2012-2021 Aclara.  All Rights Reserved.
+   Copyright 2012-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -26,18 +26,27 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <mqx.h>
-#include <fio.h>
-#include "project.h"
-#include "radio_hal.h"
 
+#include "project.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
+  #include <mqx.h>
+  #include <fio.h>
+#endif
+
+#if ( MCU_SELECTED == RA6E1 )
+#include "hal_data.h"
+#endif
+#include "radio_hal.h"
+#if 0
 #define MFGP_GLOBALS
 #include "MFG_Port.h"    // Include self
 #undef  MFGP_GLOBALS
 
 #include "SELF_test.h"
+#endif
 #include "ascii.h"
 #include "buffer.h"
+#if 0
 #include "partition_cfg.h"
 #include "mode_config.h"
 #include "EVL_event_log.h"
@@ -137,7 +146,7 @@
 #if (PHASE_DETECTION == 1)
 #include "PhaseDetect.h"
 #endif
-
+#endif
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 /*lint -esym(750,ESCAPE_CHAR,LINE_FEED_CHAR,CARRIAGE_RETURN_CHAR,BACKSPACE_CHAR,TILDA_CHAR,WHITE_SPACE_CHAR)   */
@@ -176,8 +185,10 @@
 #endif
 
 /* Temporary definition of MFG_logPrintf()   */
+// TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if (USE_DTLS == 1)
 #define MFG_logPrintf MFG_printf
+// TODO: RA6 [name_Balaji]: Need to be reevaluate for code effiency
 #define MFG_printf(fmt, args...) \
 { \
    if ((_MfgPortState == DTLS_SERIAL_IO_e) && (DTLS_GetSessionState() == DTLS_SESSION_CONNECTED_e)) \
@@ -196,7 +207,13 @@
 #define MFG_logPrintf MFG_printf
 #define MFG_printf (void)DBG_printfNoCr
 #endif
-
+// TODO: RA6 [name_Balaji]:Check for _mqx_int once integrated
+#define MFG_logPrintf MFG_printf
+#define MFG_printf(fmt, args...) \
+{ \
+      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (int32_t)sizeof(MFGP_CommandBuffer), fmt, ##args); \
+      MFG_puts( mfgUart, (uint8_t *)MFGP_CommandBuffer, MFGP_CmdLen ); \
+}
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
@@ -225,15 +242,25 @@ static uint16_t         OptoTimerID;                     /* Optical port timeout
 static timer_t          OptoTimerCfg;                    /* Optical port timeout Timer configuration */
 #endif
 #endif
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add Event Onj once integrated
 static OS_EVNT_Obj    * SELF_notify;                     /* Event handler used to request a test   */
 static OS_EVNT_Obj      MFG_notify;                      /* Event handler to "notify" when test results are done.  */
+#endif
 #if (USE_DTLS == 1)
 static mfgPortState_e   _MfgPortState;                   /* Port state */
 static const char       mfgpLockInEffect[] = {"LOCK IN EFFECT\n\r"}; /* When port is in tarpit this msg is returned  */
 #endif
-
+#if ( RTOS_SELECTION == MQX_RTOS )// TODO: RA6 [name_Balaji]: Integrate _MfgpUartEvent once integrated
 static OS_EVNT_Obj      _MfgpUartEvent;
+#endif 
 static OS_MSGQ_Obj      _CommandReceived_MSGQ;
+#if ( MCU_SELECTED == RA6E1 )
+/* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+static OS_SEM_Obj       mfgReceiveSem_;
+/* For RA6E1, UART_write process is used in Semaphore method */
+OS_SEM_Obj       transferSem[MAX_UART_ID];
+#endif
+#if 0 // TODO: RA6 [name_Balaji]: Add support for RA6E1
 #if ( EP == 1 )
 static timer_t          rfTestModeTimerCfg;              /* rfTestMode timeout Timer configuration */
 #endif
@@ -244,7 +271,7 @@ static uint16_t         uStTxCwTestCompleteTimerId = 0;  /* Time out timer for S
 extern char             DbgCommandBuffer[];
 void                    DBG_CommandLine_Process ( void );
 #endif
-
+#endif
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 typedef void ( *Fxn_CmdLine )( uint32_t argc, char *argv[] ); /*lint !e452 differs from DBG_CommandLine.c  */
@@ -270,7 +297,7 @@ typedef enum menuType
 #endif
    menuLastValid
 } menuType;
-
+#if 0
 typedef enum
 {
    channelUnits,
@@ -482,7 +509,10 @@ static void MFGP_MacChannelSetsSRFN          ( uint32_t argc, char *argv[] );
 #if ( DCU == 1 )
 static void MFGP_MacChannelSetsSTAR          ( uint32_t argc, char *argv[] );
 #endif
+#endif
 static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
+// TODO: RA6 [name_Balaji]: Support functions below for RA6E1
+#if 0
 static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
@@ -503,7 +533,10 @@ static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
 static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
 static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
 static void MFGP_nvtest                      ( uint32_t argc, char *argv[] );
+#endif
 static void MFGP_ProcessCommand( char *command, uint16_t numBytes );
+// TODO: RA6 [name_Balaji]:Support below functions for RA6E1
+#if 0
 static void MFGP_shipMode                    ( uint32_t argc, char *argv[] );
 static void MFGP_SpuriousResetCount          ( uint32_t argc, char *argv[] );
 static void MFGP_stSecurityFailCount         ( uint32_t argc, char *argv[] );
@@ -680,13 +713,14 @@ static void MFGP_Vswr                        ( uint32_t argc, char *argv[] );
 #endif
 
 static void StTxCwTestCompletedTimerExpired(uint8_t cmd, void *pData);
-
+#endif
 static const struct_CmdLineEntry MFGP_CmdTable[] =
 {
    {  "help",                       MFGP_CommandLine_Help,           "Display list of commands" },
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
-// { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
+#if 0 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
+   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
    {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
    {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
    {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
@@ -906,9 +940,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "timeState",                  MFGP_timeState,                  "State of system clock: 0=INVALID 1=VALID_NO_SYNC 2=VALID"},
    {  "virgin",                     MFGP_virgin,                     "Virgin unit" },
    {  "virginDelay",                MFGP_virginDelay,                "Erases signature; continues. Allows new code load and then virgin"},
+#endif
    { 0, 0, 0 }
 };
-
+#if ( RTOS_SELECTION == MQX_RTOS )
 #if ( EP == 1 )
 /* The following commands are only valid on and endpoint not on frodo */
 static const struct_CmdLineEntry MFGP_EpCmdTable[] =
@@ -1135,21 +1170,28 @@ static const struct_CmdLineEntry MFGP_SecureTable[] =
    { 0, 0, 0 }
 };
 #endif
-
+#endif //if MQX
+// TODO: RA6 [name_Balaji]: Integrate Different Modes Tables
 static const struct_CmdLineEntry * const cmdTables[ ( uint16_t )menuLastValid ] =
 {
+#if ( MCU_SELECTED == NXP_K24 )
 #if ( EP == 1 )
    MFGP_QuietModeTable,
    MFGP_EpCmdTable,
 #endif
+#endif
    MFGP_CmdTable,
+#if ( MCU_SELECTED == NXP_K24 )
    MFGP_HiddenCmdTable
 #if (USE_DTLS == 1)
    ,
    MFGP_SecureTable
 #endif
+#endif
 };
 static const char CRLF[] = { '\r', '\n' };
+// TODO: RA6 [name_Balaji]: Add functions once integrated for RA6E1
+#if 0
 
 //lint -e750    Lint is complaining about macro not referenced
 #define MFG_COMMON_CALLS \
@@ -1592,7 +1634,7 @@ returnStatus_t MFGP_init( void )
 
    return(retVal);
 }
-
+#endif //if MQX
 /***********************************************************************************************************************
    Function Name: MFGP_cmdInit
 
@@ -1605,12 +1647,19 @@ returnStatus_t MFGP_init( void )
 returnStatus_t MFGP_cmdInit( void )
 {
    returnStatus_t retVal = eFAILURE;
-
+#if ( MCU_SELECTED == NXP_K24 )
    if ( OS_EVNT_Create(&_MfgpUartEvent) && OS_MSGQ_Create(&_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS) )
    {
       retVal = eSUCCESS;
+   } 
+#elif ( MCU_SELECTED == RA6E1 )
+   // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
+   // TODO: RA6 [name_Balaji]: Check the number of messages
+   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_ ) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ] ) )
+   {
+      retVal = eSUCCESS;
    }
-
+#endif
    return(retVal);
 }
 
@@ -1633,12 +1682,14 @@ static void mfgpReadByte( uint8_t rxByte )
    {
       /* user canceled the in progress command */
       MFGP_numBytes = 0;
+#if ( MCU_SELECTED == NXP_K24 )
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
       (void)UART_flush ( mfgUart  );
 #else
       usb_send( CRLF, sizeof( CRLF ) );
       usb_flush();
+#endif
 #endif
    }
    else if( rxByte == BACKSPACE_CHAR || rxByte == 0x7f )
@@ -1647,6 +1698,10 @@ static void mfgpReadByte( uint8_t rxByte )
       {
          /* buffer contains at least one character, remove the last one entered */
          MFGP_numBytes -= 1;
+#if ( MCU_SELECTED == RA6E1 )
+         /* Gives GUI effect in Terminal for Backspace */
+         ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b", 3 );
+#endif
       }
    }
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -1691,34 +1746,45 @@ static void mfgpReadByte( uint8_t rxByte )
             return;
          }
 #endif
-         commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
-         if ( commandBuf != NULL )
+#if ( MCU_SELECTED == RA6E1 )
+         if ( MFGP_numBytes == 0)
          {
-            commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
-
-#if ( DTLS_DEBUG == 1 )
-            INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
-            OS_TASK_Sleep( 50U );
-#endif
-            ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
-            /* Call the command */
-            OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
-#if ( USE_USB_MFG != 0 )
-            event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
-            if ( event_flags == 0 )    /* Check for time-out.  */
-            {
-               /* Unblock task(s) waiting on USB output  */
-               USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
-            }
-#endif
-            MFGP_numBytes = 0;
+            /* Gives GUI in Terminal for Carriage Return */
+            (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
          }
          else
          {
-            ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
-            MFGP_numBytes = 0;
-         }
+#endif
+            commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
+            if ( commandBuf != NULL )
+            {
+               commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
 
+#if ( DTLS_DEBUG == 1 )
+               INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
+               OS_TASK_Sleep( 50U );
+#endif
+               ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
+               /* Call the command */
+               OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
+#if ( USE_USB_MFG != 0 )
+               event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
+               if ( event_flags == 0 )    /* Check for time-out.  */
+               {
+                  /* Unblock task(s) waiting on USB output  */
+                  USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
+               }
+#endif
+               MFGP_numBytes = 0;
+            }
+            else
+            {
+               ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
+               MFGP_numBytes = 0;
+            }
+#if ( MCU_SELECTED == RA6E1 )
+         }
+#endif
       }
       else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
       {
@@ -1728,10 +1794,12 @@ static void mfgpReadByte( uint8_t rxByte )
       else
       {
          // Save character in buffer (space is available)
+        ( void )UART_write( mfgUart, &rxByte, sizeof( rxByte ) );
          MFGP_CommandBuffer[ MFGP_numBytes++] = rxByte;
       }
    }
 }
+
 /***********************************************************************************************************************
    Function Name: MFGP_uartTask
 
@@ -1742,9 +1810,10 @@ static void mfgpReadByte( uint8_t rxByte )
    Returns: none
 ***********************************************************************************************************************/
 /*lint -esym(715,Arg0) not referenced but required by API   */
-void MFGP_uartCmdTask( uint32_t Arg0 )
+void MFGP_uartCmdTask( taskParameter )
 {
    buffer_t *commandBuf;
+#if ( MCU_SELECTED == NXP_K24 )
 #if !USE_USB_MFG
    FILE_PTR fh_ptr;
 
@@ -1752,6 +1821,7 @@ void MFGP_uartCmdTask( uint32_t Arg0 )
    {
       ( void )_io_set_handle( IO_STDOUT, fh_ptr );
    }
+#endif
 #endif
    for( ;; )
    {
@@ -1786,9 +1856,10 @@ void MFGP_uartCmdTask( uint32_t Arg0 )
    Returns: none
 ***********************************************************************************************************************/
 /*lint -esym(715,Arg0) not referenced but required by API   */
-void MFGP_uartRecvTask( uint32_t Arg0 )
+void MFGP_uartRecvTask( taskParameter )
 {
-   uint8_t rxByte;
+   uint8_t rxByte = 0;
+#if ( RTOS_SELECTION == MQX_RTOS )
    ( void )Arg0;
 
    SELF_notify = SELF_getEventHandle();   /* Find out the handle used to request a test.  */
@@ -1806,6 +1877,7 @@ void MFGP_uartRecvTask( uint32_t Arg0 )
       ( void )_io_set_handle( IO_STDOUT, fh_ptr );
       //MFG_printf("MFGP_uartTask: _io_set_handle SUCCESS!\n");
    }
+#endif
 #endif
 #if (USE_DTLS == 1)
    _MfgPortState = MFG_SERIAL_IO_e;
@@ -1862,14 +1934,62 @@ void MFGP_uartRecvTask( uint32_t Arg0 )
 #else
    for( ;; )
    {
+#if ( MCU_SELECTED == NXP_K24 )
       while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) )
       {
          mfgpReadByte( rxByte );
-      }
-   }
+      } 
+#elif ( MCU_SELECTED == RA6E1 )
+      /* Instead of Polling metod, Interrupt routine method is used in RA6E1 which
+       * reads byte-by-byte and stors the data in an array */
+     ( void )UART_read( mfgUart, &rxByte, sizeof( rxByte ) );
+     ( void )OS_SEM_Pend( &mfgReceiveSem_, OS_WAIT_FOREVER );
+     if( rxByte != (uint8_t)0x00 )
+     {
+        mfgpReadByte( rxByte );
+        rxByte = 0x00;     /* resets the rxByte */
+     }/* end if () */
+#endif
+   }/* end for () */
 #endif
 }
+#if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
 
+  Function name: mfg_uart_callback
+
+  Purpose: Interrupt Handler for MFG UART Module,Postponds the semaphore wait
+            once one byte of data is read in SCI Channel 3 (MFG port)
+
+  Returns: None
+
+*******************************************************************************/
+void mfg_uart_callback( uart_callback_args_t *p_args )
+{
+  
+    /* Handle the UART event */
+     switch ( p_args->event )
+    {
+       /* Receive complete */
+       case UART_EVENT_RX_COMPLETE:
+       {
+          OS_SEM_Post_fromISR( &mfgReceiveSem_ );
+          break;
+       }
+       /* Transmit complete */
+       case UART_EVENT_TX_COMPLETE:
+       {
+          OS_SEM_Post_fromISR( &transferSem[ UART_MANUF_TEST ] );
+          break;
+       }
+       default:
+       {
+       }
+    }/* end switch () */
+}/* end mfg_uart_callback () */
+#endif
+// TODO: RA6 [name_Balaji]:Support below functions for RA6E1
+#if 0
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 /*******************************************************************************
 
@@ -2122,7 +2242,7 @@ void MFGP_optoTask( uint32_t Arg0 )
    }
 }
 #endif
-
+#endif
 /***********************************************************************************************************************
    Function Name: MFGP_ProcessCommand
 
@@ -2182,6 +2302,8 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
 
       if ( argc > 0 )
       {
+// TODO: RA6 [name_Balaji]: Add all menu support for RA6E1
+#if 0 
          uint8_t  securityMode;
 
          ( void )APP_MSG_SecurityHandler( method_get, appSecurityAuthMode, &securityMode, NULL );
@@ -2193,19 +2315,20 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
             table = menuQuiet;
 #else
             table = menuStd;
-#endif
+#endif //EP
          }
          else
          {
             table = menuSecure;
          }
 #else    /* DTLS disabled  */
+#endif /*End of #if K24*/
+#endif
 #if ( EP == 1 )
          table = menuQuiet;
 #else
          table = menuStd;
-#endif
-#endif
+#endif //EP
          CmdEntry = cmdTables[ table ];
 
          while ( CmdEntry->pcCmd != 0 )
@@ -2214,6 +2337,8 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
             {
                /* This is the line of code that is actually calling the handler function
                   for the command that was received */
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add support for RA6E1
+/* Functions need to be integrated for RA6E1 */
 _Pragma ( "calls = \
                  MFG_COMMON_CALLS \
                  MFG_DCU_CALLS \
@@ -2235,7 +2360,9 @@ _Pragma ( "calls = \
                  MFG_REMOTE_DISCONNECT_CALLS \
                  MFG_EP_LGSIM_CALLS \
                  " )
+#endif
                    CmdEntry->pfnCmd( argc, argvar );
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add support for RA6E1
 #if ( EP == 1 )
                /***************************************************************************
                   Reset the rfTestmode timer upon execution of a valid command
@@ -2251,6 +2378,7 @@ _Pragma ( "calls = \
                   OptoPortTimerReset();
                }
 #endif
+#endif
                break;
             }
 
@@ -2261,6 +2389,7 @@ _Pragma ( "calls = \
                if ( table < ( menuType )( ( uint16_t )menuLastValid - 1 ) )
                {
                   table = (menuType)((uint8_t)table + 1);
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add support for RA6E1
                   if ( MODECFG_get_quiet_mode() != 0 )   /* Only one menu available in "quiet mode".  */
                   {
                      break;
@@ -2271,12 +2400,14 @@ _Pragma ( "calls = \
                         ( table != menuSecure )    ||             /* commands in this menu allowed in any mode.   */
                         ( _MfgPortState == DTLS_SERIAL_IO_e ) )   /* OR, still in DTLS_SERIAL_IO_e mode           */
 #endif
+#endif /*End of K24*/
                   {
                      CmdEntry = cmdTables[ ( uint16_t )table ];
                   }/* Else, CmdEntry points to a NULL and the command is considered invalid...   */
                }
             }
          }
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add support for RA6E1
 
          if ( CmdEntry->pcCmd == 0 )
          {
@@ -2302,6 +2433,7 @@ _Pragma ( "calls = \
                }
             }
          }
+#endif
       }
    }
 } /* end  */
@@ -2341,15 +2473,24 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
 #else
    menu = menuStd;
 #endif
-
-   MFG_printf( "\nCommand List:\n" );
-
+#if ( MCU_SELECTED == NXP_K24 )
+   MFG_printf( "\nCommand List:\n" );   
+#elif ( MCU_SELECTED == RA6E1 )
+   /* Added carriage return to follow printing standard */
+   MFG_printf( "\r\nCommand List:\r\n" );
+#endif
    CmdLineEntry = cmdTables[ menu ];
    while ( CmdLineEntry->pcCmd )
    {
+#if ( MCU_SELECTED == NXP_K24 )
       MFG_printf( "%32s: %s\n", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
+#elif ( MCU_SELECTED == RA6E1 )
+      /* Added Carriage return to follow Printing standard */
+      MFG_printf( "%32s: %s\r\n", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
+#endif 
       CmdLineEntry++;
-      OS_TASK_Sleep( TEN_MSEC );
+      OS_TASK_Sleep( TEN_MSEC );    /* Delay of 10millisecond makes all prints visible */
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add other menu support
       if ( CmdLineEntry->pcCmd == NULL )
       {
          menu = (menuType)((uint8_t)menu + 1);
@@ -2357,10 +2498,12 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
          {
             CmdLineEntry = cmdTables[ menu ];
          }
-      }
-   }
-}
+      }/* end if() */
+#endif
+   }/* end while() */
+}/* end MFGP_CommandLine_Help () */
 
+#if 0 // TODO: RA6 [name_Balaji]: Add Support for RA6E1
 /***********************************************************************************************************************
    Function Name: MFGP_firmwareVersion
 
@@ -11742,11 +11885,4 @@ bool strto_time(const char* argv, TIMESTAMP_t *value)
    value->QSecFrac = 0;
    return true;
 }
-
-
-
-
-
-
-
-
+#endif

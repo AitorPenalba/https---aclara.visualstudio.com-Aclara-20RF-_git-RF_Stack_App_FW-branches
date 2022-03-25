@@ -1127,6 +1127,9 @@
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\RTC.c</name>
             </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\UART.c</name>
+            </file>
         </group>
         <group>
             <name>Common</name>
@@ -1317,6 +1320,12 @@
                 </file>
             </group>
             <file>
+                <name>$PROJ_DIR$\..\..\Common\buffer.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\buffer.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\Common\DBG_CommandLine.c</name>
             </file>
             <file>
@@ -1339,6 +1348,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\MFG_Port.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\MFG_Port.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\partitions.c</name>
@@ -1439,15 +1454,6 @@
         </group>
         <group>
             <name>FSP_Gen</name>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_gen\blinky_thread.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_gen\blinky_thread.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\src\blinky_thread_entry.c</name>
-            </file>
             <file>
                 <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board.h</name>
             </file>

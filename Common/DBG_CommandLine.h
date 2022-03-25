@@ -201,7 +201,9 @@ uint32_t DBG_CommandLine_NoiseBurst     ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_BurstHistogram ( uint32_t argc, char *argv[] );
 #endif
 uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] );
+#endif
 uint32_t DBG_CommandLine_DebugDisable ( uint32_t argc, char *argv[] );
+#ifdef CompileSwitch_H
 #if 0
 uint32_t DBG_CommandLine_FlashSecurity(uint32_t argc, char *argv[]);
 uint32_t DBG_CommandLine_DebugEnable ( uint32_t argc, char *argv[] );

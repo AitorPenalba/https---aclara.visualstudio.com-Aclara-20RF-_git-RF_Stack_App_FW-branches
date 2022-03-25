@@ -34,7 +34,7 @@
  ***********************************************************************************************************************
    A product of Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2004-2020 Aclara.  All Rights Reserved.
+   Copyright 2004-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -58,7 +58,9 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdlib.h>
+#if ( MCU_SELECTED == NXP_K24 )
 #include <bsp.h>
+#endif
 #include "DBG_SerialDebug.h"
 #include "user_settings.h"
 
@@ -66,7 +68,9 @@
 #include "buffer.h"
 #undef  BM_GLOBAL
 
-#include "EVL_event_log.h"
+#if ( MCU_SELECTED == NXP_K24 )
+#include "EVL_event_log.h"// TODO: RA6 [name_Balaji]: Add support for RA6E1 once integrated
+#endif
 
 /* ****************************************************************************************************************** */
 /* LINT SUPPRESSIONS */
@@ -117,8 +121,11 @@ static uint32_t bExtMetaNbBuffers = 0;             // Number of external metadat
 /* The size of the external memory pool is based on the size and number of eBM_DEBUG buffers in BM_bufferPoolParams. */
 static uint8_t      extMemPool[644000] @ "EXTERNAL_RAM" ; /*lint !e430*/
 #endif
+// TODO: RA6 [name_Balaji]: Add support for RA6E1
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 static OS_TICK_Struct AllocWatchDog[2];            // Keep track of the first time when run out of buffers.  Used as a form of watchdog.
                                                    // Assume that eBM_APP = 0 and eBM_STACK = 1.
+#endif
 #ifndef _lint
 static_assert( eBM_APP == 0,   "Code relies on eBM_APP being 0" );
 static_assert( eBM_STACK == 1, "Code relies on eBM_STACK being 0" );
@@ -452,7 +459,9 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
 {
    uint8_t pool;
    buffer_t *pBuf = NULL;
-   OS_TICK_Struct CurrentTime;
+#if ( RTOS_SELECTION == MQX_RTOS ) 
+   OS_TICK_Struct CurrentTime;// TODO: RA6 [name_Balaji]: Check removing Conditional compiler once in main branch
+#endif
    bool           overflow;
    static bool outOfBuffErrorLogged_ = false; //To restrict logging out of buffers event/error once per power up
 
@@ -487,33 +496,46 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
          pBuf->x.flag.isStatic   = false;
          pBuf->x.flag.inQueue    = 0; // Not in queue yet
          pBuf->x.dataLen         = minSize; /* Initialize this with the size requested */
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_disable( );
+#endif
          BM_bufferStats.pool[pool].allocOk++;
          BM_bufferStats.pool[pool].currAlloc++;
          if ( BM_bufferStats.pool[pool].currAlloc > BM_bufferStats.pool[pool].highwater )
          {
             BM_bufferStats.pool[pool].highwater = BM_bufferStats.pool[pool].currAlloc;
          }
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_enable( );
+#endif
          break;
       }
       else
       {
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_disable( );
+#endif
          BM_bufferStats.pool[pool].allocFail++; /* pool empty - try remaining pools (in increasing size order) */
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_enable( );
+#endif
       }
    }
    if ( NULL == pBuf )
    {
-      OS_INT_disable( );
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
+         OS_INT_disable( );
+#endif
       // Buffer watchdog
       if ( ( eBM_APP == type ) || ( eBM_STACK == type ) )
       {
          // Get current time
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1 once OS_TICK_Get_CurrentElapsedTicks is integrated
          OS_TICK_Get_CurrentElapsedTicks( &CurrentTime );
+#endif
 
          // Is this the first time we run out of buffers?
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          if ( ( AllocWatchDog[type].TICKS[0] == 0 ) && ( AllocWatchDog[type].TICKS[1] == 0 ) )
          {
             // Save timestamp
@@ -535,6 +557,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
                }
             }
          }
+#endif
       }
 
       if ( eBM_APP == type )
@@ -549,8 +572,9 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
       {
          BM_bufferStats.allocFailDebug++;
       }
-
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
       OS_INT_enable( );
+#endif
    }
    return pBuf;
 }
@@ -644,18 +668,22 @@ void BM_Free( buffer_t *pBuf, const char *file, int line )
             }
             else
             {
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
                char *name = _task_get_template_ptr( _task_get_id() )->TASK_NAME;
                DBG_printf( "\nfree  pool: %2d, reqSize: %4d, poolSize:%4d, ptr: 0x%08x, "
                            "called from (%s) %s:%d, Allocator: %s, line: %d\n"
                            "Current allocation already ZERO", pool, pBuf->x.dataLen, BM_bufferPoolParams[pool].size, ( uint32_t )pBuf,
                            name, file, line, pBuf->pfile, pBuf->line );
+#endif
             }
 
             // Reset AllocWatchdog
             type = BM_bufferPoolParams[pool].type;
             if ( ( eBM_APP == type ) || ( eBM_STACK == type ) )
             {
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
                ( void )memset( &AllocWatchDog[type], 0, sizeof( OS_TICK_Struct ) );
+#endif
             }
          }
       }
