@@ -1431,15 +1431,6 @@
         <group>
             <name>FSP_Gen</name>
             <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_gen\blinky_thread.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_gen\blinky_thread.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\src\blinky_thread_entry.c</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board.h</name>
             </file>
             <file>

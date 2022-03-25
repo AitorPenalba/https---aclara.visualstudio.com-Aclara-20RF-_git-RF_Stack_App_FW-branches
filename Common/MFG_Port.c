@@ -2327,7 +2327,6 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
 #if ( EP == 1 )
          table = menuQuiet;
 #else
-#error
          table = menuStd;
 #endif //EP
          CmdEntry = cmdTables[ table ];
@@ -2339,6 +2338,7 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
                /* This is the line of code that is actually calling the handler function
                   for the command that was received */
 #if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add support for RA6E1
+/* Functions need to be integrated for RA6E1 */
 _Pragma ( "calls = \
                  MFG_COMMON_CALLS \
                  MFG_DCU_CALLS \
@@ -2489,7 +2489,7 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
       MFG_printf( "%32s: %s\r\n", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
 #endif 
       CmdLineEntry++;
-      OS_TASK_Sleep( TEN_MSEC + TEN_MSEC );    /* Delay of 20millisecond makes all prints visible */
+      OS_TASK_Sleep( TEN_MSEC );    /* Delay of 10millisecond makes all prints visible */
 #if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add other menu support
       if ( CmdLineEntry->pcCmd == NULL )
       {

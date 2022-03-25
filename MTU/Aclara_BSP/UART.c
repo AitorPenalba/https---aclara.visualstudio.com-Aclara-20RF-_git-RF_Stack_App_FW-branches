@@ -66,7 +66,7 @@ static const struct_UART_Setup UartSetup[MAX_UART_ID] =
 };  
 #elif (RTOS_SELECTION == FREE_RTOS)
 /* Baud rate and other configurations are done in RASC configurator */
-const sci_uart_instance_ctrl_t *UartCtrl[4] =
+const sci_uart_instance_ctrl_t *UartCtrl[MAX_UART_ID] =
 {
    &g_uart3_ctrl, /* MFG Port */
 #if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
@@ -76,7 +76,7 @@ const sci_uart_instance_ctrl_t *UartCtrl[4] =
    &g_uart2_ctrl  /* Meter Port */
 };
 
-const uart_cfg_t *UartCfg[4] =
+const uart_cfg_t *UartCfg[MAX_UART_ID] =
 {
    &g_uart3_cfg,
 #if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
@@ -90,7 +90,7 @@ const uart_cfg_t *UartCfg[4] =
 #if ( RTOS_SELECTION == MQX_RTOS )
 static MQX_FILE_PTR UartHandle[MAX_UART_ID];
 #endif
-
+// TODO: RA6 [name_Balaji]: Make the transferSem work without extern
 extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
 /* FUNCTION PROTOTYPES */
 

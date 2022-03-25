@@ -222,7 +222,6 @@ void DBG_TxTask( taskParameter )
 #if ( MCU_SELECTED == NXP_K24 )
       ( void ) puts ( (char*)&pBuf->data[0] );
 #elif ( MCU_SELECTED == RA6E1 )
-      // TODO: RA6 [name_Balaji]: Integrate puts once file io is integrated
       ( void )UART_write( UART_DEBUG_PORT, (char*)&pBuf->data[0], pBuf->x.dataLen );
 #endif
       OS_MUTEX_Unlock( &mutex_ ); // Function will not return if it fails
