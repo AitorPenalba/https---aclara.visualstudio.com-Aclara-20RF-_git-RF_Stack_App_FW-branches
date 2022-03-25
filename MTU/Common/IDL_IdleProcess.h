@@ -28,9 +28,9 @@
 /* FILE VARIABLE DEFINITIONS */
 
 /* FUNCTION PROTOTYPES */
-#ifdef __mqx_h__
+#if ( RTOS_SELECTION == MQX_RTOS )
 void IDL_IdleTask ( uint32_t Arg0 );
-#endif /* __mqx_h__ */
+#endif
 uint32_t IDL_Get_IdleCounter ( void );
 
 /* FUNCTION DEFINITIONS */

@@ -64,6 +64,20 @@
 #define ONE_WEEK    (ONE_DAY * 7)
 #define DEFAULT_NUM_ITEMS_MSGQ 10
 
+#define OS_MAX_TASK_PRIORITY    (9) // highest priority value allowed by MQX, value cannot be less than 9 per AN3905.pdf
+#define OS_MIN_TASK_PRIORITY   (39) // Aclara Idle Task will be at this level
+
+#if OS_MAX_TASK_PRIORITY <= 8
+#error  Highest allowable task priority is nine
+#endif
+
+#if ( RTOS_SELECTION == FREE_RTOS )
+#if OS_MIN_TASK_PRIORITY >= configMAX_PRIORITIES
+#error  Task minimum must be less than configMAX_PRIORITIES in FreeRTOSConfig.h
+#endif
+#endif
+
+
 #ifndef __BOOTLOADER
 #define OS_EVENT_ID 200
 
@@ -74,8 +88,30 @@
 #define OS_Get_OsLibDate() (_mqx_date)
 #endif
 
-#define OS_INT_disable()                                 _int_disable()
-#define OS_INT_enable()                                  _int_enable()
+/* the following macro returns the task priority immediately above the IDL task. MQX
+   uses an Aclara IDLE task above MQX IDL so will be adjusted */
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define LOWEST_TASK_PRIORITY_ABOVE_IDLE() ( OS_MIN_TASK_PRIORITY - 1 )
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define LOWEST_TASK_PRIORITY_ABOVE_IDLE() ( OS_MIN_TASK_PRIORITY )
+#endif
+
+/* the following macro converts the FREE_RTOS task priority to descending order value, used by MQX */
+#if ( RTOS_SELECTION == FREE_RTOS )
+#define FREE_RTOS_TASK_PRIORITY_CONVERT(x)  (configMAX_PRIORITIES - x)
+#endif
+
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define OS_INT_disable()                                     _int_disable()
+#define OS_INT_enable()                                       _int_enable()
+#define OS_INT_ISR_disable()                                 _int_disable()
+#define OS_INT_ISR_enable()                                   _int_enable()
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define OS_INT_disable()                               taskENTER_CRITICAL()
+#define OS_INT_enable()                                 taskEXIT_CRITICAL()
+#define OS_INT_ISR_disable()                  taskENTER_CRITICAL_FROM_ISR() // this returs a value to be used for the enable
+#define OS_INT_ISR_enable(x)                   taskEXIT_CRITICAL_FROM_ISR(x)
+#endif
 
 #define OS_EVNT_Set(EventHandle, EventMask)              OS_EVNT_SET(EventHandle, EventMask, __FILE__, __LINE__)
 #define OS_EVNT_Wait(EventHandle, EventMask, WaitForAll, Timeout) OS_EVNT_WAIT(EventHandle, EventMask, WaitForAll, Timeout, __FILE__, __LINE__)
@@ -147,6 +183,7 @@ typedef struct
 #define OS_TASK_Template_t    TASK_TEMPLATE_STRUCT
 
 #elif ( RTOS_SELECTION == FREE_RTOS )
+typedef UBaseType_t           OS_TASK_id;
 #define taskParameter   void* pvParameters
 typedef SemaphoreHandle_t     OS_SEM_Obj, OS_MUTEX_Obj, *OS_SEM_Handle, *OS_MUTEX_Handle;
 typedef QueueHandle_t         OS_QUEUE_Obj, *OS_QUEUE_Handle;
@@ -180,13 +217,15 @@ typedef struct
 
    size_t           usStackDepth; /* The number of words (not Bytes!)*/
 
-   UBaseType_t      uxPriority;
+   UBaseType_t        uxPriority;
 
-   char             *pcName;
+   char                 *pcName;
 
    uint32_t         TASK_ATTRIBUTES;
 
    uint32_t         *pvParameters;
+
+   uint32_t         defaultTimeSlice; /* added to accomdate MQX and a universal template list between RTOS */
 
    TaskHandle_t     *pxCreatedTask;
 } OS_TASK_Template_t, * pOS_TASK_Template_t;
@@ -334,7 +373,7 @@ void OS_TASK_Create_Idle ( void );
 #endif
 void OS_TASK_Create_All ( bool initSuccess );
 void OS_TASK_Create_STRT( void );
-#if 0
+
 uint32_t OS_TASK_Get_Priority ( char const *pTaskName );
 uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority );
 void OS_TASK_Sleep ( uint32_t MSec );
@@ -342,6 +381,7 @@ void OS_TASK_Exit ( void );
 void OS_TASK_ExitId ( char const *pTaskName );
 OS_TASK_id OS_TASK_GetId (void);
 bool OS_TASK_IsCurrentTask ( char const *pTaskName );
+#if 0  //TODO: need to still get updated to RA6
 uint32_t OS_TASK_UpdateCpuLoad ( void );
 void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
 void OS_TASK_Summary ( bool safePrint );
@@ -352,7 +392,7 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
 uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
 bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Struct *FutureTickValue );
 void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
-#endif
+#endif // #if 0
 /* FUNCTION DEFINITIONS */
 #endif   /* __BOOTLOADER */
 #if (TM_MUTEX == 1)
