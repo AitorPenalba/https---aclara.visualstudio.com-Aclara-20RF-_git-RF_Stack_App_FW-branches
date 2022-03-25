@@ -416,7 +416,7 @@ static uint16_t RunSelfTest()
       if ( SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had failed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 0;
-#if 0
+#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event Log module is ready
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOSucceeded;
          (void)EVL_LogEvent( 45, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
@@ -428,7 +428,7 @@ static uint16_t RunSelfTest()
       if ( !SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had passed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 1;
-#if 0
+#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event Log module is ready
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOFailed;
          eventData.eventKeyValuePairsCount      = 1;
@@ -552,7 +552,6 @@ returnStatus_t SELF_testInternalFlash( void )
    return retVal;
 }
 
-#if ( TM_RTC_UNIT_TEST == 1 )
 /***********************************************************************************************************************
    Function Name: SELF_testRTC
 
@@ -596,10 +595,10 @@ returnStatus_t SELF_testRTC( void )
    {
    .sec  = 55,
    .min  = 59,
-   .hour = 23,       //24-HOUR mode
-   .day = 31,        //RDAYCNT
-   .month  = 11,     //RMONCNT 0-Jan 11 Dec
-   .year = 121       //RYRCNT //Year SINCE 1900 (2021 = 2021-1900 = 121)
+   .hour = 23,       /* 24-HOUR mode */
+   .day = 31,
+   .month  = 12,
+   .year = 2021
    };
    sysTime_dateFormat_t getTime1;
    sysTime_dateFormat_t getTime2;
@@ -626,7 +625,14 @@ returnStatus_t SELF_testRTC( void )
    } while ( ( retVal == eFAILURE ) );// TODO: RA6 [name_Balaji]: Need to test after OS_TICK_Get_ElapsedMilliseconds integration
    R_RTC_Close (&g_rtc0_ctrl);// TODO: RA6 [name_Balaji]: Closing RTC, for now as there is no other known method to check the RTC valid or not
 #endif
-
+#if ( TM_RTC_UNIT_TEST == 1 )
+   bool isRTCUnitTestFailed;
+   isRTCUnitTestFailed = RTC_UnitTest();
+   if (isRTCUnitTestFailed == 1)
+   {
+     DBG_printf( "ERROR - RTC failed to Set Error Adjustment\n" );
+   }
+#endif
    if ( retVal == eFAILURE )
    {
       if( SELF_TestData.RTCFail < ( ( 1 << ( 8 * sizeof( SELF_TestData.RTCFail ) ) ) - 1 ) ) /* Do not let counter rollover.  */
@@ -638,7 +644,6 @@ returnStatus_t SELF_testRTC( void )
 //   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    return retVal;
 }
-#endif
 #if 0
 /***********************************************************************************************************************
    Function Name: SELF_testSecurity

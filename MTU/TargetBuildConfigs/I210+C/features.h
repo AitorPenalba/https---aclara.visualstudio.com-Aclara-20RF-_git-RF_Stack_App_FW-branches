@@ -98,11 +98,13 @@
 #define NXP_K24                           1
 #define RA6E1                             2
 #define MCU_SELECTED                      RA6E1
-#define TM_MUTEX                          0
-#define TM_SEMAPHORE                      0
-#define TM_RTC_UNIT_TEST                  0
-#define TM_QUEUE                          0
-#define TM_MSGQ                           0
-#define TM_EVENTS                         0
+//Already present in CompileSwitch.h
+//#define TM_MUTEX                          0
+//#define TM_SEMAPHORE                      0
+//#define TM_RTC_UNIT_TEST                  0
+//#define TM_ADC_UNIT_TEST                  0
+//#define TM_QUEUE                          0
+//#define TM_MSGQ                           0
+//#define TM_EVENTS                         0
 #endif
 
