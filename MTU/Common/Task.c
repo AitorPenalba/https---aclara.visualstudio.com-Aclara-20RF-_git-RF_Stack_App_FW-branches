@@ -29,6 +29,7 @@
 #include <mqx_prv.h>
 #endif
 //#include "sys_clock.h"
+#include "CompileSwitch.h"                 /* Enable required code blocks */
 #include "DBG_SerialDebug.h"
 //#include "psp_cpudef.h"
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
