@@ -574,7 +574,7 @@ void STRT_StartupTask ( taskParameter )
       we don't surpass the TickTime delay specified below
       Note:  We do have the CPU Load function below this, and that is acceptable
              to ensure we get an accurate CPU load value */
-   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
+   OS_TICK_Get_ElapsedTicks ( &TickTime );
 
    CurrentIdleCount = IDL_Get_IdleCounter();
    PrevIdleCount = CurrentIdleCount;

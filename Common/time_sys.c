@@ -98,8 +98,6 @@
 #define FREQUENCY_FILTER_LEN                          5 // Length of the frequency filter
 #endif
 
-#define TICK_DIVISOR                      200   // Configure this value to modify the SysTick timer frequency in RA6E1 - FreeRTOS (200 divisor gives 5ms tick value)
-
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
@@ -2221,7 +2219,7 @@ void TIME_SYS_HandlerTask( taskParameter )
    isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                      /*lint !e641 */
    _int_install_isr(INT_SysTick, TIME_SYS_vApplicationTickHook, isr_ptr);  /*lint !e641 !e64 !e534 */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   ( void ) SysTick_Config( SystemCoreClock / TICK_DIVISOR );      /* Configure SysTick to generate an interrupt every 5ms - TODO: This can be modified to 10ms */
+   ( void ) SysTick_Config( SystemCoreClock / configTICK_RATE_HZ );      /* Configure SysTick to generate an interrupt every 5ms - TODO: This can be modified to 10ms */
 #endif
    cnt = (uint16_t)(SYS_TIME_TICK_IN_mS / portTICK_RATE_MS);
 

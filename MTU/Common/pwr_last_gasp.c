@@ -263,7 +263,6 @@ void PWRLG_Task( taskParameter )
 #endif
    STRT_FunctionList_t const  *pFunct;
    OS_TASK_Template_t  const *pTaskList; /* Pointer to task list which contains all tasks in the system */
-   bool                       bOverflow = ( bool )false;
    uint8_t                    startUpIdx;
    uint8_t                    hwVerString[VER_HW_STR_LEN];
 
@@ -355,9 +354,7 @@ void PWRLG_Task( taskParameter )
 #endif
    if ( PWRLG_STATE_TRANSMIT == PWRLG_STATE() )   /* This should ALWAYS be the case.  */
    {
-#if ( RTOS_SELECTION == MQX_RTOS )
-      OS_TICK_Get_CurrentElapsedTicks( &startTime );
-#endif
+      OS_TICK_Get_ElapsedTicks( &startTime );
       PWRLG_STATE_SET( PWRLG_STATE_WAIT_FOR_RADIO );
 
       // Don't send last gasp messages when in ship mode, decommision mode or quiet mode.
@@ -425,9 +422,9 @@ void PWRLG_Task( taskParameter )
             }
          }
 
-         OS_TICK_Get_CurrentElapsedTicks( &endTime );
+         OS_TICK_Get_ElapsedTicks( &endTime );
          // Save the time spent transmitting
-         PREV_MSG_TIME_SET(  ( uint16_t ) ( _time_diff_microseconds( &endTime, &startTime, &bOverflow ) / 1000 ) );
+         PREV_MSG_TIME_SET(  ( uint16_t ) ( OS_TICK_Get_Diff_InMicroseconds( &endTime, &startTime ) / 1000 ) );
          PWRLG_SENT_SET( 1 );
       }
    }

@@ -223,10 +223,8 @@ static RADIO_MODE_t currentTxMode;
 
 static struct
 {
-#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TICK_Struct CallibrationTime;     // Time for next calibration
    OS_TICK_Struct TxWatchDog;           // Time when TX was started.  Used as a watch dog.
-#endif
    TIMESTAMP_t syncTime;                // Sync word interrupt dectection timestamp
    TIMESTAMP_t tentativeSyncTime;       // Tentative Sync word dectection timestamp
    float32_t   error;                   // Frequency offset error
@@ -765,9 +763,15 @@ void RADIO_TX_Watchdog(void)
    if ((radio[RADIO_0].isDeviceTX) && (currentTxMode == eRADIO_MODE_NORMAL)) {
 #endif
       // Get diff between current time and time that TX started
+#if ( MCU_SELECTED == NXP_K24 )
       _time_get_elapsed_ticks(&time);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time, &radio[RADIO_0].TxWatchDog, &Overflow );
+#elif ( MCU_SELECTED == RA6E1 )
+      OS_TICK_Get_ElapsedTicks(&time);
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time, &radio[RADIO_0].TxWatchDog );
+#endif
 
+      // TODO: RA6E1 - Overflow usage verify and modify the below statement
       // Check if TX has been ON for more than one seconds
       if ((TimeDiff > ONE_SEC) || Overflow) {
             PHY_CounterInc(ePHY_FailedTransmitCount, 0);
@@ -1372,8 +1376,10 @@ static void setPA(RADIO_PA_MODE_t mode)
 #endif
       RDO_RX0TX1_TX();
       RDO_PA_EN_ON();
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add the below code once module inserted
+#if ( MCU_SELECTED == NXP_K24 )
       _time_get_elapsed_ticks(&radio[RADIO_0].TxWatchDog);
+#elif ( MCU_SELECTED == RA6E1 )
+      OS_TICK_Get_ElapsedTicks(&radio[RADIO_0].TxWatchDog);
 #endif
       radio[RADIO_0].isDeviceTX = true;
    }
@@ -1436,7 +1442,11 @@ static void setPA(RADIO_PA_MODE_t mode)
                                    &Si446xCmd);
 #endif
          RDO_PA_EN_ON(); // Enable PA
+#if ( MCU_SELECTED == NXP_K24 )
          _time_get_elapsed_ticks(&radio[RADIO_0].TxWatchDog);
+#elif ( MCU_SELECTED == RA6E1 )
+         OS_TICK_Get_ElapsedTicks(&radio[RADIO_0].TxWatchDog);
+#endif
          radio[RADIO_0].isDeviceTX = true;
       }
    }
@@ -2562,7 +2572,7 @@ void printHex ( char const *rawStr, const uint8_t *str, uint16_t num_bytes )
    }
    usb_putc( '\n' );
 #else
-#if 0 //TODO: is this file pointer needed 
+#if 0 //TODO: is this file pointer needed
    MQX_FILE_PTR stdout_ptr;       /* mqx file pointer for UART  */
    stdout_ptr = fopen("ittya:", NULL);
 
@@ -3846,6 +3856,7 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
    // Get current time
    OS_TICK_Get_CurrentElapsedTicks(&CurrentTime);
 
+   // TODO: TICKS[] structure variable usage handling
    // Recalibrate every 4 hours or after power up
    // MKD 4-24-14 This should be done when temperature changes by 30 degree C but it takes a long time to retrieve the temperatures so we recalibrate every 4 hours instead.
    if (( _time_diff_hours(&CurrentTime, &radio[radioNum].CallibrationTime, &overflow) > 3) ||
@@ -4632,13 +4643,13 @@ void SetFreq(uint8_t radioNum, uint32_t freq)
  **********************************************************************************************************************/
 static void wait_us(uint32_t time)
 {
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO: Add once the timer module is added
    OS_TICK_Struct time1,time2;
    uint32_t       TimeDiff;
    bool           Overflow;
 
    if (time == 0) return;
 
+#if ( MCU_SELECTED == NXP_K24 )
    _time_get_elapsed_ticks(&time1);
 
    // Wait for a while
@@ -4647,7 +4658,17 @@ static void wait_us(uint32_t time)
       TimeDiff = (uint32_t)_time_diff_microseconds ( &time2, &time1, &Overflow );
    }
    while (TimeDiff < time);
+#elif ( MCU_SELECTED == RA6E1 )
+   OS_TICK_Get_ElapsedTicks(&time1);
+
+   // Wait for a while
+   do {
+      OS_TICK_Get_ElapsedTicks(&time2);
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time2, &time1 );
+   }
+   while (TimeDiff < time);
 #endif
+
 }
 #if ( NOISE_HIST_ENABLED == 1 )
 /***********************************************************************************************************************
@@ -4673,15 +4694,23 @@ static float32 wait_for_stable_RSSI(uint8_t radioNum)
    uint32_t TimeDiff;
    bool Overflow;
    uint8_t rawRSSI;
+#if ( MCU_SELECTED == NXP_K24 )
    _time_get_elapsed_ticks(&time1);
+#elif ( MCU_SELECTED == RA6E1 )
+   OS_TICK_Get_ElapsedTicks(&time1);
+#endif
 
    // Poll RSSI until valid
    do {
       si446x_get_modem_status(radioNum, 0xFF); // Don't clear int.  get_int_status needs those.
       rawRSSI = Si446xCmd.GET_MODEM_STATUS.LATCH_RSSI;
-
+#if ( MCU_SELECTED == NXP_K24 )
       _time_get_elapsed_ticks(&time2);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
+#elif ( MCU_SELECTED == RA6E1 )
+      OS_TICK_Get_ElapsedTicks(&time2);
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time2, &time1 );
+#endif
 
       // Get out if we have been stuck here more than 10 ms.
       if (TimeDiff > 10) {
@@ -4805,17 +4834,17 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
    uint32_t  minValue, maxValue;
    float32_t sum=0;
    float32_t currentRSSI;
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add once the timer module is added
    OS_TICK_Struct time1,time2;
-#endif
    uint32_t TimeDiff;
    bool Overflow;
    PHY_GetReq_t GetReq;
    int8_t       FrontEndGain;
    union si446x_cmd_reply_union Si446xCmd;
 
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add once the timer module is added
+#if ( MCU_SELECTED == NXP_K24 )
    _time_get_elapsed_ticks(&time1);
+#elif ( MCU_SELECTED == RA6E1 )
+   OS_TICK_Get_ElapsedTicks(&time1);
 #endif
 
    // Poll RSSI until valid
@@ -4823,9 +4852,12 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.  get_int_status needs those.
       currentRSSI = Si446xCmd.GET_MODEM_STATUS.LATCH_RSSI;
 
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add once the timer module is added
+#if ( MCU_SELECTED == NXP_K24 )
       _time_get_elapsed_ticks(&time2);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
+#elif ( MCU_SELECTED == RA6E1 )
+      OS_TICK_Get_ElapsedTicks(&time2);
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time2, &time1 );
 #endif
 
       // Get out if we have been stuck here more than 10 ms.
