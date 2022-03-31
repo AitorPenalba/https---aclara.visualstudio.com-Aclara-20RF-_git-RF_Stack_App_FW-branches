@@ -545,7 +545,7 @@ void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay )
    // Convert to ticks from the structure
    if ( ticksToDelay > 0 )
    {
-      xTaskDelayUntil ( &previousTick, ticksToDelay );
+      xTaskDelayUntil ( &previousTick, ticksToDelay ); // TODO: RA6E1 Bob: may need to round this up to a minimum of 5msec of delay. Scot is checking MQX to confirm
    }
 #endif
 
