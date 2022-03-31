@@ -1235,17 +1235,12 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
    DBG_printf( "\n[M]Command List:" );
 #elif ( MCU_SELECTED == RA6E1 )
 /* Added carriage return to follow printing standard */
-   DBG_printf( "\r\n[M]Command List:\r" );
+   DBG_printf( "\r\n[M]Command List:" );
 #endif
    CmdLineEntry = DBG_CmdTable;
    while ( CmdLineEntry->pcCmd )
    {
-#if ( MCU_SELECTED == NXP_K24 )
       DBG_printf( "[M]%30s: %s", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
-#elif ( MCU_SELECTED == RA6E1 )
-      /* Added carriage return to follow printing standard */
-      DBG_printf( "[M]%30s: %s\r", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
-#endif
       CmdLineEntry++;
       OS_TASK_Sleep( TEN_MSEC );
    } /* end while() */

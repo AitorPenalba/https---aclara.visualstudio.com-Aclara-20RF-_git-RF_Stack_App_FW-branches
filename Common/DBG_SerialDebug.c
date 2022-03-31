@@ -311,7 +311,12 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
          // Add \n if needed
          if ( options & ADD_LF )
          {
-            len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\n" );
+#if ( MCU_SELECTED == NXP_K24 )
+           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\n" ); 
+#elif ( MCU_SELECTED == RA6E1 )
+           /* Added carriage return to follow printing standard */
+           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\r\n" );
+#endif 
          }
 
          if ( len < sizeof( logPrintf_buf ) )
