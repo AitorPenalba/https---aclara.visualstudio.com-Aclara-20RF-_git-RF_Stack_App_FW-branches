@@ -1458,6 +1458,15 @@
         <group>
             <name>Common</name>
             <group>
+                <name>DFW</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.h</name>
+                </file>
+            </group>
+            <group>
                 <name>Driver</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\driver\dvr_banked.c</name>
@@ -1638,6 +1647,12 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\time_util.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\timer_util.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\timer_util.h</name>
                 </file>
             </group>
             <file>
