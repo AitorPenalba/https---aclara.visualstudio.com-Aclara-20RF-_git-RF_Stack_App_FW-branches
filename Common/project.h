@@ -48,7 +48,7 @@
 #include "cfg_hal.h"
 #include "cfg_app.h"
 
-//#include "CompileSwitch.h" /* MUST come AFTER cfg_app.h which influences choices in CompileSwitch.h   */
+#include "CompileSwitch.h" /* MUST come AFTER cfg_app.h which influences choices in CompileSwitch.h   */
 #ifndef __BOOTLOADER
 #include "OS_aclara.h"
 #endif
