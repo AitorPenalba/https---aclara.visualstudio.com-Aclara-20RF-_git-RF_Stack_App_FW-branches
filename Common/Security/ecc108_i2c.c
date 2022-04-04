@@ -95,14 +95,16 @@ enum i2c_read_write_flag {
    I2C_READ  = (uint8_t) 0x01   //!< read command flag
 };
 
-
 //! I2C address is set when calling #ecc108p_init or #ecc108p_set_device_id.
 static uint8_t device_address;
 
 #if ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
 
-#define WRITE_READ_IIC_TIMEOUT    25
+#define WRITE_READ_IIC_TIMEOUT    10   // Timeout for read and write complete interrupts - 10 ticks
 #define IIC_TRANSMIT_MAX_VALUE    255  // TODO: RA6E1: Verify the working after integrating WolfSSL
+
+static OS_SEM_Obj    _i2cTransmitRecieveSem;                        /* Semaphore to notify the transmit and receive complete */
+static bool          _i2cTransmitRecieveSemCreated = (bool)false;
 
 volatile i2c_master_event_t i2c_event = I2C_MASTER_EVENT_ABORTED;
 uint8_t sendVal[IIC_TRANSMIT_MAX_VALUE];
@@ -125,6 +127,11 @@ void iic_eventCallback( i2c_master_callback_args_t * p_args )
    {
       /* capture callback event for validating the i2c transfer event*/
       i2c_event = p_args->event;
+      if ( ( i2c_event == I2C_MASTER_EVENT_TX_COMPLETE ) ||
+           ( i2c_event == I2C_MASTER_EVENT_RX_COMPLETE ) )
+      {
+         OS_SEM_Post_fromISR( &_i2cTransmitRecieveSem );
+      }
    }
 }
 
@@ -140,7 +147,6 @@ void iic_eventCallback( i2c_master_callback_args_t * p_args )
 uint8_t i2c_send( uint8_t word_address, uint8_t count, uint8_t *buffer )
 {
    fsp_err_t err = FSP_SUCCESS;
-   uint8_t timeout_ms = WRITE_READ_IIC_TIMEOUT;
    memset(sendVal, 0, sizeof(sendVal));
    uint8_t sendCount = count + 1;
    sendVal[0] = word_address;
@@ -150,11 +156,14 @@ uint8_t i2c_send( uint8_t word_address, uint8_t count, uint8_t *buffer )
    }
 
    err = R_IIC_MASTER_Write( &g_i2c_master0_ctrl, sendVal, sendCount, false );
-   while ((I2C_MASTER_EVENT_TX_COMPLETE != i2c_event) && timeout_ms)
+   /* Pend for the transmit complete. Wait for only certain time to avoid hung up
+    * as there wont be any interrupts for the reset and sleep commands from the security chip */
+   ( void ) OS_SEM_Pend( &_i2cTransmitRecieveSem, WRITE_READ_IIC_TIMEOUT );
+   if( I2C_MASTER_EVENT_TX_COMPLETE != i2c_event )
    {
-      R_BSP_SoftwareDelay(500U, BSP_DELAY_UNITS_MICROSECONDS);
-      timeout_ms--;;
+      err = (uint8_t) ECC108_GEN_FAIL;
    }
+
    return (uint8_t) err;
 }
 
@@ -170,17 +179,13 @@ uint8_t i2c_send( uint8_t word_address, uint8_t count, uint8_t *buffer )
 uint8_t i2c_receive_response( uint8_t size, uint8_t *response )
 {
    fsp_err_t err = FSP_SUCCESS;
-   uint8_t timeout_ms = WRITE_READ_IIC_TIMEOUT;
    err = R_IIC_MASTER_Read(&g_i2c_master0_ctrl, response, size, false);
    if (err == FSP_SUCCESS)
    {
-      while ((I2C_MASTER_EVENT_RX_COMPLETE != i2c_event) && timeout_ms)
-      {
-          R_BSP_SoftwareDelay(500U, BSP_DELAY_UNITS_MICROSECONDS);
-          timeout_ms--;;
-      }
-
-      if(I2C_MASTER_EVENT_RX_COMPLETE != i2c_event)
+      /* Pend for the receive complete interrupt. Wait for only certain time as there
+       * won't be replies for every tranmit command from the security chip */
+      ( void ) OS_SEM_Pend( &_i2cTransmitRecieveSem, WRITE_READ_IIC_TIMEOUT );
+      if( I2C_MASTER_EVENT_RX_COMPLETE != i2c_event )
       {
          err = (uint8_t) ECC108_RX_NO_RESPONSE;
       }
@@ -245,6 +250,14 @@ uint8_t ecc108_open( void )
    if ( FSP_SUCCESS == err )
    {
 //       (void)ecc108c_wakeup( wakeup_response );   // This wakeup call here results in not communicating with the security chip as there will be another wakeup at every APIs
+   }
+
+   if ( (bool)false == _i2cTransmitRecieveSemCreated )
+   {
+      if ( OS_SEM_Create( &_i2cTransmitRecieveSem ) )
+      {
+         _i2cTransmitRecieveSemCreated = true;
+      }
    }
 
    return ( uint8_t ) err;
