@@ -1134,6 +1134,15 @@
         <group>
             <name>Common</name>
             <group>
+                <name>DFW</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.h</name>
+                </file>
+            </group>
+            <group>
                 <name>Driver</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\driver\dvr_banked.c</name>
@@ -1189,6 +1198,9 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\heep.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\project.h</name>
+                </file>
             </group>
             <group>
                 <name>OS_AL_FreeRTOS</name>
@@ -1202,7 +1214,7 @@
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Mutex.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\OS_aclara.h</name>
+                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_aclara.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_que.h</name>
@@ -1318,6 +1330,12 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\time_util.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\timer_util.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\timer_util.h</name>
+                </file>
             </group>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\buffer.c</name>
@@ -1397,7 +1415,7 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\cfg_hal.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\CompileSwitch.h</name>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
                 </file>
             </group>
             <group>
@@ -1407,9 +1425,6 @@
                 <name>Include</name>
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\alarm_cfg.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\dvr_banked_cfg.h</name>

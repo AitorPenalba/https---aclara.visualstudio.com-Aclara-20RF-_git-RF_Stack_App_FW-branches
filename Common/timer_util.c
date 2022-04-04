@@ -49,12 +49,15 @@
 #include "project.h"
 #include <stdbool.h>
 #include <string.h>
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 #include <mqx.h>
+#endif
 #include "DBG_SerialDebug.h"
 #define TMR_GLOBAL
 #include "timer_util.h"
 #undef  TMR_GLOBAL
 
+#if 0 // TODO: RA6 [name_Balaji]:  Add timer_util support to RA6E1
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="Constant Definitions">
 /* ****************************************************************************************************************** */
@@ -758,4 +761,4 @@ STATIC void TMR_vApplicationTickHook( void *user_isr_ptr )
 }
 // </editor-fold>
 /*lint +e454 +e456 The mutex is handled properly. */
-
+#endif

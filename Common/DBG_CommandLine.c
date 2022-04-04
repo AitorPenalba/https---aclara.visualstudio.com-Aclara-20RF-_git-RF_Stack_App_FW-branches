@@ -118,7 +118,11 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #if 0 // TODO: RA6: Add later
 #if (EP == 1)
 #include "smtd_config.h"
+#endif  /* end of EP */
+#endif  /* end of if 0 */
 #include "dfwtd_config.h"
+#if 0 // TODO: RA6: Add later
+#if (EP == 1)
 #include "pwr_config.h"
 #include "ed_config.h"
 #include "RG_MD_Handler.h"
