@@ -12,6 +12,7 @@
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
  *****************************************************************************/
+#if 0 // TODO: RA6E1: DG: Remove
 #ifndef MTLS_H
 #define MTLS_H
 
@@ -106,3 +107,4 @@ void MTLS_dumpReplayBuffer( void );
 #endif   /* MTLS_DEBUG  */
 
 #endif   /* MTLS_H */
+#endif // if 0

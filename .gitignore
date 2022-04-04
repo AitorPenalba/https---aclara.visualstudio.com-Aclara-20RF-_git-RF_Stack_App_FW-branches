@@ -103,3 +103,11 @@ mtu/os_bsp/mqx_kinetis/lib
 mtu/iar_v9.20/*debug
 *.ninja_deps
 *ninja_log
+/MTU/OS_BSP/FreeRTOS_RA6/IAR/Debug/BrowseInfo/EP_FreeRTOS_RA6.pbd
+*.pbw
+*.ninja
+/MTU/OS_BSP/FreeRTOS_RA6/IAR/.settings/standalone.prefs
+/MTU/OS_BSP/FreeRTOS_RA6/IAR/ra
+/MTU/OS_BSP/FreeRTOS_RA6/IAR/ra_cfg
+/MTU/OS_BSP/FreeRTOS_RA6/IAR/ra_gen
+/MTU/OS_BSP/FreeRTOS_RA6/IAR/src

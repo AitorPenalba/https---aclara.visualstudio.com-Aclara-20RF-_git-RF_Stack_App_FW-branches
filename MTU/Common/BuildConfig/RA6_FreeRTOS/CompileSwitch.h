@@ -32,16 +32,16 @@
 
 // This is the standard build
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-   #define ENABLE_ALRM_TASKS              1  /* Used to 0=disable, 1=enable the Alarm feature */
-   #define ENABLE_ID_TASKS                1  /* Used to 0=disable, 1=enable the Interval Data feature */
+   #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */
+   #define ENABLE_ID_TASKS                0  /* Used to 0=disable, 1=enable the Interval Data feature */
    #define ENABLE_MFG_TASKS               1  /* Used to 0=disable, 1=enable the Mfg Port feature */
-   #define ENABLE_TMR_TASKS               1  /* Used to 0=disable, 1=enable the Timer feature */
-   #define ENABLE_TIME_SYS_TASKS          1  /* Used to 0=disable, 1=enable the System Time feature */
-   #define ENABLE_HMC_TASKS               1  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
+   #define ENABLE_TMR_TASKS               0  /* Used to 0=disable, 1=enable the Timer feature */
+   #define ENABLE_TIME_SYS_TASKS          0  /* Used to 0=disable, 1=enable the System Time feature */
+   #define ENABLE_HMC_TASKS               0  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
    #define ENABLE_PAR_TASKS               1  /* Used to 0=disable, 1=enable the Partition feature */
-   #define ENABLE_PWR_TASKS               1  /* Used to 0=disable, 1=enable the Power feature */
-   #define ENABLE_DFW_TASKS               1  /* Used to 0=disable, 1=enable the DFW feature */
-   #define ENABLE_DEMAND_TASKS            1  /* Used to 0=disable, 1=enable the Demand feature */
+   #define ENABLE_PWR_TASKS               0  /* Used to 0=disable, 1=enable the Power feature */
+   #define ENABLE_DFW_TASKS               0  /* Used to 0=disable, 1=enable the DFW feature */
+   #define ENABLE_DEMAND_TASKS            0  /* Used to 0=disable, 1=enable the Demand feature */
    #define ENABLE_FIO_TASKS               0  /* Used to 0=disable, 1=enable the FileIO CRC feature */
    #define ENABLE_LAST_GASP_TASK          1  /* Used to 0=disable, 1=enable the Last Gasp feature */
    #define ENABLE_SRFN_ILC_TASKS          0  /* Used to 0=disable, 1=enable the SRFN ILC feature */
@@ -108,7 +108,7 @@
 #define HAL_IGNORE_BROWN_OUT_SIGNAL    0 /* 1 = Ignore brown-out signal, 0 = Use Brown Out Signal */
 
 #define DFW_TEST_KEY                   0  /* 1=Use DFW test key, 0=Used default DFW Key */
-/* Note:  All of the folowing DFW tests must be disabled "0" before releasing code! */
+/* Note:  All of the following DFW tests must be disabled "0" before releasing code! */
 /* Select one below for DFW testing */
 #define BUILD_DFW_TST_VERSION_CHANGE   0  /* Build for testing DFW, version change */
 #define BUILD_DFW_TST_CMD_CHANGE       0  /* Build for testing DFW, Changes dbg cmd from GenDFWkey to GenDfwKey */
@@ -160,7 +160,7 @@
 #define ENABLE_PRNT_HMC_MSG_WARN       0
 #define ENABLE_PRNT_HMC_MSG_ERROR      0
 
-/* HMC - protcol assemble/decode results */
+/* HMC - protocol assemble/decode results */
 #define ENABLE_PRNT_HMC_PROT_INFO      0
 #define ENABLE_PRNT_HMC_PROT_WARN      0
 #define ENABLE_PRNT_HMC_PROT_ERROR     0

@@ -97,7 +97,6 @@ returnStatus_t VBATREG_init(void)
    // that the VBAT cap was drained completely.
    if ((0 == VBATREG_VALID) || (VBATREG_VALID_SIG != VBATREG_SIG))
    {
-      // TODO: DG: Is this necessary?? VBAT is cleared if Super cap is drained completely!!!
       // The VBAT register is un-initalized.  Initialize all bits to zero, set the
       // signature and mark the VBAT register as valid.
       (void)memset( VBATREG_RFSYS_BASE_PTR, 0, sizeof(VBATREG_VbatRegisterFile) );
