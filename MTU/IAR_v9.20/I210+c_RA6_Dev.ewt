@@ -1458,6 +1458,15 @@
         <group>
             <name>Common</name>
             <group>
+                <name>DFW</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.h</name>
+                </file>
+            </group>
+            <group>
                 <name>Driver</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\driver\dvr_banked.c</name>
@@ -1506,6 +1515,9 @@
                 <name>Include</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\heep.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\project.h</name>
                 </file>
             </group>
             <group>
@@ -1636,6 +1648,12 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\time_util.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\timer_util.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\timer_util.h</name>
+                </file>
             </group>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\buffer.c</name>
@@ -1714,6 +1732,9 @@
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\cfg_hal.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
+                </file>
             </group>
             <group>
                 <name>HMC</name>
@@ -1722,9 +1743,6 @@
                 <name>Include</name>
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\alarm_cfg.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\dvr_banked_cfg.h</name>

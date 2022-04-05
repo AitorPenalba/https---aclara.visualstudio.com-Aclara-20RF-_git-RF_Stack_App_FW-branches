@@ -238,7 +238,7 @@
 #define BM_DEBUG                       0     /* Buffer allocate/free debug printing */
 #define ENABLE_B2B_COMM                0     /* DCU3 XCVR only */
 /* ------------------------------------------------------------------------------------------------------------------ */
-#define USE_MTLS                       1
+#define USE_MTLS                       0     // TODO: RA6 [name_Balaji]: Add USE_MTLS support for RA6E1
 #define MTLS_DEBUG                     (1)   /* Turn MTLS Debug On */
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -299,7 +299,7 @@
 #define TM_ADC_UNIT_TEST                  0
 #define TM_QUEUE                          0
 #define TM_MSGQ                           0
-#define TM_EVENTS                         1
+#define TM_EVENTS                         0
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

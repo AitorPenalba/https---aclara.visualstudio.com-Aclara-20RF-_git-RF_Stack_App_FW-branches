@@ -43,7 +43,7 @@
 //#include <serinprv.h>
 //#include <bsp.h>
 //#include <file_io.h>
-//#include "timer_util.h"
+#include "timer_util.h"
 //#include "time_sys.h"
 #include "DBG_SerialDebug.h"
 //#include "ascii.h"
