@@ -195,7 +195,7 @@ static volatile bool g_b_flash_event_blank = false;
 static volatile bool g_b_flash_event_erase_complete = false;
 static volatile bool g_b_flash_event_write_complete = false;
 
-uint8_t localVar[FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE];
+uint8_t localVar[BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE];
 #endif
 
 /* ****************************************************************************************************************** */
@@ -336,7 +336,7 @@ static returnStatus_t init( PartitionData_t const *pParData, DeviceDriverMem_t c
 static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver ) /*lint !e715 !e818  Parameters passed in may not be used */
 {
 #if ( MCU_SELECTED == RA6E1 )
-   fsp_err_t retVal;
+   fsp_err_t retVal = FSP_SUCCESS;
    if( !bInternalFlashOpened )
    {
       retVal = R_FLASH_HP_Open( &g_flash0_ctrl, &g_flash0_cfg );
@@ -963,40 +963,34 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
     if( address < FLASH_HP_CODEFLASH_END_ADDRESS )
     {
        /* Write supports when it is a multiply of 128 bytes - If not handle it accordingly */
-       if( ( cnt % FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE ) == 0 )
+       if( ( cnt % BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE ) == 0 )
        {
           retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
        }
        else
        {
           uint32_t localSrcAddr, localDstAddr, remainingByte;
-          uint32_t localCnt = FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE * ( cnt / FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE );
+          uint32_t localCnt = BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE * ( cnt / BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
           retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
           remainingByte = cnt - localCnt;
-          if ( ( address + localCnt + FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE ) < FLASH_HP_CODEFLASH_END_ADDRESS )
+          if ( ( address + localCnt + BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE ) < FLASH_HP_CODEFLASH_END_ADDRESS )
           {
              memcpy( localVar, ( uint8_t * )srcAddr + localCnt, remainingByte );
-             memcpy( &localVar[remainingByte], ( uint8_t * )( address + cnt ), ( FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE - remainingByte ) );
-             retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( address + localCnt ), FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE );
+             memcpy( &localVar[remainingByte], ( uint8_t * )( address + cnt ), ( BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE - remainingByte ) );
+             retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( address + localCnt ), BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
           }
           else
           {
-             if ( localCnt )
-             {
-                // TODO: RA6E1 [name_Suriya] Wait until the Write is completed by using callbacks/interrupts (which is not supported now)
-               vTaskDelay( 500 ); // For now, delay 500 ticks
-             }
-
-             localDstAddr = ( address + localCnt ) - ( FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE - remainingByte );
-             memcpy( localVar, ( uint8_t * )localDstAddr, ( FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE - remainingByte ) );
-             memcpy( &localVar[FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE - remainingByte], ( uint8_t * )( srcAddr + localCnt ), remainingByte);
-             retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( uint32_t )localDstAddr, FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE );
+             localDstAddr = ( address + localCnt ) - ( BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE - remainingByte );
+             memcpy( localVar, ( uint8_t * )localDstAddr, ( BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE - remainingByte ) );
+             memcpy( &localVar[BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE - remainingByte], ( uint8_t * )( srcAddr + localCnt ), remainingByte);
+             retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( uint32_t )localDstAddr, BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
           }
        }
     }
     else if( ( address >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( address < FLASH_HP_DATAFLASH_END_ADDRESS ) )
     {
-       if( ( cnt % FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE ) == 0 )
+       if( ( cnt % BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE ) == 0 )
        {
           retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
           /* Error Handle */
@@ -1013,7 +1007,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        else
        {
           uint32_t localSrcAddr, localDstAddr, remainingByte;
-          uint32_t localCnt = FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE * ( cnt / FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE );
+          uint32_t localCnt = BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE * ( cnt / BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
           retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
           if ( FSP_SUCCESS == retVal )
           {
@@ -1026,9 +1020,9 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
           }
 
           remainingByte = cnt - localCnt;
-          localSrcAddr = srcAddr - ( FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE - remainingByte );
-          localDstAddr = address - ( FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE - remainingByte );
-          retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, localSrcAddr, localDstAddr, FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE );
+          localSrcAddr = srcAddr - ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte );
+          localDstAddr = address - ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte );
+          retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, localSrcAddr, localDstAddr, BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
           if ( FSP_SUCCESS == retVal )
           {
              /* Wait for the write complete event flag, if BGO is SET  */

@@ -100,7 +100,7 @@ static uint8_t device_address;
 
 #if ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
 
-#define WRITE_READ_IIC_TIMEOUT    10   // Timeout for read and write complete interrupts - 10 ticks
+#define WRITE_READ_IIC_TIMEOUT    10   // Timeout for read and write complete interrupts - 10 ticks /* TODO: SMG Check against longest execution time of the ECC508 - some are 115ms (+50ms as recommended) */
 #define IIC_TRANSMIT_MAX_VALUE    255  // TODO: RA6E1: Verify the working after integrating WolfSSL
 
 static OS_SEM_Obj    _i2cTransmitRecieveSem;                        /* Semaphore to notify the transmit and receive complete */
@@ -197,7 +197,8 @@ uint8_t i2c_receive_response( uint8_t size, uint8_t *response )
 /***********************************************************************************************************************
    Function Name: i2c_wakeUp
 
-   Purpose: Wakeup the security chip
+   Purpose: Wakeup the security chip. To wakeup, make the SDA pin low for 70us and high for 1ms. This will result in response
+            from security chip
 
    Arguments: none
 
