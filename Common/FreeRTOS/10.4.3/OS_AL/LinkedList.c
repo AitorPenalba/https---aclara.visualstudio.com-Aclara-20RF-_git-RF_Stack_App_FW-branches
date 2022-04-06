@@ -172,7 +172,7 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
     return;
   }
   OS_Linked_List_Element_Handle tail_handle = &(list->tail);
-  ((OS_Linked_List_Element_Handle)listElement)->PREV = tail_handle->PREV->NEXT;
+  ((OS_Linked_List_Element_Handle)listElement)->PREV = tail_handle->PREV;
   ((OS_Linked_List_Element_Handle)listElement)->NEXT = tail_handle;
   tail_handle->PREV->NEXT = (OS_Linked_List_Element_Handle)listElement;
   tail_handle->PREV = listElement;
@@ -326,6 +326,7 @@ void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list )
   OS_Linked_List_Element *  handle;
   handle = list->head.NEXT;
   list->head.NEXT = handle->NEXT;
+  list->head.NEXT->PREV = &(list->head);
   list->size--;
   
   return ((void *) (handle));
@@ -392,12 +393,12 @@ static OS_Linked_List_Element data2;
 static OS_Linked_List_Element data3;
 static OS_Linked_List_Element data4;
 static OS_Linked_List_Element data5;
-
+static uint16_t num;
+static OS_Linked_List_Element_Handle tmp;
 
 void OS_LINKEDLIST_Test( void )
 {
-  uint16_t num;
-  OS_Linked_List_Element_Handle tmp;
+
   OS_LINKEDLIST_Create(handle, 0);
   OS_LINKEDLIST_Enqueue(handle, &data1);
   tmp = OS_LINKEDLIST_Head(handle);
@@ -405,7 +406,7 @@ void OS_LINKEDLIST_Test( void )
   OS_LINKEDLIST_Insert(handle, &data1, &data2);
   num = OS_LINKEDLIST_NumElements(handle);
   tmp = OS_LINKEDLIST_Dequeue(handle);
-  OS_LINKEDLIST_Remove(handle, &data1);
+  OS_LINKEDLIST_Remove(handle, &data2);
   
   
 }
