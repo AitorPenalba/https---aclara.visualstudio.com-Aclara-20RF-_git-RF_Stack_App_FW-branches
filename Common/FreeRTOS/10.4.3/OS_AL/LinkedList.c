@@ -403,8 +403,13 @@ void OS_LINKEDLIST_Test( void )
   OS_LINKEDLIST_Enqueue(handle, &data1);
   tmp = OS_LINKEDLIST_Head(handle);
   OS_LINKEDLIST_Enqueue(handle, &data3);
-  OS_LINKEDLIST_Insert(handle, &data1, &data2);
+  OS_LINKEDLIST_Insert(handle, &data1, &data2);  
   num = OS_LINKEDLIST_NumElements(handle);
+  for( int i = 0; i< num ; i++)
+  {
+    tmp = OS_LINKEDLIST_Next(handle, tmp);
+  }
+  //tmp should point to the tail at this point
   tmp = OS_LINKEDLIST_Dequeue(handle);
   OS_LINKEDLIST_Remove(handle, &data2);
   

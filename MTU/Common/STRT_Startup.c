@@ -20,6 +20,7 @@
  *****************************************************************************/
 
 /* INCLUDE FILES */
+#define TM_LINKED_LIST 1 /*TODO Remove once compile switch is integrated*/
 #include "project.h"
 #include <stdbool.h>
 #include "MFG_Port.h"
@@ -539,7 +540,7 @@ void STRT_StartupTask ( taskParameter )
 #if (TM_QUEUE == 1)
    OS_QUEUE_Test();
 #endif
-#if( TM_LINKED_LIST == 1)
+#if (TM_LINKED_LIST == 1)
    OS_LINKEDLIST_Test();
 #endif
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
