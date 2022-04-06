@@ -20,7 +20,6 @@
  *****************************************************************************/
 
 /* INCLUDE FILES */
-#define TM_LINKED_LIST 1 /*TODO Remove once compile switch is integrated*/
 #include "project.h"
 #include <stdbool.h>
 #include "MFG_Port.h"
