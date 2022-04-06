@@ -118,7 +118,11 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #if 0 // TODO: RA6: Add later
 #if (EP == 1)
 #include "smtd_config.h"
+#endif  /* end of EP */
+#endif  /* end of if 0 */
 #include "dfwtd_config.h"
+#if 0 // TODO: RA6: Add later
+#if (EP == 1)
 #include "pwr_config.h"
 #include "ed_config.h"
 #include "RG_MD_Handler.h"
@@ -348,9 +352,11 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
 #endif
    { "buffers",      DBG_CommandLine_Buffers,         "Display buffers allocated and statitics" },
+#endif /*end of if 0*/
 #if ( EP == 1 )
    { "cap",          DBG_CommandLine_PWR_SuperCap,    "PWR - Read Super Cap Voltage" },
 #endif
+#if 0
    { "cca",          DBG_CommandLine_CCA,             "Display/Set the CCA threshold" },
    { "ccaadaptivethreshold", DBG_CommandLine_CCAAdaptiveThreshold, "Display the CCA adaptive threshold" },
    { "ccaadaptivethresholdenable", DBG_CommandLine_CCAAdaptiveThresholdEnable, "Display/Set the CCA adaptive threshold enable" },
@@ -7984,34 +7990,34 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //   return( 0 );
 //}
 //#endif
-//
-//#if (EP == 1)
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_PWR_SuperCap
-//
-//   Purpose: Measure voltage on supercap.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
-//{
-//   float fSuperCapV;
-//   char floatStr[PRINT_FLOAT_SIZE];
-//
-//   fSuperCapV = ADC_Get_SC_Voltage();
-//   DBG_logPrintf( 'R', "Super Cap Volage: %s", DBG_printFloat( floatStr, fSuperCapV, 6 ) );
-//
-//   return( 0 );
-//}
-//#endif
-//
+
+#if (EP == 1)
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_PWR_SuperCap
+
+   Purpose: Measure voltage on supercap.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
+{
+   float fSuperCapV;
+   char floatStr[PRINT_FLOAT_SIZE];
+
+   fSuperCapV = ADC_Get_SC_Voltage();
+   DBG_logPrintf( 'R', "Super Cap Volage: %s", DBG_printFloat( floatStr, fSuperCapV, 6 ) );
+
+   return( 0 );
+}
+#endif
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_ds

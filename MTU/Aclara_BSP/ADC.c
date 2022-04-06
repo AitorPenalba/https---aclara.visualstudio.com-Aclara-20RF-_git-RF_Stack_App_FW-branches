@@ -630,8 +630,12 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
    OS_MUTEX_Unlock(&intAdcMutex_);
 
    /* Convert the raw value to voltage (voltage = (Value / ADC_ValueMax) * Vref) */
-   voltage = ( ((float)result / 65535.0f) * 3.3f );
-
+#if ( MCU_SELECTED == NXP_K24 )
+   voltage = ( ( ( float )result / 65535.0f ) * 3.3f );
+#elif ( MCU_SELECTED == RA6E1 )
+   /* ADC's resolution is 12bit */
+   voltage = ( ( ( float )result / 4095.0f ) * 3.3f );
+#endif
    return ( voltage );
 }/* end ADC_Get_Ch_Voltage () */
 

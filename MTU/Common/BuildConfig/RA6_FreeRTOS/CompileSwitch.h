@@ -238,7 +238,7 @@
 #define BM_DEBUG                       0     /* Buffer allocate/free debug printing */
 #define ENABLE_B2B_COMM                0     /* DCU3 XCVR only */
 /* ------------------------------------------------------------------------------------------------------------------ */
-#define USE_MTLS                       1
+#define USE_MTLS                       0     // TODO: RA6 [name_Balaji]: Add USE_MTLS support for RA6E1
 #define MTLS_DEBUG                     (1)   /* Turn MTLS Debug On */
 /* ------------------------------------------------------------------------------------------------------------------ */
 
