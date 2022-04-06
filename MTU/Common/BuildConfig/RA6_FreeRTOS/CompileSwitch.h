@@ -273,7 +273,7 @@
 /**** Various Test Modes available in the Project ****/
 
 /* Set to true to enable unit/integration test code */
-#define TEST_MODE_ENABLE                  0     /* Set to 0 before releasing production code! */
+#define TEST_MODE_ENABLE                  1     /* Set to 0 before releasing production code! */
 
 // NOTE: 0=Production mode, !0=Enable the respective feature
 #define TEST_QUIET_MODE                   0     /* Enable Debug output during quiet mode */
@@ -302,6 +302,8 @@
 #define TM_MSGQ                           0
 #define TM_EVENTS                         0
 #define TM_LINKED_LIST                    0
+#define TM_CRC_UNIT_TEST                  1
+#define TM_TIME_COMPOUND_TEST             1
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */
