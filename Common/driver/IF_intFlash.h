@@ -53,10 +53,6 @@
 
 #define FLASH_HP_CODEFLASH_BLOCK8_START_ADDRESS        0x00010000U
 
-/* Code and Data flash minimal write size bytes */
-#define FLASH_HP_CODEFLASH_MINIMAL_WRITE_SIZE          128
-#define FLASH_HP_DATAFLASH_MINIMAL_WRITE_SIZE          4
-
 /* Code and Data flash minimal erase size bytes */
 #define FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE          8192
 #define FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE          64

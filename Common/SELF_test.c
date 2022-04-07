@@ -552,6 +552,8 @@ returnStatus_t SELF_testInternalFlash( void )
    memset( flashBuffer, 0, sizeof( flashBuffer ) );
    memset( checkFlashBuffer, 0, sizeof( checkFlashBuffer ) );
 
+   // Enable this to test large write of internal flash
+   // retVal |= PAR_partitionFptr.parWrite( 0x80000, ( uint8_t * ) 0, ( lCnt )0x77FE0, pDFWAppCode_ );
    return retVal;
 }
 
