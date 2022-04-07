@@ -141,7 +141,7 @@ typedef QUEUE_STRUCT          OS_QUEUE_Obj, *OS_QUEUE_Handle;
 typedef LWSEM_STRUCT          OS_SEM_Obj, *OS_SEM_Handle;
 typedef MQX_TICK_STRUCT       OS_TICK_Struct;
 typedef _task_id              OS_TASK_id;
-typedef OS_LINKED_LIST_STRUCT  QUEUE_ELEMENT_STRUCT;
+typedef QUEUE_ELEMENT_STRUCT  OS_LINKED_LIST_STRUCT;
 
 typedef struct
 {
@@ -380,6 +380,18 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
 void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
 uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle );
+
+bool OS_LINKEDLIST_Create (OS_List_Handle listHandle, uint32_t QueueLength );
+void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement);
+bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listElement );
+void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement );
+void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement );
+void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list );
+uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list );
+void *OS_LINKEDLIST_Head ( OS_List_Handle list );
+
+
+
 
 bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
 void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );

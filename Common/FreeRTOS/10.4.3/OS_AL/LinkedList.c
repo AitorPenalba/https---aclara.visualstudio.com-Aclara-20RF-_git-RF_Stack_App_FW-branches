@@ -1,40 +1,22 @@
 /******************************************************************************
- *
- * Filename: LinkedList.c
- *
- * Global Designator: OS_LINKEDLIST_
- *
- * Contents: OS layer for the queue functions
- *
+
+   Filename: Linked_list.c
+
+   Global Designator:
+
+   Contents:
+
  ******************************************************************************
- * Copyright (c) 2008 Distribution Control Systems, Inc.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *          DISTRIBUTION CONTROL SYSTEMS, INC.
- *          ST. LOUIS, MISSOURI USA
- ******************************************************************************
- *
- * $Log: os_queue.c,v $
- * Revision 1.5  2008/04/03 20:23:33  ssparks
- * modifications for unit test
- * added unit test build rules to Makefile
- *
- * Revision 1.4  2008/03/10 22:25:47  mbenedict
- * New OS interface, minus queue and notification error generation
- *
- * Also, improvements towards bug 2722 - Logger - Characters/Lines dropped with no
- * warning
- *
- * Revision 1.3  2008/02/20 22:10:29  mbenedict
- * Use OS.h, similiar to BSP.h, not os.h
- *
- * Revision 1.2  2008/02/20 22:09:41  mbenedict
- * UNIX format for all these
- *
- * Revision 1.1.1.1  2008/02/20 21:31:31  mbenedict
- * Create new Operating System Support Package with a generic interface
- *
- *
+   A product of
+   Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2012-2022 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may
+   be used or copied only in accordance with the terms of such license.
  *****************************************************************************/
 
 /* INCLUDE FILES */
@@ -66,9 +48,9 @@
  * Notes: internal use only for linked list object
  *
  *****************************************************************************/
-static bool verifyListElement(OS_List_Handle list, void * listElement)
+static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle listElement)
 {
-  bool retVal = false;
+  bool retVal = (bool)false;
   uint32_t  i, listSize; //loop variables
   OS_Linked_List_Element_Handle tmp;
   
@@ -82,9 +64,9 @@ static bool verifyListElement(OS_List_Handle list, void * listElement)
   
   for(i = 0; ( (i < listSize) && (tmp->NEXT != NULL)) ; i++ )
   {
-    if( tmp == ((OS_Linked_List_Element_Handle) listElement ))
+    if( tmp == listElement )
     {
-      retVal = true;
+      retVal = (bool)true;
     }
     tmp = tmp->NEXT;
   }
@@ -98,7 +80,9 @@ static bool verifyListElement(OS_List_Handle list, void * listElement)
  *
  * Purpose: Initlalizes a linkedList Object
  *
- * Arguments: -
+ * Arguments: listHandle, preallocated list handle
+ *            QueueLength, not used in LL but necesary for API 
+ *                         between MQX and FreeRTOS
  *
  * Returns: true: list object correctly intialized; false: invalid list object
  *
@@ -211,10 +195,10 @@ bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listE
 #if( RTOS_SELECTION == MQX_RTOS )
   return OS_QUEUE_Insert(list, listPosition, listElement);
 #elif( RTOS_SELECTION == FREE_RTOS )
-   bool retVal = false;
-   bool found = false;
+   bool retVal = (bool)false;
+   bool found = (bool)false;
    OS_Linked_List_Element_Handle tmp = listPosition;
-   found = verifyListElement(list, listPosition);
+   found = verifyListElement(list, ( OS_Linked_List_Element_Handle ) listPosition);
    if( found )
    {
      tmp->NEXT->PREV = ( OS_Linked_List_Element_Handle) listElement;
@@ -222,7 +206,7 @@ bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listE
      tmp->NEXT = ( OS_Linked_List_Element_Handle) listElement;
      (( OS_Linked_List_Element_Handle)listElement)->PREV = tmp;
      list->size++;
-     retVal = true;
+     retVal = (bool)true;
    }
    return retVal;
 
@@ -258,8 +242,8 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
    {
       return;
    }
-   bool found = false;
-   found = verifyListElement(list, listElement);
+   bool found = (bool)false;
+   found = verifyListElement(list, (OS_Linked_List_Element_Handle) listElement);
    if( found )
    {
      ((OS_Linked_List_Element *) listElement)->PREV->NEXT = ((OS_Linked_List_Element *) listElement)->NEXT; 
@@ -336,7 +320,7 @@ void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list )
 
 /******************************************************************************
  *
- * Function name: OS_QUEUE_Next
+ * Function name: OS_LINKEDLIST_NumElements
  *
  * Purpose: Returns the number of elements in a list
  *
@@ -385,7 +369,7 @@ void *OS_LINKEDLIST_Head ( OS_List_Handle list )
   return ((void *) list->head.NEXT);
 #endif
 }
-
+#if( TM_LINKED_LIST == 1)
 static OS_List_Obj testList;
 static OS_List_Handle handle = &testList;
 static OS_Linked_List_Element data1;
@@ -415,6 +399,7 @@ void OS_LINKEDLIST_Test( void )
   
   
 }
+#endif
 
 //
 ////******************************************************************************
