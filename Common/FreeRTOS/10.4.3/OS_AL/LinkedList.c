@@ -81,8 +81,6 @@ static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle
  * Purpose: Initlalizes a linkedList Object
  *
  * Arguments: listHandle, preallocated list handle
- *            QueueLength, not used in LL but necesary for API 
- *                         between MQX and FreeRTOS
  *
  * Returns: true: list object correctly intialized; false: invalid list object
  *
@@ -91,7 +89,7 @@ static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle
  *       the tail->PREV always points to the last element in the queue
  *
  *****************************************************************************/
-bool OS_LINKEDLIST_Create (OS_List_Handle listHandle, uint32_t QueueLength )
+bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
 {
 #if( RTOS_SELECTION == MQX_RTOS )
   return OS_QUEUE_Create ( listHandle, 0 );
@@ -389,7 +387,7 @@ static OS_Linked_List_Element_Handle tmp;
 void OS_LINKEDLIST_Test( void )
 {
 
-  OS_LINKEDLIST_Create(handle, 0);
+  OS_LINKEDLIST_Create(handle);
   OS_LINKEDLIST_Enqueue(handle, &data1);
   tmp = OS_LINKEDLIST_Head(handle);
   OS_LINKEDLIST_Enqueue(handle, &data3);

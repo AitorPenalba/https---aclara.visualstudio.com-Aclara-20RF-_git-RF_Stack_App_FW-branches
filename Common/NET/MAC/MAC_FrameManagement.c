@@ -192,12 +192,12 @@ returnStatus_t MAC_FrameManag_init ( void )
    returnStatus_t RetVal = eSUCCESS;
    uint16_t i;
 
-   if ( ! OS_LINKEDLIST_Create(&MAC_FrameTxQueueHandle, TX_FRAME_QUEUE_SIZE) )
+   if ( ! OS_LINKEDLIST_Create(&MAC_FrameTxQueueHandle) )
    {
       RetVal = eFAILURE;
    }
 
-   if ( ! OS_LINKEDLIST_Create(&RxAssemblyTimeoutQueue, RX_FRAME_QUEUE_SIZE) )
+   if ( ! OS_LINKEDLIST_Create(&RxAssemblyTimeoutQueue) )
    {
       RetVal = eFAILURE;
    }
