@@ -249,6 +249,9 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
      ((OS_Linked_List_Element *) listElement)->PREV->NEXT = ((OS_Linked_List_Element *) listElement)->NEXT; 
      ((OS_Linked_List_Element *) listElement)->NEXT->PREV = ((OS_Linked_List_Element *) listElement)->PREV;
      list->size--;
+     /*clear out the pointers for the removed element*/
+     ((OS_Linked_List_Element *) listElement)->PREV = NULL;
+     ((OS_Linked_List_Element *) listElement)->NEXT = NULL;
    }
 #endif
 }
@@ -312,6 +315,9 @@ void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list )
   list->head.NEXT = handle->NEXT;
   list->head.NEXT->PREV = &(list->head);
   list->size--;
+  /*clear out the pointers for the removed element*/
+  handle->NEXT = NULL;
+  handle->PREV = NULL;
   
   return ((void *) (handle));
 #endif
