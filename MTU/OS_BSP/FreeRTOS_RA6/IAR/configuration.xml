@@ -621,6 +621,15 @@
       <property id="module.driver.crc.crc_bit_order" value="module.driver.crc.crc_bit_order.lms_msb"/>
       <property id="module.driver.crc.snoop_address" value="module.driver.crc.snoop_address.no_address"/>
     </module>
+    <module id="module.driver.external_irq_on_icu.209142090">
+      <property id="module.driver.external_irq.name" value="Radio0_IRQ_ISR"/>
+      <property id="module.driver.external_irq.channel" value="13"/>
+      <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_falling"/>
+      <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.false"/>
+      <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
+      <property id="module.driver.external_irq.p_callback" value="NULL"/>
+      <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority12"/>
+    </module>
     <context id="_hal.0">
       <stack module="module.driver.ioport_on_ioport.0"/>
       <stack module="module.middleware.rm_freertos_port.0"/>
@@ -644,6 +653,7 @@
       <stack module="module.driver.flash_on_flash_hp.739999360"/>
       <stack module="module.driver.timer_on_agt.1075076975"/>
       <stack module="module.driver.crc_on_crc.1606105617"/>
+      <stack module="module.driver.external_irq_on_icu.209142090"/>
     </context>
     <config id="config.driver.wdt">
       <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>
