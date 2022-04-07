@@ -586,5 +586,5 @@ bool RTC_UnitTest(void)
    }
    return retVal;
 }
-#endif
+#endif  // #if ( TM_RTC_UNIT_TEST == 1 )
 #endif
