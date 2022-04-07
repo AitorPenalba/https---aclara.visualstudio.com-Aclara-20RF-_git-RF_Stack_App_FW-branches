@@ -29,7 +29,7 @@
 #include <mqx_prv.h>
 #endif
 //#include "sys_clock.h"
-#include "CompileSwitch.h"                 /* Enable required code blocks */
+//#include "CompileSwitch.h"                 /* Enable required code blocks */
 //TODO: Remove when "CompileSwitch.h" in project.h works
 #include "DBG_SerialDebug.h"
 //#include "psp_cpudef.h"
@@ -85,6 +85,7 @@
 #include "partitions.h"
 #endif
 
+#include "pwr_task.h" // TODO:RA6E1: DG: Remove duplicate
 #if ENABLE_PWR_TASKS
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
@@ -322,6 +323,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 {
    /* Task Index,               Function,                    Stack, Pri, Name,                    Attributes,    Param, Time Slice */
    { eSTRT_TSK_IDX,             STRT_StartupTask,             1900,   13, (char *)pTskName_Strt,   DEFAULT_ATTR_STRT, 0, 0 },
+   { ePWR_TSK_IDX,              PWR_task,                     1000,  12, (char *)pTskName_Pwr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },  /* TODO: RA6E1: DG: Remove*/
 #if ENABLE_PWR_TASKS
    //{ ePWR_TSK_IDX,              PWR_task,                     1000,  12, (char *)pTskName_Pwr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    //{ ePWROR_TSK_IDX,            PWROR_Task,                   1700,  12, (char *)pTskName_PwrRestore, DEFAULT_ATTR, 0, 0 },
@@ -666,8 +668,6 @@ taskCreateReturnValue_t OS_TASK_Create ( OS_TASK_Template_t const *pTaskList )
 
    return retVal;
 }
-
-
 
 /***********************************************************************************************************************
  *

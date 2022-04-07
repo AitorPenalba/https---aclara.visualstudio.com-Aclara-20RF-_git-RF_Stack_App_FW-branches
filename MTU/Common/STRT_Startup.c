@@ -138,6 +138,9 @@
 #include "time_sys.h"
 #include "file_io.h"
 #include "time_DST.h"
+#include "vbat_reg.h"
+#include "pwr_task.h"
+
 
 /* #DEFINE DEFINITIONS */
 #define PRINT_CPU_STATS_IN_SEC 5 /* Print the Cpu statistics every x seconds */
@@ -172,6 +175,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
    INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
+   INIT( VBATREG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),    // Needed early to check validity of RTC. // TODO: RA6E1: DG: Move this to appropriate position
    INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
    INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
    INIT( TIME_SYS_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),   // NOTE: This needs to be called as soon as possible in order to create the time mutexes early on
@@ -181,6 +185,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+   INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                        // TODO: RA6E1: DG: Move this to appropriate position
 
 #if 0
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
@@ -524,9 +529,11 @@ void STRT_StartupTask ( taskParameter )
          {
             /* This condition should only show up in development.  This infinite loop should help someone figure out
                that there is an issue initializing a task. */
+#if 0  // TODO: RA6E1: DG: How to route printf to Debug Port?
             ( void )printf( "\n\t\t#####################\n" );
             ( void )printf( "\nStartup Failure - Call to %s failed, Code: %u\n", pFunct->name, ( uint16_t )response );
             ( void )printf( "\n\t\t#####################\n" );
+#endif
             initSuccess_ = false;
          }
       }

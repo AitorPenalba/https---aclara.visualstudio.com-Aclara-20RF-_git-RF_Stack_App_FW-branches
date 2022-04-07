@@ -1773,6 +1773,12 @@
                 <name>$PROJ_DIR$\..\Common\pwr_last_gasp.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Common\pwr_task.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\pwr_task.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Common\STRT_Startup.c</name>
             </file>
             <file>

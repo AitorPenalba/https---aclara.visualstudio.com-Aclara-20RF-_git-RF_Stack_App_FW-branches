@@ -35,12 +35,12 @@
 
 #include "project.h"
 #include <string.h>
-
+//#include "lpm_app.h"
 //#include <bsp.h>
 //#include "compiler_types.h"
 //
 //#include "App_Msg_Handler.h"
-//#include "DBG_SerialDebug.h"
+#include "DBG_SerialDebug.h"
 #include "STRT_Startup.h"
 //#include "pack.h"
 //#include "file_io.h"
@@ -128,7 +128,7 @@ static const uint32_t uMinSleepMilliseconds  = ( uint32_t )10;    /* Minimum tim
 static const uint32_t uTotalMilliseconds     = ( uint32_t )20 * 60 * 1000; /* 20 minutes in milliseconds */
 
 
-#if 0 /* TODO: RA6 */
+
 //static PWRLG_SysRegisterFilePtr      const pSysMem  = PWRLG_RFSYS_BASE_PTR;
 //static VBATREG_VbatRegisterFilePtr   const pVbatMem = VBATREG_RFSYS_BASE_PTR;
 
@@ -191,7 +191,7 @@ static void lg_init_uart( void );
 #define LG_PRNT_INFO( fmt, ... )
 #endif
 
-//#if 0 /* TODO: RA6 */
+#if 0 /* TODO: RA6 */
 /***********************************************************************************************************************
 
    Function Name: PWRLG_LLWU_ISR
@@ -2415,3 +2415,99 @@ void PWRLG_RestLastGaspFlags( void )
    RESTORATION_TIME_SET( 0 );    // Clear the Restoration time.
 }
 #endif
+
+/***********************************************************************************************************************
+
+   Function name: PWRLG_GetSleepCancelSource
+
+   Purpose: Identify and return the Deep Software Standby Cancel Soruce
+
+   Arguments: none
+
+   Returns: cancel Soruce
+
+   Re-entrant Code: No
+
+   Notes:
+
+ **********************************************************************************************************************/
+uint8_t PWRLG_GetSleepCancelSource( void )
+{
+   uint8_t cancelSoruce = 0;
+
+   /* TODO: RA6: Create an Enum for the Cancel Sources */
+
+   if( R_SYSTEM->DPSIFR2_b.DLVD1IF )
+   {
+      cancelSoruce = 1;
+      DBG_printf("LVD1 Deep Standby Cancel Flag");
+   }
+   else if( R_SYSTEM->DPSIFR2_b.DRTCAIF )
+   {
+      cancelSoruce = 2;
+      DBG_printf("RTC Alarm Interrupt");
+   }
+   /* TODO: RA6 Select & add appropriate reg for Power Fail signal */
+   else if( R_SYSTEM->DPSIEGR0_b.DIRQ5EG )
+   {
+      cancelSoruce = 3;
+      DBG_printf("IRQ5-DS Pin Edge Select");
+   }
+
+   return (cancelSoruce);
+
+}
+/***********************************************************************************************************************
+
+/***********************************************************************************************************************
+
+   Function name: LptmrStart
+
+   Purpose: Setup and if specified, start the LPTMR (lower power time).
+
+   Arguments:  uint16_t uCounter - Counter value for LPTMR.
+               PWRLG_LPTMR_Units eUnits - LPTMR_SECONDS, LPTMR_MILLISECONDS, LPTMR_SLEEP_FOREVER
+               PWRLG_LPTMR_Mode eMode - LPTMR_MODE_PROGRAM_ONLY, LPTMR_MODE_START, LPTMR_MODE_WAIT, LPTMR_MODE_ENBLE_INT
+
+   Returns: void
+
+   Re-entrant Code: No
+
+   Notes:
+            If the counter value is 0, continue with existing count. If the existing count is 0, set to 1.
+
+            This code is called from mqx_main, before the OS is running. So, in that case, no OS dependent routines may
+            be used ( e.g., DBG_logPrintf, OS_TASK_sleep, etc. )
+
+ **********************************************************************************************************************/
+static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode )
+{
+   /* TODO: RA6: [DG]: Use RTC Alarm for LPTMR_SECONDS and go to Deep SS Mode
+                       Use AGT for LPTMR_MILLISECONDS and less than 10 secs -> go to SS Mode */
+   (void)eMode; /* Not used for this function */
+
+   switch( eUnits )
+   {
+      case LPTMR_SECONDS:
+      {
+         /* TODO: RA6: [DG]: Initialize and Start the RTC Alarm */
+         RTC_ConfigureRTCCalendarAlarm(uCounter);
+         break;
+      }
+      case LPTMR_MILLISECONDS:
+      {
+         /* TODO: RA6: [DG]: Initialize and Start the AGT0 and 1? */
+         AGT_LPM_Timer_Configure(uCounter);
+
+         break;
+      }
+      case LPTMR_SLEEP_FOREVER:
+      default:
+      {
+         /* TODO: RA6: [DG]: TBD */
+         break;
+      }
+   }
+
+}
+

@@ -2005,7 +2005,6 @@ void g_timer0_callback (timer_callback_args_t * p_args)
 /* ****************************************************************************************************************** */
 /* Unit Test Code */
 
-#define TM_DVR_EXT_FL_UNIT_TEST 1  //TODO: remove this after #include "CompileSwitch.h" is included in project.h
 #ifdef TM_DVR_EXT_FL_UNIT_TEST
 #include "partitions.h"
 #include "partition_cfg.h"

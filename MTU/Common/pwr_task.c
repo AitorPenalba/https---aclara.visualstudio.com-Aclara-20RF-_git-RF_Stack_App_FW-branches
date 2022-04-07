@@ -24,9 +24,10 @@
    v0.1 - KAD 05/6/2013 - Initial Release
 
  **********************************************************************************************************************/
-
+#if 1
 /* INCLUDE FILES */
 #include "project.h"
+#include "hal_data.h"
 //#include <mqx.h>
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
@@ -126,6 +127,24 @@ static returnStatus_t PowerFailDebounce( void );
 
 /* FUNCTION DEFINITIONS */
 
+/* TODO: RA6E1: DG: Add Function Comments*/
+fsp_err_t pf_meter_isr_init(void)
+{
+   fsp_err_t err = FSP_SUCCESS;
+
+   /* Open external IRQ/ICU module */
+   err = R_ICU_ExternalIrqOpen(&pf_meter_ctrl, &pf_meter_cfg);
+   if(FSP_SUCCESS == err)
+   {
+      /* Enable ICU module */
+      //       DBG_printf("\nOpen PF Meter IRQ");
+      err = R_ICU_ExternalIrqEnable(&pf_meter_ctrl);
+      //      if(FSP_SUCCESS == err)
+      //         DBG_printf("\n IRQEnable");
+   }
+   return err;
+}
+
 /***********************************************************************************************************************
 
    Function Name: PWR_task
@@ -166,16 +185,19 @@ void PWR_task( taskParameter )
    {
       ( void )_bsp_int_init( BRN_OUT_IRQIsrIndex, BRN_OUT_ISR_PRI, BRN_OUT_ISR_SUB_PRI, ( bool )true );
    }
+#endif
+#if ( MCU_SELECTED == NXP_K24 )
    BRN_OUT_IRQ_EI();
-#else /*  RA6 */
-   // Add the Brown Out ISR
-
+#elif ( MCU_SELECTED == RA6E1 ) /*  RA6 */
+   pf_meter_isr_init();
 #endif
    // Loop until receiving a valid PF_METER
    while ( eFAILURE == powerFail )
    {
+#if ( MCU_SELECTED == NXP_K24 )
       // Enable the Interrupt
-//      BRN_OUT_IRQ_EI();
+      BRN_OUT_IRQ_EI();
+#endif
       ( void )OS_SEM_Pend( &PWR_Sem, OS_WAIT_FOREVER ); // Wait for power down semaphore!
       OS_SEM_Reset( &PWR_Sem );
 
@@ -264,7 +286,8 @@ _Pragma ( "calls = \
    /********************************************************************/
    /*****               Next function never returns                *****/
    /********************************************************************/
-   PWRLG_Begin( pwrFileData.uPowerAnomalyCount ); /* Never returns  */
+   /* TODO: RA6: DG: Check for Ship and Shop Mode  */
+//   PWRLG_Begin( pwrFileData.uPowerAnomalyCount ); /* Never returns  */  TODO: RA6E1: DG: Add
 #else
    VBATREG_SHORT_OUTAGE = 0;  //Ensure we do not see this as a short outage
 
@@ -716,7 +739,7 @@ void PWR_unlockMutex( enum_PwrMutexState_t reqMutexState )
  **********************************************************************************************************************/
 returnStatus_t PWR_waitForStablePower( void )
 {
-#if 0 /* TODO: RA6: Add later */
+#if ( MCU_SELECTED == NXP_K24 )
    BRN_OUT_TRIS();
 #endif
    PowerGoodDebounce();
@@ -785,7 +808,7 @@ uint16_t PWR_getResetCause( void )
  **********************************************************************************************************************/
 returnStatus_t PWR_printResetCause( void )
 {
-#if 0 /* TODO: RA6: Add later */
+#if ( MCU_SELECTED == NXP_K24 )
    /* Save the reason we went through the reset vector */
    if ( ( rstReason_ & RESET_SOURCE_POWER_ON_RESET ) != 0 )
    {
@@ -938,9 +961,9 @@ void PWR_SafeReset( void )
    PWRLG_SOFTWARE_RESET_SET( 1 ); // TODO 2016-02-02 SMG Change to call into PWRLG
    PWRLG_TIME_OUTAGE_SET( 0 );   /* Clear the time of the last outage.  */
 #endif
-   RESET();
+//   RESET();
 }
-#if 0 // TODO: RA6 : DG
+
 /***********************************************************************************************************************
 
    Function Name: isr_brownOut
@@ -956,18 +979,26 @@ void PWR_SafeReset( void )
    Reentrant Code: No
 
  **********************************************************************************************************************/
+#if ( MCU_SELECTED == NXP_K24 )
 void isr_brownOut( void )
+#elif ( MCU_SELECTED == RA6E1 )
+void isr_brownOut(  external_irq_callback_args_t * p_args)
+#endif
 {
-#if 0 /* TODO: RA6: K24 Specific */
+#if ( MCU_SELECTED == NXP_K24 )
    BRN_OUT_IRQ_DI();        /* Disable the ISR */
 #endif
 #if ( SIMULATE_POWER_DOWN == 1 )
    /* Adding a semaphore to keep the ISR as short as possible */
    OS_SEM_Post( &PWR_SimulatePowerDn_Sem ); /* Post the semaphore */
 #endif
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_SEM_Post( &PWR_Sem ); /* Post the semaphore */
-}
+#else
+   OS_SEM_Post_fromISR( &PWR_Sem );
 #endif
+}
+
 /***********************************************************************************************************************
 
    Function Name: PWR_getpwrFileData
@@ -1282,4 +1313,5 @@ returnStatus_t PWR_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
    return ( retVal );
 }
 #endif
-#endif
+#endif //Remove; #if 0
+#endif //Remove; #if 1

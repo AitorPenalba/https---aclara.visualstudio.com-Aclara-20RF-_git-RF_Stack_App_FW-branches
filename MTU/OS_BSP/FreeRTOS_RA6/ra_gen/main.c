@@ -102,8 +102,6 @@
                     }
 
                     /* Init RTOS tasks. */
-//                    SampleTST_create();
-//                    OS_TASK_Create_All ( true );
                     OS_TASK_Create_STRT();
 
                     /* Start the scheduler. */
