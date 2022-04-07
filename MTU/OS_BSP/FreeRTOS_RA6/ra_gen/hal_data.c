@@ -6,14 +6,14 @@
 #define ADC_TRIGGER_ADC0_B      ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1        ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1_B      ADC_TRIGGER_SYNC_ELC
-icu_instance_ctrl_t Radio0_IRQ_ISR_ctrl;
-const external_irq_cfg_t Radio0_IRQ_ISR_cfg =
+icu_instance_ctrl_t g_external_irq0_ctrl;
+const external_irq_cfg_t g_external_irq0_cfg =
 {
     .channel             = 13,
     .trigger             = EXTERNAL_IRQ_TRIG_FALLING,
     .filter_enable       = false,
     .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
-    .p_callback          = NULL,
+    .p_callback          = Radio0_IRQ_ISR,
     /** If NULL then do not add & */
 #if defined(NULL)
     .p_context           = NULL,
@@ -29,10 +29,10 @@ const external_irq_cfg_t Radio0_IRQ_ISR_cfg =
 #endif
 };
 /* Instance structure to use this module. */
-const external_irq_instance_t Radio0_IRQ_ISR =
+const external_irq_instance_t g_external_irq0 =
 {
-    .p_ctrl        = &Radio0_IRQ_ISR_ctrl,
-    .p_cfg         = &Radio0_IRQ_ISR_cfg,
+    .p_ctrl        = &g_external_irq0_ctrl,
+    .p_cfg         = &g_external_irq0_cfg,
     .p_api         = &g_external_irq_on_icu
 };
 crc_instance_ctrl_t g_crc1_ctrl;

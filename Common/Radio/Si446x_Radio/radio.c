@@ -167,7 +167,7 @@ extern uint32_t DMA_Complete_IRQ_ISR_Timestamp; // Used for a watchdog to make s
  *****************************************************************************/
 static RadioEvent_Fxn pEventHandler_Fxn;
 
-static void Radio0_IRQ_ISR(void);
+static void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
 
 #if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
 static float computeAverage( float const *samples, uint32_t numSamples );
@@ -976,7 +976,7 @@ static void vRadio_PowerUp(void)
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
-static void Radio0_IRQ_ISR(void)
+static void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 {
    uint32_t primask = __get_PRIMASK();
 #if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: include the code once interrupt enable/disable added

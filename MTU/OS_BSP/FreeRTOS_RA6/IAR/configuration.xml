@@ -622,12 +622,12 @@
       <property id="module.driver.crc.snoop_address" value="module.driver.crc.snoop_address.no_address"/>
     </module>
     <module id="module.driver.external_irq_on_icu.209142090">
-      <property id="module.driver.external_irq.name" value="Radio0_IRQ_ISR"/>
+      <property id="module.driver.external_irq.name" value="g_external_irq0"/>
       <property id="module.driver.external_irq.channel" value="13"/>
       <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_falling"/>
       <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.false"/>
       <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
-      <property id="module.driver.external_irq.p_callback" value="NULL"/>
+      <property id="module.driver.external_irq.p_callback" value="Radio0_IRQ_ISR"/>
       <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority12"/>
     </module>
     <context id="_hal.0">

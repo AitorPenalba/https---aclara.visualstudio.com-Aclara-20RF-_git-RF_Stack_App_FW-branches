@@ -29,14 +29,14 @@
 #include "r_i2c_master_api.h"
 FSP_HEADER
 /** External IRQ on ICU Instance. */
-extern const external_irq_instance_t Radio0_IRQ_ISR;
+extern const external_irq_instance_t g_external_irq0;
 
 /** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
-extern icu_instance_ctrl_t Radio0_IRQ_ISR_ctrl;
-extern const external_irq_cfg_t Radio0_IRQ_ISR_cfg;
+extern icu_instance_ctrl_t g_external_irq0_ctrl;
+extern const external_irq_cfg_t g_external_irq0_cfg;
 
-#ifndef NULL
-void NULL(external_irq_callback_args_t * p_args);
+#ifndef Radio0_IRQ_ISR
+void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
 #endif
 extern const crc_instance_t g_crc1;
 extern crc_instance_ctrl_t g_crc1_ctrl;
