@@ -101,7 +101,7 @@ bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
   }
   
   listHandle->head.PREV = NULL;
-  listHandle->head.NEXT = &(listHandle->tail);
+  listHandle->head.NEXT = ((OS_Linked_List_Element_Handle)&(listHandle->tail));
   listHandle->tail.NEXT = NULL;
   listHandle->tail.PREV = ((OS_Linked_List_Element_Handle)&(listHandle->head));
   listHandle->size = 0;
@@ -150,7 +150,8 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
 #if( RTOS_SELECTION == MQX_RTOS )
   OS_QUEUE_Enqueue(list, listElement);
 #elif( RTOS_SELECTION == FREE_RTOS )
-  if ( (NULL == list) ||  (NULL == listElement)) {
+  if ( (NULL == list) ||  (NULL == listElement))
+  {
     return;
   }
   OS_Linked_List_Element_Handle tail_handle = &(list->tail);
