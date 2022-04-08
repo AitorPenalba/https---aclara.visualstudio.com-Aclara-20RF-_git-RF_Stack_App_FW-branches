@@ -61,12 +61,8 @@
 #endif
 #if( RTOS_SELECTION == FREE_RTOS )
 #define RX_BUF_EXPIRE_NUM_MSGQ_ITEMS  10 //NRJ: TODO Figure out sizing
-#define RX_FRAME_QUEUE_SIZE           10
-#define TX_FRAME_QUEUE_SIZE           10
 #else
 #define RX_BUF_EXPIRE_NUM_MSGQ_ITEMS  0
-#define RX_FRAME_QUEUE_SIZE           0
-#define TX_FRAME_QUEUE_SIZE           0
 #endif
    
    
