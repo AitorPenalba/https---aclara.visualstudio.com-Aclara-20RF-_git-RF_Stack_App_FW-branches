@@ -141,10 +141,11 @@ typedef QUEUE_STRUCT          OS_QUEUE_Obj, *OS_QUEUE_Handle;
 typedef LWSEM_STRUCT          OS_SEM_Obj, *OS_SEM_Handle;
 typedef MQX_TICK_STRUCT       OS_TICK_Struct;
 typedef _task_id              OS_TASK_id;
+typedef QUEUE_ELEMENT_STRUCT  OS_LINKED_LIST_STRUCT;
 
 typedef struct
 {
-   QUEUE_ELEMENT_STRUCT queue;
+   OS_LINKED_LIST_STRUCT queue;
    /* The following variables are required either to provide better error dectection or */
    /* belong to buffer_t but are put here for better memory packing */
    uint16_t  dataLen;      /**< User filled - # of bytes in data[] (initialized with requested buf size) */
@@ -196,8 +197,17 @@ typedef UBaseType_t           OS_TASK_id;
 typedef SemaphoreHandle_t     OS_SEM_Obj, OS_MUTEX_Obj, *OS_SEM_Handle, *OS_MUTEX_Handle;
 typedef QueueHandle_t         OS_QUEUE_Obj, *OS_QUEUE_Handle;
 typedef EventGroupHandle_t    OS_EVNT_Obj,  *OS_EVNT_Handle;
+typedef struct OS_Linked_List_Element
+{
+   struct OS_Linked_List_Element * NEXT; //match MQX memeber names QUEUE_ELEMENT_STRUCT
+   struct OS_Linked_List_Element * PREV;   
+} OS_Linked_List_Element, *OS_Linked_List_Element_Handle;
+
+typedef OS_Linked_List_Element OS_LINKED_LIST_STRUCT;
+
 typedef struct
 {
+  OS_LINKED_LIST_STRUCT queue;
    uint16_t  dataLen;      /**< User filled - # of bytes in data[] (initialized with requested buf size) */
    struct {
       uint8_t isFree:   1; /**< buffer was freed through BM_free */
@@ -207,6 +217,15 @@ typedef struct
    } flag;
    uint8_t bufPool       ; /**< identifies source buffer pool */
 } OS_QUEUE_Element, *OS_QUEUE_Element_Handle;
+
+typedef struct
+{
+  OS_Linked_List_Element  head;
+  OS_Linked_List_Element  tail;
+  uint32_t                size;
+   
+} OS_List_Obj, *OS_List_Handle;
+
 #define DEFAULT_NUM_QUEUE_ITEMS          10
 #define QUEUE_ITEM_SIZE sizeof( OS_QUEUE_Element_Handle )
 typedef struct
@@ -362,6 +381,18 @@ void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
 uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle );
 
+bool OS_LINKEDLIST_Create (OS_List_Handle listHandle, uint32_t QueueLength );
+void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement);
+bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listElement );
+void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement );
+void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement );
+void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list );
+uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list );
+void *OS_LINKEDLIST_Head ( OS_List_Handle list );
+
+
+
+
 bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
 void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
 void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
@@ -428,5 +459,8 @@ bool OS_MSGQ_TestPend( void );
 void OS_EVENT_TestCreate(void);
 bool OS_EVENT_TestWait(void);;
 void OS_EVENT_TestSet(void);
+#endif
+#if( TM_LINKED_LIST == 1)
+void OS_LINKEDLIST_Test(void);
 #endif
 #endif /* this must be the last line of the file */

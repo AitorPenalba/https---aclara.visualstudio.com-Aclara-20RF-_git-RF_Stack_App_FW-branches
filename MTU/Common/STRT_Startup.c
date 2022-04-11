@@ -539,6 +539,9 @@ void STRT_StartupTask ( taskParameter )
 #if (TM_QUEUE == 1)
    OS_QUEUE_Test();
 #endif
+#if (TM_LINKED_LIST == 1)
+   OS_LINKEDLIST_Test();
+#endif
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
 #if 0
    if (!initSuccess_)
