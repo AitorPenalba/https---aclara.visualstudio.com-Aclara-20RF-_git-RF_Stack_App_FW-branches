@@ -62,7 +62,7 @@ void OS_TICK_Get_TickCount_HWTicks( OS_TICK_Struct *TickValue )
 
 /*******************************************************************************
 
-  Function name: OS_TICK_Get_ElapsedTicks
+  Function name: OS_TICK_Get_CurrentElapsedTicks
 
   Purpose: This function will return the elapsed ticks from power up
 
@@ -73,7 +73,7 @@ void OS_TICK_Get_TickCount_HWTicks( OS_TICK_Struct *TickValue )
   Notes:
 
 *******************************************************************************/
-void OS_TICK_Get_ElapsedTicks ( OS_TICK_Struct *TickValue )
+void OS_TICK_Get_CurrentElapsedTicks ( OS_TICK_Struct *TickValue )
 {
 #if ( RTOS_SELECTION == MQX_RTOS )
    _time_get_elapsed_ticks ( TickValue );

@@ -133,7 +133,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define PHY_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define PHY_NUM_MSGQ_ITEMS 0 
+#define PHY_NUM_MSGQ_ITEMS 0
 #endif
 
 
@@ -2899,8 +2899,11 @@ static bool Process_DataReq( PHY_Request_t const *pReq )
    power = 0;
 #endif
    // Some check on RxTime
+#if ( MCU_SELECTED == NXP_K24 )
    RxTime = pReq->DataReq.RxTime == 0 ? 0 : (uint32_t)(((uint64_t)(pReq->DataReq.RxTime - DWT_CYCCNT))*1000/getCoreClock());
-
+#elif ( MCU_SELECTED == RA6E1 )
+   RxTime = pReq->DataReq.RxTime == 0 ? 0 : (uint32_t)(((uint64_t)(pReq->DataReq.RxTime - DWT->CYCCNT))*1000/getCoreClock());
+#endif
    INFO_printf("DataReq: %u msec channel=%u power=%d.%1u mode=%u modeParameters=%u framing=%u detection=%u len=%u prio=%u",
       RxTime, // print future time in msec
       pReq->DataReq.channel,

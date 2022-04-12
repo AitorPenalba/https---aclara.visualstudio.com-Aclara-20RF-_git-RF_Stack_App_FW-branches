@@ -95,7 +95,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define EVL_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define EVL_NUM_MSGQ_ITEMS 0 
+#define EVL_NUM_MSGQ_ITEMS 0
 #endif
 
 /* ****************************************************************************************************************** */
@@ -198,7 +198,7 @@ static void           resetSimLGCsmaParameters( void );
 
  **********************************************************************************************************************/
 //lint -esym(715,Arg0)  // Arg0 required for generic API, but not used here.
-void EVL_AlarmHandlerTask ( uint32_t Arg0 )
+void EVL_AlarmHandlerTask ( taskParameter )
 {
    HEEP_APPHDR_t     heepHdr = {0}; /* Application header   */
    pack_t            packCfg;       /* Struct needed for PACK functions */

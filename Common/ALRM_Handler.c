@@ -22,8 +22,10 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <string.h>
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
+#endif
 #include "time_util.h"
 #include "pack.h"
 #include "EVL_event_log.h"

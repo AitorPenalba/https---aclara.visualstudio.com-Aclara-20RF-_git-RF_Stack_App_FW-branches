@@ -117,19 +117,15 @@ HEEP_UTIL_GLOBALS uint16_t HEEP_GetNextReadingInfo(void *payloadBuf, uint16_t *b
                                                         uint8_t *readingValTypecast, int8_t *readingValPow10,
                                                         uint8_t *readingFlags);
 HEEP_UTIL_GLOBALS uint8_t HEEP_getPowerOf10Code(uint8_t ch, int64_t *val);
-#if 0 // TODO: RA6E1 - Heep support
 HEEP_UTIL_GLOBALS uint8_t HEEP_getMinByteNeeded( int64_t val, ReadingsValueTypecast typecast, uint16_t valueSizeInBytes );
-#endif
 HEEP_UTIL_GLOBALS void    HEEP_initHeader(HEEP_APPHDR_t *hdr);
 HEEP_UTIL_GLOBALS void OR_PM_MsgHandler(HEEP_APPHDR_t *heepReqHdr, void *payloadBuf, uint16_t length);
-#if 0 // TODO: RA6E1 - Heep support
 HEEP_UTIL_GLOBALS returnStatus_t HEEP_util_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t NWK_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t DTLS_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr);
 returnStatus_t MAC_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t PHY_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 returnStatus_t HMC_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
-#endif
 HEEP_UTIL_GLOBALS void HEEP_setEnableOTATest( bool enabledStatus);
 HEEP_UTIL_GLOBALS bool HEEP_getEnableOTATest( void );
 

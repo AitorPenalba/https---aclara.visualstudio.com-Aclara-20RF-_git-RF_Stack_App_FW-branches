@@ -26,7 +26,7 @@
 
 #include "project.h"
 //#include "time_util.h"
-//#include "HEEP_util.h"
+#include "HEEP_util.h"
 #if ( SIMULATE_POWER_DOWN == 1 )
 #include "DBG_CommandLine.h"
 #endif
@@ -249,11 +249,9 @@ void PWR_setWatchDogResetCnt( uint16_t count );
    @param  uint32_t
    @return None
 */
-#if 0 /* TODO: RA6: Add later */
 void                    PWR_setOutageTime( sysTimeCombined_t outageTime );
 sysTimeCombined_t       PWR_getOutageTime( void );
 pwrFileData_t const *   PWR_getpwrFileData( void );
 extern returnStatus_t   PWR_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 void                    PWR_resetCounters( void );
-#endif
 #endif

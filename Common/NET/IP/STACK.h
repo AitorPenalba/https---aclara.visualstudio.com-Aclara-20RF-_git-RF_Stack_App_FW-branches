@@ -115,7 +115,7 @@ typedef enum NWK_COUNTER_e
 #ifdef ERROR_CODES_H_
 returnStatus_t NWK_init ( void );
 #endif
-void NWK_Task ( uint32_t Arg0 );
+void NWK_Task ( taskParameter );
 
 void NWK_Request(buffer_t *request);
 

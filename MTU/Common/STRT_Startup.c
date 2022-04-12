@@ -23,11 +23,23 @@
 #include "project.h"
 #include <stdbool.h>
 #include "MFG_Port.h"
-#if 0
+#if( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <fio.h>
+#endif
+
+#include "timer_util.h"
+
 #include "EVL_event_log.h"
 
+#include "SM_Protocol.h"
+#include "SM.h"
+
+#include "MAC_Protocol.h"
+#include "MAC.h"
+#include "STACK_Protocol.h"
+#include "STACK.h"
+#if 0
 #include "user_config.h"
 #if ( MQX_USE_LOGS == 1 )
 #define PRINT_LOGS 1
@@ -178,9 +190,15 @@ const STRT_FunctionList_t startUpTbl[] =
                                                                                     //       because the error logging (ERR_printf, DBG_logPrintf, etc) uses the clock
                                                                                     //       to time stamp the message and, in the process, uses the time mutex.
                                                                                     // NOTE2: This needs to be after FIO_init since it uses the file system.
+   INIT( TMR_HandlerInit, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+   INIT( PAR_initRtos, STRT_FLAG_NONE ),
+   INIT( MAC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
 
 #if 0
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */

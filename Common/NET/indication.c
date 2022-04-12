@@ -12,6 +12,7 @@ Copyright 2018 Aclara.  All Rights Reserved.
 #INCLUDES
 *******************************************************************************/
 
+#include "project.h"
 #include "indication.h"
 #include "DBG_SerialDebug.h"
 

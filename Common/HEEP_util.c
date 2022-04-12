@@ -205,6 +205,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { DFWA_OR_PM_Handler,        capableOfMeterBasecodeDFW },
   { DFWA_OR_PM_Handler,        capableOfMeterPatchDFW },
   { DFWA_OR_PM_Handler,        capableOfMeterReprogrammingOTA },
+#if 0 // TODO: RA6E1 OR_PM handlers
   { PHY_OR_PM_Handler,         phyFrontEndGain },
   { PHY_OR_PM_Handler,         phyNumChannels },
   { PHY_OR_PM_Handler,         phyAvailableChannels },
@@ -235,6 +236,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { PHY_OR_PM_Handler,         phySyncDetectCount },
   { PHY_OR_PM_Handler,         phyDemodulator },
   { PHY_OR_PM_Handler,         phyMaxTxPayload },
+#endif
 #if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
   { PHY_OR_PM_Handler,         fngVSWR },
   { PHY_OR_PM_Handler,         fngVswrNotificationSet },
@@ -256,9 +258,11 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { EVL_OR_PM_Handler,         amBuMaxTimeDiversity },
   { EVL_OR_PM_Handler,         opportunisticAlarmIndexID },
   { EVL_OR_PM_Handler,         realTimeAlarmIndexID },
+#if 0 // TODO: RA6E1 OR_PM handlers
   { SELF_OR_PM_Handler,        stRTCFailCount },
   { SELF_OR_PM_Handler,        stSecurityFailCount },
   { SELF_OR_PM_Handler,        stNvmRWFailCount },
+#endif
   { TIME_UTIL_OR_PM_Handler,   dateTime },
   { NWK_OR_PM_Handler,         ipHEContext },
   { NWK_OR_PM_Handler,         iPifInDiscards },
@@ -289,7 +293,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { MIMTINFO_OR_PM_Handler,    dataConfigurationDocumentVersion },
   { MIMTINFO_OR_PM_Handler,    manufacturerNumber },
   { MIMTINFO_OR_PM_Handler,    repairInformation },
-
+#if 0 // TODO: RA6E1 OR_PM handlers
   { MAC_OR_PM_Handler,         macAckWaitDuration },
   { MAC_OR_PM_Handler,         macCsmaQuickAbort },
   { MAC_OR_PM_Handler,         macPacketId },
@@ -322,6 +326,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { MAC_OR_PM_Handler,         macReliabilityHighCount },
   { MAC_OR_PM_Handler,         macReliabilityMedCount },
   { MAC_OR_PM_Handler,         macReliabilityLowCount },
+#endif
 #if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
   { MAC_OR_PM_Handler,         macLinkParametersMaxOffset },
   { MAC_OR_PM_Handler,         macLinkParametersPeriod },
@@ -391,13 +396,17 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { PWRCFG_SIMLG_OR_PM_Handler,                 simulateLastGaspStatPPersistAttempts },
   { PWRCFG_SIMLG_OR_PM_Handler,                 simulateLastGaspStatMsgsSent },
 #endif
+#if 0 // TODO: RA6E1 OR_PM handlers
   { PWR_OR_PM_Handler,                          watchdogResetCount },
   { PWR_OR_PM_Handler,                          spuriousResetCount },
   { PWR_OR_PM_Handler,                          PowerFailCount },
+#endif
   { SMTDCFG_OR_PM_Handler,                      smLogTimeDiversity },
+#if 0 // TODO: RA6E1 OR_PM handlers
   { PHY_OR_PM_Handler,                          stTxCWTest },
   { PHY_OR_PM_Handler,                          stRx4GFSK },
   { PHY_OR_PM_Handler,                          stTxBlurtTest },
+#endif
   { TEMPERATURE_OR_PM_Handler,                  epMaxTemperature },
   { TEMPERATURE_OR_PM_Handler,                  epMinTemperature },
   { TEMPERATURE_OR_PM_Handler,                  epTempHysteresis },
@@ -427,8 +436,10 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { HD_dsBuReadingTypesHandler,                 dsBuReadingTypes },
   { HD_dsBuEnabledHandler,                      dsBuEnabled },
   { HD_historicalRecoveryHandler,               historicalRecovery },
+#if 0 // TODO: RA6E1 OR_PM handlers
   { HMC_OR_PM_Handler,                          meterCommLockout },
   { HMC_OR_PM_Handler,                          meterSessionFailureCount },
+#endif
   { ID_LpBuDataRedundancyHandler,               lpBuDataRedundancy},
   { ID_LpBuMaxTimeDiversityHandler,             lpBuMaxTimeDiversity},
   { ID_LpBuEnabledHandler,                      lpBuEnabled},
@@ -530,18 +541,16 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { NULL , invalidReadingType }
 };
 
+// TODO: RA6E1 PHY_OR_PM handler,SELF_OR_PM_Handler, MAC_OR_PM_Handler has to be added with this common call
 //lint -e750    Lint is complaining about macro not referenced
 #define HEEP_COMMON_CALLS APP_MSG_SecurityHandler \
                      ,DFWA_OR_PM_Handler \
-                     ,PHY_OR_PM_Handler \
                      ,EVL_OR_PM_Handler \
-                     ,SELF_OR_PM_Handler \
                      ,TIME_UTIL_OR_PM_Handler \
                      ,NWK_OR_PM_Handler \
                      ,SMTDCFG_OR_PM_Handler \
                      ,HEEP_util_OR_PM_Handler \
                      ,MIMTINFO_OR_PM_Handler \
-                     ,MAC_OR_PM_Handler \
                      ,TIME_SYNC_OR_PM_Handler \
                      ,TEMPERATURE_OR_PM_Handler
 
@@ -551,6 +560,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
 #define HEEP_DCU_CALLS
 #endif
 
+// TODO: RA6E1 PWR_OR_PM_Handler has to be added with this HEEP_EP_CALLS
 #if ( EP == 1 )
 #define HEEP_EP_CALLS ,APP_MSG_initialRegistrationTimeoutHandler \
                  ,APP_MSG_maxRegistrationTimeoutHandler \
@@ -570,7 +580,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
                  ,PWRCFG_RestorationDeclarationDelayHandler \
                  ,PWRCFG_PowerQualityEventDurationHandler \
                  ,PWRCFG_LastGaspMaxNumAttemptsHandler \
-                 ,PWR_OR_PM_Handler \
                  ,TIME_SYS_OR_PM_Handler \
                  ,SMTDCFG_OR_PM_Handler
 #else
@@ -589,6 +598,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
 #define HEEP_MTLS_CALLS
 #endif
 
+// TODO: RA6E1 HMC_OR_PM_Handler has to be added with this HEEP_NOT_LC_NOT_DA_CALLS
 #if ( EP == 1 ) && ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 #define HEEP_NOT_LC_NOT_DA_CALLS ,EDCFG_OR_PM_Handler \
                                   ,HD_dailySelfReadTimeHandler \
@@ -598,7 +608,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
                                   ,HD_dsBuReadingTypesHandler \
                                   ,HD_dsBuEnabledHandler \
                                   ,HD_historicalRecoveryHandler \
-                                  ,HMC_OR_PM_Handler \
                                   ,ID_LpBuDataRedundancyHandler \
                                   ,ID_LpBuMaxTimeDiversityHandler \
                                   ,ID_LpBuEnabledHandler \
@@ -2643,6 +2652,8 @@ returnStatus_t HEEP_util_OR_PM_Handler( enum_MessageMethod action, meterReadingT
                attr->rValLen = (uint16_t)sizeof(uint8_t);
                attr->rValTypecast = (uint8_t)Boolean;
             }
+#elif ( MCU_SELECTED == RA6E1 )
+            // TODO: RA6E1 Flash security enabled configuration
 #else
 #define FLASH_SECURITY_DISABLED (2)  /* All other values indicate Flash Security is enabled */
             *(uint8_t *)value = TRUE;  //Assume Flash Security is enabled

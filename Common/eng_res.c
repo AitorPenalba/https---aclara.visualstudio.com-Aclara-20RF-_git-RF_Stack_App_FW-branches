@@ -32,7 +32,9 @@
 #include "MAC.h"
 #include "STACK.h"
 #include "STACK_Protocol.h"
+#if ( USE_DTLS == 1 )
 #include "dtls.h"
+#endif
 #include "HEEP_util.h"
 #if (EP == 1)
 #include "pwr_task.h"

@@ -537,20 +537,20 @@ returnStatus_t SELF_testInternalFlash( void )
    memset(checkFlashBuffer, 0, sizeof(checkFlashBuffer));
 
    /* App partition test - App code is stored in code flash */
-   retVal |= PAR_partitionFptr.parOpen( &pDFWAppCode_, ePART_APP_CODE, 0L );
-   /* TODO: ******** Remove ***********
-    *       This write will write the data at the location mentioned.
-    *       Hence it may lead to a crash of a system when the
-    *       code exists that location. Hence it should be removed later. Only added now for testing */
-   retVal |= PAR_partitionFptr.parWrite( 65536, ( uint8_t * ) &flashBuffer[0], ( lCnt )sizeof( flashBuffer ), pDFWAppCode_ );
-   retVal |= PAR_partitionFptr.parRead( checkFlashBuffer, 65536, ( lCnt )sizeof( checkFlashBuffer ), pDFWAppCode_ );
-   if ( 0 != memcmp( flashBuffer, checkFlashBuffer, sizeof( flashBuffer ) ) )
-   {
-      retVal |= eFAILURE;
-   }
-
-   memset( flashBuffer, 0, sizeof( flashBuffer ) );
-   memset( checkFlashBuffer, 0, sizeof( checkFlashBuffer ) );
+//   retVal |= PAR_partitionFptr.parOpen( &pDFWAppCode_, ePART_APP_CODE, 0L );
+//   /* TODO: ******** Remove ***********
+//    *       This write will write the data at the location mentioned.
+//    *       Hence it may lead to a crash of a system when the
+//    *       code exists that location. Hence it should be removed later. Only added now for testing */
+//   retVal |= PAR_partitionFptr.parWrite( 65536, ( uint8_t * ) &flashBuffer[0], ( lCnt )sizeof( flashBuffer ), pDFWAppCode_ );
+//   retVal |= PAR_partitionFptr.parRead( checkFlashBuffer, 65536, ( lCnt )sizeof( checkFlashBuffer ), pDFWAppCode_ );
+//   if ( 0 != memcmp( flashBuffer, checkFlashBuffer, sizeof( flashBuffer ) ) )
+//   {
+//      retVal |= eFAILURE;
+//   }
+//
+//   memset( flashBuffer, 0, sizeof( flashBuffer ) );
+//   memset( checkFlashBuffer, 0, sizeof( checkFlashBuffer ) );
 
    // Enable this to test large write of internal flash
    // retVal |= PAR_partitionFptr.parWrite( 0x80000, ( uint8_t * ) 0, ( lCnt )0x77FE0, pDFWAppCode_ );
@@ -574,10 +574,10 @@ returnStatus_t SELF_testTimeCompound( void )
    returnStatus_t retVal;
    uint8_t loopCnt = 20;
    OS_TICK_Struct startTick, currentTick;
-   OS_TICK_Get_ElapsedTicks( &startTick );
+   OS_TICK_Get_CurrentElapsedTicks( &startTick );
    while ( loopCnt-- > 0 )
    {
-      OS_TICK_Get_ElapsedTicks( &currentTick );
+      OS_TICK_Get_CurrentElapsedTicks( &currentTick );
       if ( OS_TICK_Get_Diff_InMilliseconds( &startTick, &currentTick ) > 100 )
       {
          break;
@@ -596,10 +596,10 @@ returnStatus_t SELF_testTimeCompound( void )
    }
 
    loopCnt = 20;
-   OS_TICK_Get_ElapsedTicks( &startTick );
+   OS_TICK_Get_CurrentElapsedTicks( &startTick );
    while ( loopCnt-- > 0 )
    {
-      OS_TICK_Get_ElapsedTicks( &currentTick );
+      OS_TICK_Get_CurrentElapsedTicks( &currentTick );
       if ( OS_TICK_Get_Diff_InMicroseconds( &startTick, &currentTick ) > 100000 )
       {
          break;

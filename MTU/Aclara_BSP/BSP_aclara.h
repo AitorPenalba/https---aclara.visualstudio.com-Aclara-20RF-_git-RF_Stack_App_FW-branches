@@ -32,6 +32,9 @@
 #undef NULL
 #define NULL               ((void *) 0)
 
+#define TRUE                  1
+#define FALSE                 0
+
 #define MIN_RTC_MONTH         1
 #define MAX_RTC_MONTH        12
 #define MIN_RTC_DAY           1
@@ -221,7 +224,7 @@ extern bool        RTC_Valid                 ( void );
 extern void        RTC_GetTimeAtRes          ( TIME_STRUCT *ptime, uint16_t fractRes );
 extern void        RTC_GetTimeInSecMicroSec  ( uint32_t *sec, uint32_t *microSec );
 #if ( MCU_SELECTED == NXP_K24 )
-  
+
 #elif ( MCU_SELECTED == RA6E1 )
 extern returnStatus_t RTC_init( void );
 extern bool RTC_SetAlarmTime ( rtc_alarm_time_t * const p_alarm );
