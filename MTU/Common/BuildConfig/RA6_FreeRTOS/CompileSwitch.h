@@ -32,17 +32,17 @@
 
 // This is the standard build
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-   #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */
-   #define ENABLE_ID_TASKS                0  /* Used to 0=disable, 1=enable the Interval Data feature */
+   #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */            /* TODO: RA6E1: Enable */
+   #define ENABLE_ID_TASKS                0  /* Used to 0=disable, 1=enable the Interval Data feature */    /* TODO: RA6E1: Enable */
    #define ENABLE_MFG_TASKS               1  /* Used to 0=disable, 1=enable the Mfg Port feature */
-   #define ENABLE_TMR_TASKS               0  /* Used to 0=disable, 1=enable the Timer feature */
-   #define ENABLE_TIME_SYS_TASKS          0  /* Used to 0=disable, 1=enable the System Time feature */
-   #define ENABLE_HMC_TASKS               0  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
+   #define ENABLE_TMR_TASKS               0  /* Used to 0=disable, 1=enable the Timer feature */            /* TODO: RA6E1: Enable */
+   #define ENABLE_TIME_SYS_TASKS          0  /* Used to 0=disable, 1=enable the System Time feature */      /* TODO: RA6E1: Enable */
+   #define ENABLE_HMC_TASKS               0  /* Used to 0=disable, 1=enable the Host Meter Comm feature */  /* TODO: RA6E1: Enable */
    #define ENABLE_PAR_TASKS               1  /* Used to 0=disable, 1=enable the Partition feature */
-   #define ENABLE_PWR_TASKS               0  /* Used to 0=disable, 1=enable the Power feature */
-   #define ENABLE_DFW_TASKS               0  /* Used to 0=disable, 1=enable the DFW feature */
-   #define ENABLE_DEMAND_TASKS            0  /* Used to 0=disable, 1=enable the Demand feature */
-   #define ENABLE_FIO_TASKS               0  /* Used to 0=disable, 1=enable the FileIO CRC feature */
+   #define ENABLE_PWR_TASKS               0  /* Used to 0=disable, 1=enable the Power feature */         /* TODO: RA6E1: Enable */
+   #define ENABLE_DFW_TASKS               0  /* Used to 0=disable, 1=enable the DFW feature */           /* TODO: RA6E1: Enable */
+   #define ENABLE_DEMAND_TASKS            0  /* Used to 0=disable, 1=enable the Demand feature */        /* TODO: RA6E1: Enable */
+   #define ENABLE_FIO_TASKS               0  /* Used to 0=disable, 1=enable the FileIO CRC feature */    /* TODO: RA6E1: Enable */
    #define ENABLE_LAST_GASP_TASK          1  /* Used to 0=disable, 1=enable the Last Gasp feature */
    #define ENABLE_SRFN_ILC_TASKS          0  /* Used to 0=disable, 1=enable the SRFN ILC feature */
    #define ENABLE_SRFN_DA_TASKS           0  /* Used to 0=disable, 1=enable the SRFN DA specific tasks */
