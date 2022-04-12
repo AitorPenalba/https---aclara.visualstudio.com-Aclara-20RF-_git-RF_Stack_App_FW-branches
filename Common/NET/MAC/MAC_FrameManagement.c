@@ -61,12 +61,8 @@
 #endif
 #if( RTOS_SELECTION == FREE_RTOS )
 #define RX_BUF_EXPIRE_NUM_MSGQ_ITEMS  10 //NRJ: TODO Figure out sizing
-#define RX_FRAME_QUEUE_SIZE           10
-#define TX_FRAME_QUEUE_SIZE           10
 #else
 #define RX_BUF_EXPIRE_NUM_MSGQ_ITEMS  0
-#define RX_FRAME_QUEUE_SIZE           0
-#define TX_FRAME_QUEUE_SIZE           0
 #endif
    
    
@@ -192,12 +188,12 @@ returnStatus_t MAC_FrameManag_init ( void )
    returnStatus_t RetVal = eSUCCESS;
    uint16_t i;
 
-   if ( ! OS_QUEUE_Create(&MAC_FrameTxQueueHandle, TX_FRAME_QUEUE_SIZE) )
+   if ( ! OS_LINKEDLIST_Create(&MAC_FrameTxQueueHandle) )
    {
       RetVal = eFAILURE;
    }
 
-   if ( ! OS_QUEUE_Create(&RxAssemblyTimeoutQueue, RX_FRAME_QUEUE_SIZE) )
+   if ( ! OS_LINKEDLIST_Create(&RxAssemblyTimeoutQueue) )
    {
       RetVal = eFAILURE;
    }
@@ -231,7 +227,7 @@ returnStatus_t MAC_FrameManag_init ( void )
       (void)memset(RxBuffers.Buffers[i].dstAddr, 0, sizeof(RxBuffers.Buffers[i].dstAddr));
       (void)memset(RxBuffers.Buffers[i].srcAddr, 0, sizeof(RxBuffers.Buffers[i].srcAddr));
       RxBuffers.Buffers[i].packetId = 0;
-      if ( ! OS_QUEUE_Create(&RxBuffers.Buffers[i].frameQueue) )
+      if ( ! OS_LINKEDLIST_Create(&RxBuffers.Buffers[i].frameQueue) )
       {
          RetVal = eFAILURE;
       }
@@ -291,7 +287,7 @@ static bool MAC_FrameManag_AllocRxData ( RxBufferTracking_s *rxBuff )
    {
       if ( BUF_Get(&MAC_FrameRxBufObj, (void **)&segment) == BUF_ERR_NONE )
       {
-         OS_QUEUE_Enqueue(&rxBuff->frameQueue, segment); // Function will not return if it fails
+         OS_LINKEDLIST_Enqueue(&rxBuff->frameQueue, segment); // Function will not return if it fails
       }
       else
       {
@@ -322,7 +318,7 @@ void MAC_FrameManag_Add_Tx ( MAC_FrameManagBuf_s *frame )
 {
    frame->SentToNextLayer = (bool)false;
 
-   OS_QUEUE_Enqueue(&MAC_FrameTxQueueHandle, frame); // Function will not return if it fails
+   OS_LINKEDLIST_Enqueue(&MAC_FrameTxQueueHandle, frame); // Function will not return if it fails
 }
 
 /***********************************************************************************************************************
@@ -343,11 +339,11 @@ MAC_FrameManagBuf_s *MAC_FrameManag_GetNextTxMsg ( void )
    uint8_t reqNumber;
    MAC_FrameManagBuf_s *ackFrame;
 
-   NumElements = OS_QUEUE_NumElements ( &MAC_FrameTxQueueHandle );
+   NumElements = OS_LINKEDLIST_NumElements ( &MAC_FrameTxQueueHandle );
    if ( NumElements > 0 )
    {
       /* Search for a message that is ready to send */
-      FrameData = OS_QUEUE_Head ( &MAC_FrameTxQueueHandle );
+      FrameData = OS_LINKEDLIST_Head ( &MAC_FrameTxQueueHandle );
       for ( i=0; i<NumElements; i++ )
       {
          if ( FrameData->SentToNextLayer == (bool)false )
@@ -356,7 +352,7 @@ MAC_FrameManagBuf_s *MAC_FrameManag_GetNextTxMsg ( void )
             break;
          }
          /* Move to the next element in the Queue for the next loop */
-         FrameData = OS_QUEUE_Next ( &MAC_FrameTxQueueHandle, FrameData );
+         FrameData = OS_LINKEDLIST_Next ( &MAC_FrameTxQueueHandle, FrameData );
       }
    }
 
@@ -429,7 +425,7 @@ Returns: number of elements in the frame tx queue
 ***********************************************************************************************************************/
 uint16_t MAC_FrameManag_GetTxQueueSize ( void )
 {
-   return OS_QUEUE_NumElements ( &MAC_FrameTxQueueHandle );
+   return OS_LINKEDLIST_NumElements ( &MAC_FrameTxQueueHandle );
 }
 
 /***********************************************************************************************************************
@@ -450,19 +446,19 @@ void MAC_FrameManag_PhyDataConfirm ( MAC_DATA_STATUS_e status)
    uint8_t sequenceNumber = 0xff;
 
    /* find the newest element in the tx frame queue.  It was just successfully transmitted */
-   NumElements = OS_QUEUE_NumElements ( &MAC_FrameTxQueueHandle );
+   NumElements = OS_LINKEDLIST_NumElements ( &MAC_FrameTxQueueHandle );
    if ( NumElements > 0 )
    {
-      QuePtr = OS_QUEUE_Head ( &MAC_FrameTxQueueHandle );
+      QuePtr = OS_LINKEDLIST_Head ( &MAC_FrameTxQueueHandle );
       for ( i=1; i < NumElements; i++ )
       {
-         QuePtr = OS_QUEUE_Next ( &MAC_FrameTxQueueHandle, QuePtr );
+         QuePtr = OS_LINKEDLIST_Next ( &MAC_FrameTxQueueHandle, QuePtr );
       }
 
       if ( false == QuePtr->MsgData.ack_required )
       {
          /* this frame can be removed from the tx frame queue */
-         OS_QUEUE_Remove ( &MAC_FrameTxQueueHandle, QuePtr );
+         OS_LINKEDLIST_Remove ( &MAC_FrameTxQueueHandle, QuePtr );
          if ( BUF_Put(&MAC_FrameTxBufObj, QuePtr) != BUF_ERR_NONE )
          {
             DBG_logPrintf('E',"BUF_PUT failed" );
@@ -578,10 +574,10 @@ bool MAC_FrameManag_DataIndHandler ( const mac_frame_t *macFrame, TIMESTAMP_t Ti
          }
 
          // put segment data into proper segment slot
-         segment = OS_QUEUE_Head ( &rxBuff->frameQueue );
+         segment = OS_LINKEDLIST_Head ( &rxBuff->frameQueue );
          for ( i = 0; i < macFrame->segment_id; i++ )
          {
-            segment = OS_QUEUE_Next( &rxBuff->frameQueue, segment );
+            segment = OS_LINKEDLIST_Next( &rxBuff->frameQueue, segment );
          }
          segment->rssi_dbm = rssi_dbm;
          segment->danl_dbm = danl_dbm;
@@ -647,12 +643,12 @@ static void MAC_FrameManag_AssemblePacket( RxBufferTracking_s *rxBuff )
 #else
    mac_buffer = BM_allocStack( (sizeof(MAC_Indication_t)) + rxBuff->totalExpectedBytes);
 #endif
-   NumElements = OS_QUEUE_NumElements ( &rxBuff->frameQueue );
+   NumElements = OS_LINKEDLIST_NumElements ( &rxBuff->frameQueue );
 
    if (mac_buffer != NULL)
    {
       /* get first segment from rx frame queue */
-      segment = OS_QUEUE_Head ( &rxBuff->frameQueue );
+      segment = OS_LINKEDLIST_Head ( &rxBuff->frameQueue );
 
       mac_buffer->eSysFmt = eSYSFMT_MAC_INDICATION;
 
@@ -685,7 +681,7 @@ static void MAC_FrameManag_AssemblePacket( RxBufferTracking_s *rxBuff )
          totalRssi += powf((float)10.0, (float) segment->rssi_dbm / (float) 10.0 );
          totalDanl += powf((float)10.0, (float) segment->danl_dbm / (float) 10.0 );
 
-         segment = OS_QUEUE_Next ( &rxBuff->frameQueue, segment );
+         segment = OS_LINKEDLIST_Next ( &rxBuff->frameQueue, segment );
       }
       mac_indication->segmentCount = rxBuff->segmentCount;
       mac_indication->channel = rxBuff->channel;
@@ -825,14 +821,14 @@ static void MAC_FrameManag_EmptyRxBuffer( RxBufferTracking_s *rxBuff )
 {
    MAC_FrameManagBuf_s *Packet;
 
-   Packet = OS_QUEUE_Dequeue ( &rxBuff->frameQueue );
+   Packet = OS_LINKEDLIST_Dequeue ( &rxBuff->frameQueue );
    while ( Packet != NULL )
    {
       if ( BUF_Put(&MAC_FrameRxBufObj, Packet) != BUF_ERR_NONE )
       {
          DBG_logPrintf('E',"MAC_FrameManag_EmptyRxBuffer:  BUF_PUT failed" );
       }
-      Packet = OS_QUEUE_Dequeue ( &rxBuff->frameQueue );
+      Packet = OS_LINKEDLIST_Dequeue ( &rxBuff->frameQueue );
    }
 
    // Decrement the number of buffers in use
