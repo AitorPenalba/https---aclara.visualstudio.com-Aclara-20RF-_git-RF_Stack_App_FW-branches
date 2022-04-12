@@ -2,7 +2,7 @@
 
    Filename: STRT_Startup.c
 
-   Global Designator:
+   Global Designator: STRT_
 
    Contents:
 
@@ -21,7 +21,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #include "MFG_Port.h"
 #if 0
 #include <mqx.h>

@@ -447,7 +447,7 @@ void rtc_callback( rtc_callback_args_t *p_args )
 
   Returns: None
 
-  Notes: Widely used in Last Gasp
+  Notes: Mostly used in Last Gasp
 
 *******************************************************************************/
 void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
@@ -473,6 +473,8 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
       if( (config_time.tm_sec + alarm_secs) / SECONDS_PER_MINUTE)
       {
          alarm_time_set.time.tm_sec = ((config_time.tm_sec + alarm_secs) % SECONDS_PER_MINUTE);
+         alarm_mins++; // Accommodate rollover
+         DBG_printf("RTC Sec Rollover\n");
       }
       else
       {
@@ -486,6 +488,8 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
       if( (config_time.tm_min + alarm_mins ) / MINUTES_PER_HOUR)
       {
          alarm_time_set.time.tm_min = ((config_time.tm_min + alarm_mins) % MINUTES_PER_HOUR);
+         alarm_hours++; // Accommodate rollover
+         DBG_printf("RTC min Rollover\n");
       }
       else
       {
@@ -499,6 +503,10 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
       if( (config_time.tm_hour + alarm_hours ) / HOURS_PER_DAY)
       {
          alarm_time_set.time.tm_hour = ((config_time.tm_hour + alarm_hours) % HOURS_PER_DAY);
+         // Accommodate rollover
+         alarm_time_set.dayofweek_match = true;
+         alarm_time_set.time.tm_wday++;  // Add One day to accomodate rollover
+         DBG_printf("RTC Hour Rollover\n");
       }
       else
       {
