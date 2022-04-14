@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "bsp_api.h"
 #include "common_data.h"
+#include "r_icu.h"
+#include "r_external_irq_api.h"
 #include "r_crc.h"
 #include "r_crc_api.h"
 #include "r_agt.h"
@@ -23,11 +25,19 @@
 #include "r_adc_api.h"
 #include "r_sci_uart.h"
             #include "r_uart_api.h"
-#include "r_icu.h"
-#include "r_external_irq_api.h"
 #include "r_iic_master.h"
 #include "r_i2c_master_api.h"
 FSP_HEADER
+/** External IRQ on ICU Instance. */
+extern const external_irq_instance_t g_external_irq0;
+
+/** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
+extern icu_instance_ctrl_t g_external_irq0_ctrl;
+extern const external_irq_cfg_t g_external_irq0_cfg;
+
+#ifndef Radio0_IRQ_ISR
+void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
+#endif
 extern const crc_instance_t g_crc1;
 extern crc_instance_ctrl_t g_crc1_ctrl;
 extern const crc_cfg_t g_crc1_cfg;

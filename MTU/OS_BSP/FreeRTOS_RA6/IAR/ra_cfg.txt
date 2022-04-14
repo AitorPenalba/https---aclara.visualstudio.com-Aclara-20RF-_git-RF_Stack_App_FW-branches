@@ -680,3 +680,12 @@ FSP Configuration
       Bit Order: MSB
       Snoop Address: NONE
       
+    Instance "g_external_irq0 External IRQ (r_icu)"
+      Name: g_external_irq0
+      Channel: 13
+      Trigger: Falling
+      Digital Filtering: Disabled
+      Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
+      Callback: Radio0_IRQ_ISR
+      Pin Interrupt Priority: Priority 12
+      

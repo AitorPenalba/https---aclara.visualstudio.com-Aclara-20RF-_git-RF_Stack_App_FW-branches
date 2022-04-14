@@ -16,6 +16,9 @@
 #if 0 // TODO: RA6 [name_Balaji]:Support for FreeRTOS
 #include <fio.h>
 #endif
+#if ( RTOS_SELECTION == FREE_RTOS )
+#include "hal_data.h"
+#endif
                 /* ======================================= *
                  *              I N C L U D E              *
                  * ======================================= */
@@ -117,7 +120,8 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 #define RDO_0_IRQ_TRIS()         ( PORTB_PCR0 = 0x300 )   /* Set PCR for FTM1_CH0. Make Input */
 #elif ( MCU_SELECTED == RA6E1 )
 #define RDO_0_IRQ()        0 //TODO Melvin: implement read here
-#define RDO_0_IRQ_TRIS()
+/* Configure the external interrupt and Enable the external interrupt. */
+#define RDO_0_IRQ_TRIS()   { R_ICU_ExternalIrqOpen(&g_external_irq0_ctrl, &g_external_irq0_cfg); R_ICU_ExternalIrqEnable(&g_external_irq0_ctrl); }
 #endif
 
 // GPIO0 Pin
