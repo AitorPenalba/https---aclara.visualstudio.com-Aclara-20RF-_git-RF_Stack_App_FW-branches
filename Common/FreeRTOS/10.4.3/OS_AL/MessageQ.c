@@ -55,7 +55,7 @@ bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
    {
       RetStatus = false;
    } /* end if() */
-   if ( false == OS_SEM_Create(&(MsgqHandle->MSGQ_SemObj)) )
+   if ( false == OS_SEM_Create(&(MsgqHandle->MSGQ_SemObj), NumMessages ) )
    {
       RetStatus = false;
    } /* end if() */

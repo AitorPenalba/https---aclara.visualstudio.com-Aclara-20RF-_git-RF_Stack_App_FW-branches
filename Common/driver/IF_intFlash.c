@@ -298,7 +298,7 @@ static returnStatus_t init( PartitionData_t const *pParData, DeviceDriverMem_t c
 #else
    if ( !bIntSemCreated_ ) /* If the semaphore has not been created, create it. */
    {
-      if ( OS_SEM_Create( &intFlashSem_ ) )
+      if ( OS_SEM_Create( &intFlashSem_ , 0) )
       {
          eRetVal = eSUCCESS;
          bIntSemCreated_ = (bool)true;

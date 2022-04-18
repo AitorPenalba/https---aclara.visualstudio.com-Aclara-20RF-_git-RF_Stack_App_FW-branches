@@ -45,13 +45,15 @@
   Purpose: This function will create a new Semaphore
 
   Arguments: SemHandle - pointer to the Handle structure of the Semaphore
+              maxCount - maximum count of semaphore 
 
   Returns: FuncStatus - True if Semaphore created successfully, False if error
 
-  Notes:
+  Notes: maxCount is only used in FreeRTOS.
+         If the maxcount is 1 then a binary sempahore is created
 
 *******************************************************************************/
-bool OS_SEM_Create ( OS_SEM_Handle SemHandle )
+bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
 {
    bool FuncStatus = true;
 #if 0
@@ -64,8 +66,15 @@ bool OS_SEM_Create ( OS_SEM_Handle SemHandle )
    } /* end if() */
 
 #endif
-
-   *SemHandle = xSemaphoreCreateBinary();
+   if( 0 == maxCount )
+   {
+     
+     *SemHandle = xSemaphoreCreateBinary();
+   }
+   else
+   {
+     *SemHandle = xSemaphoreCreateCounting(maxCount, 0); /* Always create with initial count of 0 */
+   }
    if( NULL == SemHandle )
    {
       /* TODO: DG: Add Print */

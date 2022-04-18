@@ -255,7 +255,7 @@ uint8_t ecc108_open( void )
 
    if ( (bool)false == _i2cTransmitRecieveSemCreated )
    {
-      if ( OS_SEM_Create( &_i2cTransmitRecieveSem ) )
+      if ( OS_SEM_Create( &_i2cTransmitRecieveSem , 0) )
       {
          _i2cTransmitRecieveSemCreated = true;
       }
