@@ -63,6 +63,9 @@
 /* FUNCTION PROTOTYPES */
 
 returnStatus_t DBG_init( void );
+#if ( MCU_SELECTED == RA6E1 )
+void           DBG_printfDirect( const char *fmt, ... );
+#endif
 void           DBG_lockPrintResource( void );
 void           DBG_releasePrintResource( void );
 void           DBG_TxTask( taskParameter );

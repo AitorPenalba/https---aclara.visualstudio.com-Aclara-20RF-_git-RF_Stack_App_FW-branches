@@ -167,11 +167,11 @@ static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
 const STRT_FunctionList_t startUpTbl[] =
 {
    INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
+   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
-   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
    INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
    INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
    INIT( TIME_SYS_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),   // NOTE: This needs to be called as soon as possible in order to create the time mutexes early on

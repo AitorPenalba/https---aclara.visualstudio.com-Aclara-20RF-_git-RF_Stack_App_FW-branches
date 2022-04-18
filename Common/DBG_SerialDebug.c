@@ -73,6 +73,9 @@
 #else
 #define SERIAL_DBG_NUM_MSGQ_ITEMS 0 
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+#define MAX_DBG_COMMAND_CHARS 1602
+#endif
 
 typedef struct
 {
@@ -122,6 +125,40 @@ static void PortTimer_CallBack( uint8_t cmd, const void *pData );
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function name: DBG_printfDirect()
+
+   Purpose: Directs printf to debug port and prints without using any buffer, task and Queues
+
+   Arguments: const char *fmt, ...  - The print string
+
+   Returns: None
+
+**********************************************************************************************************************/
+void DBG_printfDirect( const char *fmt, ... )
+{
+   static uint16_t         dbgCmdLen;
+   static char             dbgCommandBuffer[MAX_DBG_COMMAND_CHARS + 1];
+   static const enum_UART_ID dbgUart = UART_DEBUG_PORT;     /* UART used for DBG port prints   */
+   /* Assigns the Command Length to zero */
+   dbgCmdLen = 0;
+   /* Declaring Variable Argument list of type va_list */
+   va_list  args;
+   /* Initializing arguments to store all values after fmt */
+   va_start( args, fmt );
+   /* Assigns data to the buffer from the Variable argument list and updates the dbgCmdLen */
+   dbgCmdLen = ( uint16_t )vsnprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), fmt, args );
+   /* Cleans up the Variable Argument list */
+   va_end( args );
+   /* Adds Carriage Return and New Line to the each line of prints */
+   dbgCmdLen += ( uint16_t )snprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), "\r\n" ); 
+   /* Writes the print to Debug terminal */
+   UART_write( dbgUart, (uint8_t *)dbgCommandBuffer, dbgCmdLen ); 
+} /* end of DBG_printfDirect() */
+#endif
 
 /***********************************************************************************************************************
 
