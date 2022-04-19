@@ -24,10 +24,10 @@
    v0.1 - KAD 05/6/2013 - Initial Release
 
  **********************************************************************************************************************/
-#if 1
+#if 1 // TODO: RA6: DG: Remove
 /* INCLUDE FILES */
 #include "project.h"
-#include "hal_data.h"
+#include "hal_data.h" // TODO: RA6: DG: Add conditional
 //#include <mqx.h>
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
@@ -130,7 +130,7 @@ static returnStatus_t PowerFailDebounce( void );
 #if ( MCU_SELECTED == RA6E1 )
 /***********************************************************************************************************************
 
-   Function Name: pf_meter_isr_init
+   Function Name: brownOut_isr_init
 
    Purpose: Initialize and configure the brown Out ISR(isr_brownOut) on RA6E1
 
@@ -1000,7 +1000,7 @@ void isr_brownOut(  external_irq_callback_args_t * p_args)
 {
 #if ( MCU_SELECTED == NXP_K24 )
    BRN_OUT_IRQ_DI();        /* Disable the ISR */
-#endif
+#endif // TODO: RA6: DG: Disable the interrupt and then enable later.
 #if ( SIMULATE_POWER_DOWN == 1 )
    /* Adding a semaphore to keep the ISR as short as possible */
    OS_SEM_Post( &PWR_SimulatePowerDn_Sem ); /* Post the semaphore */

@@ -443,7 +443,7 @@ void rtc_callback( rtc_callback_args_t *p_args )
 
   Purpose: To Configure the RTC Calendar Alarm
 
-  Arguments: uint16_t seconds
+  Arguments: uint16_t seconds; Alarm period from now.
 
   Returns: None
 

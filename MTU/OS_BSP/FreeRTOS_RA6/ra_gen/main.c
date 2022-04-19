@@ -5,8 +5,7 @@
 #include "BSP_aclara.h"
 
 
-//					 extern void SampleTST_create(void);
-//                extern TaskHandle_t SampleTST;
+
                 uint32_t g_fsp_common_thread_count;
                 bool g_fsp_common_initialized;
                 SemaphoreHandle_t g_fsp_common_initialized_semaphore;

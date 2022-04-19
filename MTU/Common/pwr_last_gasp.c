@@ -35,7 +35,7 @@
 
 #include "project.h"
 #include <string.h>
-//#include "lpm_app.h"
+//#include "lpm_app.h" //TODO: RA6: DG: Add Conditional Compilation
 //#include <bsp.h>
 //#include "compiler_types.h"
 //
