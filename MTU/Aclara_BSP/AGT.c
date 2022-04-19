@@ -93,7 +93,7 @@ fsp_err_t AGT_LPM_Timer_Start(void)
 	{
 		/* Start AGT1 timer */
 		err = R_AGT_Start(&agt1_timer_cascade_lpm_trigger_ctrl);
-	}
+	} // TODO: RA6: DG: Stop AGT1 if the AGT0 start fails
 
    return err;
 }
