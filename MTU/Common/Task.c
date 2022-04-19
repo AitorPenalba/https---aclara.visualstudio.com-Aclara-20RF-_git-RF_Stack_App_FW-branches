@@ -32,6 +32,9 @@
 //#include "CompileSwitch.h"                 /* Enable required code blocks */
 //TODO: Remove when "CompileSwitch.h" in project.h works
 #include "DBG_SerialDebug.h"
+// TODO: RA6E1 Remove when enabling ENABLE_ALRM_TASKS
+#include "EVL_event_log.h"
+
 //#include "psp_cpudef.h"
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
 #if ENABLE_ALRM_TASKS

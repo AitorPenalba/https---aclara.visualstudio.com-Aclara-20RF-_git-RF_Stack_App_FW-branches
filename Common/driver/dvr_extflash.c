@@ -1250,7 +1250,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 
 #ifndef __BOOTLOADER
          /* Break out of loop if max write execution time of part has expired */
-         if ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds(&endTime, &startTime) > u32BusyTime_uS )
+         if ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds( &startTime, &endTime ) > u32BusyTime_uS )
          {
             retVal = eFAILURE;
             break;
