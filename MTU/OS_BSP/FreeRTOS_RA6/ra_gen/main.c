@@ -5,8 +5,7 @@
 #include "BSP_aclara.h"
 
 
-//					 extern void SampleTST_create(void);
-//                extern TaskHandle_t SampleTST;
+
                 uint32_t g_fsp_common_thread_count;
                 bool g_fsp_common_initialized;
                 SemaphoreHandle_t g_fsp_common_initialized_semaphore;
@@ -102,8 +101,6 @@
                     }
 
                     /* Init RTOS tasks. */
-//                    SampleTST_create();
-//                    OS_TASK_Create_All ( true );
                     OS_TASK_Create_STRT();
 
                     /* Start the scheduler. */

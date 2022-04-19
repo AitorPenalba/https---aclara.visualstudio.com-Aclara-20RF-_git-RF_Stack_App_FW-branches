@@ -50,6 +50,10 @@
 // Print 'I', string (and HEX payload), adds \n and time stamp
 #define INFO_printHex(str, data, len)       DBG_logPrintHex ( 'I', str, data, len)
 
+
+#define APP_PRINT(fmt, ...)                 DBG_log( 0, ADD_LF, fmt, ##__VA_ARGS__);
+#define APP_ERR_PRINT(fmt, ...)             DBG_log( 'E', ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)
+
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
@@ -67,7 +71,7 @@ void           DBG_lockPrintResource( void );
 void           DBG_releasePrintResource( void );
 void           DBG_TxTask( taskParameter );
 void           DBG_LogTask( taskParameter );
-//void           DBG_log ( char category, uint8_t options, const char *fmt, ... );
+void           DBG_log ( char category, uint8_t options, const char *fmt, ... );
 void           DBG_logPrintHex( char category, char const *str, const uint8_t *Data, uint16_t Length );
 void           DBG_EnableDebug ( void );
 void           DBG_DisableDebug ( void );

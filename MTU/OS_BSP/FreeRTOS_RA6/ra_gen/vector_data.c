@@ -37,6 +37,7 @@
             [30] = fcu_fiferr_isr, /* FCU FIFERR (Flash access error interrupt) */
             [31] = agt_int_isr, /* AGT0 INT (AGT interrupt) */
             [32] = r_icu_isr, /* ICU IRQ13 (External pin interrupt 13) */
+            [33] = agt_int_isr, /* AGT1 INT (AGT interrupt) */
         };
         const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENTRIES] =
         {
@@ -73,5 +74,6 @@
             [30] = BSP_PRV_IELS_ENUM(EVENT_FCU_FIFERR), /* FCU FIFERR (Flash access error interrupt) */
             [31] = BSP_PRV_IELS_ENUM(EVENT_AGT0_INT), /* AGT0 INT (AGT interrupt) */
             [32] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ13), /* ICU IRQ13 (External pin interrupt 13) */
+            [33] = BSP_PRV_IELS_ENUM(EVENT_AGT1_INT), /* AGT1 INT (AGT interrupt) */
         };
         #endif

@@ -8,8 +8,12 @@
 #include "r_external_irq_api.h"
 #include "r_crc.h"
 #include "r_crc_api.h"
+#include "r_lpm.h"
+#include "r_lpm_api.h"
 #include "r_agt.h"
 #include "r_timer_api.h"
+#include "r_crc.h"
+#include "r_crc_api.h"
 #include "r_flash_hp.h"
 #include "r_flash_api.h"
 #include "r_qspi.h"
@@ -38,6 +42,40 @@ extern const external_irq_cfg_t g_external_irq0_cfg;
 #ifndef Radio0_IRQ_ISR
 void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
 #endif
+
+/** lpm Instance */
+extern const lpm_instance_t g_lpm_DeepSWStandby;
+
+/** Access the LPM instance using these structures when calling API functions directly (::p_api is not used). */
+extern lpm_instance_ctrl_t g_lpm_DeepSWStandby_ctrl;
+extern const lpm_cfg_t g_lpm_DeepSWStandby_cfg;
+/** lpm Instance */
+extern const lpm_instance_t g_lpm_SW_Standby;
+
+/** Access the LPM instance using these structures when calling API functions directly (::p_api is not used). */
+extern lpm_instance_ctrl_t g_lpm_SW_Standby_ctrl;
+extern const lpm_cfg_t g_lpm_SW_Standby_cfg;
+/** AGT Timer Instance */
+extern const timer_instance_t agt0_timer_lpm_cascade_trigger;
+
+/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
+extern agt_instance_ctrl_t agt0_timer_lpm_cascade_trigger_ctrl;
+extern const timer_cfg_t agt0_timer_lpm_cascade_trigger_cfg;
+
+#ifndef NULL
+void NULL(timer_callback_args_t * p_args);
+#endif
+/** AGT Timer Instance */
+extern const timer_instance_t agt1_timer_cascade_lpm_trigger;
+
+/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
+extern agt_instance_ctrl_t agt1_timer_cascade_lpm_trigger_ctrl;
+extern const timer_cfg_t agt1_timer_cascade_lpm_trigger_cfg;
+
+#ifndef NULL
+void NULL(timer_callback_args_t * p_args);
+#endif
+
 extern const crc_instance_t g_crc1;
 extern crc_instance_ctrl_t g_crc1_ctrl;
 extern const crc_cfg_t g_crc1_cfg;

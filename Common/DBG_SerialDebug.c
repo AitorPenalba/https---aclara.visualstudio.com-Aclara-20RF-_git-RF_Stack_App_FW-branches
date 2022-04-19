@@ -71,7 +71,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define SERIAL_DBG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define SERIAL_DBG_NUM_MSGQ_ITEMS 0 
+#define SERIAL_DBG_NUM_MSGQ_ITEMS 0
 #endif
 
 typedef struct
@@ -100,7 +100,7 @@ static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
 static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
 #if ( MCU_SELECTED == RA6E1 )
-OS_SEM_Obj       dbgReceiveSem_;                           /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */ 
+OS_SEM_Obj       dbgReceiveSem_;                           /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */
 extern OS_SEM_Obj       transferSem[MAX_UART_ID];          /* For RA6E1, UART_write process is used in Semaphore method */
 #endif
 //static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
@@ -222,7 +222,7 @@ void DBG_TxTask( taskParameter )
 #if ( MCU_SELECTED == NXP_K24 )
       ( void ) puts ( (char*)&pBuf->data[0] );
 #elif ( MCU_SELECTED == RA6E1 )
-      ( void )UART_write( UART_DEBUG_PORT, (char*)&pBuf->data[0], pBuf->x.dataLen );
+      ( void )UART_write( UART_DEBUG_PORT, &pBuf->data[0], pBuf->x.dataLen );
 #endif
       OS_MUTEX_Unlock( &mutex_ ); // Function will not return if it fails
       BM_free( pBuf );
@@ -312,11 +312,11 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
          if ( options & ADD_LF )
          {
 #if ( MCU_SELECTED == NXP_K24 )
-           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\n" ); 
+           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\n" );
 #elif ( MCU_SELECTED == RA6E1 )
            /* Added carriage return to follow printing standard */
            len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\r\n" );
-#endif 
+#endif
          }
 
          if ( len < sizeof( logPrintf_buf ) )

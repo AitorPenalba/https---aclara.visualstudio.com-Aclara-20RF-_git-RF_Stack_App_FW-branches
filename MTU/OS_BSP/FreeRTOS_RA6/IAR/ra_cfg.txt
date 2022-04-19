@@ -257,6 +257,10 @@ FSP Configuration
     Code Flash Programming Enable: Enabled
     Data Flash Programming Enable: Enabled
     
+  Module "Low Power Modes (r_lpm)"
+    Parameter Checking: Default (BSP)
+    Standby Limit: Disabled
+    
   FreeRTOS
     General: Custom FreeRTOSConfig.h: 
     General: Use Preemption: Enabled
@@ -688,4 +692,68 @@ FSP Configuration
       Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
       Callback: Radio0_IRQ_ISR
       Pin Interrupt Priority: Priority 12
+
+    Instance "agt1_timer_cascade_lpm_trigger Timer, Low-Power (r_agt)"
+      General: Name: agt1_timer_cascade_lpm_trigger
+      General: Channel: 1
+      General: Mode: Periodic
+      General: Period: 1
+      General: Period Unit: Raw Counts
+      Output: Duty Cycle Percent (only applicable in PWM mode): 50
+      General: Count Source: AGT Underflow
+      Output: AGTOA Output: Disabled
+      Output: AGTOB Output: Disabled
+      Output: AGTO Output: Disabled
+      Input: Measurement Mode: Measure Disabled
+      Input: Input Filter: No Filter
+      Input: Enable Pin: Enable Pin Not Used
+      Input: Trigger Edge: Trigger Edge Rising
+      Interrupts: Callback: NULL
+      Interrupts: Underflow Interrupt Priority: Priority 9
+      
+    Instance "agt0_timer_lpm_cascade_trigger Timer, Low-Power (r_agt)"
+      General: Name: agt0_timer_lpm_cascade_trigger
+      General: Channel: 0
+      General: Mode: Periodic
+      General: Period: 1
+      General: Period Unit: Milliseconds
+      Output: Duty Cycle Percent (only applicable in PWM mode): 50
+      General: Count Source: SUBCLOCK
+      Output: AGTOA Output: Disabled
+      Output: AGTOB Output: Disabled
+      Output: AGTO Output: Disabled
+      Input: Measurement Mode: Measure Disabled
+      Input: Input Filter: No Filter
+      Input: Enable Pin: Enable Pin Not Used
+      Input: Trigger Edge: Trigger Edge Rising
+      Interrupts: Callback: NULL
+      Interrupts: Underflow Interrupt Priority: Priority 8
+      
+    Instance "g_lpm_SW_Standby Low Power Modes (r_lpm)"
+      General: Name: g_lpm_SW_Standby
+      General: Low Power Mode: Sleep mode
+      General: Output port state in standby and deep standby: No change
+      Standby Options: Wake Sources: IRQ1, AGT1 Underflow
+      Standby Options: Snooze Request Source: RXD0 falling edge
+      Standby Options: Snooze End Sources: 
+      Standby Options: DTC state in Snooze Mode: Disabled
+      Standby Options: Snooze Cancel Source: None
+      Deep Standby Options: I/O Port Retention: Maintain the IO port states
+      Deep Standby Options: Power-Supply Control: Supply power to the Standby SRAM, low-speed on-chip oscillator, AGTn (n = 0-3) and USBFS/HS resume detecting unit
+      Deep Standby Options: Cancel Sources: IRQ1, AGT1 Underflow
+      Deep Standby Options: Cancel Edges: 
+      
+    Instance "g_lpm_DeepSWStandby Low Power Modes (r_lpm)"
+      General: Name: g_lpm_DeepSWStandby
+      General: Low Power Mode: Deep Software Standby mode
+      General: Output port state in standby and deep standby: No change
+      Standby Options: Wake Sources: IRQ1, RTC Alarm
+      Standby Options: Snooze Request Source: RXD0 falling edge
+      Standby Options: Snooze End Sources: 
+      Standby Options: DTC state in Snooze Mode: Disabled
+      Standby Options: Snooze Cancel Source: None
+      Deep Standby Options: I/O Port Retention: Maintain the IO port states
+      Deep Standby Options: Power-Supply Control: Cut the power supply to LVDn, standby RAM, low-speed on-chip oscillator, AGTn (n = 0-3), and USBFS/HS resume detecting unit. Enable low power function of power-on reset circuit
+      Deep Standby Options: Cancel Sources: IRQ1, RTC Alarm
+      Deep Standby Options: Cancel Edges: 
       

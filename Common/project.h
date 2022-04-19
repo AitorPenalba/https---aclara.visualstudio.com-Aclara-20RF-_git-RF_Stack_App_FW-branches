@@ -56,14 +56,6 @@
 #include "heep.h"
 #include "BSP_aclara.h"
 
-/* TODO: RA6: DG: Move these to appropriate place */
-//#include "SEGGER_RTT/SEGGER_RTT.h"
-#define SEGGER_INDEX            (0)
-#define LVL_ERR      (1u)       /* error conditions   */
-#define APP_PRINT(fn_, ...)      printf(fn_);  //SEGGER_RTT_printf (SEGGER_INDEX,(fn_), ##__VA_ARGS__);
-#define APP_ERR_PRINT(fn_, ...)  /*if(LVL_ERR)\
-        SEGGER_RTT_printf (SEGGER_INDEX, "[ERR] In Function: %s(), %s",__FUNCTION__,(fn_),##__VA_ARGS__); */
-
 /* GLOBAL DEFINTION */
 #ifdef PROJ_GLOBALS
 #define PROJ_EXTERN

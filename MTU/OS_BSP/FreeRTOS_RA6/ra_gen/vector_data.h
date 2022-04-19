@@ -3,7 +3,7 @@
         #define VECTOR_DATA_H
                 /* Number of interrupts allocated */
         #ifndef VECTOR_DATA_IRQ_COUNT
-        #define VECTOR_DATA_IRQ_COUNT    (33)
+        #define VECTOR_DATA_IRQ_COUNT    (34)
         #endif
         /* ISR prototypes */
         void sci_uart_rxi_isr(void);
@@ -93,4 +93,6 @@
         #define AGT0_INT_IRQn          ((IRQn_Type) 31) /* AGT0 INT (AGT interrupt) */
         #define VECTOR_NUMBER_ICU_IRQ13 ((IRQn_Type) 32) /* ICU IRQ13 (External pin interrupt 13) */
         #define ICU_IRQ13_IRQn          ((IRQn_Type) 32) /* ICU IRQ13 (External pin interrupt 13) */
+        #define VECTOR_NUMBER_AGT1_INT ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
+        #define AGT1_INT_IRQn          ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
         #endif /* VECTOR_DATA_H */

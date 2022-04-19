@@ -35,6 +35,140 @@ const external_irq_instance_t g_external_irq0 =
     .p_cfg         = &g_external_irq0_cfg,
     .p_api         = &g_external_irq_on_icu
 };
+lpm_instance_ctrl_t g_lpm_DeepSWStandby_ctrl;
+
+const lpm_cfg_t g_lpm_DeepSWStandby_cfg =
+{
+    .low_power_mode     = LPM_MODE_DEEP,
+    .snooze_cancel_sources      = LPM_SNOOZE_CANCEL_SOURCE_NONE,
+    .standby_wake_sources       = LPM_STANDBY_WAKE_SOURCE_IRQ1 | LPM_STANDBY_WAKE_SOURCE_RTCALM |  (lpm_standby_wake_source_t) 0,
+    .snooze_request_source      = LPM_SNOOZE_REQUEST_RXD0_FALLING,
+    .snooze_end_sources         =  (lpm_snooze_end_t) 0,
+    .dtc_state_in_snooze        = LPM_SNOOZE_DTC_DISABLE,
+#if BSP_FEATURE_LPM_HAS_SBYCR_OPE
+    .output_port_enable         = LPM_OUTPUT_PORT_ENABLE_RETAIN,
+#endif
+#if BSP_FEATURE_LPM_HAS_DEEP_STANDBY
+    .io_port_state              = LPM_IO_PORT_NO_CHANGE,
+    .power_supply_state         = LPM_POWER_SUPPLY_DEEPCUT3,
+    .deep_standby_cancel_source = LPM_DEEP_STANDBY_CANCEL_SOURCE_IRQ1 | LPM_DEEP_STANDBY_CANCEL_SOURCE_RTC_ALARM |  (lpm_deep_standby_cancel_source_t) 0,
+    .deep_standby_cancel_edge   =  (lpm_deep_standby_cancel_edge_t) 0,
+#endif
+    .p_extend           = NULL,
+};
+
+const lpm_instance_t g_lpm_DeepSWStandby =
+{
+    .p_api = &g_lpm_on_lpm,
+    .p_ctrl = &g_lpm_DeepSWStandby_ctrl,
+    .p_cfg = &g_lpm_DeepSWStandby_cfg
+};
+lpm_instance_ctrl_t g_lpm_SW_Standby_ctrl;
+
+const lpm_cfg_t g_lpm_SW_Standby_cfg =
+{
+    .low_power_mode     = LPM_MODE_SLEEP,
+    .snooze_cancel_sources      = LPM_SNOOZE_CANCEL_SOURCE_NONE,
+    .standby_wake_sources       = LPM_STANDBY_WAKE_SOURCE_IRQ1 | LPM_STANDBY_WAKE_SOURCE_AGT1UD |  (lpm_standby_wake_source_t) 0,
+    .snooze_request_source      = LPM_SNOOZE_REQUEST_RXD0_FALLING,
+    .snooze_end_sources         =  (lpm_snooze_end_t) 0,
+    .dtc_state_in_snooze        = LPM_SNOOZE_DTC_DISABLE,
+#if BSP_FEATURE_LPM_HAS_SBYCR_OPE
+    .output_port_enable         = LPM_OUTPUT_PORT_ENABLE_RETAIN,
+#endif
+#if BSP_FEATURE_LPM_HAS_DEEP_STANDBY
+    .io_port_state              = LPM_IO_PORT_NO_CHANGE,
+    .power_supply_state         = LPM_POWER_SUPPLY_DEEPCUT0,
+    .deep_standby_cancel_source = LPM_DEEP_STANDBY_CANCEL_SOURCE_IRQ1 | LPM_DEEP_STANDBY_CANCEL_SOURCE_AGT1 |  (lpm_deep_standby_cancel_source_t) 0,
+    .deep_standby_cancel_edge   =  (lpm_deep_standby_cancel_edge_t) 0,
+#endif
+    .p_extend           = NULL,
+};
+
+const lpm_instance_t g_lpm_SW_Standby =
+{
+    .p_api = &g_lpm_on_lpm,
+    .p_ctrl = &g_lpm_SW_Standby_ctrl,
+    .p_cfg = &g_lpm_SW_Standby_cfg
+};
+agt_instance_ctrl_t agt0_timer_lpm_cascade_trigger_ctrl;  /* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
+const agt_extended_cfg_t agt0_timer_lpm_cascade_trigger_extend =
+{
+    .count_source     = AGT_CLOCK_SUBCLOCK,
+    .agto             = AGT_PIN_CFG_DISABLED,
+    .agtoa            = AGT_PIN_CFG_DISABLED,
+    .agtob            = AGT_PIN_CFG_DISABLED,
+    .measurement_mode = AGT_MEASURE_DISABLED,
+    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
+    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+};
+const timer_cfg_t agt0_timer_lpm_cascade_trigger_cfg =
+{
+    .mode                = TIMER_MODE_PERIODIC,
+    /* Actual period: 0.0009765625 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x20, .duty_cycle_counts = 0x10, .source_div = (timer_source_div_t)0,
+    .channel             = 0,
+    .p_callback          = NULL,
+    /** If NULL then do not add & */
+#if defined(NULL)
+    .p_context           = NULL,
+#else
+    .p_context           = &NULL,
+#endif
+    .p_extend            = &agt0_timer_lpm_cascade_trigger_extend,
+    .cycle_end_ipl       = (8),
+#if defined(VECTOR_NUMBER_AGT0_INT)
+    .cycle_end_irq       = VECTOR_NUMBER_AGT0_INT,
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t agt0_timer_lpm_cascade_trigger =
+{
+    .p_ctrl        = &agt0_timer_lpm_cascade_trigger_ctrl,
+    .p_cfg         = &agt0_timer_lpm_cascade_trigger_cfg,
+    .p_api         = &g_timer_on_agt
+};
+agt_instance_ctrl_t agt1_timer_cascade_lpm_trigger_ctrl;/* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
+const agt_extended_cfg_t agt1_timer_cascade_lpm_trigger_extend =
+{
+    .count_source     = AGT_CLOCK_AGT_UNDERFLOW,
+    .agto             = AGT_PIN_CFG_DISABLED,
+    .agtoa            = AGT_PIN_CFG_DISABLED,
+    .agtob            = AGT_PIN_CFG_DISABLED,
+    .measurement_mode = AGT_MEASURE_DISABLED,
+    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
+    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+};/* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
+const timer_cfg_t agt1_timer_cascade_lpm_trigger_cfg =
+{
+    .mode                = TIMER_MODE_PERIODIC,
+    /* Actual period: 3.3333333333333334e-8 seconds. Actual duty: 0%. */ .period_counts = (uint32_t) 0x1, .duty_cycle_counts = 0x0, .source_div = (timer_source_div_t)0,
+    .channel             = 1,
+    .p_callback          = NULL,
+    /** If NULL then do not add & */
+#if defined(NULL)
+    .p_context           = NULL,
+#else
+    .p_context           = &NULL,
+#endif
+    .p_extend            = &agt1_timer_cascade_lpm_trigger_extend,
+    .cycle_end_ipl       = (9),
+#if defined(VECTOR_NUMBER_AGT1_INT)
+    .cycle_end_irq       = VECTOR_NUMBER_AGT1_INT,
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t agt1_timer_cascade_lpm_trigger =
+{
+    .p_ctrl        = &agt1_timer_cascade_lpm_trigger_ctrl,
+    .p_cfg         = &agt1_timer_cascade_lpm_trigger_cfg,
+    .p_api         = &g_timer_on_agt
+};
 crc_instance_ctrl_t g_crc1_ctrl;
 const crc_cfg_t g_crc1_cfg =
 {

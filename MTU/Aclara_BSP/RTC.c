@@ -19,12 +19,16 @@
   #include <mqx.h>
   #include <bsp.h>
   #include <rtc.h>
-#elif ( RTOS_SELECTION == FREE_RTOS )
+#endif
+#if ( MCU_SELECTED == RA6E1 )
   #include "hal_data.h"
 #endif
 #include "BSP_aclara.h"
 #include "vbat_reg.h"
 #include "CompileSwitch.h"
+#if ( MCU_SELECTED == RA6E1 )
+#include "time_sys.h"
+#endif
 /* #DEFINE DEFINITIONS */
 
 /* MACRO DEFINITIONS */
@@ -49,7 +53,7 @@ bool RTC_UnitTest(void);
 
   Function name: RTC_Init
 
-  Purpose: This function will Initialise the Real Time Clock peripheral
+  Purpose: This function will Initialize the Real Time Clock peripheral
 
   Arguments: void
 
@@ -308,7 +312,7 @@ void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
   Returns: None
 
   Notes: DO NOT try to debug through the loop reading the RTC registers. The RTC
-         keeps running while dubugger stopped.
+         keeps running while debugger stopped.
 
 *******************************************************************************/
 void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
@@ -433,6 +437,89 @@ void rtc_callback( rtc_callback_args_t *p_args )
 }/* end rtc_callback () */
 
 
+/*******************************************************************************
+
+  Function name: RTC_ConfigureRTCCalendarAlarm
+
+  Purpose: To Configure the RTC Calendar Alarm
+
+  Arguments: uint16_t seconds; Alarm period from now.
+
+  Returns: None
+
+  Notes: Mostly used in Last Gasp
+
+*******************************************************************************/
+void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
+{
+   uint16_t          alarm_hours, alarm_mins, alarm_secs;
+   rtc_time_t        config_time    = { 0x00 };
+   rtc_alarm_time_t  alarm_time_set = { 0x00 };
+
+   if( seconds > 0 )
+   {
+      alarm_hours = ( seconds/ SECONDS_PER_HOUR );
+      alarm_mins  = ( seconds -( SECONDS_PER_HOUR * alarm_hours))/ SECONDS_PER_MINUTE;
+      alarm_secs  = ( seconds -( SECONDS_PER_HOUR * alarm_hours) - (alarm_mins * SECONDS_PER_MINUTE));
+   }
+
+   /* Get the current Calendar time */
+   ( void )R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &config_time);
+
+   if( alarm_secs > 0 )
+   {
+      alarm_time_set.sec_match = true;
+      /* Adjust the desired Alarm time in seconds, so that seconds count rolls over from 60  */
+      if( (config_time.tm_sec + alarm_secs) / SECONDS_PER_MINUTE)
+      {
+         alarm_time_set.time.tm_sec = ((config_time.tm_sec + alarm_secs) % SECONDS_PER_MINUTE);
+         alarm_mins++; // Accommodate rollover
+         DBG_printf("RTC Sec Rollover\n");
+      }
+      else
+      {
+         alarm_time_set.time.tm_sec = config_time.tm_sec + alarm_secs;
+      }
+   }
+   if( alarm_mins > 0 )
+   {
+      alarm_time_set.min_match = true;
+      /* Adjust the desired Alarm time in minutes, so that seconds count rolls over from 60  */
+      if( (config_time.tm_min + alarm_mins ) / MINUTES_PER_HOUR)
+      {
+         alarm_time_set.time.tm_min = ((config_time.tm_min + alarm_mins) % MINUTES_PER_HOUR);
+         alarm_hours++; // Accommodate rollover
+         DBG_printf("RTC min Rollover\n");
+      }
+      else
+      {
+         alarm_time_set.time.tm_min = config_time.tm_min + alarm_mins;
+      }
+   }
+   if( alarm_hours > 0 )
+   {
+      alarm_time_set.hour_match = true;
+      /* Adjust the desired Alarm time in hours, so that seconds count rolls over from 24  */
+      if( (config_time.tm_hour + alarm_hours ) / HOURS_PER_DAY)
+      {
+         alarm_time_set.time.tm_hour = ((config_time.tm_hour + alarm_hours) % HOURS_PER_DAY);
+         // Accommodate rollover
+         alarm_time_set.dayofweek_match = true;
+         alarm_time_set.time.tm_wday++;  // Add One day to accomodate rollover
+         DBG_printf("RTC Hour Rollover\n");
+      }
+      else
+      {
+         alarm_time_set.time.tm_hour = config_time.tm_hour + alarm_hours;
+      }
+   }
+
+   if( FSP_SUCCESS == R_RTC_CalendarAlarmSet( &g_rtc0_ctrl , &alarm_time_set ) )
+   {
+      DBG_printf("RTC Calendar Alarm Set \n");
+   }
+}
+
 #if ( TM_RTC_UNIT_TEST == 1 )
 /*******************************************************************************
 
@@ -507,5 +594,5 @@ bool RTC_UnitTest(void)
    }
    return retVal;
 }
-#endif
+#endif  // #if ( TM_RTC_UNIT_TEST == 1 )
 #endif
