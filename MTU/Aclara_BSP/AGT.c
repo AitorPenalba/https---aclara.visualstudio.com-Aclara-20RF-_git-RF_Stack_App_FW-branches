@@ -72,7 +72,7 @@ fsp_err_t AGT_LPM_Timer_Init(void)
 	{
 		/* Open AGT1 Timer in Periodic mode */
 		err = R_AGT_Open(&agt1_timer_cascade_lpm_trigger_ctrl, &agt1_timer_cascade_lpm_trigger_cfg);
-	}
+	} // TODO: RA6: DG: Do we need to close the agt0 if the agt1 open fails?
 
    return err;
 }
