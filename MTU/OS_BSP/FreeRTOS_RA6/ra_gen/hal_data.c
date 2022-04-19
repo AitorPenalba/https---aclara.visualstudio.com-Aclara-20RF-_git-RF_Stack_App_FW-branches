@@ -62,7 +62,7 @@ const lpm_instance_t g_lpm_SW_Standby =
     .p_ctrl = &g_lpm_SW_Standby_ctrl,
     .p_cfg = &g_lpm_SW_Standby_cfg
 };
-agt_instance_ctrl_t agt0_timer_lpm_cascade_trigger_ctrl;
+agt_instance_ctrl_t agt0_timer_lpm_cascade_trigger_ctrl;  /* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
 const agt_extended_cfg_t agt0_timer_lpm_cascade_trigger_extend =
 {
     .count_source     = AGT_CLOCK_SUBCLOCK,
@@ -101,7 +101,7 @@ const timer_instance_t agt0_timer_lpm_cascade_trigger =
     .p_cfg         = &agt0_timer_lpm_cascade_trigger_cfg,
     .p_api         = &g_timer_on_agt
 };
-agt_instance_ctrl_t agt1_timer_cascade_lpm_trigger_ctrl;
+agt_instance_ctrl_t agt1_timer_cascade_lpm_trigger_ctrl;/* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
 const agt_extended_cfg_t agt1_timer_cascade_lpm_trigger_extend =
 {
     .count_source     = AGT_CLOCK_AGT_UNDERFLOW,
@@ -112,7 +112,7 @@ const agt_extended_cfg_t agt1_timer_cascade_lpm_trigger_extend =
     .agtio_filter     = AGT_AGTIO_FILTER_NONE,
     .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
     .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
-};
+};/* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
 const timer_cfg_t agt1_timer_cascade_lpm_trigger_cfg =
 {
     .mode                = TIMER_MODE_PERIODIC,
