@@ -50,7 +50,7 @@
   Returns: FuncStatus - True if Semaphore created successfully, False if error
 
   Notes: maxCount is only used in FreeRTOS.
-         If the maxcount is 1 then a binary sempahore is created
+         If the maxcount is 0 then a binary sempahore is created
 
 *******************************************************************************/
 bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
