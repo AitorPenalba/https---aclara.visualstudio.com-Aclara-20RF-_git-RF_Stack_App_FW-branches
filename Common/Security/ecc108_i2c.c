@@ -255,7 +255,8 @@ uint8_t ecc108_open( void )
 
    if ( (bool)false == _i2cTransmitRecieveSemCreated )
    {
-      if ( OS_SEM_Create( &_i2cTransmitRecieveSem ) )
+      //TODO RA6: NRJ: determine if semaphores need to be counting
+      if ( OS_SEM_Create( &_i2cTransmitRecieveSem , 0) )
       {
          _i2cTransmitRecieveSemCreated = true;
       }

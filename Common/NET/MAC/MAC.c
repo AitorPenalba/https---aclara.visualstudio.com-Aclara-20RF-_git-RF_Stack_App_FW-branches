@@ -172,7 +172,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define MAC_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define MAC_NUM_MSGQ_ITEMS 0 
+#define MAC_NUM_MSGQ_ITEMS 0
 #endif
 
 /* TYPE DEFINITIONS */
@@ -978,8 +978,8 @@ returnStatus_t MAC_init ( void )
    {
       return eFAILURE;
    }
-
-   if (OS_SEM_Create(&MAC_AttributeSem_) && OS_MUTEX_Create(&MAC_AttributeMutex_) && OS_MSGQ_Create(&MAC_msgQueue, MAC_NUM_MSGQ_ITEMS) && OS_MUTEX_Create(&MAC_TimeSyncAttributeMutex_) &&
+   //TODO RA6: NRJ: determine if semaphores need to be counting
+   if (OS_SEM_Create(&MAC_AttributeSem_, 0) && OS_MUTEX_Create(&MAC_AttributeMutex_) && OS_MSGQ_Create(&MAC_msgQueue, MAC_NUM_MSGQ_ITEMS) && OS_MUTEX_Create(&MAC_TimeSyncAttributeMutex_) &&
        (eSUCCESS == MAC_FrameManag_init()) && (eSUCCESS == MAC_PacketManag_init()) )
    {
       // Register the message handler

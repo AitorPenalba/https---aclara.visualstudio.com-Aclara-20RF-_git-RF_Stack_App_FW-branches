@@ -287,7 +287,8 @@ static returnStatus_t init( PartitionData_t const *pParData, DeviceDriverMem_t c
       if (NULL != _int_install_isr((int)INT_FTFE, (INT_ISR_FPTR)ISR_InternalFlash, NULL))
       {
          (void)_bsp_int_init((int)INT_FTFE, 5, 1, (bool)true);
-         if ( OS_SEM_Create( &intFlashSem_ ) )
+         //TODO RA6: NRJ: determine if semaphores need to be counting
+         if ( OS_SEM_Create( &intFlashSem_, 0 ) )
          {
             eRetVal = eSUCCESS;
             bIntSemCreated_ = (bool)true;
@@ -298,7 +299,8 @@ static returnStatus_t init( PartitionData_t const *pParData, DeviceDriverMem_t c
 #else
    if ( !bIntSemCreated_ ) /* If the semaphore has not been created, create it. */
    {
-      if ( OS_SEM_Create( &intFlashSem_ ) )
+      //TODO RA6: NRJ: determine if semaphores need to be counting
+      if ( OS_SEM_Create( &intFlashSem_ , 0) )
       {
          eRetVal = eSUCCESS;
          bIntSemCreated_ = (bool)true;

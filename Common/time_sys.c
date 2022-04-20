@@ -337,7 +337,8 @@ returnStatus_t TIME_SYS_Init( void )
    /* Create counting semaphore to keep track of system ticks & mutex to protect Sys Time modules critical section */
    if ( (bool)false == _timeSysSemCreated )
    {
-      if ( OS_SEM_Create(&_timeSysSem) && OS_MUTEX_Create(&_timeVarsMutex) )
+      // counting becuase need to ensure time_sys does not fall behind
+      if ( OS_SEM_Create(&_timeSysSem, 1000) && OS_MUTEX_Create(&_timeVarsMutex) )
       {  //Semaphore and Mutex create succeeded, initialize the data structure
 #if (EP == 1)
 #if 0 // TODO: RA6E1 - File support to be added

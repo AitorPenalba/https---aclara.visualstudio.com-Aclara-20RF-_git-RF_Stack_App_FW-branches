@@ -42,21 +42,23 @@
   Purpose: This function is used to create a new Message Q Object
 
   Arguments: MsgqHandle - pointer to the MessageQ object
+             NumMessages - not used by MQX
 
   Returns: RetStatus - True if MessageQ created successfully, False if error
 
   Notes: Calling function must pass in an allocated OS_MSGQ_Obj
 
 *******************************************************************************/
-bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle )
+bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
 {
    bool RetStatus = true;
 
-   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj)) )
+   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), 0) )
    {
       RetStatus = false;
    } /* end if() */
-   if ( false == OS_SEM_Create(&(MsgqHandle->MSGQ_SemObj)) )
+   //TODO RA6: NRJ: determine if semaphores need to be counting, not required
+   if ( false == OS_SEM_Create(&(MsgqHandle->MSGQ_SemObj, 0)) )
    {
       RetStatus = false;
    } /* end if() */

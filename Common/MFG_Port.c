@@ -181,7 +181,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define MFG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define MFG_NUM_MSGQ_ITEMS 0 
+#define MFG_NUM_MSGQ_ITEMS 0
 #endif
 
 /* Temporary definition of MFG_logPrintf()   */
@@ -252,7 +252,7 @@ static const char       mfgpLockInEffect[] = {"LOCK IN EFFECT\n\r"}; /* When por
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )// TODO: RA6 [name_Balaji]: Integrate _MfgpUartEvent once integrated
 static OS_EVNT_Obj      _MfgpUartEvent;
-#endif 
+#endif
 static OS_MSGQ_Obj      _CommandReceived_MSGQ;
 #if ( MCU_SELECTED == RA6E1 )
 /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
@@ -1651,11 +1651,12 @@ returnStatus_t MFGP_cmdInit( void )
    if ( OS_EVNT_Create(&_MfgpUartEvent) && OS_MSGQ_Create(&_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS) )
    {
       retVal = eSUCCESS;
-   } 
+   }
 #elif ( MCU_SELECTED == RA6E1 )
    // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
    // TODO: RA6 [name_Balaji]: Check the number of messages
-   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_ ) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ] ) )
+   // TODO RA6: NRJ: determine if semaphores need to be counting
+   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_, 0) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ], 0 ) )
    {
       retVal = eSUCCESS;
    }
@@ -1699,7 +1700,7 @@ static void mfgpReadByte( uint8_t rxByte )
          /* buffer contains at least one character, remove the last one entered */
          MFGP_numBytes -= 1;
 #if ( MCU_SELECTED == RA6E1 )
-         /* Gives GUI effect in Terminal for Backspace */
+         /* Gives GUI ffect in Terminal for Backspace */
          ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b", 3 );
 #endif
       }
@@ -1938,7 +1939,7 @@ void MFGP_uartRecvTask( taskParameter )
       while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) )
       {
          mfgpReadByte( rxByte );
-      } 
+      }
 #elif ( MCU_SELECTED == RA6E1 )
       /* Instead of Polling metod, Interrupt routine method is used in RA6E1 which
        * reads byte-by-byte and stors the data in an array */
@@ -1966,7 +1967,7 @@ void MFGP_uartRecvTask( taskParameter )
 *******************************************************************************/
 void mfg_uart_callback( uart_callback_args_t *p_args )
 {
-  
+
     /* Handle the UART event */
      switch ( p_args->event )
     {
@@ -2303,7 +2304,7 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
       if ( argc > 0 )
       {
 // TODO: RA6 [name_Balaji]: Add all menu support for RA6E1
-#if 0 
+#if 0
          uint8_t  securityMode;
 
          ( void )APP_MSG_SecurityHandler( method_get, appSecurityAuthMode, &securityMode, NULL );
@@ -2474,7 +2475,7 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
    menu = menuStd;
 #endif
 #if ( MCU_SELECTED == NXP_K24 )
-   MFG_printf( "\nCommand List:\n" );   
+   MFG_printf( "\nCommand List:\n" );
 #elif ( MCU_SELECTED == RA6E1 )
    /* Added carriage return to follow printing standard */
    MFG_printf( "\r\nCommand List:\r\n" );
@@ -2487,7 +2488,7 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
 #elif ( MCU_SELECTED == RA6E1 )
       /* Added Carriage return to follow Printing standard */
       MFG_printf( "%32s: %s\r\n", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
-#endif 
+#endif
       CmdLineEntry++;
       OS_TASK_Sleep( TEN_MSEC );    /* Delay of 10millisecond makes all prints visible */
 #if ( MCU_SELECTED == NXP_K24 )// TODO: RA6 [name_Balaji]: Add other menu support

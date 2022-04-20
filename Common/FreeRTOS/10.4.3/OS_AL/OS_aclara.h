@@ -397,7 +397,7 @@ bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
 void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
 void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
 
-bool OS_SEM_Create ( OS_SEM_Handle SemHandle );
+bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount );
 void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line );
 bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t TimeoutMs, char *file, int line );
 void OS_SEM_Reset ( OS_SEM_Handle SemHandle );

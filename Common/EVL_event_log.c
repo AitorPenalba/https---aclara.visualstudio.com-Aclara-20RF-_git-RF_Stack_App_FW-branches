@@ -95,7 +95,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define EVL_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define EVL_NUM_MSGQ_ITEMS 0 
+#define EVL_NUM_MSGQ_ITEMS 0
 #endif
 
 /* ****************************************************************************************************************** */
@@ -1538,7 +1538,8 @@ returnStatus_t EVL_Initalize( void )
    if ( rVal == eSUCCESS )
    {
 #if ( LAST_GASP_SIMULATION == 1 ) && ( EP == 1 )
-      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS) && OS_SEM_Create( &SimLGTxDoneSem ) )
+      //TODO RA6: NRJ: determine if semaphores need to be counting
+      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS) && OS_SEM_Create( &SimLGTxDoneSem, 0 ) )
 #else
       if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS) )
 #endif

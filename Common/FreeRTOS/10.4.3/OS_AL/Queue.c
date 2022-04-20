@@ -227,7 +227,7 @@ uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle )
 {
   uint16_t NumElements;
 #if( RTOS_SELECTION == FREE_RTOS )
-  
+
   NumElements = (uint16_t) uxQueueMessagesWaiting( *QueueHandle );
 #elif( RTOS_SELECTION == MQX_RTOS )
    bool QueueEmpty;
@@ -313,7 +313,7 @@ static buffer_t *rxMsg;
 
 void OS_QUEUE_Test( void )
 {
-   
+
    uint32_t length;
    payload1.bufMaxSize = 250;
    payload2.bufMaxSize = 100;
@@ -331,7 +331,7 @@ void OS_QUEUE_Test( void )
        {
          APP_PRINT(" Fail");
        }
-     
+
 
      //queue the pointer to the element
 //     for(int i = 0; i< NUM_ITEMS; i++)

@@ -45,27 +45,27 @@
   Purpose: This function will create a new Semaphore
 
   Arguments: SemHandle - pointer to the Handle structure of the Semaphore
+              maxCount - maximum count of semaphore
 
   Returns: FuncStatus - True if Semaphore created successfully, False if error
 
-  Notes:
+  Notes: maxCount is only used in FreeRTOS.
+         If the maxcount is 0 then a binary sempahore is created,
 
 *******************************************************************************/
-bool OS_SEM_Create ( OS_SEM_Handle SemHandle )
+bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
 {
    bool FuncStatus = true;
-#if 0
-   uint32_t RetStatus;
 
-   RetStatus = _lwsem_create ( SemHandle, 0 ); /* Always create with initial count of 0 */
-   if ( RetStatus != MQX_OK )
+   if( 0 == maxCount )
    {
-      FuncStatus = false;
-   } /* end if() */
 
-#endif
-
-   *SemHandle = xSemaphoreCreateBinary();
+      *SemHandle = xSemaphoreCreateBinary();
+   }
+   else
+   {
+      *SemHandle = xSemaphoreCreateCounting(maxCount, 0); /* Always create with initial count of 0 */
+   }
    if( NULL == SemHandle )
    {
       /* TODO: DG: Add Print */
@@ -94,15 +94,11 @@ bool OS_SEM_Create ( OS_SEM_Handle SemHandle )
 *******************************************************************************/
 void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 {
-#if 0
-  if ( _lwsem_post ( SemHandle ) )
-#else
    if( pdFAIL == xSemaphoreGive(*SemHandle) )
-#endif
    {
       /* TODO: */
-//      APP_ERR_PRINT("OS_SEM_POST!");
-//      EVL_FirmwareError( "OS_SEM_Post" , file, line );
+      //      APP_ERR_PRINT("OS_SEM_POST!");
+      //      EVL_FirmwareError( "OS_SEM_Post" , file, line );
    }
 } /* end OS_SEM_Post () */
 
@@ -144,41 +140,30 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
       }
       else
       {
-
          /* Convert the passed in Timeout from Milliseconds into Ticks */
          /* This is limited to a maximum of 96 hours, to prevent an overflow!
-          * This is OK for 200 ticks per second.
-          */
+         * This is OK for 200 ticks per second.
+         */
          if(Timeout_msec > (ONE_MIN * 60 * 24 * 4))
          {
             Timeout_msec = (ONE_MIN * 60 * 24 * 4);
          }
-#if 0
-         /* Convert the Timeout from Milliseconds into Ticks */
-         timeout_ticks = (uint32_t)  ((uint64_t) ((uint64_t) Timeout_msec * (uint64_t) _time_get_ticks_per_sec()) / 1000);
-         if( (uint32_t) ((uint64_t) ((uint64_t) Timeout_msec * (uint64_t) _time_get_ticks_per_sec()) % 1000) > 0)
-         {   /* Round the value up to ensure the time is >= the time requested */
-            timeout_ticks = timeout_ticks + 1;
-         } /* end if() */
-#else
+
          timeout_ticks = pdMS_TO_TICKS(Timeout_msec);
          if( ( ( TickType_t ) ( ( ( TickType_t ) ( Timeout_msec ) * ( TickType_t ) configTICK_RATE_HZ ) % ( TickType_t ) 1000U ) ) )
          {   /* Round the value up to ensure the time is >= the time requested */
             timeout_ticks = timeout_ticks + 1;
          }
-#endif
       }
-
       RetStatus = xSemaphoreTake( *SemHandle, timeout_ticks );
-
       if ( pdFAIL == RetStatus )
       {
          FuncStatus = false;
          /* TODO: Add Print */
-//         APP_ERR_PRINT("OS_SEM_PEND!");
-//         if ( RetStatus == MQX_INVALID_LWSEM ) {
-//         EVL_FirmwareError( "OS_SEM_Pend" , file, line );
-//      }
+         //         APP_ERR_PRINT("OS_SEM_PEND!");
+         //         if ( RetStatus == MQX_INVALID_LWSEM ) {
+         //         EVL_FirmwareError( "OS_SEM_Pend" , file, line );
+         //      }
       }
    }
    else
@@ -213,12 +198,12 @@ void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
       /* TODO: */
-//      APP_ERR_PRINT("OS_SEM_POST!");
-//      EVL_FirmwareError( "OS_SEM_Post" , file, line );
+      //      APP_ERR_PRINT("OS_SEM_POST!");
+      //      EVL_FirmwareError( "OS_SEM_Post" , file, line );
    }
 
    /* If xHigherPriorityTaskWoken was set to true you we should yield.  The actual macro used here is port specific. */
-    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+   portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 } /* end OS_SEM_POST_fromISR () */
 
 /*******************************************************************************
@@ -240,8 +225,8 @@ void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    if( pdFAIL == xSemaphoreTakeFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
       /* TODO: */
-//      APP_ERR_PRINT("OS_SEM_PEND!");
-//      EVL_FirmwareError( "OS_SEM_Pend" , file, line );
+      //      APP_ERR_PRINT("OS_SEM_PEND!");
+      //      EVL_FirmwareError( "OS_SEM_Pend" , file, line );
    }
 } /* end OS_SEM_PEND_fromISR () */
 
@@ -277,7 +262,7 @@ static OS_SEM_Obj       testSem_ = NULL;
 static volatile uint8_t counter = 0;
 void OS_SEM_TestCreate ( void )
 {
-   if( OS_SEM_Create(&testSem_) )
+   if( OS_SEM_Create(&testSem_, 0) )
    {
       counter++;
    }

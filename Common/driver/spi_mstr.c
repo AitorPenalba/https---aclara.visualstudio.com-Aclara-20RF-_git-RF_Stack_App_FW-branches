@@ -330,7 +330,8 @@ returnStatus_t SPI_initPort( uint8_t port )
 #if SPI_USES_DMA == 1
       if ( SpiSemCreated[port] == false )  /* Is the sem not valid (not created)? */
       {
-         if ( true == OS_SEM_Create( &spiSem_[port] ) ) // Create the semaphore
+         //TODO RA6: NRJ: determine if semaphores need to be counting
+         if ( true == OS_SEM_Create( &spiSem_[port], 0 ) ) // Create the semaphore
          {
             SpiSemCreated[port] = true;
             /* Setup the ISR for the DMA transfer complete */

@@ -55,7 +55,7 @@ bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
    {
       RetStatus = false;
    } /* end if() */
-   if ( false == OS_SEM_Create(&(MsgqHandle->MSGQ_SemObj)) )
+   if ( false == OS_SEM_Create(&(MsgqHandle->MSGQ_SemObj), NumMessages ) )
    {
       RetStatus = false;
    } /* end if() */
@@ -75,9 +75,9 @@ bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
   Returns: None
 
   Notes: The memory for MessageData must be allocated by the calling function and
-         and is retained in the original allocated memory location. 
-         Allocation and De-allocation must be handled by the application calling 
-         these OS_MSGQ_xxx functions This OS_MSGQ module does not allocate, 
+         and is retained in the original allocated memory location.
+         Allocation and De-allocation must be handled by the application calling
+         these OS_MSGQ_xxx functions This OS_MSGQ module does not allocate,
          nor free any memory, and just deals
          with a pointer to the memory location
 
@@ -87,7 +87,7 @@ bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
 void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line )
 {
   OS_QUEUE_Element *ptr = MessageData;
-  
+
   // Sanity check
   if (ErrorCheck && ptr->flag.isFree) {
     // The buffer was freed
@@ -101,15 +101,15 @@ void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorChec
                   ptr->dataLen, ptr->bufPool, MessageData);
     DBG_LW_printf("ERROR: OS_MSGQ_POST called from %s:%d\n", file, line);
   }
-  
+
   // Mark as on queue
   ptr->flag.inQueue++;
-  
+
   OS_QUEUE_ENQUEUE(&(MsgqHandle->MSGQ_QueueObj), MessageData, file, line); // Function will not return if it fails
-  
+
   OS_SEM_POST(&(MsgqHandle->MSGQ_SemObj), file, line); // Function will not return if it fails
-   
-   
+
+
 } /* end OS_MSGQ_Post () */
 
 /*******************************************************************************
@@ -206,12 +206,12 @@ void OS_MSGQ_TestCreate ( void )
    }
    /*initialize static message*/
    payload1.data = &value;
-  
+
 }
 bool OS_MSGQ_TestPend( void )
 {
    bool retVal = false;
-   
+
    if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, OS_WAIT_FOREVER) )
    {
       counter--;
