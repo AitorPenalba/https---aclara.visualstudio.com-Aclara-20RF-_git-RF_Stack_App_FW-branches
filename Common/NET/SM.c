@@ -209,7 +209,7 @@ returnStatus_t SM_init( void )
    smMode_ = eSM_MODE_UNKNOWN;
 
    // Create the external and internal message queues and other resources
-   // TODO RA6: NRJ: determine if semaphores need to be counting
+   //TODO NRJ: determine if semaphores need to be counting
    if (OS_MSGQ_Create(&SM_externalMsgQueue, EXT_NUM_MSGQ_ITEMS)
       && OS_MSGQ_Create(&SM_internalMsgQueue, INT_NUM_MSGQ_ITEMS)
       && OS_MUTEX_Create(&SM_AttributeMutex_)

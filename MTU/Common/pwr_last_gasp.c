@@ -267,7 +267,8 @@ void PWRLG_Task( taskParameter )
    uint8_t                    hwVerString[VER_HW_STR_LEN];
 
    // Create the semaphore used to signal TX complete.
-   //TODO RA6: NRJ: determine if semaphores need to be counting
+   //TODO NRJ: determine if semaphores need to be counting
+
    ( void )OS_SEM_Create( &TxDoneSem, 0 );
 
    // Seed the random number generator for P persitence test in the MAC.
