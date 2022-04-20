@@ -27,7 +27,7 @@
 #include <mqx.h>
 #include <fio.h>
 #endif
-
+#if 1 // TODO: RA6: Remove duplicate includes
 #include "timer_util.h"
 
 #include "EVL_event_log.h"
@@ -39,7 +39,7 @@
 #include "MAC.h"
 #include "STACK_Protocol.h"
 #include "STACK.h"
-#if 0
+#else // TODO: RA6: Remove duplicate includes
 #include "user_config.h"
 #if ( MQX_USE_LOGS == 1 )
 #define PRINT_LOGS 1
