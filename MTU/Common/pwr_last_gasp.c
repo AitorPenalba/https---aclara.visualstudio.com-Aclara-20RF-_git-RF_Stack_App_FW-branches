@@ -267,7 +267,7 @@ void PWRLG_Task( taskParameter )
    uint8_t                    hwVerString[VER_HW_STR_LEN];
 
    // Create the semaphore used to signal TX complete.
-   //TODO NRJ: determine if semaphores need to be counting
+   //TODO RA6: NRJ: determine if semaphores need to be counting
 
    ( void )OS_SEM_Create( &TxDoneSem, 0 );
 

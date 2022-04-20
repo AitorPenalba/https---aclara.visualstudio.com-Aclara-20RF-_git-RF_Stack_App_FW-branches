@@ -1226,7 +1226,7 @@ returnStatus_t ILC_DRU_DRIVER_Init ( void )
    {
       if ( true == OS_MUTEX_Create( &ILC_DRU_DRIVER_Mutex_ ) )
       {
-         //TODO NRJ: determine if semaphores need to be counting
+         //TODO RA6: NRJ: determine if semaphores need to be counting
          if ( true == OS_SEM_Create( &ILC_SRFN_REG_Sem_, 0 ) )
          {
             if ( true == OS_SEM_Create( &ILC_TIME_SYNC_Sem_,0 ) )

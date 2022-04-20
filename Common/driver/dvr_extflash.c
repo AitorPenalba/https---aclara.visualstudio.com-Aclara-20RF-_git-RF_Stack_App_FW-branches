@@ -416,7 +416,7 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
    (void)dvr_shm_init();
    if ( flashSemCreated_ == false )
    {
-      //TODO NRJ: determine if semaphores need to be counting
+      //TODO RA6: NRJ: determine if semaphores need to be counting
       if ( true == OS_SEM_Create( &extFlashSem_, 0) )
       {
          flashSemCreated_ = true;

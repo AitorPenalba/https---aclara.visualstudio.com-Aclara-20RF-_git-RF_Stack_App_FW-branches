@@ -143,7 +143,7 @@ returnStatus_t DBG_init( void )
    if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS ) &&
          OS_MUTEX_Create( &mutex_ ) &&
 #if ( MCU_SELECTED == RA6E1 )
-         //TODO NRJ: determine if semaphores need to be counting
+         //TODO RA6: NRJ: determine if semaphores need to be counting
          OS_SEM_Create( &dbgReceiveSem_ , 0) &&
          OS_SEM_Create( &transferSem[UART_DEBUG_PORT], 0 ) &&
 #endif
