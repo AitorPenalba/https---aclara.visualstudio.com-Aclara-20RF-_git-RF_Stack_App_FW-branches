@@ -497,11 +497,11 @@ returnStatus_t PWR_TSK_init( void )
    t.seconds = RESTORATION_TIME();
    ( void )TIME_UTIL_SecondsToDateStr( dt, "", t );
    DBG_logPrintf( 'I', "Restoration time: %s", dt );
-   //TODO NRJ: determine if semaphores need to be counting
+   //TODO RA6: NRJ: determine if semaphores need to be counting
    if ( OS_MUTEX_Create( &PWR_Mutex ) && OS_MUTEX_Create(&Embedded_Pwr_Mutex) && OS_SEM_Create( &PWR_Sem, 0 ) )
    {
 #if ( SIMULATE_POWER_DOWN == 1 )
-      //TODO NRJ: determine if semaphores need to be counting
+      //TODO RA6: NRJ: determine if semaphores need to be counting
       (void) OS_SEM_Create( &PWR_SimulatePowerDn_Sem, 0 );     /* Creating the Semaphore */
 #endif
       if ( eSUCCESS == FIO_fopen( &fileHndlPowerDownCount, ePART_SEARCH_BY_TIMING, ( uint16_t )eFN_PWR,
@@ -557,7 +557,7 @@ returnStatus_t PWR_TSK_init( void )
    }
 #else
    returnStatus_t       retVal = eSUCCESS;
-   //TODO NRJ: determine if semaphores need to be counting
+   //TODO RA6: NRJ: determine if semaphores need to be counting
    if ( OS_MUTEX_Create( &PWR_Mutex ) && OS_MUTEX_Create(&Embedded_Pwr_Mutex) && OS_SEM_Create( &PWR_Sem, 0 ) )
    {
       DBG_printf("Created");

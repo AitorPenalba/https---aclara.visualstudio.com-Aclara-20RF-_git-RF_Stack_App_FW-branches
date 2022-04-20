@@ -127,7 +127,7 @@ void radio_hal_SpiInit( bool fastSPI )
    }
    assert( SPI_OpenPort( RADIO_0_SPI_PORT_NUM, &_spiCfg, (bool)SPI_MASTER ) == eSUCCESS );
 #elif ( MCU_SELECTED == RA6E1 )
-   //TODO NRJ: determine if semaphores need to be counting
+   //TODO RA6: NRJ: determine if semaphores need to be counting
    assert( ( true == OS_SEM_Create( &radioSpiSem_, 0 ) ) );
    R_BSP_PinAccessEnable();
    /* Open the SPI Port */

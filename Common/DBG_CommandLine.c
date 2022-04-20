@@ -219,7 +219,7 @@ static const char CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process 
 #endif
 
 /* FILE VARIABLE DEFINITIONS */
-#if ( MCU_SELECTED == RA6E1 )    
+#if ( MCU_SELECTED == RA6E1 )
 extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
 extern OS_SEM_Obj       transferSem[MAX_UART_ID]; /* For RA6E1, UART_write process is used in Semaphore method */
 #endif
@@ -706,7 +706,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 static void DBG_CommandLine_Process ( void );
 static returnStatus_t atoh( uint8_t *pHex, char const *pAscii );
 #if ( MCU_SELECTED == RA6E1 ) //Process the receieved byte from Uart read
-static void dbgpReadByte( uint8_t rxByte ); 
+static void dbgpReadByte( uint8_t rxByte );
 #endif
 /* FUNCTION DEFINITIONS */
 /*******************************************************************************
@@ -776,7 +776,7 @@ void DBG_CommandLineTask ( taskParameter )
 //      OS_TASK_Sleep(OS_WAIT_FOREVER);
 #else
 #if ( MCU_SELECTED == NXP_K24 )
-      UART_fgets( UART_DEBUG_PORT, DbgCommandBuffer, MAX_DBG_COMMAND_CHARS ); 
+      UART_fgets( UART_DEBUG_PORT, DbgCommandBuffer, MAX_DBG_COMMAND_CHARS );
 #endif
 #endif
 #if ( MCU_SELECTED == RA6E1 )
@@ -891,7 +891,7 @@ static void dbgpReadByte( uint8_t rxByte )
 *******************************************************************************/
 void dbg_uart_callback( uart_callback_args_t *p_args )
 {
-  
+
     /* Handle the UART event */
      switch (p_args->event)
     {
@@ -4797,6 +4797,7 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //         {
 //            if ( !HmcCmdSemCreated )
 //            {
+//               //TODO RA6: NRJ: determine if semaphores need to be counting
 //               if ( OS_SEM_Create ( &HMC_CMD_SEM ) )
 //               {
 //                  HmcCmdSemCreated = ( bool )true;

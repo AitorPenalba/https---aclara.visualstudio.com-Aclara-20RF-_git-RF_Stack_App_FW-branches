@@ -259,10 +259,10 @@ returnStatus_t TMR_HandlerInit( void )
 {
    returnStatus_t retVal = eFAILURE;
 
-   /* Create counting semaphore to keep track of RTOS ticks & create mutex to protect Timer modules critical section */
    if ( _tmrUtilSemCreated == false )
    {
-      if ( OS_SEM_Create(&_tmrUtilSem, 1000) && OS_MUTEX_Create(&_tmrUtilMutex) )
+      //TODO RA6: NRJ: determine if semaphores need to be counting
+      if ( OS_SEM_Create(&_tmrUtilSem, 0) && OS_MUTEX_Create(&_tmrUtilMutex) )
       {
          _tmrUtilSemCreated = true;
          (void)memset(_sTimer, 0, sizeof(_sTimer)); //Initialize Timer data-structure

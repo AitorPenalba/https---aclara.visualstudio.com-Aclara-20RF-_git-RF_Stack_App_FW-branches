@@ -57,6 +57,7 @@ bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
    {
       RetStatus = false;
    } /* end if() */
+   //TODO RA6: NRJ: determine if semaphores need to be counting, not required
    if ( false == OS_SEM_Create(&(MsgqHandle->MSGQ_SemObj, 0)) )
    {
       RetStatus = false;

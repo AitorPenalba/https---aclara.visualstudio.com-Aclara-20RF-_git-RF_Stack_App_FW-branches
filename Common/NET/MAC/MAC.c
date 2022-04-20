@@ -978,7 +978,7 @@ returnStatus_t MAC_init ( void )
    {
       return eFAILURE;
    }
-   //TODO NRJ: determine if semaphores need to be counting
+   //TODO RA6: NRJ: determine if semaphores need to be counting
    if (OS_SEM_Create(&MAC_AttributeSem_, 0) && OS_MUTEX_Create(&MAC_AttributeMutex_) && OS_MSGQ_Create(&MAC_msgQueue, MAC_NUM_MSGQ_ITEMS) && OS_MUTEX_Create(&MAC_TimeSyncAttributeMutex_) &&
        (eSUCCESS == MAC_FrameManag_init()) && (eSUCCESS == MAC_PacketManag_init()) )
    {

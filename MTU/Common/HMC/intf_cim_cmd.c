@@ -728,7 +728,7 @@ enum_CIM_QualityCode INTF_CIM_CMD_getDemandRstCnt( ValueInfo_t *rdgInfo )
 #if ( DEMAND_IN_METER == 1 )
    if ( !intfCimDmdRstSemCreated_ ) /* If the semaphore is invalid, create it */
    {
-      //TODO NRJ: determine if semaphores need to be counting
+      //TODO RA6: NRJ: determine if semaphores need to be counting
       intfCimDmdRstSemCreated_ = OS_SEM_Create( &intfCimDmdRstSem_, 0 );
    }
 
@@ -886,7 +886,7 @@ enum_CIM_QualityCode INTF_CIM_CMD_ansiRead( void *pDest, uint16_t id, uint32_t o
 
    if ( !intfCimAnsiReadSemCreated_ )        /* If the semaphore is invalid, create it */
    {
-      //TODO NRJ: determine if semaphores need to be counting
+      //TODO RA6: NRJ: determine if semaphores need to be counting
       intfCimAnsiReadSemCreated_ = OS_SEM_Create( &intfCimAnsiReadSem_, 0 );
    }
 
@@ -976,7 +976,7 @@ enum_CIM_QualityCode INTF_CIM_CMD_ansiWrite( void *pSrc, uint16_t id, uint32_t o
 
     if ( !intfCimAnsiWriteSemCreated_ )        /* If the semaphore is invalid, create it */
     {
-       //TODO NRJ: determine if semaphores need to be counting
+       //TODO RA6: NRJ: determine if semaphores need to be counting
        intfCimAnsiWriteSemCreated_ = OS_SEM_Create( &intfCimAnsiWriteSem_, 0 );
     }
 
@@ -1070,7 +1070,7 @@ enum_CIM_QualityCode INTF_CIM_CMD_ansiProcedure( void const *pSrc, uint16_t proc
 
    if ( !intfCimAnsiProcSemCreated_ )  /* If the semaphore is invalid, create it */
    {
-      //TODO NRJ: determine if semaphores need to be counting
+      //TODO RA6: NRJ: determine if semaphores need to be counting
       intfCimAnsiProcSemCreated_ = OS_SEM_Create( &intfCimAnsiProcSem_, 0 );
    }
    OS_MUTEX_Lock( &intfCimAnsiMutex_ ); // Function will not return if it fails
@@ -1142,7 +1142,7 @@ enum_CIM_QualityCode HMC_PRG_MTR_ansiRead( void *pDest, uint16_t id, uint32_t of
 
    if ( !intfCimAnsiReadSemCreated_ )        /* If the semaphore is invalid, create it */
    {
-      //TODO NRJ: determine if semaphores need to be counting
+      //TODO RA6: NRJ: determine if semaphores need to be counting
       intfCimAnsiReadSemCreated_ = OS_SEM_Create( &intfCimAnsiReadSem_, 0 );
    }
 
@@ -1278,7 +1278,7 @@ enum_CIM_QualityCode HMC_PRG_MTR_ansiWrite( void *pSrc, uint16_t id, uint32_t of
 
     if ( !intfCimAnsiWriteSemCreated_ )        /* If the semaphore is invalid, create it */
     {
-       //TODO NRJ: determine if semaphores need to be counting
+       //TODO RA6: NRJ: determine if semaphores need to be counting
        intfCimAnsiWriteSemCreated_ = OS_SEM_Create( &intfCimAnsiWriteSem_, 0 );
     }
 
@@ -1379,7 +1379,7 @@ enum_CIM_QualityCode HMC_PRG_MTR_ansiProcedure( void const *pSrc, uint16_t proc,
 
    if ( !intfCimAnsiProcSemCreated_ )  /* If the semaphore is invalid, create it */
    {
-      //TODO NRJ: determine if semaphores need to be counting
+      //TODO RA6: NRJ: determine if semaphores need to be counting
       intfCimAnsiProcSemCreated_ = OS_SEM_Create( &intfCimAnsiProcSem_, 0 );
    }
    OS_MUTEX_Lock( &intfCimAnsiMutex_ ); // Function will not return if it fails

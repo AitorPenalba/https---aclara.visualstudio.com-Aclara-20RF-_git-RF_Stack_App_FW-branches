@@ -171,7 +171,7 @@ returnStatus_t ALRM_init ( void )
 #if ( ( METER_TROUBLE_SIGNAL == 1 ) && ( ANSI_STANDARD_TABLES == 1 ) )
    if ( eSUCCESS == retVal )
    {
-      //TODO NRJ: determine if semaphores need to be counting
+      //TODO RA6: NRJ: determine if semaphores need to be counting
       if ( OS_SEM_Create( &MeterTroubleSem, 0 ) )
       {
          /* Set up the ISR for Meter trouble signal. This is only on some meters.   */

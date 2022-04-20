@@ -337,7 +337,7 @@ returnStatus_t TIME_SYS_Init( void )
    /* Create counting semaphore to keep track of system ticks & mutex to protect Sys Time modules critical section */
    if ( (bool)false == _timeSysSemCreated )
    {
-      //place comment for maxcount; counting becuase need to ensure time_sys does not fall behind
+      // counting becuase need to ensure time_sys does not fall behind
       if ( OS_SEM_Create(&_timeSysSem, 1000) && OS_MUTEX_Create(&_timeVarsMutex) )
       {  //Semaphore and Mutex create succeeded, initialize the data structure
 #if (EP == 1)

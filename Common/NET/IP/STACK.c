@@ -392,6 +392,7 @@ returnStatus_t NWK_init ( void )
 #if ( FAKE_TRAFFIC == 1 )
    tTimeSysPerAlarm alarmSettings;
 #endif
+   //TODO RA6: NRJ: determine if semaphores need to be counting
    if (OS_SEM_Create(&NWK_AttributeSem_, 0) && OS_MUTEX_Create(&NWK_AttributeMutex_) && OS_MSGQ_Create(&NWK_msgQueue, NWK_NUM_MSGQ_ITEMS))
    {
       // Reset the configuration attributes to default values
