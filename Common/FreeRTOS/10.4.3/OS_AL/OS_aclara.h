@@ -381,7 +381,7 @@ void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
 uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle );
 
-bool OS_LINKEDLIST_Create (OS_List_Handle listHandle, uint32_t QueueLength );
+bool OS_LINKEDLIST_Create (OS_List_Handle listHandle );
 void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement);
 bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listElement );
 void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement );

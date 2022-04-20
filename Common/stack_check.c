@@ -15,6 +15,9 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
+#include "project.h"
+/* Included project.h to redirect printf statement to Debug port */
+// TODO: RA6 [name_Balaji]: Add stack_check.c file to RA6E1 Project if required
 #include "mqx.h"
 #include <fio.h>
 #include <io_prv.h>
