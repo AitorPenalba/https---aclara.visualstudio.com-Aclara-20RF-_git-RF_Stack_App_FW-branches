@@ -37,7 +37,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define ILC_DRIVER_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
 #else
-#define ILC_DRIVER_QUEUE_SIZE 0 
+#define ILC_DRIVER_QUEUE_SIZE 0
 #endif
 
 /* ****************************************************************************************************************** */
@@ -1226,11 +1226,12 @@ returnStatus_t ILC_DRU_DRIVER_Init ( void )
    {
       if ( true == OS_MUTEX_Create( &ILC_DRU_DRIVER_Mutex_ ) )
       {
-         if ( true == OS_SEM_Create( &ILC_SRFN_REG_Sem_ ) )
+         //TODO NRJ: determine if semaphores need to be counting
+         if ( true == OS_SEM_Create( &ILC_SRFN_REG_Sem_, 0 ) )
          {
-            if ( true == OS_SEM_Create( &ILC_TIME_SYNC_Sem_ ) )
+            if ( true == OS_SEM_Create( &ILC_TIME_SYNC_Sem_,0 ) )
             {
-               if ( true == OS_SEM_Create( &ILC_TNL_Sem_ ) )
+               if ( true == OS_SEM_Create( &ILC_TNL_Sem_, 0 ) )
                {
                   retVal = eSUCCESS;
                }

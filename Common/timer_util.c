@@ -49,7 +49,7 @@
 #include "project.h"
 #include <stdbool.h>
 #include <string.h>
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #endif
 #include "DBG_SerialDebug.h"
@@ -262,7 +262,7 @@ returnStatus_t TMR_HandlerInit( void )
    /* Create counting semaphore to keep track of RTOS ticks & create mutex to protect Timer modules critical section */
    if ( _tmrUtilSemCreated == false )
    {
-      if ( OS_SEM_Create(&_tmrUtilSem) && OS_MUTEX_Create(&_tmrUtilMutex) )
+      if ( OS_SEM_Create(&_tmrUtilSem, 1000) && OS_MUTEX_Create(&_tmrUtilMutex) )
       {
          _tmrUtilSemCreated = true;
          (void)memset(_sTimer, 0, sizeof(_sTimer)); //Initialize Timer data-structure

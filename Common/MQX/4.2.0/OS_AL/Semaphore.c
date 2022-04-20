@@ -42,16 +42,18 @@
   Purpose: This function will create a new Semaphore
 
   Arguments: SemHandle - pointer to the Handle structure of the Semaphore
+              maxCount - not used
 
   Returns: FuncStatus - True if Semaphore created successfully, False if error
 
   Notes:
 
 *******************************************************************************/
-bool OS_SEM_Create ( OS_SEM_Handle SemHandle )
+bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount)
 {
    uint32_t RetStatus;
    bool FuncStatus = true;
+   (void) maxCount; //Paramter not used
 
    RetStatus = _lwsem_create ( SemHandle, 0 ); /* Always create with initial count of 0 */
    if ( RetStatus != MQX_OK )

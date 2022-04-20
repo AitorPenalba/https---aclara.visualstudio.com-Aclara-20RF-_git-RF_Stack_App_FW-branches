@@ -71,7 +71,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define SERIAL_DBG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define SERIAL_DBG_NUM_MSGQ_ITEMS 0 
+#define SERIAL_DBG_NUM_MSGQ_ITEMS 0
 #endif
 
 typedef struct
@@ -100,7 +100,7 @@ static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
 static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
 #if ( MCU_SELECTED == RA6E1 )
-OS_SEM_Obj       dbgReceiveSem_;                           /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */ 
+OS_SEM_Obj       dbgReceiveSem_;                           /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */
 extern OS_SEM_Obj       transferSem[MAX_UART_ID];          /* For RA6E1, UART_write process is used in Semaphore method */
 #endif
 //static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
@@ -143,6 +143,7 @@ returnStatus_t DBG_init( void )
    if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS ) &&
          OS_MUTEX_Create( &mutex_ ) &&
 #if ( MCU_SELECTED == RA6E1 )
+         //TODO NRJ: determine if semaphores need to be counting
          OS_SEM_Create( &dbgReceiveSem_ , 0) &&
          OS_SEM_Create( &transferSem[UART_DEBUG_PORT], 0 ) &&
 #endif
@@ -312,11 +313,11 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
          if ( options & ADD_LF )
          {
 #if ( MCU_SELECTED == NXP_K24 )
-           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\n" ); 
+           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\n" );
 #elif ( MCU_SELECTED == RA6E1 )
            /* Added carriage return to follow printing standard */
            len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\r\n" );
-#endif 
+#endif
          }
 
          if ( len < sizeof( logPrintf_buf ) )

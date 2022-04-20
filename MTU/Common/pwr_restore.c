@@ -341,8 +341,8 @@ void PWROR_Task( uint32_t Arg0 )
 returnStatus_t PWROR_init( void )
 {
    returnStatus_t retVal = eFAILURE;
-
-   if ( ( true == OS_SEM_Create( &PWROR_HMC_Sem ) ) && ( true == OS_SEM_Create( &PWROR_PWR_Sem ) ) )
+   //TODO NRJ: determine if semaphores need to be counting
+   if ( ( true == OS_SEM_Create( &PWROR_HMC_Sem, 0 ) ) && ( true == OS_SEM_Create( &PWROR_PWR_Sem, 0 ) ) )
    {
       retVal = eSUCCESS;
    }

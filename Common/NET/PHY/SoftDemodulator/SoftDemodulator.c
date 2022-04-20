@@ -85,7 +85,7 @@ returnStatus_t SoftDemodulator_Initialize(void)
 
    for (uint8_t i=0;i<SOFT_DEMOD_MAX_SYNC_PAYL_TASKS+1;i++)
    {
-      if (retval == eSUCCESS && (OS_SEM_Create(&SD_FilteredPhaseSamplesSemaphores[i].semaphore) == false) ||
+      if (retval == eSUCCESS && (OS_SEM_Create(&SD_FilteredPhaseSamplesSemaphores[i].semaphore, 0) == false) ||
                                 (OS_EVNT_Create(&SD_FilteredPhaseSamplesSemaphores[i].sync_payload_event) == false))
       {
          retval = eFAILURE;

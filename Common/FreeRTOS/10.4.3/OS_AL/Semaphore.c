@@ -50,10 +50,10 @@
   Returns: FuncStatus - True if Semaphore created successfully, False if error
 
   Notes: maxCount is only used in FreeRTOS.
-         If the maxcount is 0 then a binary sempahore is created
+         If the maxcount is 0 then a binary sempahore is created,
 
 *******************************************************************************/
-bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount ) //TODO NRJ; get rid of conditional compile for MQX. This is a FreeRTOS only file. Update MQX to include second parameter that matches call but is not used.
+bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
 {
    bool FuncStatus = true;
 
@@ -262,7 +262,7 @@ static OS_SEM_Obj       testSem_ = NULL;
 static volatile uint8_t counter = 0;
 void OS_SEM_TestCreate ( void )
 {
-   if( OS_SEM_Create(&testSem_) )
+   if( OS_SEM_Create(&testSem_, 0) )
    {
       counter++;
    }

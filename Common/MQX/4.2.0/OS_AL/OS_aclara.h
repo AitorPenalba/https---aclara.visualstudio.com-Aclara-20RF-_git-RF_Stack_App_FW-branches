@@ -213,7 +213,7 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
 
-bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle );
+bool OS_MSGQ_Create ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages );
 void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line );
 bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
 
@@ -221,7 +221,7 @@ bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
 void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
 void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
 
-bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle );
+bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle,  uint32_t QueueLength );
 void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );
 void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
 bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *QueueElement );
@@ -230,7 +230,7 @@ uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
 
-bool OS_SEM_Create ( OS_SEM_Handle SemHandle );
+bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount  );
 void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line );
 bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t TimeoutMs, char *file, int line );
 void OS_SEM_Reset ( OS_SEM_Handle SemHandle );

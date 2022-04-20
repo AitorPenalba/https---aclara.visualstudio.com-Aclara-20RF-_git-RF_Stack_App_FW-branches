@@ -42,13 +42,14 @@
   Purpose: This function is used to create a new Queue structure
 
   Arguments: QueueHandle - pointer to the handle structure of the queue
+             QueueLength - not used in MQX
 
   Returns: FuncStatus - True if Queue created successfully, False if error
 
-  Notes:
+  Notes: exta parameter
 
 *******************************************************************************/
-bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle )
+bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle,  uint32_t QueueLength )
 {
    bool FuncStatus = true;
 
