@@ -32,9 +32,6 @@
 #undef NULL
 #define NULL               ((void *) 0)
 
-#define TRUE                  1
-#define FALSE                 0
-
 #define MIN_RTC_MONTH         1
 #define MAX_RTC_MONTH        12
 #define MIN_RTC_DAY           1

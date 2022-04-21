@@ -999,7 +999,7 @@ returnStatus_t MAC_init ( void )
 #if 0 // TODO: RA6E1 - lastgasp
       if(PWRLG_LastGasp() == false)
 #else // TODO: RA6E1 - lastgasp
-      if ( 0 )
+      if ( 1 )
 #endif
 #endif
       {  // Normal Mode
@@ -1170,7 +1170,7 @@ static void MAC_PHY_CheckForFailure( void )
 #if ( MCU_SELECTED == NXP_K24 )
    if ( (DataReqTime.TICKS[0] != 0) || (DataReqTime.TICKS[1] != 0) )
 #elif ( MCU_SELECTED == RA6E1 )
-   if ( DataReqTime.tickCount != 0 )
+   if ( ( DataReqTime.tickCount != 0 ) || ( DataReqTime.xNumOfOverflows != 0 ) )
 #endif
    {
       // Check if PHY as been accessed recently

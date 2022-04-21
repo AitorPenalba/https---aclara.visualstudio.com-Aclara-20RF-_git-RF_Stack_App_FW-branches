@@ -50,6 +50,10 @@
 /* #DEFINE DEFINITIONS */
 #define OS_WAIT_FOREVER 0xFFFFFFFF
 
+
+#define TRUE        ( bool ) 1
+#define FALSE       ( bool ) 0
+
 #define FIVE_MSEC   (5)
 #define TEN_MSEC    (10)
 #define FIFTY_MSEC  (50)
@@ -134,8 +138,8 @@
 
 // Mapping HTONS and HTONL with Byte_Swap internal APIs
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
-#define htonl(value)    ByteSwap(value, 4)
-#define htons(value)    ByteSwap(value, 2)
+#define htonl(value)    htonx_FreeRTOS(value, 4)
+#define htons(value)    htonx_FreeRTOS(value, 2)
 #endif
 
 #if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
@@ -415,7 +419,7 @@ void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line );
 #endif
 
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
-uint32_t ByteSwap( uint32_t value, uint8_t numOfBytes );
+uint32_t htonx_FreeRTOS( uint32_t value, uint8_t numOfBytes );
 #endif
 
 #if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
