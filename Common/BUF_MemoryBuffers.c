@@ -21,7 +21,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include "project.h" // Added for RTOS_SELECTION macro. Can be used only with features.h
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h> /* Necessary for Interrupt disable/enable calls */
+#endif
 #include "os_aclara.h"
 #include "BUF_MemoryBuffers.h"
 

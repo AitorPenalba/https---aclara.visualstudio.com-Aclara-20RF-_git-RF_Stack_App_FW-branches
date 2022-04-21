@@ -35,9 +35,10 @@
    #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */            /* TODO: RA6E1: Enable */
    #define ENABLE_ID_TASKS                0  /* Used to 0=disable, 1=enable the Interval Data feature */    /* TODO: RA6E1: Enable */
    #define ENABLE_MFG_TASKS               1  /* Used to 0=disable, 1=enable the Mfg Port feature */
-   #define ENABLE_TMR_TASKS               0  /* Used to 0=disable, 1=enable the Timer feature */            /* TODO: RA6E1: Enable */
-   #define ENABLE_TIME_SYS_TASKS          0  /* Used to 0=disable, 1=enable the System Time feature */      /* TODO: RA6E1: Enable */
-   #define ENABLE_HMC_TASKS               0  /* Used to 0=disable, 1=enable the Host Meter Comm feature */  /* TODO: RA6E1: Enable */
+   #define ENABLE_TMR_TASKS               1  /* Used to 0=disable, 1=enable the Timer feature */
+   #define ENABLE_TIME_SYS_TASKS          1  /* Used to 0=disable, 1=enable the System Time feature */
+   // TODO: RA6E1 Enable HMC tasks once HMC module is in place
+   #define ENABLE_HMC_TASKS               0  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
    #define ENABLE_PAR_TASKS               1  /* Used to 0=disable, 1=enable the Partition feature */
    #define ENABLE_PWR_TASKS               0  /* Used to 0=disable, 1=enable the Power feature */         /* TODO: RA6E1: Enable */
    #define ENABLE_DFW_TASKS               0  /* Used to 0=disable, 1=enable the DFW feature */           /* TODO: RA6E1: Enable */

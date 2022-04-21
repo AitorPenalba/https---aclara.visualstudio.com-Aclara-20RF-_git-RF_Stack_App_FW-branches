@@ -1209,6 +1209,72 @@
                 </file>
             </group>
             <group>
+                <name>NET</name>
+                <group>
+                    <name>IP</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\IP\STACK.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\IP\STACK.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\IP\STACK_Protocol.h</name>
+                    </file>
+                </group>
+                <group>
+                    <name>MAC</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameManagement.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameManagement.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_PacketManagement.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_PacketManagement.h</name>
+                    </file>
+                </group>
+                <group>
+                    <name>PHY</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\PHY.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\PHY.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\PHY_Protocol.h</name>
+                    </file>
+                </group>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\indication.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\indication.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\SM.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\SM.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\smtd_config.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\smtd_config.h</name>
+                </file>
+            </group>
+            <group>
                 <name>OS_AL_FreeRTOS</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Event.c</name>
@@ -1334,6 +1400,18 @@
                     <name>$PROJ_DIR$\..\..\Common\crc_custom.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\pack.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\pack.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\rand.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\rand.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\time_util.c</name>
                 </file>
                 <file>
@@ -1346,6 +1424,18 @@
                     <name>$PROJ_DIR$\..\..\Common\timer_util.h</name>
                 </file>
             </group>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\ALRM_Handler.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\ALRM_Handler.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\BUF_MemoryBuffers.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\BUF_MemoryBuffers.h</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\buffer.c</name>
             </file>
@@ -1365,10 +1455,28 @@
                 <name>$PROJ_DIR$\..\..\Common\DBG_SerialDebug.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\Common\eng_res.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\eng_res.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\EVL_event_log.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\EVL_event_log.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\Common\file_io.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\file_io.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
@@ -1454,6 +1562,15 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\user_settings.h</name>
                 </file>
             </group>
+            <file>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.c</name>
             </file>

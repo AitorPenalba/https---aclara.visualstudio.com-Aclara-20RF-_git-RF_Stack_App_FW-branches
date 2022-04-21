@@ -103,7 +103,7 @@ static exeTable_t powerDownTbl[] =
 #if 0 /* TODO: RA6: Add later */
    ADC_ShutDown,
 #else
-   NULL
+   NULL,
 #endif
 #if ( ENABLE_HMC_TASKS == 1 )
    HMC_APP_TaskPowerDown   /* Shut down the HMC application */

@@ -238,10 +238,11 @@ returnStatus_t SM_init( void )
  Returns: none
 
 ***********************************************************************************************************************/
-void SM_Task( uint32_t Arg0 )
+void SM_Task( taskParameter )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    (void)   Arg0;
-
+#endif
    INFO_printf("SM_Task starting...");
    for (;;)
    {

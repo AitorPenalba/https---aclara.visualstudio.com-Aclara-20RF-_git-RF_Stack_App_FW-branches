@@ -1237,7 +1237,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #ifndef __BOOTLOADER
       /* create start and end struct to maintain elapsed time during busy loop */
       OS_TICK_Struct startTime, endTime;
-      OS_TICK_Get_ElapsedTicks(&startTime);
+      OS_TICK_Get_CurrentElapsedTicks(&startTime);
       endTime = startTime;
 
       /* Calculate sleep time to be 20 percent of busy time, we don't want to sleep entire busyTime */
@@ -1257,10 +1257,10 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
          }
 
          /* Get current Ticktime and put the task to sleep 20 percent of busyTime */
-         OS_TICK_Get_ElapsedTicks ( &TickTime );
+         OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
          OS_TICK_Sleep ( &TickTime, sleepTime );
 
-         OS_TICK_Get_ElapsedTicks(&endTime); /* update endtime to the latest ticktime */
+         OS_TICK_Get_CurrentElapsedTicks(&endTime); /* update endtime to the latest ticktime */
 #endif   /* BOOTLOADER  */
 #if ( MCU_SELECTED == NXP_K24 )
          (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus) ); /* check nvStatus for busy */

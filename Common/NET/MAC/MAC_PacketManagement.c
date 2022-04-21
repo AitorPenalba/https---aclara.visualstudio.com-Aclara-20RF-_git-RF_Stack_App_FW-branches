@@ -67,7 +67,7 @@ static MacPacketTracking_s CurrentPacketTracking;
 
 /* When messages to transmit are coming in faster than the Radio can send them
    out (typically head end generated), this queue is where messages buffer up. */
-static OS_QUEUE_Obj MAC_PacketTxQueue;
+static OS_List_Obj MAC_PacketTxQueue;
 static BUF_Obj MAC_PacketTxBufObj;
 
 #if ( DCU == 1 )
@@ -100,7 +100,7 @@ returnStatus_t MAC_PacketManag_init ( void )
    returnStatus_t RetVal = eSUCCESS;
 /* End Local Variables */
 
-   if ( !OS_QUEUE_Create(&MAC_PacketTxQueue) )
+   if ( !OS_LINKEDLIST_Create(&MAC_PacketTxQueue) )
    {
       RetVal = eFAILURE;
    } /* end if() */
@@ -137,7 +137,7 @@ bool MAC_PacketManag_IsTxMessagePending(MacPacket_s **PacketData)
 {
    MacPacket_s *pPacketData;
 
-   pPacketData = OS_QUEUE_Head ( &MAC_PacketTxQueue );
+   pPacketData = OS_LINKEDLIST_Head ( &MAC_PacketTxQueue );
 
    if ( NULL != pPacketData )
    {
@@ -166,13 +166,13 @@ bool MAC_PacketManag_Purge (uint16_t handle )
    int i;
    uint16_t numElements;
    MAC_DataReq_t *macRequest;
-   numElements = OS_QUEUE_NumElements ( &MAC_PacketTxQueue );
+   numElements = OS_LINKEDLIST_NumElements ( &MAC_PacketTxQueue );
 
    INFO_printf("numElements = %d:",  numElements);
 
    if ( numElements > 0 )
    {
-      PacketData = OS_QUEUE_Head ( &MAC_PacketTxQueue );
+      PacketData = OS_LINKEDLIST_Head ( &MAC_PacketTxQueue );
       for ( i=0; i<numElements; i++ )
       {
          macRequest = MAC_GetDataReqFromBuffer( (buffer_t*)(PacketData->memToFree) );
@@ -180,14 +180,14 @@ bool MAC_PacketManag_Purge (uint16_t handle )
          INFO_printf("handle = %d", macRequest->handle);
          if(macRequest->handle == handle)
          {
-            OS_QUEUE_Remove ( &MAC_PacketTxQueue, PacketData );
+            OS_LINKEDLIST_Remove ( &MAC_PacketTxQueue, PacketData );
             if ( BUF_Put(&MAC_PacketTxBufObj, PacketData) != BUF_ERR_NONE )
             {
                DBG_logPrintf('E',"BUF_PUT failed" );
             }
             return (bool)true;
          }
-         PacketData = OS_QUEUE_Next ( &MAC_PacketTxQueue, PacketData );
+         PacketData = OS_LINKEDLIST_Next ( &MAC_PacketTxQueue, PacketData );
       }
    }
    return (bool)false;
@@ -209,21 +209,21 @@ bool MAC_PacketManag_Flush ( void )
    MacPacket_s *PacketData;
    int i;
    uint16_t numElements;
-   numElements = OS_QUEUE_NumElements ( &MAC_PacketTxQueue );
+   numElements = OS_LINKEDLIST_NumElements ( &MAC_PacketTxQueue );
    INFO_printf("numElements = %d:",  numElements);
 
    if ( numElements > 0 )
    {
-      PacketData = OS_QUEUE_Head ( &MAC_PacketTxQueue );
+      PacketData = OS_LINKEDLIST_Head ( &MAC_PacketTxQueue );
       for ( i=0; i<numElements; i++ )
       {
          INFO_printf("handle = %d", PacketData->handle);
-         OS_QUEUE_Remove ( &MAC_PacketTxQueue, PacketData );
+         OS_LINKEDLIST_Remove ( &MAC_PacketTxQueue, PacketData );
          if ( BUF_Put(&MAC_PacketTxBufObj, PacketData) != BUF_ERR_NONE )
          {
             DBG_logPrintf('E',"BUF_PUT failed" );
          }
-         PacketData = OS_QUEUE_Next ( &MAC_PacketTxQueue, PacketData );
+         PacketData = OS_LINKEDLIST_Next ( &MAC_PacketTxQueue, PacketData );
       }
    }
    return (bool)true;
@@ -249,7 +249,7 @@ MacPacket_s *MAC_PacketManag_GetNextTxMsg ( void )
    MAC_DataReq_t *macRequest;
    static uint16_t maxTxPayload = PHY_DEFAULT_TX_PAYLOAD; // Use a static variable because we want to avoid changing the segment size in the middle of segmenting a frame.
 
-   PacketData = OS_QUEUE_Head ( &MAC_PacketTxQueue );
+   PacketData = OS_LINKEDLIST_Head ( &MAC_PacketTxQueue );
    if ( NULL != PacketData )
    {
       macRequest = MAC_GetDataReqFromBuffer(PacketData->memToFree);
@@ -394,7 +394,7 @@ void MAC_PacketManag_Acknowledge ( uint8_t seqNum, MAC_DATA_STATUS_e status )
    uint8_t i;
    MAC_DataReq_t *macRequest;
 
-   PacketData = OS_QUEUE_Head ( &MAC_PacketTxQueue );
+   PacketData = OS_LINKEDLIST_Head ( &MAC_PacketTxQueue );
    if ( NULL != PacketData )
    {
       macRequest = MAC_GetDataReqFromBuffer( (buffer_t*)(PacketData->memToFree) );
@@ -488,7 +488,7 @@ void MAC_PacketManag_Acknowledge ( uint8_t seqNum, MAC_DATA_STATUS_e status )
                   }
 
                   /* free the packet from tx buffer */
-                  OS_QUEUE_Remove ( &MAC_PacketTxQueue, PacketData );
+                  OS_LINKEDLIST_Remove ( &MAC_PacketTxQueue, PacketData );
                   if ( BUF_Put(&MAC_PacketTxBufObj, PacketData) != BUF_ERR_NONE )
                   {
                      DBG_logPrintf('E',"BUF_PUT failed" );
@@ -590,18 +590,18 @@ static bool PrioritizeAndInsert( MacPacket_s *packet )
 
    newMacRequest = MAC_GetDataReqFromBuffer( (buffer_t*)(packet->memToFree) );
 
-   NumElements = OS_QUEUE_NumElements ( &MAC_PacketTxQueue );
+   NumElements = OS_LINKEDLIST_NumElements ( &MAC_PacketTxQueue );
    if ( 0 == NumElements )
    {
       /* no existing elements in queue to prioritize against */
-      OS_QUEUE_Enqueue(&MAC_PacketTxQueue, packet); // Function will not return if it fails
+      OS_LINKEDLIST_Enqueue(&MAC_PacketTxQueue, packet); // Function will not return if it fails
    }
    else
    {
       if ( NumElements == MAX_TX_PACKET_BUFFERS )
       {
          /* queue is full, see if an existing element is both droppable & lower priority than the new element */
-         QosSortingPacket = OS_QUEUE_Head ( &MAC_PacketTxQueue );
+         QosSortingPacket = OS_LINKEDLIST_Head ( &MAC_PacketTxQueue );
          TrackPointPacket = NULL;
          /* find the lowest priority packet that is droppable and drop it */
          for ( i=0; i<NumElements; i++ )
@@ -614,7 +614,7 @@ static bool PrioritizeAndInsert( MacPacket_s *packet )
                /* we found a droppable element, but keep searching in case there is an even lower priority candidate */
                TrackPointPacket = QosSortingPacket;
             }
-            QosSortingPacket = OS_QUEUE_Next( &MAC_PacketTxQueue, QosSortingPacket );
+            QosSortingPacket = OS_LINKEDLIST_Next( &MAC_PacketTxQueue, QosSortingPacket );
          }
          if (TrackPointPacket == NULL)
          {
@@ -624,49 +624,49 @@ static bool PrioritizeAndInsert( MacPacket_s *packet )
          }
          else
          {
-            OS_QUEUE_Remove( &MAC_PacketTxQueue, TrackPointPacket );
+            OS_LINKEDLIST_Remove( &MAC_PacketTxQueue, TrackPointPacket );
          }
       }
 
       if (returnVal)
       {
          /* there is space in the queue, insert this element based on priority */
-         QosSortingPacket = OS_QUEUE_Head ( &MAC_PacketTxQueue );
+         QosSortingPacket = OS_LINKEDLIST_Head ( &MAC_PacketTxQueue );
          sortingMacRequest = MAC_GetDataReqFromBuffer( (buffer_t*)(QosSortingPacket->memToFree) );
          if ( (sortingMacRequest->priority < newMacRequest->priority) && (!QosSortingPacket->txInProgress ) )
          {
             /* the first element is lower priority than the new element, add it to the begining */
-            if ( !OS_QUEUE_Insert( &MAC_PacketTxQueue, NULL, packet ) )
+            if ( !OS_LINKEDLIST_Insert( &MAC_PacketTxQueue, NULL, packet ) )
             {
                returnVal = (bool)false;
-               DBG_logPrintf('E',"OS_QUEUE_Insert(MAC_PacketTxQueue) failed" );
+               DBG_logPrintf('E',"OS_LINKEDLIST_Insert(MAC_PacketTxQueue) failed" );
             }
          }
          else
          {
             /* First element is higher priority than new element or is already transmitting, so start from there */
             TrackPointPacket = QosSortingPacket;
-            QosSortingPacket = OS_QUEUE_Next( &MAC_PacketTxQueue, QosSortingPacket );
+            QosSortingPacket = OS_LINKEDLIST_Next( &MAC_PacketTxQueue, QosSortingPacket );
             for ( i=1; i<NumElements; i++ )
             {
                sortingMacRequest = MAC_GetDataReqFromBuffer( (buffer_t*)(QosSortingPacket->memToFree) );
                if (sortingMacRequest->priority < newMacRequest->priority)
                {
                   /* TrackPointPacket points to the previous element, insert after that element */
-                  if ( !OS_QUEUE_Insert( &MAC_PacketTxQueue, TrackPointPacket, packet ) )
+                  if ( !OS_LINKEDLIST_Insert( &MAC_PacketTxQueue, TrackPointPacket, packet ) )
                   {
                      returnVal = (bool)false;
-                     DBG_logPrintf('E',"OS_QUEUE_Insert(MAC_PacketTxQueue) failed" );
+                     DBG_logPrintf('E',"OS_LINKEDLIST_Insert(MAC_PacketTxQueue) failed" );
                   }
                   break;
                }
                TrackPointPacket = QosSortingPacket;
-               QosSortingPacket = OS_QUEUE_Next( &MAC_PacketTxQueue, QosSortingPacket );
+               QosSortingPacket = OS_LINKEDLIST_Next( &MAC_PacketTxQueue, QosSortingPacket );
             }
             if ( NULL == QosSortingPacket )
             {
                /* the new element is the lowest priority packet, add to the end */
-               (void)OS_QUEUE_Insert( &MAC_PacketTxQueue, TrackPointPacket, packet );
+               (void)OS_LINKEDLIST_Insert( &MAC_PacketTxQueue, TrackPointPacket, packet );
             }
          }
       }

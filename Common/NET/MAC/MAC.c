@@ -668,8 +668,10 @@ void MAC_RestoreConfig_From_BkupRAM()
                                           sizeof( MacAddress_ ), pSecurePart );
    }
 
+#if 0 // TODO: RA6E1 - lastgasp
    // Get the handle to the location where the data was saved
    pMacConfig = PWRLG_MacConfigHandle();
+#endif
 
    // BAH - This is here until this is being used!!!
    if( pMacConfig )
@@ -994,7 +996,11 @@ returnStatus_t MAC_init ( void )
       FileStatus_t fileStatus;
       uint8_t i;
 #if ( EP == 1 )
+#if 0 // TODO: RA6E1 - lastgasp
       if(PWRLG_LastGasp() == false)
+#else // TODO: RA6E1 - lastgasp
+      if ( 1 )
+#endif
 #endif
       {  // Normal Mode
          for( i=0; i < (sizeof(Files)/sizeof(*(Files))); i++ )
@@ -1116,7 +1122,7 @@ Arguments: confType - Confirmation type
 
 Returns: none
 ***********************************************************************************************************************/
-static void ConfigurePHYTimeout( PHY_CONF_TYPE_t confType, _mqx_uint timeout )
+static void ConfigurePHYTimeout( PHY_CONF_TYPE_t confType, uint32_t timeout )
 {
    phy.confirmPending = (bool)true;
    phy.pendingConfirmType = confType;
@@ -1161,7 +1167,12 @@ static void MAC_PHY_CheckForFailure( void )
    bool Overflow;
 
    // Check if we have received a data request
-   if ( (DataReqTime.TICKS[0] != 0) || (DataReqTime.TICKS[1] != 0) ) {
+#if ( MCU_SELECTED == NXP_K24 )
+   if ( (DataReqTime.TICKS[0] != 0) || (DataReqTime.TICKS[1] != 0) )
+#elif ( MCU_SELECTED == RA6E1 )
+   if ( ( DataReqTime.tickCount != 0 ) || ( DataReqTime.xNumOfOverflows != 0 ) )
+#endif
+   {
       // Check if PHY as been accessed recently
       _time_get_elapsed_ticks(&time);
 
@@ -5353,7 +5364,12 @@ static bool Process_DataReq( buffer_t *pBuf )
             // We want to track this event and use it as part of a watchdog to make sure that the PHY did its job.
 
             // Update time if it is empty
-            if ( (DataReqTime.TICKS[0] == 0) && (DataReqTime.TICKS[1] == 0) ){
+#if ( MCU_SELECTED == NXP_K24 )
+            if ( (DataReqTime.TICKS[0] == 0) && (DataReqTime.TICKS[1] == 0) )
+#elif ( MCU_SELECTED == RA6E1 )
+            if ( ( DataReqTime.tickCount == 0 ) && (DataReqTime.xNumOfOverflows == 0) )
+#endif
+            {
                _time_get_elapsed_ticks(&DataReqTime);
             }
             return false;

@@ -238,7 +238,7 @@ EventAction_e EVL_LogEvent( uint8_t priority, const EventData_s *eventData,
 /******************************************************************************
  * Handles transmitting high priority alarms with time diversity.
  *****************************************************************************/
-void EVL_AlarmHandlerTask ( uint32_t Arg0 );
+void EVL_AlarmHandlerTask ( taskParameter );
 
 /******************************************************************************
  * Initializes the Event Log data structers.

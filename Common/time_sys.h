@@ -28,8 +28,8 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #include "project.h"
-#if 0 // TODO: RA6E1 - Support to DST and mac modules - Porting for Systick timer
 #include "HEEP_util.h"
+#if 0 // TODO: RA6E1 - Support to DST and mac modules - Porting for Systick timer
 #if ( EP == 1 )
 #include "buffer.h"
 #include "MAC_Protocol.h"
@@ -150,10 +150,8 @@ typedef struct
 
 typedef struct
 {  //Only one of the handles below should be valid.
-#if 0 // TODO: RA6E1 - Queue handling in FreeRTOS
    OS_QUEUE_Handle pQueueHandle;  /* Queue handle, if not NULL, send message */
    OS_MSGQ_Handle  pMQueueHandle; /* Message Queue handle, if not NULL, send message */
-#endif
    uint32_t ulPeriod;             /* Period */
    uint32_t ulOffset;             /* Offset or local shift time in system ticks */
    uint8_t ucAlarmId;             /* Alarm Id */
@@ -217,9 +215,7 @@ returnStatus_t TIME_SYS_GetPeriodicAlarm( tTimeSysPerAlarm *pData, uint8_t alarm
 returnStatus_t TIME_SYS_AddPerAlarm(tTimeSysPerAlarm *pData);
 returnStatus_t TIME_SYS_DeleteAlarm(uint8_t alarmId);
 
-#if 0 // TODO: RA6E1 Support OR_PM functionalities - Support only to Systick basic functionalities
 returnStatus_t TIME_SYS_OR_PM_Handler(enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr);
-#endif
 
 uint8_t TIME_SYS_TimeState(void);
 void    TIME_SYS_SetTimeState(uint8_t state);

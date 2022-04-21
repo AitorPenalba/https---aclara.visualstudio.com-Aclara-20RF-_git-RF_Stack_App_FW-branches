@@ -69,7 +69,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define APP_MSG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define APP_MSG_NUM_MSGQ_ITEMS 0 
+#define APP_MSG_NUM_MSGQ_ITEMS 0
 #endif
 
 
@@ -457,11 +457,19 @@ void APP_MSG_HandlerTask ( uint32_t Arg0 )
                // Special case for /tn/tw/which mp must be through MTLS port if MULTICAST and DTLS port if Unicast
                if ( tn_tw_mp == ( enum_MessageResource )heepHdr.Resource )
                {
-                  if ( ( ( UDP_MTLS_PORT == port ) && ( eMULTICAST    == indication->dstAddr.addr_type ) ) ||
+#if ( USE_MTLS == 1 )
+                  if ( ( ( UDP_MTLS_PORT == port ) && ( eMULTICAST    == indication->dstAddr.addr_type ) )
+                  {
+                     pass = ( bool )true;
+                  }
+#endif
+#if ( USE_DTLS == 1 )
+                  if ( ( !pass ) &&
                        ( ( UDP_DTLS_PORT == port ) && ( eEXTENSION_ID == indication->dstAddr.addr_type ) ) )
                   {
                      pass = ( bool )true;
                   }
+#endif
                }
                else
                {
@@ -484,7 +492,9 @@ void APP_MSG_HandlerTask ( uint32_t Arg0 )
                      {  //TODO: Can the Resource check be removed since all of the allowed ones must come through MTLS port?
                         if ( tn_tw_mp == ( enum_MessageResource )heepHdr.Resource )
                         {
+#if ( USE_MTLS == 1 )
                            if ( UDP_MTLS_PORT == port )
+#endif
                            {
                               pass = ( bool )true; // resource is MUST  come through the MTLS port
                               break;

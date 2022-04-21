@@ -605,7 +605,7 @@ Arguments: Arg0 - Not used, but required here because this is a task
 
 Returns: none
 ***********************************************************************************************************************/
-void NWK_Task ( uint32_t Arg0 )
+void NWK_Task ( taskParameter )
 {
    buffer_t *pBuf;
 
@@ -1700,8 +1700,10 @@ bool NWK_decode_frame ( uint8_t *p, uint16_t num_bytes, IP_Frame_t *pf, NWK_COUN
                   pf->data = &p[ (bitNo/8) ];
                   if (  ( pf->dst_port == (uint8_t)UDP_NONDTLS_PORT ) || /* Unsecured msg -> pass to app layer to determine
                                                                             whether to accept */
-                        ( pf->dst_port == (uint8_t)UDP_DTLS_PORT )    || /* Secured - pass to dtls handler   */
-                        ( pf->dst_port == (uint8_t)UDP_MTLS_PORT )       /* mtls - pass to mtls handler   */
+                        ( pf->dst_port == (uint8_t)UDP_DTLS_PORT )       /* Secured - pass to dtls handler   */
+#if (USE_MTLS == 1)
+                        || ( pf->dst_port == (uint8_t)UDP_MTLS_PORT )    /* mtls - pass to mtls handler   */
+#endif
 #if (USE_IPTUNNEL == 1)
                         || (pf->dst_port == (uint8_t)UDP_IP_NONDTLS_PORT)  /* unsecured - pass to IP handler   */
                         || (pf->dst_port == (uint8_t)UDP_IP_DTLS_PORT) /* Secured - pass to dtls handler   */
@@ -1969,9 +1971,12 @@ static NWK_SET_STATUS_e NWK_Attribute_Set( NWK_SetReq_t const *pSetReq)
    NWK_SET_STATUS_e eStatus;
 
    // This function should only be called inside the NWK task
-   if ( _task_get_id() != _task_get_id_from_name( "NWK" ) ) {
+#if 0 // TODO: RA6E1 task get id and from name function
+   if ( _task_get_id() != _task_get_id_from_name( "NWK" ) )
+   {
      ERR_printf("WARNING: NWK_Attribute_Set should only be called inside the NWK task. Please use NWK_SetRequest instead.");
    }
+#endif
 
    switch (pSetReq->eAttribute)
    {
@@ -2048,9 +2053,12 @@ static NWK_GET_STATUS_e NWK_Attribute_Get( NWK_GetReq_t const *pGetReq, NWK_ATTR
    NWK_GET_STATUS_e eStatus = eNWK_GET_SUCCESS;
 
    // This function should only be called inside the NWK task
-   if ( _task_get_id() != _task_get_id_from_name( "NWK" ) ) {
+#if 0 // TODO: RA6E1 task get id and from name function
+   if ( _task_get_id() != _task_get_id_from_name( "NWK" ) )
+   {
      ERR_printf("WARNING: NWK_Attribute_Get should only be called inside the NWK task. Please use NWK_GetRequest instead.");
    }
+#endif
 
    switch (pGetReq->eAttribute)
    {

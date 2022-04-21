@@ -64,9 +64,7 @@ typedef uint64_t  sysTimeCombined_t;                          /*!< Time format i
 /* FUNCTION PROTOTYPES */
 uint32_t TIME_UTIL_GetYear( uint32_t daysSinceEpoch );
 uint8_t TIME_UTIL_GetDaysInMonth( uint8_t month, uint32_t year );
-#if 0 // TODO: RA6E1 - Support OR_PM functionalities - Support only to Systick basic functionalities
 returnStatus_t TIME_UTIL_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
-#endif
 int32_t TIME_UTIL_SecondsToDateStr( char* buffer, char* msg, TIMESTAMP_t t );
 
 /* ************************************** */

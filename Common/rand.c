@@ -25,10 +25,12 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include <mqx.h>
 #include <math.h>
 #include <stdlib.h>
 #include "project.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include <mqx.h>
+#endif
 #include "rand.h"
 
 /* ****************************************************************************************************************** */
@@ -257,6 +259,8 @@ int32_t aclara_rand(void)
       utemp3 = *(uint32_t*)&temp3;  /*lint !e740 just want bit pattern from temp3   */
 
       aclara_srand(((utemp1 & 0xFFFF) << 16) | ((utemp2 & 0xFF) << 8) | (utemp3 & 0xFF));
+#elif ( MCU_SELECTED == RA6E1 )
+      // TODO: RA6E1 - Get temperature from Radio
 #else
 #error "Unsupported TARGET HARDWARE"
 #endif

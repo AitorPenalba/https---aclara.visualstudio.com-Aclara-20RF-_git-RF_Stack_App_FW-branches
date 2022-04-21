@@ -64,8 +64,8 @@
 #else
 #define RX_BUF_EXPIRE_NUM_MSGQ_ITEMS  0
 #endif
-   
-   
+
+
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -103,7 +103,7 @@ typedef struct
    uint8_t srcAddr[MAC_ADDRESS_SIZE];
    uint8_t dstAddrMode;
    uint8_t frameType;
-   OS_QUEUE_Obj frameQueue;
+   OS_List_Obj frameQueue;
    uint16_t channel;
    MAC_RXBUFF_STATE_e state;
    uint32_t sync_time; // This is used by set time to measure the delta time
@@ -133,8 +133,8 @@ static struct{
 /* CONSTANTS */
 
 /* FILE VARIABLE DEFINITIONS */
-static OS_QUEUE_Obj MAC_FrameTxQueueHandle;
-static OS_QUEUE_Obj RxAssemblyTimeoutQueue;
+static OS_List_Obj MAC_FrameTxQueueHandle;
+static OS_List_Obj RxAssemblyTimeoutQueue;
 static OS_MSGQ_Obj RxBufferExpiredQueue;
 static BUF_Obj MAC_FrameTxBufObj;
 static BUF_Obj MAC_FrameRxBufObj;

@@ -106,7 +106,7 @@
 //
 //#include "STACK_Protocol.h"
 //#include "STACK.h"
-//#include "SM.h"
+#include "SM.h"
 //#include "PHY_Protocol.h"
 //#include "PHY.h"
 //#include "stack_check.h"
@@ -349,10 +349,10 @@ const OS_TASK_Template_t  Task_template_list[] =
    //{ eSD_SYNC_PAYL_DEMOD1_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod1, DEFAULT_ATTR|RFTEST_MODE_ATTR, 1, 0 }, // |  ID's 0-2, run sequentially by the preprocessor
    //{ eSD_SYNC_PAYL_DEMOD2_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod2, DEFAULT_ATTR|RFTEST_MODE_ATTR, 2, 0 }, // V  The preamble detector is always 0, regardles of what is passed
 
-   //{ eSM_TSK_IDX,               SM_Task,                      1000,  20, (char *)pTskName_Sm,     DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eSM_TSK_IDX,               SM_Task,                      1000,  20, (char *)pTskName_Sm,     DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    //{ ePHY_TSK_IDX,              PHY_Task,                     2100,  21, (char *)pTskName_Phy,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    //{ eMAC_TSK_IDX,              MAC_Task,                     1500,  22, (char *)pTskName_Mac,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-   //{ eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_HMC_TASKS
    //{ eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
@@ -416,7 +416,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 #if ENABLE_FIO_TASKS
    //{ eFIO_TSK_IDX,              FIO_Task,                     1000,  38, (char *)pTskName_Fio,    DEFAULT_ATTR, 0, 0 },
 #endif
-   //{ eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
+   { eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
 
    /* should be the lowest priority tasks */
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed

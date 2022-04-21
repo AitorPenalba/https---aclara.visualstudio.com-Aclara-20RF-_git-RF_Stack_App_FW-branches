@@ -57,7 +57,6 @@
 #include "timer_util.h"
 #undef  TMR_GLOBAL
 
-#if 0 // TODO: RA6 [name_Balaji]:  Add timer_util support to RA6E1
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="Constant Definitions">
 /* ****************************************************************************************************************** */
@@ -72,12 +71,13 @@
 // <editor-fold defaultstate="collapsed" desc="Type Definitions">
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
 typedef struct my_isr_struct
 {
    void *         OLD_ISR_DATA;
    void           (_CODE_PTR_ OLD_ISR)(void *);
 } MY_ISR_STRUCT, *MY_ISR_STRUCT_PTR;
-
+#endif
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="File Static Variables">
 /* ****************************************************************************************************************** */
@@ -295,6 +295,7 @@ returnStatus_t TMR_HandlerInit( void )
 void TMR_HandlerTask( uint32_t Arg0 )
 {
    timer_t           *pTimer;          /* Pointer to timer data structure */
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
    MY_ISR_STRUCT_PTR isr_ptr;          /* */
 
    /* The following code was taken from MQX example code for adding our timer code to the RTOS tick interrupt.  So, the
@@ -303,6 +304,7 @@ void TMR_HandlerTask( uint32_t Arg0 )
    isr_ptr->OLD_ISR_DATA = _int_get_isr_data(INT_SysTick);              /*lint !e641  This code is from an example */
    isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                   /*lint !e641  This code is from an example */
    _int_install_isr(INT_SysTick, TMR_vApplicationTickHook, isr_ptr);    /*lint !e641 !e64 !e534 code is from an example */
+#endif // TODO: RA6E1 - TMR_vApplicationTickHook in RA6E1
    /* End the example code! */
 
    for ( ; ; ) /* RTOS Task, keep running forever */
@@ -745,20 +747,21 @@ void TMR_GetMillisecondCntr( uint64_t *ulMSCntr )
  ******************************************************************************************************************/
 STATIC void TMR_vApplicationTickHook( void *user_isr_ptr )
 {
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
    MY_ISR_STRUCT_PTR  isr_ptr;   /* */
 
    /* This code is taken from the MQX example isr.c code to use the system tick to tick our own module. */
    isr_ptr = (MY_ISR_STRUCT_PTR)user_isr_ptr;
-
+#endif
    /* RTOS tick, signal the timer task */
    if ( _tmrUtilSemCreated == true )
    {
       OS_SEM_Post(&_tmrUtilSem);
    }
 
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
    (*isr_ptr->OLD_ISR)(isr_ptr->OLD_ISR_DATA);     /* Chain to the previous notifier - This will call the RTOS tick. */
-
+#endif
 }
 // </editor-fold>
 /*lint +e454 +e456 The mutex is handled properly. */
-#endif

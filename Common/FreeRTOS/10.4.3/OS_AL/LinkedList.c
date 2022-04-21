@@ -20,7 +20,7 @@
  *****************************************************************************/
 
 /* INCLUDE FILES */
-#include "Project.h"
+#include "project.h"
 
 
 /* CONSTANTS */
@@ -53,15 +53,15 @@ static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle
   bool retVal = (bool)false;
   uint32_t  i, listSize; //loop variables
   OS_Linked_List_Element_Handle tmp;
-  
+
   if( list == NULL || listElement == NULL )
   {
     return retVal;
   }
-  
+
   listSize = list->size;
   tmp = list->head.NEXT;
-  
+
   for(i = 0; ( (i < listSize) && (tmp->NEXT != NULL)) ; i++ )
   {
     if( tmp == listElement )
@@ -70,7 +70,7 @@ static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle
     }
     tmp = tmp->NEXT;
   }
-        
+
   return retVal;
 }
 
@@ -84,7 +84,7 @@ static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle
  *
  * Returns: true: list object correctly intialized; false: invalid list object
  *
- * Notes: the head and tail of a list object are dummy elements, 
+ * Notes: the head and tail of a list object are dummy elements,
  *       the head->NEXT awlays points to the first element in the queue
  *       the tail->PREV always points to the last element in the queue
  *
@@ -99,14 +99,14 @@ bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
   {
     return (false);     /* XXX KEL Add error logging */
   }
-  
+
   listHandle->head.PREV = NULL;
   listHandle->head.NEXT = ((OS_Linked_List_Element_Handle)&(listHandle->tail));
   listHandle->tail.NEXT = NULL;
   listHandle->tail.PREV = ((OS_Linked_List_Element_Handle)&(listHandle->head));
   listHandle->size = 0;
   return (true);
-#endif 
+#endif
 //   OS_QUEUE_Obj *que_obj;
 //
 //
@@ -126,9 +126,9 @@ bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
 //  }
 //
 //   return (que_obj);
-//  
+//
 //  return (que_obj);
-  
+
 }
 
 
@@ -160,7 +160,7 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
   tail_handle->PREV->NEXT = (OS_Linked_List_Element_Handle)listElement;
   tail_handle->PREV = listElement;
   list->size++;
-  
+
 #endif
 //    if (ALERT (NULL == Queue) || ALERT (NULL == Elem)) {
 //       return;
@@ -179,7 +179,7 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
  *
  * Function name: OS_LINKEDLIST_Insert
  *
- * Purpose: Add an element in the middle of the list, in back of an 
+ * Purpose: Add an element in the middle of the list, in back of an
  *          existing element.
  *
  * Arguments: list, Pointer to an element already in the list, pointer to new element.
@@ -237,7 +237,7 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
 #if( RTOS_SELECTION == MQX_RTOS )
   OS_QUEUE_Remove(list, Elem);
 #elif( RTOS_SELECTION == FREE_RTOS )
-   if( NULL == listElement) 
+   if( NULL == listElement)
    {
       return;
    }
@@ -245,7 +245,7 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
    found = verifyListElement(list, (OS_Linked_List_Element_Handle) listElement);
    if( found )
    {
-     ((OS_Linked_List_Element *) listElement)->PREV->NEXT = ((OS_Linked_List_Element *) listElement)->NEXT; 
+     ((OS_Linked_List_Element *) listElement)->PREV->NEXT = ((OS_Linked_List_Element *) listElement)->NEXT;
      ((OS_Linked_List_Element *) listElement)->NEXT->PREV = ((OS_Linked_List_Element *) listElement)->PREV;
      list->size--;
      /*clear out the pointers for the removed element*/
@@ -278,7 +278,7 @@ void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement )
   if ( (NULL == list) ||  (NULL ==listElement) )
   {
     return (NULL);
-  } 
+  }
   else
   {
     return ((OS_Linked_List_Element *) listElement)->NEXT;
@@ -317,7 +317,7 @@ void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list )
   /*clear out the pointers for the removed element*/
   handle->NEXT = NULL;
   handle->PREV = NULL;
-  
+
   return ((void *) (handle));
 #endif
 }
@@ -344,7 +344,7 @@ uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list )
   if ( NULL == list) {
     return 0;
   }
-  
+
   return (uint16_t)(list->size);
 #endif
 }
@@ -392,7 +392,7 @@ void OS_LINKEDLIST_Test( void )
   OS_LINKEDLIST_Enqueue(handle, &data1);
   tmp = OS_LINKEDLIST_Head(handle);
   OS_LINKEDLIST_Enqueue(handle, &data3);
-  OS_LINKEDLIST_Insert(handle, &data1, &data2);  
+  OS_LINKEDLIST_Insert(handle, &data1, &data2);
   num = OS_LINKEDLIST_NumElements(handle);
   for( int i = 0; i< num ; i++)
   {
@@ -401,8 +401,8 @@ void OS_LINKEDLIST_Test( void )
   //tmp should point to the tail at this point
   tmp = OS_LINKEDLIST_Dequeue(handle);
   OS_LINKEDLIST_Remove(handle, &data2);
-  
-  
+
+
 }
 #endif
 
@@ -423,8 +423,8 @@ void OS_LINKEDLIST_Test( void )
 // *****************************************************************************/
 //void OS_QUEUE_Put (OS_LIST_Obj *Queue, void *Elem)
 //{
-//  
-//  
+//
+//
 //   struct sched_param old, new;
 //   int policy;
 //   OS_LIST_Obj *prev;
@@ -436,7 +436,7 @@ void OS_LINKEDLIST_Test( void )
 //
 //   prev = Queue->Prev;
 //
-//   if (pthread_getschedparam (pthread_self(), &policy, &old)) 
+//   if (pthread_getschedparam (pthread_self(), &policy, &old))
 //   {
 //    if (ALERT (EPERM == errno)) {
 //         return; /* XXX Return an error? */
@@ -445,8 +445,8 @@ void OS_LINKEDLIST_Test( void )
 //
 //   /* XXX BUMP priority to prevent priority inversion, this can be removed once glibc implments priority inheritence in locks */
 //   new.__sched_priority = TSK_MAXPRI+1;
-//   
-//   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &new)) 
+//
+//   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &new))
 //   {
 //    if (ALERT (EPERM == errno)) {
 //         return; /* XXX Return an error? */
@@ -463,8 +463,8 @@ void OS_LINKEDLIST_Test( void )
 //   prev->Next = (OS_LIST_Obj *) Elem;
 //   Queue->Prev = (OS_LIST_Obj *) Elem ;
 ////   OS_LOCK_Unlock (Queue->Lock);
-//  
-//   if (pthread_setschedparam (pthread_self(), policy, &old)) 
+//
+//   if (pthread_setschedparam (pthread_self(), policy, &old))
 //   {
 //    if (ALERT (EPERM == errno)) {
 //         return; /* XXX Return an error? */
@@ -494,21 +494,21 @@ void OS_LINKEDLIST_Test( void )
 //   int policy;
 //   OS_LIST_Obj *elem;
 //   OS_LIST_Obj *next;
-//  
-//   
+//
+//
 //   if (ALERT (Queue == NULL) || ALERT (Queue->Next == NULL) ||
 //      ALERT (Queue->Next->Next == NULL) || ALERT (Queue->Lock == NULL)) {
 //      return NULL;
 //  }
-//   
+//
 //   elem = Queue->Next;
 //   next = elem->Next;
 //   Queue->Next = next;
 //   next->Prev = Queue;
 //
-//   if (pthread_getschedparam (pthread_self(), &policy, &old)) 
+//   if (pthread_getschedparam (pthread_self(), &policy, &old))
 //   {
-//      if (EPERM != errno) 
+//      if (EPERM != errno)
 //   perror("pthread_getschedparam"); /* XXX add error reporting */
 //      return NULL;
 //   }
@@ -516,20 +516,20 @@ void OS_LINKEDLIST_Test( void )
 //   /* XXX BUMP priority to prevent priority inversion, this can be removed once glibc implments priority inheritence in locks */
 //   new.__sched_priority = TSK_MAXPRI+1;
 //
-//   if (pthread_setschedparam (pthread_self (), SCHED_FIFO, &new)) 
+//   if (pthread_setschedparam (pthread_self (), SCHED_FIFO, &new))
 //   {
 //      if (EPERM != errno)
 //   perror ("pthread_setschedparam");
 //      return NULL;
 //   }
 //
-//   if (OS_LOCK_Lock (Queue->Lock, OS_WAIT_FOREVER)) 
+//   if (OS_LOCK_Lock (Queue->Lock, OS_WAIT_FOREVER))
 //   {
 //      Queue->Next = next;
 //      next->Prev = Queue;
 //      OS_LOCK_Unlock (Queue->Lock);
-//   } 
-//   else 
+//   }
+//   else
 //   {
 //      elem = NULL;
 //   }
@@ -542,4 +542,4 @@ void OS_LINKEDLIST_Test( void )
 //
 //   return (elem);
 //}
-    
+

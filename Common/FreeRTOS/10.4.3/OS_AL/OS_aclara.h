@@ -50,6 +50,10 @@
 /* #DEFINE DEFINITIONS */
 #define OS_WAIT_FOREVER 0xFFFFFFFF
 
+
+#define TRUE        ( bool ) 1
+#define FALSE       ( bool ) 0
+
 #define FIVE_MSEC   (5)
 #define TEN_MSEC    (10)
 #define FIFTY_MSEC  (50)
@@ -132,6 +136,12 @@
 #define OS_SEM_Pend_fromISR(SemHandle)                   OS_SEM_PEND_fromISR(SemHandle, __FILE__, __LINE__)
 #endif
 
+// Mapping HTONS and HTONL with Byte_Swap internal APIs
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+#define htonl(value)    htonx_FreeRTOS(value, 4)
+#define htons(value)    htonx_FreeRTOS(value, 2)
+#endif
+
 #if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 /* TYPE DEFINITIONS */
 typedef LWEVENT_STRUCT        OS_EVNT_Obj, *OS_EVNT_Handle;
@@ -139,6 +149,7 @@ typedef LWMSGQ_STRUCT         OS_MBOX_Handle;
 typedef MUTEX_STRUCT          OS_MUTEX_Obj, *OS_MUTEX_Handle;
 typedef QUEUE_STRUCT          OS_QUEUE_Obj, *OS_QUEUE_Handle;
 typedef LWSEM_STRUCT          OS_SEM_Obj, *OS_SEM_Handle;
+typedef QUEUE_STRUCT          OS_List_Obj, *OS_List_Handle;
 typedef MQX_TICK_STRUCT       OS_TICK_Struct;
 typedef _task_id              OS_TASK_id;
 typedef QUEUE_ELEMENT_STRUCT  OS_LINKED_LIST_STRUCT;
@@ -200,7 +211,7 @@ typedef EventGroupHandle_t    OS_EVNT_Obj,  *OS_EVNT_Handle;
 typedef struct OS_Linked_List_Element
 {
    struct OS_Linked_List_Element * NEXT; //match MQX memeber names QUEUE_ELEMENT_STRUCT
-   struct OS_Linked_List_Element * PREV;   
+   struct OS_Linked_List_Element * PREV;
 } OS_Linked_List_Element, *OS_Linked_List_Element_Handle;
 
 typedef OS_Linked_List_Element OS_LINKED_LIST_STRUCT;
@@ -223,7 +234,7 @@ typedef struct
   OS_Linked_List_Element  head;
   OS_Linked_List_Element  tail;
   uint32_t                size;
-   
+
 } OS_List_Obj, *OS_List_Handle;
 
 #define DEFAULT_NUM_QUEUE_ITEMS          10
@@ -381,12 +392,12 @@ void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
 uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle );
 
-bool OS_LINKEDLIST_Create (OS_List_Handle listHandle );
+bool OS_LINKEDLIST_Create ( OS_List_Handle listHandle );
 void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement);
 bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listElement );
 void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement );
-void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement );
-void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list );
+void *OS_LINKEDLIST_Next ( OS_List_Handle list, void *listElement );
+void *OS_LINKEDLIST_Dequeue  ( OS_List_Handle list );
 uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list );
 void *OS_LINKEDLIST_Head ( OS_List_Handle list );
 
@@ -405,6 +416,10 @@ void OS_SEM_Reset ( OS_SEM_Handle SemHandle );
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
 void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line );
 void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line );
+#endif
+
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+uint32_t htonx_FreeRTOS( uint32_t value, uint8_t numOfBytes );
 #endif
 
 #if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */

@@ -84,6 +84,28 @@ void Byte_Swap(uint8_t *sBSStringToConvert, uint8_t ucBSNumOfBytes)
       }
    }
 }
+
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+/******************************************************************************
+ *
+ * Function name: htonx_FreeRTOS
+ *
+ * Purpose: Swaps bytes in a string.  Uses internal Byte_Swap mechanism
+ *
+ * Arguments: uint32_t value, uint8_t numOfBytes
+ *
+ * Returns: uint32_t
+ *
+ *****************************************************************************/
+uint32_t htonx_FreeRTOS( uint32_t value, uint8_t numOfBytes )
+{
+   uint8_t *byteSwapVal = ( uint8_t * ) &value;
+   Byte_Swap( byteSwapVal, numOfBytes );
+   return value;
+}
+
+#endif
+
 /******************************************************************************
  *
  * Function name: Byte_Swap_Data_String()
