@@ -1320,7 +1320,7 @@ void OS_TASK_Summary ( bool safePrint )
 void OS_TASK_Create_STRT( void )
 {
 //   APP_PRINT("Create STRT");
-   if (pdPASS != xTaskCreate( STRT_StartupTask, pTskName_Strt, 512/4, (void *)0, 2, &taskHandleTable[eSTRT_TSK_IDX].taskHandle ))
+   if (pdPASS != xTaskCreate( STRT_StartupTask, pTskName_Strt, 2048/4, (void *)0, 2, &taskHandleTable[eSTRT_TSK_IDX].taskHandle ))
    {
 //      APP_ERR_PRINT("Unable to create STRT");
       /* TODO: Print Error */

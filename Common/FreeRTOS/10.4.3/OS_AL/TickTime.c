@@ -173,11 +173,19 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
    uint32_t diffTicksCount, diffHWTicks;
    if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
    {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
       diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
    }
    else
    {
-      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
       {
          isTimeValid = false;
          TimeDiff = 0;
@@ -201,7 +209,7 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
       {
          // Handle hw ticks overflow
          diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerMicrosec;
-         TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS * 1000 ) - diffHWTicks );
+         TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS * 1000 ) - diffHWTicks );
       }
    }
 #endif
@@ -241,11 +249,19 @@ uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK
    uint32_t diffTicksCount, diffHWTicks;
    if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
    {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
       diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
    }
    else
    {
-      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
       {
          isTimeValid = false;
          TimeDiff = 0;
@@ -269,7 +285,7 @@ uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK
       {
          // Handle hw ticks overflow
          diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerTenNanoSec; // Difference HW ticks per ten nano second
-         TimeDiff = ( uint32_t ) ( ( ( diffTicksCount * portTICK_RATE_MS * 1000 * 100 ) - diffHWTicks ) * 10 ); // Convert to once nano second
+         TimeDiff = ( uint32_t ) ( ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS * 1000 * 100 ) - diffHWTicks ) * 10 ); // Convert to once nano second
       }
    }
 #endif
@@ -308,11 +324,19 @@ uint32_t OS_TICK_Get_Diff_InMilliseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
    uint32_t diffTicksCount, diffHWTicks;
    if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
    {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
       diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
    }
    else
    {
-      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
       {
          isTimeValid = false;
          TimeDiff = 0;
@@ -336,7 +360,7 @@ uint32_t OS_TICK_Get_Diff_InMilliseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
       {
          // Handle hw ticks overflow
          diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerMillisec;
-         TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS ) - diffHWTicks );
+         TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS ) - diffHWTicks );
       }
    }
 #endif
@@ -371,15 +395,22 @@ uint32_t OS_TICK_Get_Diff_InSeconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Str
    } /* end if() */
 #elif ( RTOS_SELECTION == FREE_RTOS )
    bool isTimeValid = true;
-   uint32_t ticksPerSec;
    uint32_t diffTicksCount;
    if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
    {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
       diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
    }
    else
    {
-      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
       {
          isTimeValid = false;
          TimeDiff = 0;
@@ -390,7 +421,7 @@ uint32_t OS_TICK_Get_Diff_InSeconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Str
 
    if( isTimeValid )
    {
-      TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS ) / 1000 ); // Convert to sec
+      TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS ) / 1000 ); // Convert to sec
    }
 #endif
    return ( TimeDiff );
@@ -423,7 +454,35 @@ uint32_t OS_TICK_Get_Diff_InMinutes ( OS_TICK_Struct *PrevTickValue, OS_TICK_Str
       TimeDiff = 0;
    } /* end if() */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   TimeDiff = OS_TICK_Get_Diff_InSeconds( PrevTickValue, CurrTickValue ) / 60; // Convert to min
+   bool isTimeValid = true;
+   uint32_t diffTicksCount;
+   if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
+   {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
+   }
+   else
+   {
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = UINT32_MAX - PrevTickValue->tickCount + CurrTickValue->tickCount;
+   }
+
+   if( isTimeValid )
+   {
+      TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS ) / ( 1000 * 60 ) ); // Convert to min
+   }
 #endif
    return ( TimeDiff );
 }
@@ -455,7 +514,35 @@ uint32_t OS_TICK_Get_Diff_InHours ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struc
       TimeDiff = 0;
    } /* end if() */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   TimeDiff = OS_TICK_Get_Diff_InMinutes( PrevTickValue, CurrTickValue ) / 60; // Convert to hours
+   bool isTimeValid = true;
+   uint32_t diffTicksCount;
+   if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
+   {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
+   }
+   else
+   {
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = UINT32_MAX - PrevTickValue->tickCount + CurrTickValue->tickCount;
+   }
+
+   if( isTimeValid )
+   {
+      TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS ) / ( 1000 * 60 * 60 ) ); // Convert to hours
+   }
 #endif
    return ( TimeDiff );
 }
