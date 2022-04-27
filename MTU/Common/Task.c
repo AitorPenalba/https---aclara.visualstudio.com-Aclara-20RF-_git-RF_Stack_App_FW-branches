@@ -604,6 +604,7 @@ void OS_TASK_Create_All ( bool initSuccess )
                while(true) /*lint !e716  */
                {}  /* Todo:  We may wish to discuss the definition of LEDs.  Maybe we could add code here. */
             }
+            // TODO: RA6: DG: Move these lines to OS_Task_Create
 
 #if ( RTOS_SELECTION == MQX_RTOS )
             /* Set the exception handler of the task if still valid */

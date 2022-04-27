@@ -82,7 +82,7 @@
 #endif
 
 #if ( RTOS_SELECTION == FREE_RTOS )
-#define MQX_AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */
+#define MQX_AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */ // TODO: RA6: Update MQX_AUTO_START_TASK to be more generic. 
 
 #if OS_MIN_TASK_PRIORITY >= configMAX_PRIORITIES
 #error  Task minimum must be less than configMAX_PRIORITIES in FreeRTOSConfig.h

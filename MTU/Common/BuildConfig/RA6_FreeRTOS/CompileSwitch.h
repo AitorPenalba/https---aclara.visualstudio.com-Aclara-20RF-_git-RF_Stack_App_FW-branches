@@ -32,7 +32,7 @@
 
 // This is the standard build
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-   #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */
+   #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */            /* TODO: RA6E1: Enable */
    #define ENABLE_ID_TASKS                0  /* Used to 0=disable, 1=enable the Interval Data feature */    /* TODO: RA6E1: Enable */
    #define ENABLE_MFG_TASKS               1  /* Used to 0=disable, 1=enable the Mfg Port feature */
    #define ENABLE_TMR_TASKS               1  /* Used to 0=disable, 1=enable the Timer feature */
