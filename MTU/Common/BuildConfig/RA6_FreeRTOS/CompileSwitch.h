@@ -32,7 +32,7 @@
 
 // This is the standard build
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-   #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */            /* TODO: RA6E1: Enable */
+   #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */
    #define ENABLE_ID_TASKS                0  /* Used to 0=disable, 1=enable the Interval Data feature */    /* TODO: RA6E1: Enable */
    #define ENABLE_MFG_TASKS               1  /* Used to 0=disable, 1=enable the Mfg Port feature */
    #define ENABLE_TMR_TASKS               1  /* Used to 0=disable, 1=enable the Timer feature */
@@ -251,9 +251,9 @@
 #endif
 
 #if ( NEGOTIATE_HMC_COMM == 1)
-#define NEGOTIATE_HMC_BAUD             1     /* negotiate an alernative baud rate*/
-#define NEGOTIATE_HMC_PACKET_NUMBER    0     /* negotiate an alernative MAX packet number*/
-#define NEGOTIATE_HMC_PACKET_SIZE      0     /* negotiate an alernative MAX packet size*/
+#define NEGOTIATE_HMC_BAUD             1     /* negotiate an alternative baud rate*/
+#define NEGOTIATE_HMC_PACKET_NUMBER    0     /* negotiate an alternative MAX packet number*/
+#define NEGOTIATE_HMC_PACKET_SIZE      0     /* negotiate an alternative MAX packet size*/
 #endif
 /* ------------------------------------------------------------------------------------------------------------------ */
 //Enable Processor Random Number Generator if supported
@@ -301,7 +301,7 @@
 #define TM_QUEUE                          0
 #define TM_MSGQ                           0
 #define TM_EVENTS                         0
-#define TM_LINKED_LIST                    1
+#define TM_LINKED_LIST                    0
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */
@@ -319,7 +319,7 @@
 /* These are now part of normal build   */
 #define TM_DVR_EXT_FL_UNIT_TEST     /* Enabled - Run unit testing on external flash driver. */
 #define TM_PARTITION_TBL            /* Will validate the partition tables. */
-#define TM_PARTITION_USAGE          /* Enables printing of partition useage */
+#define TM_PARTITION_USAGE          /* Enables printing of partition usage */
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */

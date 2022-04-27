@@ -188,7 +188,7 @@
 // TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if (USE_DTLS == 1)
 #define MFG_logPrintf MFG_printf
-// TODO: RA6 [name_Balaji]: Need to be reevaluate for code effiency
+// TODO: RA6 [name_Balaji]: Need to be reevaluate for code efficiency
 #define MFG_printf(fmt, args...) \
 { \
    if ((_MfgPortState == DTLS_SERIAL_IO_e) && (DTLS_GetSessionState() == DTLS_SESSION_CONNECTED_e)) \
@@ -204,8 +204,9 @@
    } \
 }
 #else
-#define MFG_logPrintf MFG_printf
-#define MFG_printf (void)DBG_printfNoCr
+/* TODO: RA6: Revisit and Add later */
+//#define MFG_logPrintf MFG_printf
+//#define MFG_printf (void)DBG_printfNoCr
 #endif
 // TODO: RA6 [name_Balaji]:Check for _mqx_int once integrated
 #define MFG_logPrintf MFG_printf
@@ -1941,8 +1942,8 @@ void MFGP_uartRecvTask( taskParameter )
          mfgpReadByte( rxByte );
       }
 #elif ( MCU_SELECTED == RA6E1 )
-      /* Instead of Polling metod, Interrupt routine method is used in RA6E1 which
-       * reads byte-by-byte and stors the data in an array */
+      /* Instead of Polling method, Interrupt routine method is used in RA6E1 which
+       * reads byte-by-byte and stores the data in an array */
      ( void )UART_read( mfgUart, &rxByte, sizeof( rxByte ) );
      ( void )OS_SEM_Pend( &mfgReceiveSem_, OS_WAIT_FOREVER );
      if( rxByte != (uint8_t)0x00 )
@@ -1959,7 +1960,7 @@ void MFGP_uartRecvTask( taskParameter )
 
   Function name: mfg_uart_callback
 
-  Purpose: Interrupt Handler for MFG UART Module,Postponds the semaphore wait
+  Purpose: Interrupt Handler for MFG UART Module,Postpones the semaphore wait
             once one byte of data is read in SCI Channel 3 (MFG port)
 
   Returns: None
@@ -2032,7 +2033,7 @@ static void  OptoTimerCallBack( uint8_t cmd, void *pData )
 
    Function name: OptoTimer_Init
 
-   Purpose: Used to intialize the Opto UART port Timer
+   Purpose: Used to initialize the Opto UART port Timer
 
    Arguments: none
 

@@ -682,14 +682,14 @@ returnStatus_t SELF_testRTC( void )
 
       RTC_GetDateTime (&getTime1);              /* Record RTC milliseconds, at entry.    */
       OS_TASK_Sleep( 10 );                      /* Wait for 10ms.                   */
-      RTC_GetDateTime (&getTime2);              /* Record RTC millliseconds after wait.   */
+      RTC_GetDateTime (&getTime2);              /* Record RTC milliseconds after wait.   */
 
       /* If readings don't change, then not running.  */
       if ( getTime1.msec == getTime2.msec )
       {
          retVal = eFAILURE;
       }
-   } while ( ( retVal == eFAILURE ) );// TODO: RA6 [name_Balaji]: Need to test after OS_TICK_Get_ElapsedMilliseconds integration
+   } while ( retVal == eFAILURE );// TODO: RA6 [name_Balaji]: Need to test after OS_TICK_Get_ElapsedMilliseconds integration
    R_RTC_Close (&g_rtc0_ctrl);// TODO: RA6 [name_Balaji]: Closing RTC, for now as there is no other known method to check the RTC valid or not
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )

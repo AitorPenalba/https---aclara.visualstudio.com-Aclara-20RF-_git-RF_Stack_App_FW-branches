@@ -26,6 +26,9 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #include "project.h"
+#if ( MCU_SELECTED == RA6E1 )
+#include "hal_data.h"
+#endif
 #include "meter.h"
 
 /* Define all supported target hardware here. */
@@ -69,13 +72,13 @@
 #if ( MCU_SELECTED == NXP_K24 )
 #define CLRWDT()                    WDOG_Kick()
 #elif ( MCU_SELECTED == RA6E1 )
-#define CLRWDT()                    1   //TODO Melvin: add RA6E1 equivalent for the same
+#define CLRWDT()                    1   //TODO: RA6: Melvin: add RA6E1 equivalent for the same
 #endif
 #define NOP()                       asm("nop")
-#if 0 /* TODO: RA6: Add later */
+#if ( MCU_SELECTED == NXP_K24 )
 #define RESET()                     { SCB_AIRCR = SCB_AIRCR_VECTKEY(0x5FA)| SCB_AIRCR_SYSRESETREQ_MASK; while(1){} }
-#else
-#define RESET()                     asm("nop")
+#elif ( MCU_SELECTED == RA6E1 )
+#define RESET()                     __NVIC_SystemReset()
 #endif
 #define DI()                        OS_INT_disable( )
 #define EI()                        ERROR! NOT DEFINED
@@ -126,6 +129,7 @@
 /* Disable this interrupt if ignoring the signal! */
 #define BRN_OUT_IRQ_EI()            BRN_OUT_IRQ_DI()
 #else
+#if ( MCU_SELECTED == NXP_K24 )
 #define BRN_OUT()                   (!((GPIOD_PDIR & (1<<0)) >> 0)) /* Brown out - Active Low Signal */
 #define BRN_OUT_TRIS()              {  PORTD_PCR0 = (PORTD_PCR0 & ~PORT_PCR_MUX_MASK) | PORT_PCR_MUX( 1 ); \
                                        GPIOD_PDDR &= ~(1<<0); } /* Set PCR for GPIO, Make Input */
@@ -133,7 +137,14 @@
                                       PORTD_PCR0 |= (PORT_PCR_IRQC(0xb)); } /* Interrupt on either edge */
 #define BRN_OUT_ISF()               (PORTD_ISFR & 1)  /* For testing state of BRN_OUT interrupt flag. */
 #define BRN_OUT_CLR_IF()            (PORTD_ISFR = 1)  /* For clearing BRN_OUT interrupt flag. */
-#endif
+
+#elif ( MCU_SELECTED == RA6E1 )
+#define BRN_OUT()                   (!(R_PORT0->PIDR_b.PIDR6)) /* Brown out/PF_Meter - Active Low Signal */
+#define BRN_OUT_IRQ_EI()            (void)R_ICU_ExternalIrqEnable( &pf_meter_ctrl )
+
+#endif // ( MCU_SELECTED == NXP_K24 )
+#endif // #if HAL_IGNORE_BROWN_OUT_SIGNAL == 1
+#if ( MCU_SELECTED == NXP_K24 )
 #define BRN_OUT_PULLDN_ENABLE()     ( PORTD_PCR0 |= (    PORT_PCR_PE_MASK  & ~PORT_PCR_PS_MASK ) )
 #define BRN_OUT_PULLUP_ENABLE()     ( PORTD_PCR0 |= (    PORT_PCR_PE_MASK | PORT_PCR_PS_MASK   ) )
 #define BRN_OUT_PULLUP_DISABLE()    ( PORTD_PCR0 &= ( ~( PORT_PCR_PE_MASK | PORT_PCR_PS_MASK ) ) )
@@ -141,13 +152,16 @@
 #define BRN_OUT_ISR_PRI             ((uint8_t)2)
 #define BRN_OUT_ISR_SUB_PRI         ((uint8_t)0)
 #define BRN_OUT_IRQ_DI()            (PORTD_PCR0 &= (~PORT_PCR_IRQC(0x0))) /* Disable Interrupt */
-#define DEBOUNCE_DELAY_VAL          ((uint32_t)10)       /* 100us (number of 10us delays) */
-#define DEBOUNCE_CNT_RST_VAL        ((uint16_t)10)       /* Number of debounce delays to ensure signal stable */
 
 #define LLWU_LG_IRQInterruptIndex   ( (int) INT_LLW )  // To enable the LLWU interrupt handler
 #define LLWU_LG_ISR_PRI             ( (uint8_t)2)
 #define LLWU_LG_ISR_SUB_PRI         ( (uint8_t)0)
 
+#elif ( MCU_SELECTED == RA6E1 )
+#define BRN_OUT_IRQ_DI()            R_ICU_ExternalIrqDisable( &pf_meter_ctrl ) /* Disable Interrupt */
+#endif
+#define DEBOUNCE_DELAY_VAL          ((uint32_t)10)       /* 100us (number of 10us delays) */
+#define DEBOUNCE_CNT_RST_VAL        ((uint16_t)10)       /* Number of debounce delays to ensure signal stable */
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* GPIO I/O Definitions */
 

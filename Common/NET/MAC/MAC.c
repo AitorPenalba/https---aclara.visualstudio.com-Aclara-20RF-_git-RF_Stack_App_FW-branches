@@ -10,7 +10,7 @@
   A product of
   Aclara Technologies LLC
   Confidential and Proprietary
-  Copyright 2014-2021 Aclara. All Rights Reserved.
+  Copyright 2014-2022 Aclara. All Rights Reserved.
 
   PROPRIETARY NOTICE
   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -21,7 +21,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #include <stdlib.h>
 #if ( DCU == 1 )
 #include <stdio.h>
@@ -34,9 +33,9 @@
 #include "file_io.h"
 #include "crc32.h"
 #include "rand.h"
-#include "Phy_Protocol.h"
+#include "PHY_Protocol.h"
 #include "MAC_FrameEncoder.h"    // MAC_Codec.h
-#include "Stack.h"
+#include "STACK.h"
 #if ( TEST_TDMA == 1 )
 #include "sys_clock.h"
 #endif

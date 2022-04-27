@@ -171,7 +171,7 @@ static RadioEvent_Fxn pEventHandler_Fxn;
 #if ( MCU_SELECTED == NXP_K24 )
 static void Radio0_IRQ_ISR(void);
 #elif ( MCU_SELECTED == RA6E1 )
-static void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
+void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
 #endif
 
 #if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )

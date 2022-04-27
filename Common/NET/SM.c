@@ -19,7 +19,6 @@
  **********************************************************************************************************************/
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #if ( DCU == 1 )
 #include "partitions.h"
 #endif

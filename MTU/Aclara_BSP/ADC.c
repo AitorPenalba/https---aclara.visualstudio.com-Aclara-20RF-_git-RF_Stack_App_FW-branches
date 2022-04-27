@@ -15,13 +15,10 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #include "DBG_SerialDebug.h"
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#elif (RTOS_SELECTION == FREE_RTOS) 
-#include "hal_data.h"
 #endif
 
 /* #DEFINE DEFINITIONS */
@@ -554,7 +551,7 @@ returnStatus_t ADC_ShutDown ( void )
    ADC0_SC1A = (ADC0_SC1A & ~ADC_SC1_ADCH_MASK) | ADC_SC1_ADCH(ADC0_DISABLED_CH);
 #if ENABLE_ADC1
    ADC1_SC1A = (ADC1_SC1A & ~ADC_SC1_ADCH_MASK) | ADC_SC1_ADCH(ADC1_DISABLED_CH);
-#endif   //#if ENABLE_ADC1 
+#endif   //#if ENABLE_ADC1
 #elif ( MCU_SELECTED == RA6E1 )
    //Closes the ADC driver, disables the interrupts and Stops the ADC
    (void)R_ADC_Close( &g_adc0_ctrl );
@@ -864,10 +861,10 @@ float ADC_Get_VSWR( void )
 float ADC_GetHWRevVoltage ( void )
 {
 #if ( ( USE_LWADC == 1 ) || ( ENABLE_ADC1 == 0 ) || ( MCU_SELECTED == RA6E1 ) )
-   return ( ADC_Get_Ch_Voltage( ADC0_HW_REV_CH ) ); 
+   return ( ADC_Get_Ch_Voltage( ADC0_HW_REV_CH ) );
 #else // LWDAC==0 && USE_ADC1==1
    return ( ADC_Get_Ch_Voltage( ADC1_HW_REV_CH ) );
-#endif 
+#endif
 }/* end ADC_GetHWRevVoltage () */
 
 /*******************************************************************************

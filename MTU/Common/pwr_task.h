@@ -25,7 +25,7 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-//#include "time_util.h"
+#include "time_util.h"
 #include "HEEP_util.h"
 #if ( SIMULATE_POWER_DOWN == 1 )
 #include "DBG_CommandLine.h"
@@ -40,9 +40,6 @@ extern OS_SEM_Obj    PWR_SimulatePowerDn_Sem;           /* Used for the simulati
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
-
-/* TODO: RA6: Remove it from this module */
-typedef uint64_t  sysTimeCombined_t;                          /*!< Time format in combined date/time format. */
 
 #if ( RTOS_SELECTION == MQX_RTOS )
 typedef void ( *vFPtr_strct )( OS_TASK_id );

@@ -23,9 +23,6 @@
 /*lint -esym(715,argc, argv, Arg0)  */
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>

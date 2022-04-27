@@ -26,7 +26,7 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-//#include "meter.h" /* TODO: RA6: Depricated include */
+//#include "meter.h" /* TODO: RA6: Deprecated include */
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
@@ -84,12 +84,12 @@
 #define ACLARA_DVR_ABSTRACTION            0
 #if ( ACLARA_DVR_ABSTRACTION != 0 )
    #define FILE_IO                        0
-   #define PARTITION_MANAGER              0 /* 0 = No PARTITION_MANAGER, 1 = Parition Manager */
+   #define PARTITION_MANAGER              0 /* 0 = No PARTITION_MANAGER, 1 = Partition Manager */
    #define TIMER_UTIL                     0
    #define RTC                            0
 #endif
-#define SUPPORT_HEEP                      0
-#define INCLUDE_ECC                       0
+#define SUPPORT_HEEP                      0 /* TODO: RA6E1: Temporary conditional*/
+#define INCLUDE_ECC                       0 /* TODO: RA6E1: Temporary conditional*/
 #define RTOS_SELECTION                    FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
 #define DBG_TESTS                         0
 #define SEGGER_RTT                        0
@@ -98,13 +98,6 @@
 #define NXP_K24                           1
 #define RA6E1                             2
 #define MCU_SELECTED                      RA6E1
-//Already present in CompileSwitch.h
-//#define TM_MUTEX                          0
-//#define TM_SEMAPHORE                      0
-//#define TM_RTC_UNIT_TEST                  0
-//#define TM_ADC_UNIT_TEST                  0
-//#define TM_QUEUE                          0
-//#define TM_MSGQ                           0
-//#define TM_EVENTS                         0
+
 #endif
 

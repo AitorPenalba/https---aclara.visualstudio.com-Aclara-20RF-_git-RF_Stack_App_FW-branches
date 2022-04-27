@@ -16,17 +16,14 @@
 #define BSP_aclara_H
 
 /* INCLUDE FILES */
-#if ( MCU_SELECTED == 1 )//( MCU_SELECTED == NXP_K24 ) // TODO: RA6 [name_Balaji]:Check if the issue in Compiler or IAR
+
 #ifndef __BOOTLOADER
+#if ( MCU_SELECTED == NXP_K24 )
 #include "user_config.h"
 #include "psp_cpudef.h"
-#endif   /* BOOTLOADER  */
-#elif ( MCU_SELECTED == RA6E1 )
-#include "r_adc.h"
-#include "r_adc_api.h"
-#include "r_rtc.h"
-#include "r_rtc_api.h"
 #endif
+#endif   /* BOOTLOADER  */
+
 
 /* #DEFINE DEFINITIONS */
 #undef NULL

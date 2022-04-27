@@ -63,7 +63,7 @@ static const struct_UART_Setup UartSetup[MAX_UART_ID] =
 #else
    {   2400,   IO_SERIAL_NON_BLOCKING,                HOST_PORT_IO_CHANNEL    }  /* DRU Port */
 #endif
-};  
+};
 #elif (RTOS_SELECTION == FREE_RTOS)
 /* Baud rate and other configurations are done in RASC configurator */
 const sci_uart_instance_ctrl_t *UartCtrl[MAX_UART_ID] =
@@ -266,9 +266,9 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 #elif ( MCU_SELECTED == RA6E1 )
    ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
    ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+
    return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif
-
 }
 
 /*******************************************************************************
@@ -294,7 +294,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 
 *******************************************************************************/
 uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength )
-{ 
+{
 #if ( MCU_SELECTED == NXP_K24 )
    uint32_t DataReceived;
 
@@ -558,7 +558,7 @@ uint8_t UART_open ( enum_UART_ID UartId )
                                     (void *)&Flags); /*lint !e835 !e845 !e64 */
       }
    }
-   return retVal; 
+   return retVal;
 #elif ( MCU_SELECTED == RA6E1 )
    /*Uart Open for RA6E1 is done in Uart Init*/
    return ( uint8_t )eSUCCESS;
@@ -578,7 +578,7 @@ uint8_t UART_open ( enum_UART_ID UartId )
 *******************************************************************************/
 void user_uart_callback( uart_callback_args_t *p_args )
 {
-  
+
     /* Handle the UART event */
      switch (p_args->event)
     {

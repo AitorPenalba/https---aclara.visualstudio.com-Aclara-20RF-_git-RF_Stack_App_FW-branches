@@ -31,7 +31,6 @@
 
 #include "project.h"
 #include <stdarg.h>
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -47,7 +46,7 @@
 //#include "time_sys.h"
 #include "DBG_SerialDebug.h"
 //#include "ascii.h"
-//#include "time_util.h"
+#include "time_util.h"
 #include "buffer.h"
 //#ifndef BSP_DEFAULT_IO_CHANNEL_DEFINED
 //#error This application requires BSP_DEFAULT_IO_CHANNEL to be not NULL. Please set corresponding BSPCFG_ENABLE_TTYx to non-zero in user_config.h and recompile BSP with this option.
@@ -154,9 +153,9 @@ void DBG_printfDirect( const char *fmt, ... )
    /* Cleans up the Variable Argument list */
    va_end( args );
    /* Adds Carriage Return and New Line to the each line of prints */
-   dbgCmdLen += ( uint16_t )snprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), "\r\n" ); 
+   dbgCmdLen += ( uint16_t )snprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), "\r\n" );
    /* Writes the print to Debug terminal */
-   UART_write( dbgUart, (uint8_t *)dbgCommandBuffer, dbgCmdLen ); 
+   UART_write( dbgUart, (uint8_t *)dbgCommandBuffer, dbgCmdLen );
 } /* end of DBG_printfDirect() */
 #endif
 
@@ -316,7 +315,7 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
             /* DEVELOPER NOTE:  Update DBG_SIZE_OF_LINE_COUNT_AND_CATEGORY #def if you modify the below line */
             len += (uint16_t)snprintf( logPrintf_buf, (int32_t)sizeof( logPrintf_buf ), "[%05d %c]", ++line_num_, category );
          }
-#if 0
+#if 0  // TODO: RA6: Balaji: Enable the following code
          // Build time/data header
          if ( options & PRINT_DATE_TIME )
          {
@@ -449,7 +448,7 @@ void DBG_logPrintHex ( char category, char const *str, const uint8_t *pSrc, uint
 static uint16_t addLogPrefixToString ( char category, char *pDst )
 {
    sysTime_dateFormat_t RT_Clock;
-   uint16_t len;
+   uint16_t             len = 0;
    (void)TIME_UTIL_GetTimeInDateFormat( &RT_Clock );
    // TODO: RA6 [name_Balaji]: Integrate once _task API's are done
 #if 0

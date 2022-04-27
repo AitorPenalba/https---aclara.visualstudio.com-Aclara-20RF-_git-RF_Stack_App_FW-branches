@@ -151,6 +151,7 @@
 #include "time_DST.h"
 #include "vbat_reg.h"
 #include "pwr_task.h"
+#include "pwr_last_gasp.h"
 
 
 /* #DEFINE DEFINITIONS */
@@ -181,7 +182,7 @@ static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
 const STRT_FunctionList_t startUpTbl[] =
 {
    INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
-   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP 
+   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
 // TODO: RA6: Balaji:  Why was DBG_init() moved?
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
@@ -387,17 +388,18 @@ void STRT_StartupTask ( taskParameter )
 {
    //FSP_PARAMETER_NOT_USED(taskParameter);
 //   OS_TICK_Struct       TickTime;
-   TickType_t           TickTime;
+//   TickType_t           TickTime;
    STRT_FunctionList_t  *pFunct;
-   uint32_t             CurrentIdleCount;
-   uint32_t             PrevIdleCount;
-   uint32_t             TempIdleCount;
-   uint32_t             printStackAndTask = 0;
-   uint32_t             CpuLoad[PRINT_CPU_STATS_IN_SEC];
-   uint8_t              CpuIdx = 0;
+//   uint32_t             CurrentIdleCount;
+//   uint32_t             PrevIdleCount;
+//   uint32_t             TempIdleCount;
+//   uint32_t             printStackAndTask = 0;
+//   uint32_t             CpuLoad[PRINT_CPU_STATS_IN_SEC];
+//   uint8_t              CpuIdx = 0;
    uint8_t              startUpIdx;
    uint8_t              quiet = 0;
    uint8_t              rfTest = 0;
+
 #if 0
    // Enable to use DWT module.
    // This is needed for DWT_CYCCNT to work properly when the debugger (I-jet) is not plugged in.
@@ -547,7 +549,7 @@ void STRT_StartupTask ( taskParameter )
          {
             /* This condition should only show up in development.  This infinite loop should help someone figure out
                that there is an issue initializing a task. */
-#if 0  // TODO: RA6E1: DG: How to route printf to Debug Port?
+#if 0   // TODO: RA6E1: DG: Enable this code
             ( void )printf( "\n\t\t#####################\n" );
             ( void )printf( "\nStartup Failure - Call to %s failed, Code: %u\n", pFunct->name, ( uint16_t )response );
             ( void )printf( "\n\t\t#####################\n" );
@@ -609,7 +611,7 @@ void STRT_StartupTask ( taskParameter )
 #endif  // #if 0
    for ( ;; )
    {
-      vTaskSuspend(NULL); // TODO: DG: Remove
+      vTaskSuspend(NULL); // TODO: RA6: DG: Remove
 #if 0
       OS_TICK_Sleep ( &TickTime, ONE_SEC );
 

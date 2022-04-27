@@ -2,7 +2,7 @@
  *
  * Filename: Event.c
  *
- * Global Designator:
+ * Global Designator: OS_EVNT_
  *
  * Contents:
  *
@@ -15,7 +15,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #if( RTOS_SELECTION == FREE_RTOS )
 #elif( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
@@ -55,7 +54,7 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 {
    bool FuncStatus = true;
 #if( RTOS_SELECTION == FREE_RTOS )
-   *EventHandle = xEventGroupCreate();  
+   *EventHandle = xEventGroupCreate();
    if ( NULL == EventHandle )
    {
      FuncStatus = false;
@@ -93,7 +92,7 @@ void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, i
 {
 #if( RTOS_SELECTION == FREE_RTOS )
       //TODO Error Handling, return value
-      xEventGroupSetBits( *EventHandle , EventMask); 
+      xEventGroupSetBits( *EventHandle , EventMask);
 #elif( RTOS_SELECTION == MQX_RTOS )
    if ( _lwevent_set ( EventHandle, EventMask ) ) {
       EVL_FirmwareError( "OS_EVNT_Set" , file, line );
@@ -169,8 +168,8 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
       /* just use the minimum value cause we don't want to wait */
       timeout_ticks = 1;
    } /* end else() */
-#if( RTOS_SELECTION == FREE_RTOS )  
-   SetMask = xEventGroupWaitBits(*EventHandle, EventMask, pdTRUE, (bool)WaitForAll, timeout_ticks ); //clears bits after event                             
+#if( RTOS_SELECTION == FREE_RTOS )
+   SetMask = xEventGroupWaitBits(*EventHandle, EventMask, pdTRUE, (bool)WaitForAll, timeout_ticks ); //clears bits after event
 #elif( RTOS_SELECTION == MQX_RTOS )
    RetStatus = _lwevent_wait_ticks ( EventHandle, EventMask, (bool)WaitForAll, timeout_ticks );
    if ( RetStatus == MQX_LWEVENT_INVALID ) {

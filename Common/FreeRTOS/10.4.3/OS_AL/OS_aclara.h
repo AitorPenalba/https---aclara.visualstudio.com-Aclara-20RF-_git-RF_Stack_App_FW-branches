@@ -7,10 +7,16 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2012-2022 ACLARA.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *    ACLARA, ST. LOUIS, MISSOURI USA
+  A product of
+  Aclara Technologies LLC
+  Confidential and Proprietary
+  Copyright 2012-2022 Aclara. All Rights Reserved.
+
+  PROPRIETARY NOTICE
+  The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+  (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+  authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may
+  be used or copied only in accordance with the terms of such license.
  *****************************************************************************/
 #ifndef OS_aclara_H
 #define OS_aclara_H
@@ -76,6 +82,8 @@
 #endif
 
 #if ( RTOS_SELECTION == FREE_RTOS )
+#define MQX_AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */
+
 #if OS_MIN_TASK_PRIORITY >= configMAX_PRIORITIES
 #error  Task minimum must be less than configMAX_PRIORITIES in FreeRTOSConfig.h
 #endif
@@ -85,7 +93,7 @@
 #ifndef __BOOTLOADER
 #define OS_EVENT_ID 200
 
-#if 0 //( RTOS_SELECTION == MQX_RTOS ) /* MQX */
+#if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 /* MACRO DEFINITIONS */
 #define OS_Get_OsVersion() (_mqx_version)
 #define OS_Get_OsGenRevision() (_mqx_generic_revision)
@@ -157,7 +165,7 @@ typedef QUEUE_ELEMENT_STRUCT  OS_LINKED_LIST_STRUCT;
 typedef struct
 {
    OS_LINKED_LIST_STRUCT queue;
-   /* The following variables are required either to provide better error dectection or */
+   /* The following variables are required either to provide better error detection or */
    /* belong to buffer_t but are put here for better memory packing */
    uint16_t  dataLen;      /**< User filled - # of bytes in data[] (initialized with requested buf size) */
    struct {
@@ -181,7 +189,6 @@ typedef struct
    uint16_t    cmdCat;
    int         data[];       /* payload to the destination. */
 }msgQueueSrc_t;
-#warning "Nooo"
 #endif  // ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 
 
@@ -255,15 +262,15 @@ typedef struct
 
    size_t           usStackDepth; /* The number of words (not Bytes!)*/
 
-   UBaseType_t        uxPriority;
+   UBaseType_t      uxPriority;
 
-   char                 *pcName;
+   char             *pcName;
 
    uint32_t         TASK_ATTRIBUTES;
 
    uint32_t         *pvParameters;
 
-   uint32_t         defaultTimeSlice; /* added to accomdate MQX and a universal template list between RTOS */
+   uint32_t         defaultTimeSlice; /* added to accommodate MQX and a universal template list between RTOS */
 
    TaskHandle_t     *pxCreatedTask;
 } OS_TASK_Template_t, * pOS_TASK_Template_t;
@@ -427,6 +434,7 @@ void OS_TASK_Create_Idle ( void );
 #endif
 void OS_TASK_Create_All ( bool initSuccess );
 void OS_TASK_Create_STRT( void );
+void OS_TASK_Create_PWRLG( void );
 
 uint32_t OS_TASK_Get_Priority ( char const *pTaskName );
 uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority );
