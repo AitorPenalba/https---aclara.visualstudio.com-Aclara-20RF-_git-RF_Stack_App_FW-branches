@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * 
+ *
  * Filename: pwr_config.c
  *
  * Global Designator: PWRCFG_
@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2020-2021 Aclara.  All Rights Reserved.
+ * Copyright 2020-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -34,8 +34,6 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-#include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include "compiler_types.h"

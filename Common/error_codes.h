@@ -8,14 +8,14 @@
  *           Each section is then divided into subsection          (e.g. Driver has SPI, I2C, UART).
  *           Finally each subsection has error code enumerated     ( eUART_RX_OVERFLOW, eUART_RX_PARITY, ...)
  *
- *           It is expected that this file will be modifed during the design and development phase of the project
+ *           It is expected that this file will be modified during the design and development phase of the project
  *           as new error codes required.
  *
  ***********************************************************************************************************************
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2012-2020 Aclara.  All Rights Reserved.
+ * Copyright 2012-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -68,7 +68,7 @@
 // Where should this one be? Driver, OS, or other???
 #define E_BUFFER_TYPE       (E_DRIVER_TYPE + 0x80)  /*!< Buffer Manager */
 
-/*! OS Error Error Types */
+/*! OS Error Types */
 #define E_OS_TASK_TYPE      (E_OS_TYPE     +     0)  /*!< OS Task       Errors */
 #define E_OS_SEM_TYPE       (E_OS_TYPE     +  0x20)  /*!< OS Semaphore  Errors */
 #define E_OS_MUTEX_TYPE     (E_OS_TYPE     +  0x40)  /*!< OS Mutex      Errors */

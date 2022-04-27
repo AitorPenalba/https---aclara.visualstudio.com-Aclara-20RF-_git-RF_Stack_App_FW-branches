@@ -15,22 +15,17 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdint.h>
-#include <stdbool.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
 #endif
-#include "error_codes.h"
-#include "crc.h"
+#include "CRC.h"
 #if ( MCU_SELECTED == NXP_K24 )
 #include "crc_kn.h"
 #elif( MCU_SELECTED == RA6E1 )
 #include "crc_custom.h"
 #include "crc16.h"
-#include "hal_data.h"
 #endif
-#include "OS_aclara.h"
 
 /* #DEFINE DEFINITIONS */
 

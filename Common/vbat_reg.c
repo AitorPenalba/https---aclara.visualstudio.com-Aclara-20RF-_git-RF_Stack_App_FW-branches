@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2015-2018 Aclara.  All Rights Reserved.
+ * Copyright 2015-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -34,7 +34,6 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-//#include "error_codes.h"
 
 #define VBATREG_GLOBALS
 #include "vbat_reg.h"
@@ -148,7 +147,6 @@ void VBATREG_EnableRegisterAccess( void )
    R_SYSTEM->VBTBER_b.VBAE = 0x01;  /* Enable access to VBTBKR */
    /* RA6E1 HRM: 11.2.4: Wait for at least 500 ns after writing 1 to VBAE, and then access VBTBKR. */
    R_BSP_SoftwareDelay(1, BSP_DELAY_UNITS_MICROSECONDS); /* TODO: RA6: [DG]: Update the dealy to be 500ns */
-
 #endif
 }
 

@@ -85,7 +85,8 @@
 #include "partitions.h"
 #endif
 
-#include "pwr_task.h" // TODO:RA6E1: DG: Remove duplicate
+#include "pwr_task.h"         // TODO:RA6E1: DG: Remove duplicate
+#include "pwr_last_gasp.h"    // TODO:RA6E1: DG: Remove duplicate
 #if ENABLE_PWR_TASKS
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
@@ -139,8 +140,8 @@
 #define DEFAULT_ATTR       (MQX_FLOATING_POINT_TASK)                       /* All tasks save floating point on switch */
 #define DEFAULT_ATTR_STRT  (MQX_AUTO_START_TASK|MQX_FLOATING_POINT_TASK)   /* Add the auto start attribute */
 #elif (RTOS_SELECTION == FREE_RTOS)
-#define DEFAULT_ATTR        (0)                       /* All tasks save floating point on switch */
-#define DEFAULT_ATTR_STRT   (0)
+#define DEFAULT_ATTR        (0)                                            /* All tasks save floating point on switch */
+#define DEFAULT_ATTR_STRT   (MQX_AUTO_START_TASK)
 #endif
 #define TASK_CPULOAD_SIZE  10 // Keep track of the last 10 seconds
 #define QUIET_MODE_ATTR    ((uint32_t)(1<<30))                             /* Task runs in quiet mode, also */
@@ -416,8 +417,9 @@ const OS_TASK_Template_t  Task_template_list[] =
 #if ENABLE_FIO_TASKS
    //{ eFIO_TSK_IDX,              FIO_Task,                     1000,  38, (char *)pTskName_Fio,    DEFAULT_ATTR, 0, 0 },
 #endif
+#if ( ENABLE_ALRM_TASKS == 1 )
    { eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
-
+#endif
    /* should be the lowest priority tasks */
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -426,23 +428,26 @@ const OS_TASK_Template_t  Task_template_list[] =
    { 0 }
 };
 
-#if 0  // TODO: RA6: need to remove the #if 0 when last gasp is supported so the last gasp task list is supported
+
 /*lint -e{641}  Suppress the index conversion from enum to int for this section. */
-const TASK_TEMPLATE_STRUCT  MQX_template_list_last_gasp[] =
+const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 {
+   { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, 0, 0 },
 #if ENABLE_PWR_TASKS
    { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, 0, 0 },
 #endif
+#if ENABLE_TIME_SYS_TASKS
    { eTIME_TSK_IDX,     TIME_SYS_HandlerTask,   1200,  11, (char *)pTskName_Time,   DEFAULT_ATTR, 0, 0 },
+#endif
    { eSM_TSK_IDX,       SM_Task,                1000,  12, (char *)pTskName_Sm,     DEFAULT_ATTR, 0, 0 },
-   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, 0, 0 },
-   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
+//   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, 0, 0 },
+//   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
    { eSTACK_TSK_IDX,    NWK_Task,               1500,  15, (char *)pTskName_Nwk,    DEFAULT_ATTR, 0, 0 },
 
 #if ( USE_DTLS == 1 )
    { eDTLS_TSK_IDX,     DTLS_Task,              5400,  16, (char *)pTskName_Dtls,   DEFAULT_ATTR, 0, 0 },
 #endif
-   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, 0, 0 },
+//   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, 0, 0 },
 
    { eDBG_PRNT_TSK_IDX, DBG_TxTask,              680,  18, (char *)pTskName_Print,  DEFAULT_ATTR, 0, 0 },
 #if ENABLE_PWR_TASKS
@@ -451,7 +456,7 @@ const TASK_TEMPLATE_STRUCT  MQX_template_list_last_gasp[] =
 #endif
    { 0 }
 };
-#endif // #if 0
+
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 #if (RTOS_SELECTION == FREE_RTOS)
@@ -569,25 +574,18 @@ void OS_TASK_Create_All ( bool initSuccess )
 //   quiet = MODECFG_get_quiet_mode();
 //   rfTest = MODECFG_get_rfTest_mode();
 
-#if (RTOS_SELECTION == FREE_RTOS)
-   // initialize the task handle lookup table, this table will be updated as we create each task
-   (void)memset( (uint8_t *)&taskHandleTable, 0, sizeof(taskHandleTable) );
-#endif
-
 #if ( RTOS_SELECTION == MQX_RTOS )
    /* Install exception handler */
    (void)_int_install_exception_isr();  TODO:  What is the equivalent opertion in FREE RTOS
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   // TODO: What is the equivalent operation for FreeRTOS?
+      // TODO: RA6: What is the equivalent operation for FreeRTOS?
 #endif
 
    /*lint -e{641} converting enum to int  */
-   for (pTaskList = &Task_template_list[1]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++)  /* TODO: RA6: DG: Don't include StartUp Task */
+   for (pTaskList = &Task_template_list[0]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++)
    {  /* Create the task if the "Auto Start" attribute is NOT set */
 
-#if ( RTOS_SELECTION == MQX_RTOS )
       if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
-#endif
       {  /* Create the task */
 // TODO: RA6: uncomment the following once required modules are available
 //           if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&
@@ -606,6 +604,7 @@ void OS_TASK_Create_All ( bool initSuccess )
                while(true) /*lint !e716  */
                {}  /* Todo:  We may wish to discuss the definition of LEDs.  Maybe we could add code here. */
             }
+            // TODO: RA6: DG: Move these lines to OS_Task_Create
 
 #if ( RTOS_SELECTION == MQX_RTOS )
             /* Set the exception handler of the task if still valid */
@@ -1311,15 +1310,55 @@ void OS_TASK_Summary ( bool safePrint )
    }
 }
 #endif
-/* TODO: ADD Header
-   TODO: DG: Is this the appropriate Module? Or move it to STRT_Startup.c ? */
 
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+/***********************************************************************************************************************
+ *
+ * Function Name: OS_TASK_Create_STRT
+ *
+ * Purpose: This function will Create the Startup Task in FreeRTOS
+ *
+ * Arguments: None
+ *
+ * Returns: None
+ *
+ * Notes:
+ *
+ **********************************************************************************************************************/
 void OS_TASK_Create_STRT( void )
 {
-//   APP_PRINT("Create STRT");
-   if (pdPASS != xTaskCreate( STRT_StartupTask, pTskName_Strt, 512/4, (void *)0, 2, &taskHandleTable[eSTRT_TSK_IDX].taskHandle ))
+   // initialize the task handle lookup table, this table will be updated as we create each task
+   (void)memset( (uint8_t *)&taskHandleTable, 0, sizeof(taskHandleTable) );
+
+   if ( pdPASS != OS_TASK_Create( &Task_template_list[0] ) )
    {
-//      APP_ERR_PRINT("Unable to create STRT");
-      /* TODO: Print Error */
+      /* TODO: RA6: Print Error */
+//      printf("Unable to create STRT"); // Note: printf doesn't work here yet. TODO: RA6: Initialize UART prior to this?
    }
 }
+
+/***********************************************************************************************************************
+ *
+ * Function Name: OS_TASK_Create_PWRLG
+ *
+ * Purpose: This function will Create the PWRLG_Task in FreeRTOS
+ *
+ * Arguments: None
+ *
+ * Returns: None
+ *
+ * Notes:
+ *
+ **********************************************************************************************************************/
+void OS_TASK_Create_PWRLG( void )
+{
+   // initialize the task handle lookup table, this table will be updated as we create each task
+   (void)memset( (uint8_t *)&taskHandleTable, 0, sizeof(taskHandleTable) );
+
+   if ( pdPASS != OS_TASK_Create( &OS_template_list_last_gasp[0] ) )
+   {
+      /* TODO: RA6: Print Error */
+//      printf("Unable to create PWRLG_Task"); // Note: printf doesn't work here yet. TODO: RA6: Initialize UART prior to this?
+   }
+}
+#endif

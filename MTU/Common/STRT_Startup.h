@@ -15,14 +15,6 @@
 #ifndef STRT_Startup_H
 #define STRT_Startup_H
 
-/* TODO: Remove the following includes*/
-#include "bsp_api.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "hal_data.h"
-#include "error_codes.h"
-
 /* INCLUDE FILES */
 
 /* #DEFINE DEFINITIONS */
@@ -59,11 +51,10 @@ typedef enum STRT_CPU_LOAD_PRINT_e
 
 /* FUNCTION PROTOTYPES */
 #ifdef __mqx_h__
-extern void STRT_StartupTask ( uint32_t Arg0 );
 extern void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode );
 #endif /* __mqx_h__ */
 
-extern void STRT_StartupTask (  ); // TODO: DG: Update
+extern void STRT_StartupTask ( taskParameter );
 /* FUNCTION DEFINITIONS */
 
 #endif /* this must be the last line of the file */
