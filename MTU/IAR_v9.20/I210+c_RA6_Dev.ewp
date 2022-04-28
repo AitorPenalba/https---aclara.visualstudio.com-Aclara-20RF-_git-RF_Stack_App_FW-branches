@@ -1520,6 +1520,12 @@
             <file>
                 <name>$PROJ_DIR$\..\..\Common\vbat_reg.h</name>
             </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\virgin_device.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\virgin_device.h</name>
+            </file>
         </group>
         <group>
             <name>EP_Common</name>

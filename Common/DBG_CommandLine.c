@@ -70,7 +70,7 @@
 #include "mtls.h"
 #endif
 //#include "time_util.h"
-//#include "partitions.h"
+#include "partitions.h"
 #if ( DCU == 1 )
 #include "MAINBD_Handler.h"
 #include "HEEP_util.h"
