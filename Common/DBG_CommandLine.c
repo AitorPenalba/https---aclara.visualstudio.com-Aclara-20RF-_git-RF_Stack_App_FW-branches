@@ -669,8 +669,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "dfwmonitormode",  DBG_CommandLine_dfwMonMode,    "enable (1) or disable (0) mode to only print DFW responses\n" },
 //#endif
 //   { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
-//   { "virgin",       DBG_CommandLine_virgin,          "Erases flash chip and resets the micro" },
-//   { "virgindelay",  DBG_CommandLine_virginDelay,     "Erases signature; continues. Allows new code load and then virgin" },
+   { "virgin",       DBG_CommandLine_virgin,          "Erases flash chip and resets the micro" },
+   { "virgindelay",  DBG_CommandLine_virginDelay,     "Erases signature; continues. Allows new code load and then virgin" },
 //#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 //   { "vswr",         DBG_CommandLine_VSWR,            "Displays VSWR measurement" },
 //#endif
@@ -3726,64 +3726,64 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //}
 //#endif // (EP == 1)
 //#if 0
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_virgin
-//
-//   Purpose: Erases NV chip and reset micro. Comes up as a virgin unit.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_virgin ( uint32_t argc, char *argv[] )
-//{
-//
-//   /* Pass in argc of 2 to differentiate this call from a command line entry of virginDelay  */
-//   ( void )DBG_CommandLine_virginDelay ( 2, argv );   /* Erase the signature  */
-//
-//   RESET();  /* Execute Software Reset. Just erased NV, PWR_SafeReset() not necessary */
-//}
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_virginDelay
-//
-//   Purpose: Erases signature and continues to run. Allows new code load and automatic virgin on next reboot.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
-//{
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_virgin
+
+   Purpose: Erases NV chip and reset micro. Comes up as a virgin unit.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_virgin ( uint32_t argc, char *argv[] )
+{
+
+   /* Pass in argc of 2 to differentiate this call from a command line entry of virginDelay  */
+   ( void )DBG_CommandLine_virginDelay ( 2, argv );   /* Erase the signature  */
+
+   RESET();  /* Execute Software Reset. Just erased NV, PWR_SafeReset() not necessary */
+}
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_virginDelay
+
+   Purpose: Erases signature and continues to run. Allows new code load and automatic virgin on next reboot.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
+{
 //#if ( PARTITION_MANAGER == 1 )
-//   PartitionData_t const * partitionData;    /* Pointer to partition information   */
-//   uint8_t                 erasedSignature[ 8 ];
-//
-//   /* Open the partition with the signature  */
-//   if ( eSUCCESS ==  PAR_partitionFptr.parOpen( &partitionData, ePART_NV_VIRGIN_SIGNATURE, 0xffffffff ) )
-//   {
-//      // Erase signature
-//      ( void )memset( erasedSignature, 0, sizeof( erasedSignature ) );
-//      if ( eSUCCESS == PAR_partitionFptr.parWrite( 0, erasedSignature, sizeof( erasedSignature ), partitionData ) )
-//      {
-//         if ( 1 == argc )  /* Invoked from command line directly? */
-//         {
-//            DBG_logPrintf( 'D', "Signature erased. Device will be made virgin on next reboot!" );
-//         }
-//      }
-//   }
+   PartitionData_t const * partitionData;    /* Pointer to partition information   */
+   uint8_t                 erasedSignature[ 8 ];
+
+   /* Open the partition with the signature  */
+   if ( eSUCCESS ==  PAR_partitionFptr.parOpen( &partitionData, ePART_NV_VIRGIN_SIGNATURE, 0xffffffff ) )
+   {
+      // Erase signature
+      ( void )memset( erasedSignature, 0, sizeof( erasedSignature ) );
+      if ( eSUCCESS == PAR_partitionFptr.parWrite( 0, erasedSignature, sizeof( erasedSignature ), partitionData ) )
+      {
+         if ( 1 == argc )  /* Invoked from command line directly? */
+         {
+            DBG_logPrintf( 'D', "Signature erased. Device will be made virgin on next reboot!" );
+         }
+      }
+   }
 //#endif
-//   return 0;
-//}
+   return 0;
+}
 //#endif // #if 0
 //#if WRITE_KEY_ALLOWED
 //#warning "Don't release with WRITE_KEY_ALLOWED"
