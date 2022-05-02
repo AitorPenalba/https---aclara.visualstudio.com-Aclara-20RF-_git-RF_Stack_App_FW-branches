@@ -70,7 +70,7 @@
 #include "mtls.h"
 #endif
 //#include "time_util.h"
-//#include "partitions.h"
+#include "partitions.h"
 #if ( DCU == 1 )
 #include "MAINBD_Handler.h"
 #include "HEEP_util.h"
@@ -327,374 +327,370 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "help",         DBG_CommandLine_Help,            "Display list of commands" },
    { "h",            DBG_CommandLine_Help,            "help" },
    { "?",            DBG_CommandLine_Help,            "help" },
-#if 0
-#if ( FAKE_TRAFFIC == 1 )
-   { "bhgencount",   DBG_CommandLine_ipBhaulGenCount, "get (no args) or set (arg1) backhaul fake record gen count" },
-#endif
-#if ( EP == 1 )
-//   { "afcenable",    DBG_CommandLine_AfcEnable,       "Enable/disable AFC" },
-//   { "afcrssithreshold", DBG_CommandLine_AfcRSSIThreshold, "display/Set AFC RSSI threshold" },
-//   { "afctemperaturerange", DBG_CommandLine_AfcTemperatureRange, "display/Set AFC temperature range" },
-#endif
-#if ( USE_USB_MFG != 0 )
-   {  "bdt",         DBG_CommandLine_BDT,             "Print USB buffer descriptor table(s)" },
-#endif
-#if ( EP == 1 )
-   { "boost",        DBG_CommandLine_PWR_BoostTest,   "PWR - Boost Test" },
-   { "boostmode",    DBG_CommandLine_PWR_BoostMode,   "Turn boost supply on/off" },
-#endif
-#if ENABLE_PWR_TASKS
-#if 0
-   { "brown",        DBG_CommandLine_PWR_BrownOut,    "PWR - Signal Brown Out" },
-#endif
-#endif
-   { "buffers",      DBG_CommandLine_Buffers,         "Display buffers allocated and statitics" },
-#endif /*end of if 0*/
+//#if ( FAKE_TRAFFIC == 1 )
+//   { "bhgencount",   DBG_CommandLine_ipBhaulGenCount, "get (no args) or set (arg1) backhaul fake record gen count" },
+//#endif
+//#if ( EP == 1 )
+////   { "afcenable",    DBG_CommandLine_AfcEnable,       "Enable/disable AFC" },
+////   { "afcrssithreshold", DBG_CommandLine_AfcRSSIThreshold, "display/Set AFC RSSI threshold" },
+////   { "afctemperaturerange", DBG_CommandLine_AfcTemperatureRange, "display/Set AFC temperature range" },
+//#endif
+//#if ( USE_USB_MFG != 0 )
+//   {  "bdt",         DBG_CommandLine_BDT,             "Print USB buffer descriptor table(s)" },
+//#endif
+//#if ( EP == 1 )
+//   { "boost",        DBG_CommandLine_PWR_BoostTest,   "PWR - Boost Test" },
+//   { "boostmode",    DBG_CommandLine_PWR_BoostMode,   "Turn boost supply on/off" },
+//#endif
+//#if ENABLE_PWR_TASKS
+//#if 0
+//   { "brown",        DBG_CommandLine_PWR_BrownOut,    "PWR - Signal Brown Out" },
+//#endif
+//#endif
+//   { "buffers",      DBG_CommandLine_Buffers,         "Display buffers allocated and statitics" },
+//#endif
 #if ( EP == 1 )
    { "cap",          DBG_CommandLine_PWR_SuperCap,    "PWR - Read Super Cap Voltage" },
 #endif
-#if 0
-   { "cca",          DBG_CommandLine_CCA,             "Display/Set the CCA threshold" },
-   { "ccaadaptivethreshold", DBG_CommandLine_CCAAdaptiveThreshold, "Display the CCA adaptive threshold" },
-   { "ccaadaptivethresholdenable", DBG_CommandLine_CCAAdaptiveThresholdEnable, "Display/Set the CCA adaptive threshold enable" },
-   { "ccaoffset",    DBG_CommandLine_CCAOffset,       "Display/Set the CCA offset" },
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-   { "clockswtest",  DBG_CommandLine_clockswtest,     "Count cycle counter at 2 different clock settings over 5 seconds" },
-#endif
-   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" },
-   { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
-#if ( EP == 1 )
-   { "counters",     DBG_CommandLine_Counters,        "Display the current counters like reset counts etc" },
-#endif
-   { "cpuloaddis",   DBG_CommandLine_CpuLoadDisable,  "Disable CPU Load Output" },
-   { "cpuloaden",    DBG_CommandLine_CpuLoadEnable,   "Enable CPU Load Output" },
-   { "cpuloadsmart", DBG_CommandLine_CpuLoadSmart,    "Print CPU Load only when > 30%" },
-   { "crc",          DBG_CommandLine_crc,             "calculate crc over hex string" },
-//   { "crc16",        DBG_CommandLine_crc16,           "calculate DCU hack 16 bit crc over hex string" },
-#if ( EP == 1 )
-   { "crcm",         DBG_CommandLine_crc16m,          "calculate ANSI psem 16 bit crc over hex string" },
-#if ( TEST_TDMA == 1 )
-   { "csmaskip",     DBG_CommandLine_CsmaSkip,        "Skip CCA" },
-#endif
-#endif
-//   { "dbgdis",       DBG_CommandLine_DebugDisable,    "Disable Debug Output" },
-//   { "dbgen",        DBG_CommandLine_DebugEnable,     "Enable Debug Output" },
-   { "dbgfilter",    DBG_CommandLine_DebugFilter,     "Set debug port print filter task id" },
-#if ( EP == 1 )
-#if ( TEST_TDMA == 1 )
-   { "Delay",        DBG_CommandLine_Delay,           "Set/Get the Slot Time Delay betwen 0 and 100 ms" },
-#endif
-#if ( ENABLE_DEMAND_TASKS == 1 )
-#if ( DEMAND_IN_METER == 1 )
-   { "demandreset",  DBG_CommandLine_DemandReset,     "Execute a demand reset (in the meter)" },
-#endif
-#if( DEMAND_IN_METER == 0 )
-   { "schDmdRst",    DBG_CommandLine_SchDmdRst,       "Get (no args) or set (arg1) the scheduled demand reset date of month" },
-#endif
-//   { "demandto",     DBG_CommandLine_DMDTO,           "Get (no args) or set (arg1) the demand reset timeout" },
-#endif
-#endif
-#if ENABLE_DFW_TASKS
-   { "dfw",          DBG_CommandLine_DFW_Status,      "DFW - Status" },
-#endif   //End of #if EP
-#if ( EP == 1 )
-   { "dfwtd",        DBG_CommandLine_DfwTimeDv,       "Get/Set DFW TimeDiversity 0-255 minutes (DLConfirm ApplyConfirm)" },
-#if ( REMOTE_DISCONNECT == 1 )
-#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
-   { "ds",           DBG_CommandLine_ds,              "Open/Close switch. Format ds close or ds open [ msgID ]" },
-#endif
-#endif
-//   { "dstimedv",     DBG_CommandLine_DsTimeDv,        "Get (no args) or set (one arg) Daily Shift Time Diversity" },
-#endif
-#if ( USE_DTLS == 1 )
-   { "dtls",         DBG_CommandLine_Dtls,            "Gets or resets DTLS session state" },
-   { "dtlsstats",    DBG_CommandLine_DtlsStats,       "Print the DTLS stats" },
-#endif
-#if ( EP == 1 )
-#if ( ENABLE_DEMAND_TASKS == 1 ) /* If Demand Feature is enabled */
-   { "dumpdemand",   DBG_CommandLine_DMDDump,         "Prints the demand file/variables" },
-#endif
-#endif
-   { "evladd",       DBG_CommandLine_EVLADD,          "Add an event to the log" },
-   { "evlcmd",       DBG_CommandLine_EVLCMD,          "Send Commands to EVL" },
-   { "evlgetlog",    DBG_CommandLine_EVLGETLOG,       "Get an event log" },
-   { "evlq",         DBG_CommandLine_EVLQ,            "Query event log" },
-   { "evlsend",      DBG_CommandLine_EVLSEND,         "Mark Events as Sent" },
-#if ( EVL_UNIT_TESTING == 1 )
-   { "evlUnitTest",  DBG_CommandLine_EVL_UNIT_TESTING, "Run and event log unit test" },
-#endif
-   { "file",         DBG_CommandLine_PrintFiles,      "Print File list or file content (optional param, filename)" },
-   { "filedump",     DBG_CommandLine_DumpFiles,       "Print the contents of files in the un-named partitions" },
-   { "freeram",      DBG_CommandLine_FreeRAM,         "Display remaining free internal RAM" },
-#if ( DCU == 1 )
-   { "frontendgain", DBG_CommandLine_FrontEndGain,    "Display/Set the front end gain" },
-#endif
-#if ( BUILD_DFW_TST_CMD_CHANGE == 0 )
-   { "GenDFWkey",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
-#else
-   { "DfwKeyGen",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
-#endif
-#if ( EP == 1 )
-//   { "getdstenable", DBG_CommandLine_getDstEnable,    "Prints the DST enable" },
-//   { "getdsthash",   DBG_CommandLine_getDstHash,      "Prints the DST hash" },
-//   { "getdstoffset", DBG_CommandLine_getDstOffset,    "Prints the DST offset" },
-#endif
-   { "getfreq",      DBG_CommandLine_GetFreq,         "print list of available frequencies" },
-#if ( EP == 1 )
-//   { "getstartrule", DBG_CommandLine_getDstStartRule, "Prints the DST start rule" },
-//   { "getstoprule",  DBG_CommandLine_getDstStopRule,  "Prints the DST stop rule" },
-//   { "gettimezoneoffset", DBG_CommandLine_getTimezoneOffset, "Prints the timezone offset" },
-#endif
-#if ENABLE_HMC_TASKS
-#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
-   { "hmc",          DBG_CommandLine_HmcCmd,          "Host Meter Table Read, format is: hmc [m] id offset len" },
-   { "hmcc",         DBG_CommandLine_HmcCurrent,      "Host Meter Read Current, format is: hmcc uom" },
-   { "hmcd",         DBG_CommandLine_HmcDemand,       "Host Meter Demand, format is: hmcd uom" },
-   { "hmceng",       DBG_CommandLine_HmcEng,          "print Host Meter Communication engineering stats"},
-#endif
-#if 0
-   { "hmcdc",        DBG_CommandLine_HmcDemandCoin,   "Host Meter Demand Coincident, format is: hmcd uom coin" },
-#endif
-   { "hmcs",         DBG_CommandLine_HmcHist,         "Host Meter Read Shift, format is: hmcs uom" },
-#if ( CLOCK_IN_METER == 1 )
-   { "hmctime",      DBG_CommandLine_HMC_time,        "Get/Set Host Meter time" },
-#endif
-#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
-   { "hmcw",         DBG_CommandLine_HmcwCmd,         "Host Meter Table Write, format is: hmcw [m] id offset data" },
-#endif
-#endif
-   { "hwinfo",       DBG_CommandLine_GetHWInfo,       "Display the HW Info" },
-#ifdef TM_ID_TEST_CODE
-//   { "idbufr",       DBG_CommandLine_IdBufRd,         "Reads from the interval data test buffer: bufIndex "},
-//   { "idbufw",       DBG_CommandLine_IdBufWr,         "Reads from the interval data test buffer: bufIndex floatVal"},
-//   { "idcfg",        DBG_CommandLine_IdCfg,           "Configure Interval Data: ch smpl_mS store mult div mode rti" },
-//   { "idcfgr",       DBG_CommandLine_IdCfgR,          "Read Interval Data Configuration" },
-//   { "idparams",     DBG_CommandLine_IdParams,        "Read/Write Parameters\n"
-//                   "                                   Read: No Params, Set: SamplePeriod BuSchedule" },
-//   { "idrd",         DBG_CommandLine_IdRd,            "Read Interval: ch yy mm dd hh mm" },
-//   { "idtimedv",     DBG_CommandLine_IdTimeDv,        "Get (no args) or set (one arg) Interval Data Time Diversity" },
-#endif
-#ifdef TM_ID_UNIT_TEST
-//   { "idut",         DBG_CommandLine_IdUt,            "Run interval data self test: idut ch"},
-#endif
-
-   { "insertappmsg", DBG_CommandLine_InsertAppMsg,    "send NWK payload (arg1) into the bottom of the APP layer" },
-   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\n"
-                   "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
-#if ( EP == 1 )
-   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" },
-#if ( LP_IN_METER != 0 )
-   { "lpstats",      DBG_CommandLine_lpstats,         "Dump Load Profile info. Usage: lptstats [first_block [last_block]]" },
-#endif
-#endif
-   { "mac_time",     DBG_CommandLine_MacTimeCmd,      "Send a 'mac_time set' (DCU) or 'mac_time req' (EP) command" },
-   { "mac_tsync",    DBG_CommandLine_TimeSync,        "Set/Get the TimeSync parameters" },
-   { "macaddr",      DBG_CommandLine_MacAddr,         "Set/Get the MAC address" },
-   { "macconfig",    DBG_CommandLine_MacConfig,       "Print the MAC Configuration" },
-//   { "macflush",     DBG_CommandLine_MacFlush,        "mac flush" },
-//   { "macget",       DBG_CommandLine_MacGet,          "mac get"   },
-//   { "macpurge",     DBG_CommandLine_MacPurge,        "mac purge" },
-#if ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
-   { "mac_lp",       DBG_CommandLine_MAC_LinkParameters,"Get/Send MAC Link Parameters Config/Command" },
-#endif
-   { "macreset",     DBG_CommandLine_MacReset,        "mac reset" },
-//   { "macset",       DBG_CommandLine_MacSet,          "mac set"   },
-//   { "macstart",     DBG_CommandLine_MacStart,        "mac start" },
-   { "macstats",     DBG_CommandLine_MacStats,        "Print the MAC stats" },
-#if ( DCU == 1 )
-   { "macpacketdelay",DBG_CommandLine_TxPacketDelay,   "get (no args) or set (arg1) MAC TxPacketDelay attribute" },
-#endif
-//   { "macstop",      DBG_CommandLine_MacStop,         "mac stop"  },
-   { "macrxtimeout", DBG_CommandLine_RxTimeout,       "get (no args) or set (arg1) MAC Reassembly Timeout in seconds" },
-   { "macrelhigh",   DBG_CommandLine_RelHighCnt,      "get (no args) or set (arg1) MAC ReliabilityHighCount attribute" },
-   { "macrelmed",    DBG_CommandLine_RelMedCnt,       "get (no args) or set (arg1) MAC ReliabilityMediumCount attribute" },
-   { "macrellow",    DBG_CommandLine_RelLowCnt,       "get (no args) or set (arg1) MAC ReliabilityLowCount attribute" },
-   { "mactxpause",   DBG_CommandLine_MacTxPause,      "pause transmit of mac for QoS testing" },
-   { "mactxunpause", DBG_CommandLine_MacTxUnPause,    "unpause transmit of mac for QoS testing" },
-#if ( OVERRIDE_TEMPERATURE == 1 )
-   { "manTemp",      DBG_CommandLine_ManualTemperature, "Set/Get manual (temporary override) temperture" },
-#endif
-#if ( USE_MTLS == 1 )
-   { "mtlsstats",    DBG_CommandLine_mtlsStats,       "Get/Reset the MTLS stats 'mtlsstats reset' to reset" },
-#endif
-#if ( CLOCK_IN_METER == 1 )
-   { "mtrtime",      DBG_CommandLine_mtrTime,         "Convert meter time mm dd yy hh mm to system time" },
-#endif
-   { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
-   { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
-   { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
-   { "noiseestimatecount", DBG_CommandLine_NoiseEstimateCount, "Display/Set the noise estimate count" },
-   { "noiseestimaterate", DBG_CommandLine_NoiseEstimateRate, "Display/Set the noise estimate rate" },
-#if ( NOISE_HIST_ENABLED == 1 )
-   { "noisehist",    DBG_CommandLine_NoiseHistogram,  "Display a noise histogram for channel(s)" },
-   { "noiseburst",   DBG_CommandLine_NoiseBurst,      "Display noise bursts for channel(s)" },
-   { "bursthist",    DBG_CommandLine_BurstHistogram,  "Display histgram of noise bursts for channel(s)" },
-#endif
-#if ( ( MULTIPLE_MAC != 0 ) && ( EP == 1 ) )
-   { "NumMac",          DBG_CommandLine_NumMac,       "Set/Get number of mac addresses emulated (1-50)" },
-#endif
-   { "nvr",          DBG_CommandLine_NvRead,          "NV memory Read: Params - Partition Addr Len" },
-#ifdef TM_DVR_EXT_FL_UNIT_TEST
-   { "nvtest",       DBG_CommandLine_NvTest,          "[count (default=100)] Test a sector of external NV" },
-#endif
-   { "nwkget",       DBG_CommandLine_NwkGet,          "nwk get"  },
-   { "nwkreset",     DBG_CommandLine_NwkReset,        "nwk reset"},
-   { "nwkset",       DBG_CommandLine_NwkSet,          "nwk set"  },
-   { "nwkstart",     DBG_CommandLine_NwkStart,        "nwk start"},
-   { "nwkstats",     DBG_CommandLine_NwkStats,        "Print the NWK stats" },
-   { "nwkstop",      DBG_CommandLine_NwkStop,         "nwk stop" },
-#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-#if ( EP == 1 )
-   { "ondemandread", DBG_CommandLine_OnDemandRead,    "Does on demand read of pre-set quantities" },
-#endif
-#endif
-#if OTA_CHANNELS_ENABLED == 1
-#if DCU == 1
-   { "ota",          CommandLine_OTA_Cmd,             "Over the air command"},
-#endif
-#endif
-#if ( PHASE_DETECTION == 1 )
-   { "pd",           DBG_CommandLine_PhaseDetectCmd,  "Phase Detect Info : pd <info> <freq>" },
-#endif
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-   { "padac",        DBG_CommandLine_PaDAC,           "Prints Power Amplifier DAC output" },
-#if ( ENGINEERING_BUILD == 1 )
-   { "PaDBMtoDAC",   DBG_CommandLine_PaCoeff,         "Get/Set Power Amplifier output" },
-   { "PaVFWDtoDBM",  DBG_CommandLine_PaCoeff,         "Get/Set Power Amplifier output" },
-#endif   //( ENGINEERING_BUILD == 1 )
-#endif   //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//   { "packettimeout", DBG_CommandLine_PacketTimeout,  "get (no args) or set (arg1) MAC Packet Timeout in ms" },
-   { "part",         DBG_CommandLine_Partition,       "Prints partition data" },
-//   { "phymaxtxlen",  DBG_CommandLine_GetPhyMaxTxPayload, "Usage:  'phymaxtxlen' get phy maximum TX payload" },
-   { "phyreset",     DBG_CommandLine_PhyReset,        "phy reset" },
-//   { "phystart",     DBG_CommandLine_PhyStart,        "phy start" },
-   { "phystats",     DBG_CommandLine_PhyStats,        "Print the PHY stats" },
-   { "phyconfig",    DBG_CommandLine_PhyConfig,       "Print the PHY Configuration" },
-//   { "phystop",      DBG_CommandLine_PhyStop,         "phy stop"  },
-   { "ping",         DBG_CommandLine_MacPingCmd,      "Send a 'ping' request to EP"},
-   { "power",        DBG_CommandLine_Power,           "Get power level when no arguments. Set power level (0-5)" },
-#if ( EP == 1 )
-   { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
-#endif
-   { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
-   { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
-#if ( EP == 1 )
-   { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
-   { "regtimeouts",  DBG_CommandLine_RegTimeouts,     "Get or Set the Registration Timeouts" },
-#endif
-#if BOB_IS_LAZY == 1
-   { "reset",        DBG_ResetAllStats,               "Reset PHY, MAC and NWK stats" },
-#endif
-#if ( CLOCK_IN_METER == 1 )
-   { "revmtrtime",   DBG_CommandLine_mtrTime,         "Convert system time to meter time mm dd yy hh mm" },
-#endif
-#if ( FAKE_TRAFFIC == 1 )
-   { "rfdutycycle",  DBG_CommandLine_ipRfDutyCycle,   "get (no args) or set (arg1) RF dutycycle" },
-#endif
-   { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
-//   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },
-   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" },
-   { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\n"
-                   "                                   Set: Params - yy mm dd hh mm ss" },
-   { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\n"
-                   "                                   Type ""rxchannels"" with no arguments for more help" },
-   { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
-   { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
-   { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },
-#if ( DCU == 1 )
-   { "sdtest",       DBG_CommandLine_sdtest,          "[count (default=1)] Exercise SDRAM" },
-#endif
-   { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\n"
-                   "                                   Plus unpublished functions - see source code for details" },
-   { "sectest",      DBG_CommandLine_sectest,         "[count (default=1)] Exercise Security Device" },
-   { "sendappmsg",   DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
-#if (USE_IPTUNNEL == 1)
-   { "sendtunmsg",   DBG_CommandLine_SendIpTunMsg,    "send data (arg1) to address (arg2) with qos (arg3)" },
-#endif
-   { "sendheadendmsg", DBG_CommandLine_SendHeadEndMsg,  "send data (arg1) to head end with qos (arg2)" },
-   { "sendheepmsg",  DBG_CommandLine_SendHeepMsg,     "send dummy alarm header HEEP_MSG_TxHeepHdrOnly" },
-   { "sendmtlsmsg",  DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
-//   { "sendmeta",     DBG_CommandLine_SendMetadata,    "Trigger transmission of a Metadata message" },
-#if ( EP == 1 )
-   { "setdstenable", DBG_CommandLine_setDstEnable,   "Updates the DST enable:\n"
-                   "                                   Params - enable flag (0 - disable or 1 - enable)" },
-   { "setdstoffset", DBG_CommandLine_setDstOffset,    "Updates the DST offset: Params - offset in seconds" },
-#endif
-   { "setfreq",      DBG_CommandLine_SetFreq,         "set list of available frequencies.\n"
-                   "                                   Type ""setfreq"" with no arguments for more help" },
-#if ( EP == 1 )
-   { "setstartrule", DBG_CommandLine_setDstStartRule, "Updates the DST start rule: Params - mm dow ood hh mm" },
-   { "setstoprule",  DBG_CommandLine_setDstStopRule,  "Updates the DST stop rule: Params - mm dow ood hh mm" },
-   { "settimezoneoffset", DBG_CommandLine_setTimezoneOffset, "Updates the timezone offset: Params - offset in seconds" },
-#endif
-   // SM - Stack Manager
-//   { "smstart",      DBG_CommandLine_SM_Start,         "SM start" },
-//   { "smstop",       DBG_CommandLine_SM_Stop,          "SM stop"  },
-//   { "smget",        DBG_CommandLine_SM_Get,           "SM get"   },
-//   { "smset",        DBG_CommandLine_SM_Set,           "SM set"   },
-   { "nwPassActTimeout",   DBG_CommandLine_SM_NwPassiveActTimeout, "Get or set passive network activity timeout" },
-   { "nwActiveActTimeout", DBG_CommandLine_SM_NwActiveActTimeout,  "Get or set active network activity timeout" },
-   { "smstats",      DBG_CommandLine_SM_Stats,        "Print the SM stats" },
-   { "smconfig",     DBG_CommandLine_SM_Config,       "Print the SM Configuration" },
-
-   { "stackusage",   DBG_CommandLine_StackUsage,      "print the stack of active tasks" },
-#if BOB_IS_LAZY ==  1
-   { "stats",        DBG_ShowAllStats,                "print the PHY and MAC statistics" },
-#endif
-#if ( TEST_SYNC_ERROR == 1 )
-   { "syncerror",    DBG_CommandLine_SyncError,       "Set SYNC bit error " },
-#endif
-   { "tasksummary",  DBG_CommandLine_TaskSummary,     "print tasks summary" },
-   { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
-                   "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
-#if ( DCU == 1 )
-//   { "read_res",     CommandLine_ReadResource,       "Read a resource and value."},
-   { "slot",         DBG_CommandLine_getTBslot,        "Get the slot of this TB." },
-
-//   { "tr",           DBG_TraceRoute,                 "Trace Route"},
-#endif
-   { "tunnel",       DBG_CommandLine_tunnel,          "Convert TWACS command to tunnel format" },
-   { "txchannels",   DBG_CommandLine_TxChannels,      "set/print the TX channel list.\n"
-                   "                                   Type ""txchannels"" with no arguments for more help" },
-   { "txmode",       DBG_CommandLine_TXMode,          "Choose TX mode: 0 = Normal (default), 1 = PN9,\n"
-                   "                                   2 = Unmodulated Carrier Wave,\n"
-                   "                                   3 = Deprecated,\n"
-#if ( PORTABLE_DCU == 1)
-                   "                                   4 = 4GFSK BER with manufacturing print out,\n"
-                   "                                   5 = Old PHY (freq dev 600Hz, RS(63,59)" },
-#else
-                   "                                   4 = 4GFSK BER with manufacturing print out,\n" },
-#endif
-#if ( EP == 1 ) && ( TEST_TDMA == 1 )
-   { "txslot",       DBG_CommandLine_TxSlot,           "Specify which time slot to use for TDMA test\n" },
-#endif
-#if ( PORTABLE_DCU == 1)
-   { "dfwmonitormode",  DBG_CommandLine_dfwMonMode,    "enable (1) or disable (0) mode to only print DFW responses\n" },
-#endif
-   { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
+//   { "cca",          DBG_CommandLine_CCA,             "Display/Set the CCA threshold" },
+//   { "ccaadaptivethreshold", DBG_CommandLine_CCAAdaptiveThreshold, "Display the CCA adaptive threshold" },
+//   { "ccaadaptivethresholdenable", DBG_CommandLine_CCAAdaptiveThresholdEnable, "Display/Set the CCA adaptive threshold enable" },
+//   { "ccaoffset",    DBG_CommandLine_CCAOffset,       "Display/Set the CCA offset" },
+//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+//   { "clockswtest",  DBG_CommandLine_clockswtest,     "Count cycle counter at 2 different clock settings over 5 seconds" },
+//#endif
+//   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" },
+//   { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
+//#if ( EP == 1 )
+//   { "counters",     DBG_CommandLine_Counters,        "Display the current counters like reset counts etc" },
+//#endif
+//   { "cpuloaddis",   DBG_CommandLine_CpuLoadDisable,  "Disable CPU Load Output" },
+//   { "cpuloaden",    DBG_CommandLine_CpuLoadEnable,   "Enable CPU Load Output" },
+//   { "cpuloadsmart", DBG_CommandLine_CpuLoadSmart,    "Print CPU Load only when > 30%" },
+//   { "crc",          DBG_CommandLine_crc,             "calculate crc over hex string" },
+////   { "crc16",        DBG_CommandLine_crc16,           "calculate DCU hack 16 bit crc over hex string" },
+//#if ( EP == 1 )
+//   { "crcm",         DBG_CommandLine_crc16m,          "calculate ANSI psem 16 bit crc over hex string" },
+//#if ( TEST_TDMA == 1 )
+//   { "csmaskip",     DBG_CommandLine_CsmaSkip,        "Skip CCA" },
+//#endif
+//#endif
+////   { "dbgdis",       DBG_CommandLine_DebugDisable,    "Disable Debug Output" },
+////   { "dbgen",        DBG_CommandLine_DebugEnable,     "Enable Debug Output" },
+//   { "dbgfilter",    DBG_CommandLine_DebugFilter,     "Set debug port print filter task id" },
+//#if ( EP == 1 )
+//#if ( TEST_TDMA == 1 )
+//   { "Delay",        DBG_CommandLine_Delay,           "Set/Get the Slot Time Delay betwen 0 and 100 ms" },
+//#endif
+//#if ( ENABLE_DEMAND_TASKS == 1 )
+//#if ( DEMAND_IN_METER == 1 )
+//   { "demandreset",  DBG_CommandLine_DemandReset,     "Execute a demand reset (in the meter)" },
+//#endif
+//#if( DEMAND_IN_METER == 0 )
+//   { "schDmdRst",    DBG_CommandLine_SchDmdRst,       "Get (no args) or set (arg1) the scheduled demand reset date of month" },
+//#endif
+////   { "demandto",     DBG_CommandLine_DMDTO,           "Get (no args) or set (arg1) the demand reset timeout" },
+//#endif
+//#endif
+//#if ENABLE_DFW_TASKS
+//   { "dfw",          DBG_CommandLine_DFW_Status,      "DFW - Status" },
+//#endif   //End of #if EP
+//#if ( EP == 1 )
+//   { "dfwtd",        DBG_CommandLine_DfwTimeDv,       "Get/Set DFW TimeDiversity 0-255 minutes (DLConfirm ApplyConfirm)" },
+//#if ( REMOTE_DISCONNECT == 1 )
+//#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
+//   { "ds",           DBG_CommandLine_ds,              "Open/Close switch. Format ds close or ds open [ msgID ]" },
+//#endif
+//#endif
+////   { "dstimedv",     DBG_CommandLine_DsTimeDv,        "Get (no args) or set (one arg) Daily Shift Time Diversity" },
+//#endif
+//#if ( USE_DTLS == 1 )
+//   { "dtls",         DBG_CommandLine_Dtls,            "Gets or resets DTLS session state" },
+//   { "dtlsstats",    DBG_CommandLine_DtlsStats,       "Print the DTLS stats" },
+//#endif
+//#if ( EP == 1 )
+//#if ( ENABLE_DEMAND_TASKS == 1 ) /* If Demand Feature is enabled */
+//   { "dumpdemand",   DBG_CommandLine_DMDDump,         "Prints the demand file/variables" },
+//#endif
+//#endif
+//   { "evladd",       DBG_CommandLine_EVLADD,          "Add an event to the log" },
+//   { "evlcmd",       DBG_CommandLine_EVLCMD,          "Send Commands to EVL" },
+//   { "evlgetlog",    DBG_CommandLine_EVLGETLOG,       "Get an event log" },
+//   { "evlq",         DBG_CommandLine_EVLQ,            "Query event log" },
+//   { "evlsend",      DBG_CommandLine_EVLSEND,         "Mark Events as Sent" },
+//#if ( EVL_UNIT_TESTING == 1 )
+//   { "evlUnitTest",  DBG_CommandLine_EVL_UNIT_TESTING, "Run and event log unit test" },
+//#endif
+//   { "file",         DBG_CommandLine_PrintFiles,      "Print File list or file content (optional param, filename)" },
+//   { "filedump",     DBG_CommandLine_DumpFiles,       "Print the contents of files in the un-named partitions" },
+//   { "freeram",      DBG_CommandLine_FreeRAM,         "Display remaining free internal RAM" },
+//#if ( DCU == 1 )
+//   { "frontendgain", DBG_CommandLine_FrontEndGain,    "Display/Set the front end gain" },
+//#endif
+//#if ( BUILD_DFW_TST_CMD_CHANGE == 0 )
+//   { "GenDFWkey",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
+//#else
+//   { "DfwKeyGen",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
+//#endif
+//#if ( EP == 1 )
+////   { "getdstenable", DBG_CommandLine_getDstEnable,    "Prints the DST enable" },
+////   { "getdsthash",   DBG_CommandLine_getDstHash,      "Prints the DST hash" },
+////   { "getdstoffset", DBG_CommandLine_getDstOffset,    "Prints the DST offset" },
+//#endif
+//   { "getfreq",      DBG_CommandLine_GetFreq,         "print list of available frequencies" },
+//#if ( EP == 1 )
+////   { "getstartrule", DBG_CommandLine_getDstStartRule, "Prints the DST start rule" },
+////   { "getstoprule",  DBG_CommandLine_getDstStopRule,  "Prints the DST stop rule" },
+////   { "gettimezoneoffset", DBG_CommandLine_getTimezoneOffset, "Prints the timezone offset" },
+//#endif
+//#if ENABLE_HMC_TASKS
+//#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
+//   { "hmc",          DBG_CommandLine_HmcCmd,          "Host Meter Table Read, format is: hmc [m] id offset len" },
+//   { "hmcc",         DBG_CommandLine_HmcCurrent,      "Host Meter Read Current, format is: hmcc uom" },
+//   { "hmcd",         DBG_CommandLine_HmcDemand,       "Host Meter Demand, format is: hmcd uom" },
+//   { "hmceng",       DBG_CommandLine_HmcEng,          "print Host Meter Communication engineering stats"},
+//#endif
+//#if 0
+//   { "hmcdc",        DBG_CommandLine_HmcDemandCoin,   "Host Meter Demand Coincident, format is: hmcd uom coin" },
+//#endif
+//   { "hmcs",         DBG_CommandLine_HmcHist,         "Host Meter Read Shift, format is: hmcs uom" },
+//#if ( CLOCK_IN_METER == 1 )
+//   { "hmctime",      DBG_CommandLine_HMC_time,        "Get/Set Host Meter time" },
+//#endif
+//#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
+//   { "hmcw",         DBG_CommandLine_HmcwCmd,         "Host Meter Table Write, format is: hmcw [m] id offset data" },
+//#endif
+//#endif
+//   { "hwinfo",       DBG_CommandLine_GetHWInfo,       "Display the HW Info" },
+//#ifdef TM_ID_TEST_CODE
+////   { "idbufr",       DBG_CommandLine_IdBufRd,         "Reads from the interval data test buffer: bufIndex "},
+////   { "idbufw",       DBG_CommandLine_IdBufWr,         "Reads from the interval data test buffer: bufIndex floatVal"},
+////   { "idcfg",        DBG_CommandLine_IdCfg,           "Configure Interval Data: ch smpl_mS store mult div mode rti" },
+////   { "idcfgr",       DBG_CommandLine_IdCfgR,          "Read Interval Data Configuration" },
+////   { "idparams",     DBG_CommandLine_IdParams,        "Read/Write Parameters\n"
+////                   "                                   Read: No Params, Set: SamplePeriod BuSchedule" },
+////   { "idrd",         DBG_CommandLine_IdRd,            "Read Interval: ch yy mm dd hh mm" },
+////   { "idtimedv",     DBG_CommandLine_IdTimeDv,        "Get (no args) or set (one arg) Interval Data Time Diversity" },
+//#endif
+//#ifdef TM_ID_UNIT_TEST
+////   { "idut",         DBG_CommandLine_IdUt,            "Run interval data self test: idut ch"},
+//#endif
+//
+//   { "insertappmsg", DBG_CommandLine_InsertAppMsg,    "send NWK payload (arg1) into the bottom of the APP layer" },
+//   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\n"
+//                   "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
+//#if ( EP == 1 )
+//   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" },
+//#if ( LP_IN_METER != 0 )
+//   { "lpstats",      DBG_CommandLine_lpstats,         "Dump Load Profile info. Usage: lptstats [first_block [last_block]]" },
+//#endif
+//#endif
+//   { "mac_time",     DBG_CommandLine_MacTimeCmd,      "Send a 'mac_time set' (DCU) or 'mac_time req' (EP) command" },
+//   { "mac_tsync",    DBG_CommandLine_TimeSync,        "Set/Get the TimeSync parameters" },
+//   { "macaddr",      DBG_CommandLine_MacAddr,         "Set/Get the MAC address" },
+//   { "macconfig",    DBG_CommandLine_MacConfig,       "Print the MAC Configuration" },
+////   { "macflush",     DBG_CommandLine_MacFlush,        "mac flush" },
+////   { "macget",       DBG_CommandLine_MacGet,          "mac get"   },
+////   { "macpurge",     DBG_CommandLine_MacPurge,        "mac purge" },
+//#if ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
+//   { "mac_lp",       DBG_CommandLine_MAC_LinkParameters,"Get/Send MAC Link Parameters Config/Command" },
+//#endif
+//   { "macreset",     DBG_CommandLine_MacReset,        "mac reset" },
+////   { "macset",       DBG_CommandLine_MacSet,          "mac set"   },
+////   { "macstart",     DBG_CommandLine_MacStart,        "mac start" },
+//   { "macstats",     DBG_CommandLine_MacStats,        "Print the MAC stats" },
+//#if ( DCU == 1 )
+//   { "macpacketdelay",DBG_CommandLine_TxPacketDelay,   "get (no args) or set (arg1) MAC TxPacketDelay attribute" },
+//#endif
+////   { "macstop",      DBG_CommandLine_MacStop,         "mac stop"  },
+//   { "macrxtimeout", DBG_CommandLine_RxTimeout,       "get (no args) or set (arg1) MAC Reassembly Timeout in seconds" },
+//   { "macrelhigh",   DBG_CommandLine_RelHighCnt,      "get (no args) or set (arg1) MAC ReliabilityHighCount attribute" },
+//   { "macrelmed",    DBG_CommandLine_RelMedCnt,       "get (no args) or set (arg1) MAC ReliabilityMediumCount attribute" },
+//   { "macrellow",    DBG_CommandLine_RelLowCnt,       "get (no args) or set (arg1) MAC ReliabilityLowCount attribute" },
+//   { "mactxpause",   DBG_CommandLine_MacTxPause,      "pause transmit of mac for QoS testing" },
+//   { "mactxunpause", DBG_CommandLine_MacTxUnPause,    "unpause transmit of mac for QoS testing" },
+//#if ( OVERRIDE_TEMPERATURE == 1 )
+//   { "manTemp",      DBG_CommandLine_ManualTemperature, "Set/Get manual (temporary override) temperture" },
+//#endif
+//#if ( USE_MTLS == 1 )
+//   { "mtlsstats",    DBG_CommandLine_mtlsStats,       "Get/Reset the MTLS stats 'mtlsstats reset' to reset" },
+//#endif
+//#if ( CLOCK_IN_METER == 1 )
+//   { "mtrtime",      DBG_CommandLine_mtrTime,         "Convert meter time mm dd yy hh mm to system time" },
+//#endif
+//   { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
+//   { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
+//   { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
+//   { "noiseestimatecount", DBG_CommandLine_NoiseEstimateCount, "Display/Set the noise estimate count" },
+//   { "noiseestimaterate", DBG_CommandLine_NoiseEstimateRate, "Display/Set the noise estimate rate" },
+//#if ( NOISE_HIST_ENABLED == 1 )
+//   { "noisehist",    DBG_CommandLine_NoiseHistogram,  "Display a noise histogram for channel(s)" },
+//   { "noiseburst",   DBG_CommandLine_NoiseBurst,      "Display noise bursts for channel(s)" },
+//   { "bursthist",    DBG_CommandLine_BurstHistogram,  "Display histgram of noise bursts for channel(s)" },
+//#endif
+//#if ( ( MULTIPLE_MAC != 0 ) && ( EP == 1 ) )
+//   { "NumMac",          DBG_CommandLine_NumMac,       "Set/Get number of mac addresses emulated (1-50)" },
+//#endif
+//   { "nvr",          DBG_CommandLine_NvRead,          "NV memory Read: Params - Partition Addr Len" },
+//#ifdef TM_DVR_EXT_FL_UNIT_TEST
+//   { "nvtest",       DBG_CommandLine_NvTest,          "[count (default=100)] Test a sector of external NV" },
+//#endif
+//   { "nwkget",       DBG_CommandLine_NwkGet,          "nwk get"  },
+//   { "nwkreset",     DBG_CommandLine_NwkReset,        "nwk reset"},
+//   { "nwkset",       DBG_CommandLine_NwkSet,          "nwk set"  },
+//   { "nwkstart",     DBG_CommandLine_NwkStart,        "nwk start"},
+//   { "nwkstats",     DBG_CommandLine_NwkStats,        "Print the NWK stats" },
+//   { "nwkstop",      DBG_CommandLine_NwkStop,         "nwk stop" },
+//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+//#if ( EP == 1 )
+//   { "ondemandread", DBG_CommandLine_OnDemandRead,    "Does on demand read of pre-set quantities" },
+//#endif
+//#endif
+//#if OTA_CHANNELS_ENABLED == 1
+//#if DCU == 1
+//   { "ota",          CommandLine_OTA_Cmd,             "Over the air command"},
+//#endif
+//#endif
+//#if ( PHASE_DETECTION == 1 )
+//   { "pd",           DBG_CommandLine_PhaseDetectCmd,  "Phase Detect Info : pd <info> <freq>" },
+//#endif
+//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+//   { "padac",        DBG_CommandLine_PaDAC,           "Prints Power Amplifier DAC output" },
+//#if ( ENGINEERING_BUILD == 1 )
+//   { "PaDBMtoDAC",   DBG_CommandLine_PaCoeff,         "Get/Set Power Amplifier output" },
+//   { "PaVFWDtoDBM",  DBG_CommandLine_PaCoeff,         "Get/Set Power Amplifier output" },
+//#endif   //( ENGINEERING_BUILD == 1 )
+//#endif   //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+////   { "packettimeout", DBG_CommandLine_PacketTimeout,  "get (no args) or set (arg1) MAC Packet Timeout in ms" },
+//   { "part",         DBG_CommandLine_Partition,       "Prints partition data" },
+////   { "phymaxtxlen",  DBG_CommandLine_GetPhyMaxTxPayload, "Usage:  'phymaxtxlen' get phy maximum TX payload" },
+//   { "phyreset",     DBG_CommandLine_PhyReset,        "phy reset" },
+////   { "phystart",     DBG_CommandLine_PhyStart,        "phy start" },
+//   { "phystats",     DBG_CommandLine_PhyStats,        "Print the PHY stats" },
+//   { "phyconfig",    DBG_CommandLine_PhyConfig,       "Print the PHY Configuration" },
+////   { "phystop",      DBG_CommandLine_PhyStop,         "phy stop"  },
+//   { "ping",         DBG_CommandLine_MacPingCmd,      "Send a 'ping' request to EP"},
+//   { "power",        DBG_CommandLine_Power,           "Get power level when no arguments. Set power level (0-5)" },
+//#if ( EP == 1 )
+//   { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
+//#endif
+//   { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
+//   { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
+//#if ( EP == 1 )
+//   { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
+//   { "regtimeouts",  DBG_CommandLine_RegTimeouts,     "Get or Set the Registration Timeouts" },
+//#endif
+//#if BOB_IS_LAZY == 1
+//   { "reset",        DBG_ResetAllStats,               "Reset PHY, MAC and NWK stats" },
+//#endif
+//#if ( CLOCK_IN_METER == 1 )
+//   { "revmtrtime",   DBG_CommandLine_mtrTime,         "Convert system time to meter time mm dd yy hh mm" },
+//#endif
+//#if ( FAKE_TRAFFIC == 1 )
+//   { "rfdutycycle",  DBG_CommandLine_ipRfDutyCycle,   "get (no args) or set (arg1) RF dutycycle" },
+//#endif
+//   { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
+////   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },
+//   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" },
+//   { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\n"
+//                   "                                   Set: Params - yy mm dd hh mm ss" },
+//   { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\n"
+//                   "                                   Type ""rxchannels"" with no arguments for more help" },
+//   { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
+//   { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
+//   { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },
+//#if ( DCU == 1 )
+//   { "sdtest",       DBG_CommandLine_sdtest,          "[count (default=1)] Exercise SDRAM" },
+//#endif
+//   { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\n"
+//                   "                                   Plus unpublished functions - see source code for details" },
+//   { "sectest",      DBG_CommandLine_sectest,         "[count (default=1)] Exercise Security Device" },
+//   { "sendappmsg",   DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
+//#if (USE_IPTUNNEL == 1)
+//   { "sendtunmsg",   DBG_CommandLine_SendIpTunMsg,    "send data (arg1) to address (arg2) with qos (arg3)" },
+//#endif
+//   { "sendheadendmsg", DBG_CommandLine_SendHeadEndMsg,  "send data (arg1) to head end with qos (arg2)" },
+//   { "sendheepmsg",  DBG_CommandLine_SendHeepMsg,     "send dummy alarm header HEEP_MSG_TxHeepHdrOnly" },
+//   { "sendmtlsmsg",  DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
+////   { "sendmeta",     DBG_CommandLine_SendMetadata,    "Trigger transmission of a Metadata message" },
+//#if ( EP == 1 )
+//   { "setdstenable", DBG_CommandLine_setDstEnable,   "Updates the DST enable:\n"
+//                   "                                   Params - enable flag (0 - disable or 1 - enable)" },
+//   { "setdstoffset", DBG_CommandLine_setDstOffset,    "Updates the DST offset: Params - offset in seconds" },
+//#endif
+//   { "setfreq",      DBG_CommandLine_SetFreq,         "set list of available frequencies.\n"
+//                   "                                   Type ""setfreq"" with no arguments for more help" },
+//#if ( EP == 1 )
+//   { "setstartrule", DBG_CommandLine_setDstStartRule, "Updates the DST start rule: Params - mm dow ood hh mm" },
+//   { "setstoprule",  DBG_CommandLine_setDstStopRule,  "Updates the DST stop rule: Params - mm dow ood hh mm" },
+//   { "settimezoneoffset", DBG_CommandLine_setTimezoneOffset, "Updates the timezone offset: Params - offset in seconds" },
+//#endif
+//   // SM - Stack Manager
+////   { "smstart",      DBG_CommandLine_SM_Start,         "SM start" },
+////   { "smstop",       DBG_CommandLine_SM_Stop,          "SM stop"  },
+////   { "smget",        DBG_CommandLine_SM_Get,           "SM get"   },
+////   { "smset",        DBG_CommandLine_SM_Set,           "SM set"   },
+//   { "nwPassActTimeout",   DBG_CommandLine_SM_NwPassiveActTimeout, "Get or set passive network activity timeout" },
+//   { "nwActiveActTimeout", DBG_CommandLine_SM_NwActiveActTimeout,  "Get or set active network activity timeout" },
+//   { "smstats",      DBG_CommandLine_SM_Stats,        "Print the SM stats" },
+//   { "smconfig",     DBG_CommandLine_SM_Config,       "Print the SM Configuration" },
+//
+//   { "stackusage",   DBG_CommandLine_StackUsage,      "print the stack of active tasks" },
+//#if BOB_IS_LAZY ==  1
+//   { "stats",        DBG_ShowAllStats,                "print the PHY and MAC statistics" },
+//#endif
+//#if ( TEST_SYNC_ERROR == 1 )
+//   { "syncerror",    DBG_CommandLine_SyncError,       "Set SYNC bit error " },
+//#endif
+//   { "tasksummary",  DBG_CommandLine_TaskSummary,     "print tasks summary" },
+//   { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
+//                   "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
+//#if ( DCU == 1 )
+////   { "read_res",     CommandLine_ReadResource,       "Read a resource and value."},
+//   { "slot",         DBG_CommandLine_getTBslot,        "Get the slot of this TB." },
+//
+////   { "tr",           DBG_TraceRoute,                 "Trace Route"},
+//#endif
+//   { "tunnel",       DBG_CommandLine_tunnel,          "Convert TWACS command to tunnel format" },
+//   { "txchannels",   DBG_CommandLine_TxChannels,      "set/print the TX channel list.\n"
+//                   "                                   Type ""txchannels"" with no arguments for more help" },
+//   { "txmode",       DBG_CommandLine_TXMode,          "Choose TX mode: 0 = Normal (default), 1 = PN9,\n"
+//                   "                                   2 = Unmodulated Carrier Wave,\n"
+//                   "                                   3 = Deprecated,\n"
+//#if ( PORTABLE_DCU == 1)
+//                   "                                   4 = 4GFSK BER with manufacturing print out,\n"
+//                   "                                   5 = Old PHY (freq dev 600Hz, RS(63,59)" },
+//#else
+//                   "                                   4 = 4GFSK BER with manufacturing print out,\n" },
+//#if ( EP == 1 ) && ( TEST_TDMA == 1 )
+//   { "txslot",       DBG_CommandLine_TxSlot,           "Specify which time slot to use for TDMA test\n" },
+//#endif
+//#if ( PORTABLE_DCU == 1)
+//   { "dfwmonitormode",  DBG_CommandLine_dfwMonMode,    "enable (1) or disable (0) mode to only print DFW responses\n" },
+//#endif
+//   { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
    { "virgin",       DBG_CommandLine_virgin,          "Erases flash chip and resets the micro" },
    { "virgindelay",  DBG_CommandLine_virginDelay,     "Erases signature; continues. Allows new code load and then virgin" },
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-   { "vswr",         DBG_CommandLine_VSWR,            "Displays VSWR measurement" },
-#endif
-#if ( READ_KEY_ALLOWED != 0 )
-   { "dumpKeys",     DBG_CommandLine_dumpKeys ,       "Dump 3 keys automatically replace on flash security change" },
-   { "rkey",         DBG_CommandLine_readKey ,        "Read specifed key" },
-   { "rkeyenc",      DBG_CommandLine_readKey ,        "Read specifed encrypted key" },
-#endif
-#if USE_USB_MFG
-   { "usb",          DBG_CommandLine_usbaddr ,        "Display USB address" },
-#endif
-#if ( WRITE_KEY_ALLOWED != 0 )
-   { "wkey",         DBG_CommandLine_writeKey ,       "Write specifed key with specified data" },
-#endif
-#if 0
-   { "x",            DBG_CommandLine_hardfault,       "Force a write to flash; test fault handler" },
-#endif
-#if ( SIMULATE_POWER_DOWN == 1 )
-   { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
-#endif
-#endif  // #if 0
+//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+//   { "vswr",         DBG_CommandLine_VSWR,            "Displays VSWR measurement" },
+//#endif
+//#if ( READ_KEY_ALLOWED != 0 )
+//   { "dumpKeys",     DBG_CommandLine_dumpKeys ,       "Dump 3 keys automatically replace on flash security change" },
+//   { "rkey",         DBG_CommandLine_readKey ,        "Read specifed key" },
+//   { "rkeyenc",      DBG_CommandLine_readKey ,        "Read specifed encrypted key" },
+//#endif
+//#if USE_USB_MFG
+//   { "usb",          DBG_CommandLine_usbaddr ,        "Display USB address" },
+//#endif
+//#if ( WRITE_KEY_ALLOWED != 0 )
+//   { "wkey",         DBG_CommandLine_writeKey ,       "Write specifed key with specified data" },
+//#endif
+//#if 0
+//   { "x",            DBG_CommandLine_hardfault,       "Force a write to flash; test fault handler" },
+//#endif
+//#if ( SIMULATE_POWER_DOWN == 1 )
+//   { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
+//#endif
    { 0, 0, 0 }
 };
 
@@ -3730,64 +3726,64 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //}
 //#endif // (EP == 1)
 //#if 0
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_virgin
-//
-//   Purpose: Erases NV chip and reset micro. Comes up as a virgin unit.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_virgin ( uint32_t argc, char *argv[] )
-//{
-//
-//   /* Pass in argc of 2 to differentiate this call from a command line entry of virginDelay  */
-//   ( void )DBG_CommandLine_virginDelay ( 2, argv );   /* Erase the signature  */
-//
-//   RESET();  /* Execute Software Reset. Just erased NV, PWR_SafeReset() not necessary */
-//}
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_virginDelay
-//
-//   Purpose: Erases signature and continues to run. Allows new code load and automatic virgin on next reboot.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
-//{
-//#if ( PARTITION_MANAGER == 1 )
-//   PartitionData_t const * partitionData;    /* Pointer to partition information   */
-//   uint8_t                 erasedSignature[ 8 ];
-//
-//   /* Open the partition with the signature  */
-//   if ( eSUCCESS ==  PAR_partitionFptr.parOpen( &partitionData, ePART_NV_VIRGIN_SIGNATURE, 0xffffffff ) )
-//   {
-//      // Erase signature
-//      ( void )memset( erasedSignature, 0, sizeof( erasedSignature ) );
-//      if ( eSUCCESS == PAR_partitionFptr.parWrite( 0, erasedSignature, sizeof( erasedSignature ), partitionData ) )
-//      {
-//         if ( 1 == argc )  /* Invoked from command line directly? */
-//         {
-//            DBG_logPrintf( 'D', "Signature erased. Device will be made virgin on next reboot!" );
-//         }
-//      }
-//   }
-//#endif
-//   return 0;
-//}
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_virgin
+
+   Purpose: Erases NV chip and reset micro. Comes up as a virgin unit.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_virgin ( uint32_t argc, char *argv[] )
+{
+
+   /* Pass in argc of 2 to differentiate this call from a command line entry of virginDelay  */
+   ( void )DBG_CommandLine_virginDelay ( 2, argv );   /* Erase the signature  */
+
+   RESET();  /* Execute Software Reset. Just erased NV, PWR_SafeReset() not necessary */
+}
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_virginDelay
+
+   Purpose: Erases signature and continues to run. Allows new code load and automatic virgin on next reboot.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
+{
+#if ( PARTITION_MANAGER == 1 )
+   PartitionData_t const * partitionData;    /* Pointer to partition information   */
+   uint8_t                 erasedSignature[ 8 ];
+
+   /* Open the partition with the signature  */
+   if ( eSUCCESS ==  PAR_partitionFptr.parOpen( &partitionData, ePART_NV_VIRGIN_SIGNATURE, 0xffffffff ) )
+   {
+      // Erase signature
+      ( void )memset( erasedSignature, 0, sizeof( erasedSignature ) );
+      if ( eSUCCESS == PAR_partitionFptr.parWrite( 0, erasedSignature, sizeof( erasedSignature ), partitionData ) )
+      {
+         if ( 1 == argc )  /* Invoked from command line directly? */
+         {
+            DBG_logPrintf( 'D', "Signature erased. Device will be made virgin on next reboot!" );
+         }
+      }
+   }
+#endif
+   return 0;
+}
 //#endif // #if 0
 //#if WRITE_KEY_ALLOWED
 //#warning "Don't release with WRITE_KEY_ALLOWED"

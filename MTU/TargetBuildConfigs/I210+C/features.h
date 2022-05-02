@@ -81,10 +81,10 @@
 #endif
 #define FREE_RTOS                         2
 /* */
-#define ACLARA_DVR_ABSTRACTION            0
+#define ACLARA_DVR_ABSTRACTION            1
 #if ( ACLARA_DVR_ABSTRACTION != 0 )
    #define FILE_IO                        0
-   #define PARTITION_MANAGER              0 /* 0 = No PARTITION_MANAGER, 1 = Partition Manager */
+   #define PARTITION_MANAGER              1 /* 0 = No PARTITION_MANAGER, 1 = Partition Manager */
    #define TIMER_UTIL                     0
    #define RTC                            0
 #endif
