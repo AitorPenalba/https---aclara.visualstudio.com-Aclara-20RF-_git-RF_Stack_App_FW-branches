@@ -128,7 +128,9 @@ static bool          voltageEventMonitor;                /* Read from MFG table 
 #if ( ( EP == 1 ) && ( METER_TROUBLE_SIGNAL == 1 ) && ( ANSI_STANDARD_TABLES == 1 ) )
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
 #if ( LOG_IN_METER == 1 )
+#if ( MCU_SELECTED == NXP_K24 )
 static void       meter_trouble_isr_busy( void );
+#endif
 #endif
 #endif
 #endif
@@ -176,6 +178,7 @@ returnStatus_t ALRM_init ( void )
       //TODO RA6: NRJ: determine if semaphores need to be counting
       if ( OS_SEM_Create( &MeterTroubleSem, 0 ) )
       {
+#if ( RTOS_SELECTION == MQX_RTOS )
          /* Set up the ISR for Meter trouble signal. This is only on some meters.   */
          if ( NULL != _int_install_isr( HMC_TROUBLE_IRQIsrIndex, ( INT_ISR_FPTR )meter_trouble_isr_busy, NULL ) )
          {
@@ -186,6 +189,7 @@ returnStatus_t ALRM_init ( void )
                HMC_TROUBLE_BUSY_IRQ_EI();    /* Enable the ISR */
             }
          }
+#endif
       }
       else
       {
@@ -1147,14 +1151,22 @@ uint8_t ALRM_AddOpportunisticAlarms(   uint16_t msgLen,
    Reentrant Code: No
 
  **********************************************************************************************************************/
+#if ( MCU_SELECTED == NXP_K24 )
 static void meter_trouble_isr_busy( void )
+#elif ( MCU_SELECTED == RA6E1 )
+void meter_trouble_isr_busy(external_irq_callback_args_t * p_args)
+#endif
 {
 #if ( HMC_TROUBLE_EDGE_TRIGGERED == 0 )
    HMC_TROUBLE_BUSY_IRQ_DI();       /* Disable the ISR */
 #else
    HMC_TROUBLE_BUSY_IRQ_EI()        /* This resets the ISF flag   */
 #endif
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_SEM_Post( &MeterTroubleSem ); /* Post the semaphore */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_SEM_Post_fromISR( &MeterTroubleSem ); /* Post the semaphore */
+#endif
    ( void )HMC_DIAGS_DoDiags( ( uint8_t )HMC_APP_API_CMD_ACTIVATE, NULL );
 }
 #endif

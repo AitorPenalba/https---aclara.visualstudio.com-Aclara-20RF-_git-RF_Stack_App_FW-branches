@@ -52,7 +52,7 @@
 
 HD_EXTERN returnStatus_t HD_init ( void );
 HD_EXTERN void HD_MsgHandler(HEEP_APPHDR_t *heepHdr, void *payloadBuf, uint16_t length);
-HD_EXTERN void HD_DailyShiftTask ( uint32_t Arg0 );
+HD_EXTERN void HD_DailyShiftTask ( taskParameter );
 HD_EXTERN uint8_t HD_getDsBuDataRedundancy(void);
 HD_EXTERN returnStatus_t HD_setDsBuDataRedundancy(uint8_t dsBuDataRedundancy);
 HD_EXTERN uint8_t HD_getDsBuMaxTimeDiversity(void);

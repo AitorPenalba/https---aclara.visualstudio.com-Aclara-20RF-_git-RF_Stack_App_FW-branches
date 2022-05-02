@@ -32,19 +32,15 @@
 #include "time_util.h"
 #include "BSP_aclara.h"
 #include "time_DST.h"
-#if 0 // TODO: RA6E1 - Support to mac module - Porting for Systick timer
 #include "mac.h"
-#endif
 #include "DBG_SerialDebug.h"
 #if ( EP == 1 )
 #include "portable_aclara.h"
-#if 0 // TODO: RA6E1 - Support to DST and mac modules - Porting for Systick timer
 #include "file_io.h"
 #include "timer_util.h"
 #include "mode_config.h"
 #include "radio_hal.h"
 #include "radio.h"
-#endif
 #endif
 #if (ACLARA_DA == 1)
 #include "b2bMessage.h"
@@ -54,10 +50,10 @@
 #include <mqx_prv.h>    //DCU2+
 #include "FTM.h"        //Used for GPS FTM0_CH2 common for 9975T and 9985T and FTM0_CH4 used for TCXO trimming.
 #endif
-#if 0 // TODO: RA6E1 - Support to DST and mac modules - Porting for Systick timer
 #include "sys_clock.h"
 #include "buffer.h"
 #include "time_sync.h"
+#if 0 // TODO: RA6E1 GPIO files to be done
 #include "gpio.h"
 #endif
 #if ( USE_MTLS == 1 )
@@ -210,9 +206,7 @@ STATIC tTimeSys      _sTimeSys[MAX_ALARMS];              /* Manage alarm request
 static time_vars_t   timeVars_;                          /* Time related variable */
 
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - File access not supported now
 static FileHandle_t  fileHndlTimeSys_ = {0};             /* Contains the file handle information */
-#endif
 static uint8_t       statusTimeRequest_;                 /* State variable to track get time */
 static bool          acceptanceTimerRunning_ = (bool)false;    /* Time-sync within timeAcceptanceDelay */
 
@@ -2220,7 +2214,7 @@ void TIME_SYS_HandlerTask( taskParameter )
    isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                      /*lint !e641 */
    _int_install_isr(INT_SysTick, TIME_SYS_vApplicationTickHook, isr_ptr);  /*lint !e641 !e64 !e534 */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   ( void ) SysTick_Config( SystemCoreClock / configTICK_RATE_HZ );      /* Configure SysTick to generate an interrupt every 5ms - TODO: This can be modified to 10ms */
+   /* FreeRTOS uses the Tick Hook method to call so no initialization needed for that case */
 #endif
    cnt = (uint16_t)(SYS_TIME_TICK_IN_mS / portTICK_RATE_MS);
 
@@ -2558,7 +2552,6 @@ void vApplicationTickHook()
 }
 
 
-#if 0 /* TODO: OR_PM and MAC layer support */
 #if ( EP == 1 )
 /*****************************************************************************************************************
  *
@@ -2726,8 +2719,11 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
 
          // Make sure the time adjustment is not close to cross a 10ms boundary.
          // if so, waste some time such that we won't have to worry about 10ms boundary crossing while we adjust time.
-
+#if ( MCU_SELECTED == NXP_K24 )
          systRVR = SYST_RVR; // Save the original value for later
+#elif ( MCU_SELECTED == RA6E1 )
+         systRVR = SysTick->LOAD;
+#endif
          _ticTocCntr = 1;    // Set to 1 because we are going to waste up to 10ms here.
                              // In other words, we are getting ready for the next 10ms tick that expects tictoc to be 1.
 
@@ -2735,7 +2731,11 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
          __disable_interrupt(); // Disable all interrupts. This section is time critical.
          do {
             // Add processing latency to the timeSync time to compensate for processing delays
+#if ( MCU_SELECTED == NXP_K24 )
             timePlusLatency = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT_CYCCNT - pDataInd->timeStampCYCCNT);
+#elif ( MCU_SELECTED == RA6E1 )
+            timePlusLatency = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT->CYCCNT - pDataInd->timeStampCYCCNT);
+#endif
 
             currentTimeCombined = (((timePlusLatency >> 16) * 100LL) >> 16) * 10LL;     // Convert the updated timeSync time in 10ms granularity
             currentTimeRebuilt  = (((currentTimeCombined / 10LL) << 16) / 100LL) << 16; // Convert the converted timeSync back in Q32.32 format.
@@ -2746,15 +2746,29 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
 
             // This is where the magic happens. We refine the time from a 10ms granularity to usec precision.
             // Recompute with time setting added latency
+#if ( MCU_SELECTED == NXP_K24 )
             timePlusLatency2 = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT_CYCCNT - pDataInd->timeStampCYCCNT);
+#elif ( MCU_SELECTED == RA6E1 )
+            timePlusLatency2 = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT->CYCCNT - pDataInd->timeStampCYCCNT);
+#endif
             diffTime = timePlusLatency2 - currentTimeRebuilt;
-
+#if ( MCU_SELECTED == NXP_K24 )
             systRVRUpdate = (2*SYST_RVR)-(uint32_t)((diffTime * (uint64_t)cpuFreq) >> 32); // Compute RVR to waste the remainder of 10ms
+#elif ( MCU_SELECTED == RA6E1 )
+            systRVRUpdate = ( 2 * SysTick->LOAD )-(uint32_t)((diffTime * (uint64_t)cpuFreq) >> 32); // Compute RVR to waste the remainder of 10ms
+#endif
          } while ( systRVR < (uint32_t)( 0.0001f * (float32_t)cpuFreq ) ); // Keep iterating if we are too close from a 10ms transition.
 
+#if ( MCU_SELECTED == NXP_K24 )
          SYST_RVR = systRVRUpdate; // Set RVR to waste the remainder of 10ms
          SYST_CVR = 0;             // This doesn't really writes 0. Any value would work. It just forces RVR to load CVR indireclty because we can't load CVR directly.
          SYST_RVR = systRVR;       // Restore previous value.  This won't impact CVR until the next sysTick interrupt. That's what we want.
+#elif ( MCU_SELECTED == RA6E1 )
+         SysTick->LOAD = systRVRUpdate; // Set RVR to waste the remainder of 10ms
+         SysTick->VAL = 0;              // This doesn't really writes 0. Any value would work. It just forces RVR to load CVR indireclty because we can't load CVR directly.
+         SysTick->LOAD = systRVR;       // Restore previous value.  This won't impact CVR until the next sysTick interrupt. That's what we want.
+#endif
+
 //TODO: Added #if DCU when putting RTC as source for sys tick adjustment since not used.  Put back in when using TCXO.
 #if ( DCU == 1 )
          CYCdiff  = 0;             // Reset error tracking
@@ -2993,4 +3007,3 @@ returnStatus_t TIME_SYS_OR_PM_Handler( enum_MessageMethod action, meterReadingTy
    }
    return ( retVal );
 }
-#endif

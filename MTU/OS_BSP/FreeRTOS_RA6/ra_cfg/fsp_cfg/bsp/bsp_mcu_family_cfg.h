@@ -203,7 +203,7 @@
             (((1 > 0) ? 0U : 1U) << 11U) /* External IRQ11 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 12U) /* External IRQ12 */ | \
             (((1 > 0) ? 0U : 1U) << 13U) /* External IRQ13 */ | \
-            (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 14U) /* External IRQ14 */ | \
+            (((1 > 0) ? 0U : 1U) << 14U) /* External IRQ14 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 15U) /* External IRQ15 */ | \
             0xFFFF0000U)
 #endif

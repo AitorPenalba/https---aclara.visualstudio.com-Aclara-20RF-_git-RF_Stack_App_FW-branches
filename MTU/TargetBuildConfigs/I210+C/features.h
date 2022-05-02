@@ -43,8 +43,8 @@
 
 #define COMMERCIAL_METER                  2  /* Not a commercial meter, but can have more than one phase voltage */
 #define CLOCK_IN_METER                    0
-#define LP_IN_METER                       0
-#define DEMAND_IN_METER                   0
+#define LP_IN_METER                       1
+#define DEMAND_IN_METER                   1
 #define COINCIDENT_SUPPORT                0
 
 #if ( LP_IN_METER == 0 )
@@ -55,12 +55,12 @@
 
 #define REMOTE_DISCONNECT                 0
 #define HMC_SNAPSHOT                      0
-#define ANSI_STANDARD_TABLES              0
-#define ANSI_LOGON                        0
+#define ANSI_STANDARD_TABLES              1
+#define ANSI_LOGON                        1
 #define ANSI_SECURITY                     0
-#define METER_TROUBLE_SIGNAL              0
+#define METER_TROUBLE_SIGNAL              1
 #define END_DEVICE_NEGOTIATION            0
-#define LOG_IN_METER                      0
+#define LOG_IN_METER                      1
 #define OPTICAL_PASS_THROUGH              0
 #define SAMPLE_METER_TEMPERATURE          0  /* Is sampling the meter's thermometer required, some meter's do this on their own */
 #define LOAD_CONTROL_DEVICE               0  /* 1 -> supports load control and signed multicast messages.   */

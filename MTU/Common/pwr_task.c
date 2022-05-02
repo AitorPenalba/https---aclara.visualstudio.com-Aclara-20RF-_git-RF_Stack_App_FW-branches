@@ -36,7 +36,7 @@
 #include "file_io.h"
 //#include "pwr_restore.h"
 //#include "pwr_config.h"
-//#include "hmc_app.h"
+#include "hmc_app.h"
 #include "mode_config.h"
 #include "time_util.h"
 //#include "demand.h"

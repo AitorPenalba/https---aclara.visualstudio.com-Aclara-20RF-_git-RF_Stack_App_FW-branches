@@ -117,8 +117,13 @@ void PWROR_Task( uint32_t Arg0 )
 {
    sysTimeCombined_t    timeRestorationSysComb = 0; /* System time at entry to this task   */
    sysTimeCombined_t    outageTimeSysComb;
+#if ( RTOS_SELECTION == MQX_RTOS )
    MQX_TICK_STRUCT      endTime;             /* Used to compute elapsed time since restoration.  */
    MQX_TICK_STRUCT      startTime;           /* Used to compute elapsed time since restoration.  */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_TICK_Struct       endTime;             /* Used to compute elapsed time since restoration.  */
+   OS_TICK_Struct       startTime;           /* Used to compute elapsed time since restoration.  */
+#endif
    int32_t              validRTCDeltaSec;       /* delta between restoration and valid RTC in Ticks  */
    pwrFileData_t const  *pwrFileData;        /* Pointer to pwrFileData  */
    uint32_t             uSleepMilliseconds;  /* Random hold off time before sending restoration message. */

@@ -300,6 +300,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getBoolValue( meterReadingType RdgType, uint8
       case newRegistrationRequired:
          retVal = ENDPT_CIM_CMD_getNewRegistrationRequired( boolVal );
          break;
+#if 0 // TODO: RA6E1 Enabled once DFW ported
       case capableOfEpPatchDFW:
          retVal = ENDPT_CIM_CMD_getCapableOfEpPatchDFW( boolVal );
          break;
@@ -315,6 +316,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getBoolValue( meterReadingType RdgType, uint8
       case capableOfMeterReprogrammingOTA:
          retVal = ENDPT_CIM_CMD_getCapableOfMeterReprogrammingOTA( boolVal );
          break;
+#endif
       default:
          retVal = CIM_QUALCODE_KNOWN_MISSING_READ;
          break;
@@ -671,6 +673,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getOpportunisticAlarmIndexID( uint64_t *oppor
    return CIM_QUALCODE_SUCCESS;
 }
 
+#if 0 // TODO: RA6E1 Enabled once DFW ported
 /***********************************************************************************************************************
  *
  * Function name: ENDPT_CIM_CMD_getCapableOfEpPatchDFW
@@ -780,6 +783,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getCapableOfMeterReprogrammingOTA( uint8_t *m
    *meterReprogrammingOTASupported = (uint8_t)DFWA_getCapableOfMeterReprogrammingOTA();
    return retVal;
 }
+#endif
 
 /***********************************************************************************************************************
 

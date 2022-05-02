@@ -1549,6 +1549,12 @@
                         <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC.h</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameEncoder.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameEncoder.h</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_FrameManagement.c</name>
                     </file>
                     <file>
@@ -1559,6 +1565,9 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_PacketManagement.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_Protocol.h</name>
                     </file>
                 </group>
                 <group>
@@ -1859,6 +1868,12 @@
                     <name>$PROJ_DIR$\..\..\Common\crc16.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\crc16_m.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\crc16_m.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\crc_custom.c</name>
                 </file>
                 <file>
@@ -1956,10 +1971,22 @@
                 <name>$PROJ_DIR$\..\..\Common\MFG_Port.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\Common\MIMT_info.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\MIMT_info.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\Common\mode_config.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\mode_config.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\object_list.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\object_list.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\partitions.c</name>
@@ -1974,10 +2001,28 @@
                 <name>$PROJ_DIR$\..\..\Common\SELF_test.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\Common\sys_busy.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\sys_busy.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\Temperature.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\Temperature.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\Common\time_DST.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\time_DST.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\time_sync.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\time_sync.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\time_sys.c</name>
@@ -2014,6 +2059,90 @@
             </group>
             <group>
                 <name>HMC</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_app.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_app.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_demand.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_demand.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_diags.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_diags.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_eng.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_eng.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_finish.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_finish.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_msg.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_msg.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_mtr_info.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_mtr_info.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_prot.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_prot.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_request.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_request.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\HMC_seq_id.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_snapshot.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_snapshot.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_start.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_start.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_tsk_lst.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_tsk_lst.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\intf_cim_cmd.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\intf_cim_cmd.h</name>
+                </file>
             </group>
             <group>
                 <name>Include</name>
@@ -2046,10 +2175,46 @@
                 <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Common\demand.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\demand.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\ed_config.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\ed_config.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\endpt_cim_cmd.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\endpt_cim_cmd.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\historyd.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\historyd.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\ID_intervalTask.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\ID_intervalTask.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\OR_MR_Handler.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\OR_MR_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_config.c</name>
@@ -2064,10 +2229,28 @@
                 <name>$PROJ_DIR$\..\Common\pwr_last_gasp.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Common\pwr_restore.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\pwr_restore.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Common\pwr_task.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_task.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\RG_CF_Handler.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\RG_CF_Handler.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\RG_MD_Handler.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\RG_MD_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\STRT_Startup.c</name>

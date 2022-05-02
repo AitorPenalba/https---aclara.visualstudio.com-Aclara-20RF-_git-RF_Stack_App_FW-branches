@@ -128,7 +128,7 @@ static volatile bool dmdResetDone_;                //Indicates demand reset comp
 #if( RTOS_SELECTION == FREE_RTOS )
 #define DEMAND_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define DEMAND_NUM_MSGQ_ITEMS 0 
+#define DEMAND_NUM_MSGQ_ITEMS 0
 #endif
 // make sure the size of the reading Quality is still 1 bytes for this application
 #define READING_QTY_MAX_SIZE                 25                       // Worst case size of the ReadingQty field for this application
@@ -185,7 +185,11 @@ static volatile bool dmdResetDone_;                //Indicates demand reset comp
 //Set for maximum UTC time in sysTimeCombined_t format
 #define INVALID_DMD_TIME                  ((sysTimeCombined_t)0)
 //Set for the maximum demand reading supported (TODO: Verify against the value in the HEEP)
+#if ( RTOS_SELECTION == MQX_RTOS )
 #define INVALID_DMD_ENERGY                (MAX_UINT_32)
+#elif ( RTOS_SELECTION == FREE_RTOS ) // TODO: RA6E1 Can we use this direct from stdint.h or should need a separate header to define this?
+#define INVALID_DMD_ENERGY                ( UINT32_MAX )
+#endif
 #define DISABLE_SCHED_DMD_RESET_DATE      ((uint8_t) 0)  /* Used for an unassigned Demand Reset Day */
 #define MAX_SCHED_DMD_RESET_DATE          ((uint8_t)31)  /* Max calendar date of month */
 #define LAST_DMD_RESET_DATE_DEFAULT       ((uint8_t) 1)  /* A calendar date of zero means a periodic alarm */
@@ -421,7 +425,7 @@ returnStatus_t DEMAND_init( void )
  *
  **********************************************************************************************************************/
 //lint -esym(715,Arg0)  // Arg0 required for generic API, but not used here.
-void DEMAND_task(uint32_t Arg0)
+void DEMAND_task(taskParameter)
 {
 #if ( DEMAND_IN_METER == 0 )
    tTimeSysPerAlarm  alarmSettings; //Configure the periodic alarm for time

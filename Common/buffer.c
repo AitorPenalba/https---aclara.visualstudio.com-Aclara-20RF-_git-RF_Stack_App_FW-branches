@@ -83,7 +83,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define BUFFERS_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define BUFFERS_NUM_MSGQ_ITEMS 0 
+#define BUFFERS_NUM_MSGQ_ITEMS 0
 #endif
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -122,7 +122,7 @@ static uint32_t bExtMetaNbBuffers = 0;             // Number of external metadat
 static uint8_t      extMemPool[644000] @ "EXTERNAL_RAM" ; /*lint !e430*/
 #endif
 // TODO: RA6 [name_Balaji]: Add support for RA6E1
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 static OS_TICK_Struct AllocWatchDog[2];            // Keep track of the first time when run out of buffers.  Used as a form of watchdog.
                                                    // Assume that eBM_APP = 0 and eBM_STACK = 1.
 #endif
@@ -459,7 +459,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
 {
    uint8_t pool;
    buffer_t *pBuf = NULL;
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TICK_Struct CurrentTime;// TODO: RA6 [name_Balaji]: Check removing Conditional compiler once in main branch
 #endif
    bool           overflow;

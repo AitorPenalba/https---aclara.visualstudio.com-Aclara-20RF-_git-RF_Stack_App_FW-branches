@@ -197,6 +197,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
 {
   // OR_PM for all devices:
   { APP_MSG_SecurityHandler,   appSecurityAuthMode },
+#if 0 // TODO: RA6E1 OR_PM handlers
   { DFWA_OR_PM_Handler,        dfwStatus },
   { DFWA_OR_PM_Handler,        dfwStreamID },
   { DFWA_OR_PM_Handler,        dfwFileType },
@@ -205,7 +206,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { DFWA_OR_PM_Handler,        capableOfMeterBasecodeDFW },
   { DFWA_OR_PM_Handler,        capableOfMeterPatchDFW },
   { DFWA_OR_PM_Handler,        capableOfMeterReprogrammingOTA },
-#if 0 // TODO: RA6E1 OR_PM handlers
   { PHY_OR_PM_Handler,         phyFrontEndGain },
   { PHY_OR_PM_Handler,         phyNumChannels },
   { PHY_OR_PM_Handler,         phyAvailableChannels },
@@ -358,7 +358,9 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { APP_MSG_minRegistrationTimeoutHandler,      minRegistrationTimeout },
   { DFWTDCFG_OR_PM_Handler,                     dfwApplyConfirmTimeDiversity },
   { DFWTDCFG_OR_PM_Handler,                     dfwDowloadConfirmTimeDiversity },
+#if 0 // TODO: RA6E1 Enable once DFW ported
   { DFWA_OR_PM_Handler,                         dfwDupDiscardPacketQty},
+#endif
   { DST_timeZoneOffsetHandler,                  timeZoneOffset },
   { DST_dstOffsetHandler,                       dstOffset },
   { DST_dstEnabledHandler,                      dstEnabled },

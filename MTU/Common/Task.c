@@ -58,8 +58,6 @@
 
 //#include "timer_util.h"
 
-// TODO: RA6E1 - Set inside ENABLE_TIME_SYS_TASKS macro
-#include "time_sys.h"
 #if ENABLE_TIME_SYS_TASKS
 #include "time_sys.h"
 #endif
@@ -82,7 +80,7 @@
 #include "host_reset.h"
 #endif
 
-//#include "demand.h"
+#include "demand.h"
 #if ENABLE_ID_TASKS
 #include "ID_intervalTask.h"
 #endif
@@ -99,8 +97,8 @@
 #include "pwr_restore.h"
 #endif
 
-//#include "historyd.h"
-//#include "APP_MSG_Handler.h"
+#include "historyd.h"
+#include "APP_MSG_Handler.h"
 #if (USE_IPTUNNEL == 1)
 #include "tunnel_msg_handler.h"
 #endif
@@ -346,18 +344,18 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 #endif
 
-   { eSD_PS_LISTENER_IDX,       SD_PhaseSamplesListenerTask,   600,  16, (char *)pTskName_SdPsListener,        DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-   { eSD_PREAM_DET_IDX,         SD_PreambleDetectorTask,      6300,  18, (char *)pTskName_SdPreambleDetector,  DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 }, // |  Parameters here are the ID's
-   { eSD_SYNC_PAYL_DEMOD1_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod1, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 1, 0 }, // |  ID's 0-2, run sequentially by the preprocessor
-   { eSD_SYNC_PAYL_DEMOD2_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod2, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 2, 0 }, // V  The preamble detector is always 0, regardles of what is passed
+//   { eSD_PS_LISTENER_IDX,       SD_PhaseSamplesListenerTask,   600,  16, (char *)pTskName_SdPsListener,        DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+//   { eSD_PREAM_DET_IDX,         SD_PreambleDetectorTask,      6300,  18, (char *)pTskName_SdPreambleDetector,  DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 }, // |  Parameters here are the ID's
+//   { eSD_SYNC_PAYL_DEMOD1_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod1, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 1, 0 }, // |  ID's 0-2, run sequentially by the preprocessor
+//   { eSD_SYNC_PAYL_DEMOD2_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod2, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 2, 0 }, // V  The preamble detector is always 0, regardles of what is passed
 
    { eSM_TSK_IDX,               SM_Task,                      1000,  20, (char *)pTskName_Sm,     DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-   { ePHY_TSK_IDX,              PHY_Task,                     2100,  21, (char *)pTskName_Phy,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-   //{ eMAC_TSK_IDX,              MAC_Task,                     1500,  22, (char *)pTskName_Mac,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+//   { ePHY_TSK_IDX,              PHY_Task,                     2100,  21, (char *)pTskName_Phy,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eMAC_TSK_IDX,              MAC_Task,                     1500,  22, (char *)pTskName_Mac,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_HMC_TASKS
-   //{ eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
+   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_SRFN_ILC_TASKS
    //{ eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
@@ -379,13 +377,13 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 
 #if ENABLE_ID_TASKS
-   //{ eID_TSK_IDX,               ID_task,                      1900,  31, (char *)pTskName_Id,     DEFAULT_ATTR, 0, 0 },
+   { eID_TSK_IDX,               ID_task,                      1900,  31, (char *)pTskName_Id,     DEFAULT_ATTR, 0, 0 },
 #endif
 
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-   //{ eDMD_TSK_IDX,              DEMAND_task,                  1200,  32, (char *)pTskName_Dmd,    DEFAULT_ATTR, 0, 0 },
+   { eDMD_TSK_IDX,              DEMAND_task,                  1200,  32, (char *)pTskName_Dmd,    DEFAULT_ATTR, 0, 0 },
 
-   //{ eHD_DS_TSK_IDX,            HD_DailyShiftTask,            1600,  33, (char *)pTskName_HD_Ds,  DEFAULT_ATTR, 0, 0 },
+   { eHD_DS_TSK_IDX,            HD_DailyShiftTask,            1600,  33, (char *)pTskName_HD_Ds,  DEFAULT_ATTR, 0, 0 },
 #endif
 
 #if ( TEST_QUIET_MODE == 0 )
@@ -411,7 +409,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 #if ( USE_MTLS == 1 )
    //{ eMTLS_TSK_IDX,             MTLS_Task,                    1100,  38, (char *)pTskName_Mtls,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
-   //{ eAPP_TSK_IDX,              APP_MSG_HandlerTask,          2400,  38, (char *)pTskName_AppMsg, DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eAPP_TSK_IDX,              APP_MSG_HandlerTask,          2400,  38, (char *)pTskName_AppMsg, DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #if (USE_IPTUNNEL == 1)
    //{ eTUN_TSK_IDX,              TUNNEL_MSG_HandlerTask,        500,  38, (char *)pTskName_TunMsg, DEFAULT_ATTR, 0, 0 },
 #endif

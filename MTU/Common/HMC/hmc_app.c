@@ -46,8 +46,12 @@
 /* INCLUDE FILES */
 #include <stdint.h>
 #include <stdbool.h>
-#include <mqx.h>
 #include "project.h"
+
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include <mqx.h>
+#endif
+
 #define HMC_APP_GLOBAL
 #include "hmc_app.h"
 #undef  HMC_APP_GLOBAL
@@ -60,8 +64,10 @@
 #if ( ( END_DEVICE_PROGRAMMING_CONFIG == 1 ) || ( END_DEVICE_PROGRAMMING_FLASH >  ED_PROG_FLASH_NOT_SUPPORTED ) )
 #include "intf_cim_cmd.h"
 #endif
+#if 0 // TODO: RA6E1 - Enable WolfSSL
 #include <wolfssl/quicksession.h>
 #include <wolfssl/internal.h>
+#endif
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
@@ -80,7 +86,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define HMC_APP_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
 #else
-#define HMC_APP_QUEUE_SIZE 0 
+#define HMC_APP_QUEUE_SIZE 0
 #endif
 
 /* ****************************************************************************************************************** */
@@ -193,7 +199,7 @@ returnStatus_t HMC_APP_RTOS_Init( void )
    Returns: None
 
  **********************************************************************************************************************/
-void HMC_APP_Task( uint32_t Arg0 )
+void HMC_APP_Task( taskParameter )
 {
    sysQueueEntry_t   *pSysQueue;
    bool              bHmcBusy = false;

@@ -149,7 +149,7 @@ typedef enum
 #ifdef ERROR_CODES_H_
 returnStatus_t MAC_init ( void );
 #endif
-void MAC_Task ( uint32_t Arg0 );
+void MAC_Task ( taskParameter );
 
 void MAC_Request(buffer_t *request);
 void MAC_RegisterIndicationHandler(MAC_IndicationHandler pCallback);
@@ -194,9 +194,7 @@ void MAC_XID_Address_Set( xid_addr_t const *xid_addr );
 
 void MAC_SaveConfig_To_BkupRAM(void);
 void MAC_RestoreConfig_From_BkupRAM(void);
-#if 0 /* TODO: Queue handle for FreeRTOS */
 OS_MSGQ_Obj *MAC_GetMsgQueue(void);
-#endif
 void MAC_TimeSyncParameters_Print(void);
 bool MAC_TimeQueryReq(void);
 void MAC_Stats(void);

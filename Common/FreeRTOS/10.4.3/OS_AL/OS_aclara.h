@@ -150,6 +150,11 @@
 #define htons(value)    htonx_FreeRTOS(value, 2)
 #endif
 
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+#define malloc(value)   pvPortMalloc(value)
+#define free(value)     vPortFree(value)
+#endif
+
 #if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 /* TYPE DEFINITIONS */
 typedef LWEVENT_STRUCT        OS_EVNT_Obj, *OS_EVNT_Handle;

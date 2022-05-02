@@ -191,7 +191,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define DFWA_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define DFWA_DBG_NUM_MSGQ_ITEMS 0 
+#define DFWA_DBG_NUM_MSGQ_ITEMS 0
 #endif
 
 

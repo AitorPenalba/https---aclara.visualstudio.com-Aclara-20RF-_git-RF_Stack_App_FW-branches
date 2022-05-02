@@ -370,7 +370,7 @@ returnStatus_t APP_MSG_init ( void )
 
  **********************************************************************************************************************/
 //lint -esym(715,Arg0)  // Arg0 required for generic API, but not used here.
-void APP_MSG_HandlerTask ( uint32_t Arg0 )
+void APP_MSG_HandlerTask ( taskParameter )
 {
    buffer_t *pBuf;            //pointer to message
    bool     handlerMatchFound = ( bool )false;
