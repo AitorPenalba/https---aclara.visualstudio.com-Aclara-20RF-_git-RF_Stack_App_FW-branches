@@ -574,7 +574,12 @@ returnStatus_t ADC_ShutDown ( void )
 *******************************************************************************/
 static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    uint32_t result;
+#elif ( MCU_SELECTED == RA6E1 )
+   /* In RA6E1, ADC's value is returned in uint16_t  */
+   uint16_t result;
+#endif
    float    voltage;
 
    /* Wait for mutex so multiple tasks can share the ADC */
@@ -622,7 +627,7 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
        (void)R_ADC_StatusGet( &g_adc0_ctrl, &status );
    }
    /* Read converted data. */
-   (void)R_ADC_Read( &g_adc0_ctrl, adc_source_adx, (uint16_t *)&result );
+   (void)R_ADC_Read( &g_adc0_ctrl, adc_source_adx, &result );
 #endif
    OS_MUTEX_Unlock(&intAdcMutex_);
 
