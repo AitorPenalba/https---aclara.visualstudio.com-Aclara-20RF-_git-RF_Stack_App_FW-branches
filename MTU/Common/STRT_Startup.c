@@ -152,6 +152,7 @@
 #include "vbat_reg.h"
 #include "pwr_task.h"
 #include "virgin_device.h"
+/* END OF TODO: RA6: DG: Remove Duplicate Includes */
 
 
 

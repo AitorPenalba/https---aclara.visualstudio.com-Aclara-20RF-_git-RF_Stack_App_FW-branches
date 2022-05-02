@@ -3764,7 +3764,7 @@ uint32_t DBG_CommandLine_virgin ( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
 {
-//#if ( PARTITION_MANAGER == 1 )
+#if ( PARTITION_MANAGER == 1 )
    PartitionData_t const * partitionData;    /* Pointer to partition information   */
    uint8_t                 erasedSignature[ 8 ];
 
@@ -3781,7 +3781,7 @@ static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
          }
       }
    }
-//#endif
+#endif
    return 0;
 }
 //#endif // #if 0
