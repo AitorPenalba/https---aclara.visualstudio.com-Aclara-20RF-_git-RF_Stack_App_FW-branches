@@ -43,7 +43,7 @@
 
   Arguments: TickValue - pointer to the current value of the OS Tick counter (populated by this function)
 
-  Returns:
+  Returns: Nothing
 
   Notes:
 
@@ -68,7 +68,7 @@ void OS_TICK_Get_TickCount_HWTicks( OS_TICK_Struct *TickValue )
 
   Arguments: TickValue - pointer to the current value of the OS Tick counter (populated by this function)
 
-  Returns:
+  Returns: Nothing
 
   Notes:
 
@@ -120,7 +120,7 @@ void OS_Tick_Get_TimeElapsed ( TIME_STRUCT *time_ptr )
   Purpose: This function will return the number of milliseconds that have elapsed
            since powerup
 
-  Arguments:
+  Arguments: Nothing
 
   Returns: Msec - milliseconds since powerup
 
@@ -148,7 +148,7 @@ uint32_t OS_TICK_Get_ElapsedMilliseconds ( void )
   Purpose: This function will return the number of microseconds difference between
            the two passed in Tick Structure values
 
-  Arguments:
+  Arguments: OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue
 
   Returns: TimeDiff - difference in microseconds
 
@@ -173,11 +173,19 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
    uint32_t diffTicksCount, diffHWTicks;
    if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
    {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
       diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
    }
    else
    {
-      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
       {
          isTimeValid = false;
          TimeDiff = 0;
@@ -201,7 +209,7 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
       {
          // Handle hw ticks overflow
          diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerMicrosec;
-         TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS * 1000 ) - diffHWTicks );
+         TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS * 1000 ) - diffHWTicks );
       }
    }
 #endif
@@ -216,7 +224,7 @@ uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
   Purpose: This function will return the number of nanosecond difference between
            the two passed in Tick Structure values
 
-  Arguments:
+  Arguments: OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue
 
   Returns: TimeDiff - difference in nanoseconds
 
@@ -241,11 +249,19 @@ uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK
    uint32_t diffTicksCount, diffHWTicks;
    if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
    {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
       diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
    }
    else
    {
-      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
       {
          isTimeValid = false;
          TimeDiff = 0;
@@ -269,7 +285,7 @@ uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK
       {
          // Handle hw ticks overflow
          diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerTenNanoSec; // Difference HW ticks per ten nano second
-         TimeDiff = ( uint32_t ) ( ( ( diffTicksCount * portTICK_RATE_MS * 1000 * 100 ) - diffHWTicks ) * 10 ); // Convert to once nano second
+         TimeDiff = ( uint32_t ) ( ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS * 1000 * 100 ) - diffHWTicks ) * 10 ); // Convert to once nano second
       }
    }
 #endif
@@ -283,7 +299,7 @@ uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK
   Purpose: This function will return the number of millisecond difference between
            the two passed in Tick Structure values
 
-  Arguments:
+  Arguments: OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue
 
   Returns: TimeDiff - difference in milliseconds
 
@@ -308,11 +324,19 @@ uint32_t OS_TICK_Get_Diff_InMilliseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
    uint32_t diffTicksCount, diffHWTicks;
    if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
    {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
       diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
    }
    else
    {
-      if( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows )
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
       {
          isTimeValid = false;
          TimeDiff = 0;
@@ -336,7 +360,7 @@ uint32_t OS_TICK_Get_Diff_InMilliseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
       {
          // Handle hw ticks overflow
          diffHWTicks = ( CurrTickValue->HW_TICKS - PrevTickValue->HW_TICKS ) / ticksPerMillisec;
-         TimeDiff = ( uint32_t ) ( ( diffTicksCount * portTICK_RATE_MS ) - diffHWTicks );
+         TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS ) - diffHWTicks );
       }
    }
 #endif
@@ -350,7 +374,7 @@ uint32_t OS_TICK_Get_Diff_InMilliseconds ( OS_TICK_Struct *PrevTickValue, OS_TIC
   Purpose: This function will return the number of second difference between
            the two passed in Tick Structure values
 
-  Arguments:
+  Arguments: OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue
 
   Returns: TimeDiff - difference in seconds
 
@@ -370,7 +394,35 @@ uint32_t OS_TICK_Get_Diff_InSeconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Str
       TimeDiff = 0;
    } /* end if() */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   TimeDiff = OS_TICK_Get_Diff_InMilliseconds( PrevTickValue, CurrTickValue ) / 1000; // Convert to sec
+   bool isTimeValid = true;
+   uint32_t diffTicksCount;
+   if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
+   {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
+   }
+   else
+   {
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = UINT32_MAX - PrevTickValue->tickCount + CurrTickValue->tickCount;
+   }
+
+   if( isTimeValid )
+   {
+      TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS ) / 1000 ); // Convert to sec
+   }
 #endif
    return ( TimeDiff );
 }
@@ -382,7 +434,7 @@ uint32_t OS_TICK_Get_Diff_InSeconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Str
   Purpose: This function will return the number of minute difference between
            the two passed in Tick Structure values
 
-  Arguments:
+  Arguments: OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue
 
   Returns: TimeDiff - difference in minutes
 
@@ -402,7 +454,35 @@ uint32_t OS_TICK_Get_Diff_InMinutes ( OS_TICK_Struct *PrevTickValue, OS_TICK_Str
       TimeDiff = 0;
    } /* end if() */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   TimeDiff = OS_TICK_Get_Diff_InSeconds( PrevTickValue, CurrTickValue ) / 60; // Convert to min
+   bool isTimeValid = true;
+   uint32_t diffTicksCount;
+   if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
+   {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
+   }
+   else
+   {
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = UINT32_MAX - PrevTickValue->tickCount + CurrTickValue->tickCount;
+   }
+
+   if( isTimeValid )
+   {
+      TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS ) / ( 1000 * 60 ) ); // Convert to min
+   }
 #endif
    return ( TimeDiff );
 }
@@ -414,7 +494,7 @@ uint32_t OS_TICK_Get_Diff_InMinutes ( OS_TICK_Struct *PrevTickValue, OS_TICK_Str
   Purpose: This function will return the number of hour difference between
            the two passed in Tick Structure values
 
-  Arguments:
+  Arguments: OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue
 
   Returns: TimeDiff - difference in hours
 
@@ -434,7 +514,35 @@ uint32_t OS_TICK_Get_Diff_InHours ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struc
       TimeDiff = 0;
    } /* end if() */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   TimeDiff = OS_TICK_Get_Diff_InMinutes( PrevTickValue, CurrTickValue ) / 60; // Convert to hours
+   bool isTimeValid = true;
+   uint32_t diffTicksCount;
+   if ( CurrTickValue->tickCount >= PrevTickValue->tickCount )
+   {
+      if ( ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) >= 1 ) ||
+           ( ( CurrTickValue->tickCount == PrevTickValue->tickCount ) && ( CurrTickValue->HW_TICKS > PrevTickValue->HW_TICKS ) ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = CurrTickValue->tickCount - PrevTickValue->tickCount;
+   }
+   else
+   {
+      if( ( CurrTickValue->xNumOfOverflows == PrevTickValue->xNumOfOverflows ) ||
+          ( ( CurrTickValue->xNumOfOverflows - PrevTickValue->xNumOfOverflows ) > 1 ) )
+      {
+         isTimeValid = false;
+         TimeDiff = 0;
+      }
+
+      diffTicksCount = UINT32_MAX - PrevTickValue->tickCount + CurrTickValue->tickCount;
+   }
+
+   if( isTimeValid )
+   {
+      TimeDiff = ( uint32_t ) ( ( ( uint64_t ) diffTicksCount * portTICK_RATE_MS ) / ( 1000 * 60 * 60 ) ); // Convert to hours
+   }
 #endif
    return ( TimeDiff );
 }
@@ -507,7 +615,7 @@ bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Stru
              TimeDelay - The time in milliseconds that is added to the TickValue
                          (when the task should wake up)
 
-  Returns:
+  Returns: Nothing
 
   Notes: The TickValue that is passed in should be a Tick Time from the past,
          This function will add the TimeDelay to the passed in TickValue and then
@@ -557,7 +665,7 @@ void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay )
 
   Purpose: This function will add the msec value converted and add it to tickCount
 
-  Arguments:
+  Arguments: OS_TICK_Struct *TickValue, uint32_t TimeDelay
 
   Returns: OS_TICK_Struct_Ptr
 
@@ -583,7 +691,7 @@ OS_TICK_Struct_Ptr OS_TICK_Add_msec_to_ticks ( OS_TICK_Struct *TickValue, uint32
 
   Purpose: This function will return the ticks per second
 
-  Arguments:
+  Arguments: Nothing
 
   Returns: uint32_t - ticks per sec
 

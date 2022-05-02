@@ -273,7 +273,7 @@ U8 radio_comm_PollCTS( uint8_t radioNum )
       OS_TICK_Get_ElapsedTicks(&startTime); // TODO: Check working of having elapsed ticks instead get ticks
       endTime = startTime;
 
-      while ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds( &endTime, &startTime ) < defaultDelay)
+      while ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds( &startTime, &endTime ) < defaultDelay)
       {
          OS_TICK_Get_ElapsedTicks(&endTime);
       }

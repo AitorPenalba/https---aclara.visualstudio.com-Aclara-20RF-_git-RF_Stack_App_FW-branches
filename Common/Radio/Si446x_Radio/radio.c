@@ -773,7 +773,7 @@ void RADIO_TX_Watchdog(void)
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time, &radio[RADIO_0].TxWatchDog, &Overflow );
 #elif ( MCU_SELECTED == RA6E1 )
       OS_TICK_Get_ElapsedTicks(&time);
-      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time, &radio[RADIO_0].TxWatchDog );
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &radio[RADIO_0].TxWatchDog, &time );
 #endif
 
       // TODO: RA6E1 - Overflow usage verify and modify the below statement
@@ -4673,7 +4673,7 @@ static void wait_us(uint32_t time)
    // Wait for a while
    do {
       OS_TICK_Get_ElapsedTicks(&time2);
-      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time2, &time1 );
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    }
    while (TimeDiff < time);
 #endif
@@ -4718,7 +4718,7 @@ static float32 wait_for_stable_RSSI(uint8_t radioNum)
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
 #elif ( MCU_SELECTED == RA6E1 )
       OS_TICK_Get_ElapsedTicks(&time2);
-      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time2, &time1 );
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time1, &time2 );
 #endif
 
       // Get out if we have been stuck here more than 10 ms.
@@ -4866,7 +4866,7 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
 #elif ( MCU_SELECTED == RA6E1 )
       OS_TICK_Get_ElapsedTicks(&time2);
-      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time2, &time1 );
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time1, &time2 );
 #endif
 
       // Get out if we have been stuck here more than 10 ms.

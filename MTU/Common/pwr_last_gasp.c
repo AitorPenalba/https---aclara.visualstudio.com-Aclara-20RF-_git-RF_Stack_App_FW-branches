@@ -263,6 +263,7 @@ void PWRLG_Task( taskParameter )
 #endif
    STRT_FunctionList_t const  *pFunct;
    OS_TASK_Template_t  const *pTaskList; /* Pointer to task list which contains all tasks in the system */
+   bool                       bOverflow = ( bool )false;
    uint8_t                    startUpIdx;
    uint8_t                    hwVerString[VER_HW_STR_LEN];
 
@@ -426,7 +427,11 @@ void PWRLG_Task( taskParameter )
 
          OS_TICK_Get_ElapsedTicks( &endTime );
          // Save the time spent transmitting
-         PREV_MSG_TIME_SET(  ( uint16_t ) ( OS_TICK_Get_Diff_InMicroseconds( &endTime, &startTime ) / 1000 ) );
+#if ( RTOS_SELECTION == MQX_RTOS )
+         PREV_MSG_TIME_SET(  ( uint16_t ) ( _time_diff_microseconds( &endTime, &startTime, &bOverflow ) / 1000 ) );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+         PREV_MSG_TIME_SET(  ( uint16_t ) ( OS_TICK_Get_Diff_InMicroseconds( &startTime, &endTime ) / 1000 ) );
+#endif
          PWRLG_SENT_SET( 1 );
       }
    }
