@@ -82,7 +82,7 @@
 #endif
 
 #if ( RTOS_SELECTION == FREE_RTOS )
-#define MQX_AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */ // TODO: RA6: Update MQX_AUTO_START_TASK to be more generic. 
+#define MQX_AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */ // TODO: RA6: Update MQX_AUTO_START_TASK to be more generic.
 
 #if OS_MIN_TASK_PRIORITY >= configMAX_PRIORITIES
 #error  Task minimum must be less than configMAX_PRIORITIES in FreeRTOSConfig.h
@@ -372,18 +372,13 @@ extern const char pTskName_Idle[];
 extern const char pTskName_Sleep[];
 
 /* FILE VARIABLE DEFINITIONS */
-#if 0
 /* FUNCTION PROTOTYPES */
+
+
 bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
 
-
-
-/*queue items to complete*/
-
-
-#endif
 bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *QueueElement );
 void OS_QUEUE_Remove ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
 void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
