@@ -56,7 +56,7 @@
 #include "MFG_Port.h"
 #endif
 
-//#include "timer_util.h"
+#include "timer_util.h"
 
 #if ENABLE_TIME_SYS_TASKS
 #include "time_sys.h"
@@ -329,7 +329,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    //{ ePWROR_TSK_IDX,            PWROR_Task,                   1700,  12, (char *)pTskName_PwrRestore, DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_TMR_TASKS
-   //{ eTMR_TSK_IDX,              TMR_HandlerTask,              1200,  14, (char *)pTskName_Tmr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eTMR_TSK_IDX,              TMR_HandlerTask,              1200,  14, (char *)pTskName_Tmr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
    /* SELF_testTask lowers its priority to just above the IDLE task after its first iteration.  */
    { eTEST_TSK_IDX,             SELF_testTask,                1700,  14, (char *)pTskName_Test,   DEFAULT_ATTR, 0, 0 },

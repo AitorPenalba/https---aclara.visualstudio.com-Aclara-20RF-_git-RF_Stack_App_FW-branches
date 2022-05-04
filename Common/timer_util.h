@@ -62,9 +62,7 @@ typedef struct sTimerList timer_t;
 /* TMR_EXTERN VARIABLES */
 
 /* FUNCTION PROTOTYPES */
-#ifdef __mqx_h__
-void TMR_HandlerTask( uint32_t Arg0 );
-#endif /* __mqx_h__ */
+void TMR_HandlerTask( taskParameter );
 returnStatus_t TMR_HandlerInit(void);
 returnStatus_t TMR_AddTimer(timer_t *pData);
 returnStatus_t TMR_DeleteTimer(uint16_t usiTimerId);

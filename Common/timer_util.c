@@ -293,7 +293,7 @@ returnStatus_t TMR_HandlerInit( void )
  *            module except during startup (task creation).
  *
  ******************************************************************************************************************/
-void TMR_HandlerTask( uint32_t Arg0 )
+void TMR_HandlerTask( taskParameter )
 {
    timer_t           *pTimer;          /* Pointer to timer data structure */
 #if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS

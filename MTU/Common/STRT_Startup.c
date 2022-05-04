@@ -620,6 +620,8 @@ void STRT_StartupTask ( taskParameter )
 #if (TM_LINKED_LIST == 1)
    OS_LINKEDLIST_Test();
 #endif
+   // TODO: RA6E1 - Verify why this sleep required which causes NV self test fails for the first time
+   OS_TASK_Sleep( 20 ); // Sleep for 20 msec before creating other tasks
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
 #if 0
    if (!initSuccess_)

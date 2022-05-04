@@ -531,9 +531,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "NumMac",          DBG_CommandLine_NumMac,       "Set/Get number of mac addresses emulated (1-50)" },
 //#endif
 //   { "nvr",          DBG_CommandLine_NvRead,          "NV memory Read: Params - Partition Addr Len" },
-//#ifdef TM_DVR_EXT_FL_UNIT_TEST
-//   { "nvtest",       DBG_CommandLine_NvTest,          "[count (default=100)] Test a sector of external NV" },
-//#endif
+#ifdef TM_DVR_EXT_FL_UNIT_TEST
+   { "nvtest",       DBG_CommandLine_NvTest,          "[count (default=100)] Test a sector of external NV" },
+#endif
 //   { "nwkget",       DBG_CommandLine_NwkGet,          "nwk get"  },
 //   { "nwkreset",     DBG_CommandLine_NwkReset,        "nwk reset"},
 //   { "nwkset",       DBG_CommandLine_NwkSet,          "nwk set"  },
@@ -1585,44 +1585,44 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //#endif
 //   return ( 0 );
 //} /* end DBG_CommandLine_NvRead () */
-//
-//#if (DBG_TESTS == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_NvTest
-//
-//   Purpose: Tests the NV memory
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t LoopCount = 100;
-//   char *endptr;
-//   if ( argc == 2 )
-//   {
-//      LoopCount = strtoul( argv[1], &endptr, 0 );
-//   }
-//   DBG_logPrintf( 'R', "Testing NV %d times...", LoopCount );
-//   if( 0 == DVR_EFL_UnitTest( LoopCount ) ) //External-FLash UnitTest
-//   {
-//      DBG_logPrintf( 'R', "NV Test Success!" );
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "NV Test Failed!!!!" );
-//   }
-//   return ( 0 );
-//}
-///* end DBG_CommandLine_NvTest() */
-//#endif
-//
+
+#if (DBG_TESTS == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_NvTest
+
+   Purpose: Tests the NV memory
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
+{
+   uint32_t LoopCount = 100;
+   char *endptr;
+   if ( argc == 2 )
+   {
+      LoopCount = strtoul( argv[1], &endptr, 0 );
+   }
+   DBG_logPrintf( 'R', "Testing NV %d times...", LoopCount );
+   if( 0 == DVR_EFL_UnitTest( LoopCount ) ) //External-FLash UnitTest
+   {
+      DBG_logPrintf( 'R', "NV Test Success!" );
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "NV Test Failed!!!!" );
+   }
+   return ( 0 );
+}
+/* end DBG_CommandLine_NvTest() */
+#endif
+
 //#if ( SIMULATE_POWER_DOWN == 1 )
 //
 ///*******************************************************************************

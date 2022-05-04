@@ -2071,9 +2071,7 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
                failCount = incCountLimit( failCount, 0xffff );
             }
 #ifndef __BOOTLOADER
-#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
             DBG_printf( "NV Test - Write failed at 0x%x, len = 0x%x", 0, partitionData->lDataSize );
-#endif
 #endif   /* BOOTLOADER  */
          }
       }
@@ -2089,16 +2087,14 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
 
                if ( eSUCCESS != PAR_partitionFptr.parRead( &unitTestBuf[0], 0, sizeof( unitTestBuf ), partitionData ))
                {
-#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
                   DBG_printf( "NV Test - Read failed at 0x%x, len = 0x%x", 0, sizeof( unitTestBuf ) );
-#endif
                }
                for ( uint32_t j = 0; j < sizeof( unitTestBuf ); j++ )
                {
                   if( unitTestBuf[j] != (uint8_t)( startPattern + j ) )
                   {
                      failCount = incCountLimit( failCount, 0xffff );
-#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
+#if 0 // TODO: RA6 Enable once continous printf issue resolved
                      DBG_printf( "NV Test - Compare failed at 0x%x, is = 0x%02x, s/b 0x%02x\n",
                                  partitionData->PhyStartingAddress + j,
                                  unitTestBuf[j], (uint8_t)( startPattern + j ) );
