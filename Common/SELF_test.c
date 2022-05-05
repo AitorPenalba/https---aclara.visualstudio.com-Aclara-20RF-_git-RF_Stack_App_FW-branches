@@ -61,8 +61,8 @@
 static uint32_t      sdRAM[32] @ "EXTERNAL_RAM" ; /*lint !e430*/
 #endif
 
-//static OS_EVNT_Obj      SELF_events;      /* Self test Events   */
-//static OS_EVNT_Obj *    SELF_notify;      /* Event handler to "notify" when test results are completed.     */
+static OS_EVNT_Obj      SELF_events;      /* Self test Events   */
+static OS_EVNT_Obj *    SELF_notify;      /* Event handler to "notify" when test results are completed.     */
 static uint32_t         event_flags;      /* Event flags returned by self test routine.                     */
 static SELF_TestData_t  SELF_TestData;
 #if (ENABLE_FIO_TASKS == 1)
