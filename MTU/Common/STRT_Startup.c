@@ -188,7 +188,6 @@ const STRT_FunctionList_t startUpTbl[] =
 // TODO: RA6: Balaji:  Why was DBG_init() moved?
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
-   INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
    INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
    INIT( VBATREG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),    // Needed early to check validity of RTC. // TODO: RA6E1: DG: Move this to appropriate position
@@ -208,6 +207,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
+   INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
 
 #if 0
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
