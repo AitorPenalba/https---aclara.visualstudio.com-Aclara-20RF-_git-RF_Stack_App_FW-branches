@@ -527,7 +527,7 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
 
   Function name: RTC_isRunning
 
-  Purpose: Check if the RTC is 
+  Purpose: Check if the RTC is running
 
   Arguments: None
 
@@ -535,7 +535,6 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
 
 *******************************************************************************/
 
-/* TODO: DG: Add Header */
 bool RTC_isRunning ( void )
 {
    fsp_err_t   rtc_DriverStatus  = FSP_SUCCESS;
