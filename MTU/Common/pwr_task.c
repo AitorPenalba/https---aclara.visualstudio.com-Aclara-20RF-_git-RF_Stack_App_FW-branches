@@ -310,7 +310,7 @@ _Pragma ( "calls = \
    /*****               Next function never returns                *****/
    /********************************************************************/
    /* TODO: RA6: DG: Check for Ship and Shop Mode  */
-   PWRLG_Begin( pwrFileData.uPowerAnomalyCount ); /* Never returns  */
+//   PWRLG_Begin( pwrFileData.uPowerAnomalyCount ); /* Never returns  */
 #else
    VBATREG_SHORT_OUTAGE = 0;  //Ensure we do not see this as a short outage
 

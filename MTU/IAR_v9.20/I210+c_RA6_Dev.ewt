@@ -1794,7 +1794,7 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
@@ -1807,6 +1807,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\MFG_Port.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\mode_config.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\mode_config.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\partitions.c</name>
@@ -1837,6 +1843,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\vbat_reg.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\virgin_device.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\virgin_device.h</name>
             </file>
         </group>
         <group>
@@ -1881,7 +1893,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>
@@ -1891,6 +1903,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\pwr_config.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\pwr_config.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>
