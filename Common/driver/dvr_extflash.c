@@ -36,7 +36,6 @@
 
 
 #include "project.h"
-#include <stdbool.h>
 #define dvr_eflash_GLOBAL
 #include "dvr_extflash.h"
 #undef  dvr_eflash_GLOBAL

@@ -984,7 +984,7 @@ static void vRadio_PowerUp(void)
 #if ( MCU_SELECTED == NXP_K24 )
 static void Radio0_IRQ_ISR(void)
 #elif ( MCU_SELECTED == RA6E1 )
-static void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
+void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #endif
 {
    uint32_t primask = __get_PRIMASK();
@@ -1050,7 +1050,7 @@ static void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #if ( DCU == 1 )
 /******************************************************************************
 *
-* Functio Name      : Radio1_IRQ_ISR
+* Function Name      : Radio1_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1064,7 +1064,7 @@ static void Radio1_IRQ_ISR(void)
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 /******************************************************************************
 *
-* Functio Name      : Radio0_TxDone_ISR
+* Function Name      : Radio0_TxDone_ISR
 * Comments          : Radio0 GPIO1 (TxState) interrupt signifies transmit complete on falling edge.
 *
 ******************************************************************************/
@@ -1076,7 +1076,7 @@ static void Radio0_TxDone_ISR(void)
 
 /******************************************************************************
 *
-* Functio Name      : Radio2_IRQ_ISR
+* Function Name      : Radio2_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1089,7 +1089,7 @@ static void Radio2_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Functio Name      : Radio3_IRQ_ISR
+* Function Name      : Radio3_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1102,7 +1102,7 @@ static void Radio3_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Functio Name      : Radio4_IRQ_ISR
+* Function Name      : Radio4_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1115,7 +1115,7 @@ static void Radio4_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Functio Name      : Radio5_IRQ_ISR
+* Function Name      : Radio5_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1128,7 +1128,7 @@ static void Radio5_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Functio Name      : Radio6_IRQ_ISR
+* Function Name      : Radio6_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1141,7 +1141,7 @@ static void Radio6_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Functio Name      : Radio7_IRQ_ISR
+* Function Name      : Radio7_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1154,7 +1154,7 @@ static void Radio7_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Functio Name      : Radio8_IRQ_ISR
+* Function Name      : Radio8_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -4668,11 +4668,11 @@ static void wait_us(uint32_t time)
    }
    while (TimeDiff < time);
 #elif ( MCU_SELECTED == RA6E1 )
-   OS_TICK_Get_ElapsedTicks(&time1);
+   OS_TICK_Get_CurrentElapsedTicks(&time1);
 
    // Wait for a while
    do {
-      OS_TICK_Get_ElapsedTicks(&time2);
+      OS_TICK_Get_CurrentElapsedTicks(&time2);
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    }
    while (TimeDiff < time);
@@ -4853,7 +4853,7 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
 #if ( MCU_SELECTED == NXP_K24 )
    _time_get_elapsed_ticks(&time1);
 #elif ( MCU_SELECTED == RA6E1 )
-   OS_TICK_Get_ElapsedTicks(&time1);
+   OS_TICK_Get_CurrentElapsedTicks(&time1);
 #endif
 
    // Poll RSSI until valid
@@ -4865,7 +4865,7 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       _time_get_elapsed_ticks(&time2);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
 #elif ( MCU_SELECTED == RA6E1 )
-      OS_TICK_Get_ElapsedTicks(&time2);
+      OS_TICK_Get_CurrentElapsedTicks(&time2);
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time1, &time2 );
 #endif
 

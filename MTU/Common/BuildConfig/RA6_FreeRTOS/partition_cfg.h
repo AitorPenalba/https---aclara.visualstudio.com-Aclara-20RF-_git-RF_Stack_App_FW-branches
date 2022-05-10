@@ -1,4 +1,3 @@
-// <editor-fold defaultstate="collapsed" desc="File Header">
 /***********************************************************************************************************************
  *
  * Filename: partition_cfg.h
@@ -9,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2020 Aclara.  All Rights Reserved.
+ * Copyright 2011-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -33,8 +32,7 @@
 #ifndef PARTITION_CFG_H_
 #define PARTITION_CFG_H_
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Included Files">
+
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 
@@ -45,7 +43,6 @@
 #include "dvr_sectPreErase.h"
 #include "IF_intFlash.h"
 
-// </editor-fold>
 /* ****************************************************************************************************************** */
 /* partitions_EXTERN DEFINTION */
 

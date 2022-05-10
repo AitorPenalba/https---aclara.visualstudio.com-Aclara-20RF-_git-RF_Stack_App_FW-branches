@@ -35,13 +35,15 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-//#include <mqx.h>
-//#include <fio.h>
-//#include <io_prv.h>
-//#include <charq.h>
-//#include <serinprv.h>
-//#include <bsp.h>
-//#include <file_io.h>
+#if ( MCU_SELECTED == NXP_K24 )
+#include <mqx.h>
+#include <fio.h>
+#include <io_prv.h>
+#include <charq.h>
+#include <serinprv.h>
+#include <bsp.h>
+#endif
+#include <file_io.h>
 #include "timer_util.h"
 //#include "time_sys.h"
 #include "DBG_SerialDebug.h"
@@ -91,7 +93,7 @@ typedef struct
 /* FILE VARIABLE DEFINITIONS */
 
 static bool             EnableDebugPrint_ = ( bool )true;
-//static FileHandle_t     dbgFileHndl_;                       //Contains the file handle information
+static FileHandle_t     dbgFileHndl_;                       //Contains the file handle information
 #if ( PORTABLE_DCU == 1)
 /* this flag disables all debug printing but still allows debug command processing */
 static bool             EnableDfwMonMode = ( bool )false;
@@ -178,7 +180,7 @@ returnStatus_t DBG_init( void )
 #endif
    if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS ) &&
          OS_MUTEX_Create( &mutex_ ) &&
-#if ( MCU_SELECTED == RA6E1 )
+#if ( RTOS_SELECTION == FREE_RTOS )
          //TODO RA6: NRJ: determine if semaphores need to be counting
          OS_SEM_Create( &dbgReceiveSem_ , 0) &&
          OS_SEM_Create( &transferSem[UART_DEBUG_PORT], 0 ) &&
@@ -239,7 +241,7 @@ OS_EVENT_TestCreate();
  **********************************************************************************************************************/
 void DBG_TxTask( taskParameter )
 {
-//   vTaskDelay(pdMS_TO_TICKS(1000));
+   /* TODO: RA6: Move these TM_xxx code to appropriate location */
 #if (TM_SEMAPHORE == 1)
    OS_SEM_TestPost();
 #endif
@@ -249,7 +251,6 @@ void DBG_TxTask( taskParameter )
 #if( TM_EVENTS == 1 )
    OS_EVENT_TestSet();
 #endif
-//   vTaskSuspend(NULL);
    for ( ; ; )
    {
 
@@ -409,7 +410,7 @@ void DBG_logPrintHex ( char category, char const *str, const uint8_t *pSrc, uint
       }
       else
       {
-         // Add "Cont" to any continous segment
+         // Add "Cont" to any continuous segment
          lastLoc += ( uint16_t )snprintf( &DBG_logPrintHex_buf[lastLoc], (int32_t)sizeof( DBG_logPrintHex_buf ) - lastLoc, "Cont " );
       }
 
@@ -499,7 +500,7 @@ char * DBG_printFloat( char *str, float f, uint32_t precision )
       ( void )strcpy( str, "Precision too large" );
       return str;
    }
-   // Decompose float in integer and fractionnal part
+   // Decompose float in integer and fractional part
    integer = ( int32_t )f;
    if ( precision <= 6 )
    {
@@ -780,13 +781,13 @@ void DBG_LW_printf( char const *fmt, ... )
 
    Returns: none
 
-   Note:   This mode will disable all debug printing except for respones to the following messages:
+   Note:   This mode will disable all debug printing except for responses to the following messages:
          DFW Verify Response
          DFW Init Response
          DFW Download Confirmation
-         DFW Apply Acknowledgement
+         DFW Apply Acknowledgment
          DFW Apply Confirmation
-      The mode is not persistant through power cycles
+      The mode is not persistent through power cycles
 
 *******************************************************************************/
 void DBG_DfwMonitorMode( bool enable )

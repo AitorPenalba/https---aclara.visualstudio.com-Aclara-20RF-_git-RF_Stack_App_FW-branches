@@ -270,12 +270,12 @@ U8 radio_comm_PollCTS( uint8_t radioNum )
 #elif ( RTOS_SELECTION == FREE_RTOS )
    if ( !firstPollDone[ radioNum ] )
    {
-      OS_TICK_Get_ElapsedTicks(&startTime); // TODO: Check working of having elapsed ticks instead get ticks
+      OS_TICK_Get_CurrentElapsedTicks(&startTime); // TODO: RA6: Check working of having elapsed ticks instead get ticks
       endTime = startTime;
 
       while ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds( &startTime, &endTime ) < defaultDelay)
       {
-         OS_TICK_Get_ElapsedTicks(&endTime);
+         OS_TICK_Get_CurrentElapsedTicks(&endTime);
       }
       firstPollDone[ radioNum ] = (bool)true;
    }

@@ -7,10 +7,16 @@
  * Contents:
  *
  ***********************************************************************************************************************
- * Copyright (c) 2012-2022 Aclara Power-Line Systems Inc.  All rights reserved.  This program may not be reproduced, in
- * whole or in part, in any form or by any means whatsoever without the written permission of:
- *                ACLARA POWER-LINE SYSTEMS INC.
- *                ST. LOUIS, MISSOURI USA
+   A product of
+   Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2012 - 2022 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may be
+   used or copied only in accordance with the terms of such license.
  **********************************************************************************************************************/
 
 /* ****************************************************************************************************************** */
@@ -219,7 +225,7 @@ static uint32_t CPUTotal;
 
 /* The following structure will be used to store task handle information for FreeRTOS. Each
    task handle will be tied to a specific task name as each task is created. When a task
-   handle is needed, a table of these handles will be searched by mathcing a task name to
+   handle is needed, a table of these handles will be searched by matching a task name to
    find the corresponding handle. */
 #if (RTOS_SELECTION == FREE_RTOS)
 typedef struct
@@ -229,12 +235,6 @@ typedef struct
 }taskHandleLookup_t;
 #endif
 
-// unify the return value each RTOS returns as each task is created
-#if ( RTOS_SELECTION == MQX_RTOS )
-typedef _task_id taskCreateReturnValue_t;
-#elif ( RTOS_SELECTION == FREE_RTOS )
-typedef UBaseType_t taskCreateReturnValue_t;
-#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -471,7 +471,6 @@ void task_exception_handler( _mqx_uint para, void * stack_ptr );
 #if (RTOS_SELECTION == FREE_RTOS)
 static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName );
 #endif
-static taskCreateReturnValue_t OS_TASK_Create ( OS_TASK_Template_t const *pTaskList );
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
@@ -847,7 +846,7 @@ void OS_TASK_Sleep ( uint32_t MSec )
 #if (RTOS_SELECTION == MQX_RTOS)
    _time_delay ( MSec );
 #elif (RTOS_SELECTION == FREE_RTOS)
-   vTaskDelay(pdMS_TO_TICKS(MSec));
+   vTaskDelay( pdMS_TO_TICKS(MSec) );
 #endif
 }
 /* ****************************************************************************************************************** */

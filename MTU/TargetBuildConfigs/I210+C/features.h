@@ -86,7 +86,7 @@
    #define FILE_IO                        0
    #define PARTITION_MANAGER              1 /* 0 = No PARTITION_MANAGER, 1 = Partition Manager */
    #define TIMER_UTIL                     0
-   #define RTC                            0
+   #define RTC                            1
 #endif
 #define SUPPORT_HEEP                      0 /* TODO: RA6E1: Temporary conditional*/
 #define INCLUDE_ECC                       0 /* TODO: RA6E1: Temporary conditional*/

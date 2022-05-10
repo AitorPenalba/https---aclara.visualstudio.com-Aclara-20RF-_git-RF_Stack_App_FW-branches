@@ -152,6 +152,8 @@
 #include "vbat_reg.h"
 #include "pwr_task.h"
 #include "virgin_device.h"
+#include "mode_config.h"
+#include "pwr_config.h"
 /* END OF TODO: RA6: DG: Remove Duplicate Includes */
 
 
@@ -184,10 +186,10 @@ static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
 const STRT_FunctionList_t startUpTbl[] =
 {
    INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
-   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
-// TODO: RA6: Balaji:  Why was DBG_init() moved?
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
+   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
+
    INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
    INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
    INIT( VBATREG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),    // Needed early to check validity of RTC. // TODO: RA6E1: DG: Move this to appropriate position
@@ -201,6 +203,10 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+   INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
+                                                                                       quiet and rftest mode flags can't be checked before this init
+                                                                                       has been run */
+   INIT( PWRCFG_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                         /* Must be before PWR_TSK_init so restoration delay is available*/
    INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                        // TODO: RA6E1: DG: Move this to appropriate position
    INIT( PAR_initRtos, STRT_FLAG_NONE ),
    INIT( MAC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
@@ -209,7 +215,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
 
-#if 0
+#if 0 // TODO: RA6: Add later
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS
    INIT( PWR_waitForStablePower, STRT_FLAG_NONE ),
@@ -552,11 +558,10 @@ void STRT_StartupTask ( taskParameter )
          {
             /* This condition should only show up in development.  This infinite loop should help someone figure out
                that there is an issue initializing a task. */
-#if 0   // TODO: RA6E1: DG: Enable this code
             ( void )printf( "\n\t\t#####################\n" );
             ( void )printf( "\nStartup Failure - Call to %s failed, Code: %u\n", pFunct->name, ( uint16_t )response );
             ( void )printf( "\n\t\t#####################\n" );
-#endif
+
             initSuccess_ = false;
          }
       }
@@ -607,7 +612,7 @@ void STRT_StartupTask ( taskParameter )
       we don't surpass the TickTime delay specified below
       Note:  We do have the CPU Load function below this, and that is acceptable
              to ensure we get an accurate CPU load value */
-   OS_TICK_Get_ElapsedTicks ( &TickTime );
+   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
 
    CurrentIdleCount = IDL_Get_IdleCounter();
    PrevIdleCount = CurrentIdleCount;
@@ -615,7 +620,7 @@ void STRT_StartupTask ( taskParameter )
    for ( ;; )
    {
       vTaskSuspend(NULL); // TODO: RA6: DG: Remove
-#if 0
+#if 0  // TODO: RA6: Enable the Code
       OS_TICK_Sleep ( &TickTime, ONE_SEC );
 
       CurrentIdleCount = IDL_Get_IdleCounter();

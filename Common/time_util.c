@@ -8,14 +8,17 @@
  *
  *
  ***********************************************************************************************************************
- * Copyright (c) 2010-2018 Aclara Power-Line Systems Inc.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *                ACLARA POWER-LINE SYSTEMS INC.
- *                ST. LOUIS, MISSOURI USA
- ***********************************************************************************************************************
- *
- *
+   A product of
+   Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2010 - 2020 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may be
+   used or copied only in accordance with the terms of such license.
+
  ***********************************************************************************************************************
  * Revision History:
  * 052710 MS  - Initial Release
@@ -24,7 +27,6 @@
 
 /* INCLUDE FILES */
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdio.h>
 #if 0 // TODO: RA6E1 - Support PHY
 #include "PHY_Protocol.h"
@@ -997,8 +999,8 @@ void TIME_UTIL_PrintQSecFracFormat(char const * str, uint64_t QSecFrac)
 
    sec  = (uint32_t)(QSecFrac >> 32);
    usec = (uint32_t)(((QSecFrac & 0xFFFFFFFF) * 1000000ULL) >> 32);
-#if 0 // TODO: RA6E1 - Support prints functionalities
+
    INFO_printf("%s fracFormat: %llu %u.%06u", str, QSecFrac, sec, usec);
-#endif
+
 }
 

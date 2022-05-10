@@ -21,7 +21,6 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include "meter.h"
-#include <stdbool.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
@@ -467,7 +466,7 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
    return UART_ioctl ( UartId, IO_IOCTL_SERIAL_SET_FLAGS, &flags ); // Update settings
 }
 
-#endif
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 /* No function calls for UART_close */
 /*******************************************************************************
 
@@ -598,4 +597,5 @@ void user_uart_callback( uart_callback_args_t *p_args )
         }
     }
 }/* end user_uart_callback () */
+
 #endif

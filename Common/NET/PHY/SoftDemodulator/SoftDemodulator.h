@@ -67,8 +67,8 @@ typedef struct //Used in fir_filt_circ_buff also
    uint32_t size;
 } unProcessedData_t ;
 
-extern OS_EVNT_Obj SD_Events;
-extern OS_MUTEX_Obj SD_Payload_Mutex;
+extern OS_EVNT_Obj   SD_Events;
+extern OS_MUTEX_Obj  SD_Payload_Mutex;
 extern float filteredPhaseSamplesBuffer[FILTERED_PHASE_SAMPLES_BUFFER_SIZE];
 extern uint16_t filteredPhaseSamplesBufferWriteIndex;
 //extern filteredPhaseSamples_sem_t SD_FilteredPhaseSamplesSemaphores[SOFT_DEMOD_MAX_SYNC_PAYL_TASKS + 1]; // +1 for preamble detector task

@@ -8,7 +8,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2018-2020 Aclara.  All Rights Reserved.
+   Copyright 2018-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -36,8 +36,9 @@
 
 #ifndef __BOOTLOADER
 #include "error_codes.h"
-//#include "user_config.h"
-
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include "user_config.h"
+#endif
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 #define EP                             1

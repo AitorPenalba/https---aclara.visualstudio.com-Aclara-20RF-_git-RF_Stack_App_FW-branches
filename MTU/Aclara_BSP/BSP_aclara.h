@@ -7,10 +7,16 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2022 ACLARA.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *    ACLARA, ST. LOUIS, MISSOURI USA
+   A product of
+   Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2010 - 2022 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may be
+   used or copied only in accordance with the terms of such license.
  *****************************************************************************/
 #ifndef BSP_aclara_H
 #define BSP_aclara_H
@@ -199,7 +205,9 @@ extern uint16_t    BSP_Get_ResetStatus       ( void );
 extern void        BSP_Setup_VREF            ( void );
 
 extern uint16_t    CRC_16_Calculate          ( uint8_t *Data, uint32_t Length );
+#if ( DCU == 1)
 extern uint16_t    CRC_16_DcuHack            ( uint8_t *Data, uint32_t Length );
+#endif
 extern uint16_t    CRC_16_PhyHeader          ( uint8_t *Data, uint32_t Length );
 extern uint32_t    CRC_32_Calculate          ( uint8_t *Data, uint32_t Length );
 
@@ -225,11 +233,12 @@ extern void        RTC_GetTimeInSecMicroSec  ( uint32_t *sec, uint32_t *microSec
 
 #elif ( MCU_SELECTED == RA6E1 )
 extern returnStatus_t RTC_init( void );
-extern void       RTC_ConfigureRTCCalendarAlarm( uint16_t seconds );
-extern bool       RTC_SetAlarmTime ( rtc_alarm_time_t * const p_alarm );
-extern void       RTC_GetAlarmTime ( rtc_alarm_time_t * const p_alarm );
-extern void       RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg );
-extern void       rtc_callback(rtc_callback_args_t *p_args);
+extern void           RTC_ConfigureRTCCalendarAlarm( uint16_t seconds );
+extern bool           RTC_SetAlarmTime ( rtc_alarm_time_t * const p_alarm );
+extern void           RTC_GetAlarmTime ( rtc_alarm_time_t * const p_alarm );
+extern void           RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg );
+extern void           rtc_callback(rtc_callback_args_t *p_args);
+extern bool           RTC_isRunning ( void );
 #endif
 
 extern uint32_t    UART_write                ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );

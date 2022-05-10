@@ -11,31 +11,34 @@
                die. If power should come back and the unit 'debounces' the power signal, the processor will reset.
 
  ***********************************************************************************************************************
-   Copyright (c) 2013-2020 Aclara Power-Line Systems Inc. All rights reserved. This program may not be reproduced, in
-   whole or in part, in any form or by any means whatsoever without the written permission of:
-                  ACLARA POWER-LINE SYSTEMS INC.
-                  ST. LOUIS, MISSOURI USA
+   A product of
+   Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2013 - 2022 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may be
+   used or copied only in accordance with the terms of such license.
  ***********************************************************************************************************************
 
    $Log$ kdavlin Created May 6, 2013
 
- ***********************************************************************************************************************
-   Revision History:
-   v0.1 - KAD 05/6/2013 - Initial Release
-
  **********************************************************************************************************************/
-#if 1 // TODO: RA6: DG: Remove
 /* INCLUDE FILES */
 #include "project.h"
-#include "hal_data.h" // TODO: RA6: DG: Add conditional
-//#include <mqx.h>
+#if ( MCU_SELECTED == NXP_K24 )
+#include <mqx.h>
+#endif
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
+#include "file_io.h"
 //#include "pwr_restore.h"
 //#include "pwr_config.h"
 //#include "hmc_app.h"
-//#include "mode_config.h"
-//#include "time_util.h"
+#include "mode_config.h"
+#include "time_util.h"
 //#include "demand.h"
 //#include "MAC.h"
 //#include "PHY.h"
@@ -46,11 +49,11 @@
 #if ( USE_DTLS == 1)
 #include "dtls.h"
 #endif
-//#include "radio_hal.h"
+#include "radio_hal.h"
 //#include "RG_MD_Handler.h"
 //#include "buffer.h"
 
-//#include "vbat_reg.h"
+#include "vbat_reg.h"
 //#include "fio.h"           /* For ecc108_mqx.h" */
 //#include "ecc108_mqx.h"    /* For the delay_xx functions */
 //#include "EVL_event_log.h"
@@ -59,7 +62,6 @@
 #endif
 //#include "ID_intervaltask.h"
 //#include "historyd.h"
-//#include "EVL_event_log.h"
 
 /* MACRO DEFINITIONS */
 #define POWER_DOWN_SIGNATURE ((uint64_t)0x01020304abcdef7A)
@@ -100,11 +102,7 @@ static OS_TICK_Struct   PWR_endTick_    = {0};
 /* Power Down Table - Define all modules that require a call-back for powering down below. */
 static exeTable_t powerDownTbl[] =
 {
-#if 0 /* TODO: RA6: Add later */
    ADC_ShutDown,
-#else
-   NULL,
-#endif
 #if ( ENABLE_HMC_TASKS == 1 )
    HMC_APP_TaskPowerDown   /* Shut down the HMC application */
 #endif   /* end of ENABLE_HMC_TASKS  == 1 */
@@ -150,10 +148,8 @@ static fsp_err_t brownOut_isr_init( void )
    if(FSP_SUCCESS == err)
    {
       /* Enable ICU module */
-      //       DBG_printf("\nOpen PF Meter IRQ");
+      DBG_printf("\nOpen PF Meter IRQ");
       err = R_ICU_ExternalIrqEnable( &pf_meter_ctrl );
-      //      if(FSP_SUCCESS == err)
-      //         DBG_printf("\n IRQEnable");
    }
    return err;
 }
@@ -182,35 +178,46 @@ void PWR_task( taskParameter )
 {
    returnStatus_t powerFail = eFAILURE;
 
-//   DBG_logPrintf( 'I', "PWR_task starting." );
+   DBG_logPrintf( 'I', "PWR_task starting." );
+
+#if 1 // TODO: RA6: DG: Test code
+   sysTime_dateFormat_t RTC_time;
+   if( !RTC_isRunning() )
+   {
+      printf("RTC Stopped\n");
+   }
+   else
+   {
+      RTC_GetDateTime(&RTC_time);
+      INFO_printf("RTC Time:  %02u/%02u/%04u %02u:%02u:%02u.%03u",RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec, RTC_time.msec);
+   }
+#endif
 #if 0
    ( void ) DBG_CommandLine_GetHWInfo ( 0, NULL );
 #endif
-#if 0 /* TODO: RA6: This is for K24 BSP */
+
    // Do ship mode processing if necessary.
    ShipMode();
 
    // Signal to outage restoration that the power task has initialized.
-   PWROR_PWR_signal();
+//   PWROR_PWR_signal();  // TODO: RA6: DG: Add later
 
+#if ( MCU_SELECTED == NXP_K24 )
    // Install ISR for Brown Out
    if ( NULL != _int_install_isr( BRN_OUT_IRQIsrIndex, ( INT_ISR_FPTR )isr_brownOut, ( void * )NULL ) )
    {
       ( void )_bsp_int_init( BRN_OUT_IRQIsrIndex, BRN_OUT_ISR_PRI, BRN_OUT_ISR_SUB_PRI, ( bool )true );
    }
-#endif
-#if ( MCU_SELECTED == NXP_K24 )
    BRN_OUT_IRQ_EI();
 #elif ( MCU_SELECTED == RA6E1 ) /*  RA6 */
-   brownOut_isr_init();
+   ( void )brownOut_isr_init();
 #endif
    // Loop until receiving a valid PF_METER
    while ( eFAILURE == powerFail )
    {
-#if ( MCU_SELECTED == NXP_K24 )
       // Enable the Interrupt
       BRN_OUT_IRQ_EI();
-#endif
+
       ( void )OS_SEM_Pend( &PWR_Sem, OS_WAIT_FOREVER ); // Wait for power down semaphore!
       OS_SEM_Reset( &PWR_Sem );
 
@@ -233,11 +240,12 @@ void PWR_task( taskParameter )
       //Need this to keep from allowing task switch
       PWR_USE_LDO();
    }
+#endif
    //Radio shutdown to ensure transmissions are disabled ASAP
    radio_hal_RadioImmediateSDN();
-#endif
+
    /* Before we can continue the power down process, we need to make sure no tasks are in the middle of updating
-      critial information in NV or important system status flags tied to changes in NV such as last gasp flags.
+      critical information in NV or important system status flags tied to changes in NV such as last gasp flags.
       Lock the power mutex in the PWR_AND_EMBEDDED_PWR_MUTEX state.  This will ensure all NV writes have completed,
 	  important system flags have been updated, and the device is ready to complete the power down process.  Once
 	  the mutex is acquired, the power module will not release the mutex in order to prevent other tasks from making
@@ -284,14 +292,16 @@ _Pragma ( "calls = \
       RESET(); /* PWR_SafeReset() not necessary */
    }
 #endif
-#if ( RTOS_SELECTION == MQX_RTOS )
+
    /* Increase the priority of the power and idle tasks. */
-   ( void )OS_TASK_Set_Priority( pTskName_Pwr, 10 );
+//   ( void )OS_TASK_Set_Priority( pTskName_Pwr, 10 );
+#if ( MCU_SELECTED == NXP_K24 )
    ( void )OS_TASK_Set_Priority( pTskName_Idle, 11 );
 #endif
+
    pwrFileData.uPowerDownSignature = POWER_DOWN_SIGNATURE; // Write power down signature
 
-#if 1 // TODO: RA6: Replace (ENABLE_LAST_GASP_TASK == 1)
+#if 1 // TODO: RA6: Replace (ENABLE_LAST_GASP_TASK == 1)  ?
 #if ( FILE_IO == 1 )
    ( void )FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* ) &pwrFileData, ( lCnt )sizeof( pwrFileData ) );
 #endif
@@ -300,7 +310,7 @@ _Pragma ( "calls = \
    /*****               Next function never returns                *****/
    /********************************************************************/
    /* TODO: RA6: DG: Check for Ship and Shop Mode  */
-//   PWRLG_Begin( pwrFileData.uPowerAnomalyCount ); /* Never returns  */  TODO: RA6E1: DG: Add
+   PWRLG_Begin( pwrFileData.uPowerAnomalyCount ); /* Never returns  */
 #else
    VBATREG_SHORT_OUTAGE = 0;  //Ensure we do not see this as a short outage
 
@@ -520,8 +530,8 @@ returnStatus_t PWR_TSK_init( void )
    PWR_USE_LDO();
 
    DBG_logPrintf( 'I', "\n" );
-   DBG_logPrintHex( 'I', "VBAT RAM : ", (uint8_t *)RFVBAT_BASE_PTR, 32);
-   DBG_logPrintHex( 'I', "RFSYS RAM: ", (uint8_t *)RFSYS_BASE_PTR, 32);
+   DBG_logPrintHex( 'I', "VBAT RAM : ", (uint8_t *)PWRLG_RFSYS_BASE_PTR, 32);
+   DBG_logPrintHex( 'I', "RFSYS RAM: ", (uint8_t *)VBATREG_RFSYS_BASE_PTR, 32);
    DBG_logPrintf( 'I', "outage: %d, Short outage: %d, PWR Qual count (RAM): %d", PWRLG_OUTAGE(), VBATREG_SHORT_OUTAGE, VBATREG_PWR_QUAL_COUNT );
    DBG_logPrintf( 'I', "Restoration timer: %d, Last sleep secs: %d, ms: %d", VBATREG_POWER_RESTORATION_TIMER, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
 
@@ -558,8 +568,8 @@ returnStatus_t PWR_TSK_init( void )
                if ( POWER_DOWN_SIGNATURE == pwrFileData.uPowerDownSignature )
                {
                   pwrFileData.uPowerDownCount++;
-
-                  PWRLG_Restoration( pwrFileData.uPowerAnomalyCount ); /* Note: VBATREG_PWR_QUAL_COUNT could be modified in this function */
+                    /* TODO: RA6: DG: Add below code */
+//                  PWRLG_Restoration( pwrFileData.uPowerAnomalyCount ); /* Note: VBATREG_PWR_QUAL_COUNT could be modified in this function */
                }
                else  /* Not a valid power-down signature - no outage. */
                {
@@ -592,11 +602,12 @@ returnStatus_t PWR_TSK_init( void )
       }
    }
 #else
+//#include "lpm_app.h"  // TODO: RA6: DG: Remove
    returnStatus_t       retVal = eSUCCESS;
    //TODO RA6: NRJ: determine if semaphores need to be counting
    if ( OS_MUTEX_Create( &PWR_Mutex ) && OS_MUTEX_Create(&Embedded_Pwr_Mutex) && OS_SEM_Create( &PWR_Sem, 0 ) )
    {
-      DBG_printf("Created");
+//      user_clocks_set(); /* TODO: RA6: DG: Move to appropriate location  */
    }
 #endif
    return( retVal );
@@ -935,9 +946,9 @@ returnStatus_t PWR_getPowerAnomalyCount( uint32_t *pValue )
 void PWR_resetCounters( void )
 {
    ( void )memset( ( uint8_t * )&pwrFileData, 0, sizeof( pwrFileData ) );
-#if 0 /* TODO: RA6: Add later */
+   VBATREG_EnableRegisterAccess();
    VBATREG_PWR_QUAL_COUNT = 0;
-#endif
+   VBATREG_DisableRegisterAccess();
 }
 
 /***********************************************************************************************************************
@@ -958,17 +969,17 @@ void PWR_resetCounters( void )
 void PWR_SafeReset( void )
 {
    /* Before we can continue the reset process, we need to make sure no tasks are in the middle of updating
-      critial information in NV or important system status flags tied to changes in NV such as last gasp flags.
+      critical information in NV or important system status flags tied to changes in NV such as last gasp flags.
       Lock the power mutex in the PWR_AND_EMBEDDED_PWR_MUTEX state.  This will ensure all NV writes have completed,
 	  important system flags have been updated, and the device is ready to complete the reset process.  Once the mutex
 	  is acquired, the power module will not release the mutex in order to prevent other tasks from making updates
 	  and will be released upon reset completion. */
    PWR_lockMutex( PWR_AND_EMBEDDED_PWR_MUTEX );
+   VBATREG_EnableRegisterAccess();
    pwrFileData.uPowerDownSignature  = 0;  /* Clear power down signature */
    pwrFileData.outageTime           = 0;
-#if 0 /* TODO: RA6: Add later */
    VBATREG_PWR_QUAL_COUNT           = 0;  /* Clear the RAM based power quality count.      */
-#endif
+   VBATREG_DisableRegisterAccess();
 #if ( FILE_IO == 1 ) /* TODO: RA6: */
    ( void )FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* ) &pwrFileData, ( lCnt )sizeof( pwrFileData ) );
    /* Flush all partitions (only cached actually flushed) and ensures all pending writes are completed */
@@ -976,7 +987,7 @@ void PWR_SafeReset( void )
    PWRLG_SOFTWARE_RESET_SET( 1 ); // TODO 2016-02-02 SMG Change to call into PWRLG
    PWRLG_TIME_OUTAGE_SET( 0 );   /* Clear the time of the last outage.  */
 #endif
-//   RESET();
+   RESET();
 }
 
 /***********************************************************************************************************************
@@ -997,15 +1008,17 @@ void PWR_SafeReset( void )
 #if ( MCU_SELECTED == NXP_K24 )
 void isr_brownOut( void )
 #elif ( MCU_SELECTED == RA6E1 )
-void isr_brownOut(  external_irq_callback_args_t * p_args)
+void isr_brownOut( external_irq_callback_args_t * p_args )
 #endif
 {
-#if ( MCU_SELECTED == NXP_K24 )
    BRN_OUT_IRQ_DI();        /* Disable the ISR */
-#endif // TODO: RA6: DG: Disable the interrupt and then enable later.
 #if ( SIMULATE_POWER_DOWN == 1 )
    /* Adding a semaphore to keep the ISR as short as possible */
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_SEM_Post( &PWR_SimulatePowerDn_Sem ); /* Post the semaphore */
+#else
+   OS_SEM_Post_fromISR( &PWR_SimulatePowerDn_Sem ); /* Post the semaphore */
+#endif
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )
    OS_SEM_Post( &PWR_Sem ); /* Post the semaphore */
@@ -1157,15 +1170,16 @@ static void ShipMode( void )
  **********************************************************************************************************************/
 static void PowerGoodDebounce( void )
 {
-#if 0 /* TODO: RA6: Add later */
-   uint16_t debounceCount;
-
-   debounceCount = 0;
+   uint16_t debounceCount = 0;
 
    // Make sure PF_METER deasserted for 1ms.
    while ( debounceCount < DEBOUNCE_CNT_RST_VAL )
    {
+#if ( MCU_SELECTED == NXP_K24 )
       delay_10us( DEBOUNCE_DELAY_VAL );
+#elif ( MCU_SELECTED == RA6E1 )
+      R_BSP_SoftwareDelay( DEBOUNCE_DELAY_VAL * 10 , BSP_DELAY_UNITS_MICROSECONDS );
+#endif
       CLRWDT();
       if ( BRN_OUT() )
       {
@@ -1176,7 +1190,7 @@ static void PowerGoodDebounce( void )
          ++debounceCount;
       }
    }
-#endif
+
    return;
 }
 
@@ -1197,16 +1211,17 @@ static void PowerGoodDebounce( void )
  **********************************************************************************************************************/
 static returnStatus_t PowerFailDebounce( void )
 {
-   returnStatus_t brownOut;
-   uint16_t       debounceCount;
+   returnStatus_t brownOut       = eSUCCESS;
+   uint16_t       debounceCount  = 0;
 
-   debounceCount = 0;
-   brownOut       = eSUCCESS;
-#if 0 /* TODO: RA6: Add later */
    // Make sure BRN_OUT asserted for 1ms.
    while ( ( eSUCCESS == brownOut ) && ( debounceCount < DEBOUNCE_CNT_RST_VAL ) )
    {
+#if ( MCU_SELECTED == NXP_K24 )
       delay_10us( DEBOUNCE_DELAY_VAL );
+#elif ( MCU_SELECTED == RA6E1 )
+      R_BSP_SoftwareDelay( DEBOUNCE_DELAY_VAL * 10 , BSP_DELAY_UNITS_MICROSECONDS );
+#endif
       if ( BRN_OUT() )
       {
          ++debounceCount;
@@ -1216,7 +1231,7 @@ static returnStatus_t PowerFailDebounce( void )
          brownOut = eFAILURE;
       }
    }
-#endif
+
    return ( brownOut );
 }
 
@@ -1329,4 +1344,3 @@ returnStatus_t PWR_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
 }
 #endif
 #endif //Remove; #if 0
-#endif //Remove; #if 1

@@ -15,8 +15,7 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#if( RTOS_SELECTION == FREE_RTOS )
-#elif( RTOS_SELECTION == MQX_RTOS )
+#if( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <lwevent.h>
 #include "EVL_event_log.h"

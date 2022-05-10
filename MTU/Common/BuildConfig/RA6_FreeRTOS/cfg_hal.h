@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2011-2021 Aclara.  All Rights Reserved.
+ * Copyright 2011-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -167,56 +167,55 @@
 
 #if ( TEST_REGULATOR_CONTROL_DISABLE == 0 )
 // 3P6LDO_EN
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
 #define PWR_3P6LDO_EN_OFF()      GPIOB_PCOR = 1<<1       /* 3.6V LDO Off  */
 #define PWR_3P6LDO_EN_ON()       GPIOB_PSOR = 1<<1       /* 3.6V LDO On */
-#elif (RTOS_SELECTION == FREE_RTOS)
+#elif ( MCU_SELECTED == RA6E1 )
 #define PWR_3P6LDO_EN_OFF()      R_BSP_PinWrite(BSP_IO_PORT_04_PIN_04, BSP_IO_LEVEL_LOW)       /* 3.6V LDO Off  */
 #define PWR_3P6LDO_EN_ON()       R_BSP_PinWrite(BSP_IO_PORT_04_PIN_04, BSP_IO_LEVEL_HIGH)       /* 3.6V LDO On */
 #endif
 #define PWR_3P6LDO_EN_ON_DLY_MS  ((uint32_t)1)
 
 /* Set PCR MUX for GPIO, Turn LDO On/Off, Make Output */
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
 #define PWR_3P6LDO_EN_TRIS_ON()  { PORTB_PCR1 = 0x100; PWR_3P6LDO_EN_ON();  GPIOB_PDDR |= (1<<1); }
 #define PWR_3P6LDO_EN_TRIS_OFF() { PORTB_PCR1 = 0x100; PWR_3P6LDO_EN_OFF(); GPIOB_PDDR |= (1<<1); }
-#elif (RTOS_SELECTION == FREE_RTOS)
+#elif ( MCU_SELECTED == RA6E1 )
 #define PWR_3P6LDO_EN_TRIS_ON()     PWR_3P6LDO_EN_ON();
 #define PWR_3P6LDO_EN_TRIS_OFF()    PWR_3P6LDO_EN_OFF();
 #endif
 
 // 3V6BOOST_EN
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
 #define PWR_3V6BOOST_EN_OFF()      GPIOC_PCOR = 1<<0       /* 3.6V BOOST Off  */
 #define PWR_3V6BOOST_EN_ON()       GPIOC_PSOR = 1<<0       /* 3.6V BOOST On */
-#elif (RTOS_SELECTION == FREE_RTOS)
+#elif ( MCU_SELECTED == RA6E1 )
 #define PWR_3V6BOOST_EN_OFF()      R_BSP_PinWrite(BSP_IO_PORT_06_PIN_09, BSP_IO_LEVEL_LOW)       /* 3.6V BOOST Off  */
 #define PWR_3V6BOOST_EN_ON()       R_BSP_PinWrite(BSP_IO_PORT_06_PIN_09, BSP_IO_LEVEL_HIGH)       /* 3.6V BOOST On */
 #endif
 #define PWR_3V6BOOST_EN_ON_DLY_MS  ((uint32_t)10)
 
 /* Set PCR for GPIO, Turn Boost Off/On, Make Output */
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
 #define PWR_3V6BOOST_EN_TRIS_OFF() { PORTC_PCR0 = 0x100; PWR_3V6BOOST_EN_OFF(); GPIOC_PDDR |= (1<<0);}
 #define PWR_3V6BOOST_EN_TRIS_ON()  { PORTC_PCR0 = 0x100; PWR_3V6BOOST_EN_ON();  GPIOC_PDDR |= (1<<0);}
-#elif (RTOS_SELECTION == FREE_RTOS)
+#elif ( MCU_SELECTED == RA6E1 )
 #define PWR_3V6BOOST_EN_TRIS_OFF() PWR_3V6BOOST_EN_OFF();
 #define PWR_3V6BOOST_EN_TRIS_ON()  PWR_3V6BOOST_EN_ON();
 #endif
 
 /* Use selected regulator */
-#if ( MCU_SELECTED == NXP_K24 )
 #define PWR_USE_LDO()            { PWR_3P6LDO_EN_TRIS_ON();   OS_TASK_Sleep( PWR_3P6LDO_EN_ON_DLY_MS );   PWR_3V6BOOST_EN_TRIS_OFF(); }
 #define PWR_USE_BOOST()          { PWR_3V6BOOST_EN_TRIS_ON(); OS_TASK_Sleep( PWR_3V6BOOST_EN_ON_DLY_MS ); PWR_3P6LDO_EN_TRIS_OFF(); }
-#elif ( MCU_SELECTED == RA6E1 )
-#define PWR_USE_LDO()            { OS_TASK_Sleep( PWR_3P6LDO_EN_ON_DLY_MS );   PWR_3V6BOOST_EN_TRIS_OFF(); }
-#define PWR_USE_BOOST()          { OS_TASK_Sleep( PWR_3V6BOOST_EN_ON_DLY_MS ); PWR_3P6LDO_EN_TRIS_OFF(); }
-#endif
+
 
 /* Regulator selected? */
-#if ( MCU_SELECTED == NXP_K24 ) // This section is not used in the firmware
-#define PWR_LDO_IN_USE()         ( ( GPIOB_PDOR & (1<<1) ) == 0 ? false : true )
+#if ( MCU_SELECTED == NXP_K24 )
+#define PWR_LDO_IN_USE()         ( ( GPIOB_PDOR & (1<<1) ) == 0 ? false : true )   // Not used
 #define PWR_BOOST_IN_USE()       ( ( GPIOC_PDOR & (1<<0) ) == 0 ? false : true )
+#elif ( MCU_SELECTED == RA6E1 )
+#define PWR_LDO_IN_USE()         ( R_BSP_PinRead(BSP_IO_PORT_04_PIN_04) == 0 ? false : true )
+#define PWR_BOOST_IN_USE()       ( R_BSP_PinRead(BSP_IO_PORT_06_PIN_09) == 0 ? false : true )
 #endif
 
 #else  // TEST_REGULATOR_CONTROL_DISABLE == 1

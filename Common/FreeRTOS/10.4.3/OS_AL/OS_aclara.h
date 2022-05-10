@@ -202,7 +202,7 @@ typedef struct
    uint32_t   xNumOfOverflows; // Tick count overflow
 } OS_TICK_Struct, * OS_TICK_Struct_Ptr;
 
-//#define OS_TICK_Sleep
+
 #define OS_TASK_Summary
 
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -217,7 +217,7 @@ typedef QueueHandle_t         OS_QUEUE_Obj, *OS_QUEUE_Handle;
 typedef EventGroupHandle_t    OS_EVNT_Obj,  *OS_EVNT_Handle;
 typedef struct OS_Linked_List_Element
 {
-   struct OS_Linked_List_Element * NEXT; //match MQX memeber names QUEUE_ELEMENT_STRUCT
+   struct OS_Linked_List_Element * NEXT; //match MQX member names QUEUE_ELEMENT_STRUCT
    struct OS_Linked_List_Element * PREV;
 } OS_Linked_List_Element, *OS_Linked_List_Element_Handle;
 
@@ -333,6 +333,13 @@ typedef enum
   eSYSFMT_EVL_ALARM_LOG_RESET_EVENT
 }eSysFormat_t;
 
+// unify the return value each RTOS returns as each task is created
+#if ( RTOS_SELECTION == MQX_RTOS )
+typedef _task_id taskCreateReturnValue_t;
+#elif ( RTOS_SELECTION == FREE_RTOS )
+typedef UBaseType_t taskCreateReturnValue_t;
+#endif
+
 /* CONSTANTS */
 /* This list of const needs to match the list in Task.c   These values are used for Get/Set Task Priority */
 #if 0
@@ -372,11 +379,11 @@ extern const char pTskName_Idle[];
 extern const char pTskName_Sleep[];
 
 /* FILE VARIABLE DEFINITIONS */
+
+
 /* FUNCTION PROTOTYPES */
-
-
-bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
-void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
+bool     OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
+void     OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
 
 bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *QueueElement );
@@ -426,24 +433,25 @@ uint32_t htonx_FreeRTOS( uint32_t value, uint8_t numOfBytes );
 #if ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 void OS_TASK_Create_Idle ( void );
 #endif
-void OS_TASK_Create_All ( bool initSuccess );
-void OS_TASK_Create_STRT( void );
-void OS_TASK_Create_PWRLG( void );
+taskCreateReturnValue_t OS_TASK_Create ( OS_TASK_Template_t const *pTaskList );
+void                    OS_TASK_Create_All ( bool initSuccess );
+void                    OS_TASK_Create_STRT( void );
+void                    OS_TASK_Create_PWRLG( void );
 
-uint32_t OS_TASK_Get_Priority ( char const *pTaskName );
-uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority );
-void OS_TASK_Sleep ( uint32_t MSec );
-void OS_TASK_Exit ( void );
-void OS_TASK_ExitId ( char const *pTaskName );
-OS_TASK_id OS_TASK_GetId (void);
-bool OS_TASK_IsCurrentTask ( char const *pTaskName );
+uint32_t                OS_TASK_Get_Priority ( char const *pTaskName );
+uint32_t                OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority );
+void                    OS_TASK_Sleep ( uint32_t MSec );
+void                    OS_TASK_Exit ( void );
+void                    OS_TASK_ExitId ( char const *pTaskName );
+OS_TASK_id              OS_TASK_GetId (void);
+bool                    OS_TASK_IsCurrentTask ( char const *pTaskName );
 #if 0  //TODO: need to still get updated to RA6
 uint32_t OS_TASK_UpdateCpuLoad ( void );
 void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
 void OS_TASK_Summary ( bool safePrint );
 #endif
 
-void OS_TICK_Get_ElapsedTicks ( OS_TICK_Struct *TickValue );
+void     OS_TICK_Get_CurrentElapsedTicks ( OS_TICK_Struct *TickValue );
 uint32_t OS_TICK_Get_ElapsedMilliseconds ( void );
 uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );
 uint32_t OS_TICK_Get_Diff_InNanoseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );

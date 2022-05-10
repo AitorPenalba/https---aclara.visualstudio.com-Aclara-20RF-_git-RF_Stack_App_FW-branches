@@ -21,7 +21,9 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #ifndef __BOOTLOADER
-//#include <mqx.h>
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include <mqx.h>
+#endif
 #include "error_codes.h"
 #endif /* __BOOTLOADER  */
 
