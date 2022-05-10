@@ -28,16 +28,15 @@
 #include <ctype.h>
 #include "DBG_SerialDebug.h"
 #include "DBG_CommandLine.h"
-#if ( MCU_SELECTED == RA6E1 )
-#include "hal_data.h"
+#if ( MCU_SELECTED == NXP_K24 )
+#include <bsp.h>
 #endif
-//#include <bsp.h>
-//#include "file_io.h"
+#include "file_io.h"
 //#include "SELF_test.h"
 //#include "version.h"
 //#include "dfw_app.h"
 
-//#include "pwr_task.h"
+#include "pwr_task.h"
 //#include "MIMT_info.h"
 #if 0 // TODO: RA6: Add later
 #if ( EP == 1 )
@@ -360,7 +359,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "clockswtest",  DBG_CommandLine_clockswtest,     "Count cycle counter at 2 different clock settings over 5 seconds" },
 //#endif
 //   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" },
-//   { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
+   { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
 //#if ( EP == 1 )
 //   { "counters",     DBG_CommandLine_Counters,        "Display the current counters like reset counts etc" },
 //#endif
@@ -575,7 +574,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
 //#endif
 //   { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
-//   { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
+   { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
 //#if ( EP == 1 )
 //   { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
 //   { "regtimeouts",  DBG_CommandLine_RegTimeouts,     "Get or Set the Registration Timeouts" },
@@ -592,8 +591,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
 ////   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },
 //   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" },
-//   { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\n"
-//                   "                                   Set: Params - yy mm dd hh mm ss" },
+   { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\n"
+                   "                                   Set: Params - yy mm dd hh mm ss" },
 //   { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\n"
 //                   "                                   Type ""rxchannels"" with no arguments for more help" },
 //   { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
@@ -852,6 +851,9 @@ static void dbgpReadByte( uint8_t rxByte )
          }
          else
          {
+            /* Gives GUI in Terminal for Carriage Return */
+            ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
+
             /* Call the command */
             DBG_CommandLine_Process();
             DBGP_numBytes = 0;
@@ -884,26 +886,26 @@ static void dbgpReadByte( uint8_t rxByte )
 *******************************************************************************/
 void dbg_uart_callback( uart_callback_args_t *p_args )
 {
-
-    /* Handle the UART event */
-     switch (p_args->event)
-    {
-        /* Receive complete */
-        case UART_EVENT_RX_COMPLETE:
-        {
-            OS_SEM_Post_fromISR( &dbgReceiveSem_ );
-            break;
-        }
-        /* Transmit complete */
-        case UART_EVENT_TX_COMPLETE:
-        {
-              OS_SEM_Post_fromISR( &transferSem[ UART_DEBUG_PORT ] );
-            break;
-        }
-        default:
-        {
-        }
-    }/* end switch () */
+   /* Handle the UART event */
+   switch (p_args->event)
+   {
+      /* Receive complete */
+      case UART_EVENT_RX_COMPLETE:
+      {
+         OS_SEM_Post_fromISR( &dbgReceiveSem_ );
+         break;
+      }
+      /* Transmit complete */
+      case UART_EVENT_TX_COMPLETE:
+      {
+         OS_SEM_Post_fromISR( &transferSem[ UART_DEBUG_PORT ] );
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }/* end switch () */
 }/* end user_uart_callback () */
 #endif
 /*******************************************************************************
@@ -2713,26 +2715,26 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //   return 0;
 //}
 //#endif //DBG_TESTS
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_Comment
-//
-//   Purpose: "Do nothing" routine. Allows comment to be in debug output log
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: Always successful
-//
-//   Notes:
-//
-//*******************************************************************************/
-////static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
-////{
-////   return 0;
-////}
-//
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_Comment
+
+   Purpose: "Do nothing" routine. Allows comment to be in debug output log
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: Always successful
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
+{
+   return 0;
+}
+
 ///*******************************************************************************
 //
 //   Function name: DBG_CommandLine_mtrTime
@@ -2940,61 +2942,62 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //} /* end DBG_CommandLine_time () */
 //#endif
-//#if (RTC == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_rtcTime
-//
-//   Purpose: This function will print out the current time or set the time (in RTC only)
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
-//{
-//   if ( 1 == argc ) /* No parameters will read the RTC time */
-//   {
-//      sysTime_dateFormat_t RTC_time;
-//
-//      RTC_GetDateTime ( &RTC_time );
-//
-//      DBG_logPrintf( 'R', "RTC=%02d/%02d/%04d %02d:%02d:%02d",
-//                     RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec );
-//   }
-//   else
-//   {
-//      if ( 7 == argc ) /* Need all six parameters to set the RTC and System time. */
-//      {
-//         sysTime_dateFormat_t rtcTime;
-//         rtcTime.year   = ( uint16_t )( atoi( argv[1] ) + 2000 ); /* Adjust the 2 digit date to 20xx */
-//         rtcTime.month  = ( uint8_t )( atoi( argv[2] ) );
-//         rtcTime.day    = ( uint8_t )( atoi( argv[3] ) );
-//         rtcTime.hour   = ( uint8_t )( atoi( argv[4] ) );
-//         rtcTime.min    = ( uint8_t )( atoi( argv[5] ) );
-//         rtcTime.sec    = ( uint8_t )( atoi( argv[6] ) );
-//
-//         if ( RTC_SetDateTime ( &rtcTime ) )
-//         {
-//            DBG_logPrintf( 'R', "RTC time set successfully" );
-//         }
-//         else
-//         {
-//            DBG_logPrintf( 'R', "Failed to set system time!" );
-//         }
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read, 6 params to set date/time" );
-//      }
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_rtcTime () */
-//
+#if (RTC == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_rtcTime
+
+   Purpose: This function will print out the current time or set the time (in RTC only)
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
+{
+   if ( 1 == argc ) /* No parameters will read the RTC time */
+   {
+      sysTime_dateFormat_t RTC_time;
+
+      RTC_GetDateTime ( &RTC_time );
+
+      DBG_logPrintf( 'R', "RTC=%02d/%02d/%04d %02d:%02d:%02d",
+                     RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec );
+   }
+   else
+   {
+      if ( 7 == argc ) /* Need all six parameters to set the RTC and System time. */
+      {
+         sysTime_dateFormat_t rtcTime;
+         rtcTime.year   = ( uint16_t )( atoi( argv[1] ) + 2000 ); /* Adjust the 2 digit date to 20xx */
+         rtcTime.month  = ( uint8_t )( atoi( argv[2] ) );
+         rtcTime.day    = ( uint8_t )( atoi( argv[3] ) );
+         rtcTime.hour   = ( uint8_t )( atoi( argv[4] ) );
+         rtcTime.min    = ( uint8_t )( atoi( argv[5] ) );
+         rtcTime.sec    = ( uint8_t )( atoi( argv[6] ) );
+
+         if ( RTC_SetDateTime ( &rtcTime ) )
+         {
+            DBG_logPrintf( 'R', "RTC time set successfully" );
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Failed to set system time!" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read, 6 params to set date/time" );
+      }
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_rtcTime () */
+
+#if ( MCU_SELECTED == NXP_K24 )
 ///***********************************************************************************************************************
 //   Function Name: DBG_CommandLine_rtcCap
 //
@@ -3090,7 +3093,8 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //
 //   return( 0 );
 //}
-//#endif
+#endif // #if ( MCU_SELECTED == NXP_K24 )
+#endif  // #if (RTC == 1)
 //
 //#if (EP == 1)
 //
@@ -10049,28 +10053,28 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_Reboot
-//
-//   Purpose: This function reboots the device
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-///*lint -efunc(533,DBG_CommandLine_Reboot) no return because the function doesn't return   */
-//uint32_t DBG_CommandLine_Reboot ( uint32_t argc, char *argv[] )
-//{
-//   PWR_SafeReset();  /* Execute Software Reset, with cache flush */
-//   return ( 0 );
-//}
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_Reboot
+
+   Purpose: This function reboots the device
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+/*lint -efunc(533,DBG_CommandLine_Reboot) no return because the function doesn't return   */
+uint32_t DBG_CommandLine_Reboot ( uint32_t argc, char *argv[] )
+{
+   PWR_SafeReset();  /* Execute Software Reset, with cache flush */
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_RSSI

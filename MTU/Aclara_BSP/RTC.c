@@ -7,10 +7,16 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2022 ACLARA.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *    ACLARA, ST. LOUIS, MISSOURI USA
+   A product of
+   Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2012 - 2022 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may be
+   used or copied only in accordance with the terms of such license.
  *****************************************************************************/
 
 /* INCLUDE FILES */
@@ -20,12 +26,7 @@
   #include <bsp.h>
   #include <rtc.h>
 #endif
-#if ( MCU_SELECTED == RA6E1 )
-  #include "hal_data.h"
-#endif
-#include "BSP_aclara.h"
 #include "vbat_reg.h"
-#include "CompileSwitch.h"
 #if ( MCU_SELECTED == RA6E1 )
 #include "time_sys.h"
 #endif
@@ -43,10 +44,12 @@
 #if ( MCU_SELECTED == RA6E1 )
 volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrence of alarm interrupt
 #endif
+
 /* FUNCTION PROTOTYPES */
 #if ( TM_RTC_UNIT_TEST == 1 )
 bool RTC_UnitTest(void);
 #endif
+
 /* FUNCTION DEFINITIONS */
 #if ( MCU_SELECTED == RA6E1 )
 /*******************************************************************************
@@ -62,9 +65,9 @@ bool RTC_UnitTest(void);
 *******************************************************************************/
 returnStatus_t RTC_init( void )
 {
-   returnStatus_t retVal = eSUCCESS;
    ( void )R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );
-   return( retVal );
+
+   return( eSUCCESS );
 } /* end RTC_init () */
 #endif
 /*******************************************************************************
@@ -237,9 +240,9 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
 
   Arguments: None
 
-  Returns: RTCValid - True if the RTC is valid, otherwsie false.
+  Returns: RTCValid - True if the RTC is valid, otherwise false.
 
-  Notes: This is deterimed from two pieces of information.  From the
+  Notes: This is determined from two pieces of information.  From the
          TIF (Time Invalid Flag) in the RTC_SR (RTC Status Register)
          and from knowing whether or not the RTC has been set since
          the last time that TIF was true.
@@ -269,7 +272,7 @@ bool RTC_Valid(void)
   Returns:
 
   Notes: DO NOT try to debug through the loop reading the RTC registers. The RTC
-         keeps running while dubugger stopped.
+         keeps running while debugger stopped.
 
 *******************************************************************************/
 void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
@@ -432,7 +435,7 @@ void rtc_callback( rtc_callback_args_t *p_args )
 {
    if( RTC_EVENT_ALARM_IRQ == p_args->event )
    {
-       g_alarm_irq_flag = SET_FLAG; //Alarm Interrupt occured
+       g_alarm_irq_flag = SET_FLAG; //Alarm Interrupt occurred
    }/* end if */
 }/* end rtc_callback () */
 
@@ -505,7 +508,7 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
          alarm_time_set.time.tm_hour = ((config_time.tm_hour + alarm_hours) % HOURS_PER_DAY);
          // Accommodate rollover
          alarm_time_set.dayofweek_match = true;
-         alarm_time_set.time.tm_wday++;  // Add One day to accomodate rollover
+         alarm_time_set.time.tm_wday++;  // Add One day to accommodate rollover
          DBG_printf("RTC Hour Rollover\n");
       }
       else
@@ -518,6 +521,41 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
    {
       DBG_printf("RTC Calendar Alarm Set \n");
    }
+}
+
+/*******************************************************************************
+
+  Function name: RTC_isRunning
+
+  Purpose: Check if the RTC is running
+
+  Arguments: None
+
+  Returns: None
+
+*******************************************************************************/
+
+bool RTC_isRunning ( void )
+{
+   fsp_err_t   rtc_DriverStatus  = FSP_SUCCESS;
+   rtc_info_t  rtc_status;
+   bool        retVal            = false;
+
+   /* Check if the RTC is running */
+   rtc_DriverStatus = R_RTC_InfoGet( &g_rtc0_ctrl, &rtc_status );
+
+   if( FSP_ERR_NOT_OPEN == rtc_DriverStatus )
+   {
+      /* Open RTC Driver again */
+      (void)RTC_init();
+      rtc_DriverStatus = R_RTC_InfoGet( &g_rtc0_ctrl, &rtc_status );
+   }
+   if( rtc_status.status == RTC_STATUS_RUNNING )
+   {
+      retVal = (bool) true;
+   }
+
+   return (retVal);
 }
 
 #if ( TM_RTC_UNIT_TEST == 1 )

@@ -53,7 +53,7 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 #define RADIO_0_CS_TRIS()
 #define RADIO_0_SDN_ACTIVE()    R_BSP_PinWrite(BSP_IO_PORT_01_PIN_04, BSP_IO_LEVEL_HIGH)
 #define RADIO_0_SDN_INACTIVE()  R_BSP_PinWrite(BSP_IO_PORT_01_PIN_04, BSP_IO_LEVEL_LOW)
-#define RADIO_0_SDN_TRIS()
+#define RADIO_0_SDN_TRIS()      { RADIO_0_SDN_ACTIVE(); }
 #endif
 #define RADIO_0_WP_USED          0                       /* Set to 1 if WP pin is used */
 
@@ -106,12 +106,14 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 #define RDO_PA_EN_OFF()          GPIOC_PCOR = 1<<8       /* Radio PA Off */
 #define RDO_PA_EN_ON()           GPIOC_PSOR = 1<<8       /* Radio PA On  */
 #elif ( MCU_SELECTED == RA6E1 )
-#define RDO_PA_EN_OFF()          R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_LOW)   /* Radio PA Off */
-#define RDO_PA_EN_ON()           R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_HIGH)  /* Radio PA On  */
+#define RDO_PA_EN_OFF()          R_BSP_PinWrite(BSP_IO_PORT_03_PIN_06, BSP_IO_LEVEL_LOW)   /* Radio PA Off ( SKY_EN )*/
+#define RDO_PA_EN_ON()           R_BSP_PinWrite(BSP_IO_PORT_03_PIN_06, BSP_IO_LEVEL_HIGH)  /* Radio PA On  ( SKY_EN )*/
 #endif
 /* Set PCR MUX for GPIO, Make Output, PA Off */
 #if ( MCU_SELECTED == NXP_K24 )
 #define RDO_PA_EN_TRIS()         { RDO_PA_EN_OFF(); PORTC_PCR8 = 0x100; GPIOC_PDDR |= (1<<8);}
+#elif ( MCU_SELECTED == RA6E1 )
+#define RDO_PA_EN_TRIS()         { RDO_PA_EN_OFF(); }
 #endif
 
 // /IRQ_SI4460 Pin

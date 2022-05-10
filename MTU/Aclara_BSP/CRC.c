@@ -2,15 +2,21 @@
  *
  * Filename: CRC.c
  *
- * Global Designator:
+ * Global Designator: CRC_
  *
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2013 ACLARA.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *    ACLARA, ST. LOUIS, MISSOURI USA
+   A product of
+   Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2013 - 2022 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may be
+   used or copied only in accordance with the terms of such license.
  *****************************************************************************/
 
 /* INCLUDE FILES */
@@ -25,6 +31,7 @@
 #elif( MCU_SELECTED == RA6E1 )
 #include "crc_custom.h"
 #include "crc16.h"
+#include "DBG_SerialDebug.h"
 #endif
 
 /* #DEFINE DEFINITIONS */
@@ -110,6 +117,7 @@ uint16_t CRC_16_Calculate ( uint8_t *Data, uint32_t Length )
    return ( (uint16_t) CRC16_Result );
 } /* end CRC_16_Calculate () */
 
+#if ( DCU == 1)
 /*******************************************************************************
 
   Function name: CRC_16_DcuHack
@@ -138,6 +146,7 @@ uint16_t CRC_16_DcuHack ( uint8_t *Data, uint32_t Length )
 
    return ( CRC16_Result );
 } /* end CRC_16_Calculate () */
+#endif
 
 /*******************************************************************************
 

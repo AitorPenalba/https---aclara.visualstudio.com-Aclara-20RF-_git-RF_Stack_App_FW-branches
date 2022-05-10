@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)53)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)54)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -234,7 +234,7 @@ static OS_MUTEX_Obj  verMutex_;                    //Serialize access to this mo
  **********************************************************************************************************************/
 returnStatus_t VER_Init ( void )
 {
-#if 0
+#if 0 /* TODO: RA6: TODO: Add this code  */
    FileStatus_t     fileStatusCfg;              /* Contains the file status */
    returnStatus_t   retVal = eFAILURE;
    HWVerString_t    hWVer;                      /* HW Version string */
@@ -294,13 +294,13 @@ firmwareVersion_u VER_getFirmwareVersion ( eFwTarget_t target )
    {
       ver = appFwVersion_;
    }
-   #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( DCU == 1 ) )
-   #else
-      else if ( eFWT_BL == target )
-      {
-         ver = LNKR_BL_FW_VER_ADDR;
-      }
-   #endif
+#if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( DCU == 1 ) )
+#else
+   else if ( eFWT_BL == target )
+   {
+      ver = LNKR_BL_FW_VER_ADDR;
+   }
+#endif
    return (ver);
 }
 

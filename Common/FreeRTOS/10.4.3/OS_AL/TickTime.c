@@ -100,7 +100,7 @@ void OS_Tick_Get_TimeElapsed ( TIME_STRUCT *time_ptr )
    OS_TICK_Struct TickValue;
    uint64_t sec, msec;
    uint32_t tmp;
-   OS_TICK_Get_ElapsedTicks ( &TickValue );
+   OS_TICK_Get_CurrentElapsedTicks ( &TickValue );
    msec = ( TickValue.tickCount + ( UINT32_MAX * TickValue.xNumOfOverflows ) ) * portTICK_RATE_MS ;
    sec = msec / 1000; // Get the second value from msec
    msec = msec % 1000;

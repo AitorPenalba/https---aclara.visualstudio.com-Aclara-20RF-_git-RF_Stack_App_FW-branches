@@ -24,10 +24,12 @@
 
 #include "project.h"
 #include <stdlib.h>
-//#include <mqx.h>
-//#include <rtc.h>
-//#include <fio.h>
-//#include <bsp.h>
+#if ( MCU_SELECTED == NXP_K24 )
+#include <mqx.h>
+#include <rtc.h>
+#include <fio.h>
+#include <bsp.h>
+#endif
 /*lint -esym(750,SELF_GLOBALS) not referenced   */
 #define SELF_GLOBALS
 #include "SELF_test.h"    // Include self
@@ -65,7 +67,7 @@ static OS_EVNT_Obj      SELF_events;      /* Self test Events   */
 static OS_EVNT_Obj *    SELF_notify;      /* Event handler to "notify" when test results are completed.     */
 static uint32_t         event_flags;      /* Event flags returned by self test routine.                     */
 static SELF_TestData_t  SELF_TestData;
-#if (ENABLE_FIO_TASKS == 1)
+#if (FILE_IO == 1)
 static SELF_file_t      SELF_testFile =
 {
    .ePartition      = ePART_SEARCH_BY_TIMING,
@@ -104,7 +106,7 @@ static uint16_t RunSelfTest( void );
 returnStatus_t SELF_init( void )
 {
    returnStatus_t retVal = eFAILURE;
-#if (ENABLE_FIO_TASKS == 1)
+#if ( FILE_IO == 1)
    FileStatus_t   fileStatus;
    SELF_file_t    *pFile = &SELF_testFile;
 
@@ -181,7 +183,7 @@ void SELF_testTask( taskParameter )
    uint16_t       selfTestResults;
 
 #if 1
-   // TODO: Use line 192 once complete implementation is available
+   // TODO: RA6: Use line 192 once complete implementation is available
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
    vTaskSuspend(NULL); /* TODO: Remove*/
 #else
@@ -638,7 +640,7 @@ returnStatus_t SELF_testRTC( void )
    uint16_t       tries = 0;  /* Total number of attempts before exiting the loop.  */
    returnStatus_t retVal;
 
-//   DBG_logPrintf( 'I', "SELF_testRTC: Start - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+   DBG_logPrintf( 'I', "SELF_testRTC: Start - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
 #if ( MCU_SELECTED == NXP_K24 )
    uint16_t       RTC_time_1; /* Used for difference in RTC prescalar   */
    uint16_t       RTC_time_2; /* Used for difference in RTC prescalar   */

@@ -149,8 +149,10 @@ returnStatus_t MODECFG_init( void )
 #if ( EP == 1 )
    // Save ship mode and meter shop mode in VBAT before it is cleared so outage
    // restoration will if we started up in ship mode.
-   VBATREG_SHIP_MODE = modeConfigFileData.uShipMode;
+   VBATREG_EnableRegisterAccess();
+   VBATREG_SHIP_MODE       = modeConfigFileData.uShipMode;
    VBATREG_METER_SHOP_MODE = modeConfigFileData.uDecommissionMode;
+   VBATREG_DisableRegisterAccess();
 
 #endif
 
@@ -308,6 +310,7 @@ returnStatus_t MODECFG_set_quiet_mode( uint8_t uQuietMode )
 
    return( retVal );
 }
+
 #if ( EP == 1 )
 /***********************************************************************************************************************
 
@@ -395,7 +398,7 @@ returnStatus_t MODECFG_set_rfTest_mode( uint8_t urfTestMode )
 
    Arguments: none
 
-   Returns: uint8_t system decomission mode;
+   Returns: uint8_t system decommission mode;
 
    Re-entrant Code: yes
 
@@ -421,9 +424,9 @@ uint8_t MODECFG_get_decommission_mode( void )
 
    Function name: MODECFG_set_decommision_mode
 
-   Purpose: set system decommision mode
+   Purpose: set system decommission mode
 
-   Arguments:  decommision mode setting
+   Arguments:  decommission mode setting
 
    Returns: success/failure
 
@@ -505,7 +508,7 @@ returnStatus_t MODECFG_decommissionModeHandler( enum_MessageMethod action, meter
       retVal = MODECFG_set_decommission_mode(*(uint8_t *)value);
    }
    return retVal;
-} //lint !e715 symbol id not referenced. This funtion is only called when id is matched
+} //lint !e715 symbol id not referenced. This function is only called when id is matched
 #endif
 
 /***********************************************************************************************************************

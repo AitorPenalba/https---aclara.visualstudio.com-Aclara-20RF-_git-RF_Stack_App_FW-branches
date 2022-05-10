@@ -43,7 +43,7 @@
    #define ENABLE_PWR_TASKS               0  /* Used to 0=disable, 1=enable the Power feature */         /* TODO: RA6E1: Enable */
    #define ENABLE_DFW_TASKS               0  /* Used to 0=disable, 1=enable the DFW feature */           /* TODO: RA6E1: Enable */
    #define ENABLE_DEMAND_TASKS            0  /* Used to 0=disable, 1=enable the Demand feature */        /* TODO: RA6E1: Enable */
-   #define ENABLE_FIO_TASKS               0  /* Used to 0=disable, 1=enable the FileIO CRC feature */    /* TODO: RA6E1: Enable */
+   #define ENABLE_FIO_TASKS               0  /* Used to 0=disable, 1=enable the FileIO CRC feature */
    #define ENABLE_LAST_GASP_TASK          1  /* Used to 0=disable, 1=enable the Last Gasp feature */
    #define ENABLE_SRFN_ILC_TASKS          0  /* Used to 0=disable, 1=enable the SRFN ILC feature */
    #define ENABLE_SRFN_DA_TASKS           0  /* Used to 0=disable, 1=enable the SRFN DA specific tasks */
@@ -273,7 +273,7 @@
 /**** Various Test Modes available in the Project ****/
 
 /* Set to true to enable unit/integration test code */
-#define TEST_MODE_ENABLE                  1     /* Set to 0 before releasing production code! */
+#define TEST_MODE_ENABLE                  0     /* Set to 0 before releasing production code! */
 
 // NOTE: 0=Production mode, !0=Enable the respective feature
 #define TEST_QUIET_MODE                   0     /* Enable Debug output during quiet mode */

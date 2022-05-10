@@ -83,10 +83,10 @@
 /* */
 #define ACLARA_DVR_ABSTRACTION            1
 #if ( ACLARA_DVR_ABSTRACTION != 0 )
-   #define FILE_IO                        0
+   #define FILE_IO                        0  /* TODO: RA6:  Remove these features */
    #define PARTITION_MANAGER              1 /* 0 = No PARTITION_MANAGER, 1 = Partition Manager */
    #define TIMER_UTIL                     0
-   #define RTC                            0
+   #define RTC                            1
 #endif
 #define SUPPORT_HEEP                      0 /* TODO: RA6E1: Temporary conditional*/
 #define INCLUDE_ECC                       0 /* TODO: RA6E1: Temporary conditional*/

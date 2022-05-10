@@ -19,12 +19,9 @@
  **********************************************************************************************************************/
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
+#include "project.h"
 #include <string.h>
 #include <stddef.h>
-#include "portable_freescale.h"
-#include "project.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #endif
