@@ -560,7 +560,7 @@ void SD_SyncPayloadDemodTask(taskParameter)
 #elif ( RTOS_SELECTION == FREE_RTOS )
  void SD_SyncPayloadDemodTask(void* pvParameter)
 {  
-   uint8_t semId = (uint8_t )pvParameter; //Param in Task.c
+   uint8_t semId = (uint8_t )pvParameter; //Param in Task.c - // TODO: RA6E1 Bob: we need to check on this with Mario and/or Mukesh
 #endif   
    eSyncAndPayloadDemodFailCodes_t FailureCode;
    uint16_t readIndex;

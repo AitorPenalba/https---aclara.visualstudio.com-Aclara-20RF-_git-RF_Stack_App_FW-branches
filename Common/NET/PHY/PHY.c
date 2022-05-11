@@ -2409,7 +2409,7 @@ static bool Process_CCAReq( PHY_Request_t const *pReq )
 #if 0 // TODO: RA6E1 - lastgasp
                   if ( PWRLG_LastGasp() ) {
 #else // TODO: RA6E1 - lastgasp
-                    if ( 1 ) {
+                    if ( 0 ) {
 #endif
                 noiseEstimate = CachedAttr.NoiseEstimateBoostOn[i];
                     }                
@@ -3085,7 +3085,7 @@ static buffer_t *DataIndication_Create(RX_FRAME_t const * const rx_buffer, uint8
    |---------|------------|---------------------|------------|------------------------------------|
    | 0       |    4GFSK   |(63,59) Reed-Solomon |   9600     |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
-   | 1 – 14  |  Reserved  |      Reserved       |  Reserved  |                                    |
+   | 1 â€“ 14  |  Reserved  |      Reserved       |  Reserved  |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
    | *15     |   None     |      None           |   None     |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
@@ -4037,7 +4037,7 @@ bool PHY_Channel_Set(uint8_t index, uint16_t chan)
 #if 0 // TODO: RA6E1 - lastgasp
       if(PWRLG_LastGasp() == false)
 #else // TODO: RA6E1 - lastgasp
-      if ( 1 )
+      if ( 0 )
 #endif
    
 #endif
