@@ -698,6 +698,7 @@ static bool StartRx(uint8_t radioNum, uint16_t chan);
 static void StandbyTx(void);
 
 static bool RADIO_Is_RX(uint8_t radioNum);
+static void updateTCXO ( uint8_t radioNum );
 
 /*lint -esym(401,SendData) not the same routine as in the wolfssl library  */
 PHY_DATA_STATUS_e SendData( uint8_t radioNum, uint16_t chan, PHY_MODE_e mode, PHY_DETECTION_e detection, const void *payload, uint32_t TxTime, PHY_TX_CONSTRAIN_e priority, float32_t
@@ -772,7 +773,7 @@ void RADIO_TX_Watchdog(void)
       _time_get_elapsed_ticks(&time);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time, &radio[RADIO_0].TxWatchDog, &Overflow );
 #elif ( MCU_SELECTED == RA6E1 )
-      OS_TICK_Get_ElapsedTicks(&time);
+      OS_TICK_Get_CurrentElapsedTicks(&time);
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &radio[RADIO_0].TxWatchDog, &time );
 #endif
 
@@ -811,11 +812,13 @@ void RADIO_TX_Watchdog(void)
 ******************************************************************************/
 void RADIO_RX_WatchdogService(uint8_t radioNum)
 {
-#if 0 //TODO Melvin: include the code after dependent modules integrated
-   OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
+  OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
+#if ( MCU_SELECTED == NXP_K24 )
    radio[radioNum].lastFIFOFullTimeStamp = DWT_CYCCNT;
+#else
+   radio[radioNum].lastFIFOFullTimeStamp=DWT->CYCCNT;
+#endif 
    OS_INT_enable( ); // Enable interrupts.
-#endif
 }
 
 /******************************************************************************
@@ -833,7 +836,6 @@ void RADIO_RX_WatchdogService(uint8_t radioNum)
 ******************************************************************************/
 void RADIO_RX_Watchdog(void)
 {
-#if 0  //TODO Melvin: include the code after dependent modules integrated
 #if ( EP == 1 )
    uint8_t  temp[129]; //64 in each RX/TX buffer, plus the unused TX shift barrel
    uint32_t timeStamp;
@@ -844,7 +846,13 @@ void RADIO_RX_Watchdog(void)
       OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
       timeStamp = radio[(uint8_t)RADIO_0].lastFIFOFullTimeStamp;
       OS_INT_enable( ); // Enable interrupts.
+    #if ( MCU_SELECTED == NXP_K24 )
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
+        
+    #else // TODO: RA6E1 Modify variable to get core clock from a function
+      if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {  
+        
+     #endif
          INFO_printf("Soft-Demod FIFO purged");
          // Read through the buffer
          si446x_read_rx_fifo((uint8_t)RADIO_0, 128, temp);
@@ -852,7 +860,6 @@ void RADIO_RX_Watchdog(void)
          RADIO_RX_WatchdogService((uint8_t)RADIO_0); // Reset time stamp to avoid being called again.
       }
    }
-#endif
 #endif
 }
 
@@ -883,12 +890,19 @@ void RADIO_Update_Freq_Watchdog(void)
       OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
       timeStamp = DMA_Complete_IRQ_ISR_Timestamp;
       OS_INT_enable( ); // Enable interrupts.
+       
+#if ( MCU_SELECTED == NXP_K24 )
+      
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
+#else // TODO: RA6E1 Modify variable to get core clock from a function
+      if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
+        
+#endif              
+        
          RADIO_Update_Freq();
       }
-   }
+   }  
 #endif
-
 }
 
 /*!
@@ -1388,7 +1402,7 @@ static void setPA(RADIO_PA_MODE_t mode)
 #if ( MCU_SELECTED == NXP_K24 )
       _time_get_elapsed_ticks(&radio[RADIO_0].TxWatchDog);
 #elif ( MCU_SELECTED == RA6E1 )
-      OS_TICK_Get_ElapsedTicks(&radio[RADIO_0].TxWatchDog);
+      OS_TICK_Get_CurrentElapsedTicks(&radio[RADIO_0].TxWatchDog);
 #endif
       radio[RADIO_0].isDeviceTX = true;
    }
@@ -1454,7 +1468,7 @@ static void setPA(RADIO_PA_MODE_t mode)
 #if ( MCU_SELECTED == NXP_K24 )
          _time_get_elapsed_ticks(&radio[RADIO_0].TxWatchDog);
 #elif ( MCU_SELECTED == RA6E1 )
-         OS_TICK_Get_ElapsedTicks(&radio[RADIO_0].TxWatchDog);
+         OS_TICK_Get_CurrentElapsedTicks(&radio[RADIO_0].TxWatchDog);
 #endif
          radio[RADIO_0].isDeviceTX = true;
       }
@@ -1818,13 +1832,13 @@ static void Shutdown(void)
 {
    // Put the PA in TX to save power and put radios in standby to gracefully stop them and increment appropriate counters.
    Standby();
+#if 0 //TODO: RA6E1
+   // Shutdown power amplifier 
+   RDO_PA_EN_TRIS(); 
 
-   // Shutdown power amplifier
-   RDO_PA_EN_TRIS();
-
-   // Turn off radio oscillator
+   // Turn off radio oscillator 
    RDO_OSC_EN_TRIS(); // Samwise only
-
+#endif
    // Shutdown radios (pull SDN pin high)
    RDO_SDN_TRIS();      // First radio on Frodo and Samwise
    RX_RADIO_SDN_TRIS(); // All other radios on Frodo
@@ -2024,9 +2038,9 @@ bool RADIO_TCXO_Set ( uint8_t radioNum, uint32_t TCXOfreq, TIME_SYS_SOURCE_e sou
 
       // Update AFC error if TCXO frequency was changed
       if ( retVal ) {
-#if 0  //TODO Melvin: add the below code once PHY  module is added
+
          PHY_AfcAdjustment_Set_By_Radio(radioNum, (int16_t)((int32_t)TCXOfreq-(int32_t)RADIO_TCXO_NOMINAL));
-#endif
+
       }
 
       // Update timestamp even if the frequency wasn't updated.
@@ -2117,7 +2131,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Clear all variables
    (void)memset(radio, 0, sizeof(radio));
 
-#if 0  //TODO Melvin: add the below code once PHY  module is added
+
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&RssiJumpThreshold);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
 
@@ -2147,7 +2161,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 
    // Configure CPU pin connected to radio 0 GPIO0 pin
    RDO_0_GPIO0_TRIS(); // Digital input on Samwise and Frodo.
-
+#if 0 //TODO: RA6E1
    // Configure CPU pin connected to radio 0 GPIO1 pin
    RDO_0_GPIO1_TRIS(); // Digital input on Samwise and Frodo.
 
@@ -2158,13 +2172,13 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    RDO_0_GPIO3_TRIS(); // Digital input on Samwise. Pin not connected on Frodo.
 
    // Configure power amplifier TX/RX pin. Set to RX.
-   RDO_RX0TX1_TRIS();
+   RDO_RX0TX1_TRIS(); 
 
    // Configure power amplifier enable pin. Set to disable.
-   RDO_PA_EN_TRIS();
+   RDO_PA_EN_TRIS(); 
 
    // Turn on radio oscillator effectively starting the radio
-   RDO_OSC_EN_TRIS(); // On Samwise only
+   RDO_OSC_EN_TRIS(); // On Samwise only 
 #endif
    RDO_OSC_EN_ON();
    OS_TASK_Sleep( FIVE_MSEC ); // Wait at least 3 ms as per datasheet
@@ -3985,6 +3999,7 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
                             SI446X_CMD_START_RX_ARG_NEXT_STATE2_RXVALID_STATE_ENUM_REMAIN,
                             SI446X_CMD_START_RX_ARG_NEXT_STATE3_RXINVALID_STATE_ENUM_REMAIN);
    }
+#endif
 }
 
 
@@ -4632,7 +4647,7 @@ void SetFreq(uint8_t radioNum, uint32_t freq)
                                 fc_fraq_1,
                                 fc_fraq_2,
                                 fc_fraq_3 );
-#endif
+
 }
 
 /***********************************************************************************************************************
@@ -4706,7 +4721,7 @@ static float32 wait_for_stable_RSSI(uint8_t radioNum)
 #if ( MCU_SELECTED == NXP_K24 )
    _time_get_elapsed_ticks(&time1);
 #elif ( MCU_SELECTED == RA6E1 )
-   OS_TICK_Get_ElapsedTicks(&time1);
+   OS_TICK_Get_CurrentElapsedTicks(&time1);
 #endif
 
    // Poll RSSI until valid
@@ -4717,7 +4732,7 @@ static float32 wait_for_stable_RSSI(uint8_t radioNum)
       _time_get_elapsed_ticks(&time2);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
 #elif ( MCU_SELECTED == RA6E1 )
-      OS_TICK_Get_ElapsedTicks(&time2);
+      OS_TICK_Get_CurrentElapsedTicks(&time2);
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time1, &time2 );
 #endif
 
@@ -4725,7 +4740,9 @@ static float32 wait_for_stable_RSSI(uint8_t radioNum)
       if (TimeDiff > 10) {
          break;
       }
-      _sched_yield();
+#if 0  //TODO: RA6E1 
+      _sched_yield(); 
+#endif
    } while (rawRSSI == 0); // We use the latch value as a way to consume time until RSSI is meaningful.
 
    return ( (float32)rawRSSI );
@@ -4873,7 +4890,9 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       if (TimeDiff > 10) {
          break;
       }
-      _sched_yield();
+#if 0  //TODO: RA6E1 
+      _sched_yield(); 
+#endif
    } while (currentRSSI == 0); // We use the latch value as a way to consume time until RSSI is meaningful.
 
    // Discard the first 4 samples because the radio internaly averages 4 symbols and the RSSI might not be stable yet.

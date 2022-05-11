@@ -1172,9 +1172,11 @@ static void PHY_FlushShadowAttr( void )
  Returns: none
 
 ***********************************************************************************************************************/
-void PHY_Task( uint32_t Arg0 )
+void PHY_Task( taskParameter )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    (void)   Arg0;
+#endif
    uint32_t timeout;
    uint32_t defaultTimeout;
 #if ( DCU == 1 )
@@ -2403,10 +2405,14 @@ static bool Process_CCAReq( PHY_Request_t const *pReq )
                   // Get noise estimate value
                   noiseEstimate = CachedAttr.NoiseEstimate[i];
 #if ( EP == 1 )
-                  // Use a different noise estimate when in last gasp
+        // Use a different noise estimate when in last gasp           
+#if 0 // TODO: RA6E1 - lastgasp
                   if ( PWRLG_LastGasp() ) {
-                     noiseEstimate = CachedAttr.NoiseEstimateBoostOn[i];
-                  }
+#else // TODO: RA6E1 - lastgasp
+                    if ( 0 ) {
+#endif
+                noiseEstimate = CachedAttr.NoiseEstimateBoostOn[i];
+                    }                
 #endif
                   if (rssi_dbm >= (noiseEstimate+ConfigAttr.CcaOffset)) { // Test rssi against the noise of this channel
                      // channel is busy
@@ -3079,7 +3085,7 @@ static buffer_t *DataIndication_Create(RX_FRAME_t const * const rx_buffer, uint8
    |---------|------------|---------------------|------------|------------------------------------|
    | 0       |    4GFSK   |(63,59) Reed-Solomon |   9600     |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
-   | 1 – 14  |  Reserved  |      Reserved       |  Reserved  |                                    |
+   | 1 â€“ 14  |  Reserved  |      Reserved       |  Reserved  |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
    | *15     |   None     |      None           |   None     |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
@@ -4028,7 +4034,12 @@ bool PHY_Channel_Set(uint8_t index, uint16_t chan)
 {
    ConfigAttr.Channels[index] = chan;
 #if ( EP == 1 )
-   if(PWRLG_LastGasp() == false)
+#if 0 // TODO: RA6E1 - lastgasp
+      if(PWRLG_LastGasp() == false)
+#else // TODO: RA6E1 - lastgasp
+      if ( 0 )
+#endif
+   
 #endif
    {  // Not in low power mode, so save this
       writeConfig();
