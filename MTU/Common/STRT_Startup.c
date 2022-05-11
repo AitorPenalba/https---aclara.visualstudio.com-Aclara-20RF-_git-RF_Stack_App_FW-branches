@@ -154,6 +154,7 @@
 #include "virgin_device.h"
 #include "mode_config.h"
 #include "pwr_config.h"
+#include "PHY.h"
 /* END OF TODO: RA6: DG: Remove Duplicate Includes */
 
 
@@ -209,6 +210,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( PWRCFG_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                         /* Must be before PWR_TSK_init so restoration delay is available*/
    INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                        // TODO: RA6E1: DG: Move this to appropriate position
    INIT( PAR_initRtos, STRT_FLAG_NONE ),
+   INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
    INIT( MAC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),

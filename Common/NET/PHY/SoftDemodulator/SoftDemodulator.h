@@ -56,7 +56,7 @@ typedef struct
 {
    volatile bool available;
    OS_SEM_Obj semaphore;
-   int sync_payload_event;  //TODO Melvin: OS_EVNT_Obj has to be introduced
+   OS_EVNT_Obj sync_payload_event;  
 } filteredPhaseSamples_sem_t ;
 
 typedef struct //Used in fir_filt_circ_buff also
@@ -75,10 +75,10 @@ extern uint16_t filteredPhaseSamplesBufferWriteIndex;
 
 returnStatus_t SoftDemodulator_Initialize(void);
 
-void SD_PhaseSamplesListenerTask(uint32_t arg0);
-void SD_PreprocessorTask(uint32_t arg0);
-void SD_PreambleDetectorTask(uint32_t arg0);
-void SD_SyncPayloadDemodTask(uint32_t arg0);
+void SD_PhaseSamplesListenerTask(taskParameter);
+void SD_PreprocessorTask(taskParameter);
+void SD_PreambleDetectorTask(taskParameter);
+void SD_SyncPayloadDemodTask(taskParameter);
 
 bool ProcessSRFNHeaderPBytes(unsigned const char headerBytes[], unsigned int* lengthOfPayload);
 bool ProcessSRFNPayloadPBytes(unsigned const char payloadBytes[], unsigned short numberOfPayloadBytes);

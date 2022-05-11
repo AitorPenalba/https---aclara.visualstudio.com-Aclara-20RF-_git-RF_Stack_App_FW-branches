@@ -1245,6 +1245,135 @@
                 </group>
                 <group>
                     <name>PHY</name>
+                    <group>
+                        <name>SoftDemodulator</name>
+                        <group>
+                            <name>PreampleDetector</name>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\MaximizeEyeOpening.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\MaximizeEyeOpening.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\PerformCFOCompensation.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\PerformCFOCompensation.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preamble_detect.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preamble_detect.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_data.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_data.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_initialize.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\preambleDetector_initialize.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\processDerotatedSamples.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\processDerotatedSamples.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\ScaleClipFreq2phase.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\ScaleClipFreq2phase.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\sign.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\sign.h</name>
+                            </file>
+                        </group>
+                        <group>
+                            <name>SoftDemodPreProcessor</name>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\fir_filt_circ_buff.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\fir_filt_circ_buff.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\gresample.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\gresample.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\phase2freq_wi_unwrap.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\phase2freq_wi_unwrap.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodPreProcessor\rtwtypes.h</name>
+                            </file>
+                        </group>
+                        <group>
+                            <name>SyncAndPayloadDemodulator</name>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\findSYNC.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\findSYNC.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator.h</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\SyncAndPayloadDemodulator_types.h</name>
+                            </file>
+                        </group>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodulator.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SoftDemodulator.h</name>
+                        </file>
+                    </group>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\galois.c</name>
+                    </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\NET\PHY\PHY.c</name>
                     </file>
@@ -1253,6 +1382,21 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\NET\PHY\PHY_Protocol.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\rs.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\rs.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\rsdec.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\rsenc.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\PHY\rsfec.h</name>
                     </file>
                 </group>
                 <file>
@@ -1334,6 +1478,9 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_config_normal.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\xradio.h</name>
                     </file>
                 </group>
                 <file>

@@ -142,8 +142,9 @@ typedef struct
 returnStatus_t PHY_init( void );
 returnStatus_t PHY_configRead( void );  // Update local copy of config data
 #endif
-void PHY_Task ( uint32_t Arg0 );
 
+
+void PHY_Task ( taskParameter );
 #ifdef RADIO_H_
 void PHY_TestMode_Enable(uint16_t delay, uint16_t UseMarksTxAlgo, uint16_t UseDennisTempCheck, uint16_t UseDynamicBackoff, uint16_t T, uint16_t Period, uint16_t RepeatCnt, uint16_t Delay2,
       uint16_t RepeatCnt2, RADIO_MODE_t mode);

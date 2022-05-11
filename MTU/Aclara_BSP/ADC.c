@@ -679,7 +679,7 @@ float ADC_Get_Man_Temperature  ( void )
    return ManualTemperature_;
 }
 #endif
-#if ( MCU_SELECTED == NXP_K24 ) // TODO: RA6 [name_Balaji]: Support to Board temperature
+
 /*******************************************************************************
 
   Function name: ADC_Get_uP_Temperature
@@ -695,6 +695,7 @@ float ADC_Get_Man_Temperature  ( void )
 *******************************************************************************/
 float ADC_Get_uP_Temperature  (bool bFahrenheit)
 {
+#if ( MCU_SELECTED == NXP_K24 )
    float voltage;
    float Temperature;
 
@@ -723,8 +724,12 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
    }
 
    return ( Temperature );
-}
+#else                     //TODO: RA6E1 for renesas MCU
+    float Temperature=0.0;
+    return ( Temperature );
 #endif
+}  
+
 //K22 is the only one that supports the Board temp. sensor
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A )
 /*******************************************************************************

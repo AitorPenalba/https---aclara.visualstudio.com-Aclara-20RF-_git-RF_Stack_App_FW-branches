@@ -21,8 +21,10 @@
 
 #include "project.h"
 #include <assert.h>
-#include <mqx.h>
-#include <bsp.h>
+#if( RTOS_SELECTION == MQX_RTOS )
+#include <mqx.h> 
+#include <bsp.h> 
+#endif
 #include <stdint.h>
 
 #include "compiler_types.h"
@@ -282,9 +284,11 @@ static unProcessedData_t unProcessedData = {0};
 static bool samplesAvailable = false;
 static int8_t phase2FreqBuf[8*MAX_PHASE_SAMPLES_FROM_RADIO_PER_INTERRUPT]; // This should be big enough for a full SYNC i.e. 12.207samples/sym*32sym/sync=390.6 samples/sync
                                                                            // plus some extra (padding) because of the way sync detection works (i.e.avoid out of bound access)
-void SD_PhaseSamplesListenerTask(uint32_t arg0)
+void SD_PhaseSamplesListenerTask(taskParameter)
 {
-   (void)arg0;
+   #if ( RTOS_SELECTION == MQX_RTOS )
+   (void)   Arg0;
+   #endif
 
    for (;;)
    {
@@ -352,9 +356,11 @@ of filtered phase samples are accumulated in the buffer, this task then posts a 
 for filtered phase samples. These tasks include the preamble detector task and any unblocked instance of the Sync and
 Payload Demodulator Tasks (we start 2 of these to allow for potential interruptions mid-packet).
 */
-void SD_PreprocessorTask(uint32_t arg0)
+void SD_PreprocessorTask(taskParameter)
 {
-   (void)arg0;
+   #if ( RTOS_SELECTION == MQX_RTOS )
+   (void)   Arg0;
+   #endif
 //   static int8_t freqSeg_data[RAW_PHASE_SAMPLES_COUNT_PER_SIGNAL] = {0};
    /* This could easily be changed from 225 to 150. The resampler goes from 225 to 147.45, and when
     * 150 are collected (meaning it has to be run at least more than once), The preamble detector
@@ -443,11 +449,13 @@ preamble is detected, this task unblocks any available instance of the Sync & pa
 Immediately after execution of this the task, the preamble detector is blocked until sync detection is complete. This
 prevents the preamble detector from starting more than one Sync & Payload task on the preamble of the same frame.
 */
-void SD_PreambleDetectorTask(uint32_t arg0)
+void SD_PreambleDetectorTask(taskParameter)
 {
-   (void)arg0;
+   #if ( RTOS_SELECTION == MQX_RTOS )
+   (void)   Arg0;
+   #endif
    // Get and allocate the semaphore first
-   int8_t semId = 0; // preamble detector semaphore ID is always 0
+   int8_t semId = 0; // preamble detector semaphore ID is always 0 
    SD_FilteredPhaseSamplesSemaphores[semId].available = false; //So the PreProcessor task will always notify us
    OS_SEM_Reset(&SD_FilteredPhaseSamplesSemaphores[semId].semaphore);
 
@@ -486,8 +494,12 @@ void SD_PreambleDetectorTask(uint32_t arg0)
 
                // unblock a new Sync and Payload Demodulator Task
                bool unblocked = SD_Unblock_Sync_Payload_Task();
+              
+#if( RTOS_SELECTION == MQX_RTOS ) //TODO: RA6E1 need check for FreeRTOS
+               
                // clear the flag if previously set
                (void)_lwevent_clear(&SD_Events, SYNC_DEMOD_TASK_SYNC );
+#endif
 
                if (unblocked)
                {
@@ -539,9 +551,17 @@ preamble detector task left off. It is also responsible to issue an RSSI read re
 successful demodulation of frame contents, the payload bytes are written into the radio buffers (coordinated by the use of a
 mutex lock). Once the PHY Task processes these bytes, the mutex is unlocked.
 */
-void SD_SyncPayloadDemodTask(uint32_t arg0)
-{
+#if ( RTOS_SELECTION == MQX_RTOS )
+
+void SD_SyncPayloadDemodTask(taskParameter)
+{    
+  
    uint8_t semId = (uint8_t)arg0; //Param in Task.c
+#elif ( RTOS_SELECTION == FREE_RTOS )
+ void SD_SyncPayloadDemodTask(void* pvParameter)
+{  
+   uint8_t semId = (uint8_t )pvParameter; //Param in Task.c
+#endif   
    eSyncAndPayloadDemodFailCodes_t FailureCode;
    uint16_t readIndex;
 
