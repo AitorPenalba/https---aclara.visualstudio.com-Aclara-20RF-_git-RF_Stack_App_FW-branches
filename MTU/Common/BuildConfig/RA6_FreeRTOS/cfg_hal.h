@@ -262,14 +262,23 @@
 
 /* Enable Meter trouble IRQ   */
 #if ( HMC_TROUBLE_EDGE_TRIGGERED != 0 )
+#if ( MCU_SELECTED == NXP_K24 )
 #define HMC_TROUBLE_BUSY_IRQ_EI()   {PORTC_ISFR = (1 << 11);PORTC_PCR11 |= PORT_PCR_IRQC(0xb);} /* IRQ - either edge */
+#elif ( MCU_SELECTED == RA6E1 )
+#define HMC_TROUBLE_BUSY_IRQ_EI()   (void)R_ICU_ExternalIrqEnable( &hmc_trouble_busy_ctrl );
+#endif
 #else
 #define HMC_TROUBLE_BUSY_IRQ_EI()   {PORTC_ISFR = (1 << 11);PORTC_PCR11 |= PORT_PCR_IRQC(0xc);} /* IRQ - high level  */
 #endif
 
 /* Disable Meter trouble IRQ and reset IRQ flag */
+#if ( MCU_SELECTED == NXP_K24 )
 #define HMC_TROUBLE_BUSY_IRQ_DI()   { PORTC_PCR11 &= ~PORT_PCR_IRQC(0xf); PORTC_ISFR = ( 1 << 11 ); }
 #define HMC_TROUBLE_BUSY_TRIG       (PORTC_ISFR & (1 << 11)   /* ISF Triggered? */
+#elif ( MCU_SELECTED == RA6E1 )
+#define HMC_TROUBLE_BUSY_IRQ_DI()   (void)R_ICU_ExternalIrqDisable( &hmc_trouble_busy_ctrl );
+#define HMC_TROUBLE_BUSY_TRIG
+#endif
 
 /* Definitions for network status signal */
 #define SIGNAL_NETWORK_UP() {PORTC_PCR1 = 0x100; GPIOC_PSOR = 1<<1; GPIOC_PDDR |= (1<<1);}

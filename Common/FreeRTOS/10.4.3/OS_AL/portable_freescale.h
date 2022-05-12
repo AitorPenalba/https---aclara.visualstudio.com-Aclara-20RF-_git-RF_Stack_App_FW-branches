@@ -28,6 +28,7 @@
 #define PORTABLE_freescale_H
 
 /* INCLUDE FILES */
+#include <stdint.h>
 
 /* CONSTANT DEFINITIONS */
 

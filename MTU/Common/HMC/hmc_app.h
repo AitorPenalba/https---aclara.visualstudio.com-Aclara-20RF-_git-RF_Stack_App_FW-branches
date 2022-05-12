@@ -89,9 +89,7 @@ APP_EXTERN OS_QUEUE_Obj HMC_APP_QueueHandle;
 /* FUNCTION PROTOTYPES */
 uint8_t HMC_APP_AccessMeter(uint8_t id, void *pData);
 uint8_t HMC_APP_main(uint8_t, void *);
-#ifdef __mqx_h__
-void HMC_APP_Task( uint32_t Arg0 );
-#endif /* __mqx_h__ */
+void HMC_APP_Task( taskParameter );
 returnStatus_t HMC_APP_RTOS_Init( void );
 bool HMC_APP_status(void);
 returnStatus_t HMC_APP_TaskPowerDown(void);

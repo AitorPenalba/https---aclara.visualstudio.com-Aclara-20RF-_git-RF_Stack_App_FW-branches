@@ -16,9 +16,11 @@
 /* INCLUDE FILES */
 #include <stdint.h>
 #include <stdbool.h>
+#include "project.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#include "project.h"
+#endif
 #include "buffer.h"
 #include "mac.h"
 #include "DBG_SerialDebug.h"

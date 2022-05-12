@@ -145,9 +145,7 @@ returnStatus_t ID_init( void );
  * @param  uint32_t Arg0
  * @return None
  */
-#ifdef __mqx_h__
-void ID_task( uint32_t Arg0 );
-#endif /* __mqx_h__ */
+void ID_task( taskParameter );
 
 /**
  * ID_cfgIntervalData - API to configure interval data

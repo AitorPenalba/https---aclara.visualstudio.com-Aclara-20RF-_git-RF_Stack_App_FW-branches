@@ -59,7 +59,7 @@ typedef enum
 /* FUNCTION PROTOTYPES */
 void           DEMAND_getConfig( uint64_t *demandConfig );   //Returns the current demand configuration
 returnStatus_t DEMAND_init( void );                         //Called before the register module is initialized
-void           DEMAND_task(uint32_t Arg0);                //Demand task
+void           DEMAND_task(taskParameter);                //Demand task
 enum_CIM_QualityCode DEMAND_Current_Daily_Peak( peak_t *ppeak );
 enum_CIM_QualityCode DEMAND_Shift_Daily_Peak( peak_t *ppeak );  //Called when time to shift daily demand
 enum_CIM_QualityCode DEMAND_GetDmdValue( meterReadingType RdgType, ValueInfo_t *readingInfo );

@@ -123,10 +123,8 @@ typedef struct
 
 typedef struct
 {
-#if 0 // TODO: RA6E1 - Queue handling in FreeRTOS
    OS_QUEUE_Handle pQueueHandle;   /* Queue handle, if not NULL, send message */
    OS_MSGQ_Obj     *pMQueueHandle; /* Message Queue handle, if not NULL, send message */
-#endif
    uint32_t ulAlarmDate;           /* Alarm Date, if this value = 0, it is a daily alarm */
    uint32_t ulAlarmTime;           /* Alarm Time */
    uint8_t ucAlarmId;              /* Alarm Id */

@@ -304,7 +304,9 @@ void TMR_HandlerTask( uint32_t Arg0 )
    isr_ptr->OLD_ISR_DATA = _int_get_isr_data(INT_SysTick);              /*lint !e641  This code is from an example */
    isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                   /*lint !e641  This code is from an example */
    _int_install_isr(INT_SysTick, TMR_vApplicationTickHook, isr_ptr);    /*lint !e641 !e64 !e534 code is from an example */
-#endif // TODO: RA6E1 - TMR_vApplicationTickHook in RA6E1
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   /* FreeRTOS uses the Tick Hook method to call so no initialization needed for that case */
+#endif
    /* End the example code! */
 
    for ( ; ; ) /* RTOS Task, keep running forever */

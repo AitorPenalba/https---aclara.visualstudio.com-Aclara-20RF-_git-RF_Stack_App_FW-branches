@@ -38,6 +38,28 @@
 #include "MAC.h"
 #include "STACK_Protocol.h"
 #include "STACK.h"
+
+#if ENABLE_HMC_TASKS
+#include "hmc_start.h"
+#include "hmc_eng.h"
+#endif
+
+#include "hmc_app.h"
+
+#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
+#include "hmc_prg_mtr.h"
+#endif
+
+#include "demand.h"
+#include "historyd.h"
+#include "OR_MR_Handler.h"
+#if ENABLE_ID_TASKS
+#include "ID_intervalTask.h"
+#endif
+#include "APP_MSG_Handler.h"
+
+#include "sys_busy.h"
+
 #else // TODO: RA6: Remove duplicate includes
 #include "user_config.h"
 #if ( MQX_USE_LOGS == 1 )
@@ -203,17 +225,37 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( TMR_HandlerInit, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( SYSBUSY_init, STRT_FLAG_NONE ),
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
    INIT( PWRCFG_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                         /* Must be before PWR_TSK_init so restoration delay is available*/
    INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                        // TODO: RA6E1: DG: Move this to appropriate position
+#if ENABLE_HMC_TASKS
+#if END_DEVICE_PROGRAMMING_CONFIG == 1
+   INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
+#endif
+   INIT( HMC_STRT_init, STRT_FLAG_NONE ),
+   INIT( HMC_APP_RTOS_Init, STRT_FLAG_NONE ),
+   INIT( HMC_ENG_init, STRT_FLAG_NONE ),
+#endif
    INIT( PAR_initRtos, STRT_FLAG_NONE ),
-   INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
+//   INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
+#if ( ENABLE_HMC_TASKS == 1 )
+   INIT( DEMAND_init, STRT_FLAG_NONE ),
+   INIT( ID_init, STRT_FLAG_NONE ),
+   //INIT(LPCFG_init, STRT_FLAG_NONE),
+   //INIT(DSCFG_init, STRT_FLAG_NONE),
+#endif   /* end of ENABLE_HMC_TASKS  == 1 */
    INIT( MAC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( APP_MSG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+#if ( ENABLE_HMC_TASKS == 1 )
+   INIT( HD_init, STRT_FLAG_NONE ),
+   INIT( OR_MR_init, STRT_FLAG_NONE ),
+#endif   /* end of ENABLE_HMC_TASKS  == 1 */
    INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
 
@@ -563,7 +605,6 @@ void STRT_StartupTask ( taskParameter )
             ( void )printf( "\n\t\t#####################\n" );
             ( void )printf( "\nStartup Failure - Call to %s failed, Code: %u\n", pFunct->name, ( uint16_t )response );
             ( void )printf( "\n\t\t#####################\n" );
-
             initSuccess_ = false;
          }
       }

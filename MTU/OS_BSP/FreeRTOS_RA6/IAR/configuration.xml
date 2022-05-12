@@ -694,6 +694,15 @@
       <property id="module.driver.lpm.deep_standby_cancel_sources" value="module.driver.lpm.deep_standby_cancel_irq1,module.driver.lpm.deep_standby_cancel_rtc_alarm"/>
       <property id="module.driver.lpm.deep_standby_cancel_edges" value=""/>
     </module>
+    <module id="module.driver.external_irq_on_icu.1187114507">
+      <property id="module.driver.external_irq.name" value="hmc_trouble_busy"/>
+      <property id="module.driver.external_irq.channel" value="14"/>
+      <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_both_edge"/>
+      <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.false"/>
+      <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
+      <property id="module.driver.external_irq.p_callback" value="meter_trouble_isr_busy"/>
+      <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority12"/>
+    </module>
     <context id="_hal.0">
       <stack module="module.driver.ioport_on_ioport.0"/>
       <stack module="module.middleware.rm_freertos_port.0"/>
@@ -722,6 +731,7 @@
       <stack module="module.driver.timer_on_agt.369109059"/>
       <stack module="module.driver.lpm.456371821"/>
       <stack module="module.driver.lpm.63954745"/>
+      <stack module="module.driver.external_irq_on_icu.1187114507"/>
     </context>
     <config id="config.driver.wdt">
       <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>
@@ -846,6 +856,7 @@
       <configSetting altId="iic0.sda0.p401" configurationId="iic0.sda0"/>
       <configSetting altId="irq.irq11_dash_ds.p006" configurationId="irq.irq11_dash_ds"/>
       <configSetting altId="irq.irq13.p015" configurationId="irq.irq13"/>
+      <configSetting altId="irq.irq14.p505" configurationId="irq.irq14"/>
       <configSetting altId="irq.irq9.p304" configurationId="irq.irq9"/>
       <configSetting altId="irq.mode.custom.free" configurationId="irq.mode"/>
       <configSetting altId="jtag_fslash_swd.mode.jtag.free" configurationId="jtag_fslash_swd.mode"/>
@@ -961,8 +972,9 @@
       <configSetting altId="p503.gpio_mode.gpio_mode_peripheral" configurationId="p503.gpio_mode"/>
       <configSetting altId="p504.output.low" configurationId="p504"/>
       <configSetting altId="p504.gpio_mode.gpio_mode_out.low" configurationId="p504.gpio_mode"/>
-      <configSetting altId="p505.input" configurationId="p505"/>
-      <configSetting altId="p505.gpio_mode.gpio_mode_in" configurationId="p505.gpio_mode"/>
+      <configSetting altId="p505.irq.irq14" configurationId="p505"/>
+      <configSetting altId="p505.gpio_irq.gpio_irq_enabled" configurationId="p505.gpio_irq"/>
+      <configSetting altId="p505.gpio_mode.gpio_mode_irq" configurationId="p505.gpio_mode"/>
       <configSetting altId="p600.input" configurationId="p600"/>
       <configSetting altId="p600.gpio_mode.gpio_mode_in" configurationId="p600.gpio_mode"/>
       <configSetting altId="p601.sci9.rxd9" configurationId="p601"/>

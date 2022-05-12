@@ -162,7 +162,7 @@ FSP Configuration
       P502 78 QSPI_QIO0 - L None "Peripheral mode" - - "AGT2: AGTOA2; IRQ: IRQ12; QSPI: QIO0; USB FS: USB_OVRCURB" - IO - QSPI_Flash 
       P503 79 QSPI_QIO1 - L - "Peripheral mode" - - "AGT2: AGTOB2; GPT_POEG: GTETRGC; QSPI: QIO1; USB FS: USB_EXICEN" - IO - QSPI_Flash 
       P504 80 GPIO - L - "Output mode (Initial Low)" - - "AGT3: AGTOA3; GPT_POEG: GTETRGD; QSPI: QIO2; USB FS: USB_ID" - IO - /WP_FLASH 
-      P505 81 GPIO - - None "Input mode" - - "AGT3: AGTOB3; IRQ: IRQ14; QSPI: QIO3" - IO - T_I-210+C_METER 
+      P505 81 IRQ_IRQ14 - - IRQ14 "IRQ mode" - - "AGT3: AGTOB3; IRQ: IRQ14; QSPI: QIO3" - IO - T_I-210+C_METER 
       P600 67 GPIO - - - "Input mode" - - "AGT3: AGTIO3; CAC: CACREF; CGC: CLKOUT; GPT6: GTIOC6B; SCI9: SCK9" - IO - GPIO0_SI4460 
       P601 66 SCI9_RXD9 - L - "Peripheral mode" - - "AGT3: AGTEE3; GPT6: GTIOC6A; SCI9: RXD9" - I - "Reserved for KV2C: UART4_TX" 
       P602 65 SCI9_TXD9 - L - "Peripheral mode" - - "AGT3: AGTO3; GPT7: GTIOC7B; SCI9: TXD9" - O - "Reserved for KV2C: UART4_RX" 
@@ -692,7 +692,7 @@ FSP Configuration
       Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
       Callback: Radio0_IRQ_ISR
       Pin Interrupt Priority: Priority 12
-
+      
     Instance "agt1_timer_cascade_lpm_trigger Timer, Low-Power (r_agt)"
       General: Name: agt1_timer_cascade_lpm_trigger
       General: Channel: 1
@@ -756,4 +756,13 @@ FSP Configuration
       Deep Standby Options: Power-Supply Control: Cut the power supply to LVDn, standby RAM, low-speed on-chip oscillator, AGTn (n = 0-3), and USBFS/HS resume detecting unit. Enable low power function of power-on reset circuit
       Deep Standby Options: Cancel Sources: IRQ1, RTC Alarm
       Deep Standby Options: Cancel Edges: 
+      
+    Instance "hmc_trouble_busy External IRQ (r_icu)"
+      Name: hmc_trouble_busy
+      Channel: 14
+      Trigger: Both Edges
+      Digital Filtering: Disabled
+      Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
+      Callback: meter_trouble_isr_busy
+      Pin Interrupt Priority: Priority 12
       

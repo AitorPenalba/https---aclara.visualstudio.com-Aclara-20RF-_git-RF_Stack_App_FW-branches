@@ -29,8 +29,9 @@
 #include <stdbool.h>
 #include <math.h>
 #include <stdlib.h>
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
-
+#endif
 #include "ID_intervalTask.h"
 #include "file_io.h"
 #if ( LP_IN_METER == 0 )
@@ -173,7 +174,7 @@ typedef struct
 #if( RTOS_SELECTION == FREE_RTOS )
 #define INTERVAL_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define INTERVAL_NUM_MSGQ_ITEMS 0 
+#define INTERVAL_NUM_MSGQ_ITEMS 0
 #endif
 
 /* ****************************************************************************************************************** */
@@ -1485,7 +1486,7 @@ static int16_t addMeterLoadProfileChannels( uint32_t closeTime, uint8_t *buf, ui
    Notes:
 
  **********************************************************************************************************************/
-void ID_task( uint32_t Arg0 )
+void ID_task( taskParameter )
 {
    buffer_t*    pMessage = NULL;
    tTimeSysMsg  timeMsg;             /* Stores the time message   */

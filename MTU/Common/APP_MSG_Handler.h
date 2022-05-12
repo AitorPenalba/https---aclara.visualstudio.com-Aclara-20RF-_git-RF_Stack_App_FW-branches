@@ -167,7 +167,7 @@ APP_MSG_EXTERN returnStatus_t APP_MSG_setMetadataRegistrationTimer (uint32_t tim
 APP_MSG_EXTERN returnStatus_t APP_MSG_SecurityHandler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 APP_MSG_EXTERN returnStatus_t APP_MSG_SetDmdResetDateHandler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 #endif
-APP_MSG_EXTERN void APP_MSG_HandlerTask(uint32_t Arg0);
+APP_MSG_EXTERN void APP_MSG_HandlerTask(taskParameter);
 APP_MSG_EXTERN bool APP_MSG_HandlerReady(void);
 APP_MSG_EXTERN void APP_MSG_updateRegistrationTimeout(void);
 APP_MSG_EXTERN void APP_MSG_UpdateRegistrationFile(void);

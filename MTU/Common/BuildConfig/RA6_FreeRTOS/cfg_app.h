@@ -29,6 +29,7 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 
+#include "features.h"
 #ifndef __BOOTLOADER
 #include "os_aclara.h"
 #include "portable_freescale.h"
@@ -274,14 +275,13 @@ typedef enum
    eKV
 } eMeterType_t;   /* If only one meter is supported, it should be the first in the list. */
 
-#if 0 // TODO: RA6E1 - Meter time support
 #define SUPPORT_METER_TIME_FORMAT      1              /* Time conversion utilities should support meter time   */
-#endif
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* Meter Interface Definitions */
 
 #if ( HMC_KV || HMC_I210_PLUS_C )
+#if ( MCU_SELECTED == NXP_K24 )
 //This is the CBF_BK_KV_METER (Comm Board Force/Busy KV) signal connector pin 27
 #define HMC_COMM_FORCE()            (((GPIOD_PDIR & (1<<4))>>4)) /* COMM_FORCE signal from the host meter */
 #define HMC_COMM_FORCE_TRIS()       { PORTD_PCR4 = 0x100;   GPIOD_PDDR &= ~(1<<4); } /* Set for GPIO, Make Input */
@@ -293,6 +293,21 @@ typedef enum
 /* Set PCR for GPIO, Make Output */
 #define HMC_COMM_SENSE_TRIS()       { PORTA_PCR5 = 0x100; GPIOA_PDDR |= 1<<5; HMC_COMM_SENSE_OFF(); }
 
+#elif ( MCU_SELECTED == RA6E1 )
+
+//This is the CBF_BK_KV_METER (Comm Board Force/Busy KV) signal connector pin 27
+#define HMC_COMM_FORCE()            1  // TODO: RA6E1 Setting to 1 for now
+#define HMC_COMM_FORCE_TRIS()
+
+//This is the CBS_BM_KV_METER (Comm Board Sense/Busy Modem) signal connector pin 28
+//TODO Add this to the code
+#define HMC_COMM_SENSE_OFF()         R_BSP_PinWrite(BSP_IO_PORT_00_PIN_01, BSP_IO_LEVEL_LOW)
+#define HMC_COMM_SENSE_ON()          R_BSP_PinWrite(BSP_IO_PORT_00_PIN_01, BSP_IO_LEVEL_HIGH)
+
+/* Set PCR for GPIO, Make Output */
+#define HMC_COMM_SENSE_TRIS()
+#endif
+
 #if ( HMC_KV == 1 )
 //This is the PR_KV_METER (Password Recovery) signal
 //TODO add this to code
@@ -301,10 +316,18 @@ typedef enum
 #endif
 
 #if ( HMC_I210_PLUS_C == 1 )
+#if ( MCU_SELECTED == NXP_K24 )
 /* This is the MC_I-210+C_METER on pin 12 */
 #define HMC_MUX_CTRL_TRIS()         { PORTD_PCR5 = 0x100; GPIOD_PDDR |= (1<<15);}   /* Make GPIO, output */
 #define HMC_MUX_CTRL_ASSERT()       { GPIOD_PCOR = (1<<5); HMC_MUX_CTRL_TRIS() }    /* Take pin low before HMC */
 #define HMC_MUX_CTRL_RELEASE()      { GPIOD_PSOR = (1<<5); HMC_MUX_CTRL_TRIS() }    /* Take pin high after HMC */
+
+#elif ( MCU_SELECTED == RA6E1 )
+/* This is the MC_I-210+C_METER on pin 12, signal name MC_I-210+C METER on Y84581-SCH */
+#define HMC_MUX_CTRL_TRIS()
+#define HMC_MUX_CTRL_ASSERT()       R_BSP_PinWrite(BSP_IO_PORT_00_PIN_04, BSP_IO_LEVEL_LOW)
+#define HMC_MUX_CTRL_RELEASE()      R_BSP_PinWrite(BSP_IO_PORT_00_PIN_04, BSP_IO_LEVEL_HIGH)
+#endif
 #endif
 
 //This is the T_KV_METER (Meter Trouble) signal
@@ -352,9 +375,7 @@ typedef enum
 #define REV_TC_TAMPER_TRIP_POINT   ((int64_t)-255)     /* Maximum reverse energy before setting the tamper flag. */
 #define REV_TC_TAMPER_FLAG_MASK    ((uint16_t)0x8000)  /* Bytes are swapped! Sets bit 7 over TWACS */
 
-#if 0 // TODO: RA6E1 - Event logging support
 #define ENABLE_METER_EVENT_LOGGING 1     /* Set non-zero to support meter event logs in meters that are capable.  */
-#endif
 
 /* ****************************************************************************************************************** */
 #endif

@@ -92,7 +92,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define HD_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define HD_NUM_MSGQ_ITEMS 0 
+#define HD_NUM_MSGQ_ITEMS 0
 #endif
 
 
@@ -181,7 +181,7 @@ returnStatus_t HD_init( void )
    FileStatus_t fileStatus;  //Indicates if the file is created or already exists
    returnStatus_t retVal = eFAILURE;
 
-   if ( !(OS_MSGQ_Create(&HD_MsgQ_) && (OS_MUTEX_Create(&HD_Mutex_, HD_NUM_MSGQ_ITEMS))) )
+   if ( !( OS_MSGQ_Create( &HD_MsgQ_, HD_NUM_MSGQ_ITEMS ) && ( OS_MUTEX_Create(&HD_Mutex_ ) ) ) )
    {
       return eFAILURE;
    }
@@ -653,7 +653,7 @@ void HD_MsgHandler( HEEP_APPHDR_t *heepReqHdr, void *payloadBuf, uint16_t length
    Notes:
 
  **********************************************************************************************************************/
-void HD_DailyShiftTask ( uint32_t Arg0 )
+void HD_DailyShiftTask ( taskParameter )
 {
    tTimeSysMsg        timeMsg;          //Stores the time message
    uint32_t           msgTime;          // Time converted to seconds since epoch

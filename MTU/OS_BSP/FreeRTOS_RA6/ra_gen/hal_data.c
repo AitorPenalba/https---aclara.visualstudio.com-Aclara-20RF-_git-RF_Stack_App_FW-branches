@@ -6,14 +6,14 @@
 #define ADC_TRIGGER_ADC0_B      ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1        ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1_B      ADC_TRIGGER_SYNC_ELC
-icu_instance_ctrl_t g_external_irq0_ctrl;
-const external_irq_cfg_t g_external_irq0_cfg =
+icu_instance_ctrl_t hmc_trouble_busy_ctrl;
+const external_irq_cfg_t hmc_trouble_busy_cfg =
 {
-    .channel             = 13,
-    .trigger             = EXTERNAL_IRQ_TRIG_FALLING,
+    .channel             = 14,
+    .trigger             = EXTERNAL_IRQ_TRIG_BOTH_EDGE,
     .filter_enable       = false,
     .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
-    .p_callback          = Radio0_IRQ_ISR,
+    .p_callback          = meter_trouble_isr_busy,
     /** If NULL then do not add & */
 #if defined(NULL)
     .p_context           = NULL,
@@ -22,17 +22,17 @@ const external_irq_cfg_t g_external_irq0_cfg =
 #endif
     .p_extend            = NULL,
     .ipl                 = (12),
-#if defined(VECTOR_NUMBER_ICU_IRQ13)
-    .irq                 = VECTOR_NUMBER_ICU_IRQ13,
+#if defined(VECTOR_NUMBER_ICU_IRQ14)
+    .irq                 = VECTOR_NUMBER_ICU_IRQ14,
 #else
     .irq                 = FSP_INVALID_VECTOR,
 #endif
 };
 /* Instance structure to use this module. */
-const external_irq_instance_t g_external_irq0 =
+const external_irq_instance_t hmc_trouble_busy =
 {
-    .p_ctrl        = &g_external_irq0_ctrl,
-    .p_cfg         = &g_external_irq0_cfg,
+    .p_ctrl        = &hmc_trouble_busy_ctrl,
+    .p_cfg         = &hmc_trouble_busy_cfg,
     .p_api         = &g_external_irq_on_icu
 };
 lpm_instance_ctrl_t g_lpm_DeepSWStandby_ctrl;
@@ -168,6 +168,35 @@ const timer_instance_t agt1_timer_cascade_lpm_trigger =
     .p_ctrl        = &agt1_timer_cascade_lpm_trigger_ctrl,
     .p_cfg         = &agt1_timer_cascade_lpm_trigger_cfg,
     .p_api         = &g_timer_on_agt
+};
+icu_instance_ctrl_t g_external_irq0_ctrl;
+const external_irq_cfg_t g_external_irq0_cfg =
+{
+    .channel             = 13,
+    .trigger             = EXTERNAL_IRQ_TRIG_FALLING,
+    .filter_enable       = false,
+    .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
+    .p_callback          = Radio0_IRQ_ISR,
+    /** If NULL then do not add & */
+#if defined(NULL)
+    .p_context           = NULL,
+#else
+    .p_context           = &NULL,
+#endif
+    .p_extend            = NULL,
+    .ipl                 = (12),
+#if defined(VECTOR_NUMBER_ICU_IRQ13)
+    .irq                 = VECTOR_NUMBER_ICU_IRQ13,
+#else
+    .irq                 = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const external_irq_instance_t g_external_irq0 =
+{
+    .p_ctrl        = &g_external_irq0_ctrl,
+    .p_cfg         = &g_external_irq0_cfg,
+    .p_api         = &g_external_irq_on_icu
 };
 crc_instance_ctrl_t g_crc1_ctrl;
 const crc_cfg_t g_crc1_cfg =

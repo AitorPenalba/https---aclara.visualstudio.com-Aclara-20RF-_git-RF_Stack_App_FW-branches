@@ -33,12 +33,12 @@
 // This is the standard build
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
    #define ENABLE_ALRM_TASKS              0  /* Used to 0=disable, 1=enable the Alarm feature */            /* TODO: RA6E1: Enable */
-   #define ENABLE_ID_TASKS                0  /* Used to 0=disable, 1=enable the Interval Data feature */    /* TODO: RA6E1: Enable */
+   #define ENABLE_ID_TASKS                1  /* Used to 0=disable, 1=enable the Interval Data feature */    /* TODO: RA6E1: Enable */
    #define ENABLE_MFG_TASKS               1  /* Used to 0=disable, 1=enable the Mfg Port feature */
    #define ENABLE_TMR_TASKS               1  /* Used to 0=disable, 1=enable the Timer feature */
    #define ENABLE_TIME_SYS_TASKS          1  /* Used to 0=disable, 1=enable the System Time feature */
    // TODO: RA6E1 Enable HMC tasks once HMC module is in place
-   #define ENABLE_HMC_TASKS               0  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
+   #define ENABLE_HMC_TASKS               1  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
    #define ENABLE_PAR_TASKS               1  /* Used to 0=disable, 1=enable the Partition feature */
    #define ENABLE_PWR_TASKS               0  /* Used to 0=disable, 1=enable the Power feature */         /* TODO: RA6E1: Enable */
    #define ENABLE_DFW_TASKS               0  /* Used to 0=disable, 1=enable the DFW feature */           /* TODO: RA6E1: Enable */
@@ -230,8 +230,8 @@
 #define USE_DTLS                       0     // TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if ( ACLARA_LC == 1 ) || (ACLARA_DA == 1)
 #define DTLS_FIELD_TRIAL               0     /* Disable feature to allows unsecured comm. until session established   */
-#else
-#define DTLS_FIELD_TRIAL               1     /* Allows unsecured comm. until session established   */
+#else // TODO: RA6E1 Enable DTLS_FIELD_TRIAL
+#define DTLS_FIELD_TRIAL               0     /* Allows unsecured comm. until session established   */
 #endif
 #define DTLS_DEBUG                     (0)   /* Turn DTLS Debug On */
 #define DTLS_CHECK_UNENCRYPTED         (1)   /* Check for previous version major file not encrypted   */

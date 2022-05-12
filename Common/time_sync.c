@@ -23,9 +23,11 @@
 /* INCLUDE FILES */
 #include <stdlib.h>
 #include <math.h>
-#include <mqx.h>
 #include "portable_freescale.h"
 #include "project.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include <mqx.h>
+#endif
 #include "time_sync.h"
 #include "time_sys.h"
 #include "time_util.h"

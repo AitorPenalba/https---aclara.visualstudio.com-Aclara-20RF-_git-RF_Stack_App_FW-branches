@@ -1126,7 +1126,11 @@ static void ConfigurePHYTimeout( PHY_CONF_TYPE_t confType, uint32_t timeout )
    phy.confirmPending = (bool)true;
    phy.pendingConfirmType = confType;
    OS_TICK_Get_CurrentElapsedTicks ( &phy.confirmTimeout );
+#if ( MCU_SELECTED == NXP_K24 )
    (void) _time_add_msec_to_ticks ( &phy.confirmTimeout, timeout );
+#elif ( MCU_SELECTED == RA6E1 )
+   ( void ) OS_TICK_Add_msec_to_ticks( &phy.confirmTimeout, timeout );
+#endif
 }
 
 /***********************************************************************************************************************
@@ -1168,22 +1172,38 @@ static void MAC_PHY_CheckForFailure( void )
    // Check if we have received a data request
 #if ( MCU_SELECTED == NXP_K24 )
    if ( (DataReqTime.TICKS[0] != 0) || (DataReqTime.TICKS[1] != 0) )
-#elif ( MCU_SELECTED == RA6E1 )
-   if ( ( DataReqTime.tickCount != 0 ) || ( DataReqTime.xNumOfOverflows != 0 ) )
-#endif
    {
       // Check if PHY as been accessed recently
       _time_get_elapsed_ticks(&time);
 
       TimeDiff = (uint32_t)_time_diff_seconds ( &time, &DataReqTime, &Overflow );
 
-      if ( ( TimeDiff > 600 ) || Overflow ) {
+      if ( ( TimeDiff > 600 ) || Overflow )
+      {
          // More than 5 minutes elapsed between MAC/PHY
          ERR_printf("PHY didn't received a frame in a timely manner");
          OS_TASK_Sleep(5*ONE_SEC);
          PWR_SafeReset();
       }
    }
+#elif ( MCU_SELECTED == RA6E1 )
+   if ( ( DataReqTime.tickCount != 0 ) || ( DataReqTime.xNumOfOverflows != 0 ) )
+   {
+      // Check if PHY as been accessed recently
+      OS_TICK_Get_CurrentElapsedTicks(&time);
+
+      TimeDiff = (uint32_t)OS_TICK_Get_Diff_InSeconds( &time, &DataReqTime );
+
+      // TODO: RA6E1 Overflow check removed as there is no support. Add support to overflow flag
+      if ( ( TimeDiff > 600 ) /* || Overflow */ )
+      {
+         // More than 5 minutes elapsed between MAC/PHY
+         ERR_printf("PHY didn't received a frame in a timely manner");
+         OS_TASK_Sleep(5*ONE_SEC);
+         PWR_SafeReset();
+      }
+   }
+#endif
 }
 
 /***********************************************************************************************************************
@@ -1195,9 +1215,11 @@ Arguments: Arg0 - Not used, but required here because this is a task
 
 Returns: none
 ***********************************************************************************************************************/
-void MAC_Task ( uint32_t Arg0 )
+void MAC_Task ( taskParameter )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    (void)         Arg0;
+#endif
    buffer_t       *pBuf;
    uint16_t       numBits;
    TIMESTAMP_t    CurrentTime;
@@ -1213,7 +1235,11 @@ void MAC_Task ( uint32_t Arg0 )
    INFO_printf("MAC_Task starting...");
 
 #if ( EP == 1 )
+#if 0 // TODO: RA6E1 - lastgasp
    if( PWRLG_LastGasp() == true )
+#else
+   if( 0 )
+#endif
    {  // Booting in Low Power mode, so set the tx frequency to the value that was saved
       // When booting in normal mode the phy will recover from NV.
       uMessagePend = 100;
@@ -1386,7 +1412,9 @@ void MAC_Task ( uint32_t Arg0 )
 #if ( EP == 1 )
             case eSYSFMT_VISUAL_INDICATION:
                // Delete timer and turn off LED
+#if 0 // TODO: RA6E1 Enable LED functions
                (void) TMR_DeleteTimer(LED_getLedTimerId());
+#endif
                BM_free(pBuf);
                break;
 #endif
@@ -1835,7 +1863,11 @@ void MAC_Task ( uint32_t Arg0 )
                            OS_TICK_Get_CurrentElapsedTicks ( &CurrentTicks );
                            phy.ccaDelayStart = CurrentTicks;                // Save this for measurement
                            phy.ccaDelayEnd   = CurrentTicks;
+#if ( MCU_SELECTED == NXP_K24 )
                            (void) _time_add_msec_to_ticks ( &phy.ccaDelayEnd, msec_delay );
+#elif ( MCU_SELECTED == RA6E1 )
+                           ( void ) OS_TICK_Add_msec_to_ticks( &phy.ccaDelayEnd, msec_delay );
+#endif
                            INFO_printf("CCA_DELAY");
                            phy.eState = eMAC_STATE_CCA_DELAY;
                         }
@@ -2060,7 +2092,11 @@ static void Process_DataIndication( const PHY_DataInd_t *phy_indication )
    {
 
 #if EP == 1
+#if 0 // TODO: RA6E1 - lastgasp
       if(PWRLG_LastGasp() == false)
+#else
+      if(1)
+#endif
 #endif
       {  // Normal Mode
          mac_frame_t rx_frame;
@@ -2633,10 +2669,12 @@ MAC_GET_STATUS_e MAC_Attribute_Get( MAC_GetReq_t const *pGetReq, MAC_ATTRIBUTES_
 {
    MAC_GET_STATUS_e eStatus = eMAC_GET_SUCCESS;
 
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 task id implementation in freeRTOS
    // This function should only be called inside the MAC task
    if ( _task_get_id() != _task_get_id_from_name( "MAC" ) ) {
      ERR_printf("WARNING: MAC_Attribute_Get should only be called inside the MAC task. Please use MAC_GetRequest instead.");
    }
+#endif
 
    switch (pGetReq->eAttribute)
    {
@@ -3328,10 +3366,12 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
 {
    MAC_SET_STATUS_e eStatus;
 
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 task id implementation in freeRTOS
    // This function should only be called inside the MAC task
    if ( _task_get_id() != _task_get_id_from_name( "MAC" ) ) {
      ERR_printf("WARNING: MAC_Attribute_Set should only be called inside the MAC task. Please use MAC_SetRequest instead.");
    }
+#endif
 
    switch (pSetReq->eAttribute)  /*lint !e788 not all enums used within switch */
    {
@@ -3427,8 +3467,12 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
    if (eStatus == eMAC_SET_SUCCESS)
    {
 #if EP == 1
+#if 0 // TODO: RA6E1 - lastgasp
       // Only allow configuration changes if NOT in Last Gasp Mode
       if( PWRLG_LastGasp() == false )
+#else
+      if(1)
+#endif
 #endif
       {
          file_t *pFile = (file_t *)Files[0];
@@ -5365,12 +5409,15 @@ static bool Process_DataReq( buffer_t *pBuf )
             // Update time if it is empty
 #if ( MCU_SELECTED == NXP_K24 )
             if ( (DataReqTime.TICKS[0] == 0) && (DataReqTime.TICKS[1] == 0) )
-#elif ( MCU_SELECTED == RA6E1 )
-            if ( ( DataReqTime.tickCount == 0 ) && (DataReqTime.xNumOfOverflows == 0) )
-#endif
             {
                _time_get_elapsed_ticks(&DataReqTime);
             }
+#elif ( MCU_SELECTED == RA6E1 )
+            if ( ( DataReqTime.tickCount == 0 ) && (DataReqTime.xNumOfOverflows == 0) )
+            {
+               OS_TICK_Get_CurrentElapsedTicks(&DataReqTime);
+            }
+#endif
             return false;
          }
       } else {
@@ -5906,8 +5953,11 @@ static void GenerateFailedConfirm( PHY_CONF_TYPE_t confType )
       /* extend the timeout again to avoid race condition if a data.request gets into the MAC msg queue before this
          confirm gets processed.  In that scenario this function might be called twice and put 2 recovery confirms
          into the msg queue */
+#if ( MCU_SELECTED == NXP_K24 )
       (void) _time_add_msec_to_ticks ( &phy.confirmTimeout, PHY_CONFIRM_TIMEOUT_MS );
-
+#elif ( MCU_SELECTED == RA6E1 )
+      ( void ) OS_TICK_Add_msec_to_ticks( &phy.confirmTimeout, PHY_CONFIRM_TIMEOUT_MS );
+#endif
       if ( sendConfirm )
       {
          MAC_Request(pBuf);

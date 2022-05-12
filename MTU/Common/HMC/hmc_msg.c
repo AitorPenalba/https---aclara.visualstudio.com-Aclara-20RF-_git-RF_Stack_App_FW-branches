@@ -263,7 +263,9 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
          eMode_ = HMC_MSG_MODE_TX;                                   /* Now in TX mode */
          bDoData_ = false;
          pTxRx_ = &pData->TxPacket.ucSTP;                            /* Set up the pointer */
+#if 0 // TODO: RA6E1 Implement UART flush command
          (void)UART_flush(UART_HOST_COMM_PORT);
+#endif
          HMC_MSG_PRNT_HEX_INFO( 'H', "Send:", pTxRx_, offsetof(sMtrTxPacket,uTxData) +
                            BIG_ENDIAN_16BIT( pData->TxPacket.uiPacketLength.n16 ) );
          break;
@@ -639,7 +641,11 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                      OS_TASK_Sleep( 1 );      /* The TX buffer is full, wait for buffer to free up */
                   }
                }while( eMode_ == HMC_MSG_MODE_TX );   /* While TX buffer not full and in TX Mode */
+#if 0 // TODO: RA6E1 Implement UART Tx empty command
                while(!UART_isTxEmpty(UART_HOST_COMM_PORT))  /* Wait until TX is empty. */
+#else
+               while( 0 )
+#endif
                {
                   /* The receive is called only to clear the glitch on the KV2 meter when starting a session! */
                   uint8_t rxGarbage;
