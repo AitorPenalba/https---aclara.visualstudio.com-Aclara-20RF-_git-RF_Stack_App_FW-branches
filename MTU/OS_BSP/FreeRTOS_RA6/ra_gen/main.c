@@ -4,9 +4,10 @@
 #include "project.h"
 #include "hal_data.h"
 #include "BSP_aclara.h"
-
+#if 0  // TODO: RA6: DG: Add later
                 extern uint8_t PWRLG_LastGasp(void);
                 extern void    PWRLG_Startup(void);
+#endif
 /* Aclara Added -- End */
 
                 uint32_t g_fsp_common_thread_count;
@@ -114,7 +115,7 @@
                     else
 #endif
                     {
-                       if ( PWRLG_LastGasp() )
+//                       if ( PWRLG_LastGasp() )  // TODO: RA6: DG:
                        {
                           /* Clear DPSRSTF flag */
                           R_SYSTEM->RSTSR0_b.DPSRSTF = 0;
