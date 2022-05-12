@@ -323,7 +323,7 @@ typedef enum
 #define HMC_MUX_CTRL_RELEASE()      { GPIOD_PSOR = (1<<5); HMC_MUX_CTRL_TRIS() }    /* Take pin high after HMC */
 
 #elif ( MCU_SELECTED == RA6E1 )
-/* This is the MC_I-210+C_METER on pin 12 */
+/* This is the MC_I-210+C_METER on pin 12, signal name MC_I-210+C METER on Y84581-SCH */
 #define HMC_MUX_CTRL_TRIS()
 #define HMC_MUX_CTRL_ASSERT()       R_BSP_PinWrite(BSP_IO_PORT_00_PIN_04, BSP_IO_LEVEL_LOW)
 #define HMC_MUX_CTRL_RELEASE()      R_BSP_PinWrite(BSP_IO_PORT_00_PIN_04, BSP_IO_LEVEL_HIGH)
