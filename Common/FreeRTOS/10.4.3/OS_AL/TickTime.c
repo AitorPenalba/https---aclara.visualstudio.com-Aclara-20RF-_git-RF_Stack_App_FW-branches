@@ -129,7 +129,7 @@ void OS_Tick_Get_TimeElapsed ( TIME_STRUCT *time_ptr )
 *******************************************************************************/
 uint32_t OS_TICK_Get_ElapsedMilliseconds ( void )
 {
-   uint32_t Msec;
+   uint32_t    Msec;
    TIME_STRUCT time_ptr;
 #if ( RTOS_SELECTION == MQX_RTOS )
    _time_get_elapsed ( &time_ptr );

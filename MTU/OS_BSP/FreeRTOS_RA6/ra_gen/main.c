@@ -1,10 +1,13 @@
 /* generated main source file - do not edit */
 #include "bsp_api.h"
+/* Aclara Added -- Start */
 #include "project.h"
 #include "hal_data.h"
 #include "BSP_aclara.h"
 
-
+                extern uint8_t PWRLG_LastGasp(void);
+                extern void    PWRLG_Startup(void);
+/* Aclara Added -- End */
 
                 uint32_t g_fsp_common_thread_count;
                 bool g_fsp_common_initialized;
@@ -81,7 +84,7 @@
                 {
                     g_fsp_common_thread_count = 0;
                     g_fsp_common_initialized = false;
-//                    vPortDefineHeapRegions( xHeapRegions ); //TODO: We need this for heap_5
+//                    vPortDefineHeapRegions( xHeapRegions ); //TODO: RA6: DG: We need this for heap_5
                     /* Create semaphore to make sure common init is done before threads start running. */
                     g_fsp_common_initialized_semaphore =
                     #if configSUPPORT_STATIC_ALLOCATION
@@ -100,9 +103,26 @@
                         rtos_startup_err_callback(g_fsp_common_initialized_semaphore, 0);
                     }
 
-                    /* Init RTOS tasks. */
-                    OS_TASK_Create_STRT();
-
+                    /* Aclara Added -- Start */
+#if 1  // TODO: RA6: DG: Add later
+//                    PWRLG_Startup();  // TODO: RA6: DG: Add
+                    if ( PWRLG_LastGasp() )
+                    {
+                       /* Init LastGasp tasks. */
+                       OS_TASK_Create_PWRLG();
+                    }
+                    else
+#endif
+                    {
+                       if ( PWRLG_LastGasp() )
+                       {
+                          /* Clear DPSRSTF flag */
+                          R_SYSTEM->RSTSR0_b.DPSRSTF = 0;
+                       }
+                       /* Init Normal Mode tasks. */
+                       OS_TASK_Create_STRT();
+                    }
+                    /* Aclara Added -- End */
                     /* Start the scheduler. */
                     vTaskStartScheduler();
                     return 0;

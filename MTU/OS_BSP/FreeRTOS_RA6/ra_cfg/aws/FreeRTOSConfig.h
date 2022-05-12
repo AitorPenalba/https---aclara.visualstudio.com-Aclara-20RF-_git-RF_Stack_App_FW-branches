@@ -129,13 +129,13 @@
             #define configUSE_TIMERS (1)
             #endif
             #ifndef configTIMER_TASK_PRIORITY
-            #define configTIMER_TASK_PRIORITY (3)
+            #define configTIMER_TASK_PRIORITY (3)  /* TODO: RA6: DG: Review this config */
             #endif
             #ifndef configTIMER_QUEUE_LENGTH
-            #define configTIMER_QUEUE_LENGTH (10)
+            #define configTIMER_QUEUE_LENGTH (10)  /* TODO: RA6: DG: Review this config */
             #endif
             #ifndef configTIMER_TASK_STACK_DEPTH
-            #define configTIMER_TASK_STACK_DEPTH (128)
+            #define configTIMER_TASK_STACK_DEPTH (128)  /* TODO: RA6: DG: Review this config */
             #endif
             #ifndef configLIBRARY_LOWEST_INTERRUPT_PRIORITY
             #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY ((1 << __NVIC_PRIO_BITS) - 1)

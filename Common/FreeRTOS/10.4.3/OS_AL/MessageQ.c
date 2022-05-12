@@ -137,14 +137,6 @@ bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t Time
    bool RetStatus = true;
    OS_QUEUE_Element_Handle ptr;
 
-   /* Converting TimeoutMs = 0 to wait forever */
-#if ( RTOS_SELECTION == FREE_RTOS )
-   if ( TimeoutMs == 0 )
-   {
-     TimeoutMs = portMAX_DELAY;
-   }
-#endif
-
    if ( true == OS_SEM_Pend(&(MsgqHandle->MSGQ_SemObj), TimeoutMs) )
    {
       ptr = OS_QUEUE_Dequeue(&(MsgqHandle->MSGQ_QueueObj));

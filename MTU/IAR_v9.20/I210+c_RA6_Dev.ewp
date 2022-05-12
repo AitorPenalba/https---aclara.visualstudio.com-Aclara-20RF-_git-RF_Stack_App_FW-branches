@@ -1125,6 +1125,9 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\AGT.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\CRC.c</name>
             </file>
             <file>
@@ -1556,6 +1559,12 @@
                     <name>$PROJ_DIR$\..\..\Common\crc16_m.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\crc32.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\crc32.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\crc_custom.c</name>
                 </file>
                 <file>
@@ -1738,6 +1747,9 @@
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\filenames.h</name>
+                </file>
             </group>
             <group>
                 <name>HMC</name>
@@ -1838,9 +1850,6 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\dvr_intFlash_cfg.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\filenames.h</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\partition_cfg.h</name>
                     <excluded>
                         <configuration>Debug</configuration>
@@ -1894,6 +1903,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\lpm_app.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\lpm_app.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\OR_MR_Handler.c</name>
@@ -1963,12 +1978,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board_init.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board_leds.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board_leds.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\src\hal_entry.c</name>

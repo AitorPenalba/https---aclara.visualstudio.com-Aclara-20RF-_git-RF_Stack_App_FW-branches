@@ -409,7 +409,6 @@
 #define NV_BUSY()                      (~(GPIOA_PDIR >> 17) & 1)/* NV memory chip busy pin */
 #define NV_MISO_CFG(port, cfg)         SPI_misoCfg(port, cfg)
 #else
-#define NV_CS_ACTIVE()
 #define NV_CS_TRIS()
 #define NV_CS_TRIS_LG()
 #define NV_CS_ACTIVE()

@@ -23,8 +23,6 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-
-//#include "task.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <fio.h>
@@ -414,7 +412,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    //{ eTUN_TSK_IDX,              TUNNEL_MSG_HandlerTask,        500,  38, (char *)pTskName_TunMsg, DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_FIO_TASKS
-   //{ eFIO_TSK_IDX,              FIO_Task,                     1000,  38, (char *)pTskName_Fio,    DEFAULT_ATTR, 0, 0 },
+   { eFIO_TSK_IDX,              FIO_Task,                     1000,  38, (char *)pTskName_Fio,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ( ENABLE_ALRM_TASKS == 1 )
    { eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },

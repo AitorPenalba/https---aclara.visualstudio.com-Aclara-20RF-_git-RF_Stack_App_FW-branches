@@ -260,6 +260,7 @@ bool RTC_Valid(void)
    return (bRTCValid);
 } /* end RTC_Valid () */
 
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: RTC_GetTimeAtRes
@@ -277,7 +278,6 @@ bool RTC_Valid(void)
 *******************************************************************************/
 void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
 {
-#if ( MCU_SELECTED == NXP_K24 )
    uint32_t       seconds;
    uint16_t       fractSeconds;
    RTC_MemMapPtr  rtc;
@@ -298,10 +298,9 @@ void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
       ptime->MILLISECONDS = ( ( (uint32_t)fractSeconds * (uint32_t)1000 / (uint32_t)fractRes ) / 32768 ) * fractRes;
    }
    return;
-#endif
 
 } /* end RTC_GetDateTime () */
-
+#endif
 
 /*******************************************************************************
 
