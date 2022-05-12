@@ -104,7 +104,7 @@
                     }
 
                     /* Aclara Added -- Start */
-#if 1  // TODO: RA6: DG: Add later
+#if 0  // TODO: RA6: DG: Add later
 //                    PWRLG_Startup();  // TODO: RA6: DG: Add
                     if ( PWRLG_LastGasp() )
                     {
