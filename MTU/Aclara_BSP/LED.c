@@ -751,6 +751,7 @@ static void ledVisual_CB(uint8_t cmd, void *pData)
  *  \reentrant    No
 ***************************************************************************************************************
 *********************************************/
+#if ( RTOS_SELECTION == MQX_RTOS )
 STATIC void LED_vApplicationTickHook( void *user_isr_ptr )
 {
 
@@ -788,7 +789,38 @@ STATIC void LED_vApplicationTickHook( void *user_isr_ptr )
 #endif
    (*isr_ptr->OLD_ISR)(isr_ptr->OLD_ISR_DATA);
 }
+#elif ( RTOS_SELECTION == FREE_RTOS )
+void LED_vApplicationTickHook( void )
+{
+#if ( TEST_TDMA == 0 )
+   /* Update the blue LED if needed */
+   if (blueLedControl == BLINK_SLOW && isr_ptr->TICK_COUNT % 100 == 0 ) // each second
+   {
+      LED_toggle(BLU_LED);
+   }
 
+   /*  Update the red LED if needed */
+   if ( redLedControl == BLINK_SLOW && isr_ptr->TICK_COUNT % 100 == 0 ) // each second
+   {
+      LED_toggle(RED_LED);
+   }
+   else if ( redLedControl == BLINK_FAST && isr_ptr->TICK_COUNT % 25 == 0 ) //at quarter second
+   {
+      LED_toggle(RED_LED);
+   }
+
+   /* Update the green LED if needed */
+   if (greenLedControl == BLINK_SLOW && isr_ptr->TICK_COUNT % 100 == 0) // each second
+   {
+      LED_toggle(GRN_LED);
+   }
+   else if (greenLedControl == BLINK_FAST && isr_ptr->TICK_COUNT % 25 == 0 ) //at quarter second
+   {
+      LED_toggle(GRN_LED);
+   }
+#endif
+}
+#endif
 
 /*!
  *************************************************************************************************************

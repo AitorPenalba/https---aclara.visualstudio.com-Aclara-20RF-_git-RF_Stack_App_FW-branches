@@ -138,6 +138,38 @@ static void       meter_trouble_isr_busy( void );
 /* CONSTANTS */
 
 /* FUNCTION DEFINITIONS */
+
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: meter_trouble_isr_init
+
+   Purpose: Initialize and configure the meter trouble is(meter_trouble_isr) on RA6E1
+
+   Arguments: None
+
+   Returns: fsp_err_t
+
+   Reentrant Code: No
+
+ **********************************************************************************************************************/
+static fsp_err_t meter_trouble_isr_init( void )
+{
+   fsp_err_t err = FSP_SUCCESS;
+
+   /* Open external IRQ/ICU module */
+   err = R_ICU_ExternalIrqOpen( &hmc_trouble_busy_ctrl, &hmc_trouble_busy_cfg );
+   if(FSP_SUCCESS == err)
+   {
+      /* Enable ICU module */
+      DBG_printf("\nOpen Meter Trouble Busy IRQ");
+      err = R_ICU_ExternalIrqEnable( &hmc_trouble_busy_ctrl );
+   }
+   return err;
+}
+#endif
+
 /*******************************************************************************
 
    Function name: ALRM_init
@@ -189,6 +221,8 @@ returnStatus_t ALRM_init ( void )
                HMC_TROUBLE_BUSY_IRQ_EI();    /* Enable the ISR */
             }
          }
+#elif ( RTOS_SELECTION == FREE_RTOS )
+         meter_trouble_isr_init();
 #endif
       }
       else

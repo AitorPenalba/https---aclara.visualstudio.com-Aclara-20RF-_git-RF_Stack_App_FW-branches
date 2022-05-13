@@ -103,8 +103,9 @@ nInt TimersUsed = 0;
 STATIC void insertTimerNode( timer_t *pTimer );   /* Inserts the timer in the active list */
 STATIC returnStatus_t deleteTimerNode( uint16_t usiTimerId );  /* Deletes the timer from the active timer list */
 STATIC returnStatus_t isTimerActive( uint16_t usiTimerId );    /* Checks if the timer is active */
+#if ( RTOS_SELECTION == MQX_RTOS )
 STATIC void TMR_vApplicationTickHook( void *user_isr_ptr );
-
+#endif
 // </editor-fold>
 /* ****************************************************************************************************************** */
 /* Local Function Definitions */
@@ -747,23 +748,31 @@ void TMR_GetMillisecondCntr( uint64_t *ulMSCntr )
  * Reentrant: This function is reentrant. This function should only be called from an RTOS Tick ISR
  *
  ******************************************************************************************************************/
+#if ( RTOS_SELECTION == MQX_RTOS )
 STATIC void TMR_vApplicationTickHook( void *user_isr_ptr )
 {
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
    MY_ISR_STRUCT_PTR  isr_ptr;   /* */
 
    /* This code is taken from the MQX example isr.c code to use the system tick to tick our own module. */
    isr_ptr = (MY_ISR_STRUCT_PTR)user_isr_ptr;
-#endif
    /* RTOS tick, signal the timer task */
    if ( _tmrUtilSemCreated == true )
    {
       OS_SEM_Post(&_tmrUtilSem);
    }
 
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
    (*isr_ptr->OLD_ISR)(isr_ptr->OLD_ISR_DATA);     /* Chain to the previous notifier - This will call the RTOS tick. */
-#endif
 }
+#elif ( RTOS_SELECTION == FREE_RTOS )
+void TMR_vApplicationTickHook( void )
+{
+   /* RTOS tick, signal the timer task */
+   if ( _tmrUtilSemCreated == true )
+   {
+      OS_SEM_Post_fromISR(&_tmrUtilSem);
+   }
+}
+#endif
+
 // </editor-fold>
 /*lint +e454 +e456 The mutex is handled properly. */

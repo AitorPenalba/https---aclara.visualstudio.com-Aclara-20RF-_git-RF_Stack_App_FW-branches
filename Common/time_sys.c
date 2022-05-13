@@ -2511,18 +2511,12 @@ void TIME_SYS_reqTimeoutCallback( uint8_t cmd, void *pData )
  * Reentrant: This function is reentrant. This function should only be called from an RTOS Tick ISR
  *
  ******************************************************************************************************************/
-#if 0 // TODO: RA6E1 - Using the tickHook provided by FreeRTOS. Need to add a define to call this function
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - Using the tickHook provided by FreeRTOS. Need to add a define to call this function
 STATIC void TIME_SYS_vApplicationTickHook( void * user_isr_ptr )
-#else
-void vApplicationTickHook()
-#endif
 {
    uint32_t primask = __get_PRIMASK();
    __disable_interrupt(); // Disable all interrupts so that we are not interrupted by another interrupt while processing this one.
-
-#if 0 /* TODO: ISR control for FreeRTOS */
    MY_ISR_STRUCT_PTR_MQX   isr_ptr;   /* */
-#endif
 #if ( DCU == 1 )
    KERNEL_DATA_STRUCT_PTR  kd_ptr = _mqx_get_kernel_data();
    tickSystemClock(kd_ptr->CYCCNT); // Increment system and power-up time
@@ -2531,26 +2525,45 @@ void vApplicationTickHook()
 #endif
    __set_PRIMASK(primask); // Restore interrupts
 
-#if 0 /* TODO: ISR control for FreeRTOS */
    /* This code is taken from the MQX example isr.c code to use the system tick to tick our own module. */
    isr_ptr = (MY_ISR_STRUCT_PTR_MQX)user_isr_ptr;
-#endif
 
    /* RTOS tick, signal the timer task */
    if ( _timeSysSemCreated == (bool)true )
    {
-#if ( RTOS_SELECTION == MQX_RTOS )
       OS_SEM_Post( &_timeSysSem );
-#elif ( RTOS_SELECTION == FREE_RTOS )
-      OS_SEM_Post_fromISR( &_timeSysSem );
-#endif
+      (*isr_ptr->OLD_ISR)(isr_ptr->OLD_ISR_DATA);     /* Chain to the previous notifier - This will call the RTOS tick. */
    }
-#if 0 /* TODO: ISR control for FreeRTOS */
-   (*isr_ptr->OLD_ISR)(isr_ptr->OLD_ISR_DATA);     /* Chain to the previous notifier - This will call the RTOS tick. */
+
+   //LED2_PIN_OFF();
+}
+#elif ( RTOS_SELECTION == FREE_RTOS )
+void vApplicationTickHook()
+{
+   uint32_t primask = __get_PRIMASK();
+   __disable_interrupt(); // Disable all interrupts so that we are not interrupted by another interrupt while processing this one.
+
+#if ( DCU == 1 ) // TODO: RA6E1 Handle kernel for FreeRTOS
+   KERNEL_DATA_STRUCT_PTR  kd_ptr = _mqx_get_kernel_data();
+   tickSystemClock(kd_ptr->CYCCNT); // Increment system and power-up time
+#else
+   tickSystemClock(0); // Increment system and power-up time (argument ignored for EP)
+#endif
+   __set_PRIMASK(primask); // Restore interrupts
+
+   /* RTOS tick, signal the timer task */
+   if ( _timeSysSemCreated == (bool)true )
+   {
+      OS_SEM_Post_fromISR( &_timeSysSem );
+   }
+
+   TMR_vApplicationTickHook();
+#if 0 // TODO: RA6E1 Enable once LED application tick hook is in place
+   LED_vApplicationTickHook();
 #endif
    //LED2_PIN_OFF();
 }
-
+#endif
 
 #if ( EP == 1 )
 /*****************************************************************************************************************

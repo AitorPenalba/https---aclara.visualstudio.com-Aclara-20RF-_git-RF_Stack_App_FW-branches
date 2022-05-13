@@ -29,7 +29,6 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 
-#include "features.h"
 #ifndef __BOOTLOADER
 #include "os_aclara.h"
 #include "portable_freescale.h"

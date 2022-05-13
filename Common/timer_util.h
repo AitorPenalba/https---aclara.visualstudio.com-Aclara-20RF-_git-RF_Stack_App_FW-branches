@@ -73,7 +73,9 @@ returnStatus_t TMR_StopTimer(uint16_t usiTimerId);
 returnStatus_t TMR_ResetTimer( uint16_t usiTimerId, uint32_t ulTimerValue);
 returnStatus_t TMR_ReadTimer(timer_t *pData);
 void           TMR_GetMillisecondCntr(uint64_t *ulMSCntr);
-
+#if ( RTOS_SELECTION == FREE_RTOS )
+void TMR_vApplicationTickHook( void );
+#endif
 #undef TMR_EXTERN
 
 #endif
