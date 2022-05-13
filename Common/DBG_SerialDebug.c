@@ -214,7 +214,7 @@ returnStatus_t DBG_init( void )
 #else
       // TODO: RA6: Enabling the DBG Port All the time
       ConfigAttr.version        = DBG_PORT_CONFIG_VERSION;   // File Format Version Default
-      ConfigAttr.PortTimeout_hh = 255;  // Port Disabled
+      ConfigAttr.PortTimeout_hh = 255;  // Port Enabled
       ConfigAttr.echoState      = DBG_PORT_ECHO_DEFAULT;     // Echo ON
       retVal = eSUCCESS;
 #endif
