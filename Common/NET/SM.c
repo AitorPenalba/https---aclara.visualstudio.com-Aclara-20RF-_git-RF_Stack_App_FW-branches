@@ -308,9 +308,11 @@ Watches for network state changes and sends indications as approproiate.
 
 @param arg0 Necessary for MQX tasks, but unused.
 */
-void SM_NwState_Task(uint32_t arg0)
+void SM_NwState_Task(taskParameter)
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    (void)arg0;
+#endif
    bool refreshState = false;
 
    while (true) /*lint !e716 */

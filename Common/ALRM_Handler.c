@@ -417,7 +417,7 @@ static void clearEventLogs( void )
    Notes:
 
 *******************************************************************************/
-void ALRM_RealTimeTask ( uint32_t Arg0 )
+void ALRM_RealTimeTask ( taskParameter )
 {
 #if ( LOG_IN_METER == 1 )
    sysTime_t               eventTime;
@@ -1067,7 +1067,9 @@ void ALRM_RealTimeTask ( uint32_t Arg0 )
       // A condition was discovered above requiring the processor to be reset
       if ( resetProc )
       {
+#if 0 // TODO: RA6E1 Enable once DFW is in place
          (void)DFWA_WaitForSysIdle(ALRM_RESET_GRACE_PERIOD);   // Do not need unlock mutex since reset inevitable
+#endif
          //Keep all other tasks from running
          /* Increase the priority of the power and idle tasks. */
          (void)OS_TASK_Set_Priority(pTskName_Pwr, 10);

@@ -241,7 +241,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( HMC_ENG_init, STRT_FLAG_NONE ),
 #endif
    INIT( PAR_initRtos, STRT_FLAG_NONE ),
-//   INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
+   INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
 #if ( ENABLE_HMC_TASKS == 1 )
    INIT( DEMAND_init, STRT_FLAG_NONE ),
    INIT( ID_init, STRT_FLAG_NONE ),
