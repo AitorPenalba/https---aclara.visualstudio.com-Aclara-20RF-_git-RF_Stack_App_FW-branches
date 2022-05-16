@@ -82,8 +82,8 @@
 #define WRITE_PROTECT_PIN_ON()      { NV_WP_TRIS(); NV_WP_ACTIVE(); }    /* Sets WP Pin on flash active (not writable) */
 #define WRITE_PROTECT_PIN_OFF()     { NV_WP_TRIS(); NV_WP_INACTIVE(); }  /* Sets WP pin on flash inactive (writable) */
 #elif ( MCU_SELECTED == RA6E1 )
-#define WRITE_PROTECT_PIN_ON()      R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_HIGH);
-#define WRITE_PROTECT_PIN_OFF()     R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_LOW);
+#define WRITE_PROTECT_PIN_ON()      R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_LOW)
+#define WRITE_PROTECT_PIN_OFF()     R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_HIGH);
 #endif
 #define WRITE_PROTECT_PIN_SPI()
 #ifndef __BOOTLOADER
@@ -2071,9 +2071,7 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
                failCount = incCountLimit( failCount, 0xffff );
             }
 #ifndef __BOOTLOADER
-#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
             DBG_printf( "NV Test - Write failed at 0x%x, len = 0x%x", 0, partitionData->lDataSize );
-#endif
 #endif   /* BOOTLOADER  */
          }
       }
@@ -2089,20 +2087,17 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
 
                if ( eSUCCESS != PAR_partitionFptr.parRead( &unitTestBuf[0], 0, sizeof( unitTestBuf ), partitionData ))
                {
-#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
                   DBG_printf( "NV Test - Read failed at 0x%x, len = 0x%x", 0, sizeof( unitTestBuf ) );
-#endif
                }
                for ( uint32_t j = 0; j < sizeof( unitTestBuf ); j++ )
                {
                   if( unitTestBuf[j] != (uint8_t)( startPattern + j ) )
                   {
                      failCount = incCountLimit( failCount, 0xffff );
-#if 0 // TODO: RA6 Melvin: visit back once DBG_printf
+
                      DBG_printf( "NV Test - Compare failed at 0x%x, is = 0x%02x, s/b 0x%02x\n",
                                  partitionData->PhyStartingAddress + j,
                                  unitTestBuf[j], (uint8_t)( startPattern + j ) );
-#endif
                    }
                   }
                }

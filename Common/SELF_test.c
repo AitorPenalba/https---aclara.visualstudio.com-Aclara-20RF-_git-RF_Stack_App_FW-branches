@@ -184,6 +184,7 @@ void SELF_testTask( taskParameter )
 
 #if 1
    // TODO: RA6: Use line 192 once complete implementation is available
+   DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
    vTaskSuspend(NULL); /* TODO: Remove*/
 #else
@@ -398,13 +399,14 @@ static uint16_t RunSelfTest()
    if( eSUCCESS != SELF_testInternalFlash() )
    {
       // TODO: Error handling
+      printf("ERROR: SELF_Test IF");
    }
-
+#if 0 // TODO: RA6: DG: To review and Add
    if( eSUCCESS != SELF_testTimeCompound() )
    {
       // TODO: Error handling
    }
-
+#endif
    // TODO: RA6E1 [name_Suriya] - Remove this call and add SelfTestSecurity to do complete SelfTest. Will be done once WolfSSL is done.
    if( eSUCCESS != SEC_init() )
    {
@@ -760,9 +762,8 @@ returnStatus_t SELF_testNV( void )
 {
    uint32_t errCount;         /* Number of failures reported by DVR_EFL_unitTest */
 
-#if 0 // TODO: RA6 Melvin: DBG Module to be added
    DBG_logPrintf( 'I', "SELF_testNV: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
-#endif
+
    errCount = DVR_EFL_UnitTest(1L); //External-FLash UnitTest
    if( errCount != 0 )     /* Need to update the failure counter? */
    {

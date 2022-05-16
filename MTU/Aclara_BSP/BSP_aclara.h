@@ -227,10 +227,9 @@ extern void        RNG_GetRandom_Array       ( uint8_t *DataPtr, uint16_t DataLe
 extern void        RTC_GetDateTime           ( sysTime_dateFormat_t *RT_Clock );
 extern bool        RTC_SetDateTime           ( const sysTime_dateFormat_t *RT_Clock );
 extern bool        RTC_Valid                 ( void );
-extern void        RTC_GetTimeAtRes          ( TIME_STRUCT *ptime, uint16_t fractRes );
 extern void        RTC_GetTimeInSecMicroSec  ( uint32_t *sec, uint32_t *microSec );
 #if ( MCU_SELECTED == NXP_K24 )
-
+extern void        RTC_GetTimeAtRes          ( TIME_STRUCT *ptime, uint16_t fractRes );
 #elif ( MCU_SELECTED == RA6E1 )
 extern returnStatus_t RTC_init( void );
 extern void           RTC_ConfigureRTCCalendarAlarm( uint16_t seconds );

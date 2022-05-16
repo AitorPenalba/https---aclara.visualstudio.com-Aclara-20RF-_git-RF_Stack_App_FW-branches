@@ -1,5 +1,3 @@
-// <editor-fold defaultstate="collapsed" desc="File Header Information">
-/* ****************************************************************************************************************** */
 /***********************************************************************************************************************
 
    Filename:   virgin_device
@@ -32,16 +30,12 @@
    @version    0.1
    #since      2013-02-06
  **********************************************************************************************************************/
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="PSECTs">
 /* PSECTS */
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Include Files">
+
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
+#include "project.h"
 #include <string.h>
 #define VDEV_GLOBALS
 #include "virgin_device.h"
@@ -55,23 +49,18 @@
 #include "vbat_reg.h"
 #endif
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Macro Definitions">
+
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Type Definitions">
+
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Constants">
+
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Local Variables (File Static)">
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
@@ -79,19 +68,16 @@ static PartitionData_t const  *pVDEVPTbl_;             // Virgin device signatur
 static PartitionData_t const  *pWholeNVPTbl_;          // The full NV chip
 static bool                   bVirginAtPwrUp_ = (bool)false; // Indicates device was a virgin unit
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Local Function Prototypes">
+
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
 
 static returnStatus_t virginDeviceSetup( void );
 static bool VDEV_isNVEmpty( void );
 
-// </editor-fold>
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 
-// <editor-fold defaultstate="collapsed" desc="static returnStatus_t virginDeviceSetup(void)">
 /***********************************************************************************************************************
 
    Function Name: virginDeviceSetup
@@ -142,8 +128,7 @@ static returnStatus_t virginDeviceSetup( void )
    return( RetVal );
 
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t VDEV_init(void)">
+
 /***********************************************************************************************************************
 
    Function Name: VDEV_init
@@ -221,8 +206,7 @@ returnStatus_t VDEV_init( void )
 
    return( RetVal );
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="bool VDEV_wasVirgin(void)">
+
 /***********************************************************************************************************************
 
    Function Name: VDEV_wasVirgin
@@ -242,8 +226,7 @@ bool VDEV_wasVirgin( void )
 {
    return( bVirginAtPwrUp_ );
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="bool VDEV_isNVEmpty(void)">
+
 /***********************************************************************************************************************
 
    Function Name: VDEV_isNVEmpty
@@ -307,4 +290,3 @@ static bool VDEV_isNVEmpty( void )
 
    return nvEmpty;
 }
-// </editor-fold>

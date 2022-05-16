@@ -46,7 +46,7 @@
 #endif
 #include "ascii.h"
 #include "buffer.h"
-#if 0
+
 #include "partition_cfg.h"
 #include "mode_config.h"
 #include "EVL_event_log.h"
@@ -74,15 +74,17 @@
 #include "pwr_task.h"
 #include "eng_res.h"
 #include "ecc108_lib_return_codes.h"
+#if 0 // TODO: RA6: Include ECC
 #include "ecc108_mqx.h"
 #include "ecc108_apps.h"
-#include "mac.h"
+#endif
+#include "MAC.h"
 #include "PHY.h"
 #include "PHY_Protocol.h"
 #include "STACK.h"
 #include "radio.h"
 #include "radio_hal.h"
-#include "App_Msg_Handler.h"
+#include "APP_MSG_Handler.h"
 #include "Temperature.h"
 #include "smtd_config.h"
 #if ( EP == 1 )
@@ -108,9 +110,9 @@
 #if ( ENABLE_B2B_COMM == 1 )
 #include "hdlc.h"
 #endif
-
+#if ( MCU_SELECTED == NXP_K24 )
 #include "psp_cpudef.h"
-
+#endif
 #ifndef __GNUC__
 #include "dfw_app.h"
 #endif
@@ -146,7 +148,7 @@
 #if (PHASE_DETECTION == 1)
 #include "PhaseDetect.h"
 #endif
-#endif
+
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 /*lint -esym(750,ESCAPE_CHAR,LINE_FEED_CHAR,CARRIAGE_RETURN_CHAR,BACKSPACE_CHAR,TILDA_CHAR,WHITE_SPACE_CHAR)   */
@@ -298,7 +300,7 @@ typedef enum menuType
 #endif
    menuLastValid
 } menuType;
-#if 0
+
 typedef enum
 {
    channelUnits,
@@ -335,22 +337,22 @@ typedef union{
    float         fValue;
 }value_t;
 
-static bool strto_uint8(const char* argv, uint8_t *u8);
-static bool strto_uint16(const char* argv, uint16_t *u16);
-static bool strto_uint32(const char* argv, uint32_t *u32);
-static bool strto_int8(const char* argv, int8_t *i8);
-static bool strto_int16(const char* argv, int16_t *i16);
-static bool strto_int32(const char* argv, int32_t *i32);
-static bool strto_float(const char* argv, float *fValue);
-static bool strto_bool(const char* argv, bool *bValue);
-static bool strto_time(const char* argv, TIMESTAMP_t *timeStamp);
-
-static void print_parameter_count_error(void);
-static bool strto_value(const char* argv, ValueType_e valueType, value_t * pValue);
-static void print_value(const char* argv, ValueType_e valueType, const value_t * pValue);
+//static bool strto_uint8(const char* argv, uint8_t *u8);
+//static bool strto_uint16(const char* argv, uint16_t *u16);
+//static bool strto_uint32(const char* argv, uint32_t *u32);
+//static bool strto_int8(const char* argv, int8_t *i8);
+//static bool strto_int16(const char* argv, int16_t *i16);
+//static bool strto_int32(const char* argv, int32_t *i32);
+//static bool strto_float(const char* argv, float *fValue);
+//static bool strto_bool(const char* argv, bool *bValue);
+//static bool strto_time(const char* argv, TIMESTAMP_t *timeStamp);
+//
+//static void print_parameter_count_error(void);
+//static bool strto_value(const char* argv, ValueType_e valueType, value_t * pValue);
+//static void print_value(const char* argv, ValueType_e valueType, const value_t * pValue);
 
 //static void NwkAttrSetGet(uint32_t argc, char *argv[], NWK_ATTRIBUTES_e eAttribute, ValueType_e valueType);
-static void MacAttrSetGet(uint32_t argc, char *argv[], MAC_ATTRIBUTES_e eAttribute, ValueType_e valueType);
+//static void MacAttrSetGet(uint32_t argc, char *argv[], MAC_ATTRIBUTES_e eAttribute, ValueType_e valueType);
 //static void PhyAttrSetGet(uint32_t argc, char *argv[], PHY_ATTRIBUTES_e eAttribute, ValueType_e valueType);
 
 #if ( EP == 1 )
@@ -358,20 +360,20 @@ static void MFGP_watchDogResetCount( uint32_t argc, char *argv[] );
 static void MFG_PhyDemodulator( uint32_t argc, char *argv[] );
 #endif
 
-static void MFGP_macReliabilityHighCount     ( uint32_t argc, char *argv[] );
-static void MFGP_macReliabilityMedCount      ( uint32_t argc, char *argv[] );
-static void MFGP_macReliabilityLowCount      ( uint32_t argc, char *argv[] );
-static void MFGP_capableOfEpBootloaderDFW    ( uint32_t argc, char *argv[] );
-static void MFGP_capableOfEpPatchDFW         ( uint32_t argc, char *argv[] );
-static void MFGP_capableOfMeterBasecodeDFW   ( uint32_t argc, char *argv[] );
-static void MFGP_capableOfMeterPatchDFW      ( uint32_t argc, char *argv[] );
-static void MFGP_capableOfMeterReprogrammingOTA( uint32_t argc, char *argv[] );
-static void MFG_printHex( char* msg, uint8_t const *pData, uint16_t numBytes);
-static void MFG_appSecAuthMode               ( uint32_t argc, char *argv[] );
-static void MFG_CommandLine_MacAddr          ( uint32_t argc, char *argv[] );
-static void MFG_DateTime                     ( uint32_t argc, char *argv[] );
-static void MFG_enableDebug                  ( uint32_t argc, char *argv[] );
-static void MFGP_enableOTATest               ( uint32_t argc, char *argv[] );
+//static void MFGP_macReliabilityHighCount     ( uint32_t argc, char *argv[] );
+//static void MFGP_macReliabilityMedCount      ( uint32_t argc, char *argv[] );
+//static void MFGP_macReliabilityLowCount      ( uint32_t argc, char *argv[] );
+//static void MFGP_capableOfEpBootloaderDFW    ( uint32_t argc, char *argv[] );
+//static void MFGP_capableOfEpPatchDFW         ( uint32_t argc, char *argv[] );
+//static void MFGP_capableOfMeterBasecodeDFW   ( uint32_t argc, char *argv[] );
+//static void MFGP_capableOfMeterPatchDFW      ( uint32_t argc, char *argv[] );
+//static void MFGP_capableOfMeterReprogrammingOTA( uint32_t argc, char *argv[] );
+//static void MFG_printHex( char* msg, uint8_t const *pData, uint16_t numBytes);
+//static void MFG_appSecAuthMode               ( uint32_t argc, char *argv[] );
+//static void MFG_CommandLine_MacAddr          ( uint32_t argc, char *argv[] );
+//static void MFG_DateTime                     ( uint32_t argc, char *argv[] );
+//static void MFG_enableDebug                  ( uint32_t argc, char *argv[] );
+//static void MFGP_enableOTATest               ( uint32_t argc, char *argv[] );
 
 #if ( PHASE_DETECTION == 1 )
 static void PD_SurveySelfAssessment          ( uint32_t argc, char *argv[] );
@@ -387,69 +389,69 @@ static void PD_BuDataRedundancy              ( uint32_t argc, char *argv[] );
 static void PD_SurveyPeriodQty               ( uint32_t argc, char *argv[] );
 #endif
 
-static void MFG_PhyAvailableFrequencies      ( uint32_t argc, char *argv[] );
-static void MFG_PhyAvailableChannels         ( uint32_t argc, char *argv[] );
-static void MFG_PhyRxFrequencies             ( uint32_t argc, char *argv[] );
-static void MFG_PhyRxChannels                ( uint32_t argc, char *argv[] );
-static void MFG_PhyTxFrequencies             ( uint32_t argc, char *argv[] );
-static void MFG_PhyFailedFrameDecodeCount    ( uint32_t argc, char *argv[] );
-static void MFG_PhyFailedHcsCount            ( uint32_t argc, char *argv[] );
-static void MFG_PhyFramesReceivedCount       ( uint32_t argc, char *argv[] );
-static void MFG_PhyFramesTransmittedCount    ( uint32_t argc, char *argv[] );
-static void MFG_PhyFailedHeaderDecodeCount   ( uint32_t argc, char *argv[] );
-static void MFG_PhySyncDetectCount           ( uint32_t argc, char *argv[] );
-static void MFG_PhyTxChannels                ( uint32_t argc, char *argv[] );
-static void MFG_PhyCcaThreshold              ( uint32_t argc, char *argv[] );
-static void MFG_PhyCcaAdaptiveThresholdEnable( uint32_t argc, char *argv[] );
-static void MFG_PhyCcaOffset                 ( uint32_t argc, char *argv[] );
-static void MFG_PhyFrontEndGain              ( uint32_t argc, char *argv[] );
-static void MFG_PhyMaxTxPayload              ( uint32_t argc, char *argv[] );
-static void MFG_PhyNumchannels               ( uint32_t argc, char *argv[] );
-static void MFG_PhyRcvrCount                 ( uint32_t argc, char *argv[] );
-static void MFGP_macPacketTimeout            ( uint32_t argc, char *argv[] );
+//static void MFG_PhyAvailableFrequencies      ( uint32_t argc, char *argv[] );
+//static void MFG_PhyAvailableChannels         ( uint32_t argc, char *argv[] );
+//static void MFG_PhyRxFrequencies             ( uint32_t argc, char *argv[] );
+//static void MFG_PhyRxChannels                ( uint32_t argc, char *argv[] );
+//static void MFG_PhyTxFrequencies             ( uint32_t argc, char *argv[] );
+//static void MFG_PhyFailedFrameDecodeCount    ( uint32_t argc, char *argv[] );
+//static void MFG_PhyFailedHcsCount            ( uint32_t argc, char *argv[] );
+//static void MFG_PhyFramesReceivedCount       ( uint32_t argc, char *argv[] );
+//static void MFG_PhyFramesTransmittedCount    ( uint32_t argc, char *argv[] );
+//static void MFG_PhyFailedHeaderDecodeCount   ( uint32_t argc, char *argv[] );
+//static void MFG_PhySyncDetectCount           ( uint32_t argc, char *argv[] );
+//static void MFG_PhyTxChannels                ( uint32_t argc, char *argv[] );
+//static void MFG_PhyCcaThreshold              ( uint32_t argc, char *argv[] );
+//static void MFG_PhyCcaAdaptiveThresholdEnable( uint32_t argc, char *argv[] );
+//static void MFG_PhyCcaOffset                 ( uint32_t argc, char *argv[] );
+//static void MFG_PhyFrontEndGain              ( uint32_t argc, char *argv[] );
+//static void MFG_PhyMaxTxPayload              ( uint32_t argc, char *argv[] );
+//static void MFG_PhyNumchannels               ( uint32_t argc, char *argv[] );
+//static void MFG_PhyRcvrCount                 ( uint32_t argc, char *argv[] );
+//static void MFGP_macPacketTimeout            ( uint32_t argc, char *argv[] );
 
-static void MFGP_macChannelSetsCount         ( uint32_t argc, char *argv[] );
-static void MFGP_macState                    ( uint32_t argc, char *argv[] );
-static void MFGP_macTxFrames                 ( uint32_t argc, char *argv[] );
-static void MFGP_macAckWaitDuration          ( uint32_t argc, char *argv[] );
-static void MFGP_macAckDelayDuration         ( uint32_t argc, char *argv[] );
-static void MFGP_macPacketId                 ( uint32_t argc, char *argv[] );
-static void MFGP_macIsChannelAccessConstrained ( uint32_t argc, char *argv[] );
-static void MFGP_macIsFNG                    ( uint32_t argc, char *argv[] );
-static void MFGP_macIsIAG                    ( uint32_t argc, char *argv[] );
-static void MFGP_macIsRouter                 ( uint32_t argc, char *argv[] );
+//static void MFGP_macChannelSetsCount         ( uint32_t argc, char *argv[] );
+//static void MFGP_macState                    ( uint32_t argc, char *argv[] );
+//static void MFGP_macTxFrames                 ( uint32_t argc, char *argv[] );
+//static void MFGP_macAckWaitDuration          ( uint32_t argc, char *argv[] );
+//static void MFGP_macAckDelayDuration         ( uint32_t argc, char *argv[] );
+//static void MFGP_macPacketId                 ( uint32_t argc, char *argv[] );
+//static void MFGP_macIsChannelAccessConstrained ( uint32_t argc, char *argv[] );
+//static void MFGP_macIsFNG                    ( uint32_t argc, char *argv[] );
+//static void MFGP_macIsIAG                    ( uint32_t argc, char *argv[] );
+//static void MFGP_macIsRouter                 ( uint32_t argc, char *argv[] );
 
-static void MFGP_macPingCount                ( uint32_t argc, char *argv[] );
-static void MFGP_macCsmaMaxAttempts          ( uint32_t argc, char *argv[] );
-static void MFGP_macCsmaMinBackOffTime       ( uint32_t argc, char *argv[] );
-static void MFGP_macCsmaMaxBackOffTime       ( uint32_t argc, char *argv[] );
-static void MFGP_macCsmaPValue               ( uint32_t argc, char *argv[] );
-static void MFGP_macCsmaQuickAbort           ( uint32_t argc, char *argv[] );
-static void MFGP_macReassemblyTimeout        ( uint32_t argc, char *argv[] );
-static void MFGP_inboundFrameCount           ( uint32_t argc, char *argv[] );
-static void MFGP_amBuMaxTimeDiversity        ( uint32_t argc, char *argv[] );
-static void MFGP_fctModuleTestDate           ( uint32_t argc, char *argv[] );
-static void MFGP_fctEnclosureTestDate        ( uint32_t argc, char *argv[] );
-static void MFGP_integrationSetupDate        ( uint32_t argc, char *argv[] );
-static void MFGP_fctModuleProgramVersion     ( uint32_t argc, char *argv[] );
-static void MFGP_fctEnclosureProgramVersion  ( uint32_t argc, char *argv[] );
-static void MFGP_integrationProgramVersion   ( uint32_t argc, char *argv[] );
-static void MFGP_fctModuleDatabaseVersion    ( uint32_t argc, char *argv[] );
-static void MFGP_fctEnclosureDatabaseVersion ( uint32_t argc, char *argv[] );
-static void MFGP_integrationDatabaseVersion  ( uint32_t argc, char *argv[] );
-static void MFGP_dataConfigurationDocumentVersion( uint32_t argc, char *argv[] );
-static void MFGP_manufacturerNumber          ( uint32_t argc, char *argv[] );
-static void MFGP_repairInformation           ( uint32_t argc, char *argv[] );
+//static void MFGP_macPingCount                ( uint32_t argc, char *argv[] );
+//static void MFGP_macCsmaMaxAttempts          ( uint32_t argc, char *argv[] );
+//static void MFGP_macCsmaMinBackOffTime       ( uint32_t argc, char *argv[] );
+//static void MFGP_macCsmaMaxBackOffTime       ( uint32_t argc, char *argv[] );
+//static void MFGP_macCsmaPValue               ( uint32_t argc, char *argv[] );
+//static void MFGP_macCsmaQuickAbort           ( uint32_t argc, char *argv[] );
+//static void MFGP_macReassemblyTimeout        ( uint32_t argc, char *argv[] );
+//static void MFGP_inboundFrameCount           ( uint32_t argc, char *argv[] );
+//static void MFGP_amBuMaxTimeDiversity        ( uint32_t argc, char *argv[] );
+//static void MFGP_fctModuleTestDate           ( uint32_t argc, char *argv[] );
+//static void MFGP_fctEnclosureTestDate        ( uint32_t argc, char *argv[] );
+//static void MFGP_integrationSetupDate        ( uint32_t argc, char *argv[] );
+//static void MFGP_fctModuleProgramVersion     ( uint32_t argc, char *argv[] );
+//static void MFGP_fctEnclosureProgramVersion  ( uint32_t argc, char *argv[] );
+//static void MFGP_integrationProgramVersion   ( uint32_t argc, char *argv[] );
+//static void MFGP_fctModuleDatabaseVersion    ( uint32_t argc, char *argv[] );
+//static void MFGP_fctEnclosureDatabaseVersion ( uint32_t argc, char *argv[] );
+//static void MFGP_integrationDatabaseVersion  ( uint32_t argc, char *argv[] );
+//static void MFGP_dataConfigurationDocumentVersion( uint32_t argc, char *argv[] );
+//static void MFGP_manufacturerNumber          ( uint32_t argc, char *argv[] );
+//static void MFGP_repairInformation           ( uint32_t argc, char *argv[] );
 static void MFGP_rtcDateTime                 ( uint32_t argc, char *argv[] );
-static void MFG_PhyNoiseEstimate             ( uint32_t argc, char *argv[] );
-static void MFG_PhyNoiseEstimateRate         ( uint32_t argc, char *argv[] );
-static void MFG_PhyRxDetection               ( uint32_t argc, char *argv[] );
-static void MFG_PhyRxFraming                 ( uint32_t argc, char *argv[] );
-static void MFG_PhyRxMode                    ( uint32_t argc, char *argv[] );
-static void MFG_PhyThermalControlEnable      ( uint32_t argc, char *argv[] );
-static void MFG_PhyThermalProtectionEnable   ( uint32_t argc, char *argv[] );
-static void MFG_PhyThermalProtectionCount    ( uint32_t argc, char *argv[] );
-static void MFG_PhyThermalProtectionEngaged  ( uint32_t argc, char *argv[] );
+//static void MFG_PhyNoiseEstimate             ( uint32_t argc, char *argv[] );
+//static void MFG_PhyNoiseEstimateRate         ( uint32_t argc, char *argv[] );
+//static void MFG_PhyRxDetection               ( uint32_t argc, char *argv[] );
+//static void MFG_PhyRxFraming                 ( uint32_t argc, char *argv[] );
+//static void MFG_PhyRxMode                    ( uint32_t argc, char *argv[] );
+//static void MFG_PhyThermalControlEnable      ( uint32_t argc, char *argv[] );
+//static void MFG_PhyThermalProtectionEnable   ( uint32_t argc, char *argv[] );
+//static void MFG_PhyThermalProtectionCount    ( uint32_t argc, char *argv[] );
+//static void MFG_PhyThermalProtectionEngaged  ( uint32_t argc, char *argv[] );
 
 #if ( DCU == 1 )
 static void MFGP_DCUVersion                  ( uint32_t argc, char *argv[] );
@@ -495,59 +497,58 @@ static void MFG_ReceivePowerMargin           ( uint32_t argc, char *argv[] );
 static void MFG_MacCommandResponseMaxTimeDiversity      ( uint32_t argc, char *argv[] );
 #endif
 
-static void MFG_TransactionTimeout           ( uint32_t argc, char *argv[] );
-static void MFG_TransactionTimeoutCount      ( uint32_t argc, char *argv[] );
-static void MFG_macTxLinkDelayCount          ( uint32_t argc, char *argv[] );
-static void MFG_macTxLinkDelayTime           ( uint32_t argc, char *argv[] );
+//static void MFG_TransactionTimeout           ( uint32_t argc, char *argv[] );
+//static void MFG_TransactionTimeoutCount      ( uint32_t argc, char *argv[] );
+//static void MFG_macTxLinkDelayCount          ( uint32_t argc, char *argv[] );
+//static void MFG_macTxLinkDelayTime           ( uint32_t argc, char *argv[] );
 static void MFG_reboot                       ( uint32_t argc, char *argv[] );
-static void MFG_stRTCFailCount               ( uint32_t argc, char *argv[] );
-static void MFG_stRTCFailTest                ( uint32_t argc, char *argv[] );
-static void MFG_StRx4GFSK                    ( uint32_t argc, char *argv[] );
-static void MFG_StTxBlurtTest                ( uint32_t argc, char *argv[] );
-static void MFG_StTxCwTest                   ( uint32_t argc, char *argv[] );
-static void MFGP_MacChannelSets( uint32_t argc, char *argv[], MAC_ATTRIBUTES_e channelSetsAttribute, MAC_ATTRIBUTES_e channelSetsCountAttribute, uint8_t maxChannelSets);
-static void MFGP_MacChannelSetsSRFN          ( uint32_t argc, char *argv[] );
+//static void MFG_stRTCFailCount               ( uint32_t argc, char *argv[] );
+//static void MFG_stRTCFailTest                ( uint32_t argc, char *argv[] );
+//static void MFG_StRx4GFSK                    ( uint32_t argc, char *argv[] );
+//static void MFG_StTxBlurtTest                ( uint32_t argc, char *argv[] );
+//static void MFG_StTxCwTest                   ( uint32_t argc, char *argv[] );
+//static void MFGP_MacChannelSets( uint32_t argc, char *argv[], MAC_ATTRIBUTES_e channelSetsAttribute, MAC_ATTRIBUTES_e channelSetsCountAttribute, uint8_t maxChannelSets);
+//static void MFGP_MacChannelSetsSRFN          ( uint32_t argc, char *argv[] );
 #if ( DCU == 1 )
 static void MFGP_MacChannelSetsSTAR          ( uint32_t argc, char *argv[] );
 #endif
-#endif
+
 static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
 // TODO: RA6 [name_Balaji]: Support functions below for RA6E1
-#if 0
-static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsMfgSubject2             ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsNetworkHESubject        ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsNetworkMSSubject        ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsNetworkRootCA           ( uint32_t argc, char *argv[] );
-static void MFGP_engBuEnabled                ( uint32_t argc, char *argv[] );
-static void MFGP_engData1                    ( uint32_t argc, char *argv[] );
-static void MFGP_engBuTrafficClass           ( uint32_t argc, char *argv[] );
+//static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsMfgSubject2             ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsNetworkHESubject        ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsNetworkMSSubject        ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsNetworkRootCA           ( uint32_t argc, char *argv[] );
+//static void MFGP_engBuEnabled                ( uint32_t argc, char *argv[] );
+//static void MFGP_engData1                    ( uint32_t argc, char *argv[] );
+//static void MFGP_engBuTrafficClass           ( uint32_t argc, char *argv[] );
 #if ( EP == 1 )
 static void MFGP_engData2                    ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_eventThreshold              ( uint32_t argc, char *argv[] );
-static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
-static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
-static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
-static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
-static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
+//static void MFGP_eventThreshold              ( uint32_t argc, char *argv[] );
+//static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
+//static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
+//static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
+//static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
+//static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
 static void MFGP_nvtest                      ( uint32_t argc, char *argv[] );
-#endif
+
 static void MFGP_ProcessCommand( char *command, uint16_t numBytes );
 // TODO: RA6 [name_Balaji]:Support below functions for RA6E1
-#if 0
-static void MFGP_shipMode                    ( uint32_t argc, char *argv[] );
-static void MFGP_SpuriousResetCount          ( uint32_t argc, char *argv[] );
-static void MFGP_stSecurityFailCount         ( uint32_t argc, char *argv[] );
-static void MFGP_stSecurityFailTest          ( uint32_t argc, char *argv[] );
-static void MFGP_FlashSecurity               ( uint32_t argc, char *argv[] );
+
+//static void MFGP_shipMode                    ( uint32_t argc, char *argv[] );
+//static void MFGP_SpuriousResetCount          ( uint32_t argc, char *argv[] );
+//static void MFGP_stSecurityFailCount         ( uint32_t argc, char *argv[] );
+//static void MFGP_stSecurityFailTest          ( uint32_t argc, char *argv[] );
+//static void MFGP_FlashSecurity               ( uint32_t argc, char *argv[] );
 static void MFGP_virgin                      ( uint32_t argc, char *argv[] );
 static void MFGP_virginDelay                 ( uint32_t argc, char *argv[] );
-static void MFGP_opportunisticAlarmIndexId   ( uint32_t argc, char *argv[] );
-static void MFGP_realTimeAlarmIndexId        ( uint32_t argc, char *argv[] );
-static void MFGP_temperature                 ( uint32_t argc, char *argv[] );
+//static void MFGP_opportunisticAlarmIndexId   ( uint32_t argc, char *argv[] );
+//static void MFGP_realTimeAlarmIndexId        ( uint32_t argc, char *argv[] );
+//static void MFGP_temperature                 ( uint32_t argc, char *argv[] );
 #if ( EP == 1 )
 static void MFGP_epMaxTemperature            ( uint32_t argc, char *argv[] );
 static void MFGP_epMinTemperature            ( uint32_t argc, char *argv[] );
@@ -555,10 +556,10 @@ static void MFGP_EpTempHysteresis            ( uint32_t argc, char *argv[] );
 static void MFGP_HighTempThreshold           ( uint32_t argc, char *argv[] );
 static void MFGP_EpTempMinThreshold          ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_installationDateTime        ( uint32_t argc, char *argv[] );
-static void MFGP_getRealTimeAlarm            ( uint32_t argc, char *argv[] );
-static void MFGP_timeLastUpdated             ( uint32_t argc, char *argv[] );
-static void MFGP_timeState                   ( uint32_t argc, char *argv[] );
+//static void MFGP_installationDateTime        ( uint32_t argc, char *argv[] );
+//static void MFGP_getRealTimeAlarm            ( uint32_t argc, char *argv[] );
+//static void MFGP_timeLastUpdated             ( uint32_t argc, char *argv[] );
+//static void MFGP_timeState                   ( uint32_t argc, char *argv[] );
 
 #if (EP == 1)
 #if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
@@ -706,7 +707,7 @@ static void MFGP_dtlsServerCertificateSN     ( uint32_t argc, char *argv[] );
 static void MFGP_mtlsAuthenticationWindow    ( uint32_t argc, char *argv[] );
 static void MFGP_mtlsNetworkTimeVariation    ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_macRSSI                     ( uint32_t argc, char *argv[] );
+//static void MFGP_macRSSI                     ( uint32_t argc, char *argv[] );
 
 #if (VSWR_MEASUREMENT == 1)
 extern float cachedVSWR;
@@ -714,234 +715,233 @@ static void MFGP_Vswr                        ( uint32_t argc, char *argv[] );
 #endif
 
 static void StTxCwTestCompletedTimerExpired(uint8_t cmd, void *pData);
-#endif
+
 static const struct_CmdLineEntry MFGP_CmdTable[] =
 {
    {  "help",                       MFGP_CommandLine_Help,           "Display list of commands" },
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
-#if 0 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
-   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
-   {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
-   {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
-   {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
-   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
-   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
-   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
-   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
-   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
-   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
-   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
-   {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
-#if ( DCU == 1 )
-   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
-#endif
-#if ( ENABLE_FIO_TASKS == 1 )
-   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
-   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
-#endif
-   {  "dataConfigurationDocumentVersion", MFGP_dataConfigurationDocumentVersion, "(MIMT)Get/Set the data Configuration document version" },
-   {  "DateTime",                   MFG_DateTime,                    "Get/Set system date/time" },
-   {  "dtlsDeviceCertificate",      MFGP_dtlsDeviceCertificate,      "Read Device cert" },                               // 1363
-   {  "dtlsMfgSubject1",            MFGP_dtlsMfgSubject1,            "Read Mfg1 Subject partial cert" },                 // 1359
-   {  "dtlsMfgSubject2",            MFGP_dtlsMfgSubject2,            "Read/Write Mfg2 Subject partial cert" },           // 1360
-   {  "dtlsNetworkHESubject",       MFGP_dtlsNetworkHESubject,       "Read/Write Head End Subject partial cert" },       // 1332
-   {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
-#if 0
-// These are defined in the HEEP, but not sure if they are valid or not!
-// {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
-#endif
-   {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
-
-   {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
-   {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
-   {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
-   {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
-#if ( EP == 1 )
-   {  "engData2",                   MFGP_engData2,                   "Get the engData2 stats" },
-   {  "epMaxTemperature",           MFGP_epMaxTemperature,           "Get/Set EP Max Temperature" },
-   {  "epMinTemperature",           MFGP_epMinTemperature,           "Get/Set EP Min Temperature" },
-   {  "epTempHysteresis",           MFGP_EpTempHysteresis,           "Get/Set EP Temperature Hysteresis" },
-   {  "epTempMinThreshold",         MFGP_EpTempMinThreshold,         "Get/Set EP Min Temperature Threshold" },
-#endif
-   {  "fctEnclosureDatabaseVersion",MFGP_fctEnclosureDatabaseVersion,"(MIMT)Get/Set the fct enclosure database version" },
-   {  "fctEnclosureProgramVersion", MFGP_fctEnclosureProgramVersion, "(MIMT)Get/Set the fct enclosure program version" },
-   {  "fctEnclosureTestDate",       MFGP_fctEnclosureTestDate,       "(MIMT)Get/Set the fct enclosure test date" },
-   {  "fctModuleDatabaseVersion",   MFGP_fctModuleDatabaseVersion,   "(MIMT)Get/Set the fct module database version" },
-   {  "fctModuleProgramVersion",    MFGP_fctModuleProgramVersion,    "(MIMT)Get/Set the fct module program version" },
-   {  "fctModuleTestDate",          MFGP_fctModuleTestDate,          "(MIMT)Get/Set the fct module test date" },
-#if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
-   {  "fngFemMfg",                  MFGP_fngFemMfg,                  "Get/Set FEM manufacturer (0 = Mini Circuits/1 = MicroAnt)" },
-   {  "fngForwardPower",            MFGP_fngForwardPower,            "Get Forward Power" },
-   {  "fngForwardPowerSet",         MFGP_fngForwardPowerSet,         "Get/Set Forward Power Set Point" },
-   {  "fngFowardPowerLowSet",       MFGP_fngFowardPowerLowSet,       "Get/Set Foward Power Low Set Point" },
-   {  "fngReflectedPower",          MFGP_fngReflectedPower,          "Get Reflected Power" },
-   {  "fngVSWR",                    MFGP_fngVSWR,                    "Get VSWR" },
-   {  "fngVswrNotificationSet",     MFGP_fngVswrNotificationSet,     "Get/Set VSWR Notification Set Point" },
-   {  "fngVswrShutdownSet",         MFGP_fngVswrShutdownSet,         "Get/Set VSWR Shutdown Set Point" },
-#endif
-#if ( EP == 1 )
-   {  "HighTempThreshold",          MFGP_HighTempThreshold,          "Get/Set EP High Temperature Threshold" },
-#endif
-#if (USE_DTLS == 1)
-   {  "initialAuthenticationTimeout", MFGP_initialAuthenticationTimeout, "Get/Set the maximum authentication timout value" },
-#endif
-   {  "inboundFrameCount",          MFGP_inboundFrameCount,          "Display MAC Layer inbound frame counter" },
-   {  "installationDateTime",       MFGP_installationDateTime,       "Get the installation dateTime of the device." },
-   {  "integrationDatabaseVersion", MFGP_integrationDatabaseVersion, "(MIMT)Get/Set the integration database version" },
-   {  "integrationProgramVersion",  MFGP_integrationProgramVersion,  "(MIMT)Get/Set the integration program version" },
-   {  "integrationSetupDate",       MFGP_integrationSetupDate,       "(MIMT)Get/Set the integration setup date" },
-   {  "ipHEContext",                MFGP_ipHEContext,                "Get/Set IP Head End Context" },
-
-   {  "macState",                   MFGP_macState,                   "Get MAC State" },
-   {  "macTxFrames",                MFGP_macTxFrames,                "Get MAC TxFrames" },
-   {  "macAckWaitDuration",         MFGP_macAckWaitDuration,         "Get/Set AckWaitDuration" },
-   {  "macAckDelayDuration",        MFGP_macAckDelayDuration,        "Get/Set AckDelayDuration" },
-   {  "macChannelSetsCount",        MFGP_macChannelSetsCount,        "Get MAC ChannelSetsCount" },
-   {  "macPacketId",                MFGP_macPacketId,                "Get MAC PacketId" },
-   {  "macTxFrames",                    MFGP_macTxFrames,                    "Get TxFrames"},
-   {  "macIsChannelAccessConstrained",  MFGP_macIsChannelAccessConstrained,  "Get/Set macIsChannelAccessConstrained"},
-   {  "macIsFNG",                       MFGP_macIsFNG,                       "Get/Set macIsFNG"},
-   {  "macIsIAG",                       MFGP_macIsIAG,                       "Get/Set macIsIAG"},
-   {  "macIsRouter",                    MFGP_macIsRouter,                    "Get/Set macIsRouter"},
-
-   {  "macChannelSets",             MFGP_MacChannelSetsSRFN,         "Get/Set SRFN MAC channel sets" },
-#if ( DCU == 1 )
-   {  "macChannelSetsSTAR",         MFGP_MacChannelSetsSTAR,         "Get/Set STAR MAC channel sets" },
-#endif
-   {  "macCsmaMaxAttempts",         MFGP_macCsmaMaxAttempts,         "Get/Set MAC CSMA max attempts" },
-   {  "macCsmaMinBackOffTime",      MFGP_macCsmaMinBackOffTime,      "Get/Set MAC CSMA minimum backoff time" },
-   {  "macCsmaMaxBackOffTime",      MFGP_macCsmaMaxBackOffTime,      "Get/Set MAC CSMA maximum backoff time" },
-   {  "macCsmaPValue",              MFGP_macCsmaPValue,              "Get/Set MAC CSMA PV value (float between 0-1)" },
-   {  "macCsmaQuickAbort",          MFGP_macCsmaQuickAbort,          "Get/Set MAC CSMA QuickAbort" },
-   {  "macNetworkId",               MFGP_macNetworkId,               "Get/Set MAC Netork ID" },
-   {  "macPacketTimeout",           MFGP_macPacketTimeout,           "Get/Set MAC PacketTimeout" },
-   {  "macPingCount",               MFGP_macPingCount,               "Display MAC Layer ping counter" },
-   {  "macReassemblyTimeout",       MFGP_macReassemblyTimeout,       "Get/Set MAC reassembly timeout" },
-   {  "macReliabilityHighCount",    MFGP_macReliabilityHighCount,    "Get/Set the number of retries to satisfy the QOS reliability level of high" },
-   {  "macReliabilityMedCount",     MFGP_macReliabilityMedCount,     "Get/Set the number of retries to satisfy the QOS reliability level of medium" },
-   {  "macReliabilityLowCount",     MFGP_macReliabilityLowCount,     "Get/Set the number of retries to satisfy the QOS reliability level of low" },
-   {  "macRSSI",                    MFGP_macRSSI,                    "Display the RSSI of a specified radio" },
-#if ( EP == 1 )
-   {  "macTimeSetMaxOffset",        MFG_TimeSetMaxOffset,            "Get/Set the TimeSet MaxOffset"},
-   {  "macTimeSetPeriod",           MFG_TimeSetPeriod,               "Get/Set the TimeSet Period" },
-   {  "macTimeSetStart",            MFG_TimeSetStart,                "Get/Set the TimeSet Start"},
-   {  "macTimeSource",              MFG_TimeSource,                  "Get/Set the Time Source"},
-#endif
-#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
-   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
-   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
-   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
-   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
-#endif
-#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
-   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
-#endif
-   {  "macTransactionTimeout",      MFG_TransactionTimeout,          "Get/Set MAC transaction timeout" },
-   {  "macTransactionTimeoutCount", MFG_TransactionTimeoutCount,     "Get the number of times there was a MAC transaction timeout"},
-   {  "macTxLinkDelayCount",        MFG_macTxLinkDelayCount,         "Amount of MAC delays incurred"},
-   {  "macTxLinkDelayTime",         MFG_macTxLinkDelayTime,          "Total time (ms) in delay"},
-   {  "manufacturerNumber",         MFGP_manufacturerNumber,         "(MIMT)Get/Set the manufacturerNumber of the endpoint" },
-#if (USE_DTLS == 1)
-   {  "maxAuthenticationTimeout",   MFGP_maxAuthenticationTimeout,   "Get/Set the maximum authentication timeout value" },
-   {  "minAuthenticationTimeout",   MFGP_minAuthenticationTimeout,   "Get/Set the maximum authentication timeout value" },
-#endif
-#if (USE_MTLS == 1)
-   {  "mtlsAuthenticationWindow",   MFGP_mtlsAuthenticationWindow,   "Get/Set the mtls Authentication Window value" },
-   {  "mtlsNetworkTimeVariation",   MFGP_mtlsNetworkTimeVariation,   "Get/Set the mtls Network Time Variationvalue" },
-#endif
-   {  "opportunisticAlarmIndexId",  MFGP_opportunisticAlarmIndexId,  "Get current index into the opportunistic alarm log" },
-   {  "opportunisticThreshold",     MFGP_eventThreshold,             "xxx" },
-
-#if ( PHASE_DETECTION == 1 )
-   {  "capableOfPhaseSelfAssessment",  PD_SurveySelfAssessment,        "Is device capable of Phase Detect Self Assessment" },
-   {  "capableOfPhaseDetectSurvey",    PD_SurveyCapable,               "Is device capable of Phase Detect" },
-   {  "pdSurveyStartTime",             PD_SurveyStartTime,             "Get/Set Survey StartTime" },
-   {  "pdSurveyPeriod",                PD_SurveyPeriod,                "Get/Set Survey Period" },
-   {  "pdSurveyQuantity",              PD_SurveyQuantity,              "Get/Set Survey Quantity" },
-   {  "pdSurveyMode",                  PD_SurveyReportMode,            "Get/Set Survey Mode" },
-   {  "pdZCProductNullingOffset",      PD_ZCProductNullingOffset,      "Get/Set ZC Product Nulling Offset" },
-   {  "pdLcdMsg",                      PD_LcdMsg,                      "Get/Set Lcd Msg" },
-   {  "pdBuMaxTimeDiversity",          PD_BuMaxTimeDiversity,          "Get/Set Time Diversity" },
-   {  "pdBuDataRedundancy",            PD_BuDataRedundancy,            "Get/Set DataRedundancy" },
-   {  "pdSurveyPeriodQty",             PD_SurveyPeriodQty,             "Get/Set Survey Period Quantity" },
-#endif
-
-   {  "phyAvailableChannels",          MFG_PhyAvailableChannels,        "Get/Set the available radio channels" },
-   {  "PhyAvailableFrequencies",       MFG_PhyAvailableFrequencies,     "Get/Set available radio frequencies" },
-   {  "phyCcaThreshold",               MFG_PhyCcaThreshold,             "Get the CCA threshold" },
-   {  "phyCcaAdaptiveThresholdEnable", MFG_PhyCcaAdaptiveThresholdEnable,"Enable/Disable the adaptive CCA threshold" },
-   {  "phyCcaOffset",                  MFG_PhyCcaOffset,                "The offset in dB from phyNoiseEstimate used to obtain phyCcaAdaptiveThreshold. Range: 0-30."},
-#if ( EP == 1 )
-   {  "phyDemodulator",             MFG_PhyDemodulator,              "Get/Set the demodulator used by the each receiver" },
-#endif
-   {  "phyFrontEndGain",            MFG_PhyFrontEndGain,             "Get/Set the front end gain (half dBm steps)" },
-   {  "phyMaxTxPayload",            MFG_PhyMaxTxPayload,             "Get/Set the maximum transmitable PHY payload size" },
-   {  "phyNoiseEstimate",           MFG_PhyNoiseEstimate,            "Get the PHY noise for each channel" },
-   {  "phyNoiseEstimateRate",       MFG_PhyNoiseEstimateRate,        "Get/Set the PHY noise estimate rate" },
-   {  "phyNumChannels",             MFG_PhyNumchannels,              "Get the number of channels programmed into and usable by the PHY" },
-   {  "phyRcvrCount",               MFG_PhyRcvrCount,                "Get the number receivers" },
-   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
-   {  "phyRxDetection",             MFG_PhyRxDetection,              "Get/Set the detection configuration" },
-   {  "phyRxFraming",               MFG_PhyRxFraming,                "Get/Set the framing configuration" },
-   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
-   {  "phyRxMode",                  MFG_PhyRxMode,                   "Get/Set the PHY mode configuration" },
-   {  "phyThermalControlEnable",    MFG_PhyThermalControlEnable,     "Get/Set PHY thermal control feature" },
-   {  "phyThermalProtectionEnable", MFG_PhyThermalProtectionEnable,  "Get/Set PHY thermal protection feature" },
-   {  "phyThermalProtectionCount",  MFG_PhyThermalProtectionCount,   "Get The number of times a peripheral temperature exceeding a given limit."},
-   {  "phyThermalProtectionEngaged",MFG_PhyThermalProtectionEngaged, "Get if a PHY peripheral has exceeded an allowed temperature limit"},
-   {  "phyTxChannels",              MFG_PhyTxChannels,               "Get/Set radio Transmitter channels" },
-   {  "phyTxFrequencies",           MFG_PhyTxFrequencies,            "Get/Set radio Transmitter frequencies" },
-   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
-   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
-   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
-   {  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
-   {  "phyFailedHeaderDecodeCount", MFG_PhyFailedHeaderDecodeCount,  "Get the number of received PHY frame headers that failed FEC decoding"},
-   {  "phySyncDetectCount",         MFG_PhySyncDetectCount,          "Get the number of times a valid sync word was detected on each reciever"},
-#if ( EP == 1 )
-   {  "powerQuality",               MFGP_powerQuality,               "Get power quality counter reading"},
-#endif
-#if (VSWR_MEASUREMENT == 1)
-   {  "vswr",                       MFGP_Vswr,                       "Get last VSWR reading." },
-#endif
-   {  "realTimeAlarm",              MFGP_getRealTimeAlarm,           "Get whether the endpoint supports real time alarms" },
-   {  "realTimeAlarmIndexId",       MFGP_realTimeAlarmIndexId,       "Get current index into the real time alarm log" },
-   {  "realtimeThreshold",          MFGP_eventThreshold,             "Get the realtime event threshold" },
+// TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
+//   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
+//   {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
+//   {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
+//   {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
+//   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
+//   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
+//   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
+//   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
+//   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
+//   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
+//   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
+//   {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
+//#if ( DCU == 1 )
+//   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
+//#endif
+//#if ( ENABLE_FIO_TASKS == 1 )
+//   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
+//   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
+//#endif
+//   {  "dataConfigurationDocumentVersion", MFGP_dataConfigurationDocumentVersion, "(MIMT)Get/Set the data Configuration document version" },
+//   {  "DateTime",                   MFG_DateTime,                    "Get/Set system date/time" },
+//   {  "dtlsDeviceCertificate",      MFGP_dtlsDeviceCertificate,      "Read Device cert" },                               // 1363
+//   {  "dtlsMfgSubject1",            MFGP_dtlsMfgSubject1,            "Read Mfg1 Subject partial cert" },                 // 1359
+//   {  "dtlsMfgSubject2",            MFGP_dtlsMfgSubject2,            "Read/Write Mfg2 Subject partial cert" },           // 1360
+//   {  "dtlsNetworkHESubject",       MFGP_dtlsNetworkHESubject,       "Read/Write Head End Subject partial cert" },       // 1332
+//   {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
+//#if 0
+//// These are defined in the HEEP, but not sure if they are valid or not!
+//// {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
+//#endif
+//   {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
+//
+//   {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
+//   {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
+//   {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
+//   {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
+//#if ( EP == 1 )
+//   {  "engData2",                   MFGP_engData2,                   "Get the engData2 stats" },
+//   {  "epMaxTemperature",           MFGP_epMaxTemperature,           "Get/Set EP Max Temperature" },
+//   {  "epMinTemperature",           MFGP_epMinTemperature,           "Get/Set EP Min Temperature" },
+//   {  "epTempHysteresis",           MFGP_EpTempHysteresis,           "Get/Set EP Temperature Hysteresis" },
+//   {  "epTempMinThreshold",         MFGP_EpTempMinThreshold,         "Get/Set EP Min Temperature Threshold" },
+//#endif
+//   {  "fctEnclosureDatabaseVersion",MFGP_fctEnclosureDatabaseVersion,"(MIMT)Get/Set the fct enclosure database version" },
+//   {  "fctEnclosureProgramVersion", MFGP_fctEnclosureProgramVersion, "(MIMT)Get/Set the fct enclosure program version" },
+//   {  "fctEnclosureTestDate",       MFGP_fctEnclosureTestDate,       "(MIMT)Get/Set the fct enclosure test date" },
+//   {  "fctModuleDatabaseVersion",   MFGP_fctModuleDatabaseVersion,   "(MIMT)Get/Set the fct module database version" },
+//   {  "fctModuleProgramVersion",    MFGP_fctModuleProgramVersion,    "(MIMT)Get/Set the fct module program version" },
+//   {  "fctModuleTestDate",          MFGP_fctModuleTestDate,          "(MIMT)Get/Set the fct module test date" },
+//#if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
+//   {  "fngFemMfg",                  MFGP_fngFemMfg,                  "Get/Set FEM manufacturer (0 = Mini Circuits/1 = MicroAnt)" },
+//   {  "fngForwardPower",            MFGP_fngForwardPower,            "Get Forward Power" },
+//   {  "fngForwardPowerSet",         MFGP_fngForwardPowerSet,         "Get/Set Forward Power Set Point" },
+//   {  "fngFowardPowerLowSet",       MFGP_fngFowardPowerLowSet,       "Get/Set Foward Power Low Set Point" },
+//   {  "fngReflectedPower",          MFGP_fngReflectedPower,          "Get Reflected Power" },
+//   {  "fngVSWR",                    MFGP_fngVSWR,                    "Get VSWR" },
+//   {  "fngVswrNotificationSet",     MFGP_fngVswrNotificationSet,     "Get/Set VSWR Notification Set Point" },
+//   {  "fngVswrShutdownSet",         MFGP_fngVswrShutdownSet,         "Get/Set VSWR Shutdown Set Point" },
+//#endif
+//#if ( EP == 1 )
+//   {  "HighTempThreshold",          MFGP_HighTempThreshold,          "Get/Set EP High Temperature Threshold" },
+//#endif
+//#if (USE_DTLS == 1)
+//   {  "initialAuthenticationTimeout", MFGP_initialAuthenticationTimeout, "Get/Set the maximum authentication timout value" },
+//#endif
+//   {  "inboundFrameCount",          MFGP_inboundFrameCount,          "Display MAC Layer inbound frame counter" },
+//   {  "installationDateTime",       MFGP_installationDateTime,       "Get the installation dateTime of the device." },
+//   {  "integrationDatabaseVersion", MFGP_integrationDatabaseVersion, "(MIMT)Get/Set the integration database version" },
+//   {  "integrationProgramVersion",  MFGP_integrationProgramVersion,  "(MIMT)Get/Set the integration program version" },
+//   {  "integrationSetupDate",       MFGP_integrationSetupDate,       "(MIMT)Get/Set the integration setup date" },
+//   {  "ipHEContext",                MFGP_ipHEContext,                "Get/Set IP Head End Context" },
+//
+//   {  "macState",                   MFGP_macState,                   "Get MAC State" },
+//   {  "macTxFrames",                MFGP_macTxFrames,                "Get MAC TxFrames" },
+//   {  "macAckWaitDuration",         MFGP_macAckWaitDuration,         "Get/Set AckWaitDuration" },
+//   {  "macAckDelayDuration",        MFGP_macAckDelayDuration,        "Get/Set AckDelayDuration" },
+//   {  "macChannelSetsCount",        MFGP_macChannelSetsCount,        "Get MAC ChannelSetsCount" },
+//   {  "macPacketId",                MFGP_macPacketId,                "Get MAC PacketId" },
+//   {  "macTxFrames",                    MFGP_macTxFrames,                    "Get TxFrames"},
+//   {  "macIsChannelAccessConstrained",  MFGP_macIsChannelAccessConstrained,  "Get/Set macIsChannelAccessConstrained"},
+//   {  "macIsFNG",                       MFGP_macIsFNG,                       "Get/Set macIsFNG"},
+//   {  "macIsIAG",                       MFGP_macIsIAG,                       "Get/Set macIsIAG"},
+//   {  "macIsRouter",                    MFGP_macIsRouter,                    "Get/Set macIsRouter"},
+//
+//   {  "macChannelSets",             MFGP_MacChannelSetsSRFN,         "Get/Set SRFN MAC channel sets" },
+//#if ( DCU == 1 )
+//   {  "macChannelSetsSTAR",         MFGP_MacChannelSetsSTAR,         "Get/Set STAR MAC channel sets" },
+//#endif
+//   {  "macCsmaMaxAttempts",         MFGP_macCsmaMaxAttempts,         "Get/Set MAC CSMA max attempts" },
+//   {  "macCsmaMinBackOffTime",      MFGP_macCsmaMinBackOffTime,      "Get/Set MAC CSMA minimum backoff time" },
+//   {  "macCsmaMaxBackOffTime",      MFGP_macCsmaMaxBackOffTime,      "Get/Set MAC CSMA maximum backoff time" },
+//   {  "macCsmaPValue",              MFGP_macCsmaPValue,              "Get/Set MAC CSMA PV value (float between 0-1)" },
+//   {  "macCsmaQuickAbort",          MFGP_macCsmaQuickAbort,          "Get/Set MAC CSMA QuickAbort" },
+//   {  "macNetworkId",               MFGP_macNetworkId,               "Get/Set MAC Netork ID" },
+//   {  "macPacketTimeout",           MFGP_macPacketTimeout,           "Get/Set MAC PacketTimeout" },
+//   {  "macPingCount",               MFGP_macPingCount,               "Display MAC Layer ping counter" },
+//   {  "macReassemblyTimeout",       MFGP_macReassemblyTimeout,       "Get/Set MAC reassembly timeout" },
+//   {  "macReliabilityHighCount",    MFGP_macReliabilityHighCount,    "Get/Set the number of retries to satisfy the QOS reliability level of high" },
+//   {  "macReliabilityMedCount",     MFGP_macReliabilityMedCount,     "Get/Set the number of retries to satisfy the QOS reliability level of medium" },
+//   {  "macReliabilityLowCount",     MFGP_macReliabilityLowCount,     "Get/Set the number of retries to satisfy the QOS reliability level of low" },
+//   {  "macRSSI",                    MFGP_macRSSI,                    "Display the RSSI of a specified radio" },
+//#if ( EP == 1 )
+//   {  "macTimeSetMaxOffset",        MFG_TimeSetMaxOffset,            "Get/Set the TimeSet MaxOffset"},
+//   {  "macTimeSetPeriod",           MFG_TimeSetPeriod,               "Get/Set the TimeSet Period" },
+//   {  "macTimeSetStart",            MFG_TimeSetStart,                "Get/Set the TimeSet Start"},
+//   {  "macTimeSource",              MFG_TimeSource,                  "Get/Set the Time Source"},
+//#endif
+//#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
+//   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
+//   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
+//   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
+//   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
+//#endif
+//#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
+//   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
+//#endif
+//   {  "macTransactionTimeout",      MFG_TransactionTimeout,          "Get/Set MAC transaction timeout" },
+//   {  "macTransactionTimeoutCount", MFG_TransactionTimeoutCount,     "Get the number of times there was a MAC transaction timeout"},
+//   {  "macTxLinkDelayCount",        MFG_macTxLinkDelayCount,         "Amount of MAC delays incurred"},
+//   {  "macTxLinkDelayTime",         MFG_macTxLinkDelayTime,          "Total time (ms) in delay"},
+//   {  "manufacturerNumber",         MFGP_manufacturerNumber,         "(MIMT)Get/Set the manufacturerNumber of the endpoint" },
+//#if (USE_DTLS == 1)
+//   {  "maxAuthenticationTimeout",   MFGP_maxAuthenticationTimeout,   "Get/Set the maximum authentication timeout value" },
+//   {  "minAuthenticationTimeout",   MFGP_minAuthenticationTimeout,   "Get/Set the maximum authentication timeout value" },
+//#endif
+//#if (USE_MTLS == 1)
+//   {  "mtlsAuthenticationWindow",   MFGP_mtlsAuthenticationWindow,   "Get/Set the mtls Authentication Window value" },
+//   {  "mtlsNetworkTimeVariation",   MFGP_mtlsNetworkTimeVariation,   "Get/Set the mtls Network Time Variationvalue" },
+//#endif
+//   {  "opportunisticAlarmIndexId",  MFGP_opportunisticAlarmIndexId,  "Get current index into the opportunistic alarm log" },
+//   {  "opportunisticThreshold",     MFGP_eventThreshold,             "xxx" },
+//
+//#if ( PHASE_DETECTION == 1 )
+//   {  "capableOfPhaseSelfAssessment",  PD_SurveySelfAssessment,        "Is device capable of Phase Detect Self Assessment" },
+//   {  "capableOfPhaseDetectSurvey",    PD_SurveyCapable,               "Is device capable of Phase Detect" },
+//   {  "pdSurveyStartTime",             PD_SurveyStartTime,             "Get/Set Survey StartTime" },
+//   {  "pdSurveyPeriod",                PD_SurveyPeriod,                "Get/Set Survey Period" },
+//   {  "pdSurveyQuantity",              PD_SurveyQuantity,              "Get/Set Survey Quantity" },
+//   {  "pdSurveyMode",                  PD_SurveyReportMode,            "Get/Set Survey Mode" },
+//   {  "pdZCProductNullingOffset",      PD_ZCProductNullingOffset,      "Get/Set ZC Product Nulling Offset" },
+//   {  "pdLcdMsg",                      PD_LcdMsg,                      "Get/Set Lcd Msg" },
+//   {  "pdBuMaxTimeDiversity",          PD_BuMaxTimeDiversity,          "Get/Set Time Diversity" },
+//   {  "pdBuDataRedundancy",            PD_BuDataRedundancy,            "Get/Set DataRedundancy" },
+//   {  "pdSurveyPeriodQty",             PD_SurveyPeriodQty,             "Get/Set Survey Period Quantity" },
+//#endif
+//
+//   {  "phyAvailableChannels",          MFG_PhyAvailableChannels,        "Get/Set the available radio channels" },
+//   {  "PhyAvailableFrequencies",       MFG_PhyAvailableFrequencies,     "Get/Set available radio frequencies" },
+//   {  "phyCcaThreshold",               MFG_PhyCcaThreshold,             "Get the CCA threshold" },
+//   {  "phyCcaAdaptiveThresholdEnable", MFG_PhyCcaAdaptiveThresholdEnable,"Enable/Disable the adaptive CCA threshold" },
+//   {  "phyCcaOffset",                  MFG_PhyCcaOffset,                "The offset in dB from phyNoiseEstimate used to obtain phyCcaAdaptiveThreshold. Range: 0-30."},
+//#if ( EP == 1 )
+//   {  "phyDemodulator",             MFG_PhyDemodulator,              "Get/Set the demodulator used by the each receiver" },
+//#endif
+//   {  "phyFrontEndGain",            MFG_PhyFrontEndGain,             "Get/Set the front end gain (half dBm steps)" },
+//   {  "phyMaxTxPayload",            MFG_PhyMaxTxPayload,             "Get/Set the maximum transmitable PHY payload size" },
+//   {  "phyNoiseEstimate",           MFG_PhyNoiseEstimate,            "Get the PHY noise for each channel" },
+//   {  "phyNoiseEstimateRate",       MFG_PhyNoiseEstimateRate,        "Get/Set the PHY noise estimate rate" },
+//   {  "phyNumChannels",             MFG_PhyNumchannels,              "Get the number of channels programmed into and usable by the PHY" },
+//   {  "phyRcvrCount",               MFG_PhyRcvrCount,                "Get the number receivers" },
+//   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
+//   {  "phyRxDetection",             MFG_PhyRxDetection,              "Get/Set the detection configuration" },
+//   {  "phyRxFraming",               MFG_PhyRxFraming,                "Get/Set the framing configuration" },
+//   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
+//   {  "phyRxMode",                  MFG_PhyRxMode,                   "Get/Set the PHY mode configuration" },
+//   {  "phyThermalControlEnable",    MFG_PhyThermalControlEnable,     "Get/Set PHY thermal control feature" },
+//   {  "phyThermalProtectionEnable", MFG_PhyThermalProtectionEnable,  "Get/Set PHY thermal protection feature" },
+//   {  "phyThermalProtectionCount",  MFG_PhyThermalProtectionCount,   "Get The number of times a peripheral temperature exceeding a given limit."},
+//   {  "phyThermalProtectionEngaged",MFG_PhyThermalProtectionEngaged, "Get if a PHY peripheral has exceeded an allowed temperature limit"},
+//   {  "phyTxChannels",              MFG_PhyTxChannels,               "Get/Set radio Transmitter channels" },
+//   {  "phyTxFrequencies",           MFG_PhyTxFrequencies,            "Get/Set radio Transmitter frequencies" },
+//   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
+//   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
+//   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
+//   {  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
+//   {  "phyFailedHeaderDecodeCount", MFG_PhyFailedHeaderDecodeCount,  "Get the number of received PHY frame headers that failed FEC decoding"},
+//   {  "phySyncDetectCount",         MFG_PhySyncDetectCount,          "Get the number of times a valid sync word was detected on each reciever"},
+//#if ( EP == 1 )
+//   {  "powerQuality",               MFGP_powerQuality,               "Get power quality counter reading"},
+//#endif
+//#if (VSWR_MEASUREMENT == 1)
+//   {  "vswr",                       MFGP_Vswr,                       "Get last VSWR reading." },
+//#endif
+//   {  "realTimeAlarm",              MFGP_getRealTimeAlarm,           "Get whether the endpoint supports real time alarms" },
+//   {  "realTimeAlarmIndexId",       MFGP_realTimeAlarmIndexId,       "Get current index into the real time alarm log" },
+//   {  "realtimeThreshold",          MFGP_eventThreshold,             "Get the realtime event threshold" },
    {  "reboot",                     MFG_reboot,                      "Reboot device"   },
-   {  "repairInformation",          MFGP_repairInformation,          "(MIMT)Get/Set the repair information of the endpoint of the endpoint" },
-   {  "rtcDateTime",                MFGP_rtcDateTime,                "Get/Set the RTC value"   },
-   {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
-   {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
-   {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
-   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
-   {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
-   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },
-   {  "strx4gfsk",                  MFG_StRx4GFSK,                   "Start a Receiver BER test using normal radio processing" },
-#if ( DCU == 1 )
-   {  "stRamRWFailCount",           MFG_ToolEP_SDRAMCount,           "Get/Set SDRAM test failure count" },
-   {  "stRamRWFailTest",            MFG_ToolEP_SDRAMTest,            "Run the SDRAM test" },
-#endif
-   {  "stSecurityFailCount",        MFGP_stSecurityFailCount,        "Get/Set security device test failure count" },
-   {  "stSecurityFailTest",         MFGP_stSecurityFailTest,         "Test security device" },
-#if ( DCU == 1 )
-   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX. Specify SRFN or STAR" },
-#else
-   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX" },
-#endif
-   {  "sttxcwtest",                 MFG_StTxCwTest,                  "Start a CW transmitter test" },
-#if ( DCU == 1 )
-   {  "TBImageTarget",              MFGP_DCUVersion,                 "Get/Set DCU operating mode {DCU2|DCU2+}" },
-#endif
-   {  "temperature",                MFGP_temperature,                "Get device temperature" },
-   {  "timeDefaultAccuracy",        MFG_TimeDefaultAccuracy,         "Get/Set the Default Time Accuracy"},
-   {  "timeLastUpdated",            MFGP_timeLastUpdated,            "The time that date/time was last updated" },
-   {  "timePrecision",              MFG_TimePrecision,               "Get the Time Precision"},
-   {  "macTimePrecision",           MFG_TimePrecision,               "Alias for timePrecision"},
-   {  "timeQueryResponseMode",      MFG_TimeQueryResponseMode,       "Get/Set the time query response behavior to broadcast(0), unicast(1) or ignore the request (2)" },
-   {  "timeState",                  MFGP_timeState,                  "State of system clock: 0=INVALID 1=VALID_NO_SYNC 2=VALID"},
+//   {  "repairInformation",          MFGP_repairInformation,          "(MIMT)Get/Set the repair information of the endpoint of the endpoint" },
+//   {  "rtcDateTime",                MFGP_rtcDateTime,                "Get/Set the RTC value"   },
+//   {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
+//   {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
+//   {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
+//   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
+//   {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
+//   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },
+//   {  "strx4gfsk",                  MFG_StRx4GFSK,                   "Start a Receiver BER test using normal radio processing" },
+//#if ( DCU == 1 )
+//   {  "stRamRWFailCount",           MFG_ToolEP_SDRAMCount,           "Get/Set SDRAM test failure count" },
+//   {  "stRamRWFailTest",            MFG_ToolEP_SDRAMTest,            "Run the SDRAM test" },
+//#endif
+//   {  "stSecurityFailCount",        MFGP_stSecurityFailCount,        "Get/Set security device test failure count" },
+//   {  "stSecurityFailTest",         MFGP_stSecurityFailTest,         "Test security device" },
+//#if ( DCU == 1 )
+//   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX. Specify SRFN or STAR" },
+//#else
+//   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX" },
+//#endif
+//   {  "sttxcwtest",                 MFG_StTxCwTest,                  "Start a CW transmitter test" },
+//#if ( DCU == 1 )
+//   {  "TBImageTarget",              MFGP_DCUVersion,                 "Get/Set DCU operating mode {DCU2|DCU2+}" },
+//#endif
+//   {  "temperature",                MFGP_temperature,                "Get device temperature" },
+//   {  "timeDefaultAccuracy",        MFG_TimeDefaultAccuracy,         "Get/Set the Default Time Accuracy"},
+//   {  "timeLastUpdated",            MFGP_timeLastUpdated,            "The time that date/time was last updated" },
+//   {  "timePrecision",              MFG_TimePrecision,               "Get the Time Precision"},
+//   {  "macTimePrecision",           MFG_TimePrecision,               "Alias for timePrecision"},
+//   {  "timeQueryResponseMode",      MFG_TimeQueryResponseMode,       "Get/Set the time query response behavior to broadcast(0), unicast(1) or ignore the request (2)" },
+//   {  "timeState",                  MFGP_timeState,                  "State of system clock: 0=INVALID 1=VALID_NO_SYNC 2=VALID"},
    {  "virgin",                     MFGP_virgin,                     "Virgin unit" },
    {  "virginDelay",                MFGP_virginDelay,                "Erases signature; continues. Allows new code load and then virgin"},
-#endif
    { 0, 0, 0 }
 };
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -9751,6 +9751,7 @@ static void MFGP_passwordPort0Master ( uint32_t argc, char *argv[] )
 }
 #endif // endif of (ACLARA_LC == 0)
 #endif
+#endif // #if 0 // TODO: RA6: Remove
 
 /***********************************************************************************************************************
  *
@@ -9822,6 +9823,7 @@ static void MFGP_virginDelay ( uint32_t argc, char *argv[] )
    }
 }
 
+#if 0 //  // #if 0 // TODO: RA6: Remove
 #if (USE_DTLS == 1)
 /***********************************************************************************************************************
  *

@@ -189,6 +189,7 @@ returnStatus_t DBG_init( void )
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
    {
 #if (FILE_IO == 1 )
+#if 0 // TODO: RA6: DG: Enable this code when the FIO issue is resolved.
       if ( eSUCCESS == FIO_fopen(&dbgFileHndl_,                 /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,        /* Search for the best partition according to the timing. */
                                  (uint16_t) eFN_DBG_CONFIG,     /* File ID (filename) */
@@ -210,6 +211,13 @@ returnStatus_t DBG_init( void )
             retVal = FIO_fread( &dbgFileHndl_, (uint8_t *)&ConfigAttr, 0, (lCnt)sizeof(DBG_ConfigAttr_t));
          }
       }
+#else
+      // TODO: RA6: Enabling the DBG Port All the time
+      ConfigAttr.version        = DBG_PORT_CONFIG_VERSION;   // File Format Version Default
+      ConfigAttr.PortTimeout_hh = 255;  // Port Enabled
+      ConfigAttr.echoState      = DBG_PORT_ECHO_DEFAULT;     // Echo ON
+      retVal = eSUCCESS;
+#endif
 #else
       retVal = eSUCCESS;
 #endif /* FILE_IO */

@@ -1088,12 +1088,6 @@
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\board_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\board_leds.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\board_leds.h</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_cfg.h</name>
             </file>
             <file>

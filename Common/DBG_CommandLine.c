@@ -32,9 +32,9 @@
 #include <bsp.h>
 #endif
 #include "file_io.h"
-//#include "SELF_test.h"
-//#include "version.h"
-//#include "dfw_app.h"
+#include "SELF_test.h"
+#include "version.h"
+#include "dfw_app.h"
 
 #include "pwr_task.h"
 //#include "MIMT_info.h"
@@ -238,11 +238,11 @@ static uint16_t         DBGP_numBytes = 0;               /* Number of bytes curr
 static void PrintECC_error( uint8_t ECCstatus );
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
-static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
-static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] );
-static uint32_t DBG_CommandLine_SendHeepMsg( uint32_t argc, char *argv[] );
-static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[]);
-static uint32_t DBG_CommandLine_SM_NwPassiveActTimeout(uint32_t argc, char *argv[]);
+//static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
+//static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] );
+//static uint32_t DBG_CommandLine_SendHeepMsg( uint32_t argc, char *argv[] );
+//static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[]);
+//static uint32_t DBG_CommandLine_SM_NwPassiveActTimeout(uint32_t argc, char *argv[]);
 static uint32_t DBG_CommandLine_virginDelay( uint32_t argc, char *argv[] );
 
 #if ( DCU == 1 )
@@ -346,7 +346,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "brown",        DBG_CommandLine_PWR_BrownOut,    "PWR - Signal Brown Out" },
 //#endif
 //#endif
-//   { "buffers",      DBG_CommandLine_Buffers,         "Display buffers allocated and statitics" },
+   { "buffers",      DBG_CommandLine_Buffers,         "Display buffers allocated and statitics" },
 //#endif
 #if ( EP == 1 )
    { "cap",          DBG_CommandLine_PWR_SuperCap,    "PWR - Read Super Cap Voltage" },
@@ -420,8 +420,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#if ( EVL_UNIT_TESTING == 1 )
 //   { "evlUnitTest",  DBG_CommandLine_EVL_UNIT_TESTING, "Run and event log unit test" },
 //#endif
-//   { "file",         DBG_CommandLine_PrintFiles,      "Print File list or file content (optional param, filename)" },
-//   { "filedump",     DBG_CommandLine_DumpFiles,       "Print the contents of files in the un-named partitions" },
+   { "file",         DBG_CommandLine_PrintFiles,      "Print File list or file content (optional param, filename)" },
+   { "filedump",     DBG_CommandLine_DumpFiles,       "Print the contents of files in the un-named partitions" },
 //   { "freeram",      DBG_CommandLine_FreeRAM,         "Display remaining free internal RAM" },
 //#if ( DCU == 1 )
 //   { "frontendgain", DBG_CommandLine_FrontEndGain,    "Display/Set the front end gain" },
@@ -530,7 +530,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#if ( ( MULTIPLE_MAC != 0 ) && ( EP == 1 ) )
 //   { "NumMac",          DBG_CommandLine_NumMac,       "Set/Get number of mac addresses emulated (1-50)" },
 //#endif
-//   { "nvr",          DBG_CommandLine_NvRead,          "NV memory Read: Params - Partition Addr Len" },
+   { "nvr",          DBG_CommandLine_NvRead,          "NV memory Read: Params - Partition Addr Len" },
 //#ifdef TM_DVR_EXT_FL_UNIT_TEST
 //   { "nvtest",       DBG_CommandLine_NvTest,          "[count (default=100)] Test a sector of external NV" },
 //#endif
@@ -561,7 +561,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#endif   //( ENGINEERING_BUILD == 1 )
 //#endif   //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 ////   { "packettimeout", DBG_CommandLine_PacketTimeout,  "get (no args) or set (arg1) MAC Packet Timeout in ms" },
-//   { "part",         DBG_CommandLine_Partition,       "Prints partition data" },
+   { "part",         DBG_CommandLine_Partition,       "Prints partition data" },
 ////   { "phymaxtxlen",  DBG_CommandLine_GetPhyMaxTxPayload, "Usage:  'phymaxtxlen' get phy maximum TX payload" },
 //   { "phyreset",     DBG_CommandLine_PhyReset,        "phy reset" },
 ////   { "phystart",     DBG_CommandLine_PhyStart,        "phy start" },
@@ -667,7 +667,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#if ( PORTABLE_DCU == 1)
 //   { "dfwmonitormode",  DBG_CommandLine_dfwMonMode,    "enable (1) or disable (0) mode to only print DFW responses\n" },
 //#endif
-//   { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
+   { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
    { "virgin",       DBG_CommandLine_virgin,          "Erases flash chip and resets the micro" },
    { "virgindelay",  DBG_CommandLine_virginDelay,     "Erases signature; continues. Allows new code load and then virgin" },
 //#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
@@ -730,7 +730,7 @@ void DBG_CommandLineTask ( taskParameter )
 //   OS_TASK_Sleep ( 100 ); /* Correct a display issue with STRT trying to print reset reason */
 #if ( ( EP == 1 ) || ( PORTABLE_DCU == 0 ) )
 //   DBG_logPrintf( 'I', "############## APP STARTING ##############" );
-//   (void)DBG_CommandLine_Versions ( 0, argvar );
+   (void)DBG_CommandLine_Versions ( 0, argvar );
 #else
    DBG_logPrintf('R', "#####################MOBILE DCU TEST UNIT FIRMWARE#####################");
    (void)DBG_CommandLine_Versions ( 0, argvar );
@@ -1468,124 +1468,124 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //} /* end DBG_CommandLine_CpuLoadDisable () */
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_Partition
-//
-//   Purpose: This function will print out the Partition Table Information
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_Partition ( uint32_t argc, char *argv[] )
-//{
-//#ifdef TM_PARTITION_TBL
-//   ( void )PAR_ValidatePartitionTable();
-//#else
-//   DBG_logPrintf( 'R', "ERROR - Need to enable 'TM_PARTITION_TBL' in CompileSwitch.h" );
-//#endif
-//   return ( 0 );
-//} /* end DBG_CommandLine_Partition () */
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_NvRead
-//
-//   Purpose: Reads the NV memory
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
-//{
-//#if ( PARTITION_MANAGER == 1 )
-//   char     *endptr;
-//   uint8_t  buffer[ 64 ];        /* Data read from NV */
-//   uint8_t  respDataHex[ ( sizeof( buffer ) * 3 ) + ( sizeof( buffer ) / 16 ) + 1 ];
-//   uint32_t offset;
-//   uint16_t bytesLeft;           /* Running count of bytes read, decreasing   */
-//   uint16_t part;
-//   uint16_t cnt;
-//
-//   if ( 4 == argc )
-//   {
-//      PartitionData_t const *pPTbl_;
-//      part = ( uint16_t )strtoul( argv[1], &endptr, 0 );
-//
-//      if ( eSUCCESS == PAR_partitionFptr.parOpen( &pPTbl_, ( ePartitionName )part, 0L ) )
-//      {  //If this is NOT an internalFlash partition
-//         if ( 0 != memcmp (pPTbl_->PartitionType.pDevice, &_sIntFlashType[0], sizeof( pPTbl_->PartitionType.pDevice )) )
-//         {
-//            offset = strtoul( argv[2], &endptr, 0 );
-//            bytesLeft  = ( uint16_t )( strtoul( argv[3], &endptr, 0 ) );
-//            if ( offset < pPTbl_->lDataSize )
-//            {  //Offset is within partition data size
-//               if ( (offset + bytesLeft) > pPTbl_->lDataSize )
-//               {  //Correct for a length beyond the partitions data size
-//                  bytesLeft = ( uint16_t )( pPTbl_->lDataSize - offset );
-//                  DBG_logPrintf( 'I', "Limiting Read to Partition DataSize %d", bytesLeft );
-//               }
-//               while ( bytesLeft != 0 )
-//               {
-//                  cnt = min( bytesLeft, sizeof( buffer ) );
-//                  if ( eSUCCESS == PAR_partitionFptr.parRead( &buffer[0], offset, cnt, pPTbl_ ) )
-//                  {
-//                     uint8_t i;
-//                     uint8_t *pPtr;
-//                     for ( i = 0, pPtr = &respDataHex[ 0 ]; i < cnt; i++ )
-//                     {
-//                        if ( ( ( i % 16 ) == 0 ) && ( i != 0 ) )
-//                        {
-//                           pPtr += sprintf( ( char * )pPtr, "\n" );
-//                        }
-//                        pPtr += sprintf( ( char * )pPtr, "%02X ", buffer[ i ] );
-//                     }
-//                     *pPtr = 0;
-//                     DBG_logPrintf( 'R', "Partition: %d, Offset: 0x%x\n%s", part, offset, &respDataHex[0] );
-//                     OS_TASK_Sleep( 100 );
-//                     bytesLeft -= cnt;
-//                     offset += cnt;
-//                  }
-//                  else
-//                  {
-//                     DBG_logPrintf( 'R', "Error Reading Partition at %s", argv[2] );
-//                  }
-//               }
-//            }
-//            else
-//            {
-//               DBG_logPrintf( 'R', "Error, Offset beyond partition data size" );
-//            }
-//         }
-//         else
-//         {
-//            DBG_logPrintf( 'R', "Error, Partition is Read Protected" );
-//         }
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Error Opening Partition" );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "USAGE: nvr id start len" );
-//   }
-//#endif
-//   return ( 0 );
-//} /* end DBG_CommandLine_NvRead () */
-//
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_Partition
+
+   Purpose: This function will print out the Partition Table Information
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_Partition ( uint32_t argc, char *argv[] )
+{
+#ifdef TM_PARTITION_TBL
+   ( void )PAR_ValidatePartitionTable();
+#else
+   DBG_logPrintf( 'R', "ERROR - Need to enable 'TM_PARTITION_TBL' in CompileSwitch.h" );
+#endif
+   return ( 0 );
+} /* end DBG_CommandLine_Partition () */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_NvRead
+
+   Purpose: Reads the NV memory
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
+{
+#if ( PARTITION_MANAGER == 1 )
+   char     *endptr;
+   uint8_t  buffer[ 64 ];        /* Data read from NV */
+   uint8_t  respDataHex[ ( sizeof( buffer ) * 3 ) + ( sizeof( buffer ) / 16 ) + 1 ];
+   uint32_t offset;
+   uint16_t bytesLeft;           /* Running count of bytes read, decreasing   */
+   uint16_t part;
+   uint16_t cnt;
+
+   if ( 4 == argc )
+   {
+      PartitionData_t const *pPTbl_;
+      part = ( uint16_t )strtoul( argv[1], &endptr, 0 );
+
+      if ( eSUCCESS == PAR_partitionFptr.parOpen( &pPTbl_, ( ePartitionName )part, 0L ) )
+      {  //If this is NOT an internalFlash partition
+         if ( 0 != memcmp (pPTbl_->PartitionType.pDevice, &_sIntFlashType[0], sizeof( pPTbl_->PartitionType.pDevice )) )
+         {
+            offset = strtoul( argv[2], &endptr, 0 );
+            bytesLeft  = ( uint16_t )( strtoul( argv[3], &endptr, 0 ) );
+            if ( offset < pPTbl_->lDataSize )
+            {  //Offset is within partition data size
+               if ( (offset + bytesLeft) > pPTbl_->lDataSize )
+               {  //Correct for a length beyond the partitions data size
+                  bytesLeft = ( uint16_t )( pPTbl_->lDataSize - offset );
+                  DBG_logPrintf( 'I', "Limiting Read to Partition DataSize %d", bytesLeft );
+               }
+               while ( bytesLeft != 0 )
+               {
+                  cnt = min( bytesLeft, sizeof( buffer ) );
+                  if ( eSUCCESS == PAR_partitionFptr.parRead( &buffer[0], offset, cnt, pPTbl_ ) )
+                  {
+                     uint8_t i;
+                     uint8_t *pPtr;
+                     for ( i = 0, pPtr = &respDataHex[ 0 ]; i < cnt; i++ )
+                     {
+                        if ( ( ( i % 16 ) == 0 ) && ( i != 0 ) )
+                        {
+                           pPtr += sprintf( ( char * )pPtr, "\n" );
+                        }
+                        pPtr += sprintf( ( char * )pPtr, "%02X ", buffer[ i ] );
+                     }
+                     *pPtr = 0;
+                     DBG_logPrintf( 'R', "Partition: %d, Offset: 0x%x\n%s", part, offset, &respDataHex[0] );
+                     OS_TASK_Sleep( 100 );
+                     bytesLeft -= cnt;
+                     offset += cnt;
+                  }
+                  else
+                  {
+                     DBG_logPrintf( 'R', "Error Reading Partition at %s", argv[2] );
+                  }
+               }
+            }
+            else
+            {
+               DBG_logPrintf( 'R', "Error, Offset beyond partition data size" );
+            }
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Error, Partition is Read Protected" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Error Opening Partition" );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "USAGE: nvr id start len" );
+   }
+#endif
+   return ( 0 );
+} /* end DBG_CommandLine_NvRead () */
+
 //#if (DBG_TESTS == 1)
 ///*******************************************************************************
 //
@@ -4532,66 +4532,66 @@ static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
 //} /* end DBG_CommandLine_HmcDemandCoin() */
 //#endif
 //#endif
-//
-//#if ( FILE_IO == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_PrintFiles
-//
-//   Purpose: This function will print out the File Tables from each partition
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_PrintFiles  ( uint32_t argc, char *argv[] )
-//{
-//#ifdef TM_PARTITION_USAGE
-//   if ( argc == 1 )  /* The number of arguments must be 4 */
-//   {
-//      FIO_printFileInfo();
-//   }
-//   else if ( argc == 2 )  /* The number of arguments must be 4 */
-//   {
-//      FIO_printFile( ( filenames_t )atoi( argv[1] ) );
-//   }
-//#else
-//   DBG_logPrintf( 'R', "Error - Macro 'TM_PARTITION_USAGE' must be enabled in CompileSwitch.h" );
-//#endif
-//   return ( 0 );
-//} /* end DBG_CommandLine_PrintFiles () */
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_DumpFiles
-//
-//   Purpose: This function will print out the contents of all the files in un-named partitions
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
-//{
-//#ifdef TM_PARTITION_USAGE
-//   if ( argc == 1 )
-//   {
-//      FIO_fileDump();
-//   }
-//#else
-//   DBG_logPrintf( 'R', "Error - Macro 'TM_PARTITION_USAGE' must be enabled in CompileSwitch.h" );
-//#endif
-//   return ( 0 );
-//}
-//#endif // FILE_IO == 1
+
+#if ( FILE_IO == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_PrintFiles
+
+   Purpose: This function will print out the File Tables from each partition
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_PrintFiles  ( uint32_t argc, char *argv[] )
+{
+#ifdef TM_PARTITION_USAGE
+   if ( argc == 1 )  /* The number of arguments must be 4 */
+   {
+      FIO_printFileInfo();
+   }
+   else if ( argc == 2 )  /* The number of arguments must be 4 */
+   {
+      FIO_printFile( ( filenames_t )atoi( argv[1] ) );
+   }
+#else
+   DBG_logPrintf( 'R', "Error - Macro 'TM_PARTITION_USAGE' must be enabled in CompileSwitch.h" );
+#endif
+   return ( 0 );
+} /* end DBG_CommandLine_PrintFiles () */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_DumpFiles
+
+   Purpose: This function will print out the contents of all the files in un-named partitions
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
+{
+#ifdef TM_PARTITION_USAGE
+   if ( argc == 1 )
+   {
+      FIO_fileDump();
+   }
+#else
+   DBG_logPrintf( 'R', "Error - Macro 'TM_PARTITION_USAGE' must be enabled in CompileSwitch.h" );
+#endif
+   return ( 0 );
+}
+#endif // FILE_IO == 1
 //#if (EP == 1)
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 ///*******************************************************************************
@@ -5349,77 +5349,78 @@ static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //} /* end DBG_CommandLine_dfwMonMode () */
 //#endif
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_Versions
-//
-//   Purpose: This function will print out the current versions of several components
-//            in the project
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
-//{
-//#if 0
-//   uint8_t                    string[VER_HW_STR_LEN];
-//   firmwareVersion_u          ver;
-//   const firmwareVersionDT_s *dt;
-//
-//   ver = VER_getFirmwareVersion(eFWT_APP);
-//   dt  = VER_getFirmwareVersionDT();
-//   DBG_logPrintf( 'R', "RF Electric App V%02d.%02d.%04d Built %s %s",
-//                  ver.field.version, ver.field.revision, ver.field.build, &dt->date[0], &dt->time[0]);
-//// K22 EPs and 9975T don't have a bootloader
-//#if ( !(( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )) )
-//   ver = VER_getFirmwareVersion(eFWT_BL);
-//
-//   DBG_logPrintf( 'R', "RF Electric BL  V%02u.%02u.%04u",
-//                  ver.field.version, ver.field.revision, ver.field.build);
-//#endif
-//   ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
-//   DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] );
-//   DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
-//                  BSP_Get_BspRevision(), BSP_Get_IoRevision(), BSP_Get_PspRevision(), __VER__ );
-//   DBG_logPrintf( 'R', "MQX=%s MQXgen=%s MQXLibraryDate=%s",
-//                  OS_Get_OsVersion(), OS_Get_OsGenRevision(), OS_Get_OsLibDate() );
-//   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );
-//
-//#if ( DCU == 1 )
-//   DBG_logPrintf( 'R', "TBImageTarget: %s", VER_strGetDCUVersion() );
-//#endif
-//#if ( PORTABLE_DCU == 1 )
-//   DBG_logPrintf( 'R', "Portable DCU" );
-//#endif
-//#if ( MFG_MODE_DCU == 1 )
-//   DBG_logPrintf( 'R', "Mfg Test DCU" );
-//#endif
-//#if ( DFW_TEST_KEY == 1 )
-//   DBG_logPrintf( 'R', "DFW Test Enabled" );
-//#endif
-//#if ( OTA_CHANNELS_ENABLED == 1 )
-//   DBG_logPrintf( 'R', "OTA Channels Enabled" );
-//#endif
-//
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )
-//   DBG_logPrintf ('R', "HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A");
-//#endif
-//
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//   DBG_logPrintf ('R', "HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_B");
-//#endif
-//
-//#endif // #if 0
-//   return ( 0 );
-//} /* end DBG_CommandLine_Versions () */
-//
-//
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_Versions
+
+   Purpose: This function will print out the current versions of several components
+            in the project
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
+{
+#if 1
+   uint8_t                    string[VER_HW_STR_LEN];
+   firmwareVersion_u          ver;
+   const firmwareVersionDT_s *dt;
+
+   ver = VER_getFirmwareVersion(eFWT_APP);
+   dt  = VER_getFirmwareVersionDT();
+   DBG_logPrintf( 'R', "RF Electric App V%02d.%02d.%04d Built %s %s",
+                  ver.field.version, ver.field.revision, ver.field.build, &dt->date[0], &dt->time[0]);
+// K22 EPs and 9975T don't have a bootloader
+#if ( !(( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )) )
+   ver = VER_getFirmwareVersion(eFWT_BL);
+
+   DBG_logPrintf( 'R', "RF Electric BL  V%02u.%02u.%04u",
+                  ver.field.version, ver.field.revision, ver.field.build);
+#endif
+   ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+   DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] );
+#if 0  // TODO: RA6: Add the following lines for RA6 and FreeRTOS
+   DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
+                  BSP_Get_BspRevision(), BSP_Get_IoRevision(), BSP_Get_PspRevision(), __VER__ );
+   DBG_logPrintf( 'R', "MQX=%s MQXgen=%s MQXLibraryDate=%s",
+                  OS_Get_OsVersion(), OS_Get_OsGenRevision(), OS_Get_OsLibDate() );
+   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );  // TODO: RA6: Enable this line
+#endif
+#if ( DCU == 1 )
+   DBG_logPrintf( 'R', "TBImageTarget: %s", VER_strGetDCUVersion() );
+#endif
+#if ( PORTABLE_DCU == 1 )
+   DBG_logPrintf( 'R', "Portable DCU" );
+#endif
+#if ( MFG_MODE_DCU == 1 )
+   DBG_logPrintf( 'R', "Mfg Test DCU" );
+#endif
+#if ( DFW_TEST_KEY == 1 )
+   DBG_logPrintf( 'R', "DFW Test Enabled" );
+#endif
+#if ( OTA_CHANNELS_ENABLED == 1 )
+   DBG_logPrintf( 'R', "OTA Channels Enabled" );
+#endif
+
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )
+   DBG_logPrintf ('R', "HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A");
+#endif
+
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+   DBG_logPrintf ('R', "HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_B");
+#endif
+
+#endif // #if 0
+   return ( 0 );
+} /* end DBG_CommandLine_Versions () */
+
+
 //#if (EP == 1)
 //static const char * const ResetReasons[] =
 //{
@@ -9978,59 +9979,59 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 //}
 //#endif
 //#endif // (EP == 1)
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_Buffers
-//
-//   Purpose: This function displays the available free internal RAM
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_Buffers( uint32_t argc, char *argv[] )
-//{
-//   bufferStats_t bufferStats;
-//   uint8_t i;
-//
-//   BM_getStats( &bufferStats );
-//
-//   DBG_printf( "    Alloc Fail App: %u", bufferStats.allocFailApp );
-//   DBG_printf( "  Alloc Fail Debug: %u", bufferStats.allocFailDebug );
-//   DBG_printf( "  Buffer Free Fail: %u", bufferStats.freeFail );
-//   DBG_printf( "Buffer Double Free: %u", bufferStats.freeDoubleFree );
-//
-//   for ( i = 0; i < BUFFER_N_POOLS; ++i )
-//   {
-//      DBG_printf( "Pool: %2u  "
-//                  "size/cnt/type: %4u / %4u / %u  "
-//                  "A-Ok/F-Ok:  %10u / %10u  "
-//                  "A-Fail/F-Fail: %6u / %6u  "
-//                  "Cur/Max: %4u / %4u",
-//                  i,
-//                  BM_bufferPoolParams[i].size,
-//                  BM_bufferPoolParams[i].cnt,
-//                  ( uint16_t ) BM_bufferPoolParams[i].type,
-//                  bufferStats.pool[i].allocOk,
-//                  bufferStats.pool[i].freeOk,
-//                  bufferStats.pool[i].allocFail,
-//                  bufferStats.pool[i].freeFail,
-//                  bufferStats.pool[i].currAlloc,
-//                  bufferStats.pool[i].highwater );
-//      // These lines are pretty long (about 130 char) and there might not be enough buffer avaiable to print all at once so throttle the output.
-//      OS_TASK_Sleep(TEN_MSEC); // About the time needed to print a line
-//   }
-//
-//   BM_showAlloc((bool)true);
-//
-//   return ( 0 );
-//}
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_Buffers
+
+   Purpose: This function displays the available free internal RAM
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_Buffers( uint32_t argc, char *argv[] )
+{
+   bufferStats_t bufferStats;
+   uint8_t i;
+
+   BM_getStats( &bufferStats );
+
+   DBG_printf( "    Alloc Fail App: %u", bufferStats.allocFailApp );
+   DBG_printf( "  Alloc Fail Debug: %u", bufferStats.allocFailDebug );
+   DBG_printf( "  Buffer Free Fail: %u", bufferStats.freeFail );
+   DBG_printf( "Buffer Double Free: %u", bufferStats.freeDoubleFree );
+
+   for ( i = 0; i < BUFFER_N_POOLS; ++i )
+   {
+      DBG_printf( "Pool: %2u  "
+                  "size/cnt/type: %4u / %4u / %u  "
+                  "A-Ok/F-Ok:  %10u / %10u  "
+                  "A-Fail/F-Fail: %6u / %6u  "
+                  "Cur/Max: %4u / %4u",
+                  i,
+                  BM_bufferPoolParams[i].size,
+                  BM_bufferPoolParams[i].cnt,
+                  ( uint16_t ) BM_bufferPoolParams[i].type,
+                  bufferStats.pool[i].allocOk,
+                  bufferStats.pool[i].freeOk,
+                  bufferStats.pool[i].allocFail,
+                  bufferStats.pool[i].freeFail,
+                  bufferStats.pool[i].currAlloc,
+                  bufferStats.pool[i].highwater );
+      // These lines are pretty long (about 130 char) and there might not be enough buffer avaiable to print all at once so throttle the output.
+      OS_TASK_Sleep(TEN_MSEC); // About the time needed to print a line
+   }
+
+   BM_showAlloc((bool)true);
+
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_FreeRAM

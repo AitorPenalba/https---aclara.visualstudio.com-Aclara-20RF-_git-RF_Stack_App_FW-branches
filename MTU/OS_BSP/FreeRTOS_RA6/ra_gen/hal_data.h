@@ -4,12 +4,12 @@
 #include <stdint.h>
 #include "bsp_api.h"
 #include "common_data.h"
-#include "r_icu.h"
-#include "r_external_irq_api.h"
 #include "r_lpm.h"
 #include "r_lpm_api.h"
 #include "r_agt.h"
 #include "r_timer_api.h"
+#include "r_icu.h"
+#include "r_external_irq_api.h"
 #include "r_crc.h"
 #include "r_crc_api.h"
 #include "r_flash_hp.h"
@@ -30,6 +30,7 @@
 #include "r_iic_master.h"
 #include "r_i2c_master_api.h"
 FSP_HEADER
+
 /** External IRQ on ICU Instance. */
 extern const external_irq_instance_t hmc_trouble_busy;
 
@@ -38,8 +39,21 @@ extern icu_instance_ctrl_t hmc_trouble_busy_ctrl;
 extern const external_irq_cfg_t hmc_trouble_busy_cfg;
 
 #ifndef meter_trouble_isr_busy
-void meter_trouble_isr_busy(external_irq_callback_args_t * p_args);
+void meter_trouble_isr_busy( external_irq_callback_args_t* p_args );
 #endif
+
+/** UART on SCI Instance. */
+extern const uart_instance_t      g_uart_lpm_dbg;
+
+/** Access the UART instance using these structures when calling API functions directly (::p_api is not used). */
+extern sci_uart_instance_ctrl_t     g_uart_lpm_dbg_ctrl;
+extern const uart_cfg_t g_uart_lpm_dbg_cfg;
+extern const sci_uart_extended_cfg_t g_uart_lpm_dbg_cfg_extend;
+
+#ifndef lpm_dbg_uart_callback
+void lpm_dbg_uart_callback( uart_callback_args_t* p_args );
+#endif
+
 /** lpm Instance */
 extern const lpm_instance_t g_lpm_DeepSWStandby;
 

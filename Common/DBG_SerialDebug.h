@@ -54,7 +54,7 @@
 
 
 #define APP_PRINT(fmt, ...)                 DBG_log( 0, ADD_LF, fmt, ##__VA_ARGS__);
-#define APP_ERR_PRINT(fmt, ...)             DBG_log( 'E', ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)
+#define APP_ERR_PRINT(fmt, ...)             DBG_log( 'E', ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__ )
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */

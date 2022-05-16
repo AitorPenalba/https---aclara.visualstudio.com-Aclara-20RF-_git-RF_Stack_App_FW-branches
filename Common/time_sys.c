@@ -32,7 +32,7 @@
 #include "time_util.h"
 #include "BSP_aclara.h"
 #include "time_DST.h"
-#include "mac.h"
+#include "MAC.h"
 #include "DBG_SerialDebug.h"
 #if ( EP == 1 )
 #include "portable_aclara.h"
@@ -331,13 +331,11 @@ returnStatus_t TIME_SYS_Init( void )
    /* Create counting semaphore to keep track of system ticks & mutex to protect Sys Time modules critical section */
    if ( (bool)false == _timeSysSemCreated )
    {
-      // counting becuase need to ensure time_sys does not fall behind
-      if ( OS_SEM_Create(&_timeSysSem, 1000) && OS_MUTEX_Create(&_timeVarsMutex) )
+      // counting because need to ensure time_sys does not fall behind
+      if ( OS_SEM_Create(&_timeSysSem, 1000) && OS_MUTEX_Create(&_timeVarsMutex) )  /* TODO: RA6E1: Review the need of 1000 as max value of counting semaphore */
       {  //Semaphore and Mutex create succeeded, initialize the data structure
 #if (EP == 1)
-#if 0 // TODO: RA6E1 - File support to be added
          FileStatus_t   fileStatusCfg;  //Contains the file status
-#endif
          statusTimeRequest_ = 0; //Default, time not needed
          _nuDST_TimeChanged = (bool)false; //DST related time change notification
 #endif
@@ -355,7 +353,6 @@ returnStatus_t TIME_SYS_Init( void )
          setSysTime( &timeSys );
 
 #if (EP == 1)
-#if 0 // TODO: RA6E1 - File support to be added
          if (eSUCCESS == FIO_fopen(&fileHndlTimeSys_, ePART_SEARCH_BY_TIMING, (uint16_t)eFN_TIME_SYS,
                                    (lCnt)sizeof(timeVars_), FILE_IS_NOT_CHECKSUMED,
                                    TIME_SYS_FILE_UPDATE_RATE, &fileStatusCfg) )
@@ -377,8 +374,6 @@ returnStatus_t TIME_SYS_Init( void )
                retVal = FIO_fread(&fileHndlTimeSys_, (uint8_t *)&timeVars_, 0, (lCnt)sizeof(timeVars_));
             }
          }
-#endif
-         retVal = eSUCCESS; // TODO: RA6E1 - Remove this once file support added. Handle #if and #else cases accordingly
 #else
          timeVars_.timeLastUpdated = 0;
          timeVars_.timeState       = TIME_STATE_INVALID;
