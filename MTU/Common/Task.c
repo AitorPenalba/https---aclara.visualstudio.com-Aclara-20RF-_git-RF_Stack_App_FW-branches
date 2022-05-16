@@ -54,7 +54,7 @@
 #include "MFG_Port.h"
 #endif
 
-//#include "timer_util.h"
+#include "timer_util.h"
 
 #if ENABLE_TIME_SYS_TASKS
 #include "time_sys.h"
@@ -327,7 +327,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    //{ ePWROR_TSK_IDX,            PWROR_Task,                   1700,  12, (char *)pTskName_PwrRestore, DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_TMR_TASKS
-   //{ eTMR_TSK_IDX,              TMR_HandlerTask,              1200,  14, (char *)pTskName_Tmr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eTMR_TSK_IDX,              TMR_HandlerTask,              1200,  14, (char *)pTskName_Tmr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
    /* SELF_testTask lowers its priority to just above the IDLE task after its first iteration.  */
    { eTEST_TSK_IDX,             SELF_testTask,                1700,  14, (char *)pTskName_Test,   DEFAULT_ATTR, 0, 0 },
@@ -342,13 +342,17 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 #endif
 
-//   { eSD_PS_LISTENER_IDX,       SD_PhaseSamplesListenerTask,   600,  16, (char *)pTskName_SdPsListener,        DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-//   { eSD_PREAM_DET_IDX,         SD_PreambleDetectorTask,      6300,  18, (char *)pTskName_SdPreambleDetector,  DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 }, // |  Parameters here are the ID's
-//   { eSD_SYNC_PAYL_DEMOD1_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod1, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 1, 0 }, // |  ID's 0-2, run sequentially by the preprocessor
-//   { eSD_SYNC_PAYL_DEMOD2_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod2, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 2, 0 }, // V  The preamble detector is always 0, regardles of what is passed
+#if 0 // TODO: RA6E1 Enable once PHY_Init gets succeeded
+   { eSD_PS_LISTENER_IDX,       SD_PhaseSamplesListenerTask,   600,  16, (char *)pTskName_SdPsListener,        DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eSD_PREAM_DET_IDX,         SD_PreambleDetectorTask,      6300,  18, (char *)pTskName_SdPreambleDetector,  DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 }, // |  Parameters here are the ID's
+   { eSD_SYNC_PAYL_DEMOD1_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod1, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 1, 0 }, // |  ID's 0-2, run sequentially by the preprocessor
+   { eSD_SYNC_PAYL_DEMOD2_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod2, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 2, 0 }, // V  The preamble detector is always 0, regardles of what is passed
+#endif
 
    { eSM_TSK_IDX,               SM_Task,                      1000,  20, (char *)pTskName_Sm,     DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-//   { ePHY_TSK_IDX,              PHY_Task,                     2100,  21, (char *)pTskName_Phy,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+#if 0 // TODO: RA6E1 Enable once PHY_Init gets succeeded
+   { ePHY_TSK_IDX,              PHY_Task,                     2100,  21, (char *)pTskName_Phy,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+#endif
    { eMAC_TSK_IDX,              MAC_Task,                     1500,  22, (char *)pTskName_Mac,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
@@ -370,7 +374,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
 #if ENABLE_ALRM_TASKS
-   //{ eALRM_TSK_IDX,             ALRM_RealTimeTask,            1100,  30, (char *)pTskName_Alrm,   DEFAULT_ATTR, 0, 0 },
+   { eALRM_TSK_IDX,             ALRM_RealTimeTask,            1100,  30, (char *)pTskName_Alrm,   DEFAULT_ATTR, 0, 0 },
 #endif
 #endif
 
@@ -393,10 +397,10 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  35, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_PAR_TASKS
-   //{ ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },
+   { ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if (SIGNAL_NW_STATUS == 1)
-   //{ eNW_CON_TSK_IDX,           SM_NwState_Task,               400,  36, (char *)pTskName_NwConn,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eNW_CON_TSK_IDX,           SM_NwState_Task,               400,  36, (char *)pTskName_NwConn,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 #if ENABLE_DFW_TASKS
    //{ eDFW_TSK_IDX,              DFWA_task,                    5400,  37, (char *)pTskName_Dfw,    DEFAULT_ATTR, 0, 0 },

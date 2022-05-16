@@ -45,7 +45,7 @@
 //#include "ecc108_lib_return_codes.h"
 //#include "ecc108_mqx.h"
 #include "ecc108_apps.h"
-//#include "evl_event_log.h"
+#include "evl_event_log.h"
 //#include "time_sys.h"
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
@@ -291,7 +291,6 @@ void SELF_testTask( taskParameter )
 ***********************************************************************************************************************/
 static uint16_t RunSelfTest()
 {
-#if 0 // TODO: RA6 Melvin: EVL module to be added
    EventData_s         eventData;
    EventKeyValuePair_s keyVal;                            /* Logging only one NVP */
 
@@ -308,11 +307,9 @@ static uint16_t RunSelfTest()
 
    (void)memset( ( uint8_t * )&eventData, 0, sizeof( eventData ) );
    (void)memset( ( uint8_t * )&keyVal, 0, sizeof( keyVal ) );
-#endif
    /* Test external NV memory */
    if( eSUCCESS == SELF_testNV() )
    {
-#if 0 // TODO: RA6 Melvin: EVL module to be added
       if ( SELF_TestData.lastResults.uAllResults.Bits.nvFail )  //If this had failed...
       {
 
@@ -335,7 +332,6 @@ static uint16_t RunSelfTest()
          *( uint16_t * )keyVal.Value           = SELF_TestData.nvFail;
          (void)EVL_LogEvent( 180, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
       }
-#endif
    }
 #if 0 // TODO: RA6 Melvin: new self test modules to be added
 
@@ -466,6 +462,7 @@ static uint16_t RunSelfTest()
 #endif
    return SELF_TestData.lastResults.uAllResults.Bytes;
 #else
+   DBG_logPrintf( 'I', "Self Test completed" );
    return 0;
 #endif
 }

@@ -27,9 +27,9 @@
 #include <stdbool.h>
 #include <string.h>
 #ifndef __BOOTLOADER
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
-#endif 
+#endif
 #endif /* __BOOTLOADER  */
 #define partitions_GLOBAL
 #include "partitions.h"
@@ -148,7 +148,7 @@ static const uint8_t _errorCacheData[] = "Cache Data ptr";
    Returns: None
 
  **********************************************************************************************************************/
-void PAR_appTask( uint32_t Arg0 )
+void PAR_appTask( taskParameter )
 {
    timer_t tmrSettings;
 

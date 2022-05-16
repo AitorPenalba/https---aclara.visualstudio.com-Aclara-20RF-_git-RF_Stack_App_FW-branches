@@ -41,7 +41,7 @@ returnStatus_t SM_init( void );
 #endif
 
 void SM_Task ( taskParameter );
-void SM_NwState_Task(uint32_t arg0);
+void SM_NwState_Task(taskParameter);
 void SM_WaitForStackInitialized(void);
 
 #ifdef SM_Protocol_H

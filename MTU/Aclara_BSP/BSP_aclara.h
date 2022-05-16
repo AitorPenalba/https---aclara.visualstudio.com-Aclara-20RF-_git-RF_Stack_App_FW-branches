@@ -220,7 +220,9 @@ extern void        LED_setBlueLedStatus      ( enum_BlueLedStatus_t status);
 extern void        LED_setRedLedStatus       ( enum_RedLedStatus_t status);
 extern void        LED_enableManualControl   ( void );
 extern void        LED_checkModeStatus       ( void );
-
+#if ( RTOS_SELECTION == FREE_RTOS )
+extern void        LED_vApplicationTickHook  ( void );
+#endif
 extern uint32_t    RNG_GetRandom_32bit       ( void );
 extern void        RNG_GetRandom_Array       ( uint8_t *DataPtr, uint16_t DataLen );
 

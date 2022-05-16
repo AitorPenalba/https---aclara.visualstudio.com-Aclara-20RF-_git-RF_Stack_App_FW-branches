@@ -121,7 +121,7 @@ typedef enum
 /* FUNCTION PROTOTYPES */
 extern returnStatus_t   ALRM_init ( void );
 returnStatus_t          ALRM_clearAllAlarms ( void );
-extern void             ALRM_RealTimeTask ( uint32_t Arg0 );
+extern void             ALRM_RealTimeTask ( taskParameter );
 extern uint8_t          ALRM_AddOpportunisticAlarms(  uint16_t msgLen, uint16_t *alarmLen, uint8_t *alarmData, uint8_t *alarmID, EventMarkSent_s *markedSent );
 
 #endif /* this must be the last line of the file */

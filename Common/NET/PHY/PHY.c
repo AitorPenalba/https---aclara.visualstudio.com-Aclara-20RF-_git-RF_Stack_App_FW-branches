@@ -602,6 +602,7 @@ static struct{
   { RadioEvent_CTSLineLow,   8 } ,  // 0x01 << 19  PHY_RADIO_CTS_LINE_LOW     +8
 
   { RadioEvent_Int,   0 } ,  // 0x01 << 20  PHY_RADIO_INT_PENDING_BASE +0
+#if ( MCU_SELECTED == NXP_K24 )
   { RadioEvent_Int,   1 } ,  // 0x01 << 21  PHY_RADIO_INT_PENDING_BASE +1
   { RadioEvent_Int,   2 } ,  // 0x01 << 22  PHY_RADIO_INT_PENDING_BASE +2
   { RadioEvent_Int,   3 } ,  // 0x01 << 23  PHY_RADIO_INT_PENDING_BASE +3
@@ -610,7 +611,16 @@ static struct{
   { RadioEvent_Int,   6 } ,  // 0x01 << 26  PHY_RADIO_INT_PENDING_BASE +6
   { RadioEvent_Int,   7 } ,  // 0x01 << 27  PHY_RADIO_INT_PENDING_BASE +7
   { RadioEvent_Int,   8 } ,  // 0x01 << 28  PHY_RADIO_INT_PENDING_BASE +8
-
+#elif ( MCU_SELECTED == RA6E1 )
+  { NULL,   0 } ,  // 0x01 << 21
+  { NULL,   0 } ,  // 0x01 << 22
+  { NULL,   0 } ,  // 0x01 << 23
+  { NULL,   0 } ,  // 0x01 << 24
+  { NULL,   0 } ,  // 0x01 << 25
+  { NULL,   0 } ,  // 0x01 << 26
+  { NULL,   0 } ,  // 0x01 << 27
+  { NULL,   0 } ,  // 0x01 << 28
+#endif
   { NULL,   0 } ,  // 0x01 << 29
   { NULL,   0 } ,  // 0x01 << 30
   { NULL,   0 } ,  // 0x01 << 31
@@ -1321,7 +1331,11 @@ void PHY_Task( taskParameter )
          PHY_TestMode(); // Run CW or PN9 test
 
          // Wait for a message to process
+#if ( MCU_SELECTED == NXP_K24 )
          event_flags = OS_EVNT_Wait ( &events, 0xFFFFFFFF, (bool)false , timeout );
+#elif ( MCU_SELECTED == RA6E1 ) // Only Radio 0 interrupt, also FreeRTOS events support only for 24 bits
+         event_flags = OS_EVNT_Wait ( &events, 0x00FFFFFF, (bool)false , timeout );
+#endif
 
          OS_MUTEX_Lock( &PHY_Mutex_ ); // Function will not return if it fails
 
@@ -2405,14 +2419,14 @@ static bool Process_CCAReq( PHY_Request_t const *pReq )
                   // Get noise estimate value
                   noiseEstimate = CachedAttr.NoiseEstimate[i];
 #if ( EP == 1 )
-        // Use a different noise estimate when in last gasp           
+        // Use a different noise estimate when in last gasp
 #if 0 // TODO: RA6E1 - lastgasp
                   if ( PWRLG_LastGasp() ) {
 #else // TODO: RA6E1 - lastgasp
                     if ( 0 ) {
 #endif
                 noiseEstimate = CachedAttr.NoiseEstimateBoostOn[i];
-                    }                
+                    }
 #endif
                   if (rssi_dbm >= (noiseEstimate+ConfigAttr.CcaOffset)) { // Test rssi against the noise of this channel
                      // channel is busy
@@ -4039,7 +4053,7 @@ bool PHY_Channel_Set(uint8_t index, uint16_t chan)
 #else // TODO: RA6E1 - lastgasp
       if ( 0 )
 #endif
-   
+
 #endif
    {  // Not in low power mode, so save this
       writeConfig();

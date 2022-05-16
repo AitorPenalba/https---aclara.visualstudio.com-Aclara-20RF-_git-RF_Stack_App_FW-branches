@@ -91,7 +91,7 @@
 #define SUPPORT_HEEP                      0 /* TODO: RA6E1: Temporary conditional*/
 #define INCLUDE_ECC                       0 /* TODO: RA6E1: Temporary conditional*/
 #define RTOS_SELECTION                    FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
-#define DBG_TESTS                         0
+#define DBG_TESTS                         1
 #define SEGGER_RTT                        0
 #define INCLUDE_SRFN_STACK                0 /* This is a conditional compilation for initial dev purpose only */
 // TODO: RA6 [name_Balaji]: Move to Appropriate location

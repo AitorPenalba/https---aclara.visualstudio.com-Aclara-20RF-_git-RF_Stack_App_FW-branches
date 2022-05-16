@@ -241,7 +241,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( HMC_ENG_init, STRT_FLAG_NONE ),
 #endif
    INIT( PAR_initRtos, STRT_FLAG_NONE ),
-//   INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
+   INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
 #if ( ENABLE_HMC_TASKS == 1 )
    INIT( DEMAND_init, STRT_FLAG_NONE ),
    INIT( ID_init, STRT_FLAG_NONE ),
@@ -620,6 +620,8 @@ void STRT_StartupTask ( taskParameter )
 #if (TM_LINKED_LIST == 1)
    OS_LINKEDLIST_Test();
 #endif
+   // TODO: RA6E1 - Verify why this sleep required which causes NV self test fails for the first time
+   OS_TASK_Sleep( 20 ); // Sleep for 20 msec before creating other tasks
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
 #if 0
    if (!initSuccess_)
