@@ -187,11 +187,10 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #endif
 
 #if ( TM_TIME_COMPOUND_TEST == 1 )
-#define HW_TICKCOUNT_MILLISEC    600000/portTICK_RATE_MS         /* Number of Hardware Ticks per millisec */
-#define HW_TICKCOUNT_MICROSEC    HW_TICKCOUNT_MILLISEC/1000      /* Number of Hardware Ticks per microsec */
 #define TICKCOUNT_SEC            200                             /* Number of TickCount per second */
 #define TICKCOUNT_MIN            TICKCOUNT_SEC*60                /* Number of TickCount per minute */
 #define TICKCOUNT_HOUR           TICKCOUNT_MIN*60                /* Number of TickCount per hour */
+#define MAX_SAMPLE_LOOP_COUNT    5                               /* Maximum Number of Sample for DBG_CommandLine_TimeElapsed */
 #endif
 
 /* MACRO DEFINITIONS */
@@ -540,9 +539,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "NumMac",          DBG_CommandLine_NumMac,       "Set/Get number of mac addresses emulated (1-50)" },
 //#endif
 //   { "nvr",          DBG_CommandLine_NvRead,          "NV memory Read: Params - Partition Addr Len" },
-//#ifdef TM_DVR_EXT_FL_UNIT_TEST
-//   { "nvtest",       DBG_CommandLine_NvTest,          "[count (default=100)] Test a sector of external NV" },
-//#endif
+#ifdef TM_DVR_EXT_FL_UNIT_TEST
+   { "nvtest",       DBG_CommandLine_NvTest,          "[count (default=100)] Test a sector of external NV" },
+#endif
 //   { "nwkget",       DBG_CommandLine_NwkGet,          "nwk get"  },
 //   { "nwkreset",     DBG_CommandLine_NwkReset,        "nwk reset"},
 //   { "nwkset",       DBG_CommandLine_NwkSet,          "nwk set"  },
@@ -1450,7 +1449,7 @@ uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
 }/* end DBG_CommandLine_CrcCalculate() */
 #endif
 
-#if ( TM_TIME_COMPOUND_TEST == 1)
+#if ( TM_TIME_COMPOUND_TEST == 1 )
 /*******************************************************************************
 
    Function name: DBG_CommandLine_TimeElapsed
@@ -1479,24 +1478,24 @@ uint32_t DBG_CommandLine_TimeElapsed( uint32_t argc, char *argv[] )
    }
    else if ( argc == 2 )
    {
-      /* The number of arguments must be 2 */
+      /* The number of arguments must be 1 */
       delayMilliSec = ( uint32_t )atoi( argv[1] );
       /* Sampling for 5 times */
-      for( int loopCount = 0; loopCount<5 ; loopCount++ )
+      for( int loopCount = 0; loopCount < MAX_SAMPLE_LOOP_COUNT ; loopCount++ )
       {
          milliSec1 = OS_TICK_Get_ElapsedMilliseconds();
          /* BSP delay in milliseconds */
          R_BSP_SoftwareDelay( delayMilliSec,BSP_DELAY_UNITS_MILLISECONDS );
          milliSec2 = OS_TICK_Get_ElapsedMilliseconds();
          /* Storing the difference in array */
-         diffInSec[loopCount] = milliSec2 - milliSec1;
-         diffAvg += diffInSec[loopCount]; 
+         diffInSec[ loopCount ] = milliSec2 - milliSec1;
+         diffAvg += diffInSec[ loopCount ]; 
       }
       /* Average of Sampling */
-      diffAvg = diffAvg / 5;
+      diffAvg = diffAvg / MAX_SAMPLE_LOOP_COUNT;
       diffMilliSec = milliSec2 - milliSec1;
       /* Considering success if difference is one */
-      if ( diffAvg == diffMilliSec || ( diffAvg == diffMilliSec+1 ) || diffAvg == ( diffMilliSec-1 ) )
+      if ( ( diffAvg == diffMilliSec ) || ( diffAvg == ( diffMilliSec + 1 ) ) || ( diffAvg == ( diffMilliSec - 1 ) ) )
       {
          DBG_logPrintf( 'R', "Test Success!" );
          retVal = eSUCCESS;
@@ -1542,18 +1541,18 @@ uint32_t DBG_CommandLine_TimeNanoSec( uint32_t argc, char *argv[] )
    }
    else if ( argc == 2 )
    {
-      /* The number of arguments must be 2 */
+      /* The number of arguments must be 1 */
       delayNanoSec = ( uint32_t )atoi( argv[1] );
       /* Set OS_TICK_Struct to zero */
-      memset(&tickValue1, 0, sizeof tickValue1);
-      memset(&tickValue2, 0, sizeof tickValue2);
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
       /* Gets Previous value */
-      OS_TICK_Get_CurrentElapsedTicks(&tickValue1);
+      OS_TICK_Get_CurrentElapsedTicks( &tickValue1 );
       /* BSP delay in milliseconds */
-      R_BSP_SoftwareDelay(delayNanoSec,BSP_DELAY_UNITS_MICROSECONDS);
+      R_BSP_SoftwareDelay( delayNanoSec, BSP_DELAY_UNITS_MICROSECONDS );
       /* Gets current value */
-      OS_TICK_Get_CurrentElapsedTicks(&tickValue2);
-      diffInSec = OS_TICK_Get_Diff_InNanoseconds(&tickValue1,&tickValue2);
+      OS_TICK_Get_CurrentElapsedTicks( &tickValue2 );
+      diffInSec = OS_TICK_Get_Diff_InNanoseconds( &tickValue1, &tickValue2 );
       /* If delay and difference are same */
       if ( diffInSec == delayNanoSec )
       {
@@ -1595,6 +1594,7 @@ uint32_t DBG_CommandLine_TimeMicroSec( uint32_t argc, char *argv[] )
    uint64_t delayMicroSec2;
    int64_t diffInArg;
    uint32_t diffInSec;
+   uint32_t sysTickLoad;
    if ( argc == 1 )
    {
       /* No arguments */
@@ -1606,22 +1606,23 @@ uint32_t DBG_CommandLine_TimeMicroSec( uint32_t argc, char *argv[] )
       delayMicroSec1 = ( uint64_t )atoll( argv[1] );
       delayMicroSec2 = ( uint64_t )atoll( argv[2] );
       /* Set OS_TICK_Struct to zero */
-      memset(&tickValue1, 0, sizeof tickValue1);
-      memset(&tickValue2, 0, sizeof tickValue2);
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
       diffInArg = 0;
       diffInArg = ( int64_t ) ( delayMicroSec2 - delayMicroSec1 ) ;
       if ( diffInArg < 0 )
       {
          diffInArg = 0;
       }
-      delayMicroSec1 = delayMicroSec1 * HW_TICKCOUNT_MICROSEC;
-      delayMicroSec2 = delayMicroSec2 * HW_TICKCOUNT_MICROSEC;
       taskENTER_CRITICAL( );
-      tickValue1.tickCount = delayMicroSec1 / ( SysTick->LOAD + 1 ) ;
-      delayMicroSec1 = delayMicroSec1 % ( SysTick->LOAD + 1 );
-      tickValue2.tickCount = delayMicroSec2 / ( SysTick->LOAD + 1 ) ;
-      delayMicroSec2 = delayMicroSec2 % ( SysTick->LOAD + 1 );
+      sysTickLoad = SysTick->LOAD + 1;
       taskEXIT_CRITICAL( );
+      delayMicroSec1 = delayMicroSec1 * ( ( sysTickLoad / portTICK_RATE_MS ) / 1000 );
+      delayMicroSec2 = delayMicroSec2 * ( ( sysTickLoad / portTICK_RATE_MS ) / 1000 );
+      tickValue1.tickCount = delayMicroSec1 / sysTickLoad ;
+      delayMicroSec1 = delayMicroSec1 % sysTickLoad;
+      tickValue2.tickCount = delayMicroSec2 / sysTickLoad ;
+      delayMicroSec2 = delayMicroSec2 % sysTickLoad;
       tickValue1.HW_TICKS = delayMicroSec1;
       tickValue2.HW_TICKS = delayMicroSec2;
       diffInSec = OS_TICK_Get_Diff_InMicroseconds( &tickValue2, &tickValue1 );
@@ -1666,6 +1667,7 @@ uint32_t DBG_CommandLine_TimeMilliSec( uint32_t argc, char *argv[] )
    uint64_t delayMilliSec2;
    int64_t diffInArg;
    uint32_t diffInSec;
+   uint32_t sysTickLoad;
    if ( argc == 1 )
    {
       /* No arguments */
@@ -1677,8 +1679,8 @@ uint32_t DBG_CommandLine_TimeMilliSec( uint32_t argc, char *argv[] )
       delayMilliSec1 = ( uint64_t )atoll( argv[1] );
       delayMilliSec2 = ( uint64_t )atoll( argv[2] );
       /* Set OS_TICK_Struct to zero */
-      memset(&tickValue1, 0, sizeof tickValue1);
-      memset(&tickValue2, 0, sizeof tickValue2);
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
       diffInArg = 0;
       diffInArg = ( int64_t ) ( delayMilliSec2 - delayMilliSec1 ) ;
       if ( diffInArg < 0 )
@@ -1687,12 +1689,11 @@ uint32_t DBG_CommandLine_TimeMilliSec( uint32_t argc, char *argv[] )
       }
       tickValue1.tickCount = delayMilliSec1 / 5;
       taskENTER_CRITICAL( );
-      tickValue1.HW_TICKS = ( SysTick->LOAD + 1 ) - (( delayMilliSec1 % 5 ) * HW_TICKCOUNT_MILLISEC);
+      sysTickLoad = SysTick->LOAD + 1;
       taskEXIT_CRITICAL( );
+      tickValue1.HW_TICKS = sysTickLoad - ( ( delayMilliSec1 % 5 ) * ( sysTickLoad / portTICK_RATE_MS ) );
       tickValue2.tickCount = delayMilliSec2 / 5;
-      taskENTER_CRITICAL( );
-      tickValue2.HW_TICKS = ( SysTick->LOAD + 1 ) - (( delayMilliSec2 % 5 ) * HW_TICKCOUNT_MILLISEC);
-      taskEXIT_CRITICAL( );
+      tickValue2.HW_TICKS = sysTickLoad - ( ( delayMilliSec2 % 5 ) * ( sysTickLoad / portTICK_RATE_MS ) );
       diffInSec = OS_TICK_Get_Diff_InMilliseconds(&tickValue1,&tickValue2);
       /* If delay and difference are same */
       if ( diffInSec == diffInArg )
@@ -1749,9 +1750,9 @@ uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
       delaySec1 = ( uint64_t )atoll( argv[1] );
       delaySec2 = ( uint64_t )atoll( argv[2] );
       /* Set OS_TICK_Struct to zero */
-      memset(&tickValue1, 0, sizeof tickValue1);
-      memset(&tickValue2, 0, sizeof tickValue2);
-      memset(&diffTickValue, 0, sizeof diffTickValue);
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
+      memset( &diffTickValue, 0, sizeof diffTickValue );
       diffInArg = 0;
       diffInArg = ( int64_t ) ( delaySec2 - delaySec1 ) ;
       if ( diffInArg < 0 )
@@ -1767,16 +1768,15 @@ uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
       delaySec2 = delaySec2 % UINT32_MAX;
       tickValue1.tickCount = delaySec1;
       tickValue2.tickCount = delaySec2;
-      diffInSec = OS_TICK_Get_Diff_InSeconds(&tickValue1,&tickValue2);
+      diffInSec = OS_TICK_Get_Diff_InSeconds( &tickValue1,&tickValue2 );
       /* Convert the diffInArg to OS Tick */
       diffInArg = diffInArg * TICKCOUNT_SEC;
       diffTickValue.xNumOfOverflows = diffInArg / UINT32_MAX ;
       /* Check for xNumOfOverflows */
-      if ( diffTickValue.xNumOfOverflows > 0)
+      if ( diffTickValue.xNumOfOverflows > 0 )
       {
-         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value" );
-         DBG_logPrintf( 'R', "Test Success!" );
-         retVal = eSUCCESS;
+         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
+         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
       }
 
       else
@@ -1832,12 +1832,12 @@ uint32_t DBG_CommandLine_TimeMin( uint32_t argc, char *argv[] )
    }
    else if ( argc == 3 )
    {
-      /* The number of arguments must be 1 */
+      /* The number of arguments must be 2 */
       delayMin1 = ( uint64_t )atoll( argv[1] );
       delayMin2 = ( uint64_t )atoll( argv[2] );
       /* Set OS_TICK_Struct to zero */
-      memset(&timeMin1, 0, sizeof timeMin1);
-      memset(&timeMin2, 0, sizeof timeMin2);
+      memset( &timeMin1, 0, sizeof timeMin1 );
+      memset( &timeMin2, 0, sizeof timeMin2 );
       diffInArg = 0;
       diffInArg = ( int64_t ) ( delayMin2 - delayMin1 ) ;
       if ( diffInArg < 0 )
@@ -1853,21 +1853,20 @@ uint32_t DBG_CommandLine_TimeMin( uint32_t argc, char *argv[] )
       delayMin2 = delayMin2 % UINT32_MAX;
       timeMin1.tickCount = delayMin1;
       timeMin2.tickCount = delayMin2;
-      diffInMin = OS_TICK_Get_Diff_InMinutes(&timeMin1,&timeMin2);
+      diffInMin = OS_TICK_Get_Diff_InMinutes( &timeMin1,&timeMin2 );
       /* Convert the diffInArg to OS Tick */
       diffInArg = diffInArg * TICKCOUNT_MIN;
       diffTickValue.xNumOfOverflows = diffInArg / UINT32_MAX ;
       /* Check for xNumOfOverflows */
       if ( diffTickValue.xNumOfOverflows > 0)
       {
-         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value" );
-         DBG_logPrintf( 'R', "Test Success!" );
-         retVal = eSUCCESS;
+         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
+         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
       }
       else
       {
          /* If delay and difference are same */
-         if (diffInMin == diffInArg_Check)
+         if ( diffInMin == diffInArg_Check )
          {
             DBG_logPrintf( 'R', "Test Success!" );
             retVal = eSUCCESS;
@@ -1922,8 +1921,8 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] )
       delayHour1 = ( uint64_t )atoll( argv[1] );
       delayHour2 = ( uint64_t )atoll( argv[2] );
       /* Set OS_TICK_Struct to zero */
-      memset(&timeHour1, 0, sizeof timeHour1);
-      memset(&timeHour2, 0, sizeof timeHour2);
+      memset( &timeHour1, 0, sizeof timeHour1 );
+      memset( &timeHour2, 0, sizeof timeHour2 );
       diffInArg = 0;
       diffInArg = ( int64_t ) ( delayHour2 - delayHour1 );
       /* If negative value assign zero */
@@ -1940,22 +1939,21 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] )
       delayHour2 = delayHour2 % UINT32_MAX;
       timeHour1.tickCount = delayHour1;
       timeHour2.tickCount = delayHour2;
-      diffInHour = OS_TICK_Get_Diff_InHours(&timeHour1,&timeHour2);
+      diffInHour = OS_TICK_Get_Diff_InHours( &timeHour1,&timeHour2 );
       /* Convert the diffInArg to OS Tick */
       diffInArg = diffInArg * TICKCOUNT_HOUR;
       diffTickValue.xNumOfOverflows = diffInArg / UINT32_MAX ;
       /* Check for xNumOfOverflows */
-      if ( diffTickValue.xNumOfOverflows > 0)
+      if ( diffTickValue.xNumOfOverflows > 0 )
       {
-         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value" );
-         DBG_logPrintf( 'R', "Test Success!" );
-         retVal = eSUCCESS;
+         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
+         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
       }
 
       else
       {
          /* If delay and difference are same */
-         if (diffInHour == diffInArg_Check)
+         if ( diffInHour == diffInArg_Check )
          {
             DBG_logPrintf( 'R', "Test Success!" );
             retVal = eSUCCESS;
@@ -1992,7 +1990,7 @@ uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] )
    OS_TICK_Struct timeMilliSec ;
    OS_TICK_Struct *isdelayValueSame ;
    OS_TICK_Struct_Ptr isdelayptr;
-   uint32_t delaySec1;
+   uint32_t argvMilliSec;
    uint32_t prevTickValue;
    uint32_t diffInTick;
    if ( argc == 1 )
@@ -2002,25 +2000,26 @@ uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] )
    }
    else if ( argc == 2 )
    {
-      /* The number of arguments must be 2 */
-      delaySec1 = ( uint32_t )atoi( argv[1] );
-      if( delaySec1 < 6)
+      /* The number of arguments must be 1 */
+      argvMilliSec = ( uint32_t )atoi( argv[1] );
+      if( argvMilliSec < portTICK_RATE_MS )
       {
-         /* Due to portTICK_RATE_MS accuracy values need to be greater than 5 */
-         DBG_logPrintf( 'R', "Value needs to be greater than 5 or portTICK_RATE_MS " );
+         /* Due to portTICK_RATE_MS accuracy values need to be 5 or greater than 5 
+          * as we are checking with millisec */
+         DBG_logPrintf( 'R', "Value needs to be 5 or greater than 5 which is portTICK_RATE_MS " );
       }
       else
       {
          /* Sets timeMilliSec to zero */
-         memset(&timeMilliSec, 0, sizeof timeMilliSec);
+         memset( &timeMilliSec, 0, sizeof timeMilliSec );
          /* Get Elapsed Ticks */
-         OS_TICK_Get_CurrentElapsedTicks(&timeMilliSec);
+         OS_TICK_Get_CurrentElapsedTicks( &timeMilliSec );
          prevTickValue = timeMilliSec.tickCount;
-         isdelayptr = OS_TICK_Add_msec_to_ticks( &timeMilliSec, delaySec1 );
+         isdelayptr = OS_TICK_Add_msec_to_ticks( &timeMilliSec, argvMilliSec );
          /* Get the difference between tickCounts */
          diffInTick = ( isdelayptr->tickCount ) - prevTickValue;
          /* If delay and difference are same */
-         if ( diffInTick == ( delaySec1/portTICK_RATE_MS ))
+         if ( diffInTick == ( argvMilliSec/portTICK_RATE_MS ))
          {
             DBG_logPrintf( 'R', "Test Success!" );
             retVal = eSUCCESS;
@@ -2065,18 +2064,18 @@ uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] )
    }
    else if ( argc == 2 )
    {
-      /* The number of arguments must be 2 */
+      /* The number of arguments must be 1 */
       delayMilliSec = ( uint32_t )atoi( argv[1] );
       /* Set OS_TICK_Struct to zero */
-      memset(&tickValue1, 0, sizeof tickValue1);
-      memset(&tickValue2, 0, sizeof tickValue2);
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
       /* Gets Previous value */
-      OS_TICK_Get_CurrentElapsedTicks(&tickValue1);
+      OS_TICK_Get_CurrentElapsedTicks( &tickValue1 );
       /* BSP Delay in milliseconds */
       R_BSP_SoftwareDelay( delayMilliSec,BSP_DELAY_UNITS_MILLISECONDS );
       /* Gets current value */
-      OS_TICK_Get_CurrentElapsedTicks(&tickValue2);
-      isTime2Greater = OS_TICK_Is_FutureTime_Greater(&tickValue1,&tickValue2);
+      OS_TICK_Get_CurrentElapsedTicks( &tickValue2 );
+      isTime2Greater = OS_TICK_Is_FutureTime_Greater( &tickValue1, &tickValue2 );
       if ( isTime2Greater == true )
       {
          DBG_logPrintf( 'R', "Test Success!" );
