@@ -10,7 +10,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2013-2020 Aclara.  All Rights Reserved.
+   Copyright 2013-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -34,11 +34,10 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-#include <stdbool.h>
 #include <string.h>
 #include "compiler_types.h"
 #include "error_codes.h"
-#include "App_Msg_Handler.h"
+#include "APP_MSG_Handler.h"
 #include "DBG_SerialDebug.h"
 #include "intf_cim_cmd.h"
 #include "buffer.h"
@@ -113,7 +112,7 @@ static OS_SEM_Obj PWROR_PWR_Sem;    /* Used to signal task that power task has b
 
  **********************************************************************************************************************/
 /*lint -esym(715,Arg0)  not referenced but needed by generic API  */
-void PWROR_Task( uint32_t Arg0 )
+void PWROR_Task( taskParameter )
 {
    sysTimeCombined_t    timeRestorationSysComb = 0; /* System time at entry to this task   */
    sysTimeCombined_t    outageTimeSysComb;
@@ -129,7 +128,7 @@ void PWROR_Task( uint32_t Arg0 )
    uint32_t             uSleepMilliseconds;  /* Random hold off time before sending restoration message. */
    uint32_t             fracSecs;
    uint32_t             outageTimeSec;       /* Outage time in seconds */
-   uint32_t             timeRestorationSec;  /* Restoratation time in seconds */
+   uint32_t             timeRestorationSec;  /* Restoration time in seconds */
    uint32_t             pwrEventDurationSec;    /* Duration of power event used to determine the kind of event */
    bool                 bOverflow;           /* Used in elapsed time calculation.   */
    bool                 bRTCValid;           /* Used in elapsed time calculation.   */
@@ -167,8 +166,8 @@ void PWROR_Task( uint32_t Arg0 )
                   OS_TICK_Get_CurrentElapsedTicks( &endTime ); /* Get "current" time   */
                   /* Compute seconds between entering this routine and now. This accounts for time to get signal from
                      PWR_task and waiting for RTC time valid and HMC startup.   */
-                  validRTCDeltaSec = _time_diff_seconds( &endTime, &startTime, &bOverflow );
-                  /* Restoration time was time at RTC valid. Subtract seconds from enterting task until now.   */
+                  validRTCDeltaSec = OS_TICK_Get_Diff_InSeconds( &startTime, &endTime );
+                  /* Restoration time was time at RTC valid. Subtract seconds from entering task until now.   */
                   timeRestorationSysComb -= ( sysTimeCombined_t )( int64_t )validRTCDeltaSec * TIME_TICKS_PER_SEC;
                }
                else
@@ -321,7 +320,15 @@ void PWROR_Task( uint32_t Arg0 )
       }
    }
    DBG_logPrintf( 'I', "Exiting." );
-
+#if ( RTOS_SELECTION == FREE_RTOS )
+   /* NOTE from FreeRTOS: Tasks must not attempt to return from their implementing
+   function or otherwise exit.  In newer FreeRTOS port
+   attempting to do so will result in an configASSERT() being
+   called if it is defined.  If it is necessary for a task to
+   exit then have the task call vTaskDelete( NULL ) to ensure
+   its exit is clean. */
+   OS_TASK_Exit();
+#endif
    /* TODO: While "returning" from a task automatically kills the task under MQX, this may require different handling
       under a different OS.  */
 }

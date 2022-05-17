@@ -112,9 +112,8 @@ extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write p
 returnStatus_t UART_init ( void )
 {
    returnStatus_t retVal = eSUCCESS; /* Start with pass status, and latch on any failure */
-#if ( RTOS_SELECTION == MQX_RTOS )
    uint8_t i;
-
+#if ( RTOS_SELECTION == MQX_RTOS )
    uint32_t Flags = 0;
 
    for ( i=0; i<(uint8_t)MAX_UART_ID; i++ )
@@ -165,9 +164,9 @@ returnStatus_t UART_init ( void )
       }
    }
 #elif (RTOS_SELECTION == FREE_RTOS)
-   for( int uartChannelNum = 0; uartChannelNum < MAX_UART_ID; uartChannelNum++ )
+   for( i = 0; i < (uint8_t)MAX_UART_ID; i++ )
    {
-      ( void )R_SCI_UART_Open( (void *)UartCtrl[ uartChannelNum ], (void *)UartCfg[ uartChannelNum ] );
+      ( void )R_SCI_UART_Open( (void *)UartCtrl[ i ], (void *)UartCfg[ i ] );
    }
 #endif
 
@@ -264,7 +263,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
    return ( DataSent );
 #elif ( MCU_SELECTED == RA6E1 )
    ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-   ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+   ( void )OS_SEM_Pend( &transferSem[ UartId ], 1000 ); // TODO: RA6E1: Review this change 
 
    return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif
@@ -578,24 +577,24 @@ uint8_t UART_open ( enum_UART_ID UartId )
 void user_uart_callback( uart_callback_args_t *p_args )
 {
 
-    /* Handle the UART event */
-     switch (p_args->event)
-    {
-        /* Receive complete */
-        case UART_EVENT_RX_COMPLETE:
-        {
-            break;
-        }
-        /* Transmit complete */
-        case UART_EVENT_TX_COMPLETE:
-        {
-            // TODO: RA6 [name_Balaji]: Discuss requirement for feature - print is completed or not
-            break;
-        }
-        default:
-        {
-        }
-    }
+   /* Handle the UART event */
+   switch (p_args->event)
+   {
+      /* Receive complete */
+      case UART_EVENT_RX_COMPLETE:
+      {
+         break;
+      }
+      /* Transmit complete */
+      case UART_EVENT_TX_COMPLETE:
+      {
+         // TODO: RA6 [name_Balaji]: Discuss requirement for feature - print is completed or not
+         break;
+      }
+      default:
+      {
+      }
+   }
 }/* end user_uart_callback () */
 
 #endif

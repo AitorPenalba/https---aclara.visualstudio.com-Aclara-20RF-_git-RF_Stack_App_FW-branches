@@ -1597,7 +1597,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 static void setBusyTimer( uint32_t busyTimer_uS )
 {
    busyTime_uS_ = busyTimer_uS;
-#if 0 // Melvin: revist with a OS Timer
+#if 0 // TODO: RA6E1: Melvin: revisit with a OS Timer
    EXT_FLASH_TIMER_DIS();
    EXT_FLASH_TIMER_COMPARE = busyTimer_uS / 1000;  /* 1mS timer, so convert to mS */
    EXT_FLASH_TIMER_RST();               /* Reset the timer */
@@ -1605,11 +1605,28 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
    EXT_FLASH_TIMER_EN();                /* Enable Interrupt & Start the timer. */
+#endif  // if 0
+
+#if USE_POWER_MODE
+   bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
 
+#if 0 /* TODO: RA6E1: DG: This is one of the procedures to change the AGT period according to the FSP Manual*/
+   timer_info_t   info;
+   uint32_t       timer_freq_hz;
+
+   (void) R_AGT_InfoGet(&g_timer0_ctrl, &info);
+
+   timer_freq_hz = info.clock_frequency;
+   uint32_t period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000);
+
+
+
+   R_AGT_PeriodSet( &g_timer0_ctrl, period_counts );
+#else
    /* Set the period of the AGT Timer. The timer is configured in microseconds in RASC Configurator */
    R_AGT_PeriodSet( &g_timer0_ctrl, busyTimer_uS );
-
+#endif
    /* Start the timer. */
    (void) R_AGT_Start(&g_timer0_ctrl);
 }
@@ -2096,12 +2113,12 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
                      failCount = incCountLimit( failCount, 0xffff );
 
                      DBG_printf( "NV Test - Compare failed at 0x%x, is = 0x%02x, s/b 0x%02x\n",
-                                 partitionData->PhyStartingAddress + j,
-                                 unitTestBuf[j], (uint8_t)( startPattern + j ) );
-                   }
+                                partitionData->PhyStartingAddress + j,
+                                unitTestBuf[j], (uint8_t)( startPattern + j ) );
                   }
                }
             }
+         }
 #if 0 /* DG: Dead Code */
          else
          {

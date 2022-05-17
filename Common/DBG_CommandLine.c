@@ -727,9 +727,9 @@ void DBG_CommandLineTask ( taskParameter )
 #endif
 
    /* Print out the version information one time at power up */
-//   OS_TASK_Sleep ( 100 ); /* Correct a display issue with STRT trying to print reset reason */
+   OS_TASK_Sleep ( 100 ); /* Correct a display issue with STRT trying to print reset reason */
 #if ( ( EP == 1 ) || ( PORTABLE_DCU == 0 ) )
-//   DBG_logPrintf( 'I', "############## APP STARTING ##############" );
+   DBG_logPrintf( 'I', "############## APP STARTING ##############" );
    (void)DBG_CommandLine_Versions ( 0, argvar );
 #else
    DBG_logPrintf('R', "#####################MOBILE DCU TEST UNIT FIRMWARE#####################");

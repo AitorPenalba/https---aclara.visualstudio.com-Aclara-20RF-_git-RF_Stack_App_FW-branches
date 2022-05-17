@@ -247,7 +247,7 @@ bool OS_TASK_IsCurrentTask ( char const *pTaskName );
 uint32_t OS_TASK_UpdateCpuLoad ( void );
 void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
 void OS_TASK_Summary ( bool safePrint );
-
+char* OS_TASK_GetTaskName ( void );
 void OS_TICK_Get_CurrentElapsedTicks ( OS_TICK_Struct *TickValue );
 uint32_t OS_TICK_Get_ElapsedMilliseconds ( void );
 uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );

@@ -70,7 +70,7 @@
 
 #define DBG_RSVD_SIZE 30
 #if( RTOS_SELECTION == FREE_RTOS )
-#define SERIAL_DBG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#define SERIAL_DBG_NUM_MSGQ_ITEMS 100 //NRJ: TODO Figure out sizing
 #else
 #define SERIAL_DBG_NUM_MSGQ_ITEMS 0
 #endif
@@ -324,7 +324,6 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
             /* DEVELOPER NOTE:  Update DBG_SIZE_OF_LINE_COUNT_AND_CATEGORY #def if you modify the below line */
             len += (uint16_t)snprintf( logPrintf_buf, (int32_t)sizeof( logPrintf_buf ), "[%05d %c]", ++line_num_, category );
          }
-#if 0  // TODO: RA6: Balaji: Enable the following code
          // Build time/data header
          if ( options & PRINT_DATE_TIME )
          {
@@ -338,9 +337,9 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
                                          RT_Clock.min  , //lint !e123
                                          RT_Clock.sec,
                                          RT_Clock.msec,
-                                         _task_get_template_ptr( _task_get_id() )->TASK_NAME );
+                                         OS_TASK_GetTaskName() );
+
          }
-#endif
          // Format rest of the string
          va_list  ap;
          va_start( ap, fmt );
@@ -459,8 +458,7 @@ static uint16_t addLogPrefixToString ( char category, char *pDst )
    sysTime_dateFormat_t RT_Clock;
    uint16_t             len = 0;
    (void)TIME_UTIL_GetTimeInDateFormat( &RT_Clock );
-   // TODO: RA6 [name_Balaji]: Integrate once _task API's are done
-#if 0
+
    len = ( uint16_t )sprintf(   pDst, "%04u/%02u/%02u %02u:%02u:%02u.%03u %s_TSK ",
                                 RT_Clock.year,
                                 RT_Clock.month,
@@ -469,8 +467,7 @@ static uint16_t addLogPrefixToString ( char category, char *pDst )
                                 RT_Clock.min  ,
                                 RT_Clock.sec,
                                 RT_Clock.msec,
-                                _task_get_template_ptr( _task_get_id() )->TASK_NAME );
-#endif
+                                OS_TASK_GetTaskName() );
    return( len );
 }  /*lint +esym(715,category) not referenced */
 /***********************************************************************************************************************
