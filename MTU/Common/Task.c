@@ -774,7 +774,7 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
 
    if(NULL != pTaskName)
    {  // specific task requested
-      static TaskHandle_t *taskHandlePtr;
+      static TaskHandle_t *taskHandlePtr  = NULL;
 
       if( 0 == strcmp("IDL", pTaskName ))  /* FreeRTOS creates the IDLE Task, hence its not in the list. Use different function */
       {
@@ -794,6 +794,7 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
          }
       }
    }
+   else
    {  // get info for current task
       OldPriority = FREE_RTOS_TASK_PRIORITY_CONVERT( uxTaskPriorityGet(NULL) );
       vTaskPrioritySet( NULL, (UBaseType_t)FREE_RTOS_TASK_PRIORITY_CONVERT( NewPriority ) );

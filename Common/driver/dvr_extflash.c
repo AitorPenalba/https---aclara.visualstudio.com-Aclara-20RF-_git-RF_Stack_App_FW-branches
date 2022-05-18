@@ -1607,11 +1607,10 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    EXT_FLASH_TIMER_EN();                /* Enable Interrupt & Start the timer. */
 #endif  // if 0
 
-#if USE_POWER_MODE
+#if USE_POWER_MODE  // TODO: RA6E1: Remove if the above TODO is resolved
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
 
-#if 0 /* TODO: RA6E1: DG: This is one of the procedures to change the AGT period according to the FSP Manual*/
    timer_info_t   info;
    uint32_t       timer_freq_hz;
 
@@ -1620,13 +1619,8 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    timer_freq_hz = info.clock_frequency;
    uint32_t period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000);
 
-
-
    R_AGT_PeriodSet( &g_timer0_ctrl, period_counts );
-#else
-   /* Set the period of the AGT Timer. The timer is configured in microseconds in RASC Configurator */
-   R_AGT_PeriodSet( &g_timer0_ctrl, busyTimer_uS );
-#endif
+
    /* Start the timer. */
    (void) R_AGT_Start(&g_timer0_ctrl);
 }

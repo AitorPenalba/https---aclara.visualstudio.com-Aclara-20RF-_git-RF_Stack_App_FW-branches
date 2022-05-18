@@ -263,7 +263,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
    return ( DataSent );
 #elif ( MCU_SELECTED == RA6E1 )
    ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-   ( void )OS_SEM_Pend( &transferSem[ UartId ], 1000 ); // TODO: RA6E1: Review this change 
+   ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER ); 
 
    return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif
