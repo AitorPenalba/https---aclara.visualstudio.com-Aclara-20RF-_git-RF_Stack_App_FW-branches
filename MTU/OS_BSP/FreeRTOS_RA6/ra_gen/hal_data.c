@@ -281,7 +281,7 @@ const external_irq_instance_t g_external_irq0 =
 crc_instance_ctrl_t g_crc1_ctrl;
 const crc_cfg_t g_crc1_cfg =
 {
-    .polynomial      = CRC_POLYNOMIAL_CRC_16,
+    .polynomial      = CRC_POLYNOMIAL_CRC_CCITT,
     .bit_order       = CRC_BIT_ORDER_LMS_MSB,
     .snoop_address   = CRC_SNOOP_ADDRESS_NONE,
     .p_extend        = NULL,

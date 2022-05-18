@@ -185,6 +185,14 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define WHITE_SPACE_CHAR      0x20
 #define CTRL_C_CHAR 0x03
 #endif
+
+#if ( TM_TIME_COMPOUND_TEST == 1 )
+#define TICKCOUNT_SEC            200                             /* Number of TickCount per second */
+#define TICKCOUNT_MIN            TICKCOUNT_SEC*60                /* Number of TickCount per minute */
+#define TICKCOUNT_HOUR           TICKCOUNT_MIN*60                /* Number of TickCount per hour */
+#define MAX_SAMPLE_LOOP_COUNT    5                               /* Maximum Number of Sample for DBG_CommandLine_TimeElapsed */
+#endif
+
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -690,6 +698,20 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#if ( SIMULATE_POWER_DOWN == 1 )
 //   { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
 //#endif
+#if ( TM_CRC_UNIT_TEST == 1)
+   { "crcunittest",  DBG_CommandLine_CrcCalculate,     "Displays CRC results" },
+#endif
+#if ( TM_TIME_COMPOUND_TEST == 1)
+   { "ticktestelapsed",      DBG_CommandLine_TimeElapsed,    "Displays Time compound's difference in ElapsedMilliseconds " },
+   { "ticktestnanosec",      DBG_CommandLine_TimeNanoSec,    "Displays Time compound's difference in nanosecond results" },
+   { "ticktestmicrosec",     DBG_CommandLine_TimeMicroSec,   "Displays Time compound's difference in microsecond results" },
+   { "ticktestmillisec",     DBG_CommandLine_TimeMilliSec,   "Displays Time compound's difference in millisecond results" },
+   { "ticktestsec",          DBG_CommandLine_TimeSec,        "Displays Time compound's difference in second results" },
+   { "ticktestmin",          DBG_CommandLine_TimeMin,        "Displays Time compound's difference in minute results" },
+   { "ticktesthour",         DBG_CommandLine_TimeHour,       "Displays Time compound's difference in hour results" },
+   { "ticktestmsectoticks",  DBG_CommandLine_TimeTicks,      "Displays Time compound's add millisecond to tickcount results" },
+   { "ticktestfuture",       DBG_CommandLine_TimeFuture,     "Displays Time compound's difference between two tick struct results" },
+#endif
    { 0, 0, 0 }
 };
 
@@ -1378,10 +1400,706 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
    DBG_PortTimer_Set ( 0 );
    return ( 0 );
 } /* end DBG_CommandLine_DebugDisable () */
+
+#if ( TM_CRC_UNIT_TEST == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_CrcCalculate
+
+   Purpose: This function will test the CRC for the input string
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint16_t crc16;   /* Used to store CRC results */
+   uint32_t crc32;   /* Used to store CRC results */
+   
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      crc16 = CRC_16_Calculate( argv[1], strlen( argv[1] ) );
+      DBG_logPrintf( 'R', "CRC_16_Calculate: %x", crc16 );
+      /* Setting the Seed value to 0 and KeepLock value to false */
+      CRC_ecc108_crc( strlen( argv[1] ), argv[1], (uint8_t *)&crc16, 0, false );
+      DBG_logPrintf( 'R', "CRC_ecc108_crc: %x", crc16 );
+      crc16 = CRC_16_PhyHeader( argv[1], strlen( argv[1] ) );
+      DBG_logPrintf( 'R', "CRC_16_PhyHeader: %x", crc16 );
+      crc32 = CRC_32_Calculate( argv[1], strlen( argv[1] ) );
+      DBG_logPrintf( 'R', "CRC_32_Calculate: %x", crc32 );
+      retVal = eSUCCESS;
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_CrcCalculate() */
+#endif
+
+#if ( TM_TIME_COMPOUND_TEST == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeElapsed
+
+   Purpose: This function will test the OS_TICK_Get_ElapsedMilliseconds 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeElapsed( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint32_t delayMilliSec;
+   uint32_t milliSec1;
+   uint32_t milliSec2;
+   uint32_t diffInSec[6];
+   uint32_t diffAvg = 0;
+   uint32_t diffMilliSec;
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      delayMilliSec = ( uint32_t )atoi( argv[1] );
+      /* Sampling for 5 times */
+      for( int loopCount = 0; loopCount < MAX_SAMPLE_LOOP_COUNT ; loopCount++ )
+      {
+         milliSec1 = OS_TICK_Get_ElapsedMilliseconds();
+         /* BSP delay in milliseconds */
+         R_BSP_SoftwareDelay( delayMilliSec,BSP_DELAY_UNITS_MILLISECONDS );
+         milliSec2 = OS_TICK_Get_ElapsedMilliseconds();
+         /* Storing the difference in array */
+         diffInSec[ loopCount ] = milliSec2 - milliSec1;
+         diffAvg += diffInSec[ loopCount ]; 
+      }
+      /* Average of Sampling */
+      diffAvg = diffAvg / MAX_SAMPLE_LOOP_COUNT;
+      diffMilliSec = milliSec2 - milliSec1;
+      /* Considering success if difference is one */
+      if ( ( diffAvg == diffMilliSec ) || ( diffAvg == ( diffMilliSec + 1 ) ) || ( diffAvg == ( diffMilliSec - 1 ) ) )
+      {
+         DBG_logPrintf( 'R', "Test Success!" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Test Failure!" );
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeElapsed() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeNanoSec
+
+   Purpose: This function will test the OS_TICK_Get_Diff_InNanoseconds 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeNanoSec( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   OS_TICK_Struct tickValue1 ;
+   OS_TICK_Struct tickValue2 ;
+   uint32_t delayNanoSec;
+   int64_t diffInArg;
+   uint32_t diffInSec;
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      delayNanoSec = ( uint32_t )atoi( argv[1] );
+      /* Set OS_TICK_Struct to zero */
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
+      /* Gets Previous value */
+      OS_TICK_Get_CurrentElapsedTicks( &tickValue1 );
+      /* BSP delay in milliseconds */
+      R_BSP_SoftwareDelay( delayNanoSec, BSP_DELAY_UNITS_MICROSECONDS );
+      /* Gets current value */
+      OS_TICK_Get_CurrentElapsedTicks( &tickValue2 );
+      diffInSec = OS_TICK_Get_Diff_InNanoseconds( &tickValue1, &tickValue2 );
+      /* If delay and difference are same */
+      if ( diffInSec == delayNanoSec )
+      {
+         DBG_logPrintf( 'R', "Test Success!" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Test Failure!" );
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeNanoSec() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeMicroSec
+
+   Purpose: This function will test the OS_TICK_Get_Diff_InMicroseconds 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeMicroSec( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   OS_TICK_Struct tickValue1 ;
+   OS_TICK_Struct tickValue2 ;
+   uint64_t delayMicroSec1;
+   uint64_t delayMicroSec2;
+   int64_t diffInArg;
+   uint32_t diffInSec;
+   uint32_t sysTickLoad;
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 3 )
+   {
+      /* The number of arguments must be 2 */
+      delayMicroSec1 = ( uint64_t )atoll( argv[1] );
+      delayMicroSec2 = ( uint64_t )atoll( argv[2] );
+      /* Set OS_TICK_Struct to zero */
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
+      diffInArg = 0;
+      diffInArg = ( int64_t ) ( delayMicroSec2 - delayMicroSec1 ) ;
+      if ( diffInArg < 0 )
+      {
+         diffInArg = 0;
+      }
+      taskENTER_CRITICAL( );
+      sysTickLoad = SysTick->LOAD + 1;
+      taskEXIT_CRITICAL( );
+      delayMicroSec1 = delayMicroSec1 * ( ( sysTickLoad / portTICK_RATE_MS ) / 1000 );
+      delayMicroSec2 = delayMicroSec2 * ( ( sysTickLoad / portTICK_RATE_MS ) / 1000 );
+      tickValue1.tickCount = delayMicroSec1 / sysTickLoad ;
+      delayMicroSec1 = delayMicroSec1 % sysTickLoad;
+      tickValue2.tickCount = delayMicroSec2 / sysTickLoad ;
+      delayMicroSec2 = delayMicroSec2 % sysTickLoad;
+      tickValue1.HW_TICKS = delayMicroSec1;
+      tickValue2.HW_TICKS = delayMicroSec2;
+      diffInSec = OS_TICK_Get_Diff_InMicroseconds( &tickValue2, &tickValue1 );
+      /* If delay and difference are same */
+      if ( diffInSec == diffInArg )
+      {
+         DBG_logPrintf( 'R', "Test Success!" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Test Failure!" );
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeMicroSec() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeMilliSec
+
+   Purpose: This function will test the OS_TICK_Get_Diff_InMilliseconds 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeMilliSec( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   OS_TICK_Struct tickValue1 ;
+   OS_TICK_Struct tickValue2 ;
+   uint64_t delayMilliSec1;
+   uint64_t delayMilliSec2;
+   int64_t diffInArg;
+   uint32_t diffInSec;
+   uint32_t sysTickLoad;
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 3 )
+   {
+      /* The number of arguments must be 2 */
+      delayMilliSec1 = ( uint64_t )atoll( argv[1] );
+      delayMilliSec2 = ( uint64_t )atoll( argv[2] );
+      /* Set OS_TICK_Struct to zero */
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
+      diffInArg = 0;
+      diffInArg = ( int64_t ) ( delayMilliSec2 - delayMilliSec1 ) ;
+      if ( diffInArg < 0 )
+      {
+         diffInArg = 0;
+      }
+      tickValue1.tickCount = delayMilliSec1 / 5;
+      taskENTER_CRITICAL( );
+      sysTickLoad = SysTick->LOAD + 1;
+      taskEXIT_CRITICAL( );
+      tickValue1.HW_TICKS = sysTickLoad - ( ( delayMilliSec1 % 5 ) * ( sysTickLoad / portTICK_RATE_MS ) );
+      tickValue2.tickCount = delayMilliSec2 / 5;
+      tickValue2.HW_TICKS = sysTickLoad - ( ( delayMilliSec2 % 5 ) * ( sysTickLoad / portTICK_RATE_MS ) );
+      diffInSec = OS_TICK_Get_Diff_InMilliseconds(&tickValue1,&tickValue2);
+      /* If delay and difference are same */
+      if ( diffInSec == diffInArg )
+      {
+         DBG_logPrintf( 'R', "Test Success!" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Test Failure!" );
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeMilliSec() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeSec
+
+   Purpose: This function will test the OS_TICK_Get_Diff_InSeconds 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   OS_TICK_Struct tickValue1 ;
+   OS_TICK_Struct tickValue2 ;
+   OS_TICK_Struct diffTickValue ;
+   uint64_t delaySec1;
+   uint64_t delaySec2;
+   int64_t diffInArg;
+   uint64_t diffTicksCount;
+   uint32_t diffInSec;
+   uint32_t diffInArg_Check;
+   if ( argc < 3 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 3 )
+   {
+      /* The number of arguments must be 2 */
+      delaySec1 = ( uint64_t )atoll( argv[1] );
+      delaySec2 = ( uint64_t )atoll( argv[2] );
+      /* Set OS_TICK_Struct to zero */
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
+      memset( &diffTickValue, 0, sizeof diffTickValue );
+      diffInArg = 0;
+      diffInArg = ( int64_t ) ( delaySec2 - delaySec1 ) ;
+      if ( diffInArg < 0 )
+      {
+         diffInArg = 0;
+      }
+      diffInArg_Check = diffInArg;
+      delaySec1 = delaySec1 * TICKCOUNT_SEC;
+      delaySec2 = delaySec2 * TICKCOUNT_SEC;
+      tickValue1.xNumOfOverflows = delaySec1 / UINT32_MAX ;
+      delaySec1 = delaySec1 % UINT32_MAX;
+      tickValue2.xNumOfOverflows = delaySec2 / UINT32_MAX ;
+      delaySec2 = delaySec2 % UINT32_MAX;
+      tickValue1.tickCount = delaySec1;
+      tickValue2.tickCount = delaySec2;
+      diffInSec = OS_TICK_Get_Diff_InSeconds( &tickValue1,&tickValue2 );
+      /* Convert the diffInArg to OS Tick */
+      diffInArg = diffInArg * TICKCOUNT_SEC;
+      diffTickValue.xNumOfOverflows = diffInArg / UINT32_MAX ;
+      /* Check for xNumOfOverflows */
+      if ( diffTickValue.xNumOfOverflows > 0 )
+      {
+         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
+         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+      }
+
+      else
+      {
+         /* If delay and difference are same */
+         if ( diffInSec == diffInArg_Check )
+         {
+            DBG_logPrintf( 'R', "Test Success!" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Test Failure!" );
+         }
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeSec() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeMin
+
+   Purpose: This function will test the OS_TICK_Get_Diff_InMinutes 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeMin( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   OS_TICK_Struct timeMin1 ;
+   OS_TICK_Struct timeMin2 ;
+   OS_TICK_Struct diffTickValue ;
+   uint64_t delayMin1;
+   uint64_t delayMin2;
+   int64_t diffInArg;
+   uint32_t diffInMin;
+   uint32_t diffInArg_Check;
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 3 )
+   {
+      /* The number of arguments must be 2 */
+      delayMin1 = ( uint64_t )atoll( argv[1] );
+      delayMin2 = ( uint64_t )atoll( argv[2] );
+      /* Set OS_TICK_Struct to zero */
+      memset( &timeMin1, 0, sizeof timeMin1 );
+      memset( &timeMin2, 0, sizeof timeMin2 );
+      diffInArg = 0;
+      diffInArg = ( int64_t ) ( delayMin2 - delayMin1 ) ;
+      if ( diffInArg < 0 )
+      {
+         diffInArg = 0;
+      }
+      diffInArg_Check = diffInArg;
+      delayMin1 = delayMin1 * TICKCOUNT_MIN;
+      delayMin2 = delayMin2 * TICKCOUNT_MIN;
+      timeMin1.xNumOfOverflows = delayMin1 / UINT32_MAX ;
+      delayMin1 = delayMin1 % UINT32_MAX;
+      timeMin2.xNumOfOverflows = delayMin2 / UINT32_MAX ;
+      delayMin2 = delayMin2 % UINT32_MAX;
+      timeMin1.tickCount = delayMin1;
+      timeMin2.tickCount = delayMin2;
+      diffInMin = OS_TICK_Get_Diff_InMinutes( &timeMin1,&timeMin2 );
+      /* Convert the diffInArg to OS Tick */
+      diffInArg = diffInArg * TICKCOUNT_MIN;
+      diffTickValue.xNumOfOverflows = diffInArg / UINT32_MAX ;
+      /* Check for xNumOfOverflows */
+      if ( diffTickValue.xNumOfOverflows > 0)
+      {
+         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
+         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+      }
+      else
+      {
+         /* If delay and difference are same */
+         if ( diffInMin == diffInArg_Check )
+         {
+            DBG_logPrintf( 'R', "Test Success!" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Test Failure!" );
+         }
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeMin() */
+
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeHour
+
+   Purpose: This function will test the OS_TICK_Get_Diff_InHours 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   OS_TICK_Struct timeHour1 ;
+   OS_TICK_Struct timeHour2 ;
+   OS_TICK_Struct diffTickValue ;
+   uint64_t delayHour1;
+   uint64_t delayHour2;
+   int64_t diffInArg;
+   uint32_t diffInHour;
+   uint32_t diffInArg_Check;
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 3 )
+   {
+      /* The number of arguments must be 2 */
+      delayHour1 = ( uint64_t )atoll( argv[1] );
+      delayHour2 = ( uint64_t )atoll( argv[2] );
+      /* Set OS_TICK_Struct to zero */
+      memset( &timeHour1, 0, sizeof timeHour1 );
+      memset( &timeHour2, 0, sizeof timeHour2 );
+      diffInArg = 0;
+      diffInArg = ( int64_t ) ( delayHour2 - delayHour1 );
+      /* If negative value assign zero */
+      if ( diffInArg < 0 )
+      {
+         diffInArg = 0;
+      }
+      diffInArg_Check = diffInArg;
+      delayHour1 = delayHour1 * TICKCOUNT_HOUR;
+      delayHour2 = delayHour2 * TICKCOUNT_HOUR;
+      timeHour1.xNumOfOverflows = delayHour1 / UINT32_MAX ;
+      delayHour1 = delayHour1 % UINT32_MAX;
+      timeHour2.xNumOfOverflows = delayHour2 / UINT32_MAX ;
+      delayHour2 = delayHour2 % UINT32_MAX;
+      timeHour1.tickCount = delayHour1;
+      timeHour2.tickCount = delayHour2;
+      diffInHour = OS_TICK_Get_Diff_InHours( &timeHour1,&timeHour2 );
+      /* Convert the diffInArg to OS Tick */
+      diffInArg = diffInArg * TICKCOUNT_HOUR;
+      diffTickValue.xNumOfOverflows = diffInArg / UINT32_MAX ;
+      /* Check for xNumOfOverflows */
+      if ( diffTickValue.xNumOfOverflows > 0 )
+      {
+         DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
+         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+      }
+
+      else
+      {
+         /* If delay and difference are same */
+         if ( diffInHour == diffInArg_Check )
+         {
+            DBG_logPrintf( 'R', "Test Success!" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Test Failure!" );
+         }
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeHour() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeTicks
+
+   Purpose: This function will test the OS_TICK_Add_msec_to_ticks 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   OS_TICK_Struct timeMilliSec ;
+   OS_TICK_Struct *isdelayValueSame ;
+   OS_TICK_Struct_Ptr isdelayptr;
+   uint32_t argvMilliSec;
+   uint32_t prevTickValue;
+   uint32_t diffInTick;
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      argvMilliSec = ( uint32_t )atoi( argv[1] );
+      if( argvMilliSec < portTICK_RATE_MS )
+      {
+         /* Due to portTICK_RATE_MS accuracy values need to be 5 or greater than 5 
+          * as we are checking with millisec */
+         DBG_logPrintf( 'R', "Value needs to be 5 or greater than 5 which is portTICK_RATE_MS " );
+      }
+      else
+      {
+         /* Sets timeMilliSec to zero */
+         memset( &timeMilliSec, 0, sizeof timeMilliSec );
+         /* Get Elapsed Ticks */
+         OS_TICK_Get_CurrentElapsedTicks( &timeMilliSec );
+         prevTickValue = timeMilliSec.tickCount;
+         isdelayptr = OS_TICK_Add_msec_to_ticks( &timeMilliSec, argvMilliSec );
+         /* Get the difference between tickCounts */
+         diffInTick = ( isdelayptr->tickCount ) - prevTickValue;
+         /* If delay and difference are same */
+         if ( diffInTick == ( argvMilliSec/portTICK_RATE_MS ))
+         {
+            DBG_logPrintf( 'R', "Test Success!" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Test Failure!" );
+         }
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeTicks() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_TimeFuture
+
+   Purpose: This function will test the OS_TICK_Is_FutureTime_Greater 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   OS_TICK_Struct tickValue1 ;
+   OS_TICK_Struct tickValue2 ;
+   uint32_t delayMilliSec;
+   bool isTime2Greater;
+   if ( argc == 1 )
+   {
+      /* No arguments */
+      DBG_logPrintf( 'R', "ERROR - Enter arguments" );
+   }
+   else if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      delayMilliSec = ( uint32_t )atoi( argv[1] );
+      /* Set OS_TICK_Struct to zero */
+      memset( &tickValue1, 0, sizeof tickValue1 );
+      memset( &tickValue2, 0, sizeof tickValue2 );
+      /* Gets Previous value */
+      OS_TICK_Get_CurrentElapsedTicks( &tickValue1 );
+      /* BSP Delay in milliseconds */
+      R_BSP_SoftwareDelay( delayMilliSec,BSP_DELAY_UNITS_MILLISECONDS );
+      /* Gets current value */
+      OS_TICK_Get_CurrentElapsedTicks( &tickValue2 );
+      isTime2Greater = OS_TICK_Is_FutureTime_Greater( &tickValue1, &tickValue2 );
+      if ( isTime2Greater == true )
+      {
+         DBG_logPrintf( 'R', "Test Success!" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Test Failure!" );
+      }
+   }
+   else
+   {
+      /* More arguments */
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_TimeFuture() */
+#endif
+
 // TODO: RA6 [name_Balaji]: Add support to the following function in RA6E1
 ///*******************************************************************************
 //
-//   Function name: DDBG_CommandLine_CpuLoadEnable
+//   Function name: DBG_CommandLine_CpuLoadEnable
 //
 //   Purpose: This function will enable CPU Load output
 //
@@ -1468,7 +2186,6 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //} /* end DBG_CommandLine_CpuLoadDisable () */
-
 /*******************************************************************************
 
    Function name: DBG_CommandLine_Partition
@@ -1760,7 +2477,7 @@ uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
 ///* end DBG_CommandLine_SimulatePowerDown() */
 ///*******************************************************************************
 //
-//   Function name: DBG_CommandLine_NvTest
+//   Function name: DBG_CommandLine_NvEraseTest
 //
 //   Purpose: To perform R-E-W ( Read Erase Write ) test on Internal or External NV
 //

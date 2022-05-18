@@ -45,7 +45,7 @@
 #else
 #include "EVL_event_log.h"
 #endif
-
+#include "EVL_event_log.h"
 #include "DBG_CommandLine.h"
 #include "MFG_Port.h"
 #include "IDL_IdleProcess.h"

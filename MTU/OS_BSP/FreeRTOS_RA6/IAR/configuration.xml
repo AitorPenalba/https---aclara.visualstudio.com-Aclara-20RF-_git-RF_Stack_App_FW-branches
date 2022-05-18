@@ -617,7 +617,7 @@
     </module>
     <module id="module.driver.crc_on_crc.1606105617">
       <property id="module.driver.crc.name" value="g_crc1"/>
-      <property id="module.driver.crc.crc_polynomial" value="module.driver.crc.crc_polynomial.gps_crc_16"/>
+      <property id="module.driver.crc.crc_polynomial" value="module.driver.crc.crc_polynomial.gps_crc_ccitt"/>
       <property id="module.driver.crc.crc_bit_order" value="module.driver.crc.crc_bit_order.lms_msb"/>
       <property id="module.driver.crc.snoop_address" value="module.driver.crc.snoop_address.no_address"/>
     </module>

@@ -784,7 +784,7 @@ FSP Configuration
       
     Instance "g_crc1 CRC (r_crc)"
       Name: g_crc1
-      CRC Polynomial: CRC-16
+      CRC Polynomial: CRC-CCITT
       Bit Order: MSB
       Snoop Address: NONE
       
