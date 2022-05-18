@@ -6,42 +6,40 @@
 #define ADC_TRIGGER_ADC0_B      ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1        ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1_B      ADC_TRIGGER_SYNC_ELC
-
 icu_instance_ctrl_t hmc_trouble_busy_ctrl;
 const external_irq_cfg_t hmc_trouble_busy_cfg =
 {
-    .channel = 14,
-    .trigger = EXTERNAL_IRQ_TRIG_BOTH_EDGE,
-    .filter_enable = false,
-    .pclk_div = EXTERNAL_IRQ_PCLK_DIV_BY_64,
-    .p_callback = meter_trouble_isr_busy,
+    .channel             = 14,
+    .trigger             = EXTERNAL_IRQ_TRIG_BOTH_EDGE,
+    .filter_enable       = false,
+    .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
+    .p_callback          = meter_trouble_isr_busy,
     /** If NULL then do not add & */
 #if defined(NULL)
-    .p_context = NULL,
+    .p_context           = NULL,
 #else
-    .p_context = &NULL,
+    .p_context           = &NULL,
 #endif
-    .p_extend = NULL,
-    .ipl = ( 12 ),
+    .p_extend            = NULL,
+    .ipl                 = (12),
 #if defined(VECTOR_NUMBER_ICU_IRQ14)
-    .irq = VECTOR_NUMBER_ICU_IRQ14,
+    .irq                 = VECTOR_NUMBER_ICU_IRQ14,
 #else
-    .irq = FSP_INVALID_VECTOR,
+    .irq                 = FSP_INVALID_VECTOR,
 #endif
 };
 /* Instance structure to use this module. */
 const external_irq_instance_t hmc_trouble_busy =
 {
-    .p_ctrl = &hmc_trouble_busy_ctrl,
-    .p_cfg = &hmc_trouble_busy_cfg,
-    .p_api = &g_external_irq_on_icu
+    .p_ctrl        = &hmc_trouble_busy_ctrl,
+    .p_cfg         = &hmc_trouble_busy_cfg,
+    .p_api         = &g_external_irq_on_icu
 };
-
 sci_uart_instance_ctrl_t     g_uart_lpm_dbg_ctrl;
 
             baud_setting_t               g_uart_lpm_dbg_baud_setting =
             {
-               /* Baud rate calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = ( uint8_t )256, .brme = false
+                /* Baud rate calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */
@@ -129,7 +127,7 @@ const lpm_cfg_t g_lpm_DeepSWStandby_cfg =
     .output_port_enable         = LPM_OUTPUT_PORT_ENABLE_HIGH_IMPEDANCE,
 #endif
 #if BSP_FEATURE_LPM_HAS_DEEP_STANDBY
-    .io_port_state              = LPM_IO_PORT_RESET,
+    .io_port_state              = LPM_IO_PORT_NO_CHANGE,
     .power_supply_state         = LPM_POWER_SUPPLY_DEEPCUT3,
     .deep_standby_cancel_source = LPM_DEEP_STANDBY_CANCEL_SOURCE_IRQ11 | LPM_DEEP_STANDBY_CANCEL_SOURCE_RTC_ALARM |  (lpm_deep_standby_cancel_source_t) 0,
     .deep_standby_cancel_edge   = LPM_DEEP_STANDBY_CANCEL_SOURCE_IRQ11_RISING |  (lpm_deep_standby_cancel_edge_t) 0,
@@ -149,7 +147,7 @@ const lpm_cfg_t g_lpm_SW_Standby_cfg =
 {
     .low_power_mode     = LPM_MODE_STANDBY,
     .snooze_cancel_sources      = LPM_SNOOZE_CANCEL_SOURCE_NONE,
-    .standby_wake_sources       = LPM_STANDBY_WAKE_SOURCE_AGT1UD |  (lpm_standby_wake_source_t) 0,//LPM_STANDBY_WAKE_SOURCE_IRQ11 | LPM_STANDBY_WAKE_SOURCE_AGT1UD |  (lpm_standby_wake_source_t) 0,
+    .standby_wake_sources       = LPM_STANDBY_WAKE_SOURCE_IRQ11 | LPM_STANDBY_WAKE_SOURCE_AGT1UD |  (lpm_standby_wake_source_t) 0,
     .snooze_request_source      = LPM_SNOOZE_REQUEST_RXD0_FALLING,
     .snooze_end_sources         =  (lpm_snooze_end_t) 0,
     .dtc_state_in_snooze        = LPM_SNOOZE_DTC_DISABLE,
@@ -897,7 +895,7 @@ sci_uart_instance_ctrl_t     g_uart4_ctrl;
 
             baud_setting_t               g_uart4_baud_setting =
             {
-               /* Baud rate calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = ( uint8_t )256, .brme = false
+                /* Baud rate calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */

@@ -39,7 +39,7 @@ extern icu_instance_ctrl_t hmc_trouble_busy_ctrl;
 extern const external_irq_cfg_t hmc_trouble_busy_cfg;
 
 #ifndef meter_trouble_isr_busy
-void meter_trouble_isr_busy( external_irq_callback_args_t* p_args );
+void meter_trouble_isr_busy(external_irq_callback_args_t * p_args);
 #endif
 
 /** UART on SCI Instance. */
