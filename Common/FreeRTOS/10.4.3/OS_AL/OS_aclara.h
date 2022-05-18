@@ -450,7 +450,8 @@ void                    OS_TASK_Exit ( void );
 void                    OS_TASK_ExitId ( char const *pTaskName );
 OS_TASK_id              OS_TASK_GetId (void);
 bool                    OS_TASK_IsCurrentTask ( char const *pTaskName );
-#if 0  //TODO: need to still get updated to RA6
+char *                  OS_TASK_GetTaskName ( void );
+#if 0  //TODO: RA6E1: need to still get updated to RA6
 uint32_t OS_TASK_UpdateCpuLoad ( void );
 void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
 void OS_TASK_Summary ( bool safePrint );

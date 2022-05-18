@@ -759,7 +759,7 @@
       <stack module="module.driver.lpm.63954745"/>
       <stack module="module.driver.cgc_on_cgc.570942820"/>
       <stack module="module.driver.uart_on_sci_uart.455733271"/>
-      <stack module="module.driver.external_irq_on_icu.1187114507"/>      
+      <stack module="module.driver.external_irq_on_icu.1187114507"/>
     </context>
     <config id="config.driver.wdt">
       <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>
@@ -942,7 +942,7 @@
     <comment propertyId="p609.comment" value="3V6BOOST_EN"/>
     <comment propertyId="p610.comment" value="Open"/>
     <comment propertyId="p708.comment" value="Open"/>
-    <pincfg active="true" name="I-210+c_RA6" selected="false" symbol="g_bsp_pin_cfg">
+    <pincfg active="true" name="I-210+c_RA6" selected="true" symbol="g_bsp_pin_cfg">
       <configSetting altId="adc0.an005.p005" configurationId="adc0.an005"/>
       <configSetting altId="adc0.an007.p007" configurationId="adc0.an007"/>
       <configSetting altId="adc0.an008.p008" configurationId="adc0.an008"/>
@@ -970,14 +970,14 @@
       <configSetting altId="jtag_fslash_swd.tdi.p110" configurationId="jtag_fslash_swd.tdi"/>
       <configSetting altId="jtag_fslash_swd.tdo.p109" configurationId="jtag_fslash_swd.tdo"/>
       <configSetting altId="jtag_fslash_swd.tms.p108" configurationId="jtag_fslash_swd.tms"/>
-      <configSetting altId="p000.output.low" configurationId="p000"/>
-      <configSetting altId="p000.gpio_mode.gpio_mode_out.low" configurationId="p000.gpio_mode"/>
+      <configSetting altId="p000.input" configurationId="p000"/>
+      <configSetting altId="p000.gpio_mode.gpio_mode_in" configurationId="p000.gpio_mode"/>
       <configSetting altId="p001.output.low" configurationId="p001"/>
       <configSetting altId="p001.gpio_mode.gpio_mode_out.low" configurationId="p001.gpio_mode"/>
       <configSetting altId="p002.input" configurationId="p002"/>
       <configSetting altId="p002.gpio_mode.gpio_mode_in" configurationId="p002.gpio_mode"/>
-      <configSetting altId="p003.output.low" configurationId="p003"/>
-      <configSetting altId="p003.gpio_mode.gpio_mode_out.low" configurationId="p003.gpio_mode"/>
+      <configSetting altId="p003.input" configurationId="p003"/>
+      <configSetting altId="p003.gpio_mode.gpio_mode_in" configurationId="p003.gpio_mode"/>
       <configSetting altId="p004.output.low" configurationId="p004"/>
       <configSetting altId="p004.gpio_mode.gpio_mode_out.low" configurationId="p004.gpio_mode"/>
       <configSetting altId="p005.adc0.an005" configurationId="p005"/>
@@ -1010,9 +1010,8 @@
       <configSetting altId="p105.output.low" configurationId="p105"/>
       <configSetting altId="p105.gpio_speed.gpio_speed_h" configurationId="p105.gpio_drivecapacity"/>
       <configSetting altId="p105.gpio_mode.gpio_mode_out.low" configurationId="p105.gpio_mode"/>
-      <configSetting altId="p106.output.low" configurationId="p106"/>
-      <configSetting altId="p106.gpio_speed.gpio_speed_h" configurationId="p106.gpio_drivecapacity"/>
-      <configSetting altId="p106.gpio_mode.gpio_mode_out.low" configurationId="p106.gpio_mode"/>
+      <configSetting altId="p106.input" configurationId="p106"/>
+      <configSetting altId="p106.gpio_mode.gpio_mode_in" configurationId="p106.gpio_mode"/>
       <configSetting altId="p107.output.low" configurationId="p107"/>
       <configSetting altId="p107.gpio_mode.gpio_mode_out.low" configurationId="p107.gpio_mode"/>
       <configSetting altId="p108.jtag_fslash_swd.tms" configurationId="p108"/>
@@ -1192,7 +1191,7 @@
       <pinNumberSetting comment="CBS_I-210+C_METER" pinNumber="99"/>
       <pinNumberSetting comment="GPIO2_SI440" pinNumber="100"/>
     </pincfg>
-    <pincfg active="true" name="I-210+c_RA6_LPM" selected="true" symbol="g_bsp_pin_cfg_lpm">
+    <pincfg active="true" name="I-210+c_RA6_LPM" selected="false" symbol="g_bsp_pin_cfg_lpm">
       <configSetting altId="agt1.mode.custom.free" configurationId="agt1.mode"/>
       <configSetting altId="agt3.mode.custom.free" configurationId="agt3.mode"/>
       <configSetting altId="gpt2.mode.gtiocaorgtiocb.free" configurationId="gpt2.mode"/>

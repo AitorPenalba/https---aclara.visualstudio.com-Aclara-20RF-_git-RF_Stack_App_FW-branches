@@ -27,7 +27,7 @@
 #include <string.h>
 #include "version.h"
 #ifndef __BOOTLOADER
-//#include "file_io.h"
+#include "file_io.h"
 
 #endif   /* __BOOTLOADER   */
 /* ****************************************************************************************************************** */
@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)59)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)60)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -211,7 +211,7 @@ typedef struct
 /* FILE VARIABLE DEFINITIONS */
 #ifndef __BOOTLOADER
 static OS_MUTEX_Obj  verMutex_;                    //Serialize access to this module
-//static FileHandle_t  verFileHndl_;                 //Contains the file handle information
+static FileHandle_t  verFileHndl_;                 //Contains the file handle information
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */

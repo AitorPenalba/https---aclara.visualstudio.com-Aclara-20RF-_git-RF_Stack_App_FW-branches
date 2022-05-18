@@ -2669,12 +2669,10 @@ MAC_GET_STATUS_e MAC_Attribute_Get( MAC_GetReq_t const *pGetReq, MAC_ATTRIBUTES_
 {
    MAC_GET_STATUS_e eStatus = eMAC_GET_SUCCESS;
 
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 task id implementation in freeRTOS
    // This function should only be called inside the MAC task
-   if ( _task_get_id() != _task_get_id_from_name( "MAC" ) ) {
+   if ( 0 != strcmp("MAC", OS_TASK_GetTaskName()) ) {
      ERR_printf("WARNING: MAC_Attribute_Get should only be called inside the MAC task. Please use MAC_GetRequest instead.");
    }
-#endif
 
    switch (pGetReq->eAttribute)
    {

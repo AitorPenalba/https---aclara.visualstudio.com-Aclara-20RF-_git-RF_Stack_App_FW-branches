@@ -485,7 +485,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
 #if (BM_DEBUG==1)
          if ( strcasecmp( file, "dbg_serialdebug.c" ) != 0 )
          {
-            char *name = _task_get_template_ptr( _task_get_id() )->TASK_NAME;
+            char *name = OS_TASK_GetTaskName();
             DBG_printf( "\nalloc pool: %2d, reqSize: %4d, poolSize:%4d, ptr: 0x%08x, addr: 0x%08x, called from (%s) %s:%d",
                         pool, minSize, BM_bufferPoolParams[pool].size, ( uint32_t )pBuf, pBuf->data, name, file, line );
          }
@@ -614,7 +614,7 @@ void BM_Free( buffer_t *pBuf, const char *file, int line )
 
    // When we get here, it means that either:
    // 1) we found the buffer in internal or external RAM
-   // 2) the buffer was staticaly allocated
+   // 2) the buffer was statically allocated
    // 3) the buffer is invalid
    pool = pBuf->x.bufPool;
    // Validate critical buffer header values before using them
@@ -668,13 +668,11 @@ void BM_Free( buffer_t *pBuf, const char *file, int line )
             }
             else
             {
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
-               char *name = _task_get_template_ptr( _task_get_id() )->TASK_NAME;
+               char *name = OS_TASK_GetTaskName();
                DBG_printf( "\nfree  pool: %2d, reqSize: %4d, poolSize:%4d, ptr: 0x%08x, "
                            "called from (%s) %s:%d, Allocator: %s, line: %d\n"
                            "Current allocation already ZERO", pool, pBuf->x.dataLen, BM_bufferPoolParams[pool].size, ( uint32_t )pBuf,
                            name, file, line, pBuf->pfile, pBuf->line );
-#endif
             }
 
             // Reset AllocWatchdog

@@ -167,11 +167,13 @@ void VBATREG_EnableRegisterAccess( void )
  **********************************************************************************************************************/
 void VBATREG_DisableRegisterAccess( void )
 {
+#if 0  /* TODO: RA6: Always enable VBAT Reg Access*/
 #if ( MCU_SELECTED == RA6E1 )
    R_SYSTEM->VBTBER_b.VBAE = 0x00;  /* Disable access to VBTBKR */
 
    /* Enable Register Write Protection on RA6E1 */
    R_BSP_RegisterProtectEnable( BSP_REG_PROTECT_OM_LPC_BATT );
+#endif
 #endif
 }
 

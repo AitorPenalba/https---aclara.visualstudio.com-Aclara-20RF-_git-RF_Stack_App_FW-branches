@@ -25,43 +25,9 @@
 #if( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <fio.h>
-#endif
-#if 1 // TODO: RA6: Remove duplicate includes
-#include "timer_util.h"
-
-#include "EVL_event_log.h"
-
-#include "SM_Protocol.h"
-#include "SM.h"
-
-#include "MAC_Protocol.h"
-#include "MAC.h"
-#include "STACK_Protocol.h"
-#include "STACK.h"
-
-#if ENABLE_HMC_TASKS
-#include "hmc_start.h"
-#include "hmc_eng.h"
-#endif
-
-#include "hmc_app.h"
-
-#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
-#include "hmc_prg_mtr.h"
-#endif
-
-#include "demand.h"
-#include "historyd.h"
-#include "OR_MR_Handler.h"
-#if ENABLE_ID_TASKS
-#include "ID_intervalTask.h"
-#endif
-#include "APP_MSG_Handler.h"
-
-#include "sys_busy.h"
-
-#else // TODO: RA6: Remove duplicate includes
 #include "user_config.h"
+#endif
+
 #if ( MQX_USE_LOGS == 1 )
 #define PRINT_LOGS 1
 #warning "Don't release with MQX_USE_LOGS set in user_config.h"   /*lint !e10 !e16  */
@@ -153,33 +119,18 @@
 #include "historyd.h"
 #include "OR_MR_Handler.h"
 #include "APP_MSG_Handler.h"
-#include "tunnel_msg_handler.h"
+#include "TUNNEL_MSG_Handler.h"
 #include "time_DST.h"
 #include "SELF_test.h"
+#if( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"
+#endif
 #include "pwr_last_gasp.h"
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
 #endif
 #include "version.h"
 #include "FTM.h" // Used for radio interrupt (FTM1_CH0), radio TCXO (FTM1_CH1) and ZCD_METER interrupt (FTM3_CH1)
-#endif
-/* TODO: RA6: DG: Remove Duplicate Includes */
-#include "STRT_Startup.h"
-#include "version.h"
-#include "DBG_SerialDebug.h"
-#include "time_sys.h"
-#include "file_io.h"
-#include "time_DST.h"
-#include "vbat_reg.h"
-#include "pwr_task.h"
-#include "virgin_device.h"
-#include "mode_config.h"
-#include "pwr_config.h"
-#include "PHY.h"
-/* END OF TODO: RA6: DG: Remove Duplicate Includes */
-
-
 
 /* #DEFINE DEFINITIONS */
 #define PRINT_CPU_STATS_IN_SEC 5 /* Print the Cpu statistics every x seconds */
@@ -226,12 +177,15 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SYSBUSY_init, STRT_FLAG_NONE ),
+#if ENABLE_PWR_TASKS
+   INIT( PWRCFG_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                         /* Must be before PWR_TSK_init so restoration delay is available*/
+   INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+   INIT( PWROR_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+#endif
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
-   INIT( PWRCFG_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                         /* Must be before PWR_TSK_init so restoration delay is available*/
-   INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                        // TODO: RA6E1: DG: Move this to appropriate position
 #if ENABLE_HMC_TASKS
 #if END_DEVICE_PROGRAMMING_CONFIG == 1
    INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
@@ -623,24 +577,24 @@ void STRT_StartupTask ( taskParameter )
    // TODO: RA6E1 - Verify why this sleep required which causes NV self test fails for the first time
    OS_TASK_Sleep( 20 ); // Sleep for 20 msec before creating other tasks
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
-#if 0
-   if (!initSuccess_)
-   {
-      //LED_setRedLedStatus(MANUAL_RED);
-#if ( TEST_TDMA == 0 )
-      LED_enableManualControl();
-      LED_on(RED_LED);
-#endif
-   }
+// TODO: RA6: Enable this code later
+//   if (!initSuccess_)
+//   {
+//      //LED_setRedLedStatus(MANUAL_RED);
+//#if ( TEST_TDMA == 0 )
+//      LED_enableManualControl();
+//      LED_on(RED_LED);
+//#endif
+//   }
 
    // Reset all CPU stats
    // This MUST be done after the tasks are started
-   (void)OS_TASK_UpdateCpuLoad();
-
-   if ( quiet == 0 )
-   {
-      ( void )SM_StartRequest( eSM_START_STANDARD, NULL );  /* Start stack manager  */
-   }
+//   (void)OS_TASK_UpdateCpuLoad();   // TODO: RA6: Enable this code later
+// TODO: RA6: Enable this code later
+//   if ( quiet == 0 )
+//   {
+//      ( void )SM_StartRequest( eSM_START_STANDARD, NULL );  /* Start stack manager  */
+//   }
 
 #ifdef NDEBUG /* If defined, this is release code (not debug) */
    DBG_logPrintf( 'I', "Running Release code" );
@@ -657,11 +611,11 @@ void STRT_StartupTask ( taskParameter )
       we don't surpass the TickTime delay specified below
       Note:  We do have the CPU Load function below this, and that is acceptable
              to ensure we get an accurate CPU load value */
-   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
+//   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );   // TODO: RA6: Enable this code later
+//
+//   CurrentIdleCount = IDL_Get_IdleCounter();        // TODO: RA6: Enable this code later
+//   PrevIdleCount = CurrentIdleCount;                // TODO: RA6: Enable this code later
 
-   CurrentIdleCount = IDL_Get_IdleCounter();
-   PrevIdleCount = CurrentIdleCount;
-#endif  // #if 0
    for ( ;; )
    {
       vTaskSuspend(NULL); // TODO: RA6: DG: Remove

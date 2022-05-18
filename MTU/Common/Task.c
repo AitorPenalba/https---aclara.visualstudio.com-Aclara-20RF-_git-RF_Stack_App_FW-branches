@@ -321,10 +321,9 @@ const OS_TASK_Template_t  Task_template_list[] =
 {
    /* Task Index,               Function,                    Stack, Pri, Name,                    Attributes,    Param, Time Slice */
    { eSTRT_TSK_IDX,             STRT_StartupTask,             1900,   13, (char *)pTskName_Strt,   DEFAULT_ATTR_STRT, 0, 0 },
-   { ePWR_TSK_IDX,              PWR_task,                     1000,  12, (char *)pTskName_Pwr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },  /* TODO: RA6E1: DG: Remove*/
 #if ENABLE_PWR_TASKS
-   //{ ePWR_TSK_IDX,              PWR_task,                     1000,  12, (char *)pTskName_Pwr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-   //{ ePWROR_TSK_IDX,            PWROR_Task,                   1700,  12, (char *)pTskName_PwrRestore, DEFAULT_ATTR, 0, 0 },
+   { ePWR_TSK_IDX,              PWR_task,                     1000,  12, (char *)pTskName_Pwr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { ePWROR_TSK_IDX,            PWROR_Task,                   1700,  12, (char *)pTskName_PwrRestore, DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_TMR_TASKS
    { eTMR_TSK_IDX,              TMR_HandlerTask,              1200,  14, (char *)pTskName_Tmr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
@@ -357,7 +356,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_HMC_TASKS
-   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
+//   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_SRFN_ILC_TASKS
    //{ eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
@@ -471,7 +470,9 @@ void task_exception_handler( _mqx_uint para, void * stack_ptr );
 #endif // ( RTOS_SELECTION == MQX_RTOS )
 #if (RTOS_SELECTION == FREE_RTOS)
 static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName );
+static uint32_t       setIdleTaskPriority ( uint32_t NewPriority );
 #endif
+
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
@@ -613,7 +614,7 @@ void OS_TASK_Create_All ( bool initSuccess )
                stack_check_init(taskID);
             }
 #elif (RTOS_SELECTION == FREE_RTOS)
-            // TODO: What is the equivalent operation for FreeRTOS, still need to investigate further?
+            // TODO: RA6E1: What is the equivalent operation for FreeRTOS, still need to investigate further?
 #endif
          }
       }
@@ -773,16 +774,24 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
 
    if(NULL != pTaskName)
    {  // specific task requested
-      TaskHandle_t *taskHandlePtr = NULL;
-      taskHandlePtr = getFreeRtosTaskHandle( pTaskName );
-      OldPriority = FREE_RTOS_TASK_PRIORITY_CONVERT( uxTaskPriorityGet(*taskHandlePtr) );
-      if( NULL != taskHandlePtr )
+      static TaskHandle_t *taskHandlePtr  = NULL;
+
+      if( 0 == strcmp("IDL", pTaskName ))  /* FreeRTOS creates the IDLE Task, hence its not in the list. Use different function */
       {
-         vTaskPrioritySet( *taskHandlePtr, (UBaseType_t)FREE_RTOS_TASK_PRIORITY_CONVERT( NewPriority ) );
+         OldPriority = setIdleTaskPriority( NewPriority );
       }
       else
       {
-         OldPriority = 0;
+         taskHandlePtr = getFreeRtosTaskHandle( pTaskName );
+         OldPriority = FREE_RTOS_TASK_PRIORITY_CONVERT( uxTaskPriorityGet(*taskHandlePtr) );
+         if( NULL != taskHandlePtr )
+         {
+            vTaskPrioritySet( *taskHandlePtr, (UBaseType_t)FREE_RTOS_TASK_PRIORITY_CONVERT( NewPriority ) );
+         }
+         else
+         {
+            OldPriority = 0;
+         }
       }
    }
    else
@@ -795,6 +804,35 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
    return ( (uint32_t)OldPriority );
 } /* end OS_TASK_Set_Priority () */
 /* ****************************************************************************************************************** */
+
+#if (RTOS_SELECTION == FREE_RTOS)
+/***********************************************************************************************************************
+ *
+ * Function Name: setIdleTaskPriority
+ *
+ * Purpose: To set the Idle Task Priority in FreeRTOS
+ *
+ * Arguments: NewPriority - new priority value for the task
+ *
+ * Returns: OldPriority - the current priority value for the requested task (before changing)
+ *
+ * Side Effects:
+ *
+ **********************************************************************************************************************/
+static uint32_t setIdleTaskPriority ( uint32_t NewPriority )
+{
+   TaskHandle_t   IdleTaskHandle;
+   uint32_t       OldIdlePriority;
+
+   IdleTaskHandle = xTaskGetIdleTaskHandle();
+   OldIdlePriority = FREE_RTOS_TASK_PRIORITY_CONVERT(uxTaskPriorityGet( IdleTaskHandle ));
+   vTaskPrioritySet(IdleTaskHandle, (UBaseType_t)FREE_RTOS_TASK_PRIORITY_CONVERT( NewPriority ));
+
+   return OldIdlePriority;
+
+} /* end setIdleTaskPriority () */
+/* ****************************************************************************************************************** */
+#endif
 
 /***********************************************************************************************************************
  *
@@ -876,7 +914,7 @@ void OS_TASK_Exit ( void )
 #if (RTOS_SELECTION == MQX_RTOS) /* MQX */
    (void)_task_destroy ( MQX_NULL_TASK_ID );
 #elif (RTOS_SELECTION == FREE_RTOS)
-   vTaskDelete(xTaskGetCurrentTaskHandle());
+   vTaskDelete( NULL ); /* NULL indicates the calling task */
 #endif
 }
 /* ****************************************************************************************************************** */
@@ -978,6 +1016,28 @@ bool OS_TASK_IsCurrentTask ( char const *pTaskName )
 #endif
    return( retVal );
 } /* end OS_TASK_IsCurrentTask () */
+
+/***********************************************************************************************************************
+ *
+ * Function Name: OS_TASK_GetTaskName
+ *
+ * Purpose: This function will return the name of the current Task
+ *
+ * Arguments:
+ *
+ * Returns: char *pTaskName
+ *
+ * Reentrant Code:
+ *
+ **********************************************************************************************************************/
+char * OS_TASK_GetTaskName ( void )
+{
+#if (RTOS_SELECTION == MQX_RTOS) /* MQX */
+   return ( _task_get_template_ptr( _task_get_id() )->TASK_NAME );
+#elif (RTOS_SELECTION == FREE_RTOS)
+   return ( pcTaskGetName( xTaskGetCurrentTaskHandle() ) );
+#endif
+} /* end OS_TASK_GetTaskName () */
 
 #if 0
 /***********************************************************************************************************************

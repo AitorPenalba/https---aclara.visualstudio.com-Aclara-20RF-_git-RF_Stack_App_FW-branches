@@ -2398,6 +2398,8 @@ static void lg_init_uart( void )
 }
 #endif
 
+#endif /* if 0*/
+
 /***********************************************************************************************************************
 
    Function name: PWRLG_RestLastGaspFlags
@@ -2415,23 +2417,25 @@ static void lg_init_uart( void )
  **********************************************************************************************************************/
 void PWRLG_RestLastGaspFlags( void )
 {
+   VBATREG_EnableRegisterAccess();
    PWRLG_OUTAGE_SET( 0 );        // Clear the "sustained" outage flag.
    VBATREG_SHORT_OUTAGE = 0;     // Clear the "short" outage flag.
    VBATREG_PWR_QUAL_COUNT = 0;   // Clear the RAM based power quality count.
    PWRLG_TIME_OUTAGE_SET( 0 );   // Clear the time of the last outage.
    RESTORATION_TIME_SET( 0 );    // Clear the Restoration time.
+   VBATREG_DisableRegisterAccess();
 }
-#endif
+
 
 /***********************************************************************************************************************
 
    Function name: PWRLG_GetSleepCancelSource
 
-   Purpose: Identify and return the Deep Software Standby Cancel Soruce
+   Purpose: Identify and return the Deep Software Standby Cancel Source
 
    Arguments: none
 
-   Returns: cancel Soruce
+   Returns: cancel Source
 
    Re-entrant Code: No
 

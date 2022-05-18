@@ -1079,13 +1079,14 @@ void ALRM_RealTimeTask ( taskParameter )
       }
 #endif
    }  /* End of ALRM_RealTimeTask forever loop  */
+
 }
 /*lint +esym(529,event) not subsequently accessed *//*lint +esym(438,event) last value not used*/
 /***********************************************************************************************************************
 
    Function name: ALRM_AddOpportunisticAlarms
 
-   Purpose: Adds opporutnistic alarms to the current HEEP message
+   Purpose: Adds opportunistic alarms to the current HEEP message
 
    Arguments:  uint16_t          msgLen - length of existing msg including header. Used to calculate space for alarm data
                uint16_t          *alarmLen - pointer to number of bytes of alarm data added.

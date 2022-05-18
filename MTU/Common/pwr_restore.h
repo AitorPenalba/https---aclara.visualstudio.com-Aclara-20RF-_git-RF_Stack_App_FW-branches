@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2020 Aclara.  All Rights Reserved.
+ * Copyright 2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -48,7 +48,7 @@
 #endif
 
 PWROR_EXTERN returnStatus_t PWROR_init(void);
-PWROR_EXTERN void PWROR_Task(uint32_t Arg0);
+PWROR_EXTERN void PWROR_Task( taskParameter );
 PWROR_EXTERN void PWROR_HMC_signal(void);
 PWROR_EXTERN void PWROR_PWR_signal(void);
 PWROR_EXTERN void PWROR_printOutageStats( sysTimeCombined_t outageTime, sysTimeCombined_t restorationTime );

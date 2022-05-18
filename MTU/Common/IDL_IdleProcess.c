@@ -182,8 +182,8 @@ void freertos_sleep (uint32_t xExpectedIdleTime)
 
   Returns: None
 
-  Notes: This function supercedes the weak definition made by defaul freeRTOS.
-         This function is an exact copy copy of the weak definition made by freeRTOS
+  Notes: This function supersedes the weak definition made by default freeRTOS.
+         This function is an exact copy of the weak definition made by freeRTOS
          contained within the port.c module. It is utilized here to avoid possible tweeks
          which would modify the existing freeRTOS code. If changes are made to this,
          function, comment the code as an Aclara change

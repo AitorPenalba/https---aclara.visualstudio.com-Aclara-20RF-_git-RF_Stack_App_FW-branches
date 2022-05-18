@@ -45,7 +45,7 @@
 //#include "ecc108_lib_return_codes.h"
 //#include "ecc108_mqx.h"
 #include "ecc108_apps.h"
-#include "evl_event_log.h"
+#include "EVL_event_log.h"
 //#include "time_sys.h"
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
@@ -307,6 +307,7 @@ static uint16_t RunSelfTest()
 
    (void)memset( ( uint8_t * )&eventData, 0, sizeof( eventData ) );
    (void)memset( ( uint8_t * )&keyVal, 0, sizeof( keyVal ) );
+
    /* Test external NV memory */
    if( eSUCCESS == SELF_testNV() )
    {
@@ -333,6 +334,7 @@ static uint16_t RunSelfTest()
          (void)EVL_LogEvent( 180, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
       }
    }
+
 #if 0 // TODO: RA6 Melvin: new self test modules to be added
 
    /* Test the security device   */
@@ -391,13 +393,14 @@ static uint16_t RunSelfTest()
    }
 #endif
 #endif
+#if 0 // TODO: RA6: DG: To review and Add
    // Can be removed if not required - Currently in place for testing
    if( eSUCCESS != SELF_testInternalFlash() )
    {
       // TODO: Error handling
       printf("ERROR: SELF_Test IF");
    }
-#if 0 // TODO: RA6: DG: To review and Add
+
    if( eSUCCESS != SELF_testTimeCompound() )
    {
       // TODO: Error handling

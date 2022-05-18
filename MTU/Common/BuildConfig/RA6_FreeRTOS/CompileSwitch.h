@@ -40,7 +40,7 @@
    // TODO: RA6E1 Enable HMC tasks once HMC module is in place
    #define ENABLE_HMC_TASKS               1  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
    #define ENABLE_PAR_TASKS               1  /* Used to 0=disable, 1=enable the Partition feature */
-   #define ENABLE_PWR_TASKS               0  /* Used to 0=disable, 1=enable the Power feature */         /* TODO: RA6E1: Enable */
+   #define ENABLE_PWR_TASKS               1  /* Used to 0=disable, 1=enable the Power feature */
    #define ENABLE_DFW_TASKS               0  /* Used to 0=disable, 1=enable the DFW feature */           /* TODO: RA6E1: Enable */
    #define ENABLE_DEMAND_TASKS            1  /* Used to 0=disable, 1=enable the Demand feature */
    #define ENABLE_FIO_TASKS               0  /* Used to 0=disable, 1=enable the FileIO CRC feature */
@@ -168,8 +168,8 @@
 
 /* HMC - Diags */
 #define ENABLE_PRNT_HMC_DIAGS_INFO     0
-#define ENABLE_PRNT_HMC_DIAGS_WARN     1
-#define ENABLE_PRNT_HMC_DIAGS_ERROR    1
+#define ENABLE_PRNT_HMC_DIAGS_WARN     0   /* TODO: RA6E1: Enable later */
+#define ENABLE_PRNT_HMC_DIAGS_ERROR    0   /* TODO: RA6E1: Enable later */
 
 /* HMC - Finish */
 #define ENABLE_PRNT_HMC_FINISH_INFO    0
@@ -193,8 +193,8 @@
 
 /* HMC - Start */
 #define ENABLE_PRNT_HMC_START_INFO     0
-#define ENABLE_PRNT_HMC_START_WARN     1
-#define ENABLE_PRNT_HMC_START_ERROR    1
+#define ENABLE_PRNT_HMC_START_WARN     0  /* TODO: RA6E1: Enable HMC Print Later */
+#define ENABLE_PRNT_HMC_START_ERROR    0  /* TODO: RA6E1: Enable HMC Print Later */
 
 /* HMC - Sync */
 #define ENABLE_PRNT_HMC_SYNC_INFO      0

@@ -115,3 +115,5 @@ mtu/iar_v9.20/*debug
 /MTU/OS_BSP/FreeRTOS_RA6/IAR/Debug/BrowseInfo 
 /MTU/OS_BSP/FreeRTOS_RA6/IAR/.settings
 *.log
+*.ewd
+*.ipcf

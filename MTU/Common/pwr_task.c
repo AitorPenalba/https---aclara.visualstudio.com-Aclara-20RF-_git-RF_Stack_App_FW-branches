@@ -39,10 +39,10 @@
 #include "hmc_app.h"
 #include "mode_config.h"
 #include "time_util.h"
-//#include "demand.h"
-//#include "MAC.h"
-//#include "PHY.h"
-//#include "SM.h"
+#include "demand.h"
+#include "MAC.h"
+#include "PHY.h"
+#include "SM.h"
 #if (USE_MTLS == 1)
 #include "mtls.h"
 #endif
@@ -51,12 +51,14 @@
 #endif
 #include "radio_hal.h"
 //#include "RG_MD_Handler.h"
-//#include "buffer.h"
+#include "buffer.h"
 
 #include "vbat_reg.h"
-//#include "fio.h"           /* For ecc108_mqx.h" */
-//#include "ecc108_mqx.h"    /* For the delay_xx functions */
-//#include "EVL_event_log.h"
+#if ( MCU_SELECTED == NXP_K24 )  /* TODO: RA6E1: Add includes for RA6 */
+#include "fio.h"           /* For ecc108_mqx.h" */
+#include "ecc108_mqx.h"    /* For the delay_xx functions */
+#endif
+#include "EVL_event_log.h"
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
 #include "ALRM_Handler.h"    /* For the delay_xx functions */
 #endif
@@ -66,10 +68,12 @@
 /* MACRO DEFINITIONS */
 #define POWER_DOWN_SIGNATURE ((uint64_t)0x01020304abcdef7A)
 
+#if ( MCU_SELECTED == NXP_K24 )
 /* The following macro is in bsp.h, however, pclint gives many warnings over the partitions.h structures and bsp.h
    structures. So, this isn't the best idea to put this here, however, at this moment in the project, I don't have
    time to figure it all out. So I'm adding this label:  TODO  */
 #define _bsp_int_init(num, prior, subprior, enable)     _nvic_int_init(num, prior, enable)
+#endif
 
 #if ( SIMULATE_POWER_DOWN == 1 )
 OS_SEM_Obj    PWR_SimulatePowerDn_Sem;
@@ -103,9 +107,13 @@ static OS_TICK_Struct   PWR_endTick_    = {0};
 static exeTable_t powerDownTbl[] =
 {
    ADC_ShutDown,
+#if 1  /* TODO: RA6E1: Remove */
+   NULL
+#else
 #if ( ENABLE_HMC_TASKS == 1 )
    HMC_APP_TaskPowerDown   /* Shut down the HMC application */
 #endif   /* end of ENABLE_HMC_TASKS  == 1 */
+#endif
 };
 
 #define PWR_COMMON_CALLS ADC_ShutDown
@@ -148,7 +156,7 @@ static fsp_err_t brownOut_isr_init( void )
    if(FSP_SUCCESS == err)
    {
       /* Enable ICU module */
-      DBG_printf("\nOpen PF Meter IRQ");
+//      DBG_printf("\nOpen PF Meter IRQ");
       err = R_ICU_ExternalIrqEnable( &pf_meter_ctrl );
    }
    return err;
@@ -262,12 +270,10 @@ void PWR_task( taskParameter )
       {
          if ( NULL != pFunct->fptr )
          {
-#if 0 /* TODO: RA6: Add later */
 _Pragma ( "calls = \
                  PWR_COMMON_CALLS \
                  PWR_HMC_CALLS \
                  " )
-#endif
             ( void )pFunct->fptr();
          }
       }
@@ -294,10 +300,8 @@ _Pragma ( "calls = \
 #endif
 
    /* Increase the priority of the power and idle tasks. */
-//   ( void )OS_TASK_Set_Priority( pTskName_Pwr, 10 );
-#if ( MCU_SELECTED == NXP_K24 )
+   ( void )OS_TASK_Set_Priority( pTskName_Pwr, 10 );
    ( void )OS_TASK_Set_Priority( pTskName_Idle, 11 );
-#endif
 
    pwrFileData.uPowerDownSignature = POWER_DOWN_SIGNATURE; // Write power down signature
 
