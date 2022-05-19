@@ -1118,6 +1118,9 @@
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_crc_cfg.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_dac_cfg.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_dmac_cfg.h</name>
             </file>
             <file>
@@ -1310,6 +1313,15 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_crc_api.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\src\r_dac\r_dac.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_dac.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_dac_api.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\ra\fsp\src\r_dmac\r_dmac.c</name>

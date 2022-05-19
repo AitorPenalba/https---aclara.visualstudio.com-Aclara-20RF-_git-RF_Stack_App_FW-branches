@@ -61,6 +61,14 @@
 #define PHY_RADIO_RX_DATA_BASE       2 // Event bit 2 to 10
 #define PHY_RADIO_CTS_LINE_LOW_BASE 11 // Event bit 11 to 19
 #define PHY_RADIO_INT_PENDING_BASE  20 // Event bit 20 to 28. Interrupt pending bit 20 for radio 0 and bit 21 for all RX radios on TB 101-9975T but bits 21 to 28 for all RX radioes on TB 101-9985T
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define PHY_EVENT_MASK             0xFFFFFFFF
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define PHY_EVENT_MASK             0x00108007 /* FreeRTOS only allows use of the lower 24 bits for event flags; we only need bits 0, 1, 2, 11 and 20 for an end-point with 1 radio */
+#if ( EP != 1 )
+#error "Attempt to compile with FreeRTOS on something other than an end-point; EP != 1"
+#endif
+#endif
 
 #define PHY_CONFIG_FILE_UPDATE_RATE ((uint32_t)0xFFFFFFFF)/* File updates every now and then */
 
@@ -448,7 +456,13 @@ static void SendConfirm(PHY_Confirm_t const *pConf, buffer_t const *pReqBuf);
 
 static void Indication_Send(buffer_t *pBuf);
 
+#if ( RTOS_SELECTION == MQX_RTOS )
 static void RadioEvent_Set(RADIO_EVENT_t event_type, uint8_t chan);
+#elif ( RTOS_SELECTION == FREE_RTOS )
+static void RadioEvent_Set(RADIO_EVENT_t event_type, uint8_t chan, bool fromISR);
+#else
+#error "RTOS_SELECTION is invalid!"
+#endif
 static void RadioEvent_TxDone(uint8_t chan);
 static void RadioEvent_RxData(uint8_t radioNum);
 static void RadioEvent_CTSLineLow(uint8_t radioNum);
@@ -506,8 +520,9 @@ returnStatus_t PHY_init( void )
    uint32_t i;
    //TODO RA6: NRJ: determine if semaphores need to be counting
    if ( OS_SEM_Create(&PHY_AttributeSem_, 0) && OS_MUTEX_Create(&PHY_AttributeMutex_) && OS_MUTEX_Create(&PHY_Mutex_) &&
-        OS_EVNT_Create(&events) && OS_MSGQ_Create(&PHY_msgQueue, PHY_NUM_MSGQ_ITEMS) )
+        OS_EVNT_Create(&events) && OS_MSGQ_Create(&PHY_msgQueue, PHY_NUM_MSGQ_ITEMS, "PHY") )
    {
+#if 0 // TODO: attempt to get through PHY_init without a working file system
       // Open PHY cached data (mainly counters)
       if ( eSUCCESS == FIO_fopen(&PHYcachedFileHndl_,              /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
@@ -518,14 +533,17 @@ returnStatus_t PHY_init( void )
                                  &fileStatus)) {                   /* Contains the file status */
          if ( fileStatus.bFileCreated )
          {  //File was created for the first time, set defaults.
+#endif // 0
             (void)memset(&CachedAttr, 0, sizeof(CachedAttr));
             (void)TIME_UTIL_GetTimeInSecondsFormat(&CachedAttr.LastResetTime);
-            for (i=0; i<PHY_MAX_CHANNEL; i++) {
+            for (i=0; i<PHY_MAX_CHANNEL; i++)
+            {
                CachedAttr.NoiseEstimate[i]        = PHY_CCA_THRESHOLD_MAX;
 #if ( EP == 1 )
                CachedAttr.NoiseEstimateBoostOn[i] = PHY_CCA_THRESHOLD_MAX;
 #endif
             }
+#if 0 // TODO: attempt to get through PHY_init without a working file system
             retVal = FIO_fwrite( &PHYcachedFileHndl_, 0, (uint8_t*)&CachedAttr, sizeof(CachedAttr));
          }
          else
@@ -534,16 +552,17 @@ returnStatus_t PHY_init( void )
          }
          if (eSUCCESS == retVal)
          {
+#endif
             // Open PHY config data (configuration data that doesn't change often)
             if ( eSUCCESS == FIO_fopen(&PHYconfigFileHndl_,              /* File Handle so that PHY access the file. */
-                                       ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
+                                       ePART_NV_APP_CACHED, // TODO: RA6E1 ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
                                        (uint16_t)eFN_PHY_CONFIG,         /* File ID (filename) */
                                        (lCnt)sizeof(ConfigAttr),         /* Size of the data in the file. */
                                        FILE_IS_NOT_CHECKSUMED,           /* File attributes to use. */
                                        PHY_CONFIG_FILE_UPDATE_RATE,      /* The update rate of the data in the file. */
                                        &fileStatus) )                    /* Contains the file status */
             {
-               if ( fileStatus.bFileCreated )
+               if (1) // ( fileStatus.bFileCreated ) // TODO: RA6E1 Bob: temporarily ALWAYS initialize PHY config to defaults
                {  // File was created for the first time, set defaults.
                   retVal = FIO_fwrite( &PHYconfigFileHndl_, 0, (uint8_t*)&ConfigAttr, sizeof(ConfigAttr));
                }
@@ -558,13 +577,17 @@ returnStatus_t PHY_init( void )
                // Update shadow data
                (void)memcpy( ShadowAttr.AfcAdjustment, ConfigAttr.AfcAdjustment, sizeof( ShadowAttr.AfcAdjustment ));
             }
+#if 0 // TODO: attempt to get through PHY_init without a working file system
          }
       }
+#endif
    }
 #if ( EP == 1 )
    if (retVal == eSUCCESS)
    {
+#if 0 // TODO: RA6E1 Bob: temporarily without soft demodulator
       retVal = SoftDemodulator_Initialize();
+#endif // 0
    }
 #endif
    return(retVal);
@@ -694,7 +717,7 @@ void PHY_TestMode_Enable(uint16_t delay, uint16_t UseMarksTxAlgo, uint16_t UseDe
    }else
    {
       test_mode.RepeatCnt = 0;
-      (void) MAC_StartRequest( NULL );
+      (void) MAC_StartRequest( NULL ); // TODO: RA6E1 Bob: temporarily remove until file system issue is fixed so MAC_task can run
    }
 }
 
@@ -1331,11 +1354,7 @@ void PHY_Task( taskParameter )
          PHY_TestMode(); // Run CW or PN9 test
 
          // Wait for a message to process
-#if ( MCU_SELECTED == NXP_K24 )
-         event_flags = OS_EVNT_Wait ( &events, 0xFFFFFFFF, (bool)false , timeout );
-#elif ( MCU_SELECTED == RA6E1 ) // Only Radio 0 interrupt, also FreeRTOS events support only for 24 bits
-         event_flags = OS_EVNT_Wait ( &events, 0x00FFFFFF, (bool)false , timeout );
-#endif
+         event_flags = OS_EVNT_Wait ( &events, PHY_EVENT_MASK, (bool)false , timeout );
 
          OS_MUTEX_Lock( &PHY_Mutex_ ); // Function will not return if it fails
 
@@ -2419,14 +2438,12 @@ static bool Process_CCAReq( PHY_Request_t const *pReq )
                   // Get noise estimate value
                   noiseEstimate = CachedAttr.NoiseEstimate[i];
 #if ( EP == 1 )
-        // Use a different noise estimate when in last gasp
-#if 0 // TODO: RA6E1 - lastgasp
+                  // Use a different noise estimate when in last gasp
+#if 0 // TODO: RA6E1 Bob: defer this until the Last Gasp module is ready
                   if ( PWRLG_LastGasp() ) {
-#else // TODO: RA6E1 - lastgasp
-                    if ( 0 ) {
+                     noiseEstimate = CachedAttr.NoiseEstimateBoostOn[i];
+                  }
 #endif
-                noiseEstimate = CachedAttr.NoiseEstimateBoostOn[i];
-                    }
 #endif
                   if (rssi_dbm >= (noiseEstimate+ConfigAttr.CcaOffset)) { // Test rssi against the noise of this channel
                      // channel is busy
@@ -3099,7 +3116,7 @@ static buffer_t *DataIndication_Create(RX_FRAME_t const * const rx_buffer, uint8
    |---------|------------|---------------------|------------|------------------------------------|
    | 0       |    4GFSK   |(63,59) Reed-Solomon |   9600     |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
-   | 1 â€“ 14  |  Reserved  |      Reserved       |  Reserved  |                                    |
+   | 1 – 14  |  Reserved  |      Reserved       |  Reserved  |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
    | *15     |   None     |      None           |   None     |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
@@ -4048,12 +4065,9 @@ bool PHY_Channel_Set(uint8_t index, uint16_t chan)
 {
    ConfigAttr.Channels[index] = chan;
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - lastgasp
-      if(PWRLG_LastGasp() == false)
-#else // TODO: RA6E1 - lastgasp
-      if ( 0 )
+#if 0 // TODO: RA6E1 Bob: Defer this until Last Gasp module is ready
+   if(PWRLG_LastGasp() == false)
 #endif
-
 #endif
    {  // Not in low power mode, so save this
       writeConfig();
@@ -4138,24 +4152,52 @@ static void SendConfirm(PHY_Confirm_t const *pConf, buffer_t const *pReqBuf)
 /*!
  * Used to set a radio event
  */
+#if ( RTOS_SELECTION == FREE_RTOS )
+static void RadioEvent_Set(RADIO_EVENT_t event_type, uint8_t chan, bool fromISR)
+{
+   if ( fromISR )
+   {
+      switch (event_type)
+      {
+         case eRADIO_TX_DONE:
+            OS_EVNT_Set_from_ISR( &events, 0x01u << (PHY_RADIO_TX_DONE_BASE            ));
+            break;
+         case eRADIO_RX_DATA:
+            OS_EVNT_Set_from_ISR( &events, 0x01u << (PHY_RADIO_RX_DATA_BASE      + chan));
+            break;
+         case eRADIO_CTS_LINE_LOW:
+            OS_EVNT_Set_from_ISR( &events, 0x01u << (PHY_RADIO_CTS_LINE_LOW_BASE + chan));
+            break;
+         case eRADIO_INT:
+            OS_EVNT_Set_from_ISR( &events, 0x01u << (PHY_RADIO_INT_PENDING_BASE  + chan));
+            break;
+         default:
+            break;
+      }
+   }
+   else
+#elif ( RTOS_SELECTION == MQX_RTOS )
 static void RadioEvent_Set(RADIO_EVENT_t event_type, uint8_t chan)
 {
-   switch (event_type)
+#endif
    {
-      case eRADIO_TX_DONE:
-         OS_EVNT_Set( &events, 0x01u << (PHY_RADIO_TX_DONE_BASE            ));
-         break;
-      case eRADIO_RX_DATA:
-         OS_EVNT_Set( &events, 0x01u << (PHY_RADIO_RX_DATA_BASE      + chan));
-         break;
-      case eRADIO_CTS_LINE_LOW:
-         OS_EVNT_Set( &events, 0x01u << (PHY_RADIO_CTS_LINE_LOW_BASE + chan));
-         break;
-      case eRADIO_INT:
-         OS_EVNT_Set( &events, 0x01u << (PHY_RADIO_INT_PENDING_BASE  + chan));
-         break;
-      default:
-         break;
+      switch (event_type)
+      {
+         case eRADIO_TX_DONE:
+            OS_EVNT_Set( &events, 0x01u << (PHY_RADIO_TX_DONE_BASE            ));
+            break;
+         case eRADIO_RX_DATA:
+            OS_EVNT_Set( &events, 0x01u << (PHY_RADIO_RX_DATA_BASE      + chan));
+            break;
+         case eRADIO_CTS_LINE_LOW:
+            OS_EVNT_Set( &events, 0x01u << (PHY_RADIO_CTS_LINE_LOW_BASE + chan));
+            break;
+         case eRADIO_INT:
+            OS_EVNT_Set( &events, 0x01u << (PHY_RADIO_INT_PENDING_BASE  + chan));
+            break;
+         default:
+            break;
+      }
    }
 }
 

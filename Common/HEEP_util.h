@@ -150,7 +150,7 @@ struct ui_list_s
    uint16_t data[MAX_UI_LIST_ELEMENTS];
 };
 
-#if 0 // TODO: RA6E1 - Heep support
+#if 1 // TODO: RA6E1 - Heep support
 void HEEP_Put_Boolean( struct readings_s *p, meterReadingType ReadingType, uint8_t value);
 void HEEP_Put_HexBinary ( struct readings_s *p, meterReadingType ReadingType,  uint8_t const Data[], uint16_t  Size);
 void HEEP_Put_DateTimeValue( struct readings_s *p, meterReadingType   ReadingType,TIMESTAMP_t const *DateTime);

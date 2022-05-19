@@ -52,6 +52,12 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] );
 #endif
+#if ( DAC_CODE_CONFIG == 1 )
+uint32_t DBG_CommandLine_DAC_SetDacStep ( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_setPwrSel ( uint32_t argc, char *argv[] );
+
+uint32_t DBG_CommandLine_DAC_Code ( uint32_t argc, char *argv[] );
+#endif
 #ifdef CompileSwitch_H
 #define ENABLE_DAC_TEST_FUNCTIONS 0
 #if ENABLE_DAC_TEST_FUNCTIONS
@@ -208,7 +214,9 @@ uint32_t DBG_CommandLine_FrontEndGain ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseEstimate ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseEstimateCount ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseEstimateRate ( uint32_t argc, char *argv[] );
+#endif // TODO: RA6E1 Bob: enable this command even without compile_switch.h
 uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] );
+#if 0 // TODO: RA6E1 Bob: back to the previous state
 #if ( NOISE_HIST_ENABLED == 1 )
 uint32_t DBG_CommandLine_NoiseHistogram ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseBurst     ( uint32_t argc, char *argv[] );

@@ -53,10 +53,12 @@
 //#include "STACK_Protocol.h"
 //#include "COMM.h"
 //#include "time_util.h"
-//#include "radio.h"
-//#include "radio_hal.h"
-//#include "PHY.h"
-//#include "PHY_Protocol.h"
+#include "dvr_DAC0.h"
+#include "radio.h"
+#include "radio_hal.h"
+#include "xradio.h" // TODO: RA6E1 Bob: temporary include for vRadioInit for noiseband
+#include "PHY.h"
+#include "PHY_Protocol.h"
 //#include "MAC_Protocol.h"
 //#include "SM_Protocol.h"     // Stack Manager
 //#include "SM.h"              // Stack Manager
@@ -334,6 +336,11 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "help",         DBG_CommandLine_Help,            "Display list of commands" },
    { "h",            DBG_CommandLine_Help,            "help" },
    { "?",            DBG_CommandLine_Help,            "help" },
+#if ( DAC_CODE_CONFIG == 1 )
+   { "setdac0step",               DBG_CommandLine_DAC_SetDacStep,      "Set the DAC Step, range for steps is 0 - 4096 eg.) setdac0step 2200" },
+   { "pwrsel",                    DBG_CommandLine_setPwrSel,           "Set/reset pwrsel pin" },
+//   { "setdaccode",                DBG_CommandLine_DAC_Code,            "Set DAC Code Eg: setdaccode <channelNumber> <dBM>" },
+#endif
 //#if ( FAKE_TRAFFIC == 1 )
 //   { "bhgencount",   DBG_CommandLine_ipBhaulGenCount, "get (no args) or set (arg1) backhaul fake record gen count" },
 //#endif
@@ -444,7 +451,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "getdsthash",   DBG_CommandLine_getDstHash,      "Prints the DST hash" },
 ////   { "getdstoffset", DBG_CommandLine_getDstOffset,    "Prints the DST offset" },
 //#endif
-//   { "getfreq",      DBG_CommandLine_GetFreq,         "print list of available frequencies" },
+   { "getfreq",      DBG_CommandLine_GetFreq,         "print list of available frequencies" },
 //#if ( EP == 1 )
 ////   { "getstartrule", DBG_CommandLine_getDstStartRule, "Prints the DST start rule" },
 ////   { "getstoprule",  DBG_CommandLine_getDstStopRule,  "Prints the DST stop rule" },
@@ -526,7 +533,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "mtrtime",      DBG_CommandLine_mtrTime,         "Convert meter time mm dd yy hh mm to system time" },
 //#endif
 //   { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
-//   { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
+   { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
 //   { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
 //   { "noiseestimatecount", DBG_CommandLine_NoiseEstimateCount, "Display/Set the noise estimate count" },
 //   { "noiseestimaterate", DBG_CommandLine_NoiseEstimateRate, "Display/Set the noise estimate rate" },
@@ -577,7 +584,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "phyconfig",    DBG_CommandLine_PhyConfig,       "Print the PHY Configuration" },
 ////   { "phystop",      DBG_CommandLine_PhyStop,         "phy stop"  },
 //   { "ping",         DBG_CommandLine_MacPingCmd,      "Send a 'ping' request to EP"},
-//   { "power",        DBG_CommandLine_Power,           "Get power level when no arguments. Set power level (0-5)" },
+   { "power",        DBG_CommandLine_Power,           "Get power level when no arguments. Set power level (0-5)" },
 //#if ( EP == 1 )
 //   { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
 //#endif
@@ -599,10 +606,12 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
 ////   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },
 //   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" },
-   { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\n"
+   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\r\n"
                    "                                   Set: Params - yy mm dd hh mm ss" },
-//   { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\n"
-//                   "                                   Type ""rxchannels"" with no arguments for more help" },
+   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\r\n"
+                   "                                   Type ""rxchannels"" with no arguments for more help" },
 //   { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
 //   { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
 //   { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },
@@ -625,8 +634,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //                   "                                   Params - enable flag (0 - disable or 1 - enable)" },
 //   { "setdstoffset", DBG_CommandLine_setDstOffset,    "Updates the DST offset: Params - offset in seconds" },
 //#endif
-//   { "setfreq",      DBG_CommandLine_SetFreq,         "set list of available frequencies.\n"
-//                   "                                   Type ""setfreq"" with no arguments for more help" },
+   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "setfreq",      DBG_CommandLine_SetFreq,         "set list of available frequencies.\r\n"
+                   "                                   Type ""setfreq"" with no arguments for more help" },
 //#if ( EP == 1 )
 //   { "setstartrule", DBG_CommandLine_setDstStartRule, "Updates the DST start rule: Params - mm dow ood hh mm" },
 //   { "setstoprule",  DBG_CommandLine_setDstStopRule,  "Updates the DST stop rule: Params - mm dow ood hh mm" },
@@ -659,16 +669,20 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "tr",           DBG_TraceRoute,                 "Trace Route"},
 //#endif
 //   { "tunnel",       DBG_CommandLine_tunnel,          "Convert TWACS command to tunnel format" },
-//   { "txchannels",   DBG_CommandLine_TxChannels,      "set/print the TX channel list.\n"
-//                   "                                   Type ""txchannels"" with no arguments for more help" },
-//   { "txmode",       DBG_CommandLine_TXMode,          "Choose TX mode: 0 = Normal (default), 1 = PN9,\n"
-//                   "                                   2 = Unmodulated Carrier Wave,\n"
-//                   "                                   3 = Deprecated,\n"
-//#if ( PORTABLE_DCU == 1)
-//                   "                                   4 = 4GFSK BER with manufacturing print out,\n"
-//                   "                                   5 = Old PHY (freq dev 600Hz, RS(63,59)" },
-//#else
-//                   "                                   4 = 4GFSK BER with manufacturing print out,\n" },
+   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "txchannels",   DBG_CommandLine_TxChannels,      "set/print the TX channel list.\r\n"
+                   "                                   Type ""txchannels"" with no arguments for more help" },
+   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "txmode",       DBG_CommandLine_TXMode,          "Choose TX mode: 0 = Normal (default), 1 = PN9,\r\n"
+                   "                                   2 = Unmodulated Carrier Wave,\r\n"
+                   "                                   3 = Deprecated,\r\n"
+#if ( PORTABLE_DCU == 1)
+                   "                                   4 = 4GFSK BER with manufacturing print out,\r\n"
+                   "                                   5 = Old PHY (freq dev 600Hz, RS(63,59)" },
+#else
+                   "                                   4 = 4GFSK BER with manufacturing print out,\r\n" },
+#endif
+
 //#if ( EP == 1 ) && ( TEST_TDMA == 1 )
 //   { "txslot",       DBG_CommandLine_TxSlot,           "Specify which time slot to use for TDMA test\n" },
 //#endif
@@ -702,7 +716,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "crcunittest",  DBG_CommandLine_CrcCalculate,     "Displays CRC results" },
 #endif
 #if ( TM_TIME_COMPOUND_TEST == 1)
-   { "ticktestelapsed",      DBG_CommandLine_TimeElapsed,    "Displays Time compound's difference in ElapsedMilliseconds " },
+   { "ticktestelapsed",      DBG_CommandLine_TimeElapsed,    "Displays Time compound's difference in ElapsedMilliseconds" },
    { "ticktestnanosec",      DBG_CommandLine_TimeNanoSec,    "Displays Time compound's difference in nanosecond results" },
    { "ticktestmicrosec",     DBG_CommandLine_TimeMicroSec,   "Displays Time compound's difference in microsecond results" },
    { "ticktestmillisec",     DBG_CommandLine_TimeMilliSec,   "Displays Time compound's difference in millisecond results" },
@@ -1270,6 +1284,118 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_Help () */
 
+#if ( DAC_CODE_CONFIG == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_DAC_SetDacStep
+
+   Purpose: Set values to the DAC0 Data registers (DAC0_DAT0H & DAC0_DAT0L)
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_DAC_SetDacStep ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+      OS_TASK_Sleep( TEN_MSEC );
+   }
+   else
+   {
+      // No parameters
+      if ( argc == 1 )
+      {
+         DBG_logPrintf( 'R', "Set the DAC Step, range for steps is 0 - 4095 eg.) setdac0step 2200");
+         OS_TASK_Sleep( TEN_MSEC );
+      }
+      else
+      {
+         uint16_t dac0StepVal;
+         dac0StepVal = ( uint16_t )atoi( argv[1] );
+         DBG_logPrintf( 'R', "setdac0step %d", dac0StepVal );
+         OS_TASK_Sleep( TEN_MSEC );
+         if ( dac0StepVal < 4096)
+         {
+            DVR_DAC0_setVoltageStep( dac0StepVal );
+
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Value out of bounds, the value range is 0 - 4095");
+            OS_TASK_Sleep( TEN_MSEC );
+         }
+      }
+   }
+
+   return ( uint32_t )retVal;
+}
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_setPwrSel
+
+   Purpose: Set/Rest the pwrsel pin
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_setPwrSel ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   R_BSP_PinAccessEnable();
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+      OS_TASK_Sleep( TEN_MSEC );
+   }
+   else
+   {
+      // No parameters
+      if ( argc == 1 )
+      {
+         DBG_logPrintf( 'R', "pwrsel 1/0");
+         OS_TASK_Sleep( TEN_MSEC );
+      }
+      else
+      {
+         uint16_t pwrSelVal;
+         pwrSelVal = ( uint16_t )atoi( argv[1] );
+         DBG_logPrintf( 'R', "pwrsel %d", pwrSelVal );
+         OS_TASK_Sleep( TEN_MSEC );
+         if ( pwrSelVal == 1)
+         {
+            R_BSP_PinWrite(BSP_IO_PORT_07_PIN_08, BSP_IO_LEVEL_HIGH);
+         }
+         else
+         {
+            R_BSP_PinWrite(BSP_IO_PORT_07_PIN_08, BSP_IO_LEVEL_LOW);
+         }
+
+         retVal = eSUCCESS;
+      }
+   }
+
+   return ( uint32_t )retVal;
+}
+
+#endif
+
+
 #if ENABLE_DFW_TASKS
 /*******************************************************************************
 
@@ -1428,14 +1554,14 @@ uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
    else if ( argc == 2 )
    {
       /* The number of arguments must be 1 */
-      crc16 = CRC_16_Calculate( argv[1], strlen( argv[1] ) );
+      crc16 = CRC_16_Calculate( (uint8_t *)argv[1], strlen( argv[1] ) );
       DBG_logPrintf( 'R', "CRC_16_Calculate: %x", crc16 );
       /* Setting the Seed value to 0 and KeepLock value to false */
       CRC_ecc108_crc( strlen( argv[1] ), argv[1], (uint8_t *)&crc16, 0, false );
       DBG_logPrintf( 'R', "CRC_ecc108_crc: %x", crc16 );
-      crc16 = CRC_16_PhyHeader( argv[1], strlen( argv[1] ) );
+      crc16 = CRC_16_PhyHeader( (uint8_t *)argv[1], strlen( argv[1] ) );
       DBG_logPrintf( 'R', "CRC_16_PhyHeader: %x", crc16 );
-      crc32 = CRC_32_Calculate( argv[1], strlen( argv[1] ) );
+      crc32 = CRC_32_Calculate( (uint8_t *)argv[1], strlen( argv[1] ) );
       DBG_logPrintf( 'R', "CRC_32_Calculate: %x", crc32 );
       retVal = eSUCCESS;
    }
@@ -8796,183 +8922,200 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 //#endif
 //#endif
 //
-///******************************************************************************
-//
-//   Function Name: printErr
-//
-//   Purpose: Print the word ERROR. This is used to reduce code space
-//
-//   Arguments: none
-//
-//   Returns: none
-//
-//   Notes:
-//
-//******************************************************************************/
-//static void printErr(void)
-//{
-//   DBG_logPrintf( 'R', "ERROR");
-//}
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_SetFreq
-//
-//   Purpose: This function sets a list of available frequencies
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_SetFreq ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t i; // loop counter
-//   uint32_t locationIndex = 0;
-//   uint32_t freq; // Frequency between 450 and 470 MHz
-//   uint16_t Channel; // Frequency translates into a channel between 0-3200 //lint !e578  Declaration of symbol 'channel' hides symbol 'channel'
-//
-//   // No parameters
-//   if ( argc == 1 )
-//   {
-////      DBG_printf( "setfreq sets a list of available frequencies:" );
-////      DBG_printf( "usage: setfreq locationIndex freq|channel [freq|channel] [...]" );
-////      DBG_printf( "       locationIndex (0-31) is a starting index into an array of frequencies" );
-////      DBG_printf( "       freq is betwen 450000000 and 470000000 Hz" );
-////      DBG_printf( "       channel is between 0-3200 (0 is 450 MHz, 1 is 450.00625 MHz, etc)" );
-////      DBG_printf( "       To delete a frequency from the list use frequency 999999999" );
-////      DBG_printf( "       or channel 9999." );
-//      return ( 0 );
-//   }
-//
-//   // One parameter
-//   if ( argc == 2 )
-//   {
-////      DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one frequency or channel must be provided" );
-//      printErr();
-//      return ( 0 );
-//   }
-//
-//   // Many parameters. Validate locationIndex
-//   if ( argc > 2 )
-//   {
-//      locationIndex = ( uint32_t )atoi( argv[1] );
-//
-//      // Check for valid range
-//      if ( locationIndex >= PHY_MAX_CHANNEL )
-//      {
-////         DBG_logPrintf( 'R', "ERROR - locationIndex is invalid. Must be between 0-31" );
-//         printErr();
-//         return ( 0 );
-//      }
-//   }
-//
-//   // Notice how locationIndex is incremented in the loop
-//   for ( i = 2; i < argc; i++, locationIndex++ )
-//   {
-//      // Validate locationIndex
-//      if ( locationIndex >= PHY_MAX_CHANNEL )
-//      {
-////         DBG_logPrintf( 'R', "locationIndex is out of range. Further frequencies ignored" );
-//         printErr();
-//         return ( 0 );
-//      }
-//
-//      // Validate as frequency
-//      freq    = ( uint32_t )atoi( argv[i] );
-//      Channel = ( uint16_t )atoi( argv[i] );
-//      if ( ( freq >= PHY_MIN_FREQ ) && ( freq <= PHY_MAX_FREQ ) )
-//      {
-//         // Convert frequency into a channel
-//         Channel = FREQ_TO_CHANNEL( freq );
-//
-//         if ( CHANNEL_TO_FREQ( Channel ) != freq )
-//         {
-////            DBG_logPrintf( 'R', "ERROR - Invalid frequency %u for locationIndex %u", freq, locationIndex );
-//            printErr();
-//            continue;
-//         }
-//         // Validate as delete frequency
-//      }
-//      else if ( freq == PHY_INVALID_FREQ )
-//      {
-//         Channel = DELETE_CHANNEL;
-//         // Validate as channel
-//      }
-//      else if ( ( Channel > PHY_NUM_CHANNELS ) && ( Channel != DELETE_CHANNEL ) )
-//      {
-////         DBG_logPrintf( 'R', "ERROR - Invalid channel %u for locationIndex %u", Channel, locationIndex );
-//         printErr();
-//         continue;
-//      }
-//
-//      // Program that frequency
-//      if ( Channel != DELETE_CHANNEL )
-//      {
-//         DBG_printf( "Programmed locationIndex %u with %uMHz (channel %u)",
-//                     locationIndex, CHANNEL_TO_FREQ( Channel ), Channel );
-//      }
-//      else
-//      {
-//         // Check if current channel that we are going to delete is not in the TX or RX list.
-//         (void)PHY_Channel_Get( ( uint8_t )locationIndex, &Channel );
-//         if ( PHY_IsRXChannelValid( Channel ) )
-//         {
-//            DBG_logPrintf( 'R', "ERROR - Remove channel %u from RX list first.", Channel );
-//            continue;
-//         }
-//
-//         if ( PHY_IsTXChannelValid( Channel ) )
-//         {
-//            DBG_logPrintf( 'R', "ERROR - Remove channel %u from TX list first.", Channel );
-//            continue;
-//         }
-//         DBG_printf( "Deleted channel %u at locationIndex %u", Channel, locationIndex );
-//         Channel = PHY_INVALID_CHANNEL;
-//      }
-//      (void)PHY_Channel_Set( ( uint8_t )locationIndex, Channel );
-//   }
-//
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_GetFreq
-//
-//   Purpose: This function will print a list of available frequencies
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_GetFreq ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t i; // loop counter
-//   uint16_t Channel = PHY_INVALID_CHANNEL;
-//
-//   for ( i = 0; i < PHY_MAX_CHANNEL; i++ )
-//   {
-//      (void)PHY_Channel_Get( ( uint8_t )i , &Channel );
-//      if ( Channel == PHY_INVALID_CHANNEL )
-//      {
-//         DBG_printf( "Index %2u Freq Invalid", i );
-//      }
-//      else
-//      {
-//         DBG_printf( "Index %2u Freq %u (channel %4u)", i, CHANNEL_TO_FREQ( Channel ), Channel );
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
+/******************************************************************************
+
+   Function Name: printErr
+
+   Purpose: Print the word ERROR. This is used to reduce code space
+
+   Arguments: none
+
+   Returns: none
+
+   Notes:
+
+******************************************************************************/
+static void printErr(void)
+{
+   DBG_logPrintf( 'R', "ERROR");
+}
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_SetFreq
+
+   Purpose: This function sets a list of available frequencies
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_SetFreq ( uint32_t argc, char *argv[] )
+{
+   uint32_t i; // loop counter
+   uint32_t locationIndex = 0;
+   uint32_t freq; // Frequency between 450 and 470 MHz
+   uint16_t Channel; // Frequency translates into a channel between 0-3200 //lint !e578  Declaration of symbol 'channel' hides symbol 'channel'
+
+   // No parameters
+   if ( argc == 1 )
+   {
+#if ( FULL_USER_INTERFACE == 1 )
+      DBG_printf( "setfreq sets a list of available frequencies:" );
+      DBG_printf( "usage: setfreq locationIndex freq|channel [freq|channel] [...]" );
+      DBG_printf( "       locationIndex (0-31) is a starting index into an array of frequencies" );
+      DBG_printf( "       freq is betwen 450000000 and 470000000 Hz" );
+      DBG_printf( "       channel is between 0-3200 (0 is 450 MHz, 1 is 450.00625 MHz, etc)" );
+      DBG_printf( "       To delete a frequency from the list use frequency 999999999" );
+      DBG_printf( "       or channel 9999." );
+#endif
+      return ( 0 );
+   }
+
+   // One parameter
+   if ( argc == 2 )
+   {
+#if ( FULL_USER_INTERFACE == 1 )
+      DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one frequency or channel must be provided" );
+#else
+      printErr();
+#endif
+      return ( 0 );
+   }
+
+   // Many parameters. Validate locationIndex
+   if ( argc > 2 )
+   {
+      locationIndex = ( uint32_t )atoi( argv[1] );
+
+      // Check for valid range
+      if ( locationIndex >= PHY_MAX_CHANNEL )
+      {
+#if ( FULL_USER_INTERFACE == 1 )
+         DBG_logPrintf( 'R', "ERROR - locationIndex is invalid. Must be between 0-31" );
+#else
+         printErr();
+#endif
+         return ( 0 );
+      }
+   }
+
+   // Notice how locationIndex is incremented in the loop
+   for ( i = 2; i < argc; i++, locationIndex++ )
+   {
+      // Validate locationIndex
+      if ( locationIndex >= PHY_MAX_CHANNEL )
+      {
+#if ( FULL_USER_INTERFACE == 1 )
+         DBG_logPrintf( 'R', "locationIndex is out of range. Further frequencies ignored" );
+#else
+         printErr();
+#endif
+         return ( 0 );
+      }
+
+      // Validate as frequency
+      freq    = ( uint32_t )atoi( argv[i] );
+      Channel = ( uint16_t )atoi( argv[i] );
+      if ( ( freq >= PHY_MIN_FREQ ) && ( freq <= PHY_MAX_FREQ ) )
+      {
+         // Convert frequency into a channel
+         Channel = FREQ_TO_CHANNEL( freq );
+
+         if ( CHANNEL_TO_FREQ( Channel ) != freq )
+         {
+#if ( FULL_USER_INTERFACE == 1 )
+            DBG_logPrintf( 'R', "ERROR - Invalid frequency %u for locationIndex %u", freq, locationIndex );
+#else
+            printErr();
+#endif
+            continue;
+         }
+         // Validate as delete frequency
+      }
+      else if ( freq == PHY_INVALID_FREQ )
+      {
+         Channel = DELETE_CHANNEL;
+         // Validate as channel
+      }
+      else if ( ( Channel > PHY_NUM_CHANNELS ) && ( Channel != DELETE_CHANNEL ) )
+      {
+#if ( FULL_USER_INTERFACE == 1 )
+         DBG_logPrintf( 'R', "ERROR - Invalid channel %u for locationIndex %u", Channel, locationIndex );
+#else
+         printErr();
+#endif
+         continue;
+      }
+
+      // Program that frequency
+      if ( Channel != DELETE_CHANNEL )
+      {
+         DBG_printf( "Programmed locationIndex %u with %uMHz (channel %u)",
+                     locationIndex, CHANNEL_TO_FREQ( Channel ), Channel );
+      }
+      else
+      {
+         // Check if current channel that we are going to delete is not in the TX or RX list.
+         (void)PHY_Channel_Get( ( uint8_t )locationIndex, &Channel );
+         if ( PHY_IsRXChannelValid( Channel ) )
+         {
+            DBG_logPrintf( 'R', "ERROR - Remove channel %u from RX list first.", Channel );
+            continue;
+         }
+
+         if ( PHY_IsTXChannelValid( Channel ) )
+         {
+            DBG_logPrintf( 'R', "ERROR - Remove channel %u from TX list first.", Channel );
+            continue;
+         }
+         DBG_printf( "Deleted channel %u at locationIndex %u", Channel, locationIndex );
+         Channel = PHY_INVALID_CHANNEL;
+      }
+      (void)PHY_Channel_Set( ( uint8_t )locationIndex, Channel );
+   }
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_GetFreq
+
+   Purpose: This function will print a list of available frequencies
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_GetFreq ( uint32_t argc, char *argv[] )
+{
+   uint32_t i; // loop counter
+   uint16_t Channel = PHY_INVALID_CHANNEL;
+
+   for ( i = 0; i < PHY_MAX_CHANNEL; i++ )
+   {
+      (void)PHY_Channel_Get( ( uint8_t )i , &Channel );
+      if ( Channel == PHY_INVALID_CHANNEL )
+      {
+         DBG_printf( "Index %2u Freq Invalid", i );
+      }
+      else
+      {
+         DBG_printf( "Index %2u Freq %u (channel %4u)", i, CHANNEL_TO_FREQ( Channel ), Channel );
+      }
+   }
+
+   return ( 0 );
+}
+
 //#if DCU == 1
 //#if OTA_CHANNELS_ENABLED == 1
 ///*
@@ -9486,306 +9629,326 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 //
 //
 //
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_TxChannels
-//
-//   Purpose: This function will set/print a list of TX channels
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_TxChannels ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t i; // Loop counter
-//   uint32_t locationIndex = 0;
-//   uint32_t freq; // Frequency between 450 and 470 MHz
-//   uint16_t Channel; // Frequency translates into a channel between 0-3200 //lint !e578  Declaration of symbol 'channel' hides symbol 'channel'
-//
-//   // No parameters
-//   if ( argc == 1 )
-//   {
-////      DBG_printf( "TxChannels sets a list of available TX frequencies:" );
-////      DBG_printf( "usage: txchannels locationIndex freq|channel [freq|channel] [...]" );
-////      DBG_printf( "       locationIndex (0-31) is a starting index into an array of frequencies" );
-////      DBG_printf( "       freq is betwen 450000000 and 470000000 Hz" );
-////      DBG_printf( "       channel is between 0-3200 (0 is 450 MHz, 1 is 450.00625 MHz, etc)" );
-////      DBG_printf( "       To delete a frequency from the list use frequency 999999999" );
-////      DBG_printf( "       or channel 9999." );
-//
-//      for ( i = 0; i < PHY_MAX_CHANNEL; i++ )
-//      {
-//         if ( PHY_TxChannel_Get( ( uint8_t )i, &Channel ) )
-//         {
-//            if ( Channel == PHY_INVALID_CHANNEL )
-//            {
-////            DBG_printf( "Index %u not set", i );
-////            printErr();
-//            }
-//            else if ( PHY_IsChannelValid( Channel ) )
-//            {
-//              DBG_printf( "Index %u set to channel %4u Freq %u", i, Channel, CHANNEL_TO_FREQ( Channel ) );
-////            printErr();
-//            }
-//            else
-//            {
-//               DBG_printf( "Index %u set to channel %4u Freq %u (WARNING: Not in PHY channel list)",
-//                           i, Channel, CHANNEL_TO_FREQ( Channel ) );
-////            printErr();
-//            }
-//         }
-//      }
-//      return ( 0 );
-//   }
-//
-//   // One parameter
-//   if ( argc == 2 )
-//   {
-////      DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one frequency or channel must be provided" );
-//      printErr();
-//      return ( 0 );
-//   }
-//
-//   // Many parameters. Validate locationIndex
-//   if ( argc > 2 )
-//   {
-//      locationIndex = ( uint32_t )atoi( argv[1] );
-//
-//      // Check for valid range
-//      if ( locationIndex >= PHY_MAX_CHANNEL )
-//      {
-////         DBG_logPrintf( 'R', "ERROR - locationIndex is invalid. Must be between 0-31" );
-//         printErr();
-//         return ( 0 );
-//      }
-//   }
-//
-//   // Notice how locationIndex is incremented in the loop
-//   for ( i = 2; i < argc; i++, locationIndex++ )
-//   {
-//      // Validate locationIndex
-//      if ( locationIndex >= PHY_MAX_CHANNEL )
-//      {
-////         DBG_logPrintf( 'R', "locationIndex is out of range. Further frequencies ignored" );
-//         printErr();
-//         return ( 0 );
-//      }
-//
-//      freq    = ( uint32_t )atoi( argv[i] );
-//      Channel = ( uint16_t )atoi( argv[i] );
-//      if ( ( freq >= PHY_MIN_FREQ ) && ( freq <= PHY_MAX_FREQ ) )
-//      {
-//         // Convert frequency into a channel
-//         Channel = FREQ_TO_CHANNEL( freq );
-//
-//         if ( CHANNEL_TO_FREQ( Channel ) != freq )
-//         {
-////               DBG_logPrintf( 'R', "ERROR - Invalid frequency %u for locationIndex %u", freq, locationIndex );
-//            printErr();
-//            continue;
-//         }
-//      // Validate as delete frequency
-//      }
-//      else if ( freq == PHY_INVALID_FREQ )
-//      {
-//         Channel = DELETE_CHANNEL;
-//      }
-//
-//      // Validate as channel
-//      if ( ( Channel > PHY_NUM_CHANNELS ) && ( Channel != DELETE_CHANNEL ) )
-//      {
-////         DBG_logPrintf( 'R', "ERROR - Invalid channel %u for locationIndex %u", channel, locationIndex );
-//         printErr();
-//         // Delete channel
-//      }
-//      else if ( Channel == DELETE_CHANNEL )
-//      {
-//         DBG_printf( "Deleted index %u", locationIndex );
-//         (void)PHY_TxChannel_Set( ( uint8_t )locationIndex, ( uint16_t )PHY_INVALID_CHANNEL );
-//         // Make sure channel is in PHY channel list
-//      }
-//      else if ( !PHY_IsChannelValid( Channel ) )
-//      {
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_TxChannels
+
+   Purpose: This function will set/print a list of TX channels
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_TxChannels ( uint32_t argc, char *argv[] )
+{
+   uint32_t i; // Loop counter
+   uint32_t locationIndex = 0;
+   uint32_t freq; // Frequency between 450 and 470 MHz
+   uint16_t Channel; // Frequency translates into a channel between 0-3200 //lint !e578  Declaration of symbol 'channel' hides symbol 'channel'
+
+   // No parameters
+   if ( argc == 1 )
+   {
+#if ( FULL_USER_INTERFACE == 1 )
+      DBG_printf( "TxChannels sets a list of available TX frequencies:" );
+      DBG_printf( "usage: txchannels locationIndex freq|channel [freq|channel] [...]" );
+      DBG_printf( "       locationIndex (0-31) is a starting index into an array of frequencies" );
+      DBG_printf( "       freq is betwen 450000000 and 470000000 Hz" );
+      DBG_printf( "       channel is between 0-3200 (0 is 450 MHz, 1 is 450.00625 MHz, etc)" );
+      DBG_printf( "       To delete a frequency from the list use frequency 999999999" );
+      DBG_printf( "       or channel 9999." );
+#endif
+
+      for ( i = 0; i < PHY_MAX_CHANNEL; i++ )
+      {
+         if ( PHY_TxChannel_Get( ( uint8_t )i, &Channel ) )
+         {
+            if ( Channel == PHY_INVALID_CHANNEL )
+            {
+#if ( FULL_USER_INTERFACE == 1 )
+               DBG_printf( "Index %u not set", i );
+#else
+               printErr();
+#endif
+            }
+            else if ( PHY_IsChannelValid( Channel ) )
+            {
+               DBG_printf( "Index %u set to channel %4u Freq %u", i, Channel, CHANNEL_TO_FREQ( Channel ) );
+//             printErr();
+            }
+            else
+            {
+               DBG_printf( "Index %u set to channel %4u Freq %u (WARNING: Not in PHY channel list)",
+                           i, Channel, CHANNEL_TO_FREQ( Channel ) );
+//             printErr();
+            }
+         }
+      }
+      return ( 0 );
+   }
+
+   // One parameter
+   if ( argc == 2 )
+   {
+#if ( FULL_USER_INTERFACE == 1 )
+      DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one frequency or channel must be provided" );
+#else
+      printErr();
+#endif
+      return ( 0 );
+   }
+
+   // Many parameters. Validate locationIndex
+   if ( argc > 2 )
+   {
+      locationIndex = ( uint32_t )atoi( argv[1] );
+
+      // Check for valid range
+      if ( locationIndex >= PHY_MAX_CHANNEL )
+      {
+#if ( FULL_USER_INTERFACE == 1 )
+         DBG_logPrintf( 'R', "ERROR - locationIndex is invalid. Must be between 0-31" );
+#else
+         printErr();
+#endif
+         return ( 0 );
+      }
+   }
+
+   // Notice how locationIndex is incremented in the loop
+   for ( i = 2; i < argc; i++, locationIndex++ )
+   {
+      // Validate locationIndex
+      if ( locationIndex >= PHY_MAX_CHANNEL )
+      {
+#if ( FULL_USER_INTERFACE == 1 )
+         DBG_logPrintf( 'R', "locationIndex is out of range. Further frequencies ignored" );
+#else
+         printErr();
+#endif
+         return ( 0 );
+      }
+
+      freq    = ( uint32_t )atoi( argv[i] );
+      Channel = ( uint16_t )atoi( argv[i] );
+      if ( ( freq >= PHY_MIN_FREQ ) && ( freq <= PHY_MAX_FREQ ) )
+      {
+         // Convert frequency into a channel
+         Channel = FREQ_TO_CHANNEL( freq );
+
+         if ( CHANNEL_TO_FREQ( Channel ) != freq )
+         {
+#if ( FULL_USER_INTERFACE == 1 )
+            DBG_logPrintf( 'R', "ERROR - Invalid frequency %u for locationIndex %u", freq, locationIndex );
+#else
+            printErr();
+#endif
+            continue;
+         }
+      // Validate as delete frequency
+      }
+      else if ( freq == PHY_INVALID_FREQ )
+      {
+         Channel = DELETE_CHANNEL;
+      }
+
+      // Validate as channel
+      if ( ( Channel > PHY_NUM_CHANNELS ) && ( Channel != DELETE_CHANNEL ) )
+      {
+#if ( FULL_USER_INTERFACE == 1 )
+         DBG_logPrintf( 'R', "ERROR - Invalid channel %u for locationIndex %u", channel, locationIndex );
+#else
+         printErr();
+#endif
+         // Delete channel
+      }
+      else if ( Channel == DELETE_CHANNEL )
+      {
+         DBG_printf( "Deleted index %u", locationIndex );
+         (void)PHY_TxChannel_Set( ( uint8_t )locationIndex, ( uint16_t )PHY_INVALID_CHANNEL );
+         // Make sure channel is in PHY channel list
+      }
+      else if ( !PHY_IsChannelValid( Channel ) )
+      {
+         DBG_logPrintf( 'R',
+                        "ERROR - Channel %u is not present in PHY channel list. Add to PHY channel list first.",
+                        Channel );
+         printErr();
+         // Program that channel
+      }
+      else
+      {
+         DBG_printf( "Programmed locationIndex %u with %uMHz (channel %u)",
+                     locationIndex, CHANNEL_TO_FREQ( Channel ), Channel );
+         (void)PHY_TxChannel_Set( ( uint8_t )locationIndex, Channel );
+      }
+   }
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RxChannels
+
+   Purpose: This function will set/print a list of TX channels
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RxChannels ( uint32_t argc, char *argv[] )
+{
+   uint32_t i; // Loop counter
+   uint32_t RadioIndex = 0;
+   uint32_t freq; // Frequency between 450 and 470 MHz
+   uint16_t Channel; // Frequency translate into a channel between 0-3200 //lint !e578  Declaration of symbol 'channel' hides symbol 'channel'
+
+   // No parameters
+   if ( argc == 1 )
+   {
+//      DBG_printf( "RxChannels sets a list of available RX frequencies:" );
+//      DBG_printf( "usage: rxchannels RadioIndex freq|channel [freq|channel] [...]" );
+//      DBG_printf( "       RadioIndex (0-8) is the first radio to set" );
+//      DBG_printf( "       freq is betwen 450000000 and 470000000 Hz" );
+//      DBG_printf( "       channel is between 0-3200 (0 is 450 MHz, 1 is 450.00625 MHz, etc)" );
+//      DBG_printf( "       To delete a frequency from the list use frequency 999999999" );
+//      DBG_printf( "       or channel 9999." );
+
+      for ( i = 0; i < PHY_RCVR_COUNT; i++ )
+      {
+         if ( PHY_RxChannel_Get( ( uint8_t )i, &Channel ) )
+         {
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )
+         if ( i == ( uint8_t )RADIO_0 )
+         {
+            DBG_printf( "Radio 0 has no receiver on this hardware." );
+         }
+         else
+#endif
+            if ( Channel == PHY_INVALID_CHANNEL )
+            {
+//               DBG_printf( "Radio %u not set", i );
+//               printErr();
+            }
+            else if ( PHY_IsChannelValid( Channel ) )
+            {
+               DBG_printf( "Radio %u set to channel %4u Freq %u", i, Channel, CHANNEL_TO_FREQ( Channel ) );
+//               printErr();
+            }
+            else
+            {
+               DBG_printf( "Radio %u set to channel %4u Freq %u (WARNING: Not in PHY channel list)",
+                              i, Channel, CHANNEL_TO_FREQ( Channel ) );
+//               printErr();
+            }
+         }
+      }
+      return ( 0 );
+   }
+
+   // One parameter
+   if ( argc == 2 )
+   {
+//      DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one frequency or channel must be provided" );
+      printErr();
+      return ( 0 );
+   }
+
+   // Many parameters. Validate RadioIndex
+   if ( argc > 2 )
+   {
+      RadioIndex = ( uint32_t )atoi( argv[1] );
+
+      // Check for valid range
+      if ( RadioIndex >= PHY_RCVR_COUNT )
+      {
+//         DBG_logPrintf( 'R', "ERROR - RadioIndex is invalid. Must be between less than %u", PHY_RCVR_COUNT );
+         printErr();
+         return ( 0 );
+      }
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )
+      if ( RadioIndex == ( uint8_t )RADIO_0 )
+      {
 //         DBG_logPrintf( 'R',
-//                        "ERROR - Channel %u is not present in PHY channel list. Add to PHY channel list first.",
-//                        Channel );
-//         printErr();
-//         // Program that channel
-//      }
-//      else
-//      {
-//         DBG_printf( "Programmed locationIndex %u with %uMHz (channel %u)",
-//                     locationIndex, CHANNEL_TO_FREQ( Channel ), Channel );
-//         (void)PHY_TxChannel_Set( ( uint8_t )locationIndex, Channel );
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RxChannels
-//
-//   Purpose: This function will set/print a list of TX channels
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RxChannels ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t i; // Loop counter
-//   uint32_t RadioIndex = 0;
-//   uint32_t freq; // Frequency between 450 and 470 MHz
-//   uint16_t Channel; // Frequency translate into a channel between 0-3200 //lint !e578  Declaration of symbol 'channel' hides symbol 'channel'
-//
-//   // No parameters
-//   if ( argc == 1 )
-//   {
-////      DBG_printf( "RxChannels sets a list of available RX frequencies:" );
-////      DBG_printf( "usage: rxchannels RadioIndex freq|channel [freq|channel] [...]" );
-////      DBG_printf( "       RadioIndex (0-8) is the first radio to set" );
-////      DBG_printf( "       freq is betwen 450000000 and 470000000 Hz" );
-////      DBG_printf( "       channel is between 0-3200 (0 is 450 MHz, 1 is 450.00625 MHz, etc)" );
-////      DBG_printf( "       To delete a frequency from the list use frequency 999999999" );
-////      DBG_printf( "       or channel 9999." );
-//
-//      for ( i = 0; i < PHY_RCVR_COUNT; i++ )
-//      {
-//         if ( PHY_RxChannel_Get( ( uint8_t )i, &Channel ) )
-//         {
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )
-//         if ( i == ( uint8_t )RADIO_0 )
-//         {
-//            DBG_printf( "Radio 0 has no receiver on this hardware." );
-//         }
-//         else
-//#endif
-//            if ( Channel == PHY_INVALID_CHANNEL )
-//            {
-////               DBG_printf( "Radio %u not set", i );
-////               printErr();
-//            }
-//            else if ( PHY_IsChannelValid( Channel ) )
-//            {
-//               DBG_printf( "Radio %u set to channel %4u Freq %u", i, Channel, CHANNEL_TO_FREQ( Channel ) );
-////               printErr();
-//            }
-//            else
-//            {
-//               DBG_printf( "Radio %u set to channel %4u Freq %u (WARNING: Not in PHY channel list)",
-//                              i, Channel, CHANNEL_TO_FREQ( Channel ) );
-////               printErr();
-//            }
-//         }
-//      }
-//      return ( 0 );
-//   }
-//
-//   // One parameter
-//   if ( argc == 2 )
-//   {
-////      DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one frequency or channel must be provided" );
-//      printErr();
-//      return ( 0 );
-//   }
-//
-//   // Many parameters. Validate RadioIndex
-//   if ( argc > 2 )
-//   {
-//      RadioIndex = ( uint32_t )atoi( argv[1] );
-//
-//      // Check for valid range
-//      if ( RadioIndex >= PHY_RCVR_COUNT )
-//      {
-////         DBG_logPrintf( 'R', "ERROR - RadioIndex is invalid. Must be between less than %u", PHY_RCVR_COUNT );
-//         printErr();
-//         return ( 0 );
-//      }
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )
-//      if ( RadioIndex == ( uint8_t )RADIO_0 )
-//      {
-////         DBG_logPrintf( 'R',
-////                        "ERROR - RadioIndex 0 is invalid because the hardware doesn't have a receiver for RADIO 0" );
-//         printErr();
-//         return ( 0 );
-//      }
-//#endif
-//   }
-//
-//   // Notice how RadioIndex is incremented in the loop
-//   for ( i = 2; i < argc; i++, RadioIndex++ )
-//   {
-//      // Validate RadioIndex
-//      if ( RadioIndex >= PHY_RCVR_COUNT )
-//      {
-////         DBG_logPrintf( 'R', "RadioIndex is out of range. Further frequencies ignored" );
-//         printErr();
-//         return ( 0 );
-//      }
-//
-//      freq    = ( uint32_t )atoi( argv[i] );
-//      Channel = ( uint16_t )atoi( argv[i] );
-//      if ( ( freq >= PHY_MIN_FREQ ) && ( freq <= PHY_MAX_FREQ ) )
-//      {
-//         // Convert frequency into a channel
-//         Channel = FREQ_TO_CHANNEL( freq );
-//
-//         if ( CHANNEL_TO_FREQ( Channel ) != freq )
-//         {
-////               DBG_logPrintf( 'R', "ERROR - Invalid frequency %u for RadioIndex %d", freq, RadioIndex );
-//            printErr();
-//            continue;
-//         }
-//      // Validate as delete frequency
-//      }
-//      else if ( freq == PHY_INVALID_FREQ )
-//      {
-//         Channel = DELETE_CHANNEL;
-//      }
-//
-//      // Validate as channel
-//      if ( ( Channel > PHY_NUM_CHANNELS ) && ( Channel != DELETE_CHANNEL ) )
-//      {
-////         DBG_logPrintf( 'R', "ERROR - Invalid channel %u for RadioIndex %d", channel, RadioIndex );
-//         printErr();
-//         // Delete channel
-//      }
-//      else if ( Channel == DELETE_CHANNEL )
-//      {
-//         DBG_printf( "Deleted index %u", RadioIndex );
-//         (void)PHY_RxChannel_Set( ( uint8_t )RadioIndex, ( uint16_t )PHY_INVALID_CHANNEL );
-//         // Make sure channel is in PHY channel list
-//      }
-//      else if ( !PHY_IsChannelValid( Channel ) )
-//      {
-//         DBG_logPrintf( 'R',
-//                        "ERROR - Channel %u is not present in PHY channel list. Add to PHY channel list first.",
-//                        Channel );
-//         printErr();
-//         // Program that channel
-//      }
-//      else
-//      {
-//         DBG_printf( "Programmed RadioIndex %u with %uMHz (channel %u)",
-//                     RadioIndex, CHANNEL_TO_FREQ( Channel ), Channel );
-//         (void)PHY_RxChannel_Set( ( uint8_t )RadioIndex, Channel );
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
+//                        "ERROR - RadioIndex 0 is invalid because the hardware doesn't have a receiver for RADIO 0" );
+         printErr();
+         return ( 0 );
+      }
+#endif
+   }
+
+   // Notice how RadioIndex is incremented in the loop
+   for ( i = 2; i < argc; i++, RadioIndex++ )
+   {
+      // Validate RadioIndex
+      if ( RadioIndex >= PHY_RCVR_COUNT )
+      {
+//         DBG_logPrintf( 'R', "RadioIndex is out of range. Further frequencies ignored" );
+         printErr();
+         return ( 0 );
+      }
+
+      freq    = ( uint32_t )atoi( argv[i] );
+      Channel = ( uint16_t )atoi( argv[i] );
+      if ( ( freq >= PHY_MIN_FREQ ) && ( freq <= PHY_MAX_FREQ ) )
+      {
+         // Convert frequency into a channel
+         Channel = FREQ_TO_CHANNEL( freq );
+
+         if ( CHANNEL_TO_FREQ( Channel ) != freq )
+         {
+//               DBG_logPrintf( 'R', "ERROR - Invalid frequency %u for RadioIndex %d", freq, RadioIndex );
+            printErr();
+            continue;
+         }
+      // Validate as delete frequency
+      }
+      else if ( freq == PHY_INVALID_FREQ )
+      {
+         Channel = DELETE_CHANNEL;
+      }
+
+      // Validate as channel
+      if ( ( Channel > PHY_NUM_CHANNELS ) && ( Channel != DELETE_CHANNEL ) )
+      {
+//         DBG_logPrintf( 'R', "ERROR - Invalid channel %u for RadioIndex %d", channel, RadioIndex );
+         printErr();
+         // Delete channel
+      }
+      else if ( Channel == DELETE_CHANNEL )
+      {
+         DBG_printf( "Deleted index %u", RadioIndex );
+         (void)PHY_RxChannel_Set( ( uint8_t )RadioIndex, ( uint16_t )PHY_INVALID_CHANNEL );
+         // Make sure channel is in PHY channel list
+      }
+      else if ( !PHY_IsChannelValid( Channel ) )
+      {
+         DBG_logPrintf( 'R',
+                        "ERROR - Channel %u is not present in PHY channel list. Add to PHY channel list first.",
+                        Channel );
+         printErr();
+         // Program that channel
+      }
+      else
+      {
+         DBG_printf( "Programmed RadioIndex %u with %uMHz (channel %u)",
+                     RadioIndex, CHANNEL_TO_FREQ( Channel ), Channel );
+         (void)PHY_RxChannel_Set( ( uint8_t )RadioIndex, Channel );
+      }
+   }
+
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_RxDetection
@@ -10087,139 +10250,139 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_TXMode
-//
-//   Purpose: This function sets the radio mode
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:  This is used to cause the PHY layer to either enter or exit test mode.
-//           In test mode the Radio can be configured to CW or PN9 Mode. In this mode it will
-//           transmit for T (msec), and and repeat every Period (msec).
-//           This will repeat for RepeatCnt times.
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_TXMode ( uint32_t argc, char *argv[] )
-//{
-//   RADIO_MODE_t mode = eRADIO_MODE_NORMAL;
-//   uint16_t T;                  // Time the signal is active
-//   uint16_t Period;             // Time for one full cycle
-//   uint16_t RepeatCnt;          // How many time the test will run
-//   uint16_t Delay;              // Delay in seconds before the test starts
-//   uint16_t Delay2=0;           // Delay between 2 loops
-//   uint16_t RepeatCnt2=0;       // How many time to repeat the 2nd loop (65535 is infinity)
-//   uint16_t UseMarksTxAlgo;     // Use Mark's PA temperature compensation algorithm
-//   uint16_t UseDennisTempCheck; // Enable/Disable Dennis' temperature check
-//   uint16_t UseDynamicBackoff;  // Use fixed backoff delay (0) or dynamic (1)
-//
-//   if ( argc == 1 )
-//   {
-//      DBG_printf( "Txmode syntax: mode constantPower thermalProtection delayType delayStart dutyON period repeat delay2 repeat2" );
-//      DBG_printf( "mode:              0 = Normal (default), 1 = PN9, 2 = Unmodulated Carrier Wave, 3 = Deprecated, 4 = 4GFSK BER with manufacturing print out" );
-//      DBG_printf( "constantPower:     Use Mark's algorithm for constant TX power" );
-//      DBG_printf( "thermalProtection: Use Dennis' algorithm for PA protection" );
-//      DBG_printf( "delayType:         Use fixed backoff delay (0) or dynamic (1)" );
-//      DBG_printf( "delayStart:        Delay start of Txmode (in seconds)" );
-//      DBG_printf( "dutyON:            Duty cycle ON part (in msec)" );
-//      DBG_printf( "period:            Duty cycle ON + OFF part (in msec)"  );
-//      DBG_printf( "repeat:            Repeat first loop (65535 is forever)" );
-//      DBG_printf( "delay2:            Second delay (in second)" );
-//      DBG_printf( "repeat2:           Repeat second loop (65535 is forever)" );
-//   }
-//
-//   if ( argc == 2 )
-//   {
-//      mode = ( RADIO_MODE_t )atoi( argv[1] );
-//
-//      // Check for valid range
-//      if ( mode >= eRADIO_LAST_MODE )
-//      {
-//         DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between 0-%u", ( uint16_t )eRADIO_LAST_MODE - 1 );
-//         return ( 0 );
-//      }
-//
-//      // If the phy is in the test repeat mode, then it first needs to be taken out of that mode
-//      // then put the radio into the requested mode
-//      PHY_TestMode_Enable( 0, 0, 0, 0, 0, 0, 0, 0, 0, eRADIO_MODE_NORMAL );
-//
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//      (void)PHY_StartRequest( ( PHY_START_e )0, NULL );
-//#endif
-//      RADIO_Mode_Set( mode );
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//      if ( mode == 0 )  /* Restart the stack */
-//      {
-//         (void)SM_StopRequest( NULL );
-//         (void)SM_StartRequest( eSM_START_STANDARD, NULL );
-//      }
-//#endif
-//
-//      return ( 0 );
-//   }
-//
-//   /* -----------------------------------------------------------------------------------
-//    * This is used to put the PHY/Radio into the CW or PN9 Mode
-//    * In this mode, the radio will do a cycle of CW/PN9, delay, normal, delay, repeat
-//    * -----------------------------------------------------------------------------------*/
-//   if ( argc > 7 )
-//   {
-//      mode               = ( RADIO_MODE_t )atoi( argv[1] );
-//      UseMarksTxAlgo     = (uint16_t)atoi( argv[2] );
-//      UseDennisTempCheck = (uint16_t)atoi( argv[3] );
-//      UseDynamicBackoff  = (uint16_t)atoi( argv[4] );
-//      Delay              = (uint16_t)atoi( argv[5] );
-//      T                  = (uint16_t)atoi( argv[6] );
-//      Period             = (uint16_t)atoi( argv[7] );
-//      RepeatCnt          = (uint16_t)atoi( argv[8] );
-//      if (argc >= 10) {
-//         Delay2 = (uint16_t)atoi( argv[9] );
-//      }
-//      if (argc >= 11) {
-//         RepeatCnt2 = (uint16_t)atoi( argv[10] );
-//      }
-//
-//      if ( (mode == eRADIO_MODE_PN9) || (mode == eRADIO_MODE_CW) )
-//      {
-//         // Check the input parameters
-//         if( RepeatCnt > 0 )
-//         {
-//            // Period and T must be > 0 and Period must be >= T
-//            if(((Period == 0) || ( T == 0 )) ||
-//                (Period < T))
-//            {  // Error.
-//               DBG_logPrintf( 'R', "ERROR - Invalid Parameter" );
-//               return 0;
-//            }
-//
-//            // Enable the PHY Test Mode
-//            PHY_TestMode_Enable( Delay, UseMarksTxAlgo, UseDennisTempCheck, UseDynamicBackoff, T, Period, RepeatCnt, Delay2, RepeatCnt2, mode );
-//
-//            // Cause the PHY to change state!
-//            (void)PHY_StartRequest( ( PHY_START_e )0, NULL );
-//            return 0;
-//         }else
-//         {
-//            DBG_logPrintf( 'R', "ERROR - Repeat Count" );
-//            return 0;
-//         }
-//      }else
-//      {
-//         DBG_logPrintf( 'R', "ERROR - Invalid mode" );
-//      }
-//   }else if ( argc == 1)
-//   {
-//      DBG_printf( "Current radio TXMode = %u", ( (uint16_t)RADIO_TxMode_Get() ) );
-//   }
-//
-//   return ( 0 );
-//}
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_TXMode
+
+   Purpose: This function sets the radio mode
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:  This is used to cause the PHY layer to either enter or exit test mode.
+           In test mode the Radio can be configured to CW or PN9 Mode. In this mode it will
+           transmit for T (msec), and and repeat every Period (msec).
+           This will repeat for RepeatCnt times.
+
+******************************************************************************/
+uint32_t DBG_CommandLine_TXMode ( uint32_t argc, char *argv[] )
+{
+   RADIO_MODE_t mode = eRADIO_MODE_NORMAL;
+   uint16_t T;                  // Time the signal is active
+   uint16_t Period;             // Time for one full cycle
+   uint16_t RepeatCnt;          // How many time the test will run
+   uint16_t Delay;              // Delay in seconds before the test starts
+   uint16_t Delay2=0;           // Delay between 2 loops
+   uint16_t RepeatCnt2=0;       // How many time to repeat the 2nd loop (65535 is infinity)
+   uint16_t UseMarksTxAlgo;     // Use Mark's PA temperature compensation algorithm
+   uint16_t UseDennisTempCheck; // Enable/Disable Dennis' temperature check
+   uint16_t UseDynamicBackoff;  // Use fixed backoff delay (0) or dynamic (1)
+
+   if ( argc == 1 )
+   {
+      DBG_printf( "Txmode syntax: mode constantPower thermalProtection delayType delayStart dutyON period repeat delay2 repeat2" );
+      DBG_printf( "mode:              0 = Normal (default), 1 = PN9, 2 = Unmodulated Carrier Wave, 3 = Deprecated, 4 = 4GFSK BER with manufacturing print out" );
+      DBG_printf( "constantPower:     Use Mark's algorithm for constant TX power" );
+      DBG_printf( "thermalProtection: Use Dennis' algorithm for PA protection" );
+      DBG_printf( "delayType:         Use fixed backoff delay (0) or dynamic (1)" );
+      DBG_printf( "delayStart:        Delay start of Txmode (in seconds)" );
+      DBG_printf( "dutyON:            Duty cycle ON part (in msec)" );
+      DBG_printf( "period:            Duty cycle ON + OFF part (in msec)"  );
+      DBG_printf( "repeat:            Repeat first loop (65535 is forever)" );
+      DBG_printf( "delay2:            Second delay (in second)" );
+      DBG_printf( "repeat2:           Repeat second loop (65535 is forever)" );
+   }
+
+   if ( argc == 2 )
+   {
+      mode = ( RADIO_MODE_t )atoi( argv[1] );
+
+      // Check for valid range
+      if ( mode >= eRADIO_LAST_MODE )
+      {
+         DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between 0-%u", ( uint16_t )eRADIO_LAST_MODE - 1 );
+         return ( 0 );
+      }
+
+      // If the phy is in the test repeat mode, then it first needs to be taken out of that mode
+      // then put the radio into the requested mode
+      PHY_TestMode_Enable( 0, 0, 0, 0, 0, 0, 0, 0, 0, eRADIO_MODE_NORMAL );
+
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+      (void)PHY_StartRequest( ( PHY_START_e )0, NULL );
+#endif
+      RADIO_Mode_Set( mode );
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+      if ( mode == 0 )  /* Restart the stack */
+      {
+         (void)SM_StopRequest( NULL );
+         (void)SM_StartRequest( eSM_START_STANDARD, NULL );
+      }
+#endif
+
+      return ( 0 );
+   }
+
+   /* -----------------------------------------------------------------------------------
+    * This is used to put the PHY/Radio into the CW or PN9 Mode
+    * In this mode, the radio will do a cycle of CW/PN9, delay, normal, delay, repeat
+    * -----------------------------------------------------------------------------------*/
+   if ( argc > 7 )
+   {
+      mode               = ( RADIO_MODE_t )atoi( argv[1] );
+      UseMarksTxAlgo     = (uint16_t)atoi( argv[2] );
+      UseDennisTempCheck = (uint16_t)atoi( argv[3] );
+      UseDynamicBackoff  = (uint16_t)atoi( argv[4] );
+      Delay              = (uint16_t)atoi( argv[5] );
+      T                  = (uint16_t)atoi( argv[6] );
+      Period             = (uint16_t)atoi( argv[7] );
+      RepeatCnt          = (uint16_t)atoi( argv[8] );
+      if (argc >= 10) {
+         Delay2 = (uint16_t)atoi( argv[9] );
+      }
+      if (argc >= 11) {
+         RepeatCnt2 = (uint16_t)atoi( argv[10] );
+      }
+
+      if ( (mode == eRADIO_MODE_PN9) || (mode == eRADIO_MODE_CW) )
+      {
+         // Check the input parameters
+         if( RepeatCnt > 0 )
+         {
+            // Period and T must be > 0 and Period must be >= T
+            if(((Period == 0) || ( T == 0 )) ||
+                (Period < T))
+            {  // Error.
+               DBG_logPrintf( 'R', "ERROR - Invalid Parameter" );
+               return 0;
+            }
+
+            // Enable the PHY Test Mode
+            PHY_TestMode_Enable( Delay, UseMarksTxAlgo, UseDennisTempCheck, UseDynamicBackoff, T, Period, RepeatCnt, Delay2, RepeatCnt2, mode );
+
+            // Cause the PHY to change state!
+            (void)PHY_StartRequest( ( PHY_START_e )0, NULL );
+            return 0;
+         }else
+         {
+            DBG_logPrintf( 'R', "ERROR - Repeat Count" );
+            return 0;
+         }
+      }else
+      {
+         DBG_logPrintf( 'R', "ERROR - Invalid mode" );
+      }
+   }else if ( argc == 1)
+   {
+      DBG_printf( "Current radio TXMode = %u", ( (uint16_t)RADIO_TxMode_Get() ) );
+   }
+
+   return ( 0 );
+}
+
 //#if ( EP == 1 )
 ///******************************************************************************
 //
@@ -10366,60 +10529,60 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 //}
 //#endif
 //
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_Power
-//
-//   Purpose: This function sets the TX power level mode
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_Power ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t PowerSetting;
-//
-//   // One parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      if ( argc == 1 )
-//      {
-//         PHY_GetConf_t GetConf;
-//         GetConf = PHY_GetRequest( ePhyAttr_PowerSetting );
-//         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//            DBG_printf( "Current power level is %u", ( uint8_t )GetConf.val.PowerSetting );
-//         }
-//      }
-//      else
-//      {
-//         PowerSetting = ( uint8_t )atoi( argv[1] );
-//
-//         // Check for valid range
-//         if ( PowerSetting > 127 )
-//         {
-//            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between 0-127" );
-//            return ( 0 );
-//         }
-//         PHY_SetConf_t SetConf;
-//         SetConf = PHY_SetRequest( ePhyAttr_PowerSetting, &PowerSetting);
-//         if (SetConf.eStatus == ePHY_SET_SUCCESS) {
-//            DBG_printf( "Power level is set to %u", PowerSetting );
-//         } else {
-//            DBG_printf( "Failed to set power" );
-//         }
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_Power
+
+   Purpose: This function sets the TX power level mode
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_Power ( uint32_t argc, char *argv[] )
+{
+   uint8_t PowerSetting;
+
+   // One parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      if ( argc == 1 )
+      {
+         PHY_GetConf_t GetConf;
+         GetConf = PHY_GetRequest( ePhyAttr_PowerSetting );
+         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+            DBG_printf( "Current power level is %u", ( uint8_t )GetConf.val.PowerSetting );
+         }
+      }
+      else
+      {
+         PowerSetting = ( uint8_t )atoi( argv[1] );
+
+         // Check for valid range
+         if ( PowerSetting > 127 )
+         {
+            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between 0-127" );
+            return ( 0 );
+         }
+         PHY_SetConf_t SetConf;
+         SetConf = PHY_SetRequest( ePhyAttr_PowerSetting, &PowerSetting);
+         if (SetConf.eStatus == ePHY_SET_SUCCESS) {
+            DBG_printf( "Power level is set to %u", PowerSetting );
+         } else {
+            DBG_printf( "Failed to set power" );
+         }
+      }
+   }
+
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_RadioStatus
@@ -11351,314 +11514,749 @@ uint32_t DBG_CommandLine_Reboot ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //
-//static uint8_t scaleAverage( double val, uint8_t min, uint8_t max )
-//{
-//   if (min == max) {
-//      return 0;
-//   }
-//   return (uint8_t)((((val-min)/(max-min))*256.0)+0.5);
-//}
-//
-//static float unscaleAverage( uint8_t val, uint8_t min, uint8_t max )
-//{
-//   float avg;
-//
-//   if (min == max) {
-//      return min;
-//   }
-//   avg = (float)((((double)val/256)*((double)max-min))+(double)min);
-//
-//   // Make sure avg is not larger than max. This can happen because of poor granularity.
-//   if ( avg > max ) {
-//      avg = max;
-//   }
-//   return avg;
-//}
-//
-//static uint8_t scaleStddev( double val )
-//{
-//   return (uint8_t)((log10(1+(val*NOISEBAND_SCALE_STDDEV))*100)+0.5);
-//}
-//
-//static float unscaleStddev( uint8_t val )
-//{
-//   return (float)((pow( 10.0, (double)val/100.0 ) - 1.0)/NOISEBAND_SCALE_STDDEV);
-//}
-//
-///******************************************************************************
-//
-//   Function Name: computeAvgAndStddev
-//
-//   Purpose: This function computes the average and stddev of a RSSI buffer
-//
-//   Arguments:  buf - buffer of RSSI data
-//               length - number of samples in buf
-//               average - linear average of buf returned in dBm
-//               stddev - linear standard deviation
-//
-//   Returns:
-//
-//   Notes:
-//
-//******************************************************************************/
-//static void computeAvgAndStddev( uint8_t const *buf, uint16_t length, double *average, double *stddev )
-//{
-//   double   sum, temp;
-//   uint32_t i; // loop counter
-//
-//   // Compute average
-//   sum = 0;
-//   for (i=0; i<length; i++) {
-//      sum += pow(10.0, ((double)buf[i]/20.0)); // Convert to linear and average. Divide by 20 because the RSSI is in half dB step
-//   }
-//   *average = log10(sum/length)*20; // Average in dBm in half dB step
-//
-//   // Compute stddev
-//   sum = 0;
-//   for (i=0; i<length; i++) {
-//      temp = (*average-(double)buf[i])/2.0;
-//      sum += temp*temp;
-//   }
-//   *stddev = sqrt(sum/length);
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_NoiseBand
-//
-//   Purpose: This function displays/compute the noise for a range of channels
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//static int cmpfunc( const void *a, const void *b);
-//static int cmpfunc( const void *a, const void *b) {
-//  return *(char*)a - *(char*)b;
-//}
-//uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t      time;
-//   PHY_GetConf_t GetConf;
-//   uint16_t      waittime, nSamples, samplingRate, i, j;
-//   uint8_t       radioNum;
-//   double        average, stddev;
-//   uint8_t       min, max;
-//   uint32_t      freeRam;
-//   NOISEBAND_Stats_t *stats;
-//
-//   static uint16_t nbChannels = 0;
-//   static uint8_t *workBuf = NULL;
-//   static NOISEBAND_Stats_t *noiseResults = NULL;
-//   static uint16_t start = 0;
-//   static uint16_t end   = 0;
-//   static uint16_t step  = 0;
-//   static uint8_t  boost = 0;
-//
-//   // No parameters
-//   if ( argc == 1 )
-//   {
-//      // Print data if available
-//      if ( noiseResults )
-//      {
-//         DBG_printf( "   min    med    max     avg stddev    P90    P95    P99   P995   P999");
-//
-//         //List seperately so existing test programs are not affected
-//         for ( j=0, i = start; i <= end; i += step, j++ )
-//         {
-//            // Get data into the appropriate buffer
-//            stats = &noiseResults[j];
-//
-//            DBG_printf( "%4d.%1d %4d.%1d %4d.%1d %4d.%02d %3u.%02u %4d.%1d %4d.%1d %4d.%1d %4d.%1d %4d.%1d",
-//                      (int32_t)RSSI_RAW_TO_DBM(stats->min ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->min )*10)%10),
-//                      (int32_t)RSSI_RAW_TO_DBM(stats->med ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->med )*10)%10),
-//                      (int32_t)RSSI_RAW_TO_DBM(stats->max ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->max )*10)%10),
-//                      (int32_t)RSSI_RAW_TO_DBM(unscaleAverage(stats->avg, stats->min, stats->max)), abs((int32_t)(RSSI_RAW_TO_DBM(unscaleAverage(stats->avg, stats->min, stats->max))*100)%100),
-//                      (uint32_t)unscaleStddev( stats->stddev ), (uint32_t)(unscaleStddev(stats->stddev)*100)%100,
-//                      (int32_t)RSSI_RAW_TO_DBM(stats->P90 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P90 )*10)%10),
-//                      (int32_t)RSSI_RAW_TO_DBM(stats->P95 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P95 )*10)%10),
-//                      (int32_t)RSSI_RAW_TO_DBM(stats->P99 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P99 )*10)%10),
-//                      (int32_t)RSSI_RAW_TO_DBM(stats->P995), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P995)*10)%10),
-//                      (int32_t)RSSI_RAW_TO_DBM(stats->P999), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P999)*10)%10));
-//
-//            OS_TASK_Sleep( 1 );
-//         }
-//
-//         // Free buffers
-//         free( workBuf );
-//         workBuf = NULL;
-//         free( noiseResults );
-//         noiseResults = NULL;
-//      } else {
-//         DBG_printf( "NoiseBand  displays/compute the noise for a range of channels:" );
-//         DBG_printf( "usage: noiseband radio waittime nSamples samplingRate start end step boost" );
-//         DBG_printf( "       radio is the radio to use for RX (0-8)" );
-//         DBG_printf( "       waittime is the time in seconds that the test will be postponed" );
-//         DBG_printf( "       nSamples is the number of samples used for averaging and std deviation (1-20000)" );
-//         DBG_printf( "       samplingRate is the time in microseconds between RSSI reads" );
-//         DBG_printf( "       start is the first channel to get RSSI for" );
-//         DBG_printf( "       end is the last channel to get RSSI for" );
-//         DBG_printf( "       step is the increment between channels (minimum 2)" );
-//         DBG_printf( "       boost (opt.) 0=LDO only(default), 1=LDO and Boost" );
-//      }
-//      return ( 0 );
-//   }
-//
-//   // More than one parameter
-//   if ( argc > 9 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//      return ( 0 );
-//   }
-//
-//   if ( argc < 8 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Not enough arguments" );
-//      return ( 0 );
-//   }
-//
-//   radioNum     = ( uint8_t  )atoi( argv[1] );
-//   waittime     = ( uint16_t )atoi( argv[2] );
-//   nSamples     = ( uint16_t )atoi( argv[3] );
-//   samplingRate = ( uint16_t )atoi( argv[4] );
-//   start        = ( uint16_t )atoi( argv[5] );
-//   end          = ( uint16_t )atoi( argv[6] );
-//   step         = ( uint16_t )atoi( argv[7] );
-//   boost        = 0;  //Default to Off
-//   if ( argc == 9 )
-//   {
-//      boost = ( uint8_t )atoi( argv[8] );
-//   }
-//
-//   if ( radioNum >= (uint8_t)MAX_RADIO )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - invalid radio" );
-//      return ( 0 );
-//   }
-//   if ( waittime > 600 ) /* Don't wait more than 10 minutes */
-//   {
-//      DBG_logPrintf( 'R', "ERROR - waittime too long" );
-//      return ( 0 );
-//   }
-//   if ( nSamples > NOISEBAND_MAX_NSAMPLES )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - nSamples over %u", NOISEBAND_MAX_NSAMPLES );
-//      return ( 0 );
-//   }
-//   if ( nSamples == 0 )
-//   {
-//      nSamples = 1;
-//   }
-//   if ( start >= PHY_INVALID_CHANNEL )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - start channel is invalid" );
-//      return ( 0 );
-//   }
-//   if ( end >= PHY_INVALID_CHANNEL )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - end channel is invalid" );
-//      return ( 0 );
-//   }
-//   if ( end < start )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - end channel must be greater than or equal to start channel" );
-//      return ( 0 );
-//   }
-//   if ( step < 2 )
-//   {
-//      step = 2;
-//   }
-//
-//   nbChannels = ( uint16_t )( ( end - start ) / step + 1 ); /* Number of channel to scan *//*lint !e573 mixed signed-unsigned with division  */
-//   if ( nbChannels > NOISEBAND_MAX_CHANNELS ) {
-//      DBG_printf("Can't process more than %u channels at once", NOISEBAND_MAX_CHANNELS);
-//      return ( 0 );
-//   }
-//
-//   freeRam = (uint32_t)_mem_get_free();
-//
-//   // Reserve RAM for processing
-//   // 1) Reserve work area
-//   if ( (workBuf = (uint8_t*)malloc( nSamples )) == NULL) {
-//      DBG_printf("%u bytes needed out of %u available", nSamples, freeRam);
-//      DBG_printf("Reduce the number of samples and/or the number of channels");
-//      return ( 0 );
-//   }
-//   // 2) Reserve statistics buffer
-//   if ( (noiseResults = (NOISEBAND_Stats_t*)malloc( sizeof(NOISEBAND_Stats_t)*nbChannels )) == NULL) {
-//      DBG_printf("%u bytes needed out of %u available", nSamples+(sizeof(NOISEBAND_Stats_t)*nbChannels), freeRam);
-//      DBG_printf("Reduce the number of samples and/or the number of channels");
-//      free( workBuf );
-//      workBuf = NULL;
-//      return ( 0 );
-//   }
-//
-//   // This minimum sampling rate is around 320usec per read.
-//   // RSSI read will take a minimum time which is bounded by the SPI rate and radio turn around time.
-//   if (samplingRate < 320) {
-//      samplingRate = 320;
-//   }
-//   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) );
-//
-//   // Remove the time it takes to read RSSI from the sampling rate so that we read RSSI at the specified rate
-//   if (samplingRate > 320) {
-//      samplingRate -= 320;
-//   } else {
-//      samplingRate = 0;
-//   }
-//
-//   DBG_printf( "test should take %02u:%02u", time / 60, time % 60 );
-//
-//   OS_TASK_Sleep( waittime * ONE_SEC );
-//
-//   DBG_logPrintf( 'R', "noiseband start" );
-//
-//   for ( j=0, i = start; i <= end; i += step, j++ )
-//   {
-//      PHY_Lock();      // Function will not return if it fails
-//      RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
-//      PHY_Unlock();    // Function will not return if it fails
-//
-//      qsort( workBuf, nSamples, sizeof(uint8_t), cmpfunc); // Sort RSSI array
-//
-//      // Compute average and stddev
-//      computeAvgAndStddev( workBuf, nSamples, &average, &stddev );
-//
-//      // Update stats
-//      min = workBuf[0];
-//      max = workBuf[nSamples-1];
-//      noiseResults[j].min = min;
-//      noiseResults[j].med = workBuf[(nSamples-1)/2];
-//      noiseResults[j].max = max;
-//      noiseResults[j].avg = scaleAverage( average, min, max );
-//      noiseResults[j].stddev = scaleStddev( stddev );
-//      noiseResults[j].P90  = workBuf[(uint32_t)((nSamples-1)*0.9)];
-//      noiseResults[j].P95  = workBuf[(uint32_t)((nSamples-1)*0.95)];
-//      noiseResults[j].P99  = workBuf[(uint32_t)((nSamples-1)*0.99)];
-//      noiseResults[j].P995 = workBuf[(uint32_t)((nSamples-1)*0.995)];
-//      noiseResults[j].P999 = workBuf[(uint32_t)((nSamples-1)*0.999)];
-//
-//      OS_TASK_Sleep( 5 ); // Be nice to other tasks
-//   }
-//
-//   // Get the RX channels
-//   GetConf = PHY_GetRequest( ePhyAttr_RxChannels );
-//   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//      // Restart the radio if needed
-//      if (GetConf.val.RxChannels[radioNum] != PHY_INVALID_CHANNEL) {
-//         (void) Radio.StartRx(radioNum, GetConf.val.RxChannels[radioNum]);
-//      }
-//   }
-//
-//   DBG_logPrintf( 'R', "noiseband end" );
-//
-//   return ( 0 );
-//}//lint !e429 Custodial pointer has not been freed or returned
-//
+static uint8_t scaleAverage( double val, uint8_t min, uint8_t max )
+{
+   if (min == max) {
+      return 0;
+   }
+   return (uint8_t)((((val-min)/(max-min))*256.0)+0.5);
+}
+
+static float unscaleAverage( uint8_t val, uint8_t min, uint8_t max )
+{
+   float avg;
+
+   if (min == max) {
+      return min;
+   }
+   avg = (float)((((double)val/256)*((double)max-min))+(double)min);
+
+   // Make sure avg is not larger than max. This can happen because of poor granularity.
+   if ( avg > max ) {
+      avg = max;
+   }
+   return avg;
+}
+
+static uint8_t scaleStddev( double val )
+{
+   return (uint8_t)((log10(1+(val*NOISEBAND_SCALE_STDDEV))*100)+0.5);
+}
+
+static float unscaleStddev( uint8_t val )
+{
+   return (float)((pow( 10.0, (double)val/100.0 ) - 1.0)/NOISEBAND_SCALE_STDDEV);
+}
+
+/******************************************************************************
+
+   Function Name: computeAvgAndStddev
+
+   Purpose: This function computes the average and stddev of a RSSI buffer
+
+   Arguments:  buf - buffer of RSSI data
+               length - number of samples in buf
+               average - linear average of buf returned in dBm
+               stddev - linear standard deviation
+
+   Returns:
+
+   Notes:
+
+******************************************************************************/
+static void computeAvgAndStddev( uint8_t const *buf, uint16_t length, double *average, double *stddev )
+{
+   double   sum, temp;
+   uint32_t i; // loop counter
+
+   // Compute average
+   sum = 0;
+   for (i=0; i<length; i++) {
+      sum += pow(10.0, ((double)buf[i]/20.0)); // Convert to linear and average. Divide by 20 because the RSSI is in half dB step
+   }
+   *average = log10(sum/length)*20; // Average in dBm in half dB step
+
+   // Compute stddev
+   sum = 0;
+   for (i=0; i<length; i++) {
+      temp = (*average-(double)buf[i])/2.0;
+      sum += temp*temp;
+   }
+   *stddev = sqrt(sum/length);
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NoiseBand
+
+   Purpose: This function displays/compute the noise for a range of channels
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+static int cmpfunc( const void *a, const void *b);
+static int cmpfunc( const void *a, const void *b) {
+  return *(char*)a - *(char*)b;
+}
+
+typedef struct 
+{
+   char RadioSPI;
+   char RadioSDN;
+   char RadioCS;
+   char RadioOSC;
+   char RadioGPIO;
+   char JtagPins;
+   char Unused;
+   char Meter;
+} ports_s;
+
+static char upperCase(char letter)
+{
+   if ( ( (uint8_t)letter >= (uint8_t)'a' ) && ( (uint8_t)letter <= (uint8_t)'z' ) )
+   {
+      return ( (char)((uint8_t)letter - (uint8_t)'a' + (uint8_t)'A' ) );
+   } else {
+      return ( letter );
+   }
+}
+
+#define CONFIG_PORTS_FOR_NOISEBAND 1
+#define LIST_FREQUENCIES_NOISEBAND 1
+
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 ) // Capability to change port pin configuration during noiseband run
+#warning "You have built a version that allows Noiseband to change many port configurations!"
+
+static bool checkOptions( char inputByte, char *option, char pAllowed[] )
+{
+   char inputUpper = upperCase( inputByte );
+   if ( inputByte == 0 )
+   {
+      return ( (bool)true ); // this option was defaulted so we use the previous one without updating it
+   }
+   else
+   {
+      for ( uint32_t j = 0; j < 10; j++ )
+      {
+         if ( pAllowed[j] == 0 )   // search through the string of allowed options until null termination
+         {
+            return( (bool)false ); // reached the end of our allowed options, no match
+         }
+         if ( pAllowed[j] == inputUpper )
+         {
+            break; // got a match, break out of loop
+         }
+      }
+   }
+   *option = inputUpper;  // return the matching option for use in this run
+   return ( (bool)true ); // found a matching option
+}
+#endif // Capability to change port pin configuration during noiseband run
+                         
+uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
+{
+   uint32_t      time;
+#if 0 // TODO: RA6E1 Bob: temporarily remove until Radio and PHY are integrated
+   PHY_GetConf_t GetConf;
+#endif
+#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+   uint16_t      waittime, nSamples, samplingRate, i, j;
+   uint8_t       radioNum;
+#else
+   uint16_t      i, j;
+#endif
+   double        average, stddev;
+   uint8_t       min, max;
+   uint32_t      freeRam;
+   NOISEBAND_Stats_t *stats;
+
+   static uint16_t nbChannels = 0;
+   static uint8_t *workBuf = NULL;
+   static NOISEBAND_Stats_t *noiseResults = NULL;
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+   static uint8_t  radioNum = 0;
+   static uint16_t waittime = 15, nSamples = 80, samplingRate = 1000, requestedSamplingRate = 1000;
+   static uint16_t start = 0;
+   static uint16_t end   = 3200;
+   static uint16_t step  = 2;
+   static uint8_t  boost = 0;
+#else
+   static uint16_t waittime, nSamples, samplingRate;
+   static uint16_t start = 0;
+   static uint16_t end   = 0;
+   static uint16_t step  = 0;
+   static uint8_t  boost = 0;
+#endif
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+   static ports_s  portPins, ports = { '_', '_', '_', '_', '_', '_', '_', '_' };
+   OS_TICK_Struct time1,time2;
+   uint32_t       TimeDiff;
+#if 0 // TODO: No longer needed
+   static bool    cgcInitialized = (bool)false;
+#endif // 0
+#endif
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+   static bool     listFreqs = (bool)false;
+
+   if ( argc == 2 ) // Special handling for noiseband f = list frequencies.  Might want to make this permanent.
+   {
+      if ( ( *argv[1] == 'f' ) || ( *argv[1] == 'F' ) )
+      {
+         listFreqs = (bool)true;
+         --argc;
+      }  
+   }
+#endif
+   // No parameters
+   if ( argc == 1 )
+   {
+      // Print data if available
+      if ( noiseResults )
+      {
+#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+         DBG_printf( "   min    med    max     avg stddev    P90    P95    P99   P995   P999");
+#else
+         if ( listFreqs ) {
+           DBG_printf( "\r\nFrequency   min    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' 'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c'", \
+                        radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, \
+                        ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter );
+         } else {
+            DBG_printf( "\r\nmin    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' 'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c'", \
+                        radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, \
+                        ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter );
+         }
+#endif
+         //List seperately so existing test programs are not affected
+         for ( j=0, i = start; i <= end; i += step, j++ )
+         {
+           OS_TASK_Sleep( 10 ); // TODO: RA6E1 Bob: this delay should not be needed but I experience a problem with UART/Debug that needs it
+           // Get data into the appropriate buffer
+            stats = &noiseResults[j];
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+            if ( listFreqs )
+            {
+               DBG_printf( "%3d.%04d %4d.%1d %4d.%1d %4d.%1d %4d.%02d %3u.%02u %4d.%1d %4d.%1d %4d.%1d %4d.%1d %4d.%1d",
+                      (int32_t)(450+(i*20/3200)), (int32_t)((450UL*10000UL+((uint32_t)i*10000UL*20UL/3200UL))%10000UL),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->min ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->min )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->med ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->med )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->max ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->max )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(unscaleAverage(stats->avg, stats->min, stats->max)), abs((int32_t)(RSSI_RAW_TO_DBM(unscaleAverage(stats->avg, stats->min, stats->max))*100)%100),
+                      (uint32_t)unscaleStddev( stats->stddev ), (uint32_t)(unscaleStddev(stats->stddev)*100)%100,
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P90 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P90 )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P95 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P95 )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P99 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P99 )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P995), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P995)*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P999), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P999)*10)%10));
+            }
+            else
+#endif 
+            {
+               DBG_printf( "%4d.%1d %4d.%1d %4d.%1d %4d.%02d %3u.%02u %4d.%1d %4d.%1d %4d.%1d %4d.%1d %4d.%1d",
+                      (int32_t)RSSI_RAW_TO_DBM(stats->min ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->min )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->med ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->med )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->max ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->max )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(unscaleAverage(stats->avg, stats->min, stats->max)), abs((int32_t)(RSSI_RAW_TO_DBM(unscaleAverage(stats->avg, stats->min, stats->max))*100)%100),
+                      (uint32_t)unscaleStddev( stats->stddev ), (uint32_t)(unscaleStddev(stats->stddev)*100)%100,
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P90 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P90 )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P95 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P95 )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P99 ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P99 )*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P995), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P995)*10)%10),
+                      (int32_t)RSSI_RAW_TO_DBM(stats->P999), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P999)*10)%10));
+            }
+            OS_TASK_Sleep( 1 );
+         }
+
+         // Free buffers
+         free( workBuf );
+         workBuf = NULL;
+         free( noiseResults );
+         noiseResults = NULL;
+      } else {
+         DBG_printf( "NoiseBand  displays/compute the noise for a range of channels:" );
+         DBG_printf( "usage: noiseband radio waittime nSamples samplingRate start end step boost" );
+         DBG_printf( "       radio is the radio to use for RX (0-8)" );
+         DBG_printf( "       waittime is the time in seconds that the test will be postponed" );
+         DBG_printf( "       nSamples is the number of samples used for averaging and std deviation (1-20000)" );
+         DBG_printf( "       samplingRate is the time in microseconds between RSSI reads" );
+         DBG_printf( "       start is the first channel to get RSSI for" );
+         DBG_printf( "       end is the last channel to get RSSI for" );
+         DBG_printf( "       step is the increment between channels (minimum 2)" );
+#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+         DBG_printf( "       boost (opt.) 0=LDO only(default), 1=LDO and Boost" );
+#else
+         DBG_printf( "       (optional) boost 0=LDO only(default), 1=LDO and Boost (must enter a value to reach the next option)" );
+         DBG_printf( "       (optional) port pin configuration during test: 12345678 or ________" );
+         DBG_printf( "           1=rSPIdrv:H|M|L 2=rSDNdrv:H|M|L|N|P 3=rCSdrv:H|M|L|N|P 4=rOSCdrv:H|M|L|N|P 5=MCUrGPIO:I|U 6=JTAG:H|L|J 7=Unused:L|H|I|P 8=Meter:L|H|I|P " );
+         DBG_printf( "             For 1,2,3,4: H=High Drive, M=Mid Drive, L=Low Drive, N=NMOS, P=PMOS" );
+         DBG_printf( "             For 5,6,7,8: H=High Output/Mid Drive, L=Low Output/Mid Drive, I=Input, U=Pulled-Up Input, J=JTAG" );
+         DBG_printf( "             Do NOT use L or H for option 8 when a meter is connected as the output pins will conflict" );
+#endif
+      }
+      return ( 0 );
+   }
+
+   // More than one parameter
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+   if ( argc > 10 )
+#else
+   if ( argc > 9 )
+#endif
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+      return ( 0 );
+   }
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+   if ( ( argc == 2 ) && ( ( *argv[1] == 'd' ) || ( *argv[1] == 'D' ) ) )
+   {
+      radioNum     = 0;
+      waittime     = 5;
+      nSamples     = 80;
+      samplingRate = 1000;
+      requestedSamplingRate = samplingRate;
+      start        = 0;
+      end          = 3200;
+      step         = 2;
+      boost        = 0;  //Default to Off
+      listFreqs    = (bool)false;
+      portPins     = ports;
+   }
+   else
+#endif
+   if ( argc < 8 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Not enough arguments" );
+      return ( 0 );
+   }
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+   else
+   {
+#endif
+      radioNum     = ( uint8_t  )atoi( argv[1] );
+      waittime     = ( uint16_t )atoi( argv[2] );
+      nSamples     = ( uint16_t )atoi( argv[3] );
+      samplingRate = ( uint16_t )atoi( argv[4] );
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+      requestedSamplingRate = samplingRate;
+#endif
+      start        = ( uint16_t )atoi( argv[5] );
+      end          = ( uint16_t )atoi( argv[6] );
+      step         = ( uint16_t )atoi( argv[7] );
+      boost        = 0;  //Default to Off
+#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+      if ( argc == 9 )
+#else
+      if ( argc >= 9 )
+#endif
+      {
+         boost = ( uint8_t )atoi( argv[8] );
+      }
+
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+      portPins = ports; // Start off with the values from the previous run
+      if ( argc >= 10 )
+      {
+         ports_s *pPorts = (ports_s *)argv[9]; /* Point to the string containing the 9th parameter to noiseband */
+         bool optionsOK = (bool)false;
+         if (                      checkOptions( pPorts->RadioSPI,  (char *)&portPins.RadioSPI,  "_HML"   ) )  {
+            if (                   checkOptions( pPorts->RadioSDN,  (char *)&portPins.RadioSDN,  "_HMLNP" ) )  {
+               if (                checkOptions( pPorts->RadioCS,   (char *)&portPins.RadioCS,   "_HMLNP" ) )  {
+                  if (             checkOptions( pPorts->RadioOSC,  (char *)&portPins.RadioOSC,  "_HMLNP" ) )  {
+                     if (          checkOptions( pPorts->RadioGPIO, (char *)&portPins.RadioGPIO, "_IU"    ) )  {
+                        if (       checkOptions( pPorts->JtagPins,  (char *)&portPins.JtagPins,  "_HLJ"   ) )  {
+                           if (    checkOptions( pPorts->Unused,    (char *)&portPins.Unused,    "_IUHL"  ) )  {
+                              if ( checkOptions( pPorts->Meter,     (char *)&portPins.Meter,     "_IUHL"  ) )
+                              {
+                                 optionsOK = (bool)true;
+                              } else { DBG_printf( "Error: Meter = %c, must be I|U|H|L to set the meter interface port pins or _ to leave them as is", portPins.Meter );    }
+                           } else { DBG_printf( "Error: Unused pins = %c, must be I|U|H|L to set unused pins or _ to leave them as is", portPins.Unused );                  }                           
+                        } else { DBG_printf( "Error: JtagPins = %c, must be H|L|J to set JTAG pins or _ to leave them as is", portPins.JtagPins );                          }                           
+                    } else { DBG_printf( "Error: RadioGPIO = %c, must be I|U to set MCU pins connected to Radio GPIOn pins or _ to leave them as is", portPins.RadioGPIO ); }                        
+                 } else { DBG_printf( "Error: RadioOSC = %c, must be H|M|L|N|P to set Radio SPI chip select drive strength or _ to leave them as is", portPins.RadioOSC );  }
+               } else { DBG_printf( "Error: RadioCS = %c, must be H|M|L|N|P to set Radio SPI Chip Select drive strength or _ to leave them as is", portPins.RadioCS );      }
+            } else { DBG_printf( "Error: RadioSDN = %c, must be H|M|L|N|P to set Radio SDN pin drive strength or _ to leave it as is", portPins.RadioSDN );                 }
+         } else { DBG_printf( "Error: RadioSPI = %c, must be H|M|L to set Radio SPI pins drive strength or _ to leave them as is", portPins.RadioSPI );                 }
+         if ( ! optionsOK )
+         {
+            return ( 0 );
+         }
+      }
+#endif
+      if ( radioNum >= (uint8_t)MAX_RADIO )
+      {
+         DBG_logPrintf( 'R', "ERROR - invalid radio" );
+         return ( 0 );
+      }
+      if ( waittime > 600 ) /* Don't wait more than 10 minutes */
+      {
+         DBG_logPrintf( 'R', "ERROR - waittime too long" );
+         return ( 0 );
+      }
+      if ( nSamples > NOISEBAND_MAX_NSAMPLES )
+      {
+         DBG_logPrintf( 'R', "ERROR - nSamples over %u", NOISEBAND_MAX_NSAMPLES );
+         return ( 0 );
+      }
+      if ( nSamples == 0 )
+      {
+         nSamples = 1;
+      }
+      if ( start >= PHY_INVALID_CHANNEL )
+      {
+         DBG_logPrintf( 'R', "ERROR - start channel is invalid" );
+         return ( 0 );
+      }
+      if ( end >= PHY_INVALID_CHANNEL )
+      {
+         DBG_logPrintf( 'R', "ERROR - end channel is invalid" );
+         return ( 0 );
+      }
+      if ( end < start )
+      {
+         DBG_logPrintf( 'R', "ERROR - end channel must be greater than or equal to start channel" );
+         return ( 0 );
+      }
+      if ( step < 2 )
+      {
+         step = 2;
+      }
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+   }
+#endif
+
+   nbChannels = ( uint16_t )( ( end - start ) / step + 1 ); /* Number of channel to scan *//*lint !e573 mixed signed-unsigned with division  */
+   if ( nbChannels > NOISEBAND_MAX_CHANNELS ) {
+      DBG_printf("Can't process more than %u channels at once", NOISEBAND_MAX_CHANNELS);
+      return ( 0 );
+   }
+
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Bob: should create an abstraction layer for _mem_get_free and malloc
+      freeRam = (uint32_t)_mem_get_free();
+#elif (RTOS_SELECTION == FREE_RTOS)
+      HeapStats_t hd;
+      (void) vPortGetHeapStats ( &hd );              /* Get the statistics for the heap.  This assumes the use of heap_4.c */
+      freeRam = hd.xSizeOfLargestFreeBlockInBytes;   /* We need a contiguous block so find size of largest one */
+      DBG_printf("\n\rFreeRTOS vPortGetHeapStats returned %d bytes are available in the largest block", freeRam);
+#endif
+
+   // Reserve RAM for processing
+   // 1) Reserve work area
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 ) // just to produce same .hex file
+   if ( workBuf == NULL )
+   {
+#endif
+      if ( (workBuf = (uint8_t*)malloc( nSamples )) == NULL) {
+         DBG_printf("%u bytes needed out of %u available", nSamples, freeRam);
+         DBG_printf("Reduce the number of samples and/or the number of channels");
+         return ( 0 );
+      }
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 ) // just to produce same .hex file
+   }
+#endif
+   // 2) Reserve statistics buffer
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+   if ( noiseResults == NULL )
+   {
+#endif
+      if ( (noiseResults = (NOISEBAND_Stats_t*)malloc( sizeof(NOISEBAND_Stats_t)*nbChannels )) == NULL) {
+         DBG_printf("%u bytes needed out of %u available", nSamples+(sizeof(NOISEBAND_Stats_t)*nbChannels), freeRam);
+         DBG_printf("Reduce the number of samples and/or the number of channels");
+         free( workBuf );
+         workBuf = NULL;
+         return ( 0 );
+      }
+#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+   }
+#endif
+#if ( RTOS_SELECTION == MQX_RTOS )
+   #define MIMINUM_TIME 320 // TODO: RA6E1 Bob: verify whether this changed due to RA6E1 or was it always wrong even on K24
+#else
+   #define MINIMUM_TIME 130
+#endif
+   // This minimum sampling rate is around 320usec per read.
+   // RSSI read will take a minimum time which is bounded by the SPI rate and radio turn around time.
+   if (samplingRate < MINIMUM_TIME) {
+      samplingRate = MINIMUM_TIME;
+   }
+#if ( RTOS_SELECTION == MQX_RTOS )
+   #define PAUSE_MSEC 5
+   // TODO: RA6E1 Bob: restore original time calculation for K24/MQX
+#else
+   #define PAUSE_MSEC 11 // TODO: RA6E1 Bob: reflect this in the calculation of time
+   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) * (float)1.05 ); // fudge factor 
+#endif
+   // Remove the time it takes to read RSSI from the sampling rate so that we read RSSI at the specified rate
+   if (samplingRate > MINIMUM_TIME) {
+      samplingRate -= MINIMUM_TIME;
+   } else {
+      samplingRate = 0;
+   }
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+// R_BSP_PinCfg (BSP_IO_PORT_04_PIN_06, ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_HIGH | (uint32_t)IOPORT_CFG_DRIVE_MID )); // P406: TP121 (used for timing verification)
+   uint32_t portConfig;
+#define IOPORT_CFG_DRIVE_LOW 0UL // TODO: RA6E1 Bob: not sure if LOW is a valid drive capability value, let's support it for testing purposes
+
+/* If non-blank, set up configurations for drive strength of the Radio SPI port pins */
+   if ( ( portPins.RadioSPI != ' ' ) && ( portPins.RadioSPI != '_' ) ) 
+   {
+      portConfig = ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI );
+      if        ( portPins.RadioSPI == 'H' ) {
+         portConfig |= ((uint32_t)IOPORT_CFG_DRIVE_HIGH | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT );
+      } else if ( portPins.RadioSPI == 'M' ) {
+         portConfig |= ((uint32_t)IOPORT_CFG_DRIVE_LOW  | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT );
+      } else if ( portPins.RadioSPI == 'L' ) {
+         portConfig |= ((uint32_t)IOPORT_CFG_DRIVE_MID  | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT );
+      } else if ( portPins.RadioSPI == 'N' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_NMOS_ENABLE ); // Doesn't work in HW, causes radio errors
+      } else if ( portPins.RadioSPI == 'P' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PMOS_ENABLE ); // Doesn't work in HW, causes radio errors
+      } else {
+         return ( 0 ); // Shouldn't get here unless a mismatch exists between options allowed here and string passed to checkOptions()
+      }
+      ports.RadioSPI = portPins.RadioSPI;                 // remember valid configuration in static memory for next run
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_01, portConfig ); // P101: SPIB_MOSI
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_02, portConfig ); // P102: SPIB_SCK     
+   }
+/* If non-blank, set up configurations for drive strength and output type of the SDN_SI4467 (radio shutdown) signal */
+   if ( ( portPins.RadioSDN != ' ' ) && ( portPins.RadioSDN != '_' ) )
+   {
+      if        ( portPins.RadioSDN == 'H' ) {
+         portConfig = ((uint32_t) IOPORT_CFG_DRIVE_HIGH | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t) IOPORT_CFG_PORT_OUTPUT_LOW );
+      } else if ( portPins.RadioSDN == 'M' ) {
+         portConfig = ((uint32_t) IOPORT_CFG_DRIVE_MID  | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t) IOPORT_CFG_PORT_OUTPUT_LOW );
+      } else if ( portPins.RadioSDN == 'L' ) {
+         portConfig = ((uint32_t) IOPORT_CFG_DRIVE_LOW  | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t) IOPORT_CFG_PORT_OUTPUT_LOW );
+      } else if ( portPins.RadioSDN == 'N' ) {
+         portConfig = ((uint32_t) IOPORT_CFG_DRIVE_LOW  | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t) IOPORT_CFG_PORT_OUTPUT_LOW | (uint32_t)IOPORT_CFG_NMOS_ENABLE );
+      } else if ( portPins.RadioSDN == 'P' ) {
+         portConfig = ((uint32_t) IOPORT_CFG_DRIVE_LOW  | (uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t) IOPORT_CFG_PORT_OUTPUT_LOW | (uint32_t)IOPORT_CFG_PMOS_ENABLE );
+      }
+      ports.RadioSDN = portPins.RadioSDN;                 // remember valid configuration in static memory for next run
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_04, portConfig ); // P104: SDN_SI4467
+   }
+/* If non-blank, set up configurations for drive strength and output type of the /SPIB_CS_SI4467 chip select signal */
+   if ( ( portPins.RadioCS != ' ' ) && ( portPins.RadioCS != '_' ) )
+   {
+      if        ( portPins.RadioCS == 'H' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_HIGH  | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI );
+      } else if ( portPins.RadioCS == 'M' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI );
+      } else if ( portPins.RadioCS == 'L' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_MID   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI );
+      } else if ( portPins.RadioCS == 'N' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI | (uint32_t)IOPORT_CFG_NMOS_ENABLE );
+      } else if ( portPins.RadioCS == 'P' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI | (uint32_t)IOPORT_CFG_PMOS_ENABLE );
+      }
+      ports.RadioCS = portPins.RadioCS;                   // remember valid configuration in static memory for next run
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_03, portConfig ); // P103: /SPIB_CS_SI4467      
+   }
+ /* If non-blank, set up configurations for drive strength of the Oscillator Enable port pin */
+   if ( ( portPins.RadioOSC != ' ' ) && ( portPins.RadioOSC != '_' ) )
+   {
+      if        ( portPins.RadioOSC == 'H' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_HIGH  | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI );
+      } else if ( portPins.RadioOSC == 'M' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI );
+      } else if ( portPins.RadioOSC == 'L' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_MID   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI );
+      } else if ( portPins.RadioOSC == 'N' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI | (uint32_t)IOPORT_CFG_NMOS_ENABLE );
+      } else if ( portPins.RadioOSC == 'P' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI | (uint32_t)IOPORT_CFG_PMOS_ENABLE );
+      }
+      ports.RadioOSC = portPins.RadioOSC;                  // remember valid configuration in static memory for next run
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_05, portConfig );  // P105: /OSC_EN      
+   }
+ /* If non-blank, then set up configurations for MCU pins connected to the Radio GPIOn_SI4467 pins; do not allow them to be outputs as the SI4467 drives them! */
+   if ( ( portPins.RadioGPIO != ' ' ) && ( portPins.RadioGPIO != '_' ) )
+   {
+      if        ( portPins.RadioGPIO == 'U' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT  | (uint32_t)IOPORT_CFG_PULLUP_ENABLE                                                 ); // Input with pull-up enabled
+      } else if ( portPins.RadioGPIO == 'I' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                                                                                       ); // Input without pull-up enabled
+      }
+      ports.RadioGPIO = portPins.RadioGPIO;               // remember valid configuration in static memory for next run
+      R_BSP_PinCfg ( BSP_IO_PORT_06_PIN_00, portConfig ); // P600: GPIO0_SI4467
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_06, portConfig ); // P106: GPIO1_SI4467
+      R_BSP_PinCfg ( BSP_IO_PORT_00_PIN_00, portConfig ); // P000: GPIO2_SI4467
+      R_BSP_PinCfg ( BSP_IO_PORT_00_PIN_03, portConfig ); // P003: GPIO3_SI4467
+    }
+/* If non-blank, set up configurations for the JTAG and MD_BOOT pins during test.  Restored to JTAG after test or JTAG will no longer function! */
+   if ( ( portPins.JtagPins != ' ' ) && ( portPins.JtagPins != '_' ) )
+   {
+      /* P300 and P201 are tied together on the board.  Therefore, make P300 an input first, then set P201 to OUTPUT_xxx, then set P300 to OUTPUT_xxx */
+      R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_00, ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT )); // P300: TCLK/SWCLK
+      if        ( portPins.JtagPins == 'L' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_LOW       | (uint32_t)IOPORT_CFG_DRIVE_MID        );
+      } else if ( portPins.JtagPins == 'H' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_HIGH      | (uint32_t)IOPORT_CFG_DRIVE_MID        );
+      } else if ( portPins.JtagPins == 'J' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN        | (uint32_t)IOPORT_PERIPHERAL_DEBUG                                                  );
+      }
+      ports.JtagPins = portPins.JtagPins;                 // remember valid configuration in static memory for next run
+      R_BSP_PinCfg ( BSP_IO_PORT_02_PIN_01, portConfig ); // P201: MD_BOOT
+      R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_00, portConfig ); // P300: TCLK/SWCLK
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_08, portConfig ); // P108: TMS/SWDIO
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_09, portConfig ); // P109: TDO
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_10, portConfig ); // P110: TDI
+   }
+/* If non-blank, then set up configurations for unused / unconnected pins.  Didn't bother with drive strength options since these signals do not toggle */
+   if ( ( portPins.Unused != ' ' ) && ( portPins.Unused != '_' ) )
+   {
+      if        ( portPins.Unused == 'U' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT  | (uint32_t)IOPORT_CFG_PULLUP_ENABLE                                                 ); // Input with pull-up enabled
+      } else if ( portPins.Unused == 'I' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                                                                                       ); // Input without pull-up enabled
+      } else if ( portPins.Unused == 'H' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_HIGH      | (uint32_t)IOPORT_CFG_DRIVE_MID        ); // Output in HIGH state
+      } else if ( portPins.Unused == 'L' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_LOW       | (uint32_t)IOPORT_CFG_DRIVE_MID        ); // Output in LOW state
+      }
+      ports.Unused = portPins.Unused;                     // remember valid configuration in static memory for next run
+      R_BSP_PinCfg ( BSP_IO_PORT_00_PIN_14, portConfig ); // P014: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_11, portConfig ); // P111: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_15, portConfig ); // P115: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_02_PIN_05, portConfig ); // P205: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_02_PIN_08, portConfig ); // P208: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_02_PIN_09, portConfig ); // P209: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_02_PIN_10, portConfig ); // P210: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_02_PIN_11, portConfig ); // P211: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_02_PIN_14, portConfig ); // P214: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_01, portConfig ); // P301: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_02, portConfig ); // P302: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_03, portConfig ); // P303: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_04, portConfig ); // P304: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_05, portConfig ); // P305: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_02, portConfig ); // P402: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_03, portConfig ); // P403: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_06, portConfig ); // P406: TP121
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_07, portConfig ); // P407: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_10, portConfig ); // P410: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_11, portConfig ); // P411: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_12, portConfig ); // P412: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_13, portConfig ); // P413: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_14, portConfig ); // P414: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_04_PIN_15, portConfig ); // P415: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_06_PIN_01, portConfig ); // P601: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_06_PIN_02, portConfig ); // P602: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_06_PIN_08, portConfig ); // P608: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_06_PIN_10, portConfig ); // P610: unused
+      R_BSP_PinCfg ( BSP_IO_PORT_07_PIN_08, portConfig ); // P708: unused
+   }
+/* If non-blank, set up onfigurations for meter interface port pins (use only when NIC is NOT integrated with a meter) */
+   if ( ( portPins.Meter != ' ' ) && ( portPins.Meter != '_' )  )  
+   {
+      if        ( portPins.Meter == 'U' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT  | (uint32_t)IOPORT_CFG_PULLUP_ENABLE                                                 ); // Input with pull-up enabled     
+      } else if ( portPins.Meter == 'I' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                                                                                       ); // Input without pull-up enabled
+      } else if ( portPins.Meter == 'H' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_HIGH      | (uint32_t)IOPORT_CFG_DRIVE_MID        ); // Output in HIGH state
+      } else if ( portPins.Meter == 'L' ) {
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_LOW       | (uint32_t)IOPORT_CFG_DRIVE_MID        ); // Output in LOW state
+      }
+      ports.Meter = portPins.Meter;                      // remember valid configuration in static memory for next run
+      R_BSP_PinCfg ( BSP_IO_PORT_00_PIN_01, portConfig); // P001: CBS_I-210+C_METER
+      R_BSP_PinCfg ( BSP_IO_PORT_00_PIN_02, portConfig); // P002: CBF_BI_I-210+C_METER
+      R_BSP_PinCfg ( BSP_IO_PORT_00_PIN_04, portConfig); // P004: MC_I-210+C_METER
+      R_BSP_PinCfg ( BSP_IO_PORT_00_PIN_06, portConfig); // P006: /PF_METER
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_07, portConfig); // P107: AD_I-210+C_METER
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_14, portConfig); // P114: ZCD_METER
+      R_BSP_PinCfg ( BSP_IO_PORT_05_PIN_05, portConfig); // P505; T_I-210+C_METER      
+   }
+   // TODO: RA6E1 Bob: Add capability to configure UART pins but restore them afterwards
+   // TODO: RA6E1 Bob: Set unused GPIO pins on the radio to known state
+#if 0 // TODO: RA6E1 Bob: limited testing showed that this didn't make a difference
+   cgc_instance_ctrl_t  g_cgc0_ctrl;
+   cgc_cfg_t   g_cgc0_cfg;
+   if ( ! cgcInitialized )
+   {
+      (void) R_CGC_Open ( &g_cgc0_ctrl, &g_cgc0_cfg );
+      cgcInitialized = (bool)true;
+   }
+   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_HOCO ); // 
+   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_MOCO );
+   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_LOCO );
+#endif // 0
+
+#endif
+#if 0 // TODO: RA6E1 Bob: Temporary code so that we don't need to initialize the PHY
+   vRadio_Init(eRADIO_MODE_NORMAL);
+#endif
+   
+   DBG_printf( "test should take %02u:%02u", time / 60, time % 60 );
+
+   OS_TASK_Sleep( waittime * ONE_SEC );
+
+   DBG_logPrintf( 'R', "noiseband start" );
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )  // just so we produce the same .hex file
+   OS_TICK_Get_CurrentElapsedTicks(&time1);
+
+   PWR_3P6LDO_EN_ON();    // TODO: RA6E1 Bob: This should already be in this condition, just being sure
+   PWR_3V6BOOST_EN_OFF(); // TODO: RA6E1 Bob: This should already be in this condition, just being sure
+
+   OS_TASK_Sleep( ONE_SEC ); /* Make sure debug printout of the above message has completed before we start */
+#endif
+
+   for ( j=0, i = start; i <= end; i += step, j++ )
+   {
+      PHY_Lock();      // Function will not return if it fails
+      RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
+      PHY_Unlock();    // Function will not return if it fails 
+      qsort( workBuf, nSamples, sizeof(uint8_t), cmpfunc); // Sort RSSI array
+
+      // Compute average and stddev
+      computeAvgAndStddev( workBuf, nSamples, &average, &stddev );
+
+      // Update stats
+      min = workBuf[0];
+      max = workBuf[nSamples-1];
+      noiseResults[j].min = min;
+      noiseResults[j].med = workBuf[(nSamples-1)/2];
+      noiseResults[j].max = max;
+      noiseResults[j].avg = scaleAverage( average, min, max );
+      noiseResults[j].stddev = scaleStddev( stddev );
+      noiseResults[j].P90  = workBuf[(uint32_t)((nSamples-1)*0.9)];
+      noiseResults[j].P95  = workBuf[(uint32_t)((nSamples-1)*0.95)];
+      noiseResults[j].P99  = workBuf[(uint32_t)((nSamples-1)*0.99)];
+      noiseResults[j].P995 = workBuf[(uint32_t)((nSamples-1)*0.995)];
+      noiseResults[j].P999 = workBuf[(uint32_t)((nSamples-1)*0.999)];
+
+      OS_TASK_Sleep( PAUSE_MSEC ); // Be nice to other tasks
+   }
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+   R_BSP_PinCfg (BSP_IO_PORT_03_PIN_00, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
+   R_BSP_PinCfg (BSP_IO_PORT_01_PIN_08, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
+   R_BSP_PinCfg (BSP_IO_PORT_01_PIN_09, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
+   R_BSP_PinCfg (BSP_IO_PORT_01_PIN_10, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
+   R_BSP_PinCfg (BSP_IO_PORT_02_PIN_01, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
+   OS_TICK_Get_CurrentElapsedTicks(&time2);
+   TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
+   DBG_logPrintf( 'R', "Noiseband end, took %d seconds", TimeDiff/1000000);
+#endif
+                 
+#if 0 // TODO: RA6E1 Bob: temporarily remove until Radio and PHY are integrated
+   // Get the RX channels
+   GetConf = PHY_GetRequest( ePhyAttr_RxChannels );
+   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+      // Restart the radio if needed
+      if (GetConf.val.RxChannels[radioNum] != PHY_INVALID_CHANNEL) {
+         (void) Radio.StartRx(radioNum, GetConf.val.RxChannels[radioNum]);
+      }
+   }
+#endif // TODO: RA6E1
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 0 )
+   DBG_logPrintf( 'R', "noiseband end" );
+#endif
+
+   return ( 0 );
+}//lint !e429 Custodial pointer has not been freed or returned
+
 //#if ( TEST_SYNC_ERROR == 1 )
 ///******************************************************************************
 //

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "bsp_api.h"
 #include "common_data.h"
+#include "r_dac.h"
+#include "r_dac_api.h"
 #include "r_lpm.h"
 #include "r_lpm_api.h"
 #include "r_agt.h"
@@ -99,6 +101,12 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
 extern const crc_instance_t g_crc1;
 extern crc_instance_ctrl_t g_crc1_ctrl;
 extern const crc_cfg_t g_crc1_cfg;
+/** DAC on DAC Instance. */
+extern const dac_instance_t g_dac0;
+
+/** Access the DAC instance using these structures when calling API functions directly (::p_api is not used). */
+extern dac_instance_ctrl_t g_dac0_ctrl;
+extern const dac_cfg_t g_dac0_cfg;
 /** AGT Timer Instance */
 extern const timer_instance_t g_timer0;
 

@@ -286,7 +286,7 @@ returnStatus_t ID_init( void )
    LP_Config_.loadTables = true;      /* load the tables on power-up */
 #endif
 
-   if ( ( OS_MUTEX_Create( &idMutex_ ) ) && ( OS_MSGQ_Create( &mQueueHandle_, INTERVAL_NUM_MSGQ_ITEMS) ) &&
+   if ( ( OS_MUTEX_Create( &idMutex_ ) ) && ( OS_MSGQ_Create( &mQueueHandle_, INTERVAL_NUM_MSGQ_ITEMS, "Interval" ) ) &&
 #if ( LP_IN_METER == 0 )
          ( eSUCCESS == FIO_fopen( &fileHndlMeta_,                       /* File Handle so that Interval Data can get meta data. */
                                   ePART_SEARCH_BY_TIMING,               /* Search for best partition according to the timing.*/

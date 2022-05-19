@@ -101,7 +101,7 @@
 #define TEMPERATURE_MAX    98 // Maximum valid radio temperature
 
 #if ( EP == 1 )
-#define SUPER_CAP_MIN_VOLTAGE 2.1f // Minimum voltage required to compute noise estimate with boost capacitor turned on
+#define SUPER_CAP_MIN_VOLTAGE 1.60f // TODO: RA6E1 Bob: does this vary from Maxim to TI?  Minimum voltage required to compute noise estimate with boost capacitor turned on
 #endif
 
 #define ENABLE_PSM          0 // Set to 1 to use preamble sense mode
@@ -711,7 +711,7 @@ void compbyte(uint8_t group, uint8_t number);
 void compare(void);
 #endif
 
-#if 0
+#if 0  // TODO: RA6E1 Bob: This was removed from original project
 void RF_SetHardwareMode(RFHardwareMode_e newMode)
 {
    switch (newMode)
@@ -757,11 +757,11 @@ void RF_SetHardwareMode(RFHardwareMode_e newMode)
 ******************************************************************************/
 void RADIO_TX_Watchdog(void)
 {
+#if 0 //TODO Melvin: include the code after dependent modules integrated
    OS_TICK_Struct time;
    uint32_t       TimeDiff;
    bool           Overflow;
 
-#if 0 //TODO: RA6E1: Melvin: include the code after dependent modules integrated
    // Only valid if TX is active
 #if ( PORTABLE_DCU == 1)
    if ((radio[RADIO_0].isDeviceTX) && ((currentTxMode == eRADIO_MODE_NORMAL) || (currentMode == eRADIO_MODE_NORMAL_DEV_600))) {
@@ -812,10 +812,10 @@ void RADIO_TX_Watchdog(void)
 ******************************************************************************/
 void RADIO_RX_WatchdogService(uint8_t radioNum)
 {
-  OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
+   OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
 #if ( MCU_SELECTED == NXP_K24 )
    radio[radioNum].lastFIFOFullTimeStamp = DWT_CYCCNT;
-#else
+#elif ( MCU_SELECTED == RA6E1 )
    radio[radioNum].lastFIFOFullTimeStamp=DWT->CYCCNT;
 #endif
    OS_INT_enable( ); // Enable interrupts.
@@ -847,12 +847,10 @@ void RADIO_RX_Watchdog(void)
       timeStamp = radio[(uint8_t)RADIO_0].lastFIFOFullTimeStamp;
       OS_INT_enable( ); // Enable interrupts.
     #if ( MCU_SELECTED == NXP_K24 )
-      if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-
-    #else // TODO: RA6E1 Modify variable to get core clock from a function
-      if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
-
-     #endif
+      if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {        
+    #elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Modify variable to get core clock from a function
+      if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {  
+    #endif
          INFO_printf("Soft-Demod FIFO purged");
          // Read through the buffer
          si446x_read_rx_fifo((uint8_t)RADIO_0, 128, temp);
@@ -862,7 +860,6 @@ void RADIO_RX_Watchdog(void)
    }
 #endif
 }
-
 
 /******************************************************************************
 
@@ -882,9 +879,9 @@ void RADIO_RX_Watchdog(void)
 ******************************************************************************/
 void RADIO_Update_Freq_Watchdog(void)
 {
+#if 0  //TODO Melvin: include the code after dependent modules integrated
    uint32_t timeStamp;
 
-#if 0  //TODO Melvin: include the code after dependent modules integrated
    // Make sure radio 0 is initialized because we won't get TCXO output until it is done
    if ( radio[(uint8_t)RADIO_0].configured ) {
       OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
@@ -894,7 +891,7 @@ void RADIO_Update_Freq_Watchdog(void)
 #if ( MCU_SELECTED == NXP_K24 )
 
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-#else // TODO: RA6E1 Modify variable to get core clock from a function
+#elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Modify variable to get core clock from a function
       if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
 
 #endif
@@ -912,11 +909,19 @@ void RADIO_Update_Freq_Watchdog(void)
  *  @param radioNum    - index of the radio (0, or 0-8 for frodo)
  *
  */
-void RADIO_Event_Set(RADIO_EVENT_t event_type, uint8_t radioNum)
+#if ( RTOS_SELECTION == MQX_RTOS )
+void     RADIO_Event_Set(RADIO_EVENT_t event_type, uint8_t radioNum)
+#elif ( RTOS_SELECTION == FREE_RTOS )
+void     RADIO_Event_Set(RADIO_EVENT_t event_type, uint8_t radioNum, bool fromISR)
+#endif
 {
    if(pEventHandler_Fxn != NULL)
    {  // Handler is defined
+#if ( RTOS_SELECTION == MQX_RTOS )
       pEventHandler_Fxn(event_type, radioNum);
+#elif ( RTOS_SELECTION == FREE_RTOS )
+      pEventHandler_Fxn(event_type, radioNum, fromISR);
+#endif
    }
    else{
 //      INFO_printf("No event handler");
@@ -991,25 +996,26 @@ static void vRadio_PowerUp(void)
 
 /******************************************************************************
 *
-* Functio Name      : Radio0_IRQ_ISR
+* Function Name     : Radio0_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( RTOS_SELECTION == MQX_RTOS )
 static void Radio0_IRQ_ISR(void)
-#elif ( MCU_SELECTED == RA6E1 )
+#elif (RTOS_SELECTION == FREE_RTOS )
 void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
-#endif
+#endif // RTOS_SELECTION
 {
    uint32_t primask = __get_PRIMASK();
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: include the code once interrupt enable/disable added
+//#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: include the code once interrupt enable/disable added
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
-#endif
+//#endif
 
    // There is no guarantee that this interrupt was from a time sync (it could be from preamble or FIFO almost full) but only the time sync interrupt will validate this value
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
 
 #if ( EP == 1 )
+#if 0 //TODO Melvin: include the code after replacement for Flexible Timer Module (FTM) is integrated
    uint32_t cycleCounter;
    uint32_t cpuFreq;
    uint16_t currentFTM;
@@ -1017,7 +1023,6 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    uint16_t delayFTM;
    uint32_t delayCore;
 
-#if 0 //TODO Melvin: include the code after dependent modules integrated
    // Need to read those 3 counters together so disable interrupts if they are not disabled already
    cycleCounter   = DWT_CYCCNT;
    currentFTM     = (uint16_t)FTM1_CNT; // Connected to radio interrupt
@@ -1048,23 +1053,31 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    // Update the fractional Sync time to remove the delay between when the interrupt happened and when it was processed.
    (void)TIME_SYS_GetRealCpuFreq( &cpuFreq, NULL, NULL );
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac -= ((uint64_t)delayCore << 32) / (uint64_t)cpuFreq;
-
-   if ((radio[(uint8_t)RADIO_0].demodulator == 0) || RADIO_Is_TX()) {
-      RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_0); // Call PHY task for interrupt processing
-   } else {
-      OS_EVNT_Set( &SD_Events, SOFT_DEMOD_RAW_PHASE_SAMPLES_AVAILABLE_EVENT); // Call soft-modem task for samples processing
-   }
 #else
    __set_PRIMASK(primask); // Restore interrupts
+#endif // 0
+   if ((radio[(uint8_t)RADIO_0].demodulator == 0) || RADIO_Is_TX()) {
+      RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_0, (bool)true); // Call PHY task for interrupt processing
+   } else {
+#if ( RTOS_SELECTION == MQX_RTOS )
+      OS_EVNT_Set( &SD_Events, SOFT_DEMOD_RAW_PHASE_SAMPLES_AVAILABLE_EVENT); // Call soft-modem task for samples processing
+#elif (RTOS_SELECTION == FREE_RTOS )
+      OS_EVNT_Set_from_ISR( &SD_Events, SOFT_DEMOD_RAW_PHASE_SAMPLES_AVAILABLE_EVENT); // Call soft-modem task for samples processing
+#endif // RTOS_SELECTION
+   }
+
+#if ( RTOS_SELECTION == MQX_RTOS )
    RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_0);
-#endif
-#endif
+#elif (RTOS_SELECTION == FREE_RTOS )
+   RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_0, (bool)true); /* Signal the event from the ISR */
+#endif // RTOS_SELECTION
+#endif // ( EP == 1 )
 }
 
 #if ( DCU == 1 )
 /******************************************************************************
 *
-* Function Name      : Radio1_IRQ_ISR
+* Function Name     : Radio1_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1078,7 +1091,7 @@ static void Radio1_IRQ_ISR(void)
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 /******************************************************************************
 *
-* Function Name      : Radio0_TxDone_ISR
+* Function Name     : Radio0_TxDone_ISR
 * Comments          : Radio0 GPIO1 (TxState) interrupt signifies transmit complete on falling edge.
 *
 ******************************************************************************/
@@ -1090,7 +1103,7 @@ static void Radio0_TxDone_ISR(void)
 
 /******************************************************************************
 *
-* Function Name      : Radio2_IRQ_ISR
+* Function Name     : Radio2_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1103,7 +1116,7 @@ static void Radio2_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Function Name      : Radio3_IRQ_ISR
+* Function Name     : Radio3_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1116,7 +1129,7 @@ static void Radio3_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Function Name      : Radio4_IRQ_ISR
+* Function Name     : Radio4_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1129,7 +1142,7 @@ static void Radio4_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Function Name      : Radio5_IRQ_ISR
+* Function Name     : Radio5_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1142,7 +1155,7 @@ static void Radio5_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Function Name      : Radio6_IRQ_ISR
+* Function Name     : Radio6_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1155,7 +1168,7 @@ static void Radio6_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Function Name      : Radio7_IRQ_ISR
+* Function Name     : Radio7_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1168,7 +1181,7 @@ static void Radio7_IRQ_ISR(void)
 
 /******************************************************************************
 *
-* Function Name      : Radio8_IRQ_ISR
+* Function Name     : Radio8_IRQ_ISR
 * Comments          : The IRQ interrupt service routine triggered by gpio
 *
 ******************************************************************************/
@@ -1178,8 +1191,8 @@ static void Radio8_IRQ_ISR(void)
    (void)TIME_UTIL_GetTimeInSecondsFormat(&radio[(uint8_t)RADIO_8].tentativeSyncTime);
    RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_8);
 }
-#endif
-#endif
+#endif // ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+#endif // ( DCU == 1 )
 
 /******************************************************************************
 
@@ -2131,7 +2144,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Clear all variables
    (void)memset(radio, 0, sizeof(radio));
 
-
+#if 1 //TODO RA6E1 Bob: As long as the PHY task is running, these lines can be enabled
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&RssiJumpThreshold);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
 
@@ -2154,6 +2167,14 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Get AFC error
    GetReq.eAttribute = ePhyAttr_AfcAdjustment;
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)AfcAdjustment);   //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#else // TODO: RA6E1 Bob: temporary code to set default values until PHY_Attribute_Get is ready
+   RssiJumpThreshold  = PHY_RSSI_JUMP_THRESHOLD_DEFAULT;
+   detectionList[0]   = ePHY_DETECTION_0;
+   framingList[0]     = ePHY_FRAMING_0;
+   modeList[0]        = ePHY_MODE_1;
+   demodulatorList[0] = 0; // Hard demodulator
+   AfcAdjustment[0]   = 0;
+#endif
 
    // Configure radio SDN pin and hold all radios in reset while configuring
    RDO_SDN_TRIS();      // First radio on Frodo and Samwise
@@ -2161,7 +2182,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 
    // Configure CPU pin connected to radio 0 GPIO0 pin
    RDO_0_GPIO0_TRIS(); // Digital input on Samwise and Frodo.
-#if 0 //TODO: RA6E1
+#if 1 //TODO: RA6E1 Bob: These have tentatively been completed, to be tested
    // Configure CPU pin connected to radio 0 GPIO1 pin
    RDO_0_GPIO1_TRIS(); // Digital input on Samwise and Frodo.
 
@@ -2302,7 +2323,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
       // Set power level
       if (radioNum == (uint8_t)RADIO_0) {
          GetReq.eAttribute = ePhyAttr_PowerSetting;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
+#if 1  //TODO RA6E1 Bob: As long as the PHY task is running, this can remain 1
          (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&PowerSetting); //lint !e826   Suspicious pointer-to-pointer conversion
 #endif
          RADIO_Power_Level_Set(PowerSetting);
@@ -2579,11 +2600,10 @@ static uint8_t reverseByte(uint8_t val)
  **********************************************************************************************************************/
 void printHex ( char const *rawStr, const uint8_t *str, uint16_t num_bytes )
 {
-   uint32_t     i;
-   char         pDst[2];
-
    // Use MFG port
 #if ( USE_USB_MFG != 0 )
+   uint32_t     i;
+   char         pDst[2];
    // Print the raw string
    usb_puts( (char*)rawStr );
 
@@ -3243,9 +3263,7 @@ static void validatePhyPayload(uint8_t radioNum)
 
       // Get AFC enable setting
       GetReq.eAttribute = ePhyAttr_AfcEnable;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
       (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&AfcEnable);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
 #if ( EP == 1 )
       // Skip AFC adjustment for now when doing soft-demod because this needs to be looked into and properly integrated.
@@ -3278,7 +3296,11 @@ static void validatePhyPayload(uint8_t radioNum)
          }
       }
 #endif  // end of ( EP == 1 ) section
+#if ( RTOS_SELECTION == MQX_RTOS )
       RADIO_Event_Set(eRADIO_RX_DATA, radioNum); // Signal the RX DATA Event to PHY
+#elif ( RTOS_SELECTION == FREE_RTOS )
+      RADIO_Event_Set(eRADIO_RX_DATA, radioNum, (bool)false); // Signal the RX DATA Event to PHY
+#endif
    }
 
    return;
@@ -3532,8 +3554,10 @@ uint8_t RADIO_Get_CurrentRSSI(uint8_t radioNum)
    // Adjust RSSI to compensate for front end gain
    PHY_GetReq_t GetReq;
    GetReq.eAttribute = ePhyAttr_FrontEndGain;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
+#if 0 // TODO: RA6E1 Bob: Until the file system problem is fixed, this needs to be 0
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)&FrontEndGain);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#else
+   FrontEndGain = 0;
 #endif
    rssi += FrontEndGain;
    if ( rssi < MINIMUM_RSSI_VALUE ){
@@ -3698,7 +3722,11 @@ static void processRadioInt(uint8_t radioNum)
          }
 
          // Signal the TX DONE Event
-         RADIO_Event_Set(eRADIO_TX_DONE, radioNum);
+#if ( RTOS_SELECTION == MQX_RTOS )
+         RADIO_Event_Set(eRADIO_TX_DONE, radioNum); // Signal the RX DATA Event to PHY
+#elif ( RTOS_SELECTION == FREE_RTOS )
+         RADIO_Event_Set(eRADIO_TX_DONE, radioNum, (bool)false); // Signal the RX DATA Event to PHY
+#endif
       }
    }
 }
@@ -3831,7 +3859,6 @@ static void updateTCXO ( uint8_t radioNum )
  */
 void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 {
-#if 0  //TODO Melvin: add the below module once the timer module is added
    OS_TICK_Struct CurrentTime;
    PHY_GetReq_t   GetReq;
    uint8_t        CurrentRssiJumpThreshold;
@@ -3999,7 +4026,6 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
                             SI446X_CMD_START_RX_ARG_NEXT_STATE2_RXVALID_STATE_ENUM_REMAIN,
                             SI446X_CMD_START_RX_ARG_NEXT_STATE3_RXINVALID_STATE_ENUM_REMAIN);
    }
-#endif
 }
 
 
@@ -4669,11 +4695,11 @@ static void wait_us(uint32_t time)
 {
    OS_TICK_Struct time1,time2;
    uint32_t       TimeDiff;
-   bool           Overflow;
 
    if (time == 0) return;
 
 #if ( MCU_SELECTED == NXP_K24 )
+   bool           Overflow;
    _time_get_elapsed_ticks(&time1);
 
    // Wait for a while
@@ -4862,7 +4888,6 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
    float32_t currentRSSI;
    OS_TICK_Struct time1,time2;
    uint32_t TimeDiff;
-   bool Overflow;
    PHY_GetReq_t GetReq;
    int8_t       FrontEndGain;
    union si446x_cmd_reply_union Si446xCmd;
@@ -4879,6 +4904,7 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       currentRSSI = Si446xCmd.GET_MODEM_STATUS.LATCH_RSSI;
 
 #if ( MCU_SELECTED == NXP_K24 )
+      bool Overflow;
       _time_get_elapsed_ticks(&time2);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
 #elif ( MCU_SELECTED == RA6E1 )
@@ -4890,26 +4916,24 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       if (TimeDiff > 10) {
          break;
       }
-#if 0  //TODO: RA6E1
-      _sched_yield();
-#endif
+      OS_TASK_Yield(); // TODO: RA6E1 Bob: this needs to be tested for compatibility
    } while (currentRSSI == 0); // We use the latch value as a way to consume time until RSSI is meaningful.
 
    // Discard the first 4 samples because the radio internaly averages 4 symbols and the RSSI might not be stable yet.
-   wait_us(833); // 4 symbols at 4800 baud is 833 us
+   wait_us((uint32_t)833); // 4 symbols at 4800 baud is 833 us
    (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.
 
    // Filter RSSI
    // Load first values
    for (i=0; i<RSSI_CLUSTER_SIZE-1; i++) {
-      wait_us(samplingRate);
+      wait_us((uint32_t)samplingRate);
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.
       rssi[i] = (uint32_t)Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
    }
 
    // Load up to RSSI_AVERAGE_SIZE values
    for (; i<RSSI_AVERAGE_SIZE; i++) {
-      wait_us(samplingRate);
+      wait_us((uint32_t)samplingRate);
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.
       rssi[i] = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
 
@@ -5186,11 +5210,11 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
    }
 #endif
    // Discard the first 4 samples because the radio internaly averages 4 symbols and the RSSI might not be stable yet.
-   wait_us(1000); // 4 symbols at 4800 baud is 833 us
+   wait_us((uint32_t)1000); // 4 symbols at 4800 baud is 833 us
 
    // Get RSSI values
    for (i=0; i<nSamples; i++) {
-      wait_us(rate);
+      wait_us((uint32_t)rate);
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.
       buf[i] = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
    }
@@ -5208,8 +5232,12 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
    }
 #endif
    // Adjust RSSI to compensate for front end gain
+#if 0  // TODO: RA6E1 Bob: When file system problem is fixed, this can be removed
    GetReq.eAttribute = ePhyAttr_FrontEndGain;
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)&FrontEndGain);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
+#else
+   FrontEndGain = 0; // temporary until PHY is ready
+#endif // TODO: RA6E1 Bob
    for (i=0; i<nSamples; i++) {
       tempRSSI  = (int32_t)buf[i];
       tempRSSI += (int32_t)FrontEndGain;
@@ -6347,7 +6375,12 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
    } else {
       // Reading the radio temperature takes about 1,s which is way too long when using the soft-demodulator.
       // Use the CPU temperature as a proxy instead.
+#if ( MCU_SELECTED == NXP_K24 )
       *temp = (int16_t)ADC_Get_uP_Temperature((bool)false);
+#elif ( MCU_SELECTED == RA6E1 )
+      *temp = 0; // TODO: RA6E1 Bob: this needs to use the new method of getting the Si446x temperature even if SD is running
+      return (bool)false;
+#endif
    }
 
    // Sanitize output

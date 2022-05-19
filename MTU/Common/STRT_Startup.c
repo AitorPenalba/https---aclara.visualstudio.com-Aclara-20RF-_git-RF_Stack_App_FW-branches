@@ -108,6 +108,9 @@
 #if ( PHASE_DETECTION == 1 )
 #include "PhaseDetect.h"
 #endif
+#if ( DAC_CODE_CONFIG == 1 )
+#include "dvr_DAC0.h"
+#endif
 #include "PHY.h"
 #include "MAC_Protocol.h"
 #include "MAC.h"
@@ -186,6 +189,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
+   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),
 #if ENABLE_HMC_TASKS
 #if END_DEVICE_PROGRAMMING_CONFIG == 1
    INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
@@ -589,12 +593,12 @@ void STRT_StartupTask ( taskParameter )
 
    // Reset all CPU stats
    // This MUST be done after the tasks are started
-//   (void)OS_TASK_UpdateCpuLoad();   // TODO: RA6: Enable this code later
-// TODO: RA6: Enable this code later
-//   if ( quiet == 0 )
-//   {
-//      ( void )SM_StartRequest( eSM_START_STANDARD, NULL );  /* Start stack manager  */
-//   }
+//   (void)OS_TASK_UpdateCpuLoad();
+
+   if ( quiet == 0 )
+   {
+      ( void )SM_StartRequest( eSM_START_STANDARD, NULL );  /* Start stack manager  */
+   }
 
 #ifdef NDEBUG /* If defined, this is release code (not debug) */
    DBG_logPrintf( 'I', "Running Release code" );

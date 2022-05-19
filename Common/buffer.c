@@ -221,7 +221,11 @@ returnStatus_t BM_init( void )
          for ( pool = 0; ( eSUCCESS == retVal ) && ( pool < BUFFER_N_POOLS ); pool++ )
          {
             // Create a queue to hold the buffer pointers for this pool
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+            if ( OS_MSGQ_Create( &bufferPools_[pool], BM_bufferPoolParams[pool].cnt, (char *)BM_bufferPoolParams[pool].pName ) == false )
+#else
             if ( OS_MSGQ_Create( &bufferPools_[pool], BM_bufferPoolParams[pool].cnt ) == false )
+#endif
             {
                //Message queue creation failed
                return eFAILURE;
@@ -461,8 +465,8 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
    buffer_t *pBuf = NULL;
 #if ( RTOS_SELECTION == MQX_RTOS )
    OS_TICK_Struct CurrentTime;// TODO: RA6 [name_Balaji]: Check removing Conditional compiler once in main branch
-#endif
    bool           overflow;
+#endif
    static bool outOfBuffErrorLogged_ = false; //To restrict logging out of buffers event/error once per power up
 
    for ( pool = 0; pool < BUFFER_N_POOLS; pool++ )
@@ -496,36 +500,36 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
          pBuf->x.flag.isStatic   = false;
          pBuf->x.flag.inQueue    = 0; // Not in queue yet
          pBuf->x.dataLen         = minSize; /* Initialize this with the size requested */
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
+//#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_disable( );
-#endif
+//#endif
          BM_bufferStats.pool[pool].allocOk++;
          BM_bufferStats.pool[pool].currAlloc++;
          if ( BM_bufferStats.pool[pool].currAlloc > BM_bufferStats.pool[pool].highwater )
          {
             BM_bufferStats.pool[pool].highwater = BM_bufferStats.pool[pool].currAlloc;
          }
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
+//#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_enable( );
-#endif
+//#endif
          break;
       }
       else
       {
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
+//#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_disable( );
-#endif
+//#endif
          BM_bufferStats.pool[pool].allocFail++; /* pool empty - try remaining pools (in increasing size order) */
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
+//#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_enable( );
-#endif
+//#endif
       }
    }
    if ( NULL == pBuf )
    {
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
+//#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
          OS_INT_disable( );
-#endif
+//#endif
       // Buffer watchdog
       if ( ( eBM_APP == type ) || ( eBM_STACK == type ) )
       {
@@ -572,9 +576,9 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
       {
          BM_bufferStats.allocFailDebug++;
       }
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
+//#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Add support for RA6E1
       OS_INT_enable( );
-#endif
+//#endif
    }
    return pBuf;
 }

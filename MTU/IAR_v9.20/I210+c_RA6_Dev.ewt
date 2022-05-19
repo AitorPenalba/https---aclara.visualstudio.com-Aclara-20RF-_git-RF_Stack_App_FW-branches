@@ -1490,6 +1490,12 @@
                     <name>$PROJ_DIR$\..\..\Common\driver\dvr_cache.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_DAC0.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\driver\dvr_DAC0.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.c</name>
                 </file>
                 <file>
@@ -1578,7 +1584,7 @@
                     <group>
                         <name>SoftDemodulator</name>
                         <group>
-                            <name>PreampleDetector</name>
+                            <name>PreambleDetector</name>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\PreambleDetector\EstimateCarrierFrequencyOffset.c</name>
                             </file>

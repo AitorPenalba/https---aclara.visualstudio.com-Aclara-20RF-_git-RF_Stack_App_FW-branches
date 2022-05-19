@@ -279,7 +279,7 @@ returnStatus_t APP_MSG_init ( void )
    returnStatus_t retVal = eFAILURE  ; //Return status
    FileStatus_t fileStatus;
 
-   if ( OS_MSGQ_Create( &AppMsgHandler_MsgQ_, APP_MSG_NUM_MSGQ_ITEMS ) )
+   if ( OS_MSGQ_Create( &AppMsgHandler_MsgQ_, APP_MSG_NUM_MSGQ_ITEMS, "APP_MSG" ) )
    {
       appMsgHandlerReady = true; //Let apps know handler is ready to accept messages
 

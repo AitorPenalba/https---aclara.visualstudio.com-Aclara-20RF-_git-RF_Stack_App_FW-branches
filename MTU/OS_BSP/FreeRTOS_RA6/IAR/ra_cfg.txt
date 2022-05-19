@@ -103,7 +103,7 @@ FSP Configuration
       P006 94 IRQ_IRQ11-DS PF_METER - IRQ11-DS "IRQ mode" - - "ADC0: AN006; IRQ: IRQ11-DS" PF_Meter IO - /PF_METER 
       P007 93 ADC0_AN007 - - - "Analog mode" - - "ADC0: AN007" ADC_SC0 I - "ADC_SC0 / Super Cap Voltage" 
       P008 92 ADC0_AN008 - - - "Analog mode" - - "ADC0: AN008; IRQ: IRQ12-DS" ADC_4V0 I - "ADC_4V0 / Analog input from potential divider P4V0" 
-      P014 85 GPIO - L - "Output mode (Initial Low)" - - "ADC0: AN012; DAC120: DA0" Open IO - VPC_Power_Control 
+      P014 85 DAC120_DA0 - - - "Analog mode" - - "ADC0: AN012; DAC120: DA0" - O - VPC_Power_Control 
       P015 84 IRQ_IRQ13 - - IRQ13 "IRQ mode" - - "ADC0: AN013; IRQ: IRQ13" IRQ_SI4467 IO - /IRQ_SI4460 
       P100 75 SPI1_MISO1 - M None "Peripheral mode" - - "AGT0: AGTIO0; GPT5: GTIOC5B; GPT_POEG: GTETRGA; IRQ: IRQ2; QSPI: QSPCLK; SCI0: RXD0; SCI1: SCK1; SPI1: MISO1" SPIB_MISO IO - SPI1_MISO 
       P101 74 SPI1_MOSI1 - M None "Peripheral mode" - - "AGT0: AGTEE0; GPT5: GTIOC5A; GPT_POEG: GTETRGB; IRQ: IRQ1; QSPI: QIO1; SCI0: TXD0; SCI1: CTS_RTS1; SPI1: MOSI1" SPIB_MOSI IO - SPI1_MOSI 

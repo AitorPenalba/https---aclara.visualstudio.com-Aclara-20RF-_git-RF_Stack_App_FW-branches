@@ -252,7 +252,7 @@ uint8_t HMC_DIAGS_DoDiags( uint8_t cmd, void *pData )
             returnStatus_t   resFileOpen;
             returnStatus_t   resAddTimer;
             tTimeSysPerAlarm alarmSettings;                    /* Configure the periodic alarm for time */
-            ( void )OS_QUEUE_Create( &hmcDiagQueueHandle_, HMC_DIAG_QUEUE_SIZE );
+            ( void )OS_QUEUE_Create( &hmcDiagQueueHandle_, HMC_DIAG_QUEUE_SIZE, "HMC_DIAGS" );
             alarmSettings.pMQueueHandle = NULL;                /* Don't use the message queue */
             alarmSettings.bOnInvalidTime = false;              /* Only alarmed on valid time, not invalid */
             alarmSettings.bOnValidTime = true;                 /* Alarmed on valid time */

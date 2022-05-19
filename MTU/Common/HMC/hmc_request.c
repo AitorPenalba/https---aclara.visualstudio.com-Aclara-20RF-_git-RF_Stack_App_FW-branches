@@ -193,7 +193,7 @@ uint8_t HMC_REQ_applet( uint8_t ucCmd, void *pData )
       {
          if ( !HMC_REQ_queueCreated ) // RCZ added for second instance of this applet
          {
-            HMC_REQ_queueCreated = OS_QUEUE_Create( &HMC_REQ_queueHandle, HMC_REQ_QUEUE_SIZE );
+            HMC_REQ_queueCreated = OS_QUEUE_Create( &HMC_REQ_queueHandle, HMC_REQ_QUEUE_SIZE, "HMC_REQ" );
          }
 
          totalBytesToRead_ = 0;
