@@ -51,10 +51,12 @@
 #include "dfw_interface.h"
 #include "pwr_task.h"
 #include "ecc108_apps.h"
+#if 0 // TODO: RA6E1 Enable WolfSSL
 #include "wolfssl/wolfcrypt/aes.h"
 #include "wolfssl/wolfcrypt/ecc.h"
 #include "wolfssl/wolfcrypt/sha.h"
 #include "wolfssl/wolfcrypt/sha256.h"
+#endif
 #include "ecc108_lib_return_codes.h"
 #include "EVL_event_log.h"
 #if ( DCU == 1 )
@@ -439,10 +441,14 @@ static returnStatus_t   verifyCrc( flAddr StartAddr, uint32_t cnt, uint32_t expe
 static eDfwErrorCodes_t executeMacroCmds( eDfwPatchState_t ePatchState, patchHeader_t const *pPatchHeader );
 static eDfwErrorCodes_t getPatchHeader( patchHeader_t *pPatchHeader, const DFW_vars_t * const pDfwVars );
 static void             brick( void );
+#if 0 // TODO: RA6E1 Enable once WolfSSL integrated
 static returnStatus_t   decryptPatch( DFW_vars_t * const pVars, patchHeader_t *pPatchHeader );
+#endif
 static void             createPemFromExtractedKey( const uint8_t *extractedKey, uint8_t *pem, uint8_t *pemSz );
+#if 0 // TODO: RA6E1 Enable once WolfSSL integrated
 static returnStatus_t   verifySignature( eDfwDecryptState_t decryptStatus, PartitionData_t const *pPartition,
                                          flAddr StartAddr, uint32_t cnt );
+#endif
 static returnStatus_t   decryptData( PartitionData_t const *pPartition, flAddr StartAddr, flAddr DecodedStart,
                                      const uint8_t *authTag, uint32_t authTagSz, uint32_t patchLen );
 static bool DFWA_verifyPatchFormat( dl_dfwFileType_t fileType, uint8_t patchFormat );
@@ -802,7 +808,7 @@ returnStatus_t DFWA_init( void )
    Notes:
 
 ******************************************************************************************************************** */
-void DFWA_task( uint32_t Arg0 )
+void DFWA_task( taskParameter )
 {
    DFW_vars_t  dfwVars; /* Contains all of the DFW file variables */
 
@@ -2503,6 +2509,7 @@ static eDfwErrorCodes_t validatePatchHeader( eValidatePatch_t valPatchCmd, dl_df
          {
             eErrorCode_ = eDFWE_PATCH_FORMAT;
          }
+#if 0 // TODO: RA6E1 Enable once WolfSSL is in place (verifySignature dependent on WolfSSL)
          /* If decryption is ready (enabled) and the signature check fails */
          else if ( ( ( DFW_ENDPOINT_FIRMWARE_FILE_TYPE == fileType ) || IS_METER_FIRM_UPGRADE( fileType ) ) &&
                    eSUCCESS != verifySignature( dfwVars.decryptState,
@@ -2511,6 +2518,10 @@ static eDfwErrorCodes_t validatePatchHeader( eValidatePatch_t valPatchCmd, dl_df
                                                 patchOffset,
                                                 /* Size is everything except the signature*/
                                                 dfwVars.initVars.patchSize - SIG_PACKET_SIZE ) ) //lint !e826  Ptr to msg data
+#else
+         /* If decryption is ready (enabled) and the signature check fails */
+         else if ( ( DFW_ENDPOINT_FIRMWARE_FILE_TYPE == fileType ) || IS_METER_FIRM_UPGRADE( fileType ) )
+#endif
          {
             EventKeyValuePair_s  keyVal;     /* Event key/value pair info  */
             EventData_s          event;      /* Event info  */
@@ -2525,9 +2536,14 @@ static eDfwErrorCodes_t validatePatchHeader( eValidatePatch_t valPatchCmd, dl_df
             ( void )EVL_LogEvent( 120, &event, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
             eErrorCode_ = eDFWE_SIGNATURE;
          }
+#if 0 // TODO: RA6E1 Enable once WolfSSL is in place (decryptPatch dependent on WolfSSL)
          /* If decryption is ready(enabled) and the patch is not successfully decrypted */
          else if ( ( ( DFW_ENDPOINT_FIRMWARE_FILE_TYPE == fileType ) || IS_METER_FIRM_UPGRADE( fileType ) ) &&
-                   eSUCCESS != decryptPatch( &dfwVars, &patchHeader ) )
+                  eSUCCESS != decryptPatch( &dfwVars, &patchHeader ) )
+#else
+         /* If decryption is ready(enabled) and the patch is not successfully decrypted */
+         else if ( ( ( DFW_ENDPOINT_FIRMWARE_FILE_TYPE == fileType ) || IS_METER_FIRM_UPGRADE( fileType ) ) )
+#endif
          {
             EventKeyValuePair_s  keyVal;     /* Event key/value pair info  */
             EventData_s          event;      /* Event info  */
@@ -2585,6 +2601,7 @@ static eDfwErrorCodes_t validatePatchHeader( eValidatePatch_t valPatchCmd, dl_df
    return( eErrorCode_ );
 }
 
+#if 0 // TODO: RA6E1 Enable once WolfSSL integrated
 /***********************************************************************************************************************
 
    Function name: decryptPatch
@@ -2689,6 +2706,7 @@ static returnStatus_t decryptPatch( DFW_vars_t * const pVars, patchHeader_t *pPa
    }
    return( retStatus );
 }
+#endif
 
 /***********************************************************************************************************************
 
@@ -3494,6 +3512,7 @@ returnStatus_t DFWA_setDerivedKey( firmwareVersion_u fromVersion, firmwareVersio
    return returnValue;
 }
 
+#if 0 // TODO: RA6E1 Enable once WolfSSL is in place
 /***********************************************************************************************************************
 
    Function name: decryptData
@@ -3791,6 +3810,7 @@ static returnStatus_t verifySignature( eDfwDecryptState_t decryptStatus,
    }
    return ( returnValue );
 }
+#endif // if 0
 
 #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( ( DCU == 1 ) &&  ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )) )
 #else

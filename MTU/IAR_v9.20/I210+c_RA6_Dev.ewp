@@ -1145,6 +1145,24 @@
             <group>
                 <name>DFW</name>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_app.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_app.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_interface.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_interface.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_pckt.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_pckt.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.c</name>
                 </file>
                 <file>
@@ -1364,7 +1382,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1869,7 +1887,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>

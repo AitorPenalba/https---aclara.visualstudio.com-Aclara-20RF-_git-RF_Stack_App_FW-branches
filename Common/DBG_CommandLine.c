@@ -37,6 +37,7 @@
 #include "dfw_app.h"
 
 #include "pwr_task.h"
+#include "dfw_interface.h"
 //#include "MIMT_info.h"
 #if 0 // TODO: RA6: Add later
 #if ( EP == 1 )
@@ -403,9 +404,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "demandto",     DBG_CommandLine_DMDTO,           "Get (no args) or set (arg1) the demand reset timeout" },
 //#endif
 //#endif
-//#if ENABLE_DFW_TASKS
-//   { "dfw",          DBG_CommandLine_DFW_Status,      "DFW - Status" },
-//#endif   //End of #if EP
+#if ENABLE_DFW_TASKS
+   { "dfw",          DBG_CommandLine_DFW_Status,      "DFW - Status" },
+#endif   //End of #if EP
 //#if ( EP == 1 )
 //   { "dfwtd",        DBG_CommandLine_DfwTimeDv,       "Get/Set DFW TimeDiversity 0-255 minutes (DLConfirm ApplyConfirm)" },
 //#if ( REMOTE_DISCONNECT == 1 )
@@ -486,8 +487,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#ifdef TM_ID_UNIT_TEST
 ////   { "idut",         DBG_CommandLine_IdUt,            "Run interval data self test: idut ch"},
 //#endif
-//
-//   { "insertappmsg", DBG_CommandLine_InsertAppMsg,    "send NWK payload (arg1) into the bottom of the APP layer" },
+
+   { "insertappmsg", DBG_CommandLine_InsertAppMsg,    "send NWK payload (arg1) into the bottom of the APP layer" },
    { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\n"
                    "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
 //#if ( EP == 1 )
@@ -5371,66 +5372,66 @@ uint32_t DBG_CommandLine_HmcDemandCoin ( uint32_t argc, char *argv[] )
 } /* end DBG_CommandLine_HmcDemandCoin() */
 #endif
 #endif
-//
-//#if ( FILE_IO == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_PrintFiles
-//
-//   Purpose: This function will print out the File Tables from each partition
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_PrintFiles  ( uint32_t argc, char *argv[] )
-//{
-//#ifdef TM_PARTITION_USAGE
-//   if ( argc == 1 )  /* The number of arguments must be 4 */
-//   {
-//      FIO_printFileInfo();
-//   }
-//   else if ( argc == 2 )  /* The number of arguments must be 4 */
-//   {
-//      FIO_printFile( ( filenames_t )atoi( argv[1] ) );
-//   }
-//#else
-//   DBG_logPrintf( 'R', "Error - Macro 'TM_PARTITION_USAGE' must be enabled in CompileSwitch.h" );
-//#endif
-//   return ( 0 );
-//} /* end DBG_CommandLine_PrintFiles () */
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_DumpFiles
-//
-//   Purpose: This function will print out the contents of all the files in un-named partitions
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
-//{
-//#ifdef TM_PARTITION_USAGE
-//   if ( argc == 1 )
-//   {
-//      FIO_fileDump();
-//   }
-//#else
-//   DBG_logPrintf( 'R', "Error - Macro 'TM_PARTITION_USAGE' must be enabled in CompileSwitch.h" );
-//#endif
-//   return ( 0 );
-//}
-//#endif // FILE_IO == 1
+
+#if ( FILE_IO == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_PrintFiles
+
+   Purpose: This function will print out the File Tables from each partition
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_PrintFiles  ( uint32_t argc, char *argv[] )
+{
+#ifdef TM_PARTITION_USAGE
+   if ( argc == 1 )  /* The number of arguments must be 4 */
+   {
+      FIO_printFileInfo();
+   }
+   else if ( argc == 2 )  /* The number of arguments must be 4 */
+   {
+      FIO_printFile( ( filenames_t )atoi( argv[1] ) );
+   }
+#else
+   DBG_logPrintf( 'R', "Error - Macro 'TM_PARTITION_USAGE' must be enabled in CompileSwitch.h" );
+#endif
+   return ( 0 );
+} /* end DBG_CommandLine_PrintFiles () */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_DumpFiles
+
+   Purpose: This function will print out the contents of all the files in un-named partitions
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
+{
+#ifdef TM_PARTITION_USAGE
+   if ( argc == 1 )
+   {
+      FIO_fileDump();
+   }
+#else
+   DBG_logPrintf( 'R', "Error - Macro 'TM_PARTITION_USAGE' must be enabled in CompileSwitch.h" );
+#endif
+   return ( 0 );
+}
+#endif // FILE_IO == 1
 #if (EP == 1)
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 /*******************************************************************************
@@ -6742,79 +6743,79 @@ static returnStatus_t atoh( uint8_t *pHex, char const *pAscii )
 //
 //   return ( 0 );
 //}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_InsertAppMsg
-//
-//   Purpose: This command will insert a NWK payload into the bottom of the APP layer
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - status of this function - currently always 0 (success)
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_InsertAppMsg ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t        data[MAX_ATOH_CHARS];
-//   uint16_t       dataLen;
-//   uint16_t       bufIndex;
-//   uint16_t       srcIndex;
-//   buffer_t      *stack_buffer = NULL;
-//   IP_Frame_t     rx_frame;
-//   TIMESTAMP_t    timeStamp;
-//
-//   DBG_logPrintf( 'R', "Received DBG_CommandLine_InsertAppMsg command" );
-//   if ( argc == 2 )  /* The number of arguments must be 2 */
-//   {
-//      dataLen = ( uint16_t )strlen( argv[1] );
-//      if ( ( dataLen % 2 ) != 0 )
-//      {
-//         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'insertmacmsg 1354AB'" );
-//      }
-//      else if ( dataLen > ( MAX_ATOH_CHARS *  2) )
-//      {
-//         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
-//
-//      }
-//      else
-//      {
-//         (void)memset(data, 0, MAX_ATOH_CHARS);
-//         /* convert ascii data to hex data */
-//         for ( bufIndex = 0, srcIndex = 0;
-//               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
-//               srcIndex += 2, bufIndex++ )
-//         {
-//            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
-//         }
-//
-//         rx_frame.version              = 0;
-//         rx_frame.qualityOfService     = 0;
-//         rx_frame.nextHeaderPresent    = 0;
-//         rx_frame.srcAddress.addr_type = eCONTEXT;
-//         rx_frame.srcAddress.context   = 0;
-//         rx_frame.dstAddress.addr_type = eELIDED;
-//         rx_frame.nextHeader           = 0;
-//         rx_frame.src_port             = 0;   /* 4 bit. source port */
-//         rx_frame.dst_port             = 0;   /* 4 bit. destination port */
-//         rx_frame.length               = bufIndex;
-//         rx_frame.data                 = data;
-//
-//         /* generate a stack indication */
-//         stack_buffer = BM_allocStack( (sizeof(NWK_DataInd_t) + rx_frame.length) );
-//         if (stack_buffer != NULL)
-//         {
-//            timeStamp.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
-//            NWK_SendDataIndication(stack_buffer, &rx_frame, timeStamp);
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid, expected format:  'insertappmsg 11223344'" );
-//   }
-//
-//   return ( 0 );
-//}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_InsertAppMsg
+
+   Purpose: This command will insert a NWK payload into the bottom of the APP layer
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - status of this function - currently always 0 (success)
+*******************************************************************************/
+uint32_t DBG_CommandLine_InsertAppMsg ( uint32_t argc, char *argv[] )
+{
+   uint8_t        data[MAX_ATOH_CHARS];
+   uint16_t       dataLen;
+   uint16_t       bufIndex;
+   uint16_t       srcIndex;
+   buffer_t      *stack_buffer = NULL;
+   IP_Frame_t     rx_frame;
+   TIMESTAMP_t    timeStamp;
+
+   DBG_logPrintf( 'R', "Received DBG_CommandLine_InsertAppMsg command" );
+   if ( argc == 2 )  /* The number of arguments must be 2 */
+   {
+      dataLen = ( uint16_t )strlen( argv[1] );
+      if ( ( dataLen % 2 ) != 0 )
+      {
+         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'insertmacmsg 1354AB'" );
+      }
+      else if ( dataLen > ( MAX_ATOH_CHARS *  2) )
+      {
+         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
+
+      }
+      else
+      {
+         (void)memset(data, 0, MAX_ATOH_CHARS);
+         /* convert ascii data to hex data */
+         for ( bufIndex = 0, srcIndex = 0;
+               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
+               srcIndex += 2, bufIndex++ )
+         {
+            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
+         }
+
+         rx_frame.version              = 0;
+         rx_frame.qualityOfService     = 0;
+         rx_frame.nextHeaderPresent    = 0;
+         rx_frame.srcAddress.addr_type = eCONTEXT;
+         rx_frame.srcAddress.context   = 0;
+         rx_frame.dstAddress.addr_type = eELIDED;
+         rx_frame.nextHeader           = 0;
+         rx_frame.src_port             = 0;   /* 4 bit. source port */
+         rx_frame.dst_port             = 0;   /* 4 bit. destination port */
+         rx_frame.length               = bufIndex;
+         rx_frame.data                 = data;
+
+         /* generate a stack indication */
+         stack_buffer = BM_allocStack( (sizeof(NWK_DataInd_t) + rx_frame.length) );
+         if (stack_buffer != NULL)
+         {
+            timeStamp.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
+            NWK_SendDataIndication(stack_buffer, &rx_frame, timeStamp);
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid, expected format:  'insertappmsg 11223344'" );
+   }
+
+   return ( 0 );
+}
 
 /*******************************************************************************
    Function name: DBG_CommandLine_InsertMacMsg

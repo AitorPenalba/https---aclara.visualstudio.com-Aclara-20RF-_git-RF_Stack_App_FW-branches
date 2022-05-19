@@ -721,6 +721,8 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "help",                       MFGP_CommandLine_Help,           "Display list of commands" },
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
+   {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
+
 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
 //   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
 //   {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
@@ -2504,6 +2506,44 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
 #endif
    }/* end while() */
 }/* end MFGP_CommandLine_Help () */
+
+// TODO: RA6E1 Remove this function once MFG functions are getting enabled (Currently in two places)
+/***********************************************************************************************************************
+   Function Name: MFGP_dstOffset
+
+   Purpose: Set or Print the DST offset
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: void
+***********************************************************************************************************************/
+static void MFGP_dstOffset( uint32_t argc, char *argv[] )
+{
+   int32_t nDstOffset = 0; //for convience actual parameter is int16_T
+
+   if ( argc <= 2 )
+   {
+      if ( 2 == argc )
+      {
+         // Write dstOffset
+         nDstOffset = atol( argv[1] );
+         if(SHRT_MIN <= nDstOffset && nDstOffset <= SHRT_MAX) //make input within param size
+         {
+            ( void )DST_setDstOffset( ( int16_t ) nDstOffset );
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+
+   /* Always print read back value  */
+   DST_getDstOffset( (int16_t *) &nDstOffset );
+   MFG_printf( "%s %d\n", argv[ 0 ], nDstOffset );
+}
 
 #if 0 // TODO: RA6 [name_Balaji]: Add Support for RA6E1
 /***********************************************************************************************************************

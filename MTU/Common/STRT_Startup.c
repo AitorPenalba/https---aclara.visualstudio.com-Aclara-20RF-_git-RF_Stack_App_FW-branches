@@ -180,6 +180,10 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SYSBUSY_init, STRT_FLAG_NONE ),
+#if ENABLE_DFW_TASKS
+   INIT( DFWA_init, STRT_FLAG_NONE ),
+   INIT( DFWTDCFG_init, STRT_FLAG_NONE ),
+#endif
 #if ENABLE_PWR_TASKS
    INIT( PWRCFG_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                         /* Must be before PWR_TSK_init so restoration delay is available*/
    INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
