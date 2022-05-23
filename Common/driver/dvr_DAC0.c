@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2020-2021 Aclara.  All Rights Reserved.
+ * Copyright 2020-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -984,7 +984,7 @@ returnStatus_t DVR_DAC0_setDacCode ( uint16_t channelNumber, float32_t dBM )
 
    DBG_logPrintf( 'R', "RF Algorithm: Ceiled Temperature val: %d\n",  temperatureCeilingVal );
 
-   for (i = 0; i < 1188; i++)
+   for (i = 0; i < ARRAY_IDX_CNT(struct_dacSoteps); i++)
    {
       if ( (struct_dacSoteps[i].frequencyMHz == channelRange) && (struct_dacSoteps[i].temperature == temperatureCeilingVal) && (struct_dacSoteps[i].dBM == powerVal) )
       {

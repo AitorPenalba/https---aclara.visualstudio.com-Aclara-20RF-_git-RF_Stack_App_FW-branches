@@ -212,7 +212,7 @@ bool OS_MSGQ_TestPend( void )
 {
    bool retVal = false;
    
-   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, OS_WAIT_FOREVER, "TM_MSGQ") )
+   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, OS_WAIT_FOREVER ) )
    {
       counter--;
       retVal = true;

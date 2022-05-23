@@ -9878,8 +9878,8 @@ uint32_t DBG_CommandLine_RxChannels ( uint32_t argc, char *argv[] )
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )
       if ( RadioIndex == ( uint8_t )RADIO_0 )
       {
-//         DBG_logPrintf( 'R',
-//                        "ERROR - RadioIndex 0 is invalid because the hardware doesn't have a receiver for RADIO 0" );
+         DBG_logPrintf( 'R',
+                       "ERROR - RadioIndex 0 is invalid because the hardware doesn't have a receiver for RADIO 0" );
          printErr();
          return ( 0 );
       }
