@@ -394,6 +394,14 @@ __STATIC_INLINE void R_BSP_PinCfg (bsp_io_port_pin_t pin, uint32_t cfg)
     R_PFS->PORT[pin >> 8].PIN[pin & BSP_IO_PRV_8BIT_MASK].PmnPFS = cfg;
 }
 
+/******************************* THIS FUNCTION IS FROM ACLARA TECHNOLOGIES LLC *************************************//**
+ * Configure just the lower byte of the SFR for a pin. If PFS protection is enabled, disable PFS protection using
+ * R_BSP_PinAccessEnable() before calling this function.  This allows changing both the direction and output state
+ * of a pin in a single operation.  It leaves the upper 24 bits of the configuration SFR unchanged.
+ *
+ * @param[in]  pin      The pin
+ * @param[in]  cfg      Configuration for the pin (PmnPFS register setting)
+ **********************************************************************************************************************/
 __STATIC_INLINE void R_BSP_PinCfg_BY (bsp_io_port_pin_t pin, uint8_t cfg_BY) // TODO: RA6E1 Bob: if this works, determine where to put it
 {
     /* Configure a pin. */

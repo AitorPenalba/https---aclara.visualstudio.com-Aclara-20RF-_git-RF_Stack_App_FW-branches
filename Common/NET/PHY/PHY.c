@@ -717,7 +717,7 @@ void PHY_TestMode_Enable(uint16_t delay, uint16_t UseMarksTxAlgo, uint16_t UseDe
    }else
    {
       test_mode.RepeatCnt = 0;
-      (void) MAC_StartRequest( NULL ); // TODO: RA6E1 Bob: temporarily remove until file system issue is fixed so MAC_task can run
+      (void) MAC_StartRequest( NULL );
    }
 }
 
@@ -3116,7 +3116,7 @@ static buffer_t *DataIndication_Create(RX_FRAME_t const * const rx_buffer, uint8
    |---------|------------|---------------------|------------|------------------------------------|
    | 0       |    4GFSK   |(63,59) Reed-Solomon |   9600     |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
-   | 1 – 14  |  Reserved  |      Reserved       |  Reserved  |                                    |
+   | 1 â€“ 14  |  Reserved  |      Reserved       |  Reserved  |                                    |
    |---------|------------|---------------------|------------|------------------------------------|
    | *15     |   None     |      None           |   None     |                                    |
    |---------|------------|---------------------|------------|------------------------------------|

@@ -101,7 +101,7 @@
 #define TEMPERATURE_MAX    98 // Maximum valid radio temperature
 
 #if ( EP == 1 )
-#define SUPER_CAP_MIN_VOLTAGE 1.60f // TODO: RA6E1 Bob: does this vary from Maxim to TI?  Minimum voltage required to compute noise estimate with boost capacitor turned on
+#define SUPER_CAP_MIN_VOLTAGE 2.10f // TODO: RA6E1 Bob: does this vary from Maxim to TI?  Minimum voltage required to compute noise estimate with boost capacitor turned on
 #endif
 
 #define ENABLE_PSM          0 // Set to 1 to use preamble sense mode

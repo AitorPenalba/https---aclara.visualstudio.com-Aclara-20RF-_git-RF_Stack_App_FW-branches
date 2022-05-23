@@ -7,7 +7,7 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2012 ACLARA.  All rights reserved.
+ * Copyright (c) 2012-2022 ACLARA.  All rights reserved.
  * This program may not be reproduced, in whole or in part, in any form or by
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
@@ -116,7 +116,6 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
    OS_QUEUE_Element_Handle ptr = ( OS_QUEUE_Element_Handle )QueueElement;
    if (pdPASS != xQueueSend ( *QueueHandle, (void *)&ptr, 0 ) )
    {
-      APP_PRINT("Could not add item to queue");
       DBG_printf("Could not add item to queue at %s line %d", file, line);
    }
 
