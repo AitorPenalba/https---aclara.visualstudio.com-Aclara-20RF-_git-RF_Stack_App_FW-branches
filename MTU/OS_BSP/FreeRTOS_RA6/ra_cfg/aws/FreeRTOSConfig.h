@@ -84,7 +84,7 @@
             #define configCHECK_FOR_STACK_OVERFLOW (0)
             #endif
             #ifndef configQUEUE_REGISTRY_SIZE
-            #define configQUEUE_REGISTRY_SIZE (10)
+            #define configQUEUE_REGISTRY_SIZE (100)
             #endif
             #ifndef configUSE_QUEUE_SETS
             #define configUSE_QUEUE_SETS (1)
@@ -129,7 +129,7 @@
             #define configUSE_TIMERS (1)
             #endif
             #ifndef configTIMER_TASK_PRIORITY
-            #define configTIMER_TASK_PRIORITY (3)  /* TODO: RA6: DG: Review this config */
+            #define configTIMER_TASK_PRIORITY (30)  /* TODO: RA6: DG: Review this config */
             #endif
             #ifndef configTIMER_QUEUE_LENGTH
             #define configTIMER_QUEUE_LENGTH (10)  /* TODO: RA6: DG: Review this config */
@@ -195,7 +195,7 @@
             #define INCLUDE_xEventGroupSetBitFromISR (1)
             #endif
             #ifndef INCLUDE_xTimerPendFunctionCall
-            #define INCLUDE_xTimerPendFunctionCall (0)
+            #define INCLUDE_xTimerPendFunctionCall (1)
             #endif
             #ifndef INCLUDE_xTaskAbortDelay
             #define INCLUDE_xTaskAbortDelay (0)

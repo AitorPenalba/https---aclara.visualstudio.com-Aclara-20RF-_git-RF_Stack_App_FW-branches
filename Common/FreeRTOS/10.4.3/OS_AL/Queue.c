@@ -17,6 +17,8 @@
 #include "project.h"
 #include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
 #include "buffer.h"
+#include "DBG_SerialDebug.h"
+#include "DBG_CommandLine.h"
 //#include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
@@ -51,7 +53,11 @@
            The size, in bytes, of each data item that can be stored in the queue.
 
 *******************************************************************************/
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, char *name)
+#else
 bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength )
+#endif
 {
    bool FuncStatus = true;
 
@@ -62,6 +68,12 @@ bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength )
    {
       FuncStatus = false;
    }
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+   else
+   {
+      vQueueAddToRegistry(*QueueHandle, name);
+   }
+#endif // BOB_DEBUG_BUFMGR
 #elif( RTOS_SELECTION == MQX_RTOS )
     //queuelength is not neceary in MQX
     _queue_init ( QueueHandle, 0 );
@@ -104,12 +116,13 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
    OS_QUEUE_Element_Handle ptr = ( OS_QUEUE_Element_Handle )QueueElement;
    if (pdPASS != xQueueSend ( *QueueHandle, (void *)&ptr, 0 ) )
    {
-     APP_PRINT("Could not add item to queue");
+      APP_PRINT("Could not add item to queue");
+      DBG_printf("Could not add item to queue at %s line %d", file, line);
    }
 
 #elif( RTOS_SELECTION == MQX_RTOS )
    if (!_queue_enqueue ( QueueHandle, (QUEUE_ELEMENT_STRUCT_PTR)QueueElement ) ) {
-     EVL_FirmwareError( "OS_QUEUE_Enqueue" , file, line );
+      EVL_FirmwareError( "OS_QUEUE_Enqueue" , file, line );
    }
 #endif
 

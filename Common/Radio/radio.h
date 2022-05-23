@@ -102,7 +102,11 @@ typedef enum
 } RADIO_MODE_t;
 
 /*! Radio Event Callback Function */
+#if ( RTOS_SELECTION == MQX_RTOS )
 typedef void (* RadioEvent_Fxn)(RADIO_EVENT_t event_type, uint8_t radio_num);
+#elif ( RTOS_SELECTION == FREE_RTOS )
+typedef void (* RadioEvent_Fxn)(RADIO_EVENT_t event_type, uint8_t radio_num, bool fromISR);
+#endif
 
 /**
  * The structure of a device driver for a radio in Aclara
@@ -156,7 +160,11 @@ bool     RADIO_RxFramingConfig(uint8_t radioNum, PHY_FRAMING_e framing, bool for
 bool     RADIO_RxModeConfig(uint8_t radioNum, PHY_MODE_e mode, bool forceSet);
 uint16_t RADIO_RxChannelGet(uint8_t radioNum);
 #endif
+#if ( RTOS_SELECTION == MQX_RTOS )
 void     RADIO_Event_Set(RADIO_EVENT_t event_type, uint8_t radioNum);
+#elif ( RTOS_SELECTION == FREE_RTOS )
+void     RADIO_Event_Set(RADIO_EVENT_t event_type, uint8_t radioNum, bool fromISR);
+#endif
 void     RADIO_Lock_Mutex(void);
 void     RADIO_UnLock_Mutex(void);
 void     RADIO_PreambleDetected(uint8_t radioNum);

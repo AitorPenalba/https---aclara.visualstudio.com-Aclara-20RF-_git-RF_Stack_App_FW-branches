@@ -208,7 +208,7 @@ returnStatus_t MAC_FrameManag_init ( void )
       RetVal = eFAILURE;
    }
 
-   if ( ! OS_MSGQ_Create(&RxBufferExpiredQueue, RX_BUF_EXPIRE_NUM_MSGQ_ITEMS) )
+   if ( ! OS_MSGQ_Create(&RxBufferExpiredQueue, RX_BUF_EXPIRE_NUM_MSGQ_ITEMS, "MAC_Frame") )
    {
       RetVal = eFAILURE;
    }

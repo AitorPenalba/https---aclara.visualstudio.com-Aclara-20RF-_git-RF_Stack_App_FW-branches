@@ -394,6 +394,11 @@ __STATIC_INLINE void R_BSP_PinCfg (bsp_io_port_pin_t pin, uint32_t cfg)
     R_PFS->PORT[pin >> 8].PIN[pin & BSP_IO_PRV_8BIT_MASK].PmnPFS = cfg;
 }
 
+__STATIC_INLINE void R_BSP_PinCfg_BY (bsp_io_port_pin_t pin, uint8_t cfg_BY) // TODO: RA6E1 Bob: if this works, determine where to put it
+{
+    /* Configure a pin. */
+    R_PFS->PORT[pin >> 8].PIN[pin & BSP_IO_PRV_8BIT_MASK].PmnPFS_BY = cfg_BY;
+}
 /*******************************************************************************************************************//**
  * Enable access to the PFS registers. Uses a reference counter to protect against interrupts that could occur
  * via multiple threads or an ISR re-entering this code.

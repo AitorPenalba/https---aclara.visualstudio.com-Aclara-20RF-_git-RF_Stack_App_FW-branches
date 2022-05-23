@@ -323,7 +323,7 @@ returnStatus_t DEMAND_init( void )
    FileStatus_t     fileStatusCfg;                /* Contains the file status */
    returnStatus_t   retVal = eFAILURE;
 
-   if ( OS_MUTEX_Create(&dmdMutex_) && OS_MSGQ_Create(&mQueueHandle_, DEMAND_NUM_MSGQ_ITEMS) )
+   if ( OS_MUTEX_Create(&dmdMutex_) && OS_MSGQ_Create(&mQueueHandle_, DEMAND_NUM_MSGQ_ITEMS, "Demand" ) )
    {
       if (eSUCCESS == FIO_fopen(  &demandFileHndl_,                /* File Handle */
                                   ePART_SEARCH_BY_TIMING,          /* Search for the best paritition according to the timing. */

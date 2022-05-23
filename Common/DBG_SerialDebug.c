@@ -178,7 +178,7 @@ returnStatus_t DBG_init( void )
 #if (FILE_IO == 1)
    FileStatus_t fileStatus;
 #endif
-   if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS ) &&
+   if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS, "DBG" ) && /* "DBG" only used with FreeRTOS */
          OS_MUTEX_Create( &mutex_ ) &&
 #if ( RTOS_SELECTION == FREE_RTOS )
          //TODO RA6: NRJ: determine if semaphores need to be counting

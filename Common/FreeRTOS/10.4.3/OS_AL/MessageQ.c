@@ -48,10 +48,18 @@
 
 *******************************************************************************/
 
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages, char *name )
+#else
 bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
+#endif
 {
    bool RetStatus = true;
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), NumMessages, name) )
+#else
    if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), NumMessages) )
+#endif
    {
       RetStatus = false;
    } /* end if() */
@@ -120,7 +128,7 @@ void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorChec
 
   Arguments: MsgqHandle - pointer to the MessageQ object
              MessageData - pointer to the location of a pointer where the data resides
-             TimeoutMs - Timeout in Milliseconds to wait for a message
+             TimeoutMs - Timeout in Milliseconds to wait for a message.  0 = poll to see if a message is present
              ErrorCheck - flag to check some errors or not. This is needed when BM pends for a buffer.
 
   Returns: RetStatus - True if MessageQ Pended Message successfully, False if error, or Timeout
@@ -203,8 +211,8 @@ void OS_MSGQ_TestCreate ( void )
 bool OS_MSGQ_TestPend( void )
 {
    bool retVal = false;
-
-   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, OS_WAIT_FOREVER) )
+   
+   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, OS_WAIT_FOREVER, "TM_MSGQ") )
    {
       counter--;
       retVal = true;

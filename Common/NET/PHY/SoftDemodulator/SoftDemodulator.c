@@ -561,6 +561,7 @@ void SD_SyncPayloadDemodTask(taskParameter)
  void SD_SyncPayloadDemodTask(void* pvParameter)
 {  
    uint8_t semId = (uint8_t )pvParameter; //Param in Task.c - // TODO: RA6E1 Bob: we need to check on this with Mario and/or Mukesh
+#warning "THE ABOVE LINE OF CODE IS ALMOST CERTAINLY INCORRECT: do not enable soft demodulator!"
 #endif   
    eSyncAndPayloadDemodFailCodes_t FailureCode;
    uint16_t readIndex;

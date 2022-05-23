@@ -670,7 +670,6 @@ void MAC_RestoreConfig_From_BkupRAM()
 #if 0 // TODO: RA6E1 - lastgasp
    // Get the handle to the location where the data was saved
    pMacConfig = PWRLG_MacConfigHandle();
-#endif
 
    // BAH - This is here until this is being used!!!
    if( pMacConfig )
@@ -685,6 +684,7 @@ void MAC_RestoreConfig_From_BkupRAM()
       MAC_ConfigAttr.CsmaQuickAbort         = pMacConfig->CsmaQuickAbort;
       CachedAttr.PacketId                   = pMacConfig->PacketId;
    }
+#endif // TODO: RA6E1 Bob: Moved this #endif since pMacConfig will be uninitialized
 }
 
 /*!
@@ -980,7 +980,7 @@ returnStatus_t MAC_init ( void )
       return eFAILURE;
    }
    //TODO RA6: NRJ: determine if semaphores need to be counting
-   if (OS_SEM_Create(&MAC_AttributeSem_, 0) && OS_MUTEX_Create(&MAC_AttributeMutex_) && OS_MSGQ_Create(&MAC_msgQueue, MAC_NUM_MSGQ_ITEMS) && OS_MUTEX_Create(&MAC_TimeSyncAttributeMutex_) &&
+   if (OS_SEM_Create(&MAC_AttributeSem_, 0) && OS_MUTEX_Create(&MAC_AttributeMutex_) && OS_MSGQ_Create(&MAC_msgQueue, MAC_NUM_MSGQ_ITEMS, "MAC") && OS_MUTEX_Create(&MAC_TimeSyncAttributeMutex_) &&
        (eSUCCESS == MAC_FrameManag_init()) && (eSUCCESS == MAC_PacketManag_init()) )
    {
       // Register the message handler
@@ -1167,10 +1167,10 @@ static void MAC_PHY_CheckForFailure( void )
 {
    OS_TICK_Struct time;
    uint32_t TimeDiff;
-   bool Overflow;
 
    // Check if we have received a data request
 #if ( MCU_SELECTED == NXP_K24 )
+   bool Overflow;
    if ( (DataReqTime.TICKS[0] != 0) || (DataReqTime.TICKS[1] != 0) )
    {
       // Check if PHY as been accessed recently
@@ -4217,7 +4217,9 @@ static void Process_CmdFrame(MAC_DataInd_t const *pDataInd)
 #if ( EP == 1 )
       case MAC_TIME_SET_CMD:
       {  // Handle a time set command (EP Only)
+#if 0 // TODO: RA6E1 Bob: now that we have PHY running, we might get this command
          (void)TIME_SYS_SetDateTimeFromMAC(pDataInd);
+#endif
       }
       break;
 #endif

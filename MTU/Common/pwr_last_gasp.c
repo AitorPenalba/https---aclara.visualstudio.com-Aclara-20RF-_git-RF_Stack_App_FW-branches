@@ -2508,7 +2508,7 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
       case LPTMR_MILLISECONDS:
       {
          /* TODO: RA6: [DG]: Initialize and Start the AGT0 and 1? */
-         AGT_LPM_Timer_Configure(uCounter);
+//         AGT_LPM_Timer_Configure(uCounter); // TODO: RA6E1 Bob: removed temporarily while looking for a hard fault
 
          break;
       }

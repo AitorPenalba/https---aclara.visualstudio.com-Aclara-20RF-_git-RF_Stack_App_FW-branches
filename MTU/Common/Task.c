@@ -310,7 +310,7 @@ static const char pTskName_SdPsListener[]        = "PSLSNR";
 static const char pTskName_SdPreambleDetector[]  = "PREDET";
 static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
 static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
-static const char pTskName_TimeSys[]             = "TIMESYS";
+static const char pTskName_TimeSys[]             = "TIMESYS"; // TODO: RA6E1 Bob: Not referenced.  Is this replaced by pTskName_Time[] = "TIME" ?
 
 /* NOTE: The Highest Priority we should use is 9.  This excerpt was taken from AN3905.pdf on freesclale.com
    Task priority. Lower number is for higher priorities.  More than one task can have the same priority level.  Having
@@ -349,7 +349,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 
    { eSM_TSK_IDX,               SM_Task,                      1000,  20, (char *)pTskName_Sm,     DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-#if 0 // TODO: RA6E1 Enable once PHY_Init gets succeeded
+#if 1 // TODO: RA6E1 Enable once PHY_Init gets succeeded
    { ePHY_TSK_IDX,              PHY_Task,                     2100,  21, (char *)pTskName_Phy,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
    { eMAC_TSK_IDX,              MAC_Task,                     1500,  22, (char *)pTskName_Mac,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
@@ -418,7 +418,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eFIO_TSK_IDX,              FIO_Task,                     1000,  38, (char *)pTskName_Fio,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ( ENABLE_ALRM_TASKS == 1 )
-   { eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
+   //{ eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
 #endif
    /* should be the lowest priority tasks */
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
@@ -472,7 +472,6 @@ void task_exception_handler( _mqx_uint para, void * stack_ptr );
 static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName );
 static uint32_t       setIdleTaskPriority ( uint32_t NewPriority );
 #endif
-
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */

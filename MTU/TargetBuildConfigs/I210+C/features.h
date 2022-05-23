@@ -73,6 +73,7 @@
 #define MAC_LINK_PARAMETERS               0  /* Supports Decoding MAC Link Parameters Messages */
 #define MAC_CMD_RESP_TIME_DIVERSITY       0  /* Not an EP feature */
 #define TX_THROTTLE_CONTROL               0  /* 0=No Tx Throttling, 1=Tx Throttling */
+#define BM_USE_KERNEL_AWARE_DEBUGGING    (1)  // TODO: RA6E1 Bob: remove this before release
 
 /* TODO: RA6: Move the following to Appropriate module */
 #define BARE_METAL                        0
@@ -98,6 +99,13 @@
 #define NXP_K24                           1
 #define RA6E1                             2
 #define MCU_SELECTED                      RA6E1
-
+// TODO: RA6 [name_Balaji]: Move to appropriate place
+#define DAC_CODE_CONFIG                   1  /* Supports DAC0 for TX Power Control */
+//#define TM_MUTEX                          0
+//#define TM_SEMAPHORE                      0
+//#define TM_RTC_UNIT_TEST                  0
+//#define TM_QUEUE                          0
+//#define TM_MSGQ                           0
+//#define TM_EVENTS                         0
 #endif
 

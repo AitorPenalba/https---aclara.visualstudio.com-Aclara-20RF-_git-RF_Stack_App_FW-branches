@@ -85,7 +85,11 @@ U8 radio_comm_GetResp(uint8_t radioNum, U8 byteCount, U8* pData)
    if (errCnt == 0)
    {
       // Signal the CTS Line low Event
+#if ( RTOS_SELECTION == MQX_RTOS )
       RADIO_Event_Set(eRADIO_CTS_LINE_LOW, radioNum);
+#elif ( RTOS_SELECTION == FREE_RTOS )
+      RADIO_Event_Set(eRADIO_CTS_LINE_LOW, radioNum, (bool)false);
+#endif
    }
 
    if (ctsVal == 0xFF)
@@ -361,7 +365,11 @@ U8 radio_comm_SendCmdGetResp(uint8_t radioNum, U8 cmdByteCount, U8 const * pCmdD
    if ((errCnt == 0) || error)
    {
       // Signal the CTS Line low Event
+#if ( RTOS_SELECTION == MQX_RTOS )
       RADIO_Event_Set(eRADIO_CTS_LINE_LOW, radioNum);
+#elif ( RTOS_SELECTION == FREE_RTOS )
+      RADIO_Event_Set(eRADIO_CTS_LINE_LOW, radioNum, (bool)false);
+#endif
    }
 
    if (ctsVal == 0xFF)

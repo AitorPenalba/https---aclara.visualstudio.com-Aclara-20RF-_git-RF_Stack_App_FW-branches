@@ -99,6 +99,50 @@ void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, i
 #endif
 } /* end OS_EVNT_Set () */
 
+#if (RTOS_SELECTION == FREE_RTOS )
+/*******************************************************************************
+
+  Function name: OS_EVNT_Set_from_ISR
+
+  Purpose: This function is used to set an event that can be waited on by another function
+           from within an Interrupt Service Routine.
+
+  Arguments: EventHandle - pointer to the Handle structure of the Event
+             EventMask - Bit Mask of the Events that should be set
+
+  Returns: None
+
+  Notes: Setting bits in an event group is not a deterministic operation because there
+         are an unknown number of tasks that may be waiting for the bit or bits being set.
+         FreeRTOS does not allow non-deterministic operations to be performed in interrupts
+         or from critical sections. Therefore xEventGroupSetBitFromISR() sends a message to
+         the RTOS daemon task to have the set operation performed in the context of the
+         daemon task - where a scheduler lock is used in place of a critical section. The
+         daemon task is also known as the timer service task, TmrSvc.  Because we use this
+         feature to trigger processing of time-sensitive radio data, the TmrSvc task must
+         be configured to a high priority (30) using configTIMER_TASK_PRIORITY.  Also,
+         INCLUDE_xEventGroupSetBitFromISR, configUSE_TIMERS and INCLUDE_xTimerPendFunctionCall
+         must all be set to 1 in FreeRTOSConfig.h for the xEventGroupSetBitsFromISR() function
+         to be available.
+
+*******************************************************************************/
+void OS_EVNT_SET_from_ISR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line )
+{
+   BaseType_t xHigherPriorityTaskWoken, xResult;
+
+   xHigherPriorityTaskWoken = pdFALSE;
+   xResult = xEventGroupSetBitsFromISR( *EventHandle , EventMask, &xHigherPriorityTaskWoken );
+   /* Was the message posted successfully? */
+   if( xResult != pdFAIL )
+   {
+      /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context
+      switch should be requested.  The macro used is port specific and will
+      be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() - refer to
+      the documentation page for the port being used. */
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+   }
+} /* end OS_EVNT_Set_from_ISR () */
+#endif
 /*******************************************************************************
 
   Function name: OS_EVNT_Wait

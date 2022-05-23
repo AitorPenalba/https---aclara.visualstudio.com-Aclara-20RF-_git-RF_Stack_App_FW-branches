@@ -1657,7 +1657,7 @@ returnStatus_t MFGP_cmdInit( void )
    // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
    // TODO: RA6 [name_Balaji]: Check the number of messages
    // TODO RA6: NRJ: determine if semaphores need to be counting
-   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20 ) && OS_SEM_Create( &mfgReceiveSem_, 0) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ], 0 ) )
+   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20, "MFGP" ) && OS_SEM_Create( &mfgReceiveSem_, 0) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ], 0 ) )
    {
       retVal = eSUCCESS;
    }

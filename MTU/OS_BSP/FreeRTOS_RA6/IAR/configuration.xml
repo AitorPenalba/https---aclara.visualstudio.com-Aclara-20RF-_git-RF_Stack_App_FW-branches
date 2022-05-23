@@ -951,6 +951,8 @@
       <configSetting altId="agt5.agtio5.p114" configurationId="agt5.agtio5"/>
       <configSetting altId="agt5.mode.custom.free" configurationId="agt5.mode"/>
       <configSetting altId="cgc.mode.custom.free" configurationId="cgc.mode"/>
+      <configSetting altId="dac120.da0.p014" configurationId="dac120.da0"/>
+      <configSetting altId="dac120.mode.enabled.free" configurationId="dac120.mode"/>
       <configSetting altId="gpt1.gtioc1a.p405" configurationId="gpt1.gtioc1a"/>
       <configSetting altId="gpt1.mode.gtiocaorgtiocb.free" configurationId="gpt1.mode"/>
       <configSetting altId="gpt2.mode.gtiocaorgtiocb.free" configurationId="gpt2.mode"/>
@@ -989,8 +991,8 @@
       <configSetting altId="p007.gpio_mode.gpio_mode_an" configurationId="p007.gpio_mode"/>
       <configSetting altId="p008.adc0.an008" configurationId="p008"/>
       <configSetting altId="p008.gpio_mode.gpio_mode_an" configurationId="p008.gpio_mode"/>
-      <configSetting altId="p014.output.low" configurationId="p014"/>
-      <configSetting altId="p014.gpio_mode.gpio_mode_out.low" configurationId="p014.gpio_mode"/>
+      <configSetting altId="p014.dac120.da0" configurationId="p014"/>
+      <configSetting altId="p014.gpio_mode.gpio_mode_an" configurationId="p014.gpio_mode"/>
       <configSetting altId="p015.irq.irq13" configurationId="p015"/>
       <configSetting altId="p015.gpio_irq.gpio_irq_enabled" configurationId="p015.gpio_irq"/>
       <configSetting altId="p015.gpio_mode.gpio_mode_irq" configurationId="p015.gpio_mode"/>

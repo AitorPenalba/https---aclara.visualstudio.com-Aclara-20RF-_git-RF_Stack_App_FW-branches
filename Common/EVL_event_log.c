@@ -1541,7 +1541,7 @@ returnStatus_t EVL_Initalize( void )
       //TODO RA6: NRJ: determine if semaphores need to be counting
       if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS) && OS_SEM_Create( &SimLGTxDoneSem, 0 ) )
 #else
-      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS) )
+      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS, "EVL") )
 #endif
       {
          ( void )memset( &tmrSettings, 0, sizeof( tmrSettings ) );

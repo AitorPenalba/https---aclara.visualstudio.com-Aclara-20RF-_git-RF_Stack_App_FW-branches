@@ -118,16 +118,23 @@
 #define OS_INT_enable()                                       _int_enable()
 #define OS_INT_ISR_disable()                                 _int_disable()
 #define OS_INT_ISR_enable()                                   _int_enable()
+#define OS_TASK_Yield()                                      _sched_yield()
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #define OS_INT_disable()                               taskENTER_CRITICAL()
 #define OS_INT_enable()                                 taskEXIT_CRITICAL()
 #define OS_INT_ISR_disable()                  taskENTER_CRITICAL_FROM_ISR() // this returs a value to be used for the enable
 #define OS_INT_ISR_enable(x)                   taskEXIT_CRITICAL_FROM_ISR(x)
+#define OS_TASK_Yield()                                         taskYIELD()
 #endif
 
 #define OS_EVNT_Set(EventHandle, EventMask)              OS_EVNT_SET(EventHandle, EventMask, __FILE__, __LINE__)
+#define OS_EVNT_Set_from_ISR(EventHandle, EventMask)     OS_EVNT_SET_from_ISR(EventHandle, EventMask, __FILE__, __LINE__)
 #define OS_EVNT_Wait(EventHandle, EventMask, WaitForAll, Timeout) OS_EVNT_WAIT(EventHandle, EventMask, WaitForAll, Timeout, __FILE__, __LINE__)
-#define OS_MSGQ_Create( MsgqHandle, numItems )           OS_MSGQ_CREATE( MsgqHandle, numItems)
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+#define OS_MSGQ_Create( MsgqHandle, numItems, name )     OS_MSGQ_CREATE( MsgqHandle, numItems, name )
+#else
+#define OS_MSGQ_Create( MsgqHandle, numItems, name )     OS_MSGQ_CREATE( MsgqHandle, numItems)
+#endif
 #define OS_MSGQ_Post(MsgqHandle, MessageData)            OS_MSGQ_POST(MsgqHandle, MessageData, (bool)true, __FILE__, __LINE__)
 #define OS_MSGQ_Pend(MsgqHandle, MessageData, TimeoutMs) OS_MSGQ_PEND(MsgqHandle, MessageData, TimeoutMs, (bool)true, __FILE__, __LINE__)
 
@@ -389,17 +396,27 @@ extern const char pTskName_Sleep[];
 /* FUNCTION PROTOTYPES */
 bool     OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void     OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
+#if ( RTOS_SELECTION == FREE_RTOS )
+void OS_EVNT_SET_from_ISR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
+#endif
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
 
 bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *QueueElement );
 void OS_QUEUE_Remove ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
 void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
+#if ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 )
+bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages, char *name);
+#else
 bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages);
+#endif
 void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line );
 bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
 
-
+#if ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 )
+bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, char *name );
+#else
 bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength );
+#endif
 void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );
 void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
 uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );

@@ -181,7 +181,7 @@ returnStatus_t HD_init( void )
    FileStatus_t fileStatus;  //Indicates if the file is created or already exists
    returnStatus_t retVal = eFAILURE;
 
-   if ( !( OS_MSGQ_Create( &HD_MsgQ_, HD_NUM_MSGQ_ITEMS ) && ( OS_MUTEX_Create(&HD_Mutex_ ) ) ) )
+   if ( !( OS_MSGQ_Create( &HD_MsgQ_, HD_NUM_MSGQ_ITEMS, "Hist" ) && ( OS_MUTEX_Create(&HD_Mutex_ ) ) ) )
    {
       return eFAILURE;
    }
