@@ -62,7 +62,7 @@
 //#include "MAC_Protocol.h"
 //#include "SM_Protocol.h"     // Stack Manager
 //#include "SM.h"              // Stack Manager
-//#include "MAC.h"
+#include "MAC.h"
 //#include "STACK.h"
 #if ( USE_DTLS == 1 )
 #include "dtls.h"
@@ -85,6 +85,7 @@
 //#include "ecc108_apps.h"
 //#include "ecc108_config.h"
 //#include "ecc108_mqx.h"
+#include "ecc108_physical.h" // TODO: RA6E1 Bob: This is needed by DBG_CommandLine_MacAddr
 //#include "compiler_types.h"
 //#include "si446x_cmd.h"
 //#include "si446x_api_lib.h"
@@ -230,8 +231,8 @@ extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read proces
 extern OS_SEM_Obj       transferSem[MAX_UART_ID]; /* For RA6E1, UART_write process is used in Semaphore method */
 #endif
 #if ENABLE_HMC_TASKS
-static OS_SEM_Obj HMC_CMD_SEM;
-static bool       HmcCmdSemCreated = ( bool )false;
+//static OS_SEM_Obj HMC_CMD_SEM; //TODO: RA6E1 Bob: temporarily removed
+//static bool       HmcCmdSemCreated = ( bool )false; //TODO: RA6E1 Bob: temporarily removed
 #endif
 
 #if ( SIMULATE_POWER_DOWN == 1 )
@@ -245,7 +246,7 @@ static char                   *argvar[MAX_CMDLINE_ARGS + 1];
 #if ( MCU_SELECTED == RA6E1 )
 static uint16_t         DBGP_numBytes = 0;               /* Number of bytes currently in the command buffer */
 #endif
-static void PrintECC_error( uint8_t ECCstatus );
+//static void PrintECC_error( uint8_t ECCstatus ); //TODO: RA6E1 Bob: temporarily removed
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
 //static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
@@ -271,25 +272,25 @@ static uint32_t DBG_CommandLine_clockswtest( uint32_t argc, char *argv[] );
 #endif //( DCU == 1 )
 
 #if ( EP == 1 )
-static uint32_t DBG_CommandLine_crc16m( uint32_t argc, char *argv[] );
-static uint32_t DBG_CommandLine_PWR_BoostMode( uint32_t argc, char *argv[] );
+//static uint32_t DBG_CommandLine_crc16m( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+//static uint32_t DBG_CommandLine_PWR_BoostMode( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
 #if ( TEST_TDMA == 1 )
 static uint32_t DBG_CommandLine_CsmaSkip( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_TxSlot( uint32_t argc, char *argv[] );
 #endif
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-static uint32_t DBG_CommandLine_HmcwCmd( uint32_t argc, char *argv[] );
+//static uint32_t DBG_CommandLine_HmcwCmd( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
 #endif
 #if ( LP_IN_METER != 0 )
-static uint32_t DBG_CommandLine_lpstats( uint32_t argc, char *argv[] );
+//static uint32_t DBG_CommandLine_lpstats( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
 #endif
 #if ( MULTIPLE_MAC != 0 )
-static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] );
+//static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
 #endif
 #if ( ENABLE_DEMAND_TASKS == 1 )
 #if ( DEMAND_IN_METER == 1 )
-static void DBGC_DemandResetCallBack( returnStatus_t result );
-static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] );
+//static void DBGC_DemandResetCallBack( returnStatus_t result ); //TODO: RA6E1 Bob: temporarily removed
+//static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
 #endif
 #endif
 #if ( CLOCK_IN_METER == 1 )
@@ -475,7 +476,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "hmcw",         DBG_CommandLine_HmcwCmd,         "Host Meter Table Write, format is: hmcw [m] id offset data" },
 //#endif
 //#endif
-//   { "hwinfo",       DBG_CommandLine_GetHWInfo,       "Display the HW Info" },
+   { "hwinfo",       DBG_CommandLine_GetHWInfo,       "Display the HW Info" },
 //#ifdef TM_ID_TEST_CODE
 ////   { "idbufr",       DBG_CommandLine_IdBufRd,         "Reads from the interval data test buffer: bufIndex "},
 ////   { "idbufw",       DBG_CommandLine_IdBufWr,         "Reads from the interval data test buffer: bufIndex floatVal"},
@@ -491,8 +492,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#endif
 //
 //   { "insertappmsg", DBG_CommandLine_InsertAppMsg,    "send NWK payload (arg1) into the bottom of the APP layer" },
-//   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\n"
-//                   "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
+   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\n"
+                   "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
 //#if ( EP == 1 )
 //   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" },
 //#if ( LP_IN_METER != 0 )
@@ -501,7 +502,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#endif
 //   { "mac_time",     DBG_CommandLine_MacTimeCmd,      "Send a 'mac_time set' (DCU) or 'mac_time req' (EP) command" },
 //   { "mac_tsync",    DBG_CommandLine_TimeSync,        "Set/Get the TimeSync parameters" },
-//   { "macaddr",      DBG_CommandLine_MacAddr,         "Set/Get the MAC address" },
+   { "macaddr",      DBG_CommandLine_MacAddr,         "Set/Get the MAC address" },
 //   { "macconfig",    DBG_CommandLine_MacConfig,       "Print the MAC Configuration" },
 ////   { "macflush",     DBG_CommandLine_MacFlush,        "mac flush" },
 ////   { "macget",       DBG_CommandLine_MacGet,          "mac get"   },
@@ -534,14 +535,14 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#endif
 //   { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
    { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
-//   { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
-//   { "noiseestimatecount", DBG_CommandLine_NoiseEstimateCount, "Display/Set the noise estimate count" },
-//   { "noiseestimaterate", DBG_CommandLine_NoiseEstimateRate, "Display/Set the noise estimate rate" },
-//#if ( NOISE_HIST_ENABLED == 1 )
-//   { "noisehist",    DBG_CommandLine_NoiseHistogram,  "Display a noise histogram for channel(s)" },
-//   { "noiseburst",   DBG_CommandLine_NoiseBurst,      "Display noise bursts for channel(s)" },
-//   { "bursthist",    DBG_CommandLine_BurstHistogram,  "Display histgram of noise bursts for channel(s)" },
-//#endif
+   { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
+   { "noiseestimatecount", DBG_CommandLine_NoiseEstimateCount, "Display/Set the noise estimate count" },
+   { "noiseestimaterate", DBG_CommandLine_NoiseEstimateRate, "Display/Set the noise estimate rate" },
+#if ( NOISE_HIST_ENABLED == 1 )
+   { "noisehist",    DBG_CommandLine_NoiseHistogram,  "Display a noise histogram for channel(s)" },
+   { "noiseburst",   DBG_CommandLine_NoiseBurst,      "Display noise bursts for channel(s)" },
+   { "bursthist",    DBG_CommandLine_BurstHistogram,  "Display histgram of noise bursts for channel(s)" },
+#endif
 //#if ( ( MULTIPLE_MAC != 0 ) && ( EP == 1 ) )
 //   { "NumMac",          DBG_CommandLine_NumMac,       "Set/Get number of mac addresses emulated (1-50)" },
 //#endif
@@ -580,7 +581,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "phymaxtxlen",  DBG_CommandLine_GetPhyMaxTxPayload, "Usage:  'phymaxtxlen' get phy maximum TX payload" },
 //   { "phyreset",     DBG_CommandLine_PhyReset,        "phy reset" },
 ////   { "phystart",     DBG_CommandLine_PhyStart,        "phy start" },
-//   { "phystats",     DBG_CommandLine_PhyStats,        "Print the PHY stats" },
+   { "phystats",     DBG_CommandLine_PhyStats,        "Print the PHY stats" },
 //   { "phyconfig",    DBG_CommandLine_PhyConfig,       "Print the PHY Configuration" },
 ////   { "phystop",      DBG_CommandLine_PhyStop,         "phy stop"  },
 //   { "ping",         DBG_CommandLine_MacPingCmd,      "Send a 'ping' request to EP"},
@@ -588,7 +589,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#if ( EP == 1 )
 //   { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
 //#endif
-//   { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
+   { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
    { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
 //#if ( EP == 1 )
 //   { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
@@ -603,7 +604,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#if ( FAKE_TRAFFIC == 1 )
 //   { "rfdutycycle",  DBG_CommandLine_ipRfDutyCycle,   "get (no args) or set (arg1) RF dutycycle" },
 //#endif
-//   { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
+   { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
 ////   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },
 //   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" },
    // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
@@ -612,9 +613,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\r\n"
                    "                                   Type ""rxchannels"" with no arguments for more help" },
-//   { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
-//   { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
-//   { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },
+   { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
+   { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
+   { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },
 //#if ( DCU == 1 )
 //   { "sdtest",       DBG_CommandLine_sdtest,          "[count (default=1)] Exercise SDRAM" },
 //#endif
@@ -653,21 +654,18 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "smconfig",     DBG_CommandLine_SM_Config,       "Print the SM Configuration" },
 //
 //   { "stackusage",   DBG_CommandLine_StackUsage,      "print the stack of active tasks" },
-//#if BOB_IS_LAZY ==  1
-//   { "stats",        DBG_ShowAllStats,                "print the PHY and MAC statistics" },
-//#endif
 //#if ( TEST_SYNC_ERROR == 1 )
 //   { "syncerror",    DBG_CommandLine_SyncError,       "Set SYNC bit error " },
 //#endif
 //   { "tasksummary",  DBG_CommandLine_TaskSummary,     "print tasks summary" },
 //   { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
 //                   "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
-//#if ( DCU == 1 )
-////   { "read_res",     CommandLine_ReadResource,       "Read a resource and value."},
-//   { "slot",         DBG_CommandLine_getTBslot,        "Get the slot of this TB." },
-//
-////   { "tr",           DBG_TraceRoute,                 "Trace Route"},
-//#endif
+#if ( DCU == 1 )
+//   { "read_res",     CommandLine_ReadResource,       "Read a resource and value."},
+   { "slot",         DBG_CommandLine_getTBslot,        "Get the slot of this TB." },
+
+//   { "tr",           DBG_TraceRoute,                 "Trace Route"},
+#endif
 //   { "tunnel",       DBG_CommandLine_tunnel,          "Convert TWACS command to tunnel format" },
    // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "txchannels",   DBG_CommandLine_TxChannels,      "set/print the TX channel list.\r\n"
@@ -692,9 +690,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
    { "virgin",       DBG_CommandLine_virgin,          "Erases flash chip and resets the micro" },
    { "virgindelay",  DBG_CommandLine_virginDelay,     "Erases signature; continues. Allows new code load and then virgin" },
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//   { "vswr",         DBG_CommandLine_VSWR,            "Displays VSWR measurement" },
-//#endif
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+   { "vswr",         DBG_CommandLine_VSWR,            "Displays VSWR measurement" },
+#endif
 //#if ( READ_KEY_ALLOWED != 0 )
 //   { "dumpKeys",     DBG_CommandLine_dumpKeys ,       "Dump 3 keys automatically replace on flash security change" },
 //   { "rkey",         DBG_CommandLine_readKey ,        "Read specifed key" },
@@ -1545,7 +1543,7 @@ uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
    returnStatus_t retVal = eFAILURE;
    uint16_t crc16;   /* Used to store CRC results */
    uint32_t crc32;   /* Used to store CRC results */
-   
+
    if ( argc == 1 )
    {
       /* No arguments */
@@ -1556,9 +1554,9 @@ uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
       /* The number of arguments must be 1 */
       crc16 = CRC_16_Calculate( (uint8_t *)argv[1], strlen( argv[1] ) );
       DBG_logPrintf( 'R', "CRC_16_Calculate: %x", crc16 );
-      /* Setting the Seed value to 0 and KeepLock value to false */
-      CRC_ecc108_crc( strlen( argv[1] ), argv[1], (uint8_t *)&crc16, 0, false );
-      DBG_logPrintf( 'R', "CRC_ecc108_crc: %x", crc16 );
+      /* Setting the Seed value to 0 and KeepLock value to false */ //TODO: RA6E1 Bob: temporarily removed
+//      CRC_ecc108_crc( strlen( argv[1] ), argv[1], (uint8_t *)&crc16, 0, false ); //TODO: RA6E1 Bob: temporarily removed
+//      DBG_logPrintf( 'R', "CRC_ecc108_crc: %x", crc16 );
       crc16 = CRC_16_PhyHeader( (uint8_t *)argv[1], strlen( argv[1] ) );
       DBG_logPrintf( 'R', "CRC_16_PhyHeader: %x", crc16 );
       crc32 = CRC_32_Calculate( (uint8_t *)argv[1], strlen( argv[1] ) );
@@ -1570,7 +1568,7 @@ uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
       /* More arguments */
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
    }
-   
+
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_CrcCalculate() */
 #endif
@@ -1580,7 +1578,7 @@ uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeElapsed
 
-   Purpose: This function will test the OS_TICK_Get_ElapsedMilliseconds 
+   Purpose: This function will test the OS_TICK_Get_ElapsedMilliseconds
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -1615,7 +1613,7 @@ uint32_t DBG_CommandLine_TimeElapsed( uint32_t argc, char *argv[] )
          milliSec2 = OS_TICK_Get_ElapsedMilliseconds();
          /* Storing the difference in array */
          diffInSec[ loopCount ] = milliSec2 - milliSec1;
-         diffAvg += diffInSec[ loopCount ]; 
+         diffAvg += diffInSec[ loopCount ];
       }
       /* Average of Sampling */
       diffAvg = diffAvg / MAX_SAMPLE_LOOP_COUNT;
@@ -1636,7 +1634,7 @@ uint32_t DBG_CommandLine_TimeElapsed( uint32_t argc, char *argv[] )
       /* More arguments */
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
    }
-   
+
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_TimeElapsed() */
 
@@ -1644,7 +1642,7 @@ uint32_t DBG_CommandLine_TimeElapsed( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeNanoSec
 
-   Purpose: This function will test the OS_TICK_Get_Diff_InNanoseconds 
+   Purpose: This function will test the OS_TICK_Get_Diff_InNanoseconds
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -1695,7 +1693,7 @@ uint32_t DBG_CommandLine_TimeNanoSec( uint32_t argc, char *argv[] )
       /* More arguments */
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
    }
-   
+
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_TimeNanoSec() */
 
@@ -1703,7 +1701,7 @@ uint32_t DBG_CommandLine_TimeNanoSec( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeMicroSec
 
-   Purpose: This function will test the OS_TICK_Get_Diff_InMicroseconds 
+   Purpose: This function will test the OS_TICK_Get_Diff_InMicroseconds
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -1768,7 +1766,7 @@ uint32_t DBG_CommandLine_TimeMicroSec( uint32_t argc, char *argv[] )
       /* More arguments */
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
    }
-   
+
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_TimeMicroSec() */
 
@@ -1776,7 +1774,7 @@ uint32_t DBG_CommandLine_TimeMicroSec( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeMilliSec
 
-   Purpose: This function will test the OS_TICK_Get_Diff_InMilliseconds 
+   Purpose: This function will test the OS_TICK_Get_Diff_InMilliseconds
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -1837,7 +1835,7 @@ uint32_t DBG_CommandLine_TimeMilliSec( uint32_t argc, char *argv[] )
       /* More arguments */
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
    }
-   
+
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_TimeMilliSec() */
 
@@ -1845,7 +1843,7 @@ uint32_t DBG_CommandLine_TimeMilliSec( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeSec
 
-   Purpose: This function will test the OS_TICK_Get_Diff_InSeconds 
+   Purpose: This function will test the OS_TICK_Get_Diff_InSeconds
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -1924,7 +1922,7 @@ uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
       /* More arguments */
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
    }
-   
+
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_TimeSec() */
 
@@ -1932,7 +1930,7 @@ uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeMin
 
-   Purpose: This function will test the OS_TICK_Get_Diff_InMinutes 
+   Purpose: This function will test the OS_TICK_Get_Diff_InMinutes
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -2017,7 +2015,7 @@ uint32_t DBG_CommandLine_TimeMin( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeHour
 
-   Purpose: This function will test the OS_TICK_Get_Diff_InHours 
+   Purpose: This function will test the OS_TICK_Get_Diff_InHours
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -2102,7 +2100,7 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeTicks
 
-   Purpose: This function will test the OS_TICK_Add_msec_to_ticks 
+   Purpose: This function will test the OS_TICK_Add_msec_to_ticks
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -2130,7 +2128,7 @@ uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] )
       argvMilliSec = ( uint32_t )atoi( argv[1] );
       if( argvMilliSec < portTICK_RATE_MS )
       {
-         /* Due to portTICK_RATE_MS accuracy values need to be 5 or greater than 5 
+         /* Due to portTICK_RATE_MS accuracy values need to be 5 or greater than 5
           * as we are checking with millisec */
          DBG_logPrintf( 'R', "Value needs to be 5 or greater than 5 which is portTICK_RATE_MS " );
       }
@@ -2168,7 +2166,7 @@ uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_TimeFuture
 
-   Purpose: This function will test the OS_TICK_Is_FutureTime_Greater 
+   Purpose: This function will test the OS_TICK_Is_FutureTime_Greater
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -2217,7 +2215,7 @@ uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] )
       /* More arguments */
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
    }
-   
+
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_TimeFuture() */
 #endif
@@ -4844,94 +4842,96 @@ static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
 //   return ( uint32_t )retVal;
 //}
 //#endif
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_GetHWInfo
-//
-//   Purpose: This function will print out the current processor Temperature
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
-//{
-//#if 0
-//   char           floatStr[PRINT_FLOAT_SIZE];
-//   int32_t        temperatureF, temperatureC;
-//   PHY_GetConf_t  GetConf;
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//   float          volts;
-//   int32_t        dBm;
-//#endif
-//
-//   //NOTE: All conversion scaled up by 10 to get 0.1 degree resolution and avoid a floating point printf
-//   if ( argc != 0 )  /* Called by user command  */
-//   {
-//      GetConf = PHY_GetRequest( ePhyAttr_Temperature );
-//   }
-//   else  /* Assume called by PHY_TestMode - can't get radio temperature.   */
-//   {
-//      GetConf.eStatus = ePHY_GET_SUCCESS;
-//   }
-//   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//      DBG_logPrintf( 'R', "Functnl Rev = %8sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(),  3) );
-//      DBG_logPrintf( 'R', "RevLtr      =   %c", ADC_GetHWRevLetter() );
-//      if ( argc != 0 )
-//      {
-//         temperatureC = (int32_t)( 10 * GetConf.val.Temperature );
-//         temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
-//         //The space between the "%" and "4" is actually a flag that specifies the plus sign (+) is "invisible" so positicve and negative numbers are justified the same
-//         DBG_logPrintf( 'R', "Radio Temp  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
-//      }
-//      temperatureC = (int32_t)( 10 * ADC_Get_uP_Temperature( TEMP_IN_DEG_C ) );
-//      temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
-//      DBG_logPrintf( 'R', "CPU Temp    = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
-//#if ( EP == 1 )
-//      DBG_logPrintf( 'R', "SuperCap    = %-6sV", DBG_printFloat( floatStr, ADC_Get_SC_Voltage(), 3 ) );
-//      DBG_logPrintf( 'R', "Vin         = %-6sV", DBG_printFloat( floatStr, ADC_Get_4V0_Voltage(), 3 ) );
-//#elif ( DCU == 1 )
-//      temperatureC = (int32_t)( 10 * ADC_Get_PS_Temperature( TEMP_IN_DEG_C ) );
-//      temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
-//      DBG_logPrintf( 'R', "Pwr Sply T  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
-//      temperatureC = (int32_t)( 10 * PHY_VirtualTemp_Get() );
-//      temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
-//      DBG_logPrintf( 'R', "vTemp       = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
-//      DBG_logPrintf( 'R', "+12VA       = %8sV", DBG_printFloat(floatStr, ADC_Get_12VA_Monitor(), 3) );
-//      temperatureC = (int32_t)( 10 * ADC_Get_PA_Temperature( TEMP_IN_DEG_C ) );
-//      temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
-//      DBG_logPrintf( 'R', "Pwr Amp T   = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//
-//      volts = ADC_Get_FEM_V_Forward();    /* Saved as volts */
-//      dBm   = (int32_t)( BSP_VFWD_to_DBM( volts ) * 10 );
-//      DBG_logPrintf( 'R', "FEM V Fwd   = %8sV, %2d.%1ddBm", DBG_printFloat( floatStr, volts, 3 ), dBm/10, dBm%10 );
-//
-//      volts = ADC_Get_FEM_V_Reflected();  /* Saved as volts */
-//      DBG_logPrintf( 'R', "FEM V Refl  = %8sV", DBG_printFloat( floatStr, volts, 3 ) );
-//
-//      volts = ADC_Get_VSWR() + 0.5;
-//      DBG_logPrintf( 'R', "FEM VSWR    = %8s:1", DBG_printFloat( floatStr, volts, 3 ) );
-//#if 1
-//      if ( argc != 0 )
-//      {
-//         GetConf = PHY_GetRequest( ePhyAttr_fngForwardPowerSet );
-//         dBm = BSP_dBm_Out_to_PaDAC( (float)GetConf.val.fngForwardPowerSet / 10.0f );
-//         DBG_logPrintf( 'R', "PA DAC(out) = %7d (computed)", dBm );
-//      }
-//#endif
-//#endif
-//#endif
-//   }
-//#endif
-//   return ( 0 );
-//} /* end DBG_CommandLine_GetHWInfo () */
-//
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_GetHWInfo
+
+   Purpose: This function will print out the current processor Temperature
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
+{
+   char           floatStr[PRINT_FLOAT_SIZE];
+   int32_t        temperatureF, temperatureC;
+   PHY_GetConf_t  GetConf;
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+   float          volts;
+   int32_t        dBm;
+#endif
+
+   //NOTE: All conversion scaled up by 10 to get 0.1 degree resolution and avoid a floating point printf
+   if ( argc != 0 )  /* Called by user command  */
+   {
+      GetConf = PHY_GetRequest( ePhyAttr_Temperature );
+   }
+   else  /* Assume called by PHY_TestMode - can't get radio temperature.   */
+   {
+      GetConf.eStatus = ePHY_GET_SUCCESS;
+   }
+   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+      DBG_logPrintf( 'R', "Functnl Rev = %8sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(),  3) );
+      DBG_logPrintf( 'R', "RevLtr      =   %c", ADC_GetHWRevLetter() );
+      if ( argc != 0 )
+      {
+         temperatureC = (int32_t)( 10 * GetConf.val.Temperature );
+         temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
+         //The space between the "%" and "4" is actually a flag that specifies the plus sign (+) is "invisible" so positicve and negative numbers are justified the same
+         DBG_logPrintf( 'R', "Radio Temp  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+      }
+#if ( MCU_SELECTED == NXP_K24 ) /* The K24 has an internal temperature measurement but the RA6E1 does not */
+      temperatureC = (int32_t)( 10 * ADC_Get_uP_Temperature( TEMP_IN_DEG_C ) );
+      temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
+      DBG_logPrintf( 'R', "CPU Temp    = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+#elif ( MCU_SELECTED == RA6E1 )
+      DBG_logPrintf( 'R', "CPU Temp    = Unavailable on RA6E1");
+#endif
+#if ( EP == 1 )
+      DBG_logPrintf( 'R', "SuperCap    = %-6sV", DBG_printFloat( floatStr, ADC_Get_SC_Voltage(), 3 ) );
+      DBG_logPrintf( 'R', "Vin         = %-6sV", DBG_printFloat( floatStr, ADC_Get_4V0_Voltage(), 3 ) );
+#elif ( DCU == 1 )
+      temperatureC = (int32_t)( 10 * ADC_Get_PS_Temperature( TEMP_IN_DEG_C ) );
+      temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
+      DBG_logPrintf( 'R', "Pwr Sply T  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+      temperatureC = (int32_t)( 10 * PHY_VirtualTemp_Get() );
+      temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
+      DBG_logPrintf( 'R', "vTemp       = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+      DBG_logPrintf( 'R', "+12VA       = %8sV", DBG_printFloat(floatStr, ADC_Get_12VA_Monitor(), 3) );
+      temperatureC = (int32_t)( 10 * ADC_Get_PA_Temperature( TEMP_IN_DEG_C ) );
+      temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
+      DBG_logPrintf( 'R', "Pwr Amp T   = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+
+      volts = ADC_Get_FEM_V_Forward();    /* Saved as volts */
+      dBm   = (int32_t)( BSP_VFWD_to_DBM( volts ) * 10 );
+      DBG_logPrintf( 'R', "FEM V Fwd   = %8sV, %2d.%1ddBm", DBG_printFloat( floatStr, volts, 3 ), dBm/10, dBm%10 );
+
+      volts = ADC_Get_FEM_V_Reflected();  /* Saved as volts */
+      DBG_logPrintf( 'R', "FEM V Refl  = %8sV", DBG_printFloat( floatStr, volts, 3 ) );
+
+      volts = ADC_Get_VSWR() + 0.5;
+      DBG_logPrintf( 'R', "FEM VSWR    = %8s:1", DBG_printFloat( floatStr, volts, 3 ) );
+#if 1
+      if ( argc != 0 )
+      {
+         GetConf = PHY_GetRequest( ePhyAttr_fngForwardPowerSet );
+         dBm = BSP_dBm_Out_to_PaDAC( (float)GetConf.val.fngForwardPowerSet / 10.0f );
+         DBG_logPrintf( 'R', "PA DAC(out) = %7d (computed)", dBm );
+      }
+#endif
+#endif
+#endif
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_GetHWInfo () */
+
 ///*******************************************************************************
 //
 //   Function name: DBG_CommandLine_PaDAC
@@ -6340,29 +6340,29 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif
-///***********************************************************************************************************************
-//
-//   Function name: atoh
-//
-//   Purpose:  Converts 2-bytes of ASCII to one byte of hex.  For example:  ASCII 0x31 0x32 is 0x12 in Hex
-//
-//   Arguments: uint8_t *pHex - Location to store the converted ASCII Byte, char *pAscii - 2 bytes of ASCII
-//
-//   Returns: returnStatus_t - eSUCCESS
-//
-//   Side Effects: None
-//
-//   Reentrant Code: No
-//
-//   Notes:  Not much error checking here!!!
-//
-// **********************************************************************************************************************/
-//static returnStatus_t atoh( uint8_t *pHex, char const *pAscii )
-//{
-//   ( void )sscanf( ( char* )pAscii, "%02hhx", pHex );
-//   return( eSUCCESS );
-//}
-//
+/***********************************************************************************************************************
+
+   Function name: atoh
+
+   Purpose:  Converts 2-bytes of ASCII to one byte of hex.  For example:  ASCII 0x31 0x32 is 0x12 in Hex
+
+   Arguments: uint8_t *pHex - Location to store the converted ASCII Byte, char *pAscii - 2 bytes of ASCII
+
+   Returns: returnStatus_t - eSUCCESS
+
+   Side Effects: None
+
+   Reentrant Code: No
+
+   Notes:  Not much error checking here!!!
+
+ **********************************************************************************************************************/
+static returnStatus_t atoh( uint8_t *pHex, char const *pAscii )
+{
+   ( void )sscanf( ( char* )pAscii, "%02hhx", pHex );
+   return( eSUCCESS );
+}
+
 ///*******************************************************************************
 //   Function name: DBG_CommandLine_SendAppMsg
 //
@@ -6819,114 +6819,114 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_InsertMacMsg
-//
-//   Purpose: This command will insert a phy payload into the bottom of the MAC
-//   layer
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - status of this function - currently always 0 (success)
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_InsertMacMsg ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t        data[MAX_ATOH_CHARS];
-//   uint16_t       dataLen;
-//   uint16_t       length;
-//   uint16_t       bufIndex;
-//   uint16_t       srcIndex;
-//   uint8_t        framing = (uint8_t)ePHY_FRAMING_0;
-//   uint8_t        mode = (uint8_t)ePHY_MODE_1;
-//
-//   DBG_logPrintf( 'R', "Received DBG_CommandLine_InsertMacMsg command" );
-//   if ( ( argc == 2 ) || ( argc == 4 ) )  /* The number of arguments must be 1 or 3 */
-//   {
-//      dataLen = ( uint16_t )strlen( argv[1] );
-//      if ( ( dataLen % 2 ) != 0 )
-//      {
-//         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'insertmacmsg 1354AB'" );
-//      }
-//      else if ( dataLen > ( MAX_ATOH_CHARS *  2) )
-//      {
-//         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
-//      }
-//      else
-//      {
-//         (void)memset(data, 0, MAX_ATOH_CHARS);
-//         /* convert ascii data to hex data */
-//         for ( bufIndex = 0, srcIndex = 0;
-//               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
-//               srcIndex += 2, bufIndex++ )
-//         {
-//            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
-//         }
-//         if ( argc == 2 )
-//         {
-//            /* framing/mode not provided, assume SRFN */
-//            PHY_InsertTestMsg( data, ( dataLen / 2 ), ePHY_FRAMING_0, ePHY_MODE_1);
-//         }
-//         else
-//         {
-//            /* convert ascii data to hex data (framing) */
-//            length = ( uint16_t )strlen( argv[2] );
-//            if ( length  == 1 )
-//            {
-//               /* user entered a single digit, assume it represents a decimal number */
-//               framing = ( uint8_t )atoi( argv[2] );
-//            }
-//            else if ( length  == 2 )
-//            {
-//               /* user entered 2 ascii chars, assume it represents a hex byte (01, 1A, etc)*/
-//               ( void )atoh( &framing, &argv[2][0] );
-//            }
-//
-//            if ( ( (PHY_FRAMING_e)framing != ePHY_FRAMING_0 ) &&
-//                 ( (PHY_FRAMING_e)framing != ePHY_FRAMING_1 ) &&
-//                 ( (PHY_FRAMING_e)framing != ePHY_FRAMING_2 ) )
-//            {
-//               DBG_logPrintf( 'R', "Framing must be valid (0-2)" );
-//            }
-//            else
-//            {
-//               /* convert ascii data to hex data (mode)*/
-//               length = ( uint16_t )strlen( argv[3] );
-//               if ( length  == 1 )
-//               {
-//                  /* user entered a single digit, assume it represents a decimal number */
-//                  mode = ( uint8_t )atoi( argv[3] );
-//               }
-//               else if ( length  == 2 )
-//               {
-//                  /* user entered 2 ascii chars, assume it represents a hex byte (01, 1A, etc)*/
-//                  ( void )atoh( &mode, &argv[3][0] );
-//               }
-//               if ( ( (PHY_MODE_e)mode != ePHY_MODE_0 ) &&
-//                    ( (PHY_MODE_e)mode != ePHY_MODE_1 ) &&
-//                    ( (PHY_MODE_e)mode != ePHY_MODE_2 ) &&
-//                    ( (PHY_MODE_e)mode != ePHY_MODE_3 ) )
-//               {
-//                  DBG_logPrintf( 'R', "Mode must be valid (0-3)" );
-//               }
-//               else
-//               {
-//                  /*lint -e{772} Symbol 'data' initialized by call to strlen  */
-//                  PHY_InsertTestMsg( data, ( dataLen / 2 ), (PHY_FRAMING_e)framing, (PHY_MODE_e)mode );
-//               }
-//            }
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid, expected format:  'insertmacmsg 11223344' (SRFN) or 'insertmacmsg 11223344 2 2'" );
-//   }
-//
-//   return ( 0 );
-//}
-//
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_InsertMacMsg
+
+   Purpose: This command will insert a phy payload into the bottom of the MAC
+   layer
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - status of this function - currently always 0 (success)
+*******************************************************************************/
+uint32_t DBG_CommandLine_InsertMacMsg ( uint32_t argc, char *argv[] )
+{
+   uint8_t        data[MAX_ATOH_CHARS];
+   uint16_t       dataLen;
+   uint16_t       length;
+   uint16_t       bufIndex;
+   uint16_t       srcIndex;
+   uint8_t        framing = (uint8_t)ePHY_FRAMING_0;
+   uint8_t        mode = (uint8_t)ePHY_MODE_1;
+
+   DBG_logPrintf( 'R', "Received DBG_CommandLine_InsertMacMsg command" );
+   if ( ( argc == 2 ) || ( argc == 4 ) )  /* The number of arguments must be 1 or 3 */
+   {
+      dataLen = ( uint16_t )strlen( argv[1] );
+      if ( ( dataLen % 2 ) != 0 )
+      {
+         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'insertmacmsg 1354AB'" );
+      }
+      else if ( dataLen > ( MAX_ATOH_CHARS *  2) )
+      {
+         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
+      }
+      else
+      {
+         (void)memset(data, 0, MAX_ATOH_CHARS);
+         /* convert ascii data to hex data */
+         for ( bufIndex = 0, srcIndex = 0;
+               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
+               srcIndex += 2, bufIndex++ )
+         {
+            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
+         }
+         if ( argc == 2 )
+         {
+            /* framing/mode not provided, assume SRFN */
+            PHY_InsertTestMsg( data, ( dataLen / 2 ), ePHY_FRAMING_0, ePHY_MODE_1);
+         }
+         else
+         {
+            /* convert ascii data to hex data (framing) */
+            length = ( uint16_t )strlen( argv[2] );
+            if ( length  == 1 )
+            {
+               /* user entered a single digit, assume it represents a decimal number */
+               framing = ( uint8_t )atoi( argv[2] );
+            }
+            else if ( length  == 2 )
+            {
+               /* user entered 2 ascii chars, assume it represents a hex byte (01, 1A, etc)*/
+               ( void )atoh( &framing, &argv[2][0] );
+            }
+
+            if ( ( (PHY_FRAMING_e)framing != ePHY_FRAMING_0 ) &&
+                 ( (PHY_FRAMING_e)framing != ePHY_FRAMING_1 ) &&
+                 ( (PHY_FRAMING_e)framing != ePHY_FRAMING_2 ) )
+            {
+               DBG_logPrintf( 'R', "Framing must be valid (0-2)" );
+            }
+            else
+            {
+               /* convert ascii data to hex data (mode)*/
+               length = ( uint16_t )strlen( argv[3] );
+               if ( length  == 1 )
+               {
+                  /* user entered a single digit, assume it represents a decimal number */
+                  mode = ( uint8_t )atoi( argv[3] );
+               }
+               else if ( length  == 2 )
+               {
+                  /* user entered 2 ascii chars, assume it represents a hex byte (01, 1A, etc)*/
+                  ( void )atoh( &mode, &argv[3][0] );
+               }
+               if ( ( (PHY_MODE_e)mode != ePHY_MODE_0 ) &&
+                    ( (PHY_MODE_e)mode != ePHY_MODE_1 ) &&
+                    ( (PHY_MODE_e)mode != ePHY_MODE_2 ) &&
+                    ( (PHY_MODE_e)mode != ePHY_MODE_3 ) )
+               {
+                  DBG_logPrintf( 'R', "Mode must be valid (0-3)" );
+               }
+               else
+               {
+                  /*lint -e{772} Symbol 'data' initialized by call to strlen  */
+                  PHY_InsertTestMsg( data, ( dataLen / 2 ), (PHY_FRAMING_e)framing, (PHY_MODE_e)mode );
+               }
+            }
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid, expected format:  'insertmacmsg 11223344' (SRFN) or 'insertmacmsg 11223344 2 2'" );
+   }
+
+   return ( 0 );
+}
+
 //#if ( EP == 1 )
 ///*******************************************************************************
 //
@@ -8200,92 +8200,92 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
 //   }
 //   return ( 0 );
 //}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacAddr
-//
-//   Purpose: This function is used to get/set the mac extension address (40-bits)
-//            Usage: macaddr get <cr>
-//            Usage: macaddr get 01:02:03:04:aa <cr>
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes: Changing the mac address will not be allowed when the security chip is enabled!
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacAddr ( uint32_t argc, char *argv[] )
-//{
-//   bool bStatus = ( bool )false;
-//   if ( argc > 1 )
-//   {
-//      ( void )ecc108_open();
-//      if ( strcasecmp( "set", argv[1] ) == 0 )
-//      {
-//         xid_addr_t xid_addr;
-//         char delimiter[] = ":.";   // Allows delimiter to be ':' or '.'
-//         uint16_t num_tokens = 0;
-//         char* pch;
-//
-//         pch = strtok( argv[2], delimiter );
-//         while ( pch != NULL )
-//         {
-//            // Convert the token to address bytes
-//            ( void )sscanf( pch, "%02hhx", &xid_addr[num_tokens] );
-//            num_tokens++;
-//            if( num_tokens > ( uint16_t )sizeof( xid_addr ) )
-//            {
-//               // no more room!
-//               break;
-//            }
-//            pch = strtok ( NULL, delimiter );
-//         }
-//
-//         if( num_tokens == ( uint16_t )sizeof( xid_addr_t ) )
-//         {
-//            /*lint -e{545} & operator needed by compiler in next statement */
-//            MAC_XID_Address_Set( ( const xid_addr_t * )&xid_addr ); /*lint !e772 num_tokens correct->xid_addr init'd */
-//            bStatus = ( bool )true;
-//         }
-//         else
-//         {
-//            // need to print the usage
-//            DBG_logPrintf( 'R', "parameter error!" );
-//         }
-//      }
-//      else if ( strcasecmp( "get", argv[1] ) == 0 )
-//      {
-//         bStatus = ( bool )true;
-//      }
-//      ecc108_close();
-//   }
-//   if( bStatus == ( bool )true )
-//   {
-//      // Successfull
-//      eui_addr_t addr;
-//      /*lint -e{545} & operator needed by compiler in next statement */
-//      MAC_EUI_Address_Get( ( eui_addr_t * )&addr );
-//
-//      // Print the Extension Id
-//      DBG_logPrintf( 'R', "macaddr=%02x:%02x:%02x:%02x:%02x",
-//                     addr[3], addr[4], addr[5], addr[6], addr[7] );
-//
-//      // The Full Extended Unique Identifier
-//      DBG_logPrintf( 'R', "EUI=%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x", addr[0], addr[1], addr[2],
-//                     addr[3], addr[4], addr[5], addr[6], addr[7] );
-//   }
-//   else
-//   {
-//      // Error, so print the usage message
-//      DBG_logPrintf( 'R', "usage: macaddr get" );
-//      DBG_logPrintf( 'R', "usage: macaddr set 00.00.00.00.00" );
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_MacAddr () */
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacAddr
+
+   Purpose: This function is used to get/set the mac extension address (40-bits)
+            Usage: macaddr get <cr>
+            Usage: macaddr get 01:02:03:04:aa <cr>
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: Changing the mac address will not be allowed when the security chip is enabled!
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacAddr ( uint32_t argc, char *argv[] )
+{
+   bool bStatus = ( bool )false;
+   if ( argc > 1 )
+   {
+      ( void )ecc108_open();
+      if ( strcasecmp( "set", argv[1] ) == 0 )
+      {
+         xid_addr_t xid_addr;
+         char delimiter[] = ":.";   // Allows delimiter to be ':' or '.'
+         uint16_t num_tokens = 0;
+         char* pch;
+
+         pch = strtok( argv[2], delimiter );
+         while ( pch != NULL )
+         {
+            // Convert the token to address bytes
+            ( void )sscanf( pch, "%02hhx", &xid_addr[num_tokens] );
+            num_tokens++;
+            if( num_tokens > ( uint16_t )sizeof( xid_addr ) )
+            {
+               // no more room!
+               break;
+            }
+            pch = strtok ( NULL, delimiter );
+         }
+
+         if( num_tokens == ( uint16_t )sizeof( xid_addr_t ) )
+         {
+            /*lint -e{545} & operator needed by compiler in next statement */
+            MAC_XID_Address_Set( ( const xid_addr_t * )&xid_addr ); /*lint !e772 num_tokens correct->xid_addr init'd */
+            bStatus = ( bool )true;
+         }
+         else
+         {
+            // need to print the usage
+            DBG_logPrintf( 'R', "parameter error!" );
+         }
+      }
+      else if ( strcasecmp( "get", argv[1] ) == 0 )
+      {
+         bStatus = ( bool )true;
+      }
+      ecc108_close();
+   }
+   if( bStatus == ( bool )true )
+   {
+      // Successfull
+      eui_addr_t addr;
+      /*lint -e{545} & operator needed by compiler in next statement */
+      MAC_EUI_Address_Get( ( eui_addr_t * )&addr );
+
+      // Print the Extension Id
+      DBG_logPrintf( 'R', "macaddr=%02x:%02x:%02x:%02x:%02x",
+                     addr[3], addr[4], addr[5], addr[6], addr[7] );
+
+      // The Full Extended Unique Identifier
+      DBG_logPrintf( 'R', "EUI=%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x", addr[0], addr[1], addr[2],
+                     addr[3], addr[4], addr[5], addr[6], addr[7] );
+   }
+   else
+   {
+      // Error, so print the usage message
+      DBG_logPrintf( 'R', "usage: macaddr get" );
+      DBG_logPrintf( 'R', "usage: macaddr set 00.00.00.00.00" );
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_MacAddr () */
+
 //#if 0
 ///******************************************************************************
 //
@@ -8371,27 +8371,27 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_PhyStats
-//
-//   Purpose: Used to print the PHY Statistics
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_PhyStats ( uint32_t argc, char *argv[] )
-//{
-//   PHY_Stats ();
-//   return ( 0 );
-//}
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_PhyStats
+
+   Purpose: Used to print the PHY Statistics
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_PhyStats ( uint32_t argc, char *argv[] )
+{
+   PHY_Stats ();
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_PhyConfig
@@ -9949,267 +9949,267 @@ uint32_t DBG_CommandLine_RxChannels ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RxDetection
-//
-//   Purpose: This function will set/print the RX detection list
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RxDetection ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t i; // Loop counter
-//   uint32_t RadioIndex = 0;
-//   PHY_DETECTION_e detection; // Detection mode
-//   PHY_DETECTION_e detectionList[PHY_RCVR_COUNT]; // Detection list
-//
-//   if ( PHY_RxDetectionConfig_Get((uint8_t*)detectionList) ) {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         DBG_printf( "RxDetection configure the detection used for each RX radio:" );
-//         DBG_printf( "usage: rxdetection RadioIndex detection [detection] [...]" );
-//         DBG_printf( "       RadioIndex is the first radio to set" );
-//         DBG_printf( "       Detection is the detection mode to use" );
-//
-//         for ( i = 0; i < PHY_RCVR_COUNT; i++ )
-//         {
-//            {
-//               DBG_printf( "Radio %u set to detection mode %u", i, ( uint32_t )detectionList[i]);
-//            }
-//         }
-//         return ( 0 );
-//      }
-//
-//      // One parameter
-//      if ( argc == 2 )
-//      {
-//         DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one detection mode must be provided" );
-//         return ( 0 );
-//      }
-//
-//      // Many parameters. Validate RadioIndex
-//      if ( argc > 2 )
-//      {
-//         RadioIndex = ( uint32_t )atoi( argv[1] );
-//
-//         // Check for valid range
-//         if ( RadioIndex >= PHY_RCVR_COUNT )
-//         {
-//            DBG_logPrintf( 'R', "ERROR - RadioIndex is invalid. Must be between less than %u", PHY_RCVR_COUNT );
-//            return ( 0 );
-//         }
-//      }
-//
-//      // Notice how RadioIndex is incremented in the loop
-//      for ( i = 2; i < argc; i++, RadioIndex++ )
-//      {
-//         // Validate RadioIndex
-//         if ( RadioIndex >= PHY_RCVR_COUNT )
-//         {
-//            DBG_logPrintf( 'R', "RadioIndex is out of range. Further detection mode ignored" );
-//            return ( 0 );
-//         }
-//
-//         detection = ( PHY_DETECTION_e )atoi( argv[i] );
-//         // Validate
-//         if ( detection < ePHY_DETECTION_LAST )
-//         {
-//            DBG_printf( "Programmed RadioIndex %u with %u", RadioIndex, ( uint32_t )detection );
-//            detectionList[RadioIndex] = detection;
-//            (void)PHY_RxDetectionConfig_Set( (uint8_t*)detectionList );
-//         }
-//         else
-//         {
-//            DBG_logPrintf( 'R', "ERROR - Invalid detection mode %u for RadioIndex %u", ( uint32_t )detection, RadioIndex );
-//         }
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RxFraming
-//
-//   Purpose: This function will set/print the RX framing list
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RxFraming ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t i; // Loop counter
-//   uint32_t RadioIndex = 0;
-//   PHY_FRAMING_e frame; // Framing mode
-//   PHY_FRAMING_e frameList[PHY_RCVR_COUNT]; // Framing list
-//
-//   if ( PHY_RxFramingConfig_Get((uint8_t*)frameList) ) {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         DBG_printf( "RxFraming configure the framing used for each RX radio:" );
-//         DBG_printf( "usage: rxframing RadioIndex framing [framing] [...]" );
-//         DBG_printf( "       RadioIndex is the first radio to set" );
-//         DBG_printf( "       Framing is the framing mode to use" );
-//
-//         for ( i = 0; i < PHY_RCVR_COUNT; i++ )
-//         {
-//            {
-//               DBG_printf( "Radio %u set to framing mode %u", i, ( uint32_t )frameList[i]);
-//            }
-//         }
-//         return ( 0 );
-//      }
-//
-//      // One parameter
-//      if ( argc == 2 )
-//      {
-//         DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one framing mode must be provided" );
-//         return ( 0 );
-//      }
-//
-//      // Many parameters. Validate RadioIndex
-//      if ( argc > 2 )
-//      {
-//         RadioIndex = ( uint32_t )atoi( argv[1] );
-//
-//         // Check for valid range
-//         if ( RadioIndex >= PHY_RCVR_COUNT )
-//         {
-//            DBG_logPrintf( 'R', "ERROR - RadioIndex is invalid. Must be between less than %u", PHY_RCVR_COUNT );
-//            return ( 0 );
-//         }
-//      }
-//
-//      // Notice how RadioIndex is incremented in the loop
-//      for ( i = 2; i < argc; i++, RadioIndex++ )
-//      {
-//         // Validate RadioIndex
-//         if ( RadioIndex >= PHY_RCVR_COUNT )
-//         {
-//            DBG_logPrintf( 'R', "RadioIndex is out of range. Further framing mode ignored" );
-//            return ( 0 );
-//         }
-//
-//         frame = ( PHY_FRAMING_e )atoi( argv[i] );
-//         // Validate
-//         if ( frame < ePHY_FRAMING_LAST )
-//         {
-//            DBG_printf( "Programmed RadioIndex %u with %u", RadioIndex, ( uint32_t )frame );
-//            frameList[RadioIndex] = frame;
-//            (void)PHY_RxFramingConfig_Set( (uint8_t*)frameList );
-//         }
-//         else
-//         {
-//            DBG_logPrintf( 'R', "ERROR - Invalid framing mode %u for RadioIndex %u", ( uint32_t )frame, RadioIndex );
-//         }
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RxMode
-//
-//   Purpose: This function will set/print the RX mode list
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RxMode ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t i; // Loop counter
-//   uint32_t RadioIndex = 0;
-//   PHY_MODE_e mode; // mode
-//   PHY_MODE_e modeList[PHY_RCVR_COUNT]; // mode list
-//
-//   if ( PHY_RxMode_Get((uint8_t*)modeList) ) {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         DBG_printf( "RxMode configure the PHY mode used for each RX radio:" );
-//         DBG_printf( "usage: rxmode RadioIndex mode [mode] [...]" );
-//         DBG_printf( "       RadioIndex is the first radio to set" );
-//         DBG_printf( "       Mode is the PHY mode to use" );
-//
-//         for ( i = 0; i < PHY_RCVR_COUNT; i++ )
-//         {
-//            {
-//               DBG_printf( "Radio %u set to PHY mode %u", i, ( uint32_t )modeList[i]);
-//            }
-//         }
-//         return ( 0 );
-//      }
-//
-//      // One parameter
-//      if ( argc == 2 )
-//      {
-//         DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one PHY mode must be provided" );
-//         return ( 0 );
-//      }
-//
-//      // Many parameters. Validate RadioIndex
-//      if ( argc > 2 )
-//      {
-//         RadioIndex = ( uint32_t )atoi( argv[1] );
-//
-//         // Check for valid range
-//         if ( RadioIndex >= PHY_RCVR_COUNT )
-//         {
-//            DBG_logPrintf( 'R', "ERROR - RadioIndex is invalid. Must be between less than %u", PHY_RCVR_COUNT );
-//            return ( 0 );
-//         }
-//      }
-//
-//      // Notice how RadioIndex is incremented in the loop
-//      for ( i = 2; i < argc; i++, RadioIndex++ )
-//      {
-//         // Validate RadioIndex
-//         if ( RadioIndex >= PHY_RCVR_COUNT )
-//         {
-//            DBG_logPrintf( 'R', "RadioIndex is out of range. Further PHY mode ignored" );
-//            return ( 0 );
-//         }
-//
-//         mode = ( PHY_MODE_e )atoi( argv[i] );
-//         // Validate
-//         if ( mode < ePHY_MODE_LAST )
-//         {
-//            DBG_printf( "Programmed RadioIndex %u with %u", RadioIndex, ( uint32_t )mode );
-//            modeList[RadioIndex] = mode;
-//            (void)PHY_RxMode_Set( (uint8_t*)modeList );
-//         }
-//         else
-//         {
-//            DBG_logPrintf( 'R', "ERROR - Invalid PHY mode %u for RadioIndex %u", ( uint32_t )mode, RadioIndex );
-//         }
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RxDetection
+
+   Purpose: This function will set/print the RX detection list
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RxDetection ( uint32_t argc, char *argv[] )
+{
+   uint32_t i; // Loop counter
+   uint32_t RadioIndex = 0;
+   PHY_DETECTION_e detection; // Detection mode
+   PHY_DETECTION_e detectionList[PHY_RCVR_COUNT]; // Detection list
+
+   if ( PHY_RxDetectionConfig_Get((uint8_t*)detectionList) ) {
+      // No parameters
+      if ( argc == 1 )
+      {
+         DBG_printf( "RxDetection configure the detection used for each RX radio:" );
+         DBG_printf( "usage: rxdetection RadioIndex detection [detection] [...]" );
+         DBG_printf( "       RadioIndex is the first radio to set" );
+         DBG_printf( "       Detection is the detection mode to use" );
+
+         for ( i = 0; i < PHY_RCVR_COUNT; i++ )
+         {
+            {
+               DBG_printf( "Radio %u set to detection mode %u", i, ( uint32_t )detectionList[i]);
+            }
+         }
+         return ( 0 );
+      }
+
+      // One parameter
+      if ( argc == 2 )
+      {
+         DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one detection mode must be provided" );
+         return ( 0 );
+      }
+
+      // Many parameters. Validate RadioIndex
+      if ( argc > 2 )
+      {
+         RadioIndex = ( uint32_t )atoi( argv[1] );
+
+         // Check for valid range
+         if ( RadioIndex >= PHY_RCVR_COUNT )
+         {
+            DBG_logPrintf( 'R', "ERROR - RadioIndex is invalid. Must be between less than %u", PHY_RCVR_COUNT );
+            return ( 0 );
+         }
+      }
+
+      // Notice how RadioIndex is incremented in the loop
+      for ( i = 2; i < argc; i++, RadioIndex++ )
+      {
+         // Validate RadioIndex
+         if ( RadioIndex >= PHY_RCVR_COUNT )
+         {
+            DBG_logPrintf( 'R', "RadioIndex is out of range. Further detection mode ignored" );
+            return ( 0 );
+         }
+
+         detection = ( PHY_DETECTION_e )atoi( argv[i] );
+         // Validate
+         if ( detection < ePHY_DETECTION_LAST )
+         {
+            DBG_printf( "Programmed RadioIndex %u with %u", RadioIndex, ( uint32_t )detection );
+            detectionList[RadioIndex] = detection;
+            (void)PHY_RxDetectionConfig_Set( (uint8_t*)detectionList );
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "ERROR - Invalid detection mode %u for RadioIndex %u", ( uint32_t )detection, RadioIndex );
+         }
+      }
+   }
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RxFraming
+
+   Purpose: This function will set/print the RX framing list
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RxFraming ( uint32_t argc, char *argv[] )
+{
+   uint32_t i; // Loop counter
+   uint32_t RadioIndex = 0;
+   PHY_FRAMING_e frame; // Framing mode
+   PHY_FRAMING_e frameList[PHY_RCVR_COUNT]; // Framing list
+
+   if ( PHY_RxFramingConfig_Get((uint8_t*)frameList) ) {
+      // No parameters
+      if ( argc == 1 )
+      {
+         DBG_printf( "RxFraming configure the framing used for each RX radio:" );
+         DBG_printf( "usage: rxframing RadioIndex framing [framing] [...]" );
+         DBG_printf( "       RadioIndex is the first radio to set" );
+         DBG_printf( "       Framing is the framing mode to use" );
+
+         for ( i = 0; i < PHY_RCVR_COUNT; i++ )
+         {
+            {
+               DBG_printf( "Radio %u set to framing mode %u", i, ( uint32_t )frameList[i]);
+            }
+         }
+         return ( 0 );
+      }
+
+      // One parameter
+      if ( argc == 2 )
+      {
+         DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one framing mode must be provided" );
+         return ( 0 );
+      }
+
+      // Many parameters. Validate RadioIndex
+      if ( argc > 2 )
+      {
+         RadioIndex = ( uint32_t )atoi( argv[1] );
+
+         // Check for valid range
+         if ( RadioIndex >= PHY_RCVR_COUNT )
+         {
+            DBG_logPrintf( 'R', "ERROR - RadioIndex is invalid. Must be between less than %u", PHY_RCVR_COUNT );
+            return ( 0 );
+         }
+      }
+
+      // Notice how RadioIndex is incremented in the loop
+      for ( i = 2; i < argc; i++, RadioIndex++ )
+      {
+         // Validate RadioIndex
+         if ( RadioIndex >= PHY_RCVR_COUNT )
+         {
+            DBG_logPrintf( 'R', "RadioIndex is out of range. Further framing mode ignored" );
+            return ( 0 );
+         }
+
+         frame = ( PHY_FRAMING_e )atoi( argv[i] );
+         // Validate
+         if ( frame < ePHY_FRAMING_LAST )
+         {
+            DBG_printf( "Programmed RadioIndex %u with %u", RadioIndex, ( uint32_t )frame );
+            frameList[RadioIndex] = frame;
+            (void)PHY_RxFramingConfig_Set( (uint8_t*)frameList );
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "ERROR - Invalid framing mode %u for RadioIndex %u", ( uint32_t )frame, RadioIndex );
+         }
+      }
+   }
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RxMode
+
+   Purpose: This function will set/print the RX mode list
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RxMode ( uint32_t argc, char *argv[] )
+{
+   uint32_t i; // Loop counter
+   uint32_t RadioIndex = 0;
+   PHY_MODE_e mode; // mode
+   PHY_MODE_e modeList[PHY_RCVR_COUNT]; // mode list
+
+   if ( PHY_RxMode_Get((uint8_t*)modeList) ) {
+      // No parameters
+      if ( argc == 1 )
+      {
+         DBG_printf( "RxMode configure the PHY mode used for each RX radio:" );
+         DBG_printf( "usage: rxmode RadioIndex mode [mode] [...]" );
+         DBG_printf( "       RadioIndex is the first radio to set" );
+         DBG_printf( "       Mode is the PHY mode to use" );
+
+         for ( i = 0; i < PHY_RCVR_COUNT; i++ )
+         {
+            {
+               DBG_printf( "Radio %u set to PHY mode %u", i, ( uint32_t )modeList[i]);
+            }
+         }
+         return ( 0 );
+      }
+
+      // One parameter
+      if ( argc == 2 )
+      {
+         DBG_logPrintf( 'R', "ERROR - Not enough arguments. At least one PHY mode must be provided" );
+         return ( 0 );
+      }
+
+      // Many parameters. Validate RadioIndex
+      if ( argc > 2 )
+      {
+         RadioIndex = ( uint32_t )atoi( argv[1] );
+
+         // Check for valid range
+         if ( RadioIndex >= PHY_RCVR_COUNT )
+         {
+            DBG_logPrintf( 'R', "ERROR - RadioIndex is invalid. Must be between less than %u", PHY_RCVR_COUNT );
+            return ( 0 );
+         }
+      }
+
+      // Notice how RadioIndex is incremented in the loop
+      for ( i = 2; i < argc; i++, RadioIndex++ )
+      {
+         // Validate RadioIndex
+         if ( RadioIndex >= PHY_RCVR_COUNT )
+         {
+            DBG_logPrintf( 'R', "RadioIndex is out of range. Further PHY mode ignored" );
+            return ( 0 );
+         }
+
+         mode = ( PHY_MODE_e )atoi( argv[i] );
+         // Validate
+         if ( mode < ePHY_MODE_LAST )
+         {
+            DBG_printf( "Programmed RadioIndex %u with %u", RadioIndex, ( uint32_t )mode );
+            modeList[RadioIndex] = mode;
+            (void)PHY_RxMode_Set( (uint8_t*)modeList );
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "ERROR - Invalid PHY mode %u for RadioIndex %u", ( uint32_t )mode, RadioIndex );
+         }
+      }
+   }
+
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_StackUsage
@@ -10583,40 +10583,40 @@ uint32_t DBG_CommandLine_Power ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RadioStatus
-//
-//   Purpose: This function reads radio status
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RadioStatus ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t radioNum;
-//   uint8_t state, int_pend, int_status, ph_pend, ph_status, modem_pend, modem_status, chip_pend, chip_status;
-//   char stateStr[][11] = { "Undefined" , "Sleep", "SPI Active", "Ready", "Ready2", "TX Tune", "RX Tune", "TX", "RX" };
-//
-//   for ( radioNum = ( uint8_t )RADIO_0; radioNum < ( uint8_t )MAX_RADIO; radioNum++ )
-//   {
-//      if ( RADIO_Status_Get( radioNum, &state, &int_pend, &int_status, &ph_pend, &ph_status, &modem_pend, &modem_status,
-//                             &chip_pend, &chip_status ) )
-//      {
-//         DBG_printf( "Radio %u: state %11s, INT status 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X",
-//                     radioNum, stateStr[state], int_pend, int_status, ph_pend, ph_status, modem_pend, modem_status,
-//                     chip_pend, chip_status );
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RadioStatus
+
+   Purpose: This function reads radio status
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RadioStatus ( uint32_t argc, char *argv[] )
+{
+   uint8_t radioNum;
+   uint8_t state, int_pend, int_status, ph_pend, ph_status, modem_pend, modem_status, chip_pend, chip_status;
+   char stateStr[][11] = { "Undefined" , "Sleep", "SPI Active", "Ready", "Ready2", "TX Tune", "RX Tune", "TX", "RX" };
+
+   for ( radioNum = ( uint8_t )RADIO_0; radioNum < ( uint8_t )MAX_RADIO; radioNum++ )
+   {
+      if ( RADIO_Status_Get( radioNum, &state, &int_pend, &int_status, &ph_pend, &ph_status, &modem_pend, &modem_status,
+                             &chip_pend, &chip_status ) )
+      {
+         DBG_printf( "Radio %u: state %11s, INT status 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X",
+                     radioNum, stateStr[state], int_pend, int_status, ph_pend, ph_status, modem_pend, modem_status,
+                     chip_pend, chip_status );
+      }
+   }
+
+   return ( 0 );
+}
+
 //#if (EP == 1)
 //#if ( ENABLE_DEMAND_TASKS == 1 )
 ///******************************************************************************
@@ -10956,110 +10956,110 @@ uint32_t DBG_CommandLine_Reboot ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RSSI
-//
-//   Purpose: This function displays the RSSI value of a radio
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RSSI ( uint32_t argc, char *argv[] )
-//{
-//   CCA_RSSI_TYPEe processingType;
-//   uint8_t        radioNum;
-//   uint8_t        rssi;
-//   char           floatStr[PRINT_FLOAT_SIZE];
-//
-//   // One parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//      return ( 0 );
-//   }
-//#if (EP == 1)
-//   radioNum = 0;
-//   PHY_Lock(); // Function will not return if it fails
-//   rssi = (uint8_t)RADIO_Filter_CCA( radioNum, &processingType, CCA_SLEEP_TIME );
-//   PHY_Unlock(); // Function will not return if it fails
-//   DBG_printf( "Compensated RSSI = %u, %sdBm", rssi, DBG_printFloat( floatStr, RSSI_RAW_TO_DBM( rssi ), 1 ) );
-//#else
-//   if ( argc == 1 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Not enough arguments" );
-//   }
-//   else
-//   {
-//      radioNum = ( uint8_t )atoi( argv[1] );
-//
-//      if (radioNum < (uint8_t)MAX_RADIO) {
-//         PHY_Lock(); // Function will not return if it fails
-//         rssi = (uint8_t)RADIO_Filter_CCA( radioNum, &processingType, CCA_SLEEP_TIME );
-//         PHY_Unlock(); // Function will not return if it fails
-//         DBG_printf( "Compensated RSSI = %u, %sdBm", rssi, DBG_printFloat( floatStr, RSSI_RAW_TO_DBM( rssi ), 1 ) );
-//      } else {
-//         DBG_logPrintf( 'R', "ERROR - Argument is out of range. Must be between 0 and %u", (uint32_t)MAX_RADIO-1);
-//      }
-//   }
-//#endif
-//   return ( 0 );
-//}
-//#if 0
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RSSIJumpThreshold
-//
-//   Purpose: This function gets or sets the RSSI Jump Threshold
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RSSIJumpThreshold ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t rssi;
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         // Get the RSSI Jump threshold
-//         PHY_GetConf_t GetConf;
-//         GetConf = PHY_GetRequest( ePhyAttr_RssiJumpThreshold );
-//         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//            DBG_printf( "RSSI Jump Threshold is %u dBm", GetConf.val.RssiJumpThreshold );
-//         }
-//      } else {
-//         PHY_SetConf_t SetConf;
-//         rssi = ( uint8_t )atoi( argv[1] );
-//         SetConf = PHY_SetRequest( ePhyAttr_RssiJumpThreshold, &rssi);
-//         if (SetConf.eStatus == ePHY_SET_INVALID_PARAMETER) {
-//            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between %d and %d",
-//                           PHY_RSSI_JUMP_THRESHOLD_MIN, PHY_RSSI_JUMP_THRESHOLD_MAX );
-//         }
-//         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
-//            DBG_printf( "Failed to set RSSI jump threshold" );
-//         }
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//#endif
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RSSI
+
+   Purpose: This function displays the RSSI value of a radio
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RSSI ( uint32_t argc, char *argv[] )
+{
+   CCA_RSSI_TYPEe processingType;
+   uint8_t        radioNum;
+   uint8_t        rssi;
+   char           floatStr[PRINT_FLOAT_SIZE];
+
+   // One parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+      return ( 0 );
+   }
+#if (EP == 1)
+   radioNum = 0;
+   PHY_Lock(); // Function will not return if it fails
+   rssi = (uint8_t)RADIO_Filter_CCA( radioNum, &processingType, CCA_SLEEP_TIME );
+   PHY_Unlock(); // Function will not return if it fails
+   DBG_printf( "Compensated RSSI = %u, %sdBm", rssi, DBG_printFloat( floatStr, RSSI_RAW_TO_DBM( rssi ), 1 ) );
+#else
+   if ( argc == 1 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Not enough arguments" );
+   }
+   else
+   {
+      radioNum = ( uint8_t )atoi( argv[1] );
+
+      if (radioNum < (uint8_t)MAX_RADIO) {
+         PHY_Lock(); // Function will not return if it fails
+         rssi = (uint8_t)RADIO_Filter_CCA( radioNum, &processingType, CCA_SLEEP_TIME );
+         PHY_Unlock(); // Function will not return if it fails
+         DBG_printf( "Compensated RSSI = %u, %sdBm", rssi, DBG_printFloat( floatStr, RSSI_RAW_TO_DBM( rssi ), 1 ) );
+      } else {
+         DBG_logPrintf( 'R', "ERROR - Argument is out of range. Must be between 0 and %u", (uint32_t)MAX_RADIO-1);
+      }
+   }
+#endif
+   return ( 0 );
+}
+#if 0
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RSSIJumpThreshold
+
+   Purpose: This function gets or sets the RSSI Jump Threshold
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RSSIJumpThreshold ( uint32_t argc, char *argv[] )
+{
+   uint8_t rssi;
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      // No parameters
+      if ( argc == 1 )
+      {
+         // Get the RSSI Jump threshold
+         PHY_GetConf_t GetConf;
+         GetConf = PHY_GetRequest( ePhyAttr_RssiJumpThreshold );
+         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+            DBG_printf( "RSSI Jump Threshold is %u dBm", GetConf.val.RssiJumpThreshold );
+         }
+      } else {
+         PHY_SetConf_t SetConf;
+         rssi = ( uint8_t )atoi( argv[1] );
+         SetConf = PHY_SetRequest( ePhyAttr_RssiJumpThreshold, &rssi);
+         if (SetConf.eStatus == ePHY_SET_INVALID_PARAMETER) {
+            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between %d and %d",
+                           PHY_RSSI_JUMP_THRESHOLD_MIN, PHY_RSSI_JUMP_THRESHOLD_MAX );
+         }
+         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
+            DBG_printf( "Failed to set RSSI jump threshold" );
+         }
+      }
+   }
+
+   return ( 0 );
+}
+#endif
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_CCA
@@ -11375,145 +11375,145 @@ uint32_t DBG_CommandLine_Reboot ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_NoiseEstimate
-//
-//   Purpose: This function displays the noise estimate for all channels
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_NoiseEstimate ( uint32_t argc, char *argv[] )
-//{
-//   PHY_GetConf_t GetConf;
-//   uint8_t i;
-//   uint16_t Channel;
-//
-//   // Get the noise estimate
-//   GetConf = PHY_GetRequest( ePhyAttr_NoiseEstimate );
-//   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//      for ( i = 0; i < PHY_MAX_CHANNEL; i++ )
-//      {
-//         (void)PHY_Channel_Get( i, &Channel );
-//         if ( PHY_IsChannelValid( Channel )) {
-//            DBG_printf( "Channel %4u %4d dBm", Channel, GetConf.val.NoiseEstimate[i] );
-//         }
-//      }
-//   }
-//#if ( EP == 1 )
-//   // Get the noise estimate when boost is on
-//   GetConf = PHY_GetRequest( ePhyAttr_NoiseEstimateBoostOn );
-//   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//      for ( i = 0; i < PHY_MAX_CHANNEL; i++ )
-//      {
-//         (void)PHY_Channel_Get( i, &Channel );
-//         if ( PHY_IsChannelValid( Channel )) {
-//            DBG_printf( "Boost On Channel %4u %4d dBm", Channel, GetConf.val.NoiseEstimateBoostOn[i] );
-//         }
-//      }
-//   }
-//#endif
-//   return ( 0 );
-//}
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_NoiseEstimateCount
-//
-//   Purpose: This function displays/Set the noise estimate count
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_NoiseEstimateCount ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t NoiseCount;
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         PHY_GetConf_t GetConf;
-//         // Get the noise estimate count
-//         GetConf = PHY_GetRequest( ePhyAttr_NoiseEstimateCount );
-//         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//            DBG_printf( "Noise estimate count is %u", GetConf.val.NoiseEstimateCount );
-//         }
-//      } else {
-//         PHY_SetConf_t SetConf;
-//         NoiseCount = ( uint8_t )atoi( argv[1] );
-//         SetConf = PHY_SetRequest( ePhyAttr_NoiseEstimateCount, &NoiseCount);
-//         if (SetConf.eStatus == ePHY_SET_INVALID_PARAMETER) {
-//            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between %d and %d",
-//                           PHY_NOISE_ESTIMATE_COUNT_MIN, PHY_NOISE_ESTIMATE_COUNT_MAX );
-//         }
-//         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
-//            DBG_printf( "Failed to set noise estimate count" );
-//         }
-//      }
-//   }
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_NoiseEstimateRate
-//
-//   Purpose: This function displays/Set the noise estimate rate
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_NoiseEstimateRate ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t rate;
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         PHY_GetConf_t GetConf;
-//         // Get the noise estimate rate
-//         GetConf = PHY_GetRequest( ePhyAttr_NoiseEstimateRate );
-//         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//            DBG_printf( "Noise estimate rate is %u minutes", GetConf.val.NoiseEstimateRate );
-//         }
-//      } else {
-//         PHY_SetConf_t SetConf;
-//         rate = ( uint8_t )atoi( argv[1] );
-//         SetConf = PHY_SetRequest( ePhyAttr_NoiseEstimateRate, &rate);
-//         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
-//            DBG_printf( "Failed to set noise estimate rate" );
-//         }
-//      }
-//   }
-//   return ( 0 );
-//}
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NoiseEstimate
+
+   Purpose: This function displays the noise estimate for all channels
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_NoiseEstimate ( uint32_t argc, char *argv[] )
+{
+   PHY_GetConf_t GetConf;
+   uint8_t i;
+   uint16_t Channel;
+
+   // Get the noise estimate
+   GetConf = PHY_GetRequest( ePhyAttr_NoiseEstimate );
+   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+      for ( i = 0; i < PHY_MAX_CHANNEL; i++ )
+      {
+         (void)PHY_Channel_Get( i, &Channel );
+         if ( PHY_IsChannelValid( Channel )) {
+            DBG_printf( "Channel %4u %4d dBm", Channel, GetConf.val.NoiseEstimate[i] );
+         }
+      }
+   }
+#if ( EP == 1 )
+   // Get the noise estimate when boost is on
+   GetConf = PHY_GetRequest( ePhyAttr_NoiseEstimateBoostOn );
+   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+      for ( i = 0; i < PHY_MAX_CHANNEL; i++ )
+      {
+         (void)PHY_Channel_Get( i, &Channel );
+         if ( PHY_IsChannelValid( Channel )) {
+            DBG_printf( "Boost On Channel %4u %4d dBm", Channel, GetConf.val.NoiseEstimateBoostOn[i] );
+         }
+      }
+   }
+#endif
+   return ( 0 );
+}
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NoiseEstimateCount
+
+   Purpose: This function displays/Set the noise estimate count
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_NoiseEstimateCount ( uint32_t argc, char *argv[] )
+{
+   uint8_t NoiseCount;
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      // No parameters
+      if ( argc == 1 )
+      {
+         PHY_GetConf_t GetConf;
+         // Get the noise estimate count
+         GetConf = PHY_GetRequest( ePhyAttr_NoiseEstimateCount );
+         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+            DBG_printf( "Noise estimate count is %u", GetConf.val.NoiseEstimateCount );
+         }
+      } else {
+         PHY_SetConf_t SetConf;
+         NoiseCount = ( uint8_t )atoi( argv[1] );
+         SetConf = PHY_SetRequest( ePhyAttr_NoiseEstimateCount, &NoiseCount);
+         if (SetConf.eStatus == ePHY_SET_INVALID_PARAMETER) {
+            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between %d and %d",
+                           PHY_NOISE_ESTIMATE_COUNT_MIN, PHY_NOISE_ESTIMATE_COUNT_MAX );
+         }
+         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
+            DBG_printf( "Failed to set noise estimate count" );
+         }
+      }
+   }
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NoiseEstimateRate
+
+   Purpose: This function displays/Set the noise estimate rate
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_NoiseEstimateRate ( uint32_t argc, char *argv[] )
+{
+   uint8_t rate;
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      // No parameters
+      if ( argc == 1 )
+      {
+         PHY_GetConf_t GetConf;
+         // Get the noise estimate rate
+         GetConf = PHY_GetRequest( ePhyAttr_NoiseEstimateRate );
+         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+            DBG_printf( "Noise estimate rate is %u minutes", GetConf.val.NoiseEstimateRate );
+         }
+      } else {
+         PHY_SetConf_t SetConf;
+         rate = ( uint8_t )atoi( argv[1] );
+         SetConf = PHY_SetRequest( ePhyAttr_NoiseEstimateRate, &rate);
+         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
+            DBG_printf( "Failed to set noise estimate rate" );
+         }
+      }
+   }
+   return ( 0 );
+}
+
 static uint8_t scaleAverage( double val, uint8_t min, uint8_t max )
 {
    if (min == max) {
@@ -11604,7 +11604,7 @@ static int cmpfunc( const void *a, const void *b) {
   return *(char*)a - *(char*)b;
 }
 
-typedef struct 
+typedef struct
 {
    char RadioSPI;
    char RadioSDN;
@@ -11657,7 +11657,7 @@ static bool checkOptions( char inputByte, char *option, char pAllowed[] )
    return ( (bool)true ); // found a matching option
 }
 #endif // Capability to change port pin configuration during noiseband run
-                         
+
 uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 {
    uint32_t      time;
@@ -11709,7 +11709,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       {
          listFreqs = (bool)true;
          --argc;
-      }  
+      }
    }
 #endif
    // No parameters
@@ -11754,7 +11754,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
                       (int32_t)RSSI_RAW_TO_DBM(stats->P999), abs((int32_t)(RSSI_RAW_TO_DBM(stats->P999)*10)%10));
             }
             else
-#endif 
+#endif
             {
                DBG_printf( "%4d.%1d %4d.%1d %4d.%1d %4d.%02d %3u.%02u %4d.%1d %4d.%1d %4d.%1d %4d.%1d %4d.%1d",
                       (int32_t)RSSI_RAW_TO_DBM(stats->min ), abs((int32_t)(RSSI_RAW_TO_DBM(stats->min )*10)%10),
@@ -11873,9 +11873,9 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
                               {
                                  optionsOK = (bool)true;
                               } else { DBG_printf( "Error: Meter = %c, must be I|U|H|L to set the meter interface port pins or _ to leave them as is", portPins.Meter );    }
-                           } else { DBG_printf( "Error: Unused pins = %c, must be I|U|H|L to set unused pins or _ to leave them as is", portPins.Unused );                  }                           
-                        } else { DBG_printf( "Error: JtagPins = %c, must be H|L|J to set JTAG pins or _ to leave them as is", portPins.JtagPins );                          }                           
-                    } else { DBG_printf( "Error: RadioGPIO = %c, must be I|U to set MCU pins connected to Radio GPIOn pins or _ to leave them as is", portPins.RadioGPIO ); }                        
+                           } else { DBG_printf( "Error: Unused pins = %c, must be I|U|H|L to set unused pins or _ to leave them as is", portPins.Unused );                  }
+                        } else { DBG_printf( "Error: JtagPins = %c, must be H|L|J to set JTAG pins or _ to leave them as is", portPins.JtagPins );                          }
+                    } else { DBG_printf( "Error: RadioGPIO = %c, must be I|U to set MCU pins connected to Radio GPIOn pins or _ to leave them as is", portPins.RadioGPIO ); }
                  } else { DBG_printf( "Error: RadioOSC = %c, must be H|M|L|N|P to set Radio SPI chip select drive strength or _ to leave them as is", portPins.RadioOSC );  }
                } else { DBG_printf( "Error: RadioCS = %c, must be H|M|L|N|P to set Radio SPI Chip Select drive strength or _ to leave them as is", portPins.RadioCS );      }
             } else { DBG_printf( "Error: RadioSDN = %c, must be H|M|L|N|P to set Radio SDN pin drive strength or _ to leave it as is", portPins.RadioSDN );                 }
@@ -11987,7 +11987,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    // TODO: RA6E1 Bob: restore original time calculation for K24/MQX
 #else
    #define PAUSE_MSEC 11 // TODO: RA6E1 Bob: reflect this in the calculation of time
-   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) * (float)1.05 ); // fudge factor 
+   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) * (float)1.05 ); // fudge factor
 #endif
    // Remove the time it takes to read RSSI from the sampling rate so that we read RSSI at the specified rate
    if (samplingRate > MINIMUM_TIME) {
@@ -12001,7 +12001,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 #define IOPORT_CFG_DRIVE_LOW 0UL // TODO: RA6E1 Bob: not sure if LOW is a valid drive capability value, let's support it for testing purposes
 
 /* If non-blank, set up configurations for drive strength of the Radio SPI port pins */
-   if ( ( portPins.RadioSPI != ' ' ) && ( portPins.RadioSPI != '_' ) ) 
+   if ( ( portPins.RadioSPI != ' ' ) && ( portPins.RadioSPI != '_' ) )
    {
       portConfig = ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI );
       if        ( portPins.RadioSPI == 'H' ) {
@@ -12019,7 +12019,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       }
       ports.RadioSPI = portPins.RadioSPI;                 // remember valid configuration in static memory for next run
       R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_01, portConfig ); // P101: SPIB_MOSI
-      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_02, portConfig ); // P102: SPIB_SCK     
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_02, portConfig ); // P102: SPIB_SCK
    }
 /* If non-blank, set up configurations for drive strength and output type of the SDN_SI4467 (radio shutdown) signal */
    if ( ( portPins.RadioSDN != ' ' ) && ( portPins.RadioSDN != '_' ) )
@@ -12053,7 +12053,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI | (uint32_t)IOPORT_CFG_PMOS_ENABLE );
       }
       ports.RadioCS = portPins.RadioCS;                   // remember valid configuration in static memory for next run
-      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_03, portConfig ); // P103: /SPIB_CS_SI4467      
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_03, portConfig ); // P103: /SPIB_CS_SI4467
    }
  /* If non-blank, set up configurations for drive strength of the Oscillator Enable port pin */
    if ( ( portPins.RadioOSC != ' ' ) && ( portPins.RadioOSC != '_' ) )
@@ -12070,7 +12070,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          portConfig = ((uint32_t)IOPORT_CFG_DRIVE_LOW   | (uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_SPI | (uint32_t)IOPORT_CFG_PMOS_ENABLE );
       }
       ports.RadioOSC = portPins.RadioOSC;                  // remember valid configuration in static memory for next run
-      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_05, portConfig );  // P105: /OSC_EN      
+      R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_05, portConfig );  // P105: /OSC_EN
    }
  /* If non-blank, then set up configurations for MCU pins connected to the Radio GPIOn_SI4467 pins; do not allow them to be outputs as the SI4467 drives them! */
    if ( ( portPins.RadioGPIO != ' ' ) && ( portPins.RadioGPIO != '_' ) )
@@ -12149,10 +12149,10 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       R_BSP_PinCfg ( BSP_IO_PORT_07_PIN_08, portConfig ); // P708: unused
    }
 /* If non-blank, set up onfigurations for meter interface port pins (use only when NIC is NOT integrated with a meter) */
-   if ( ( portPins.Meter != ' ' ) && ( portPins.Meter != '_' )  )  
+   if ( ( portPins.Meter != ' ' ) && ( portPins.Meter != '_' )  )
    {
       if        ( portPins.Meter == 'U' ) {
-         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT  | (uint32_t)IOPORT_CFG_PULLUP_ENABLE                                                 ); // Input with pull-up enabled     
+         portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT  | (uint32_t)IOPORT_CFG_PULLUP_ENABLE                                                 ); // Input with pull-up enabled
       } else if ( portPins.Meter == 'I' ) {
          portConfig = ((uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                                                                                       ); // Input without pull-up enabled
       } else if ( portPins.Meter == 'H' ) {
@@ -12167,7 +12167,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       R_BSP_PinCfg ( BSP_IO_PORT_00_PIN_06, portConfig); // P006: /PF_METER
       R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_07, portConfig); // P107: AD_I-210+C_METER
       R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_14, portConfig); // P114: ZCD_METER
-      R_BSP_PinCfg ( BSP_IO_PORT_05_PIN_05, portConfig); // P505; T_I-210+C_METER      
+      R_BSP_PinCfg ( BSP_IO_PORT_05_PIN_05, portConfig); // P505; T_I-210+C_METER
    }
    // TODO: RA6E1 Bob: Add capability to configure UART pins but restore them afterwards
    // TODO: RA6E1 Bob: Set unused GPIO pins on the radio to known state
@@ -12179,7 +12179,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       (void) R_CGC_Open ( &g_cgc0_ctrl, &g_cgc0_cfg );
       cgcInitialized = (bool)true;
    }
-   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_HOCO ); // 
+   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_HOCO ); //
    (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_MOCO );
    (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_LOCO );
 #endif // 0
@@ -12188,7 +12188,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 #if 0 // TODO: RA6E1 Bob: Temporary code so that we don't need to initialize the PHY
    vRadio_Init(eRADIO_MODE_NORMAL);
 #endif
-   
+
    DBG_printf( "test should take %02u:%02u", time / 60, time % 60 );
 
    OS_TASK_Sleep( waittime * ONE_SEC );
@@ -12207,7 +12207,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    {
       PHY_Lock();      // Function will not return if it fails
       RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
-      PHY_Unlock();    // Function will not return if it fails 
+      PHY_Unlock();    // Function will not return if it fails
       qsort( workBuf, nSamples, sizeof(uint8_t), cmpfunc); // Sort RSSI array
 
       // Compute average and stddev
@@ -12239,7 +12239,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    DBG_logPrintf( 'R', "Noiseband end, took %d seconds", TimeDiff/1000000);
 #endif
-                 
+
 #if 0 // TODO: RA6E1 Bob: temporarily remove until Radio and PHY are integrated
    // Get the RX channels
    GetConf = PHY_GetRequest( ePhyAttr_RxChannels );
