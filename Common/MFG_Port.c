@@ -157,7 +157,7 @@
 #warning "Do not release with ECHO_OPTICAL_PORT set non-zero"
 #endif
 #define MAX_DTLS_DISCONNECT_TRIES (5)      /* Maximum times to wait for a buffer to be freed */
-#define MFGP_MAX_MFG_COMMAND_CHARS 1024    /* Root certificat may be up to 512 bytes  */
+#define MFGP_MAX_MFG_COMMAND_CHARS 1024    /* Root certificate may be up to 512 bytes  */
 #define MFGP_MAX_CMDLINE_ARGS 6
 #define CTRL_C_CHAR 0x03
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -1944,12 +1944,16 @@ void MFGP_uartRecvTask( taskParameter )
          MFGP_numPrintBytes = 0;
          rxByte = 0x0;
       }/* end if () */
-     else if( rxByte != (uint8_t)0x00 && ( rxByte != LINE_FEED_CHAR ) && ( rxByte != CARRIAGE_RETURN_CHAR ) && ( rxByte != BACKSPACE_CHAR) && (rxByte != DELETE_CHAR ))
+     else if( ( rxByte != (uint8_t)0x00 ) &&
+            ( rxByte != LINE_FEED_CHAR ) &&
+            ( rxByte != CARRIAGE_RETURN_CHAR ) &&
+            ( rxByte != BACKSPACE_CHAR) &&
+            (rxByte != DELETE_CHAR ) )
      {
         MFGP_CommandBuffer[ MFGP_numBytes++ ] = rxByte;
         MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
         rxByte = 0x0;
-        for ( MFGP_numBytes ; MFGP_numBytes < 1604 ; MFGP_numBytes++ )
+        for ( MFGP_numBytes ; MFGP_numBytes < MFGP_MAX_MFG_COMMAND_CHARS ; MFGP_numBytes++ )
          {
             /* UART_read used to read characters while doing Copy/Paste */
             ( void )UART_read ( mfgUart, &rxByte, sizeof(rxByte) );
@@ -2072,7 +2076,11 @@ void MFGP_uartRecvTask( taskParameter )
               /* Call the command */
               OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
 #if ( USE_USB_MFG != 0 )
+#if ( RTOS_SELECTION == MQX_RTOS ) 
               event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+              event_flags = OS_EVNT_Wait ( &CMD_events, 0x00ffffff, (bool)false, ONE_SEC );
+#endif
               if ( event_flags == 0 )    /* Check for time-out.  */
               {
                  /* Unblock task(s) waiting on USB output  */
