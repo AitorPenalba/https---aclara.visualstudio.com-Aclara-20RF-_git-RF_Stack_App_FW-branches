@@ -416,6 +416,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 #if ( RTOS_SELECTION == MQX_RTOS )
    (void)fgets( DataBuffer, (int32_t)DataLength, UartHandle[UartId] );
 #elif ( RTOS_SELECTION == FREE_RTOS )
+   /* This function can be used for DBG port alone */
    // TODO: RA6 [name_Balaji]: To process the copy paste of multiple commands
    uint8_t rxByte = 0;
    uint32_t DBGP_numBytes = 0;

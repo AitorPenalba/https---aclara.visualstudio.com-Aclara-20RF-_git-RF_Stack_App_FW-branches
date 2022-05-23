@@ -207,7 +207,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DVR_DAC0_init, STRT_FLAG_NONE ),  /* TODO: RA6E1: Review the order */
 #endif
 #if ENABLE_HMC_TASKS
-#if END_DEVICE_PROGRAMMING_CONFIG == 1
+#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
    INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
 #endif
    INIT( HMC_STRT_init, STRT_FLAG_NONE ),
@@ -240,7 +240,8 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( SEC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   
+   INIT( SELF_init, STRT_FLAG_NONE ),
+
 #if 0 // TODO: RA6: Add later
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS

@@ -82,6 +82,10 @@ static SELF_file_t      SELF_testFile =
 uint8_t flashBuffer[512];
 uint8_t checkFlashBuffer[512];
 
+#if ( MCU_SELECTED == RA6E1 )
+static const enum_UART_ID mfgPortUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
+#endif
+
 /* TYPE DEFINITIONS */
 
 /* ****************************************************************************************************************** */
@@ -176,14 +180,8 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 void SELF_testTask( taskParameter )
 {
    uint16_t       selfTestResults;
-
-#if 1
-   // TODO: RA6: Use line 192 once complete implementation is available
    DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
-   selfTestResults = RunSelfTest();       /* Run once during the init phase   */
-   vTaskSuspend(NULL); /* TODO: Remove*/
-#else
-   DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
+#if ( RTOS_SELECTION == MQX_RTOS ) 
    (void)Arg0;    /* Not used - avoids lint warning   */
 #if ( USE_USB_MFG == 0 )
    MQX_FILE_PTR   stdout_ptr;       /* mqx file pointer for UART  */
@@ -191,10 +189,12 @@ void SELF_testTask( taskParameter )
    {
 #if 0
       (void)_io_set_handle(IO_STDOUT, stdout_ptr);
-#endif
+#endif // if 0
    }
 #endif
+#endif // if MQX_RTOS
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 #if ( USE_USB_MFG == 0 )
    (void)fprintf( stdout_ptr, "%s %04X\n", "SelfTest", selfTestResults );
    OS_TASK_Sleep( 20 );
@@ -219,15 +219,28 @@ void SELF_testTask( taskParameter )
          OS_TASK_Sleep( 1000U ); /* Wait 1 second before tring again.   */
       }
    }
-#endif
-
+#endif //USE_USB_MFG
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   char resBuff[18];
+   ( void )snprintf( resBuff, sizeof( resBuff ), "\r\n%s %04X\r\n", "SelfTest", selfTestResults );
+   ( void )UART_write( mfgPortUart, (uint8_t*)resBuff, sizeof( resBuff ) );
+   if ( SELF_notify != NULL )
+   {
+      OS_EVNT_Set ( SELF_notify, 1U );
+   }
+#endif //RTOS_SELECTION
    /* Now, lower the task priority to just higher than the IDLE task.  */
    (void)OS_TASK_Set_Priority ( pTskName_Test, LOWEST_TASK_PRIORITY_ABOVE_IDLE() );
 
    for (;;)                                                    /* Task Loop */
    {
       /* Wait for an event or 24 hours to elapse   */
+#if ( RTOS_SELECTION == MQX_RTOS ) 
       event_flags = OS_EVNT_Wait ( &SELF_events, 0xffffffff, (bool)false , ONE_MIN * 60 * 24 );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+      event_flags = OS_EVNT_Wait ( &SELF_events, 0x00ffffff, (bool)false , ONE_MIN * 60 * 24 );
+#endif
+
       if ( event_flags != 0 )
       {
          //NOTE: Selftests initiated by MFg port do not generate Fail/Succeed Events
@@ -272,7 +285,6 @@ void SELF_testTask( taskParameter )
          (void)RunSelfTest();
       }
    }
-#endif // #if 0
 }
 
 /***********************************************************************************************************************
@@ -399,7 +411,7 @@ static uint16_t RunSelfTest()
    }
 #endif
 
-#if ( TM_RTC_UNIT_TEST == 1 )
+
    /* Execute the RTC Test last (to allow sufficient time for VBAT to come up and the OSC to start?)
       otherwise if the RTC SuperCap is completely discharged on the T-board the RTC test may fail on
       first time from power up.  The EP's are OK when in a meter or if powered up standalone and
@@ -410,11 +422,9 @@ static uint16_t RunSelfTest()
       if ( SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had failed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 0;
-#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event Log module is ready
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOSucceeded;
          (void)EVL_LogEvent( 45, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
-#endif
       }
    }
    else
@@ -422,7 +432,6 @@ static uint16_t RunSelfTest()
       if ( !SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had passed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 1;
-#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event Log module is ready
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOFailed;
          eventData.eventKeyValuePairsCount      = 1;
@@ -430,10 +439,9 @@ static uint16_t RunSelfTest()
          *( uint16_t * )keyVal.Key              = stRTCFailCount;
          *( uint16_t * )keyVal.Value            = SELF_TestData.RTCFail;
          (void)EVL_LogEvent( 86, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
-#endif
       }
    }
-#endif
+
    /* Update the number of times self test has run */
    SELF_TestData.selfTestCount++;
 #if 0
@@ -684,13 +692,16 @@ returnStatus_t SELF_testRTC( void )
    R_RTC_Close (&g_rtc0_ctrl);// TODO: RA6 [name_Balaji]: Closing RTC, for now as there is no other known method to check the RTC valid or not
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )
+// TODO: RA6 [name_Balaji]: Remove unit test if not required
+#if 0
    bool isRTCUnitTestFailed;
    isRTCUnitTestFailed = RTC_UnitTest();
    if (isRTCUnitTestFailed == 1)
    {
      DBG_printf( "ERROR - RTC failed to Set Error Adjustment\n" );
    }
-#endif
+#endif // if 0
+#endif // TM_RTC_UNIT_TEST
    if ( retVal == eFAILURE )
    {
       if( SELF_TestData.RTCFail < ( ( 1 << ( 8 * sizeof( SELF_TestData.RTCFail ) ) ) - 1 ) ) /* Do not let counter rollover.  */
@@ -699,7 +710,7 @@ returnStatus_t SELF_testRTC( void )
       }
    }
 
-//   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );
    return retVal;
 }
 
@@ -763,6 +774,8 @@ returnStatus_t SELF_testNV( void )
          SELF_TestData.nvFail += (uint16_t)errCount;
       }
    }
+
+   DBG_logPrintf( 'I', "SELF_testNV: Done - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
    return ( ( 0 == errCount ) ? eSUCCESS : eFAILURE );
 }
 
