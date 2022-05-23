@@ -7,7 +7,7 @@
  * Contents:
  *
  ******************************************************************************
- * Copyright (c) 2012 ACLARA.  All rights reserved.
+ * Copyright (c) 2012-2022 ACLARA.  All rights reserved.
  * This program may not be reproduced, in whole or in part, in any form or by
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
