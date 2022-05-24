@@ -34,7 +34,18 @@
 #endif
 
 /* #DEFINE DEFINITIONS */
+#if ( MCU_SELECTED == RA6E1 )  //To process the input byte in RA6E1
+#define MAX_DBG_COMMAND_CHARS     1602
 
+#define ESCAPE_CHAR           0x1B
+#define LINE_FEED_CHAR        0x0A
+#define CARRIAGE_RETURN_CHAR  0x0D
+#define BACKSPACE_CHAR        0x08
+#define TILDA_CHAR            0x7E
+#define WHITE_SPACE_CHAR      0x20
+#define CTRL_C_CHAR           0x03
+#define DELETE_CHAR           0x7f
+#endif
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -89,8 +100,14 @@ const uart_cfg_t *UartCfg[MAX_UART_ID] =
 #if ( RTOS_SELECTION == MQX_RTOS )
 static MQX_FILE_PTR UartHandle[MAX_UART_ID];
 #endif
+
+#if ( MCU_SELECTED == RA6E1 )
+static const char       CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
+extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+static char             DbgPrintBuffer[MAX_DBG_COMMAND_CHARS + 1];
 // TODO: RA6 [name_Balaji]: Make the transferSem work without extern
 extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
+#endif
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
@@ -308,7 +325,6 @@ uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 #endif
 }
 
-#if ( MCU_SELECTED == NXP_K24 )/* The Below API are implemented by Renesas FSP itself */
 /*******************************************************************************
 
   Function name: UART_fgets
@@ -331,9 +347,145 @@ uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 *******************************************************************************/
 void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 {
+#if ( RTOS_SELECTION == MQX_RTOS ) 
    (void)fgets( DataBuffer, (int32_t)DataLength, UartHandle[UartId] );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   // TODO: RA6 [name_Balaji]: To process the copy paste of multiple commands
+   uint8_t rxByte = 0;
+   uint32_t DBGP_numBytes = 0;
+   uint32_t DBGP_numPrintBytes = 0;
+   bool lineComplete = false;
+   /* Loops Until Newline is detected */
+   for ( ;; )
+   {
+      ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
+      ( void )OS_SEM_Pend( &dbgReceiveSem_, OS_WAIT_FOREVER );
+      if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
+         ( rxByte == CTRL_C_CHAR ) ||    /* User pressed CRTL-C key */
+         ( rxByte == 0xC0 ))             /* Left over SLIP protocol characters in buffer */
+      {
+         /* user canceled the in progress command */
+         memset( DbgPrintBuffer, 0, DBGP_numPrintBytes );
+         memset( DataBuffer, 0, DBGP_numBytes );
+         DBGP_numBytes = 0;
+         DBGP_numPrintBytes = 0;
+         rxByte = 0x0;
+      }/* end if () */
+      else if( ( rxByte != (uint8_t)0x00 ) &&
+             ( rxByte != LINE_FEED_CHAR ) &&
+             ( rxByte != CARRIAGE_RETURN_CHAR ) &&
+             ( rxByte != BACKSPACE_CHAR) &&
+             (rxByte != DELETE_CHAR ) )
+      {
+         DataBuffer[DBGP_numBytes++] = rxByte;
+         DbgPrintBuffer[DBGP_numPrintBytes++] = rxByte;
+         rxByte = 0x0;
+         for (DBGP_numBytes;DBGP_numBytes<DataLength;DBGP_numBytes++)
+         {
+            /* UART_read used to read characters while doing Copy/Paste */
+            ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
+            /* 10millisecond is the delay timing where a successful UART_read happens */
+            ( void )OS_SEM_Pend( &dbgReceiveSem_, ( portTICK_RATE_MS * 2) );
+            
+            if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
+               ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
+               ( rxByte == 0xC0 ) )           /* Left over SLIP protocol characters in buffer */
+            {
+               /* user canceled the in progress command */
+               memset( DbgPrintBuffer, 0, DBGP_numPrintBytes );
+               memset( DataBuffer, 0, DBGP_numBytes );
+               DBGP_numBytes = 0;
+               DBGP_numPrintBytes = 0;
+               rxByte = 0x0;
+            }/* end if () */
+            else if( ( rxByte != (uint8_t)0x00 ) &&
+                   ( rxByte != LINE_FEED_CHAR ) &&
+                   ( rxByte != CARRIAGE_RETURN_CHAR ) &&
+                   ( rxByte != BACKSPACE_CHAR) &&
+                   ( rxByte != DELETE_CHAR ) )
+            {
+               DbgPrintBuffer[DBGP_numPrintBytes++] = rxByte;
+               DataBuffer[DBGP_numBytes] = rxByte;
+               rxByte = 0x0;
+            }/* end if () */
+            else if( ( rxByte == LINE_FEED_CHAR ) ||
+                   ( rxByte == CARRIAGE_RETURN_CHAR ) )
+            {
+               if ( DBGP_numBytes == 0 )
+               {
+                  ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
+               }
+               else
+               {
+                  rxByte = 0x0;
+                  ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)DbgPrintBuffer, DBGP_numPrintBytes );
+                  ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
+                  lineComplete = true;
+                  break;
+               }
+            }/* end else if () */
+            else if( rxByte == BACKSPACE_CHAR || rxByte == DELETE_CHAR )
+            {
+               if( DBGP_numBytes != 0 )
+               {
+                  /* buffer contains at least one character, remove the last one entered */
+                  /* Resets the last entered character */
+                  DataBuffer[ --DBGP_numBytes ] = 0x00;
+                  rxByte = 0x0;
+               }
+            }/* end else if () */
+            else
+            {
+               /* Used to ECHO the recieved character when no more valid data is read */
+               UART_write( UART_DEBUG_PORT, (uint8_t*)DbgPrintBuffer, DBGP_numPrintBytes );
+               memset( DbgPrintBuffer, 0, DBGP_numPrintBytes );
+               DBGP_numPrintBytes = 0;
+               break;
+            }/* end else () */
+         }/* end for () */
+      }/* end else if () */
+      else if ( ( rxByte == LINE_FEED_CHAR ) || ( rxByte == CARRIAGE_RETURN_CHAR ) )
+      {
+            if( DBGP_numBytes == 0 )
+            {
+               ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
+            }
+            else
+            {
+               ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
+               DbgPrintBuffer[DBGP_numPrintBytes] = rxByte;
+               rxByte = 0x0;
+            }
+            lineComplete = true;
+      }
+      else if( rxByte == BACKSPACE_CHAR || rxByte == DELETE_CHAR )
+      {
+         if( DBGP_numBytes != 0 )
+         {
+            /* buffer contains at least one character, remove the last one entered */
+            /* Resets the last entered character */
+            DataBuffer[ --DBGP_numBytes ] = 0x00;
+            rxByte = 0x0;
+            /* Gives GUI effect in Terminal for Backspace */
+            ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)"\b\x20\b", 3 );
+         }
+      }/* end else if () */
+      else
+      {
+         DbgPrintBuffer[DBGP_numPrintBytes++] = rxByte;
+         rxByte = 0x0;
+         ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)DbgPrintBuffer, DBGP_numPrintBytes );
+         memset( DbgPrintBuffer, 0, DBGP_numPrintBytes );
+         DBGP_numPrintBytes = 0;
+      }
+      if ( lineComplete == true )
+      {
+         break;
+      }
+   }
+#endif
 }
-
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_flush
@@ -600,4 +752,40 @@ void user_uart_callback( uart_callback_args_t *p_args )
    }
 }/* end user_uart_callback () */
 
+#endif
+
+#if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
+
+  Function name: dbg_uart_callback
+
+  Purpose: Interrupt Handler for Debug UART Module, postpones the semaphore wait
+            once one byte of data is read in SCI Channel 4 (DBG port)
+
+  Returns: None
+
+*******************************************************************************/
+void dbg_uart_callback( uart_callback_args_t *p_args )
+{
+   /* Handle the UART event */
+   switch (p_args->event)
+   {
+      /* Receive complete */
+      case UART_EVENT_RX_COMPLETE:
+      {
+         OS_SEM_Post_fromISR( &dbgReceiveSem_ );
+         break;
+      }
+      /* Transmit complete */
+      case UART_EVENT_TX_COMPLETE:
+      {
+         OS_SEM_Post_fromISR( &transferSem[ UART_DEBUG_PORT ] );
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }/* end switch () */
+}/* end user_uart_callback () */
 #endif

@@ -157,7 +157,7 @@
 #warning "Do not release with ECHO_OPTICAL_PORT set non-zero"
 #endif
 #define MAX_DTLS_DISCONNECT_TRIES (5)      /* Maximum times to wait for a buffer to be freed */
-#define MFGP_MAX_MFG_COMMAND_CHARS 1024    /* Root certificat may be up to 512 bytes  */
+#define MFGP_MAX_MFG_COMMAND_CHARS 1024    /* Root certificate may be up to 512 bytes  */
 #define MFGP_MAX_CMDLINE_ARGS 6
 #define CTRL_C_CHAR 0x03
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -170,6 +170,7 @@
 #define BACKSPACE_CHAR        0x08
 #define TILDA_CHAR            0x7E
 #define WHITE_SPACE_CHAR      0x20
+#define DELETE_CHAR           0x7f
 #if ( EP == 1 )
 #define RFTEST_MODE_TIMEOUT (8U * TIME_TICKS_PER_HR)  /* time out of 8 hours   */
 #endif
@@ -181,7 +182,7 @@
 #endif
 
 #if( RTOS_SELECTION == FREE_RTOS )
-#define MFG_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#define MFG_NUM_MSGQ_ITEMS 20 //NRJ: TODO Figure out sizing
 #else
 #define MFG_NUM_MSGQ_ITEMS 0
 #endif
@@ -223,6 +224,8 @@
 static uint16_t         MFGP_CmdLen;
 static char             MFGP_CommandBuffer[MFGP_MAX_MFG_COMMAND_CHARS + 1];
 static uint16_t         MFGP_numBytes = 0;               /* Number of bytes currently in the command buffer */
+static char             MFGP_PrintCmdBuffer[MFGP_MAX_MFG_COMMAND_CHARS + 1];
+static uint16_t         MFGP_numPrintBytes = 0;               /* Number of bytes currently in the command buffer */
 static char           * argvar[MFGP_MAX_CMDLINE_ARGS + 1];
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 static enum_UART_ID mfgUart = UART_MANUF_TEST;           /* UART used for MFG port operations   */
@@ -1657,14 +1660,14 @@ returnStatus_t MFGP_cmdInit( void )
    // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
    // TODO: RA6 [name_Balaji]: Check the number of messages
    // TODO RA6: NRJ: determine if semaphores need to be counting
-   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, 20, "MFGP" ) && OS_SEM_Create( &mfgReceiveSem_, 0) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ], 0 ) )
+   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS, "MFGP" ) && OS_SEM_Create( &mfgReceiveSem_, 0) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ], 0 ) )
    {
       retVal = eSUCCESS;
    }
 #endif
    return(retVal);
 }
-
+#if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
    Function Name: mfgpReadByte
 
@@ -1684,14 +1687,12 @@ static void mfgpReadByte( uint8_t rxByte )
    {
       /* user canceled the in progress command */
       MFGP_numBytes = 0;
-#if ( MCU_SELECTED == NXP_K24 )
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
       (void)UART_flush ( mfgUart  );
 #else
       usb_send( CRLF, sizeof( CRLF ) );
       usb_flush();
-#endif
 #endif
    }
    else if( rxByte == BACKSPACE_CHAR || rxByte == 0x7f )
@@ -1700,10 +1701,6 @@ static void mfgpReadByte( uint8_t rxByte )
       {
          /* buffer contains at least one character, remove the last one entered */
          MFGP_numBytes -= 1;
-#if ( MCU_SELECTED == RA6E1 )
-         /* Gives GUI ffect in Terminal for Backspace */
-         ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b", 3 );
-#endif
       }
    }
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -1748,45 +1745,34 @@ static void mfgpReadByte( uint8_t rxByte )
             return;
          }
 #endif
-#if ( MCU_SELECTED == RA6E1 )
-         if ( MFGP_numBytes == 0)
+         commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
+         if ( commandBuf != NULL )
          {
-            /* Gives GUI in Terminal for Carriage Return */
-            (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+            commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
+
+#if ( DTLS_DEBUG == 1 )
+            INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
+            OS_TASK_Sleep( 50U );
+#endif
+            ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
+            /* Call the command */
+            OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
+#if ( USE_USB_MFG != 0 )
+            event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
+            if ( event_flags == 0 )    /* Check for time-out.  */
+            {
+               /* Unblock task(s) waiting on USB output  */
+               USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
+            }
+#endif
+            MFGP_numBytes = 0;
          }
          else
          {
-#endif
-            commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
-            if ( commandBuf != NULL )
-            {
-               commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
-
-#if ( DTLS_DEBUG == 1 )
-               INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
-               OS_TASK_Sleep( 50U );
-#endif
-               ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
-               /* Call the command */
-               OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
-#if ( USE_USB_MFG != 0 )
-               event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
-               if ( event_flags == 0 )    /* Check for time-out.  */
-               {
-                  /* Unblock task(s) waiting on USB output  */
-                  USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
-               }
-#endif
-               MFGP_numBytes = 0;
-            }
-            else
-            {
-               ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
-               MFGP_numBytes = 0;
-            }
-#if ( MCU_SELECTED == RA6E1 )
+            ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
+            MFGP_numBytes = 0;
          }
-#endif
+
       }
       else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
       {
@@ -1796,12 +1782,11 @@ static void mfgpReadByte( uint8_t rxByte )
       else
       {
          // Save character in buffer (space is available)
-        ( void )UART_write( mfgUart, &rxByte, sizeof( rxByte ) );
          MFGP_CommandBuffer[ MFGP_numBytes++] = rxByte;
       }
    }
 }
-
+#endif
 /***********************************************************************************************************************
    Function Name: MFGP_uartTask
 
@@ -1942,17 +1927,203 @@ void MFGP_uartRecvTask( taskParameter )
          mfgpReadByte( rxByte );
       }
 #elif ( MCU_SELECTED == RA6E1 )
+      // TODO: RA6 [name_Balaji]: To process the copy paste of multiple commands
+      buffer_t *commandBuf;
       /* Instead of Polling method, Interrupt routine method is used in RA6E1 which
        * reads byte-by-byte and stores the data in an array */
      ( void )UART_read( mfgUart, &rxByte, sizeof( rxByte ) );
      ( void )OS_SEM_Pend( &mfgReceiveSem_, OS_WAIT_FOREVER );
-     if( rxByte != (uint8_t)0x00 )
+     if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
+         ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
+         ( rxByte == 0xC0 ))           /* Left over SLIP protocol characters in buffer */
+      {
+         /* user canceled the in progress command */
+         memset( MFGP_CommandBuffer, 0, MFGP_numBytes );
+         memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
+         MFGP_numBytes = 0;
+         MFGP_numPrintBytes = 0;
+         rxByte = 0x0;
+      }/* end if () */
+     else if( ( rxByte != (uint8_t)0x00 ) &&
+            ( rxByte != LINE_FEED_CHAR ) &&
+            ( rxByte != CARRIAGE_RETURN_CHAR ) &&
+            ( rxByte != BACKSPACE_CHAR) &&
+            (rxByte != DELETE_CHAR ) )
      {
-        mfgpReadByte( rxByte );
-        rxByte = 0x00;     /* resets the rxByte */
-     }/* end if () */
+        MFGP_CommandBuffer[ MFGP_numBytes++ ] = rxByte;
+        MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
+        rxByte = 0x0;
+        for ( MFGP_numBytes ; MFGP_numBytes < MFGP_MAX_MFG_COMMAND_CHARS ; MFGP_numBytes++ )
+         {
+            /* UART_read used to read characters while doing Copy/Paste */
+            ( void )UART_read ( mfgUart, &rxByte, sizeof(rxByte) );
+            /* 10millisecond is the delay timing where a successful UART_read happens */
+            ( void )OS_SEM_Pend( &mfgReceiveSem_, ( portTICK_RATE_MS * 2) );
+
+            if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
+               ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
+               ( rxByte == 0xC0 ))           /* Left over SLIP protocol characters in buffer */
+            {
+               /* user canceled the in progress command */
+               memset( MFGP_CommandBuffer, 0, MFGP_numBytes );
+               memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
+               MFGP_numBytes = 0;
+               MFGP_numPrintBytes = 0;
+               rxByte = 0x0;
+            }/* end if () */
+            else if( ( rxByte != (uint8_t)0x00 ) &&
+                   ( rxByte != LINE_FEED_CHAR ) &&
+                   ( rxByte != CARRIAGE_RETURN_CHAR ) &&
+                   ( rxByte != BACKSPACE_CHAR) &&
+                   (rxByte != DELETE_CHAR ) )
+            {
+               MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
+               MFGP_CommandBuffer[ MFGP_numBytes ] = rxByte;
+               rxByte = 0x0;
+            }/* end if () */
+            else if( ( rxByte == LINE_FEED_CHAR ) ||
+                   ( rxByte == CARRIAGE_RETURN_CHAR ) )
+            {
+               if ( MFGP_numBytes == 0 )
+               {
+                  ( void )UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+               }
+               else
+               {
+                  rxByte = 0x0;
+                  ( void )UART_write( mfgUart, (uint8_t*)MFGP_PrintCmdBuffer, MFGP_numPrintBytes );
+                  ( void )UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+                  memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
+                  commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
+                  if ( commandBuf != NULL )
+                  {
+                     commandBuf->data[ MFGP_numBytes ] = 0; /* Null terminating string */
+#if ( DTLS_DEBUG == 1 )
+                     INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
+                     OS_TASK_Sleep( 50U );
 #endif
+                     ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
+                     /* Call the command */
+                     OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
+#if ( USE_USB_MFG != 0 )
+                     event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
+                     if ( event_flags == 0 )    /* Check for time-out.  */
+                     {
+                        /* Unblock task(s) waiting on USB output  */
+                        USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
+                     }
+#endif
+                     MFGP_numBytes = 0;
+                  }
+                  else
+                  {
+                     ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
+                     MFGP_numBytes = 0;
+                  }
+                  break;
+               }
+            }/* end else if () */
+            else if( ( rxByte == BACKSPACE_CHAR ) ||
+                    ( rxByte == DELETE_CHAR ) )
+            {
+               if( MFGP_numBytes != 0 )
+               {
+                  /* buffer contains at least one character, remove the last one entered */
+                  /* Resets the last entered character */
+                  MFGP_CommandBuffer[ --MFGP_numBytes ] = 0x00;
+                  rxByte = 0x0;
+                  /* Gives GUI effect in Terminal for Backspace */
+                  ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b", 3 );
+               }
+            }/* end else if () */
+            else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
+            {
+               /* buffer is full */
+               MFGP_numBytes = 0;
+            }
+            else
+            {
+               /* Used to ECHO the received character when no more valid data is read */
+               UART_write( mfgUart, (uint8_t*)MFGP_PrintCmdBuffer, MFGP_numPrintBytes );
+               memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
+               MFGP_numPrintBytes = 0;
+               break;
+            }/* end else () */
+         }
+     }/* end if () */
+     else if ( ( rxByte == LINE_FEED_CHAR ) ||
+             ( rxByte == CARRIAGE_RETURN_CHAR ) )
+     {
+        if ( MFGP_numBytes == 0 )
+        {
+           ( void )UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+        }
+        else
+        {
+           ( void )UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+           MFGP_PrintCmdBuffer[ MFGP_numPrintBytes ] = rxByte;
+           rxByte = 0x0;
+
+           commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
+           if ( commandBuf != NULL )
+           {
+              commandBuf->data[ MFGP_numBytes ] = 0; /* Null terminating string */
+#if ( DTLS_DEBUG == 1 )
+              INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
+              OS_TASK_Sleep( 50U );
+#endif
+              ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
+              /* Call the command */
+              OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
+#if ( USE_USB_MFG != 0 )
+#if ( RTOS_SELECTION == MQX_RTOS ) 
+              event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+              event_flags = OS_EVNT_Wait ( &CMD_events, 0x00ffffff, (bool)false, ONE_SEC );
+#endif
+              if ( event_flags == 0 )    /* Check for time-out.  */
+              {
+                 /* Unblock task(s) waiting on USB output  */
+                 USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
+              }
+#endif
+               MFGP_numBytes = 0;
+           }
+           else
+           {
+              ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
+              MFGP_numBytes = 0;
+           }
+       }
+     }
+     else if( ( rxByte == BACKSPACE_CHAR ) ||
+            ( rxByte == DELETE_CHAR ) )
+     {
+        if( MFGP_numBytes != 0 )
+        {
+           /* buffer contains at least one character, remove the last one entered */
+           /* Resets the last entered character */
+           MFGP_CommandBuffer[ --MFGP_numBytes ] = 0x00;
+           rxByte = 0x0;
+           /* Gives GUI effect in Terminal for Backspace */
+           ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b" , 3 );
+        }
+     }/* end else if () */
+     else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
+     {
+        /* buffer is full */
+        MFGP_numBytes = 0;
+     }
+     else
+     {
+        MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
+        rxByte = 0x0;
+        ( void )UART_write( mfgUart, (uint8_t*)MFGP_PrintCmdBuffer, MFGP_numPrintBytes );
+        memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
+        MFGP_numPrintBytes = 0;
+     }
    }/* end for () */
+#endif
 #endif
 }
 #if ( MCU_SELECTED == RA6E1 )
