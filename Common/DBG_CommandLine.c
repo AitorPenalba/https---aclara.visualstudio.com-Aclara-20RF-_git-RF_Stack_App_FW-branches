@@ -601,12 +601,19 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
 ////   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },
 //   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" },
+#if ( MCU_SELECTED == NXP_K24 )
+   { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\n"
+                   "                                   Set: Params - yy mm dd hh mm ss" },
+   { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\n"
+                   "                                   Type ""rxchannels"" with no arguments for more help" },
+#elif ( MCU_SELECTED == RA6E1 )
    // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\r\n"
                    "                                   Set: Params - yy mm dd hh mm ss" },
    // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\r\n"
                    "                                   Type ""rxchannels"" with no arguments for more help" },
+#endif
    { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
    { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
    { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },

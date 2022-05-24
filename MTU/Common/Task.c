@@ -394,8 +394,8 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 
    // TODO: RA6 [name_Balaji]: Check for Priority and change if required
-   /* Increased the Priority of DBG_CommandLineTask to handle large amount of Uart_read compared to all other tasks */
-   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  11, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   /* Increased the Priority of DBG_CommandLineTask to handle large amount of Uart_read */
+   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  13, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_PAR_TASKS
    { ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },
