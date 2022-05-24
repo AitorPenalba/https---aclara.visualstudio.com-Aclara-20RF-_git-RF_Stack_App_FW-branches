@@ -178,7 +178,11 @@ fsp_err_t R_OSPI_DirectWrite(spi_flash_ctrl_t    * p_ctrl,
                              uint8_t const * const p_src,
                              uint32_t const        bytes,
                              bool const            read_after_write);
-fsp_err_t R_OSPI_DirectRead(spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes);
+
+/* Aclara Modified: the Read API was modified witha new parameter to indictate
+   the read is a polling read. */
+fsp_err_t R_OSPI_DirectRead(spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead);
+
 fsp_err_t R_OSPI_DirectTransfer(spi_flash_ctrl_t                  * p_ctrl,
                                 spi_flash_direct_transfer_t * const p_transfer,
                                 spi_flash_direct_transfer_dir_t     direction);
