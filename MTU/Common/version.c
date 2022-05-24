@@ -122,6 +122,8 @@ static char const HWVersionDefault[] =
   "A.1.99852"      /* Y99852-1   (ILC) default hardware revision */
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84030_1_REV_A )
   "B.301-XA.84024"      /* Y84030-1   (K24 KV2c)  default hardware revision */
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_RENESAS_REV_A )
+  "A.x.84580"           /* Y84580-x where 1 = Maxim boost, 2 = TI boost */
 #else
   ""               /* NULL default hardware revision */
 #endif
@@ -348,7 +350,7 @@ const firmwareVersionDT_s * VER_getFirmwareVersionDT ( void )
 returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 {
    returnStatus_t   retVal = eFAILURE;
-#if 0
+#if 0 // TODO: RA6E1 restore this code once the file system is working.  Otherwise, garbage is printed.
    HWVerString_t    hWVer;                      /* HW Version string */
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
@@ -360,6 +362,7 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
 #else
+   memcpy(string, (uint8_t *)&HWVersionDefault, len);
    retVal = eSUCCESS;
 #endif
    return (retVal);

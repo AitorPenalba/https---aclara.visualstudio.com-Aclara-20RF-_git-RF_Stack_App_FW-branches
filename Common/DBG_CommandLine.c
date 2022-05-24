@@ -249,7 +249,9 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
 //static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[]);
 //static uint32_t DBG_CommandLine_SM_NwPassiveActTimeout(uint32_t argc, char *argv[]);
 static uint32_t DBG_CommandLine_virginDelay( uint32_t argc, char *argv[] );
-
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+static uint32_t DBG_CommandLine_DebugBaudRate( uint32_t argc, char *argv[] );
+#endif
 #if ( DCU == 1 )
 static uint32_t DBG_CommandLine_sdtest( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_getTBslot( uint32_t argc, char *argv[] );
@@ -387,6 +389,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "dbgdis",       DBG_CommandLine_DebugDisable,    "Disable Debug Output" },
 ////   { "dbgen",        DBG_CommandLine_DebugEnable,     "Enable Debug Output" },
 //   { "dbgfilter",    DBG_CommandLine_DebugFilter,     "Set debug port print filter task id" },
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+   { "dbgbaudrate",  DBG_CommandLine_DebugBaudRate,   "Set debug port baud rate to 11520 or 38400" },
+#endif
 //#if ( EP == 1 )
 //#if ( TEST_TDMA == 1 )
 //   { "Delay",        DBG_CommandLine_Delay,           "Set/Get the Slot Time Delay betwen 0 and 100 ms" },
@@ -486,7 +491,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#endif
 //
 //   { "insertappmsg", DBG_CommandLine_InsertAppMsg,    "send NWK payload (arg1) into the bottom of the APP layer" },
-   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\n"
+   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\r\n"
                    "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
 //#if ( EP == 1 )
 //   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" },
@@ -679,7 +685,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
                    "                                   4 = 4GFSK BER with manufacturing print out,\r\n"
                    "                                   5 = Old PHY (freq dev 600Hz, RS(63,59)" },
 #else
-                   "                                   4 = 4GFSK BER with manufacturing print out,\r\n" },
+                   "                                   4 = 4GFSK BER with manufacturing print out," },
 #endif
 
 //#if ( EP == 1 ) && ( TEST_TDMA == 1 )
@@ -2143,6 +2149,64 @@ uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] )
 //   return 0;
 //}
 //
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+///*******************************************************************************
+//
+//   Function name: DBG_CommandLine_DebugBaudRate
+//
+//   Purpose: This function sets the debug port baud rate to 115200 or 38400
+//
+//   Arguments:  argc - Number of Arguments passed to this function
+//               argv - pointer to the list of arguments passed to this function
+//
+//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+//
+//   Notes:
+//
+//*******************************************************************************/
+static uint32_t DBG_CommandLine_DebugBaudRate( uint32_t argc, char *argv[] )
+{
+   static const baud_setting_t baud115200 =
+   {  /* Baud rate 115200 calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false };
+   static const baud_setting_t baud38400 =
+   {  /* Baud rate  38400 calculated with 0.677% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 96, .mddr = (uint8_t) 256, .brme = false };
+   baud_setting_t *pBaudRate;
+
+   if ( argc != 2 )
+   {
+      DBG_logPrintf( 'R', "Command requires/accepts one parameter" );
+   }
+   else
+   {
+      uint32_t baudRate = atoi (argv[1] );
+      if ( ( baudRate != 115200 ) && ( baudRate != 38400 ) )
+      {
+         DBG_logPrintf( 'R', "Command only accepts baud rates of 115200 or 38400" );
+         return 0;
+      } else if (baudRate == 115200 )
+      {
+         pBaudRate = (void *)&baud115200;
+      }
+      else
+      {
+         pBaudRate = (void *)&baud38400;
+      }
+      DBG_logPrintf( 'I', "Will change baud rate of '%s' UART to %u bps in 10 seconds; please change your terminal emulator", UART_getName(UART_DEBUG_PORT), baudRate );
+      OS_TASK_Sleep ( (uint32_t) 10000 ); /* Make sure nothing is still echoing */
+
+      returnStatus_t retVal = UART_setBaud ( UART_DEBUG_PORT, pBaudRate);
+
+      if ( eSUCCESS != retVal )
+      {
+         OS_TASK_Sleep ( (uint32_t) 20000 ); /* Wait for the user to change the baud rate back to previous */
+         DBG_logPrintf( 'R', "Attempt to set baud rate of '%s' UART to %u bps failed, retVal = %u", UART_getName(UART_DEBUG_PORT), baudRate, retVal );
+      } else {
+         DBG_logPrintf( 'I', "Changed '%s' UART baud rate to %u bps", UART_getName(UART_DEBUG_PORT), baudRate );
+      }
+   }
+   return 0;
+}
+#endif
 ///*******************************************************************************
 //
 //   Function name: DBG_CommandLine_CpuLoadSmart
@@ -6102,6 +6166,13 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
                   ver.field.version, ver.field.revision, ver.field.build);
 #endif
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+#if ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Bob: this needs a better implementation
+   if        ( ( ADC_GetHWRevLetter() == 'B' ) && ( string[2] == 'x' ) ) { /* Maxim boost chip = Y84580-1 */
+      string[2] = '1';
+   } else if ( ( ADC_GetHWRevLetter() == 'C' ) && ( string[2] == 'x' ) ) { /* TI boost chip = Y84580-2 */
+      string[2] = '2';
+   }
+#endif
    DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] );
 #if 0  // TODO: RA6: Add the following lines for RA6 and FreeRTOS
    DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
