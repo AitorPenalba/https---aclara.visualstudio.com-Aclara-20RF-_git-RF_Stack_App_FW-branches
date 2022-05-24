@@ -104,7 +104,7 @@ static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
 static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
 #if ( MCU_SELECTED == RA6E1 )
-OS_SEM_Obj       dbgReceiveSem_;                           /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */
+OS_SEM_Obj              dbgReceiveSem_;                    /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */
 extern OS_SEM_Obj       transferSem[MAX_UART_ID];          /* For RA6E1, UART_write process is used in Semaphore method */
 #endif
 //static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
@@ -128,6 +128,7 @@ static void PortTimer_CallBack( uint8_t cmd, const void *pData );
 /* FUNCTION DEFINITIONS */
 
 #if ( MCU_SELECTED == RA6E1 )
+
 /***********************************************************************************************************************
 
    Function name: DBG_printfDirect()
@@ -141,9 +142,9 @@ static void PortTimer_CallBack( uint8_t cmd, const void *pData );
 **********************************************************************************************************************/
 void DBG_printfDirect( const char *fmt, ... )
 {
-   static uint16_t         dbgCmdLen;
-   static char             dbgCommandBuffer[MAX_DBG_COMMAND_CHARS + 1];
-   static const enum_UART_ID dbgUart = UART_DEBUG_PORT;     /* UART used for DBG port prints   */
+   uint32_t         dbgCmdLen;
+   char             dbgCommandBuffer[192]; /* TODO: RA6: 1062 is a quite a lot for this purpose */
+   const enum_UART_ID dbgUart = UART_DEBUG_PORT;     /* UART used for DBG port prints   */
    /* Assigns the Command Length to zero */
    dbgCmdLen = 0;
    /* Declaring Variable Argument list of type va_list */
@@ -151,14 +152,15 @@ void DBG_printfDirect( const char *fmt, ... )
    /* Initializing arguments to store all values after fmt */
    va_start( args, fmt );
    /* Assigns data to the buffer from the Variable argument list and updates the dbgCmdLen */
-   dbgCmdLen = ( uint16_t )vsnprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), fmt, args );
+   dbgCmdLen = vsnprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), fmt, args );
    /* Cleans up the Variable Argument list */
    va_end( args );
    /* Adds Carriage Return and New Line to the each line of prints */
-   dbgCmdLen += ( uint16_t )snprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), "\r\n" );
+   dbgCmdLen += snprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), "\r\n" );
    /* Writes the print to Debug terminal */
    UART_write( dbgUart, (uint8_t *)dbgCommandBuffer, dbgCmdLen );
 } /* end of DBG_printfDirect() */
+
 #endif
 
 /***********************************************************************************************************************
@@ -741,7 +743,7 @@ bool DBG_IsPortEnabled ( void )
 *******************************************************************************/
 void DBG_LW_printf( char const *fmt, ... )
 {
-#if 0
+#if 0  // TODO: RA6E1: Support this printf for RA6
    static char    LW_printf_str[DEBUG_MSG_SIZE];
    static int32_t len;
    static int32_t i;

@@ -27,10 +27,6 @@
 #define AGT_H
 
 /* INCLUDE FILES */
-#include "hal_data.h"
-#include "bsp_pin_cfg.h"
-#include "r_ioport.h"
-
 
 /* ****************************************************************************************************************** */
 

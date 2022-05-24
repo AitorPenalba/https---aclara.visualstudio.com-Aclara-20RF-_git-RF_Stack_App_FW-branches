@@ -554,7 +554,7 @@ returnStatus_t ADC_ShutDown ( void )
 #endif   //#if ENABLE_ADC1
 #elif ( MCU_SELECTED == RA6E1 )
    //Closes the ADC driver, disables the interrupts and Stops the ADC
-   (void)R_ADC_Close( &g_adc0_ctrl );
+   //   (void)R_ADC_Close( &g_adc0_ctrl );  // TODO: RA6E1: Do We need this?
 #endif
    return ( eSUCCESS );
 } /* end ADC_ShutDown () */
@@ -648,7 +648,7 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
 
   Purpose: This function is used to set the override temperature of the processor
 
-  Arguments: newTemperature - Override temperature in Celcius(0)
+  Arguments: newTemperature - Override temperature in Celsius(0)
 
   Returns: None
 
@@ -728,7 +728,7 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
     float Temperature=0.0;
     return ( Temperature );
 #endif
-}  
+}
 
 //K22 is the only one that supports the Board temp. sensor
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A )

@@ -166,7 +166,10 @@ returnStatus_t UART_init ( void )
 #elif (RTOS_SELECTION == FREE_RTOS)
    for( i = 0; i < (uint8_t)MAX_UART_ID; i++ )
    {
-      ( void )R_SCI_UART_Open( (void *)UartCtrl[ i ], (void *)UartCfg[ i ] );
+      if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)i ) )  // Only open DEBUG port in last gasp mode */
+      {
+         ( void )R_SCI_UART_Open( (void *)UartCtrl[ i ], (void *)UartCfg[ i ] );
+      }
    }
 #endif
 
@@ -263,7 +266,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
    return ( DataSent );
 #elif ( MCU_SELECTED == RA6E1 )
    ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-   ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER ); 
+   ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
 
    return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif

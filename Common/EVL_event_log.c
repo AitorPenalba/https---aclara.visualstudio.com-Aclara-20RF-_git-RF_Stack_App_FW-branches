@@ -14,7 +14,6 @@
    any means whatsoever without the written permission of:
       ACLARA, ST. LOUIS, MISSOURI USA
  *****************************************************************************/
-// <editor-fold defaultstate="collapsed" desc="Included Files">
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #include "project.h"
@@ -67,18 +66,18 @@
 #define DEFAULT_AM_BU_MAX_TIME_DIVERSITY  ((uint8_t)4)
 #define MAX_AM_BU_MAX_TIME_DIVERSITY      ((uint8_t)15)
 
-/* When reading the event log, a buffer is populated with as much data as possbile until the size limit of the the
-   buffer is reached.  The amount of space avaiable in the buffer will be limited based upon how much overhead is
-   required in the message sent back to the head end.  This overhead can vary pending on how the reponse is sent.  A
+/* When reading the event log, a buffer is populated with as much data as possible until the size limit of the
+   buffer is reached.  The amount of space available in the buffer will be limited based upon how much overhead is
+   required in the message sent back to the head end.  This overhead can vary pending on how the response is sent.  A
    basic response is limited to 15 events.  Additional CompactMeterRead bit structures, with additional overhead
    added to the response, can be appended until the size limits of the buffer have been met.  The overhead for each
    bit structure in the response will include the valuesIntervalEnd and eventReadingQuantity.  The worst case amount
-   of overhead added to a resonse will occur if every event returned contains no name/vale pair information.
+   of overhead added to a response will occur if every event returned contains no name/vale pair information.
 
    A max bit structure response containing no name/value pair data = 110 bytes (including overhead)
                                                                      105 bytest (without the overhead)
 
-   The max maximum instances overhead will need to added to the reponse:
+   The max maximum instances overhead will need to added to the response:
    = 11 -> floor(APP_MSG_MAX_PAYLOAD / 110) for K24 and DCU
    =  9 -> floor(APP_MSG_MAX_PAYLOAD / 110) for K22
    floor was taken just to be safe
@@ -624,6 +623,15 @@ void EVL_AlarmHandlerTask ( taskParameter )
    else
    {
       ERR_printf("Did not successfully initialize EVL" );
+#if ( RTOS_SELECTION == FREE_RTOS )
+      /* NOTE from FreeRTOS: Tasks must not attempt to return from their implementing
+      function or otherwise exit.  In newer FreeRTOS port
+      attempting to do so will result in an configASSERT() being
+      called if it is defined.  If it is necessary for a task to
+      exit then have the task call vTaskDelete( NULL ) to ensure
+      its exit is clean. */
+      OS_TASK_Exit();
+#endif
    }
 }
 //lint +esym(715,Arg0)  // Arg0 required for generic API, but not used here.

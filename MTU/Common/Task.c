@@ -432,7 +432,6 @@ const OS_TASK_Template_t  Task_template_list[] =
 /*lint -e{641}  Suppress the index conversion from enum to int for this section. */
 const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 {
-   { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, 0, 0 },
 #if ENABLE_PWR_TASKS
    { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, 0, 0 },
 #endif
@@ -441,7 +440,7 @@ const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 #endif
    { eSM_TSK_IDX,       SM_Task,                1000,  12, (char *)pTskName_Sm,     DEFAULT_ATTR, 0, 0 },
 //   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, 0, 0 },
-//   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
+   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
    { eSTACK_TSK_IDX,    NWK_Task,               1500,  15, (char *)pTskName_Nwk,    DEFAULT_ATTR, 0, 0 },
 
 #if ( USE_DTLS == 1 )
@@ -450,7 +449,7 @@ const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 //   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, 0, 0 },
 
    { eDBG_PRNT_TSK_IDX, DBG_TxTask,              680,  18, (char *)pTskName_Print,  DEFAULT_ATTR, 0, 0 },
-#if ENABLE_PWR_TASKS
+#if ( RTOS_SELECTION == MQX_RTOS )
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
    { ePWRLG_IDL_TSK_IDX,PWRLG_Idle_Task,         336,  19, (char *)pTskName_Idle,   DEFAULT_ATTR, 0, 0 },
 #endif

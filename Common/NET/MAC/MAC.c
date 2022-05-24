@@ -658,7 +658,7 @@ MAC_GET_STATUS_e MAC_Attribute_Get(MAC_GetReq_t const *pGetReq, MAC_ATTRIBUTES_u
 void MAC_RestoreConfig_From_BkupRAM()
 {
    mac_config_t            *pMacConfig;
-   PartitionData_t const   *pSecurePart;  /* Partion handle for security information */
+   PartitionData_t const   *pSecurePart;  /* Partition handle for security information */
 
    /* Get mac address from internal flash (ROM) */
    if (eSUCCESS == PAR_partitionFptr.parOpen(&pSecurePart, ePART_ENCRYPT_KEY, 0))
@@ -667,14 +667,13 @@ void MAC_RestoreConfig_From_BkupRAM()
                                           sizeof( MacAddress_ ), pSecurePart );
    }
 
-#if 0 // TODO: RA6E1 - lastgasp
    // Get the handle to the location where the data was saved
    pMacConfig = PWRLG_MacConfigHandle();
 
    // BAH - This is here until this is being used!!!
    if( pMacConfig )
    {
-      // Only the critial values required for the last gasp are restored.
+      // Only the critical values required for the last gasp are restored.
       // The reset will be set to defaults
       MAC_ConfigAttr.NetworkId              = pMacConfig->NetworkId;
       MAC_ConfigAttr.CsmaMaxAttempts        = pMacConfig->CsmaMaxAttempts;
@@ -711,7 +710,6 @@ void MAC_SaveConfig_To_BkupRAM(void)
       pMacConfig->PacketId                          = (CachedAttr.PacketId + 1 ) % 4;
    }
 }
-#endif
 
 /*!
  *   This function returns the next packet id.
