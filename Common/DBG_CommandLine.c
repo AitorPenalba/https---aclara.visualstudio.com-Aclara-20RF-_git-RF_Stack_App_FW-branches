@@ -221,15 +221,9 @@ typedef struct {
 } NOISEBAND_Stats_t;
 
 /* CONSTANTS */
-#if ( MCU_SELECTED == RA6E1 )
-static const char CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
-#endif
 
 /* FILE VARIABLE DEFINITIONS */
-#if ( MCU_SELECTED == RA6E1 )
-extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
-extern OS_SEM_Obj       transferSem[MAX_UART_ID]; /* For RA6E1, UART_write process is used in Semaphore method */
-#endif
+
 #if ENABLE_HMC_TASKS
 //static OS_SEM_Obj HMC_CMD_SEM; //TODO: RA6E1 Bob: temporarily removed
 //static bool       HmcCmdSemCreated = ( bool )false; //TODO: RA6E1 Bob: temporarily removed
@@ -607,12 +601,19 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
 ////   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },
 //   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" },
+#if ( MCU_SELECTED == NXP_K24 )
+   { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\n"
+                   "                                   Set: Params - yy mm dd hh mm ss" },
+   { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\n"
+                   "                                   Type ""rxchannels"" with no arguments for more help" },
+#elif ( MCU_SELECTED == RA6E1 )
    // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\r\n"
                    "                                   Set: Params - yy mm dd hh mm ss" },
    // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\r\n"
                    "                                   Type ""rxchannels"" with no arguments for more help" },
+#endif
    { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
    { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
    { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },
@@ -731,9 +732,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 
 static void DBG_CommandLine_Process ( void );
 static returnStatus_t atoh( uint8_t *pHex, char const *pAscii );
-#if ( MCU_SELECTED == RA6E1 ) //Process the receieved byte from Uart read
-static void dbgpReadByte( uint8_t rxByte );
-#endif
+
 /* FUNCTION DEFINITIONS */
 /*******************************************************************************
 
@@ -751,9 +750,6 @@ static void dbgpReadByte( uint8_t rxByte );
 *******************************************************************************/
 void DBG_CommandLineTask ( taskParameter )
 {
-#if ( MCU_SELECTED == RA6E1 )
-   uint8_t rxByte = 0; //Used to receieve from Uartread
-#endif
 #if ( BUILD_DFW_TST_LARGE_PATCH == 1 )/* Enabling this in CompileSwitch.h will shift the code down resulting in a large patch */
    NOP();
    NOP();
@@ -799,149 +795,28 @@ void DBG_CommandLineTask ( taskParameter )
       }
 #endif
 #if ( !USE_USB_MFG && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) )
-//      OS_TASK_Sleep(OS_WAIT_FOREVER);
+      OS_TASK_Sleep(OS_WAIT_FOREVER);
 #else
-#if ( MCU_SELECTED == NXP_K24 )
       UART_fgets( UART_DEBUG_PORT, DbgCommandBuffer, MAX_DBG_COMMAND_CHARS );
 #endif
-#endif
-#if ( MCU_SELECTED == RA6E1 )
-      /* Instead of Polling metod, Interrupt routine method is used in RA6E1 which
-       * reads byte-by-byte and stors the data in an array */
-      ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ));
-      ( void )OS_SEM_Pend( &dbgReceiveSem_, OS_WAIT_FOREVER );
-      if(rxByte !=  (uint8_t)0x00)
+      /* Check before executing; may have been disable while waiting for input   */
+      if ( DBG_IsPortEnabled () ) /* Only process input if the port is enabled */
       {
-         /* Check before executing; may have been disable while waiting for input   */
-         if ( DBG_IsPortEnabled () ) /* Only process input if the port is enabled */
-         {
-#endif
-#if ( MCU_SELECTED == NXP_K24 )
-        DBG_CommandLine_Process();
-#endif
+         DBG_CommandLine_Process();
 #if ( MCU_SELECTED == RA6E1 )
-         /* As there is no IOCTL for RA6E1 processing the information by bytes like MFG_Port's mfgpReadByte */
-         dbgpReadByte( rxByte );
-         }
-         else
-         {
-            (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
-#if ( MCU_SELECTED == NXP_K24 )
-            (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
+         memset( DbgCommandBuffer, 0, sizeof( DbgCommandBuffer ) );
 #endif
-            // TODO: RA6 [name_Balaji]: Add delay once integrated to main branch
-#if 0
-            OS_TASK_Sleep ( TIME_TICKS_PER_SEC  );     /* Check again in a second, or so...   */
-#endif
-         }
-//         ( void )UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
-         rxByte = 0x00; /* resets the rxByte */
       }
-#endif
-   } /* end for() */
-} /* end DBG_CommandLineTask () */
-// TODO: RA6 [name_Balaji]: Revert dbgpReadByte function once file io is integrated
-/***********************************************************************************************************************
-   Function Name: dbgpReadByte
-
-   Purpose: This function is called to process a byte received from the uart in DBG serial mode
-
-   Arguments:  uint8_t rxByte      - Byte read from the port
-
-   Returns: None
-***********************************************************************************************************************/
-static void dbgpReadByte( uint8_t rxByte )
-{
-
-   if (  ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
-         ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
-         ( rxByte == 0xC0 ))           /* Left over SLIP protocol characters in buffer */
-   {
-      /* user canceled the in progress command */
-      DBGP_numBytes = 0;
-   }/* end if () */
-   else if( rxByte == BACKSPACE_CHAR || rxByte == 0x7f )
-   {
-      if( DBGP_numBytes != 0 )
-      {
-         /* buffer contains at least one character, remove the last one entered */
-         DBGP_numBytes -= 1;
-#if ( MCU_SELECTED == RA6E1 )
-         /* Resets the last entered character */
-         DbgCommandBuffer[ DBGP_numBytes] = 0x00;
-         /* Gives GUI effect in Terminal for Backspace */
-         ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)"\b\x20\b", 3 );
-#endif
-      }/* end if () */
-   }/* end else if () */
-   else
-   {
-      if( ( rxByte == LINE_FEED_CHAR ) || ( rxByte == CARRIAGE_RETURN_CHAR ) )
-      {
-         if ( DBGP_numBytes == 0)
-         {
-            /* Gives GUI in Terminal for Carriage Return */
-            ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
-         }
-         else
-         {
-            /* Gives GUI in Terminal for Carriage Return */
-            ( void )UART_write( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
-
-            /* Call the command */
-            DBG_CommandLine_Process();
-            DBGP_numBytes = 0;
-            memset( DbgCommandBuffer, 0, sizeof( DbgCommandBuffer ) );
-         }
-      }/* end if () */
-      else if( ( DBGP_numBytes ) >= MAX_DBG_COMMAND_CHARS )
-      {
-         /* buffer is full */
-         DBGP_numBytes = 0;
-      }/* end else if () */
       else
       {
-         // Save character in buffer (space is available)
-        ( void )UART_write( UART_DEBUG_PORT, &rxByte, sizeof( rxByte ) );
-         DbgCommandBuffer[ DBGP_numBytes++] = rxByte;
-      }/* end else () */
-   }/* end else () */
-}/* end dbgpReadByte () */
-#if ( MCU_SELECTED == RA6E1 )
-/*******************************************************************************
-
-  Function name: dbg_uart_callback
-
-  Purpose: Interrupt Handler for Debug UART Module,Postponds the semaphore wait
-            once one byte of data is read in SCI Channel 4 (DBG port)
-
-  Returns: None
-
-*******************************************************************************/
-void dbg_uart_callback( uart_callback_args_t *p_args )
-{
-   /* Handle the UART event */
-   switch (p_args->event)
-   {
-      /* Receive complete */
-      case UART_EVENT_RX_COMPLETE:
-      {
-         OS_SEM_Post_fromISR( &dbgReceiveSem_ );
-         break;
-      }
-      /* Transmit complete */
-      case UART_EVENT_TX_COMPLETE:
-      {
-         OS_SEM_Post_fromISR( &transferSem[ UART_DEBUG_PORT ] );
-         break;
-      }
-      default:
-      {
-         break;
-      }
-   }/* end switch () */
-}/* end user_uart_callback () */
+         (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
+#if ( MCU_SELECTED == NXP_K24 )
+         (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
 #endif
+      }/* end if() */
+   } /* end for() */
+} /* end DBG_CommandLineTask () */
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_Process
