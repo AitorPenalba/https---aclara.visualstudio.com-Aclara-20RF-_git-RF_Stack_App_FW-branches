@@ -57,7 +57,7 @@ static void qspi_d0_byte_write_dual_mode(uint8_t byte);
 static void qspi_d0_byte_write_standard(uint8_t byte);
 
 static void r_qspi_direct_write_sub(uint8_t const * const p_src, uint32_t const bytes, bool const read_after_write);
-
+// Aclara Modified: parameter added to handle polled read
 static void r_qspi_direct_read_sub(uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead);
 static bool r_qspi_status_sub(qspi_instance_ctrl_t * p_instance_ctrl);
 

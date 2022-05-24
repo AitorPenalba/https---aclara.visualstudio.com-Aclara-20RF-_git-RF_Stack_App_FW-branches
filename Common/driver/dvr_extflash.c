@@ -82,7 +82,7 @@
 #define WRITE_PROTECT_PIN_ON()      { NV_WP_TRIS(); NV_WP_ACTIVE(); }    /* Sets WP Pin on flash active (not writable) */
 #define WRITE_PROTECT_PIN_OFF()     { NV_WP_TRIS(); NV_WP_INACTIVE(); }  /* Sets WP pin on flash inactive (writable) */
 #elif ( MCU_SELECTED == RA6E1 )
-#define WRITE_PROTECT_PIN_ON()      R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_LOW);
+#define WRITE_PROTECT_PIN_ON()      R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_LOW)
 #define WRITE_PROTECT_PIN_OFF()     R_BSP_PinWrite(BSP_IO_PORT_05_PIN_04, BSP_IO_LEVEL_HIGH);
 #endif
 #define WRITE_PROTECT_PIN_SPI()
@@ -1483,7 +1483,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
       else  /* Use AAI feature   */
       {
          /* If both bytes of data being written is in the erased state, skip the write.  */
-         bytesToWrite = AAI_WORD_PGM_SIZE;
+         bytesToWrite = AAI_WORD_PGM_SIZE;  // TODO: RA6: Look at conditional compile solution to handle K24 and RA6 hex file compare
          if ( Cnt < bytesToWrite ) /* If the Cnt is less than the bytes to be written, only write Cnt # of bytes. */
          {
             bytesToWrite = Cnt;

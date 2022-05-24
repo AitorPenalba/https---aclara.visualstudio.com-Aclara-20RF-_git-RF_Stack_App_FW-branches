@@ -397,7 +397,7 @@
 #define NV_SPI_PORT_CLOSE              R_QSPI_Close
 #define NV_SPI_PORT_WRITE              R_QSPI_DirectWrite
 #define NV_SPI_PORT_READ               R_QSPI_DirectRead
-#define POLLING_READ_EXIT()            { R_QSPI->SFMCMD = 1U; R_QSPI->SFMCMD = 0U; } //Exit QSPI Direct Communication Mode
+#define POLLING_READ_EXIT()            { R_QSPI->SFMCMD = 1U; R_QSPI->SFMCMD = 0U; } //Exit QSPI Direct Communication Mode, Only use when read polling is set to TRUE
 #endif
 
 /* Set PCR for GPIO, high drive strength, Make Output */
