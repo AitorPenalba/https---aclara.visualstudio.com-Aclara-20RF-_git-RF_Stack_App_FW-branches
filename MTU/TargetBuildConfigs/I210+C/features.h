@@ -57,7 +57,7 @@
 #define HMC_SNAPSHOT                      0
 #define ANSI_STANDARD_TABLES              1
 #define ANSI_LOGON                        1
-#define ANSI_SECURITY                     0
+#define ANSI_SECURITY                     1
 #define METER_TROUBLE_SIGNAL              1
 #define END_DEVICE_NEGOTIATION            0
 #define LOG_IN_METER                      1

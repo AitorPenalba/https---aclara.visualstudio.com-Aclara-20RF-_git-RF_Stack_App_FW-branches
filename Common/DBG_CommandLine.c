@@ -98,9 +98,7 @@
 #if (USE_DTLS==1)
 #include "dtls.h"
 #include "wolfssl/wolfcrypt/aes.h"
-#if 0
 #include "wolfssl/wolfcrypt/sha256.h"
-#endif
 #endif
 
 #if (PHASE_DETECTION==1)
@@ -470,7 +468,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "hmctime",      DBG_CommandLine_HMC_time,        "Get/Set Host Meter time" },
 #endif
 #if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
-   { "hmcw",         DBG_CommandLine_HmcwCmd,         "Host Meter Table Write, format is: hmcw [m] id offset data" },
+//   { "hmcw",         DBG_CommandLine_HmcwCmd,         "Host Meter Table Write, format is: hmcw [m] id offset data" },
 #endif
 #endif
    { "hwinfo",       DBG_CommandLine_GetHWInfo,       "Display the HW Info" },
@@ -5594,111 +5592,111 @@ uint32_t DBG_CommandLine_HmcEng ( uint32_t argc, char *argv[] )
 }
 #endif   /* end of ACLARA_LC == 0   */
 
-/*******************************************************************************
-
-   Function name: DBG_CommandLine_Cmd
-
-   Purpose: This function will write supplied data to a meter table
-
-   Arguments:  argc - Number of Arguments passed to this function
-               argv - pointer to the list of arguments passed to this function
-
-   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-
-   Notes:   If first argument is 'm' or 'M', use manufacturing tables (id offset by 2048)
-
-*******************************************************************************/
-#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
-static uint32_t DBG_CommandLine_HmcwCmd  ( uint32_t argc, char *argv[] )
-{
-   HMC_REQ_queue_t   *req;                /* psem buffer */
-   buffer_t          *pBuffer;            /* table read data   */
-   buffer_t          *preq;               /* psem command buffer  */
-   buffer_t          *writeData;
-   char              *pData;              /* User input data      */
-   uint16_t          tableID = 0;
-   uint16_t          tblOffset = 0;
-   uint16_t          bytesLeft;           /* Running count of bytes read, decreasing   */
-   uint8_t           arg;                 /* index into argv[]  */
-
-   DBG_logPrintf( 'D', "%s %s", argv[ 0 ], argv[ 1 ] );  /* Use for timing measurement, only */
-   // Allocate a buffer for a HMC data
-   pBuffer = BM_alloc( HMC_CMD_MSG_MAX  );
-   if ( pBuffer != NULL )
-   {
-      // Allocate a buffer for a HMC command
-      preq = BM_alloc( sizeof( HMC_REQ_queue_t ) );
-      if ( preq != NULL )
-      {
-         if ( argc >= 4 )  /* The number of arguments must be at least 4   */
-         {
-            if ( !HmcCmdSemCreated )
-            {
-               //TODO RA6: NRJ: determine if semaphores need to be counting
-               if ( OS_SEM_Create ( &HMC_CMD_SEM, 0 ) )
-               {
-                  HmcCmdSemCreated = ( bool )true;
-               } /* end if() */
-            }
-            arg = 1;
-            if ( strcasecmp ( argv[ arg ], "m" ) == 0 )
-            {
-               tableID = 2048;
-               arg++;
-            }
-            /* Retrieve table ID, offset, length   */
-            tableID += ( uint16_t )strtoul( argv[arg++], NULL, 0 );
-            tblOffset = ( uint16_t )strtoul( argv[arg++], NULL, 0 );
-            writeData = BM_alloc( ( uint16_t )strlen( argv[ arg ] ) / 2 );
-            if ( writeData != NULL )
-            {
-               for ( bytesLeft = 0, pData = argv[ arg ];
-                     ( bytesLeft <  writeData->x.dataLen ) && *pData != 0;
-                     pData += 2 )
-               {
-                  /* sscanf returns number of parameters successfully converted. */
-                  bytesLeft += ( uint16_t )sscanf( pData, "%02hhx", &writeData->data[ bytesLeft ] );
-               }
-               pBuffer->x.dataLen = bytesLeft ;
-               ( void )memset( pBuffer->data, 0, pBuffer->x.dataLen );
-
-               preq->x.dataLen = sizeof( HMC_REQ_queue_t );
-               ( void )memset( preq->data, 0, preq->x.dataLen );
-
-               req = ( HMC_REQ_queue_t * )( void * )preq->data;
-
-               /* Following fields don't change between requests  */
-               req->pSem         = &HMC_CMD_SEM;
-               req->bOperation   = eHMC_WRITE;
-               req->maxDataLen   = (uint8_t)bytesLeft;
-               req->pData        = writeData->data;
-               req->tblInfo.id   = tableID;
-               req->tblInfo.offset = tblOffset;
-               req->tblInfo.cnt = min( bytesLeft, HMC_CMD_MSG_MAX  );
-               OS_QUEUE_Enqueue ( &HMC_REQ_queueHandle, req );
-               if ( OS_SEM_Pend ( &HMC_CMD_SEM, ONE_SEC * HMC_WAIT_TIME ) )   // Wait for 25s max
-               {
-                  DBG_logPrintf( 'R', "HMC Status: %i, Tbl Rsp: %i", ( int32_t )req->hmcStatus, ( int32_t )req->tblResp );
-               }
-               else
-               {
-                  ( void ) OS_QUEUE_Dequeue ( &HMC_REQ_queueHandle );   /* Attempt to remove "dropped" request from queue */
-                  DBG_logPrintf( 'R', "HMC Timed out after %ds!", HMC_WAIT_TIME );
-               }
-               BM_free( writeData );
-            }
-         }
-         else
-         {
-            DBG_logPrintf( 'R', "Invalid Syntax" );
-         }
-         BM_free( preq );
-      }
-      BM_free( pBuffer );
-   }
-   return ( 0 );
-} /* end DBG_CommandLine_HmcwCmd() */
-#endif /* ACLARA_ILC */
+///*******************************************************************************
+//
+//   Function name: DBG_CommandLine_Cmd
+//
+//   Purpose: This function will write supplied data to a meter table
+//
+//   Arguments:  argc - Number of Arguments passed to this function
+//               argv - pointer to the list of arguments passed to this function
+//
+//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+//
+//   Notes:   If first argument is 'm' or 'M', use manufacturing tables (id offset by 2048)
+//
+//*******************************************************************************/
+//#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
+//static uint32_t DBG_CommandLine_HmcwCmd  ( uint32_t argc, char *argv[] )
+//{
+//   HMC_REQ_queue_t   *req;                /* psem buffer */
+//   buffer_t          *pBuffer;            /* table read data   */
+//   buffer_t          *preq;               /* psem command buffer  */
+//   buffer_t          *writeData;
+//   char              *pData;              /* User input data      */
+//   uint16_t          tableID = 0;
+//   uint16_t          tblOffset = 0;
+//   uint16_t          bytesLeft;           /* Running count of bytes read, decreasing   */
+//   uint8_t           arg;                 /* index into argv[]  */
+//
+//   DBG_logPrintf( 'D', "%s %s", argv[ 0 ], argv[ 1 ] );  /* Use for timing measurement, only */
+//   // Allocate a buffer for a HMC data
+//   pBuffer = BM_alloc( HMC_CMD_MSG_MAX  );
+//   if ( pBuffer != NULL )
+//   {
+//      // Allocate a buffer for a HMC command
+//      preq = BM_alloc( sizeof( HMC_REQ_queue_t ) );
+//      if ( preq != NULL )
+//      {
+//         if ( argc >= 4 )  /* The number of arguments must be at least 4   */
+//         {
+//            if ( !HmcCmdSemCreated )
+//            {
+//               //TODO RA6: NRJ: determine if semaphores need to be counting
+//               if ( OS_SEM_Create ( &HMC_CMD_SEM, 0 ) )
+//               {
+//                  HmcCmdSemCreated = ( bool )true;
+//               } /* end if() */
+//            }
+//            arg = 1;
+//            if ( strcasecmp ( argv[ arg ], "m" ) == 0 )
+//            {
+//               tableID = 2048;
+//               arg++;
+//            }
+//            /* Retrieve table ID, offset, length   */
+//            tableID += ( uint16_t )strtoul( argv[arg++], NULL, 0 );
+//            tblOffset = ( uint16_t )strtoul( argv[arg++], NULL, 0 );
+//            writeData = BM_alloc( ( uint16_t )strlen( argv[ arg ] ) / 2 );
+//            if ( writeData != NULL )
+//            {
+//               for ( bytesLeft = 0, pData = argv[ arg ];
+//                     ( bytesLeft <  writeData->x.dataLen ) && *pData != 0;
+//                     pData += 2 )
+//               {
+//                  /* sscanf returns number of parameters successfully converted. */
+//                  bytesLeft += ( uint16_t )sscanf( pData, "%02hhx", &writeData->data[ bytesLeft ] );
+//               }
+//               pBuffer->x.dataLen = bytesLeft ;
+//               ( void )memset( pBuffer->data, 0, pBuffer->x.dataLen );
+//
+//               preq->x.dataLen = sizeof( HMC_REQ_queue_t );
+//               ( void )memset( preq->data, 0, preq->x.dataLen );
+//
+//               req = ( HMC_REQ_queue_t * )( void * )preq->data;
+//
+//               /* Following fields don't change between requests  */
+//               req->pSem         = &HMC_CMD_SEM;
+//               req->bOperation   = eHMC_WRITE;
+//               req->maxDataLen   = (uint8_t)bytesLeft;
+//               req->pData        = writeData->data;
+//               req->tblInfo.id   = tableID;
+//               req->tblInfo.offset = tblOffset;
+//               req->tblInfo.cnt = min( bytesLeft, HMC_CMD_MSG_MAX  );
+//               OS_QUEUE_Enqueue ( &HMC_REQ_queueHandle, req );
+//               if ( OS_SEM_Pend ( &HMC_CMD_SEM, ONE_SEC * HMC_WAIT_TIME ) )   // Wait for 25s max
+//               {
+//                  DBG_logPrintf( 'R', "HMC Status: %i, Tbl Rsp: %i", ( int32_t )req->hmcStatus, ( int32_t )req->tblResp );
+//               }
+//               else
+//               {
+//                  ( void ) OS_QUEUE_Dequeue ( &HMC_REQ_queueHandle );   /* Attempt to remove "dropped" request from queue */
+//                  DBG_logPrintf( 'R', "HMC Timed out after %ds!", HMC_WAIT_TIME );
+//               }
+//               BM_free( writeData );
+//            }
+//         }
+//         else
+//         {
+//            DBG_logPrintf( 'R', "Invalid Syntax" );
+//         }
+//         BM_free( preq );
+//      }
+//      BM_free( pBuffer );
+//   }
+//   return ( 0 );
+//} /* end DBG_CommandLine_HmcwCmd() */
+//#endif /* ACLARA_ILC */
 #endif
 //
 //#ifdef TM_ID_TEST_CODE

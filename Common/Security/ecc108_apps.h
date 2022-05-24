@@ -266,6 +266,9 @@ extern void       ecc108e_UpdateKeys( const intFlashNvMap_t *intKeys );
 extern void       ecc108e_InitKeys( void );
 // TODO: RA6E1 [name_Suriya] - Create a new file and move
 #if ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+#include "partitions.h"
+
+extern PartitionData_t const *SEC_GetSecPartHandle( void );
 extern returnStatus_t SEC_init( void );
 #endif
 

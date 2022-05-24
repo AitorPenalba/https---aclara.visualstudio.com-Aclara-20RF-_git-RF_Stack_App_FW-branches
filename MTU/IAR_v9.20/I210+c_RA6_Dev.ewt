@@ -1433,6 +1433,12 @@
         </group>
         <group>
             <name>RA6_FreeRTOS_WolfSSL</name>
+            <group>
+                <name>Debug</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\RA6_FreeRTOS Debug\Exe\wolfSSL-Lib_MTU_RA6_FreeRTOS.a</name>
+                </file>
+            </group>
         </group>
     </group>
     <group>
@@ -1700,7 +1706,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1882,6 +1888,12 @@
             </group>
             <group>
                 <name>Util</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\ascii.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\ascii.h</name>
+                </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\byteswap.c</name>
                 </file>
