@@ -522,7 +522,7 @@ returnStatus_t PHY_init( void )
    if ( OS_SEM_Create(&PHY_AttributeSem_, 0) && OS_MUTEX_Create(&PHY_AttributeMutex_) && OS_MUTEX_Create(&PHY_Mutex_) &&
         OS_EVNT_Create(&events) && OS_MSGQ_Create(&PHY_msgQueue, PHY_NUM_MSGQ_ITEMS, "PHY") )
    {
-#if 0 // TODO: attempt to get through PHY_init without a working file system
+#if 1 // TODO: RA6E1 Bob: should be able to remove this now that file system and PHY task are working
       // Open PHY cached data (mainly counters)
       if ( eSUCCESS == FIO_fopen(&PHYcachedFileHndl_,              /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
@@ -533,7 +533,7 @@ returnStatus_t PHY_init( void )
                                  &fileStatus)) {                   /* Contains the file status */
          if ( fileStatus.bFileCreated )
          {  //File was created for the first time, set defaults.
-#endif // 0
+#endif // 1
             (void)memset(&CachedAttr, 0, sizeof(CachedAttr));
             (void)TIME_UTIL_GetTimeInSecondsFormat(&CachedAttr.LastResetTime);
             for (i=0; i<PHY_MAX_CHANNEL; i++)
@@ -543,7 +543,7 @@ returnStatus_t PHY_init( void )
                CachedAttr.NoiseEstimateBoostOn[i] = PHY_CCA_THRESHOLD_MAX;
 #endif
             }
-#if 0 // TODO: attempt to get through PHY_init without a working file system
+#if 1 //  // TODO: RA6E1 Bob: should be able to remove this now that file system and PHY task are working
             retVal = FIO_fwrite( &PHYcachedFileHndl_, 0, (uint8_t*)&CachedAttr, sizeof(CachedAttr));
          }
          else
@@ -555,14 +555,16 @@ returnStatus_t PHY_init( void )
 #endif
             // Open PHY config data (configuration data that doesn't change often)
             if ( eSUCCESS == FIO_fopen(&PHYconfigFileHndl_,              /* File Handle so that PHY access the file. */
-                                       ePART_NV_APP_CACHED, // TODO: RA6E1 ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
+                                       // ePART_NV_APP_CACHED,           // TODO: RA6E1 Bob: remove this once file system is working
+                                       ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
                                        (uint16_t)eFN_PHY_CONFIG,         /* File ID (filename) */
                                        (lCnt)sizeof(ConfigAttr),         /* Size of the data in the file. */
                                        FILE_IS_NOT_CHECKSUMED,           /* File attributes to use. */
                                        PHY_CONFIG_FILE_UPDATE_RATE,      /* The update rate of the data in the file. */
                                        &fileStatus) )                    /* Contains the file status */
             {
-               if (1) // ( fileStatus.bFileCreated ) // TODO: RA6E1 Bob: temporarily ALWAYS initialize PHY config to defaults
+               // if (1)  // TODO: RA6E1 Bob: remove this code that temporarily ALWAYS initialized PHY config to defaults
+               if ( fileStatus.bFileCreated )
                {  // File was created for the first time, set defaults.
                   retVal = FIO_fwrite( &PHYconfigFileHndl_, 0, (uint8_t*)&ConfigAttr, sizeof(ConfigAttr));
                }
@@ -577,7 +579,7 @@ returnStatus_t PHY_init( void )
                // Update shadow data
                (void)memcpy( ShadowAttr.AfcAdjustment, ConfigAttr.AfcAdjustment, sizeof( ShadowAttr.AfcAdjustment ));
             }
-#if 0 // TODO: attempt to get through PHY_init without a working file system
+#if 1 // TODO: RA6E1 Bob: should be able to remove this now that file system and PHY task are working
          }
       }
 #endif
@@ -1218,7 +1220,7 @@ void PHY_Task( taskParameter )
    bool     delayRssiStats;
 #endif
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // used to check RS codes
    static uint8_t original[256] = {0};
    static uint8_t corrupted[256] = {0};
@@ -3343,7 +3345,7 @@ uint16_t Frame_Encode(TX_FRAME_t const *txFrame)
 
       // Compute FEC
       if ( (pData[2] & 0x4) == 0) {
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
          // todo: 01/24/17 2:12 PM [MKD] - This code might not work for message length 43 and 44 bytes (not sure 45 is legal). Need to investigate. I know the decoder doesn't work so I put the old code back.
          RS_Encode(RS_STAR_63_59, pData, &pData[num_bytes], (uint8_t)num_bytes);
 #else
@@ -3356,7 +3358,7 @@ uint16_t Frame_Encode(TX_FRAME_t const *txFrame)
    else
    {
       INFO_printf("FrameEncode - Mode %u is not supported", txFrame->Mode);
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
       // Code not need but able to generate STAR Gen I message but it doesn't follow all the STAR  Gen I requierments.
       // Use to test the TB receivers.
 
@@ -3441,7 +3443,7 @@ uint16_t Frame_Encode(TX_FRAME_t const *txFrame)
    return(num_bytes);
 }
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
 static void decode_frame(PHY_FRAME_t*  rxFrame, phy_buffer_t* rx_buffer)
 {
 
@@ -3469,7 +3471,7 @@ PHY_SET_STATUS_e  PHY_Attribute_Set( PHY_SetReq_t const *pSetReq)
 {
    PHY_SET_STATUS_e eStatus = ePHY_SET_SERVICE_UNAVAILABLE;
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // This function should only be called inside the PHY task
    if ( _task_get_id() != _task_get_id_from_name( "PHY" ) ) {
      ERR_printf("WARNING: PHY_Attribute_Set should only be called from the PHY task. Please use PHY_SetRequest instead.");
@@ -3631,7 +3633,7 @@ PHY_GET_STATUS_e PHY_Attribute_Get( PHY_GetReq_t const *pGetReq, PHY_ATTRIBUTES_
 {
    PHY_GET_STATUS_e eStatus = ePHY_GET_SUCCESS;
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // This function should only be called inside the PHY task
    if ( ( _task_get_id() != _task_get_id_from_name( "PHY" ) )     &&
         ( _task_get_id() != _task_get_id_from_name( "PSLSNR" ) ) ) {
@@ -4030,7 +4032,7 @@ bool PHY_TxChannel_Set(uint8_t index, uint16_t chan)
    return retVal;
 }
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
 /*!
   Set cached attribute values. Bypasses check for READ ONLY. Should only be called from a "friend" function (e.g., radio.c).
 */

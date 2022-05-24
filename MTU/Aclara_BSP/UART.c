@@ -96,7 +96,7 @@ const uart_cfg_t *UartCfg[MAX_UART_ID] =
    &g_uart2_cfg
 };
 #if ( DEBUG_PORT_BAUD_RATE == 1 )
-static const char *uart_name[MAX_UART_ID] = {"MFG",
+static const char *uart_name[MAX_UART_ID] = {"MFG", /* Order must match UartCtrl and UartCfg above */
 #if 0 //TODO: RA6 Bob: Add Optical port support
                                              "Optical",
 #endif
@@ -198,10 +198,24 @@ returnStatus_t UART_init ( void )
 }
 
 #if ( DEBUG_PORT_BAUD_RATE == 1 )
+/*******************************************************************************
+
+  Function name: UART_getName
+
+  Purpose: Gets the ASCII string name of the corresponding UART port
+
+  Arguments: UartId - Identifier of the particular UART on which to change baud rate
+
+  Returns: pointer to string (null terminated) with name of this UART port
+
+  Notes:
+
+*******************************************************************************/
 char * UART_getName ( enum_UART_ID uartId )
 {
    return ( (char *)uart_name[ (uint32_t) uartId ] );
 }
+
 /*******************************************************************************
 
   Function name: UART_setBaudRate
@@ -378,7 +392,7 @@ uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 *******************************************************************************/
 void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 {
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
    (void)fgets( DataBuffer, (int32_t)DataLength, UartHandle[UartId] );
 #elif ( RTOS_SELECTION == FREE_RTOS )
    // TODO: RA6 [name_Balaji]: To process the copy paste of multiple commands
@@ -417,7 +431,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
             ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
             /* 10millisecond is the delay timing where a successful UART_read happens */
             ( void )OS_SEM_Pend( &dbgReceiveSem_, ( portTICK_RATE_MS * 2) );
-            
+
             if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
                ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
                ( rxByte == 0xC0 ) )           /* Left over SLIP protocol characters in buffer */
