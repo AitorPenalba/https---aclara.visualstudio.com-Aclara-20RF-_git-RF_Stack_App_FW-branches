@@ -239,12 +239,15 @@ fsp_err_t R_OSPI_DirectWrite (spi_flash_ctrl_t    * p_ctrl,
  * Implements @ref spi_flash_api_t::directRead.
  *
  * @retval FSP_ERR_UNSUPPORTED         API not supported by OSPI.
+ *
+ * Aclara Modified: A new polling read parameter was added to the direct read API.
  **********************************************************************************************************************/
-fsp_err_t R_OSPI_DirectRead (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes)
+fsp_err_t R_OSPI_DirectRead (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead)
 {
     FSP_PARAMETER_NOT_USED(p_ctrl);
     FSP_PARAMETER_NOT_USED(p_dest);
     FSP_PARAMETER_NOT_USED(bytes);
+    FSP_PARAMETER_NOT_USED(pollingRead);
 
     return FSP_ERR_UNSUPPORTED;
 }

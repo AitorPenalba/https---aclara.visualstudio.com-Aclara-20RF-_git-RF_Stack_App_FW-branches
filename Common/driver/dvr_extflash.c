@@ -271,6 +271,7 @@ static OS_MUTEX_Obj qspiMutex_;        /* Mutex Lock for QSPI channel */
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
+#define AAI_WORD_PGM_SIZE ((uint8_t)2)
 
 /* Each entry represents the manufactures ID, worst case timing and if the SI pin supports a busy indicator. */
 #ifndef __BOOTLOADER
@@ -282,8 +283,8 @@ static const DeviceId_t sDeviceId[] =
    /* Disallow a "default" configuration. Require a device ID that is recognizable.                         */
    {  8000000,   3000000,     200000,   12,       5000,         1,    0x00,  0x00,  0x00,   0,    0 },  /* Default */
 #endif
-   {    50000,     25000,      25000,   10,         10,         2,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */
-   {    50000,     25000,      25000,   10,         10,         2,    0xBF,  0x25,  0x41,   1,    1 },  /* SST 16Mb 25VF016B */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */
    {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x41,   0,    0 },  /* SST 16Mb 26VF016B */
    {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x42,   0,    0 },  /* SST 32Mb 26VF032B */
    { 15000000,   1000000,     300000,   25,       1000,       256,    0x9D,  0x40,  0x15,   0,    0 },  /* ISSI 16Mb 25LQ080B */
@@ -444,6 +445,11 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
       R_AGT_Open(&g_timer0_ctrl, &g_timer0_cfg);
       NV_SPI_PORT_INIT( &g_qspi0_ctrl, &g_qspi0_cfg );
       R_QSPI_SpiProtocolSet(&g_qspi0_ctrl, SPI_FLASH_PROTOCOL_EXTENDED_SPI);
+
+      /* TODO: RA6: Access needs to be enabled so we can operate the chip select of external flash during startup.
+               Need to investigate if this should be moved to a more appropriate/generic location, otherwise having
+               it here ensures it will be enabled before files stored in NV are utilized. */
+      R_BSP_PinAccessEnable();
 #endif
    }
 #if ( (DEBUG_HARDWARE_BUSY == 1) || (DEBUG_POLL_BUSY == 1 ) ) /* For NV device ready */
@@ -1229,7 +1235,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( MCU_SELECTED == NXP_K24 )
       (void)NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof(instr) ); /* write the read command to the chip */
 #elif ( MCU_SELECTED == RA6E1 )
-      (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false ); /* write the read command to the chip */
+      (void)NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), true ); /* write the read command to the chip */
 #endif
       nvStatus = STATUS_BUSY_MASK;                /* Set to true, it should be overwritten below. */
 
@@ -1264,9 +1270,16 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( MCU_SELECTED == NXP_K24 )
          (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus) ); /* check nvStatus for busy */
 #elif ( MCU_SELECTED == RA6E1 )
-         (void)NV_SPI_PORT_READ( &g_qspi0_ctrl, &nvStatus, sizeof(nvStatus) ); /* check nvStatus for busy */
+         (void)NV_SPI_PORT_READ( &g_qspi0_ctrl, &nvStatus, sizeof(nvStatus), true );
 #endif
       } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
+
+#if ( MCU_SELECTED == RA6E1 )
+      /* We are done polling the status bit.  We need indicate that the transaction is complete by closing the
+         SPI bus cyle and then turn off QSPI Direct Communication Mode */
+      POLLING_READ_EXIT();
+#endif
+
       NV_CS_INACTIVE(); /* Activate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
@@ -1470,7 +1483,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
       else  /* Use AAI feature   */
       {
          /* If both bytes of data being written is in the erased state, skip the write.  */
-         bytesToWrite = pChipId_->u16MaxSeqWrite;
+         bytesToWrite = AAI_WORD_PGM_SIZE;  // TODO: RA6: Look at conditional compile solution to handle K24 and RA6 hex file compare
          if ( Cnt < bytesToWrite ) /* If the Cnt is less than the bytes to be written, only write Cnt # of bytes. */
          {
             bytesToWrite = Cnt;
@@ -1784,7 +1797,7 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
 #if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_READ( pDevice->port, pDest, (uint16_t)Cnt ); /* Read the data back */
 #elif ( MCU_SELECTED == RA6E1 )
-         eRetVal = NV_SPI_PORT_READ( &g_qspi0_ctrl, pDest, (uint16_t)Cnt ); /* Read the data back */
+         eRetVal = NV_SPI_PORT_READ( &g_qspi0_ctrl, pDest, (uint16_t)Cnt, false ); /* Read the data back */
 #endif
          if ( eSUCCESS == eRetVal )
          {
@@ -1853,7 +1866,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 #if ( MCU_SELECTED == NXP_K24 )
             eRetVal = NV_SPI_PORT_READ( pDevice->port, &mfgId[0], sizeof(mfgId) ); /* Read the data back */
 #elif ( MCU_SELECTED == RA6E1 )
-            eRetVal = NV_SPI_PORT_READ( &g_qspi0_ctrl, &mfgId[0], sizeof(mfgId) ); /* Read the data back */
+            eRetVal = NV_SPI_PORT_READ( &g_qspi0_ctrl, &mfgId[0], sizeof(mfgId), false ); /* Read the data back */
 #endif
             if ( eSUCCESS == eRetVal )
             {
