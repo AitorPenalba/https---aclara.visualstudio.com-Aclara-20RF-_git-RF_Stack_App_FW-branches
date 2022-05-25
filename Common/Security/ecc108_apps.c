@@ -203,12 +203,7 @@ static uint8_t    ecc108e_SignMessage( uint8_t keyID,
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
-#if 0 // TODO: RA6E1 Data to be kept in separate memory space (no init in a separate memory in linker)
-/* First, data kept in separate memory space for security information   */
 static const __no_init intFlashNvMap_t secROM;   /*lint !e728 not explicitly initialized  */
-#else
-static const intFlashNvMap_t secROM;   /*lint !e728 not explicitly initialized  */
-#endif
 
 /*lint -esym(765,AclaraFWkey) May not be referenced   */
 const uint8_t AclaraFWkey[ ECC108_KEY_SIZE ] =  /* Used to derive FW key   */
