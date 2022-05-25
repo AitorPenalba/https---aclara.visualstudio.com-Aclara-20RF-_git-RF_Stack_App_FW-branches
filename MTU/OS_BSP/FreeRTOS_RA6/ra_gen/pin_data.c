@@ -220,9 +220,9 @@ const ioport_pin_cfg_t g_bsp_pin_cfg_data[] = {
         .pin = BSP_IO_PORT_05_PIN_00,
         .pin_cfg = ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_QSPI)
     },
-    {
+    {  // ACLARA Modified: Smart Config does not allow us to set as directional output, but we need it to be
         .pin = BSP_IO_PORT_05_PIN_01,
-        .pin_cfg = ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_QSPI)
+        .pin_cfg = ((uint32_t) IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t) IOPORT_CFG_PORT_OUTPUT_HIGH)
     },
     {
         .pin = BSP_IO_PORT_05_PIN_02,

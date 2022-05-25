@@ -397,6 +397,7 @@
 #define NV_SPI_PORT_CLOSE              R_QSPI_Close
 #define NV_SPI_PORT_WRITE              R_QSPI_DirectWrite
 #define NV_SPI_PORT_READ               R_QSPI_DirectRead
+#define POLLING_READ_EXIT()            { R_QSPI->SFMCMD = 1U; R_QSPI->SFMCMD = 0U; } //Exit QSPI Direct Communication Mode, Only use when read polling is set to TRUE
 #endif
 
 /* Set PCR for GPIO, high drive strength, Make Output */
@@ -411,8 +412,8 @@
 #else
 #define NV_CS_TRIS()
 #define NV_CS_TRIS_LG()
-#define NV_CS_ACTIVE()
-#define NV_CS_INACTIVE()
+#define NV_CS_ACTIVE()                 R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_LOW)
+#define NV_CS_INACTIVE()               R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_HIGH)
 #define NV_BUSY()           1 // return always true
 #define NV_MISO_CFG(port, cfg)         eSUCCESS
 #endif
