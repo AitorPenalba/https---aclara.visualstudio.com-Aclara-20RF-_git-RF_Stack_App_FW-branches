@@ -203,9 +203,9 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
 #endif
 #else
 #define EnterVLLS(counter, eUnits, uMode)  /* TODO: RA6: DG: Remove later */
-#endif
+#endif // if 0
 
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
 
    Function Name: PWRLG_LLWU_ISR
@@ -248,7 +248,7 @@ void PWRLG_LLWU_ISR( void )
         LLWU_FILT2 |= LLWU_FILT2_FILTF_MASK;
     }
 }
-#endif // #if ( RTOS_SELECTION == MQX_RTOS )
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 
 /***********************************************************************************************************************
 
@@ -332,13 +332,12 @@ void PWRLG_Task( taskParameter )
       if ( !( pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK ) )
       {
 #if ( RTOS_SELECTION == MQX_RTOS )
-         taskID = _task_create( 0, pTaskList->TASK_TEMPLATE_INDEX, 0 );
+         taskID = OS_TASK_Create( pTaskList );
          ( void )_task_set_exception_handler( taskID, task_exception_handler );
 #elif (RTOS_SELECTION == FREE_RTOS)
          if ( pdPASS != OS_TASK_Create(pTaskList) )
          {
             printf("\nUnable to Start Tasks\n");
-            /* TODO: RA6: Add Error Print?*/
          }
          /* TODO: RA6: Add exception Handler */
 #endif
@@ -377,7 +376,7 @@ void PWRLG_Task( taskParameter )
       PWRLG_STATE_SET( PWRLG_STATE_WAIT_FOR_RADIO );
 
       // Don't send last gasp messages when in ship mode, decommission mode or quiet mode.
-      if ( 0 == MODECFG_get_ship_mode() && 0 == MODECFG_get_decommission_mode() && 0 == MODECFG_get_quiet_mode() )
+      if ( 0 == MODECFG_get_ship_mode() && 0 == MODECFG_get_decommission_mode() && 0 == MODECFG_get_quiet_mode() )  /* TODO: RA6: Enable */
       {
          DBG_logPrintf( 'I', "Not ship mode" );
 
@@ -802,7 +801,7 @@ void PWRLG_Startup( void )
 
       BRN_OUT_TRIS();                        /* Enable the /PF signal GPIO input. */
       LLWU_FILT1  = LLWU_FILT1_FILTF_MASK;   /* Reset PF changed interrupt flag, if any.   */
-#else
+#elif ( MCU_SELECTED == RA6E1 )
       /* TODO: RA6: Enable PF meter Interrupt */
 #endif
 #else  //if ( DEBUG_PWRLG == 1 )
@@ -828,7 +827,7 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
       // Save the low order 8 bits of the RTC Status Register saved at reset before MQX modifies it.
       VBATREG_RTC_SR() = ( uint8_t )( RTC_SR & ( uint32_t )0xFF );
-#else
+#elif ( MCU_SELECTED == RA6E1 )
       /* TODO: RA6: Do we need to special code for RA6? */
 #endif
 #if ( MCU_SELECTED == NXP_K24 )
@@ -840,7 +839,7 @@ void PWRLG_Startup( void )
          So, instead of relying on that signal alone, check the LP timer as the cause of the wakeup, first. */
       /* This block handles timer event.   */
       if ( ( uLLWU_F3 & LLWU_F3_MWUF0_MASK ) != 0  )
-#else
+#elif ( MCU_SELECTED == RA6E1 )
          /* TODO: RA6: DG: Do we need to check DPSRSTF before entering here?? ?*/
       if ( R_SYSTEM->DPSIFR2_b.DRTCAIF != 0 )  /* RTC Alarm Interrupt */
 #endif
@@ -940,7 +939,7 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
       /* At this point, the LP timer was NOT the cause of the wake up. Might be the PF changing state.  */
       else if ( ( uLLWU_FILT1 & LLWU_FILT1_FILTF_MASK ) != 0 )
-#else
+#elif ( MCU_SELECTED == RA6E1 )
       /* Note: If the PF_METER pin were to change on the RA6E1, the below line needs to be updated */
       else if( R_SYSTEM->DPSIFR1_b.DIRQ11F ) /* IRQ11-DS - Change in PF_METER */
 #endif
