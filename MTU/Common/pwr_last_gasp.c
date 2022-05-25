@@ -33,21 +33,21 @@
 #include <bsp.h>
 #endif
 #include "compiler_types.h"
-//#include "App_Msg_Handler.h"
+#include "App_Msg_Handler.h"
 #include "DBG_SerialDebug.h"
 #include "STRT_Startup.h"
 #include "pack.h"
 #include "file_io.h"
 #include "mode_config.h"
 #include "time_sys.h"
-//#include "MAC.h"
-//#include "STACK.h"
+#include "MAC.h"
+#include "STACK.h"
 #include "radio_hal.h"
 #include "vbat_reg.h"
 #include "pwr_config.h"
 #include "pwr_task.h"
-//#include "SM_Protocol.h"
-//#include "SM.h"
+#include "SM_Protocol.h"
+#include "SM.h"
 #if ( MCU_SELECTED == RA6E1 )
 //#include "lpm_app.h" // TODO: RA6E1: DG: Add later
 #include "AGT.h"
@@ -344,10 +344,9 @@ void PWRLG_Task( taskParameter )
 #endif
       }
    }
-#if ( INCLUDE_SRFN_STACK == 1 )
+
    /* Start the communications stack in DEAF mode. */
    ( void )SM_StartRequest( eSM_START_DEAF, NULL );
-#endif
 
    char  floatStr[PRINT_FLOAT_SIZE];
    float Vcap = ADC_Get_SC_Voltage();
@@ -378,16 +377,15 @@ void PWRLG_Task( taskParameter )
       PWRLG_STATE_SET( PWRLG_STATE_WAIT_FOR_RADIO );
 
       // Don't send last gasp messages when in ship mode, decommission mode or quiet mode.
-//      if ( 0 == MODECFG_get_ship_mode() && 0 == MODECFG_get_decommission_mode() && 0 == MODECFG_get_quiet_mode() )  /* TODO: RA6: Enable */
+      if ( 0 == MODECFG_get_ship_mode() && 0 == MODECFG_get_decommission_mode() && 0 == MODECFG_get_quiet_mode() )  /* TODO: RA6: Enable */
       {
          DBG_logPrintf( 'I', "Not ship mode" );
 
-#if ( INCLUDE_SRFN_STACK == 1 )
          /* Wait for the stack to be ready. Poll the stack manager for state change from "unknown".
             This also allows time for DTLS to determine if the session has been established.
          */
          SM_WaitForStackInitialized();
-#endif
+
 #if 0 /* This test is already made by the HEEP_MSG_Tx routine */
 #if ( USE_DTLS == 1 )
          uint8_t  securityMode;

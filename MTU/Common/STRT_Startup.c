@@ -552,13 +552,11 @@ void STRT_StartupTask ( taskParameter )
 #endif
 #endif // #if 0
          response = pFunct->pFxnStrt();
-#if 0
          if ( pFunct->pFxnStrt == MODECFG_init )
          {
             quiet = MODECFG_get_quiet_mode();
             rfTest = MODECFG_get_rfTest_mode();
          }
-#endif
          if ( eSUCCESS != response )
          {
             /* This condition should only show up in development.  This infinite loop should help someone figure out

@@ -568,12 +568,11 @@ void OS_TASK_Create_All ( bool initSuccess )
 #if ( RTOS_SELECTION == MQX_RTOS )
    _task_id taskID;
 #endif
-//  TODO: uncomment the following once required modules are available
-//   uint8_t  quiet;
-//   uint8_t  rfTest;
-//
-//   quiet = MODECFG_get_quiet_mode();
-//   rfTest = MODECFG_get_rfTest_mode();
+   uint8_t  quiet;
+   uint8_t  rfTest;
+
+   quiet = MODECFG_get_quiet_mode();
+   rfTest = MODECFG_get_rfTest_mode();
 
 #if ( RTOS_SELECTION == MQX_RTOS )
    /* Install exception handler */
@@ -587,11 +586,11 @@ void OS_TASK_Create_All ( bool initSuccess )
    {  /* Create the task if the "Auto Start" attribute is NOT set */
 
       if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
-      {  /* Create the task */
-// TODO: RA6: uncomment the following once required modules are available
-//           if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&
-//              ( (rfTest == 0) || ((pTaskList->TASK_ATTRIBUTES & RFTEST_MODE_ATTR) != 0) ) &&
-//              ( (initSuccess) || ((pTaskList->TASK_ATTRIBUTES & FAIL_INIT_MODE_ATTR) != 0) ) )
+      {
+         /* Create the task */
+         if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&
+            ( (rfTest == 0) || ((pTaskList->TASK_ATTRIBUTES & RFTEST_MODE_ATTR) != 0) ) &&
+            ( (initSuccess) || ((pTaskList->TASK_ATTRIBUTES & FAIL_INIT_MODE_ATTR) != 0) ) )
          {
 #if ( RTOS_SELECTION == MQX_RTOS )
             if ( MQX_NULL_TASK_ID == (taskID = OS_TASK_Create(pTaskList) ) )
