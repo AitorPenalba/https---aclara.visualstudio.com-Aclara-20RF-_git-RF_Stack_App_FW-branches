@@ -37,11 +37,7 @@
 /* INCLUDE FILES */
 
 #include "vbat_reg.h"
-/* TODO: RA6: Add later -- Start */
-//#include "time_util.h"
-//#include "MAC.h"
-//#include "MAC_Protocol.h"
-/* TODO: RA6: Add later -- End */
+
 
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTIONS */
