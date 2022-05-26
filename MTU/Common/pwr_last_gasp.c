@@ -376,7 +376,7 @@ void PWRLG_Task( taskParameter )
       PWRLG_STATE_SET( PWRLG_STATE_WAIT_FOR_RADIO );
 
       // Don't send last gasp messages when in ship mode, decommission mode or quiet mode.
-      if ( 0 == MODECFG_get_ship_mode() && 0 == MODECFG_get_decommission_mode() && 0 == MODECFG_get_quiet_mode() )  /* TODO: RA6: Enable */
+      if ( 0 == MODECFG_get_ship_mode() && 0 == MODECFG_get_decommission_mode() && 0 == MODECFG_get_quiet_mode() )
       {
          DBG_logPrintf( 'I', "Not ship mode" );
 
