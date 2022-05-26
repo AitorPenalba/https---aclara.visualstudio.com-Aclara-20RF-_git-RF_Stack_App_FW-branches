@@ -2452,7 +2452,7 @@ static uint32_t polled_printf( char *fmt, ... )
    uart_event = 0;
 
    pOff +=  snprintf( &pBuf[pOff], (sizeof( pBuf ) - pOff), "\r\n" );  /* Add CR and New Line  */
-   fsp_err_t err = R_SCI_UART_Write( &g_uart_lpm_dbg_ctrl, (uint8_t *)&pBuf[0], sizeof( pBuf ) );
+   fsp_err_t err = R_SCI_UART_Write( &g_uart_lpm_dbg_ctrl, (uint8_t *)&pBuf[0], pOff );
    assert(FSP_SUCCESS == err);
    while ( UART_EVENT_TX_COMPLETE != uart_event )  /* Wait for last character to be fully transmitted.   */
    {

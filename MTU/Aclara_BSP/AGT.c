@@ -161,7 +161,7 @@ fsp_err_t AGT_LPM_Timer_Stop(void)
 
 /*******************************************************************************************************************//**
  * @brief       This function configures AGT0 AGT1 timer
- * @param[IN]   uint32_t period
+ * @param[IN]   uint32_t period in milliseconds
  * @retval      FSP_SUCCESS
  * @retval      Any Other Error code apart from FSP_SUCCESS
  **********************************************************************************************************************/
