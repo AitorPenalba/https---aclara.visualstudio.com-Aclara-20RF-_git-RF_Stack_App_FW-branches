@@ -25,12 +25,13 @@
  /* INCLUDE FILES */
 
 #include "project.h"
-#include "agt.h"
-
+#include "AGT.h"
+#include "DBG_SerialDebug.h"
 
 /* ****************************************************************************************************************** */
 /* #DEFINE DEFINITIONS */
-
+#define USE_AGTS_IN_CASCADE   0     /* This feature enables the use of AGT0 and AGT1 in cascade for Low Power Mode
+                                       To use this feature, there might be a modification required for AGT configs */
 
 
 /* ****************************************************************************************************************** */
@@ -63,12 +64,14 @@
  * @retval      FSP_SUCCESS                  Upon successful open of AGT modules
  * @retval      Any Other Error code apart from FSP_SUCCESS
  **********************************************************************************************************************/
-fsp_err_t AGT_LPM_Timer_Init(void)
+fsp_err_t AGT_LPM_Timer_Init( void )
 {
    fsp_err_t err = FSP_SUCCESS;
+#if ( USE_AGTS_IN_CASCADE == 1 )
 	/* Open AGT0 Timer in Periodic mode */
 	err = R_AGT_Open(&agt0_timer_lpm_cascade_trigger_ctrl, &agt0_timer_lpm_cascade_trigger_cfg);
 	if(FSP_SUCCESS == err)
+#endif
 	{
 		/* Open AGT1 Timer in Periodic mode */
 		err = R_AGT_Open(&agt1_timer_cascade_lpm_trigger_ctrl, &agt1_timer_cascade_lpm_trigger_cfg);
@@ -88,13 +91,25 @@ fsp_err_t AGT_LPM_Timer_Start(void)
    fsp_err_t err = FSP_SUCCESS;
 
 	/* Start AGT0 timer */
+#if ( USE_AGTS_IN_CASCADE == 1 )
 	err = R_AGT_Start(&agt0_timer_lpm_cascade_trigger_ctrl);
 	if(FSP_SUCCESS == err)
+#endif
 	{
 		/* Start AGT1 timer */
 		err = R_AGT_Start(&agt1_timer_cascade_lpm_trigger_ctrl);
-	} // TODO: RA6: DG: Stop AGT1 if the AGT0 start fails
-
+      if(err != FSP_SUCCESS)
+      {
+         printf("Error:AGT1");
+      }
+	}
+#if ( USE_AGTS_IN_CASCADE == 1 )
+   // TODO: RA6: DG: Stop AGT1 if the AGT0 start fails
+   else
+   {
+      printf("Error:AGT0");
+   }
+#endif
    return err;
 }
 
@@ -108,6 +123,7 @@ fsp_err_t AGT_LPM_Timer_Stop(void)
 {
 	fsp_err_t err = FSP_SUCCESS;
    timer_status_t agt_status = {0};
+#if ( USE_AGTS_IN_CASCADE == 1 )
 	/* Stop AGT timers if they are counting */
 	err = R_AGT_StatusGet(&agt0_timer_lpm_cascade_trigger_ctrl, &agt_status);
 	if(FSP_SUCCESS == err)
@@ -123,7 +139,8 @@ fsp_err_t AGT_LPM_Timer_Stop(void)
 			}
 		}
 	}
-	agt_status.state = 0; //Reset status
+#endif
+	agt_status.state = TIMER_STATE_STOPPED; //Reset status
 	err =  R_AGT_StatusGet(&agt1_timer_cascade_lpm_trigger_ctrl, &agt_status);
 	if(FSP_SUCCESS == err)
 	{
@@ -144,18 +161,59 @@ fsp_err_t AGT_LPM_Timer_Stop(void)
 
 /*******************************************************************************************************************//**
  * @brief       This function configures AGT0 AGT1 timer
- * @param[IN]   None
+ * @param[IN]   uint32_t period
  * @retval      FSP_SUCCESS
  * @retval      Any Other Error code apart from FSP_SUCCESS
  **********************************************************************************************************************/
-fsp_err_t AGT_LPM_Timer_Configure( uint32_t const period )
+fsp_err_t AGT_LPM_Timer_Configure( uint32_t period )
 {
-   AGT_LPM_Timer_Init();
-   AGT_LPM_Timer_Stop();
+   fsp_err_t      err = FSP_SUCCESS;
+   uint32_t       timer_freq_hz;
+   timer_info_t   info;
 
-   R_AGT_PeriodSet( &agt0_timer_lpm_cascade_trigger_ctrl, period );
+   err = AGT_LPM_Timer_Init();
+   assert(FSP_SUCCESS == err);
+   err = AGT_LPM_Timer_Stop();
+   assert(FSP_SUCCESS == err);
 
-   AGT_LPM_Timer_Start();
+   /* Get the source clock frequency (in Hz). There are several ways to do this in FSP:
+   *  - If LOCO or sub-clock is chosen in agt_extended_cfg_t::clock_source
+   *      - The source clock frequency is BSP_LOCO_HZ >> timer_cfg_t::source_div
+   *  - If PCLKB is chosen in agt_extended_cfg_t::clock_source and the PCLKB frequency has not changed since reset,
+   *      - The source clock frequency is BSP_STARTUP_PCLKB_HZ >> timer_cfg_t::source_div
+   *  - Use the R_AGT_InfoGet function (it accounts for the clock source and divider).
+   *  - Calculate the current PCLKB frequency using R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB) and right shift
+   *    by timer_cfg_t::source_div.
+   *
+   * This example uses the last option (R_FSP_SystemClockHzGet).
+   */
+#if ( USE_AGTS_IN_CASCADE == 1 )
+   (void) R_AGT_InfoGet(&agt0_timer_lpm_cascade_trigger_ctrl, &info);
+#else
+   (void) R_AGT_InfoGet(&agt1_timer_cascade_lpm_trigger_ctrl, &info);
+#endif
+   timer_freq_hz = info.clock_frequency;
+#if 0  /* DBG Code */
+   printf("Timer:%ld",timer_freq_hz);
+   printf("Period:%ld",info.period_counts);
+#endif
 
-   return FSP_SUCCESS;
+   /* Calculate the desired period based on the current clock. Note that this calculation could overflow if the
+   * desired period is larger than UINT32_MAX / pclkb_freq_hz. A cast to uint64_t is used to prevent this. */
+   uint32_t period_counts = (uint32_t) (((uint64_t) timer_freq_hz * period) / 1000);
+   /* Set the calculated period. This will return an error if parameter checking is enabled and the calculated
+   * period is larger than UINT16_MAX. */
+#if ( USE_AGTS_IN_CASCADE == 1 )
+   R_AGT_PeriodSet( &agt0_timer_lpm_cascade_trigger_ctrl, period_counts );
+#else
+   err = R_AGT_PeriodSet(&agt1_timer_cascade_lpm_trigger_ctrl, period_counts);
+#endif
+   assert(FSP_SUCCESS == err);
+
+   err = AGT_LPM_Timer_Start();
+#if 0  /* DBG Code */
+   (void) R_AGT_InfoGet(&agt1_timer_cascade_lpm_trigger_ctrl, &info);
+   printf("Period:%ld",info.period_counts);
+#endif
+   return err;
 }

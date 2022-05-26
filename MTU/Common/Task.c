@@ -31,12 +31,12 @@
 #include <serinprv.h>
 #include <bsp.h>
 #include <mqx_prv.h>
+#include "psp_cpudef.h"
+#include "user_config.h"
 #endif
 //#include "sys_clock.h"
-//#include "CompileSwitch.h"                 /* Enable required code blocks */
-//TODO: Remove when "CompileSwitch.h" in project.h works
 #include "DBG_SerialDebug.h"
-//#include "psp_cpudef.h"
+
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
 #if ENABLE_ALRM_TASKS
 #include "EVL_event_log.h"
@@ -87,8 +87,6 @@
 #include "partitions.h"
 #endif
 
-#include "pwr_task.h"         // TODO:RA6E1: DG: Remove duplicate
-#include "pwr_last_gasp.h"    // TODO:RA6E1: DG: Remove duplicate
 #if ENABLE_PWR_TASKS
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
@@ -104,17 +102,16 @@
 #include "dfw_app.h"
 #endif
 
-//#include "MAC_Protocol.h"
-//#include "MAC.h"
-//
-//#include "STACK_Protocol.h"
-//#include "STACK.h"
+#include "MAC_Protocol.h"
+#include "MAC.h"
+
+#include "STACK_Protocol.h"
+#include "STACK.h"
 #include "SM.h"
 #include "PHY_Protocol.h"
 #include "PHY.h"
 //#include "stack_check.h"
 #include "SoftDemodulator.h"
-//
 #include "SELF_test.h"
 //#include "dtls.h"
 
@@ -126,8 +123,7 @@
 #include "mtls.h"
 #endif
 
-//#include "mode_config.h"
-//#include "user_config.h"
+#include "mode_config.h"
 //#include "SoftDemodulator.h"
 
 /*lint -esym(526,_kuart_polled_putc)  mqx putc routine for the current stdout stream  */
@@ -359,13 +355,13 @@ const OS_TASK_Template_t  Task_template_list[] =
 //   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_SRFN_ILC_TASKS
-   //{ eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
-   //{ eILC_SRFN_REG_TSK_IDX,     ILC_SRFN_REG_Task,             650,  26, (char *)pTskName_LcSrfnReg,    DEFAULT_ATTR, 0, 0 },
-   //{ eILC_TI_SY_TSK_IDX,        ILC_TIME_SYNC_Task,            650,  27, (char *)pTskName_LcTimeSync,   DEFAULT_ATTR, 0, 0 },
+   { eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
+   { eILC_SRFN_REG_TSK_IDX,     ILC_SRFN_REG_Task,             650,  26, (char *)pTskName_LcSrfnReg,    DEFAULT_ATTR, 0, 0 },
+   { eILC_TI_SY_TSK_IDX,        ILC_TIME_SYNC_Task,            650,  27, (char *)pTskName_LcTimeSync,   DEFAULT_ATTR, 0, 0 },
 #endif
 #if (ENABLE_SRFN_DA_TASKS == 1)
-   //{ eDA_SRFN_B2B_READ_TSK_IDX, B2BRxTask,                    1100,  28, (char *)pTskName_B2BRead,      DEFAULT_ATTR, 0, 0 },
-   //{ eDA_HOST_RST_TSK_IDX,      HostResetTask,                 600,  28, (char *)pTskName_HostReset,    DEFAULT_ATTR, 0, 0 },
+   { eDA_SRFN_B2B_READ_TSK_IDX, B2BRxTask,                    1100,  28, (char *)pTskName_B2BRead,      DEFAULT_ATTR, 0, 0 },
+   { eDA_HOST_RST_TSK_IDX,      HostResetTask,                 600,  28, (char *)pTskName_HostReset,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_MFG_TASKS
    { eMFGP_CMD_TSK_IDX,         MFGP_uartCmdTask,             2000,  29, (char *)pTskName_MfgUartCmd, DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
@@ -414,13 +410,13 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
    { eAPP_TSK_IDX,              APP_MSG_HandlerTask,          2400,  38, (char *)pTskName_AppMsg, DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #if (USE_IPTUNNEL == 1)
-   //{ eTUN_TSK_IDX,              TUNNEL_MSG_HandlerTask,        500,  38, (char *)pTskName_TunMsg, DEFAULT_ATTR, 0, 0 },
+   { eTUN_TSK_IDX,              TUNNEL_MSG_HandlerTask,        500,  38, (char *)pTskName_TunMsg, DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_FIO_TASKS
    { eFIO_TSK_IDX,              FIO_Task,                     1000,  38, (char *)pTskName_Fio,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ( ENABLE_ALRM_TASKS == 1 )
-   //{ eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
+   { eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
 #endif
    /* should be the lowest priority tasks */
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
