@@ -158,7 +158,7 @@ typedef enum
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
-static OS_SEM_Obj       TxDoneSem;            /* Used to signal message tranmit completed. */
+static OS_SEM_Obj       TxDoneSem;            /* Used to signal message transmit completed. */
 static volatile uint8_t TxSuccessful;
 #if ( DEBUG_PWRLG != 0 )
 #define uLLWU_F3     ( VBATREG_RFSYS_BASE_PTR->uLLWU_F3 )
@@ -174,14 +174,14 @@ static uint8_t hwRevLetter_;                  /* Used to store the HW revision l
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 static uint32_t         CalculateSleepWindow( uint8_t uMessagesRemaining );
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
 static void             Configure_LLWU( void );
 static void             EnterVLLS( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint8_t uMode );
 static void             EnterLLS( uint16_t uCounter, PWRLG_LPTMR_Units eUnits );
 #endif
 static void             HardwareShutdown( void );
 static void             NextSleep( void );
-//static void             TxCallback( MAC_DATA_STATUS_e status, uint16_t Req_Resp_ID );
+static void             TxCallback( MAC_DATA_STATUS_e status, uint16_t Req_Resp_ID );
 static void             LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode );
 static void             LptmrEnable( bool bEnableInterrupt );
 static bool             powerStable( bool curState );
