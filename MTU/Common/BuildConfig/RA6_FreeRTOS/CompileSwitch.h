@@ -227,7 +227,7 @@
 #define ENABLE_PRNT_ALRM_ERROR         1
 
 /* ------------------------------------------------------------------------------------------------------------------ */
-#define USE_DTLS                       0     // TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
+#define USE_DTLS                       1     // TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if ( ACLARA_LC == 1 ) || (ACLARA_DA == 1)
 #define DTLS_FIELD_TRIAL               0     /* Disable feature to allows unsecured comm. until session established   */
 #else // TODO: RA6E1 Enable DTLS_FIELD_TRIAL
@@ -239,7 +239,7 @@
 #define BM_DEBUG                       0     /* Buffer allocate/free debug printing */
 #define ENABLE_B2B_COMM                0     /* DCU3 XCVR only */
 /* ------------------------------------------------------------------------------------------------------------------ */
-#define USE_MTLS                       0     // TODO: RA6 [name_Balaji]: Add USE_MTLS support for RA6E1
+#define USE_MTLS                       1     // TODO: RA6 [name_Balaji]: Add USE_MTLS support for RA6E1
 #define MTLS_DEBUG                     (1)   /* Turn MTLS Debug On */
 /* ------------------------------------------------------------------------------------------------------------------ */
 

@@ -1244,6 +1244,15 @@
             <group>
                 <name>NET</name>
                 <group>
+                    <name>DTLS</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\DTLS\dtls.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\DTLS\dtls.h</name>
+                    </file>
+                </group>
+                <group>
                     <name>IP</name>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\NET\IP\STACK.c</name>
@@ -1283,6 +1292,15 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_Protocol.h</name>
+                    </file>
+                </group>
+                <group>
+                    <name>MTLS</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MTLS\mtls.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MTLS\mtls.h</name>
                     </file>
                 </group>
                 <group>
@@ -1683,13 +1701,16 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\MFG_Dtls.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\MFG_Port.c</name>
@@ -1781,7 +1802,7 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\cfg_hal.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\compileswitch.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\filenames.h</name>
@@ -1830,6 +1851,12 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_mtr_info.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_prg_mtr.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_prg_mtr.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_prot.c</name>

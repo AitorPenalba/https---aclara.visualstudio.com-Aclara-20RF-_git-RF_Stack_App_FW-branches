@@ -121,7 +121,9 @@
 /*lint -esym(715,argc,argv,cmd,pData,ptr) -esym(818,argc,argv) */
 
 #if (USE_DTLS == 1)
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "serial.h"
+#endif
 #include "dtls.h"
 #endif
 #if (USE_MTLS == 1)
@@ -251,9 +253,7 @@ static OS_EVNT_Obj      MFG_notify;                      /* Event handler to "no
 static mfgPortState_e   _MfgPortState;                   /* Port state */
 static const char       mfgpLockInEffect[] = {"LOCK IN EFFECT\n\r"}; /* When port is in tarpit this msg is returned  */
 #endif
-#if ( RTOS_SELECTION == MQX_RTOS )// TODO: RA6 [name_Balaji]: Integrate _MfgpUartEvent once integrated
 static OS_EVNT_Obj      _MfgpUartEvent;
-#endif
 static OS_MSGQ_Obj      _CommandReceived_MSGQ;
 #if ( MCU_SELECTED == RA6E1 )
 /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
@@ -1677,7 +1677,9 @@ static void mfgpReadByte( uint8_t rxByte )
 #if ( MCU_SELECTED == NXP_K24 )
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+#if 0 // TODO: RA6E1 Implement UART flush functionality
       (void)UART_flush ( mfgUart  );
+#endif
 #else
       usb_send( CRLF, sizeof( CRLF ) );
       usb_flush();
@@ -1731,7 +1733,9 @@ static void mfgpReadByte( uint8_t rxByte )
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
+#if 0 // TODO: RA6E1 Implement UART flush functionality
             (void)UART_flush ( mfgUart  );
+#endif
 #else
             MFG_printf( mfgpLockInEffect );
 #endif
@@ -9865,19 +9869,22 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
 {
    if ( _MfgPortState == DTLS_SERIAL_IO_e )
    {
+#if 0 // TODO: RA6E1 Enable UART ioctl (check if required)
       int32_t flags = IO_SERIAL_TRANSLATION | IO_SERIAL_ECHO; /* Settings for the UART */
-
+#endif
       /* This could be caused by the user closing the connection, or the time out value exceeded. If timing out, there's
          a DTLS message sent (close notify) that isn't being handled. Pause this task to allow the UART to receive the
          entire message, before flusing the UART.  */
       OS_TASK_Sleep( 30 );       /* Wait for close notify message to be received.   */
 
+#if 0 // TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
 #if !USE_USB_MFG
       UART_RX_flush( mfgUart  );
       ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #else
       usb_flush();
       usb_ioctl( ( MQX_FILE_PTR )( uint32_t )mfgUart, ( int32_t )IO_IOCTL_SERIAL_SET_FLAGS, &flags );
+#endif
 #endif
       ( void )memset( MFGP_CommandBuffer, 0, sizeof( MFGP_CommandBuffer ) );
       MFGP_numBytes = 0;
@@ -9913,7 +9920,9 @@ static void MFG_startDTLSsession ( uint32_t argc, char *argv[] )
    {
       uint32_t flags = 0;
 #if !USE_USB_MFG
+#if 0 // TODO: RA6E1 Enable UART ioctl (check if required)
       (void)UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
+#endif
 #else
       usb_ioctl( (MQX_FILE_PTR)(uint32_t)mfgUart, IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #endif

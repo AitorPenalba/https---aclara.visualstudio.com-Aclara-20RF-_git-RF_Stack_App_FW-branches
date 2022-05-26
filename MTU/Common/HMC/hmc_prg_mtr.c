@@ -75,10 +75,14 @@ Preamble is BIG-Endian; remainder of file is LITTLE-Endian.
 #include "project.h"
 #include "hmc_prg_mtr.h"
 #include "time_DST.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "fio.h"
 #include "ecc108_mqx.h"
+#endif
 #include "intf_cim_cmd.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "mqx.h"
+#endif
 #include "CompileSwitch.h"
 #include "DBG_SerialDebug.h"
 #include "ascii.h"

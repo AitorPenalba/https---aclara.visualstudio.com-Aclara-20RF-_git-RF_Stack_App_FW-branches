@@ -12,7 +12,6 @@
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA
  *****************************************************************************/
-#if 0 // TODO: RA6E1: DG: Remove
 #ifndef MTLS_H
 #define MTLS_H
 
@@ -92,7 +91,7 @@ typedef struct
 
 /* FUNCTION PROTOTYPES */
 returnStatus_t            MTLS_init( void );
-void                      MTLS_Task( uint32_t Arg0 );
+void                      MTLS_Task( taskParameter );
 void                      MTLS_RegisterIndicationHandler ( uint8_t port, indicationHandler pCallback );
 uint32_t                  MTLS_setMTLSnetworkTimeVariation( uint32_t mtlsNetworkTimeVariation );
 uint32_t                  MTLS_setMTLSauthenticationWindow( uint32_t mtlsAuthenticationWindow );
@@ -107,4 +106,3 @@ void MTLS_dumpReplayBuffer( void );
 #endif   /* MTLS_DEBUG  */
 
 #endif   /* MTLS_H */
-#endif // if 0
