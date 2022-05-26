@@ -4065,9 +4065,8 @@ bool PHY_Channel_Set(uint8_t index, uint16_t chan)
 {
    ConfigAttr.Channels[index] = chan;
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 Bob: Defer this until Last Gasp module is ready
-   if(PWRLG_LastGasp() == false)
-#endif
+      if(PWRLG_LastGasp() == false)
+
 #endif
    {  // Not in low power mode, so save this
       writeConfig();

@@ -354,9 +354,9 @@ typedef struct
    uint8_t  CsmaMaxAttempts;              /*!< The maximum number of attempts by the MAC to gain access to the channel
                                                before failing the transaction request. (0-20) */
    uint16_t CsmaMaxBackOffTime;           /*!< The maximum amount of back off time in milliseconds for the CSMA
-                                               algorithm. (macCsmaMinBackOffTime to 500 */
+                                               algorithm. (macCsmaMinBackOffTimeÂ to 500 */
    uint16_t CsmaMinBackOffTime;           /*!< The minimum amount of back off time in milliseconds for the CSMA
-                                               algorithm (0 – 100) */
+                                               algorithm (0 â€“ 100) */
    float    CsmaPValue;                   /*!< The probability that the CSMA algorithm will decide to transmit when an
                                                idle channel is found.  (0-1, default 0.1) */
    bool     CsmaQuickAbort;               /*!< Indicates if the CSMA algorithm will abort frame transmission upon the
@@ -658,7 +658,7 @@ MAC_GET_STATUS_e MAC_Attribute_Get(MAC_GetReq_t const *pGetReq, MAC_ATTRIBUTES_u
 void MAC_RestoreConfig_From_BkupRAM()
 {
    mac_config_t            *pMacConfig;
-   PartitionData_t const   *pSecurePart;  /* Partion handle for security information */
+   PartitionData_t const   *pSecurePart;  /* Partition handle for security information */
 
    /* Get mac address from internal flash (ROM) */
    if (eSUCCESS == PAR_partitionFptr.parOpen(&pSecurePart, ePART_ENCRYPT_KEY, 0))
@@ -667,14 +667,13 @@ void MAC_RestoreConfig_From_BkupRAM()
                                           sizeof( MacAddress_ ), pSecurePart );
    }
 
-#if 0 // TODO: RA6E1 - lastgasp
    // Get the handle to the location where the data was saved
    pMacConfig = PWRLG_MacConfigHandle();
 
    // BAH - This is here until this is being used!!!
    if( pMacConfig )
    {
-      // Only the critial values required for the last gasp are restored.
+      // Only the critical values required for the last gasp are restored.
       // The reset will be set to defaults
       MAC_ConfigAttr.NetworkId              = pMacConfig->NetworkId;
       MAC_ConfigAttr.CsmaMaxAttempts        = pMacConfig->CsmaMaxAttempts;
@@ -684,7 +683,6 @@ void MAC_RestoreConfig_From_BkupRAM()
       MAC_ConfigAttr.CsmaQuickAbort         = pMacConfig->CsmaQuickAbort;
       CachedAttr.PacketId                   = pMacConfig->PacketId;
    }
-#endif // TODO: RA6E1 Bob: Moved this #endif since pMacConfig will be uninitialized
 }
 
 /*!

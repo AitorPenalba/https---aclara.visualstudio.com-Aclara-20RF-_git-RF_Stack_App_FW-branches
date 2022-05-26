@@ -31,12 +31,12 @@
 #include <serinprv.h>
 #include <bsp.h>
 #include <mqx_prv.h>
+#include "psp_cpudef.h"
+#include "user_config.h"
 #endif
 //#include "sys_clock.h"
-//#include "CompileSwitch.h"                 /* Enable required code blocks */
-//TODO: Remove when "CompileSwitch.h" in project.h works
 #include "DBG_SerialDebug.h"
-//#include "psp_cpudef.h"
+
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
 #if ENABLE_ALRM_TASKS
 #include "EVL_event_log.h"
@@ -87,8 +87,6 @@
 #include "partitions.h"
 #endif
 
-#include "pwr_task.h"         // TODO:RA6E1: DG: Remove duplicate
-#include "pwr_last_gasp.h"    // TODO:RA6E1: DG: Remove duplicate
 #if ENABLE_PWR_TASKS
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
@@ -104,17 +102,16 @@
 #include "dfw_app.h"
 #endif
 
-//#include "MAC_Protocol.h"
-//#include "MAC.h"
-//
-//#include "STACK_Protocol.h"
-//#include "STACK.h"
+#include "MAC_Protocol.h"
+#include "MAC.h"
+
+#include "STACK_Protocol.h"
+#include "STACK.h"
 #include "SM.h"
 #include "PHY_Protocol.h"
 #include "PHY.h"
 //#include "stack_check.h"
 #include "SoftDemodulator.h"
-//
 #include "SELF_test.h"
 //#include "dtls.h"
 
@@ -126,8 +123,7 @@
 #include "mtls.h"
 #endif
 
-//#include "mode_config.h"
-//#include "user_config.h"
+#include "mode_config.h"
 //#include "SoftDemodulator.h"
 
 /*lint -esym(526,_kuart_polled_putc)  mqx putc routine for the current stdout stream  */
@@ -359,13 +355,13 @@ const OS_TASK_Template_t  Task_template_list[] =
 //   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_SRFN_ILC_TASKS
-   //{ eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
-   //{ eILC_SRFN_REG_TSK_IDX,     ILC_SRFN_REG_Task,             650,  26, (char *)pTskName_LcSrfnReg,    DEFAULT_ATTR, 0, 0 },
-   //{ eILC_TI_SY_TSK_IDX,        ILC_TIME_SYNC_Task,            650,  27, (char *)pTskName_LcTimeSync,   DEFAULT_ATTR, 0, 0 },
+   { eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
+   { eILC_SRFN_REG_TSK_IDX,     ILC_SRFN_REG_Task,             650,  26, (char *)pTskName_LcSrfnReg,    DEFAULT_ATTR, 0, 0 },
+   { eILC_TI_SY_TSK_IDX,        ILC_TIME_SYNC_Task,            650,  27, (char *)pTskName_LcTimeSync,   DEFAULT_ATTR, 0, 0 },
 #endif
 #if (ENABLE_SRFN_DA_TASKS == 1)
-   //{ eDA_SRFN_B2B_READ_TSK_IDX, B2BRxTask,                    1100,  28, (char *)pTskName_B2BRead,      DEFAULT_ATTR, 0, 0 },
-   //{ eDA_HOST_RST_TSK_IDX,      HostResetTask,                 600,  28, (char *)pTskName_HostReset,    DEFAULT_ATTR, 0, 0 },
+   { eDA_SRFN_B2B_READ_TSK_IDX, B2BRxTask,                    1100,  28, (char *)pTskName_B2BRead,      DEFAULT_ATTR, 0, 0 },
+   { eDA_HOST_RST_TSK_IDX,      HostResetTask,                 600,  28, (char *)pTskName_HostReset,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_MFG_TASKS
    { eMFGP_CMD_TSK_IDX,         MFGP_uartCmdTask,             2000,  29, (char *)pTskName_MfgUartCmd, DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
@@ -414,13 +410,13 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
    { eAPP_TSK_IDX,              APP_MSG_HandlerTask,          2400,  38, (char *)pTskName_AppMsg, DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #if (USE_IPTUNNEL == 1)
-   //{ eTUN_TSK_IDX,              TUNNEL_MSG_HandlerTask,        500,  38, (char *)pTskName_TunMsg, DEFAULT_ATTR, 0, 0 },
+   { eTUN_TSK_IDX,              TUNNEL_MSG_HandlerTask,        500,  38, (char *)pTskName_TunMsg, DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_FIO_TASKS
    { eFIO_TSK_IDX,              FIO_Task,                     1000,  38, (char *)pTskName_Fio,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ( ENABLE_ALRM_TASKS == 1 )
-   //{ eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
+   { eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
 #endif
    /* should be the lowest priority tasks */
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
@@ -434,7 +430,6 @@ const OS_TASK_Template_t  Task_template_list[] =
 /*lint -e{641}  Suppress the index conversion from enum to int for this section. */
 const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 {
-   { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, 0, 0 },
 #if ENABLE_PWR_TASKS
    { ePWRLG_TSK_IDX,    PWRLG_Task,             1500,  10, (char*)pTskName_PwrLastGasp, DEFAULT_ATTR_STRT, 0, 0 },
 #endif
@@ -443,7 +438,7 @@ const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 #endif
    { eSM_TSK_IDX,       SM_Task,                1000,  12, (char *)pTskName_Sm,     DEFAULT_ATTR, 0, 0 },
 //   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, 0, 0 },
-//   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
+   { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
    { eSTACK_TSK_IDX,    NWK_Task,               1500,  15, (char *)pTskName_Nwk,    DEFAULT_ATTR, 0, 0 },
 
 #if ( USE_DTLS == 1 )
@@ -452,7 +447,7 @@ const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 //   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, 0, 0 },
 
    { eDBG_PRNT_TSK_IDX, DBG_TxTask,              680,  18, (char *)pTskName_Print,  DEFAULT_ATTR, 0, 0 },
-#if ENABLE_PWR_TASKS
+#if ( RTOS_SELECTION == MQX_RTOS )
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
    { ePWRLG_IDL_TSK_IDX,PWRLG_Idle_Task,         336,  19, (char *)pTskName_Idle,   DEFAULT_ATTR, 0, 0 },
 #endif
@@ -569,12 +564,11 @@ void OS_TASK_Create_All ( bool initSuccess )
 #if ( RTOS_SELECTION == MQX_RTOS )
    _task_id taskID;
 #endif
-//  TODO: uncomment the following once required modules are available
-//   uint8_t  quiet;
-//   uint8_t  rfTest;
-//
-//   quiet = MODECFG_get_quiet_mode();
-//   rfTest = MODECFG_get_rfTest_mode();
+   uint8_t  quiet;
+   uint8_t  rfTest;
+
+   quiet = MODECFG_get_quiet_mode();
+   rfTest = MODECFG_get_rfTest_mode();
 
 #if ( RTOS_SELECTION == MQX_RTOS )
    /* Install exception handler */
@@ -588,11 +582,11 @@ void OS_TASK_Create_All ( bool initSuccess )
    {  /* Create the task if the "Auto Start" attribute is NOT set */
 
       if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
-      {  /* Create the task */
-// TODO: RA6: uncomment the following once required modules are available
-//           if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&
-//              ( (rfTest == 0) || ((pTaskList->TASK_ATTRIBUTES & RFTEST_MODE_ATTR) != 0) ) &&
-//              ( (initSuccess) || ((pTaskList->TASK_ATTRIBUTES & FAIL_INIT_MODE_ATTR) != 0) ) )
+      {
+         /* Create the task */
+         if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&
+            ( (rfTest == 0) || ((pTaskList->TASK_ATTRIBUTES & RFTEST_MODE_ATTR) != 0) ) &&
+            ( (initSuccess) || ((pTaskList->TASK_ATTRIBUTES & FAIL_INIT_MODE_ATTR) != 0) ) )
          {
 #if ( RTOS_SELECTION == MQX_RTOS )
             if ( MQX_NULL_TASK_ID == (taskID = OS_TASK_Create(pTaskList) ) )

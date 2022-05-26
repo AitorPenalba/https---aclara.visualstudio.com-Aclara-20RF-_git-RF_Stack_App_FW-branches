@@ -4,10 +4,9 @@
 #include "project.h"
 #include "hal_data.h"
 #include "BSP_aclara.h"
-#if 0  // TODO: RA6: DG: Add later
+
                 extern uint8_t PWRLG_LastGasp(void);
                 extern void    PWRLG_Startup(void);
-#endif
 /* Aclara Added -- End */
 
                 uint32_t g_fsp_common_thread_count;
@@ -107,22 +106,25 @@
                     /* Aclara Added -- Start */
 #if 0  // TODO: RA6: DG: Add later
 //                    PWRLG_Startup();  // TODO: RA6: DG: Add
-                    if ( PWRLG_LastGasp() )
+//                    if ( PWRLG_LastGasp() )
                     {
+                       /* Clear DPSRSTF flag */
+                       R_SYSTEM->RSTSR0_b.DPSRSTF = 0;  //TODO: RA6: DG: Move it to PWRLG_LastGasp()? 
                        /* Init LastGasp tasks. */
                        OS_TASK_Create_PWRLG();
                     }
                     else
-#endif
+#else
                     {
-//                       if ( PWRLG_LastGasp() )  // TODO: RA6: DG:
+                       if ( PWRLG_LastGasp() )
                        {
                           /* Clear DPSRSTF flag */
-                          R_SYSTEM->RSTSR0_b.DPSRSTF = 0;
+                          R_SYSTEM->RSTSR0_b.DPSRSTF = 0;  //TODO: RA6: DG: Remove later 
                        }
                        /* Init Normal Mode tasks. */
                        OS_TASK_Create_STRT();
                     }
+#endif
                     /* Aclara Added -- End */
                     /* Start the scheduler. */
                     vTaskStartScheduler();

@@ -184,7 +184,7 @@ typedef struct {
    float    TickToGPSerror;    // Difference between the T-board 5 second transition and the GPS PPS interrupt
    int32_t  RawTickToGPSerror; // Raw error before filtering
    uint32_t WatchDogCounter;   // GPS watch dog. Positive value means GPS interrupts are being received. 0 means no GPS interrupt.
-   uint32_t FTMcount;          // How many FTM count between between 3 GPS interrupts (i.e. 10 seconds)
+   uint32_t FTMcount;          // How many FTM count between 3 GPS interrupts (i.e. 10 seconds)
    bool     sendCommand;       // Command to correct sysTick error
    bool     gotGpsTime;        // Got GPS time from main board
    bool     phaseLocked;       // SysyTick 5 seconds transition is locked (i.e. small error) to GPS interrupt
@@ -246,7 +246,7 @@ STATIC void             TIME_SYS_vApplicationTickHook( void * user_isr_ptr );
  *
  * Purpose: retrieve the system time
  *
- * Arguments: sysTime - struture to fill
+ * Arguments: sysTime - structure to fill
  *
  * Returns: None
  *
@@ -288,7 +288,7 @@ STATIC void getSysTime( sysTime_t *sysTime )
  *
  * Purpose: set the system time
  *
- * Arguments: sysTime - data used to update the system time struture
+ * Arguments: sysTime - data used to update the system time structure
  *
  * Returns: None
  *
@@ -302,7 +302,7 @@ STATIC void setSysTime( const sysTime_t *sysTime )
    uint32_t primask = __get_PRIMASK();
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
    (void)memcpy( &_timeSys, sysTime, sizeof(sysTime_t) );
-   _timeSys.tictoc       = 0; // Set to 0 since setSysTime is usualy rounded to 10ms so reset counter.
+   _timeSys.tictoc       = 0; // Set to 0 since setSysTime is usually rounded to 10ms so reset counter.
    _timeSys.elapsedCycle = 0; // Set to 0 since sysTime->elapsedCycle was likely not initialized
    __set_PRIMASK(primask);
 }
@@ -501,7 +501,7 @@ returnStatus_t TIME_SYS_SetTimeFromRTC(void)
    }
 #if ( DCU == 1 )
    else
-   {  /* This else clause was added to accomadate dfw patches from DCU v1.40 to v1.70.  The VBATREG_RTC_VALID
+   {  /* This else clause was added to accommodate dfw patches from DCU v1.40 to v1.70.  The VBATREG_RTC_VALID
          flag was not utilized by the DCU in version v1.40. When patching to v1.70, the RTC_Valid check will always
          fail since this bit was never set in the previous version.  The else clause will validate the RTC values,
          making a decision to use these values if the time in the RTC makes sense or else it will use invalid time.
@@ -528,17 +528,15 @@ returnStatus_t TIME_SYS_SetTimeFromRTC(void)
    (void)TIME_UTIL_ConvertDateFormatToSysFormat(&rtcTime, &sysTime); //Convert to system time format
    TIME_UTIL_ConvertSysFormatToSeconds(&sysTime, &mqxTime.SECONDS, &mqxTime.MILLISECONDS);
    mqxTime.MILLISECONDS = sysTime.time % TIME_TICKS_PER_SEC;
-#if 0 // TODO: RA6E1 - MQX dependant functions in FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - MQX dependent functions in FreeRTOS
    _time_set( &mqxTime );
 #endif
    TIME_SYS_SetSysDateTime(&sysTime);
 
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - File support to be added
    //Write the time state variable
    retVal = FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t, timeState),
                     (uint8_t *)&timeVars_.timeState, (lCnt)sizeof(timeVars_.timeState));
-#endif
 #endif
    return(retVal);
 }

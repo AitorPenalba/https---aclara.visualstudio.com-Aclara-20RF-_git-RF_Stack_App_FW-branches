@@ -2,7 +2,7 @@
 
    Filename: DBG_CommandLine.c
 
-   Global Designator:
+   Global Designator: DBG_
 
    Contents:
 
@@ -267,7 +267,7 @@ static uint32_t DBG_CommandLine_clockswtest( uint32_t argc, char *argv[] );
 
 #if ( EP == 1 )
 //static uint32_t DBG_CommandLine_crc16m( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
-//static uint32_t DBG_CommandLine_PWR_BoostMode( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_PWR_BoostMode( uint32_t argc, char *argv[] );
 #if ( TEST_TDMA == 1 )
 static uint32_t DBG_CommandLine_CsmaSkip( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_TxSlot( uint32_t argc, char *argv[] );
@@ -348,8 +348,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   {  "bdt",         DBG_CommandLine_BDT,             "Print USB buffer descriptor table(s)" },
 //#endif
 //#if ( EP == 1 )
-//   { "boost",        DBG_CommandLine_PWR_BoostTest,   "PWR - Boost Test" },
-//   { "boostmode",    DBG_CommandLine_PWR_BoostMode,   "Turn boost supply on/off" },
+   { "boost",        DBG_CommandLine_PWR_BoostTest,   "PWR - Boost Test" },
+   { "boostmode",    DBG_CommandLine_PWR_BoostMode,   "Turn boost supply on/off" },
 //#endif
 //#if ENABLE_PWR_TASKS
 //#if 0
@@ -371,7 +371,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" },
    { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
 //#if ( EP == 1 )
-//   { "counters",     DBG_CommandLine_Counters,        "Display the current counters like reset counts etc" },
+   { "counters",     DBG_CommandLine_Counters,        "Display the current counters like reset counts etc" },
 //#endif
 //   { "cpuloaddis",   DBG_CommandLine_CpuLoadDisable,  "Disable CPU Load Output" },
 //   { "cpuloaden",    DBG_CommandLine_CpuLoadEnable,   "Enable CPU Load Output" },
@@ -1118,7 +1118,7 @@ static void DBG_CommandLine_Process ( void )
 #endif
          {
             /* We reached the end of the list and did not find a valid command */
-//            DBG_logPrintf( 'R', "%s is not a valid command!", argvar[0] );
+            DBG_logPrintf( 'R', "%s is not a valid command!", argvar[0] );
          }
       } /* end if() */
    } /* end if() */
@@ -6139,64 +6139,64 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
 } /* end DBG_CommandLine_Versions () */
 
 
-//#if (EP == 1)
-//static const char * const ResetReasons[] =
-//{
-//   "Power on Reset",
-//   "External Reset Pin",
-//   "Watchdog",
-//   "Loss of Ext Clock",
-//   "Low Voltage",
-//   "Low Leakage Wakeup",
-//   "Stop Mode ACK Error",
-//   "EZPort Reset",
-//   "MDM-AP",
-//   "Software Reset",
-//   "Core Lockup",
-//   "JTAG",
-//   "Anomaly Count"
-//};
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_Counters
-//
-//   Purpose: This function will print out the current counters
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_Counters ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t i;                         /* Loop counter/index into reset reason array               */
-//   uint32_t tib;                       /* Bit mask used to loop through all possible reset causes  */
-//   uint16_t const *counter;            /* Pointer to individual counters from power fail file      */
-//   const pwrFileData_t *pwrFileData;   /* Pointer to power fail file                               */
-//
-//   pwrFileData = PWR_getpwrFileData();
-//   counter = (uint16_t const *)&pwrFileData->uPowerDownCount;
-//   if ( argc == 2 )
-//   {
-//      if ( strcasecmp( argv[1], "reset" ) == 0 )
-//      {
-//         PWR_resetCounters();
-//      }
-//   }
-//
-//   for( i = 0, tib = RESET_SOURCE_POWER_ON_RESET; tib <= RESET_ANOMALY_COUNT; tib <<= 1, i++ )
-//   {
-//      DBG_logPrintf( 'I', "%s: %d", ResetReasons[i], *counter );
-//      counter++;
-//   }
-//   ( void )PWR_printResetCause();
-//   return ( 0 );
-//}
-//#endif
-//
+#if (EP == 1)
+static const char * const ResetReasons[] =
+{
+   "Power on Reset",
+   "External Reset Pin",
+   "Watchdog",
+   "Loss of Ext Clock",
+   "Low Voltage",
+   "Low Leakage Wakeup",
+   "Stop Mode ACK Error",
+   "EZPort Reset",
+   "MDM-AP",
+   "Software Reset",
+   "Core Lockup",
+   "JTAG",
+   "Anomaly Count"
+};
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_Counters
+
+   Purpose: This function will print out the current counters
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_Counters ( uint32_t argc, char *argv[] )
+{
+   uint32_t i;                         /* Loop counter/index into reset reason array               */
+   uint32_t tib;                       /* Bit mask used to loop through all possible reset causes  */
+   uint16_t const *counter;            /* Pointer to individual counters from power fail file      */
+   const pwrFileData_t *pwrFileData;   /* Pointer to power fail file                               */
+
+   pwrFileData = PWR_getpwrFileData();
+   counter = (uint16_t const *)&pwrFileData->uPowerDownCount;
+   if ( argc == 2 )
+   {
+      if ( strcasecmp( argv[1], "reset" ) == 0 )
+      {
+         PWR_resetCounters();
+      }
+   }
+
+   for( i = 0, tib = RESET_SOURCE_POWER_ON_RESET; tib <= RESET_ANOMALY_COUNT; tib <<= 1, i++ )
+   {
+      DBG_logPrintf( 'I', "%s: %d", ResetReasons[i], *counter );
+      counter++;
+   }
+   ( void )PWR_printResetCause();
+   return ( 0 );
+}
+#endif
+
 //#if 0
 ///*******************************************************************************
 //   Function name: DBG_CommandLine_SendMetadata
@@ -8632,81 +8632,81 @@ uint32_t DBG_CommandLine_PhyStats ( uint32_t argc, char *argv[] )
 //}
 //#endif
 //
-//#if (EP == 1)
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_PWR_BoostTest
-//
-//   Purpose: Measure voltage drop on super cap during 1 second of boost.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_PWR_BoostTest( uint32_t argc, char *argv[] )
-//{
-//   float fSuperCapV[2];
-//   char floatStr[3][PRINT_FLOAT_SIZE];
-//
-//   PWR_USE_BOOST();
-//
-//   fSuperCapV[0] = ADC_Get_SC_Voltage();
-//   OS_TASK_Sleep( 1000 );
-//   fSuperCapV[1] = ADC_Get_SC_Voltage();
-//
-//   PWR_USE_LDO();
-//
-//   DBG_logPrintf( 'R', "Super Cap Volage Drop: %s -> %s, %s Ws",
-//                  DBG_printFloat( floatStr[0], fSuperCapV[0], 6 ),
-//                  DBG_printFloat( floatStr[1], fSuperCapV[1], 6 ),
-//                  DBG_printFloat( floatStr[2],
-//                                  ( ( fSuperCapV[0]*fSuperCapV[0] ) - ( fSuperCapV[1]*fSuperCapV[1] ) ) * 5, 6 ) );
-//
-//   return( 0 );
-//}
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_PWR_BoostMode
-//
-//   Purpose: Turn on/off the boost regulator to allow noise burst/Rx sensitivity testing.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:   External power supply must be provided or unit will fail.
-//
-//******************************************************************************/
-//static uint32_t DBG_CommandLine_PWR_BoostMode( uint32_t argc, char *argv[] )
-//{
-//   bool boost;
-//
-//   if ( argc < 2 )
-//   {
-//      DBG_logPrintf( 'R', "Usage boostmode on|off" );
-//   }
-//   else
-//   {
-//      if ( strcasecmp( argv[ 1 ], "on" ) == 0 )
-//      {
-//         boost = (bool)true;
-//         PWR_USE_BOOST();
-//      }
-//      else
-//      {
-//         boost = (bool)false;
-//         PWR_USE_LDO();
-//      }
-//      DBG_logPrintf( 'R', "Boost supply %s.", boost ? "on" : "off" );
-//   }
-//   return( 0 );
-//}
-//#endif
+#if (EP == 1)
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_PWR_BoostTest
+
+   Purpose: Measure voltage drop on super cap during 1 second of boost.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_PWR_BoostTest( uint32_t argc, char *argv[] )
+{
+   float fSuperCapV[2];
+   char floatStr[3][PRINT_FLOAT_SIZE];
+
+   PWR_USE_BOOST();
+
+   fSuperCapV[0] = ADC_Get_SC_Voltage();
+   OS_TASK_Sleep( 1000 );
+   fSuperCapV[1] = ADC_Get_SC_Voltage();
+
+   PWR_USE_LDO();
+
+   DBG_logPrintf( 'R', "Super Cap Volage Drop: %s -> %s, %s Ws",
+                  DBG_printFloat( floatStr[0], fSuperCapV[0], 6 ),
+                  DBG_printFloat( floatStr[1], fSuperCapV[1], 6 ),
+                  DBG_printFloat( floatStr[2],
+                                  ( ( fSuperCapV[0]*fSuperCapV[0] ) - ( fSuperCapV[1]*fSuperCapV[1] ) ) * 5, 6 ) );
+
+   return( 0 );
+}
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_PWR_BoostMode
+
+   Purpose: Turn on/off the boost regulator to allow noise burst/Rx sensitivity testing.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:   External power supply must be provided or unit will fail.
+
+******************************************************************************/
+static uint32_t DBG_CommandLine_PWR_BoostMode( uint32_t argc, char *argv[] )
+{
+   bool boost;
+
+   if ( argc < 2 )
+   {
+      DBG_logPrintf( 'R', "Usage boostmode on|off" );
+   }
+   else
+   {
+      if ( strcasecmp( argv[ 1 ], "on" ) == 0 )
+      {
+         boost = (bool)true;
+         PWR_USE_BOOST();
+      }
+      else
+      {
+         boost = (bool)false;
+         PWR_USE_LDO();
+      }
+      DBG_logPrintf( 'R', "Boost supply %s.", boost ? "on" : "off" );
+   }
+   return( 0 );
+}
+#endif
 
 #if (EP == 1)
 /******************************************************************************

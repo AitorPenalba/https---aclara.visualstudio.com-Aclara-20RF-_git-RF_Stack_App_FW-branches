@@ -2043,7 +2043,7 @@ void MFGP_uartRecvTask( taskParameter )
             }
             else
             {
-               /* Used to ECHO the recieved character when no more valid data is read */
+               /* Used to ECHO the received character when no more valid data is read */
                UART_write( mfgUart, (uint8_t*)MFGP_PrintCmdBuffer, MFGP_numPrintBytes );
                memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
                MFGP_numPrintBytes = 0;
