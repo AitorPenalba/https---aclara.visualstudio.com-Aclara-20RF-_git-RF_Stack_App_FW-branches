@@ -1027,7 +1027,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },
 //#if ( SAMPLE_METER_TEMPERATURE == 1 )
 //   {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
-//   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter’s thermometer" },
+//   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meterâ€™s thermometer" },
 //#endif
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
@@ -1184,7 +1184,11 @@ static const struct_CmdLineEntry * const cmdTables[ ( uint16_t )menuLastValid ] 
 };
 static const char CRLF[] = { '\r', '\n' };
 
-// TODO: RA6E1 Enable MFGP_dtlsServerCertificateSN once DTLS is in place
+/* TODO: RA6E1 Re-insert MFGP_dtlsServerCertificateSN as shown:
+   ,MFGP_dtlsNetworkMSSubject \
+   ,MFGP_dtlsServerCertificateSN \
+   ,MFGP_dtlsNetworkRootCA \
+  once DTLS is in place
 //lint -e750    Lint is complaining about macro not referenced
 #define MFG_COMMON_CALLS \
    MFGP_CommandLine_Help \
