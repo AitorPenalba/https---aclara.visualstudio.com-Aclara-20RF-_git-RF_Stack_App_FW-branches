@@ -1140,6 +1140,9 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\CRC.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\RA6_OptionsMemory.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\radio_hal.c</name>
             </file>
             <file>
@@ -1147,6 +1150,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\UART.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\WDOG.c</name>
             </file>
         </group>
         <group>

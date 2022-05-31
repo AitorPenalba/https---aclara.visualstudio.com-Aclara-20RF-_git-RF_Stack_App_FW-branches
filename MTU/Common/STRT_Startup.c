@@ -239,7 +239,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( SEC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-
+   INIT( WDOG_Init, STRT_FLAG_NONE ),
 #if 0 // TODO: RA6: Add later
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS

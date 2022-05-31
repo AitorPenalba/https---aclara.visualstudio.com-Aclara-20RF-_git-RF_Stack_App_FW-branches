@@ -27,6 +27,20 @@ const dac_instance_t g_dac0_ULPC =
     .p_cfg     = &g_dac0_ULPC_cfg,
     .p_api     = &g_dac_on_dac
 };
+iwdt_instance_ctrl_t g_wdt0_ctrl;
+
+const wdt_cfg_t g_wdt0_cfg =
+{
+    .p_callback = NULL,
+};
+
+/* Instance structure to use this module. */
+const wdt_instance_t g_wdt0 =
+{
+    .p_ctrl        = &g_wdt0_ctrl,
+    .p_cfg         = &g_wdt0_cfg,
+    .p_api         = &g_wdt_on_iwdt
+};
 icu_instance_ctrl_t hmc_trouble_busy_ctrl;
 const external_irq_cfg_t hmc_trouble_busy_cfg =
 {

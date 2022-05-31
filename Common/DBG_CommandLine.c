@@ -329,6 +329,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "help",         DBG_CommandLine_Help,            "Display list of commands" },
    { "h",            DBG_CommandLine_Help,            "help" },
    { "?",            DBG_CommandLine_Help,            "help" },
+   { "wdTest",       DBG_CommandLine_wdTest,          " To test watchdog Timer" },
 #if ( DAC_CODE_CONFIG == 1 )
    { "setdac0step",               DBG_CommandLine_DAC_SetDacStep,      "Set the DAC Step, range for steps is 0 - 4096 eg.) setdac0step 2200" },
    { "pwrsel",                    DBG_CommandLine_setPwrSel,           "Set/reset pwrsel pin" },
@@ -1156,6 +1157,28 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
    } /* end while() */
    return ( 0 );
 } /* end DBG_CommandLine_Help () */
+
+
+/************************************************************************/
+
+uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] )
+{
+  if ( 2 == argc )
+   {
+      int16_t wdtNo = atoi( argv[1] );
+
+     if (wdtNo==1)
+     {
+       WDOG_Kick();
+     }
+     else if (wdtNo==2)
+     {
+       SELF_testIWDT();
+     }
+   }
+
+   return 0;
+}
 
 #if ( DAC_CODE_CONFIG == 1 )
 /******************************************************************************

@@ -16,8 +16,12 @@
 /* INCLUDE FILES */
 #include "project.h"
 #ifndef __BOOTLOADER
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "hal_data.h"
+#endif
 #else
 #include <MK24F12.h>
 #endif   /* BOOTLOADER  */
@@ -27,6 +31,8 @@
 /* #DEFINE DEFINITIONS */
 #define WATCHDOG_CLOCK_DIVIDE_PRESCALER 4 /* This value is 1 less than the actual prescaler/divider used */
 #define WATCHDOG_HW_TIMEOUT 30 /* Time in seconds for the Watchdog hardware to reset the board if not refreshed */
+
+//BSP_DONT_REMOVE static const uint32_t BSP_PLACE_IN_SECTION(".option_setting_ofs0") g_bsp_rom_ofs0 = 0xFFFFFFF9;
 
 /* MACRO DEFINITIONS */
 
@@ -55,6 +61,7 @@
 *******************************************************************************/
 returnStatus_t WDOG_Init ( void )
 {
+    #if ( MCU_SELECTED == NXP_K24 )
    /* Unlock the Watchdog Registers for writing/updating */
    WDOG_UNLOCK = 0xC520;
    WDOG_UNLOCK = 0xD928;
@@ -70,6 +77,22 @@ returnStatus_t WDOG_Init ( void )
    WDOG_TOVALL = (uint16_t)(((BSP_BUS_CLOCK / (WATCHDOG_CLOCK_DIVIDE_PRESCALER+1)) * WATCHDOG_HW_TIMEOUT) & 0x0000FFFF);
    /* Set Prescaler to (4+1=5) - so Bus Clock / prescaler gives WDOG_CLK */
    WDOG_PRESC = WDOG_PRESC_PRESCVAL(WATCHDOG_CLOCK_DIVIDE_PRESCALER);
+   
+   #elif ( MCU_SELECTED == RA6E1 )
+   
+     if (R_SYSTEM->RSTSR1_b.IWDTRF)
+    {
+        /* Clear the flag. */
+        R_SYSTEM->RSTSR1 = 0U;
+    }
+    
+   R_DEBUG->DBGSTOPCR_b.DBGSTOP_IWDT = 0;
+   
+   R_IWDT_Open (&g_wdt0_ctrl, &g_wdt0_cfg);
+   
+   R_IWDT_Refresh (&g_wdt0_ctrl); 
+    
+#endif
    return(eSUCCESS);
 } /* end WDOG_Init () */
 
@@ -88,17 +111,23 @@ returnStatus_t WDOG_Init ( void )
 *******************************************************************************/
 void WDOG_Kick ( void )
 {
+#if ( MCU_SELECTED == NXP_K24 )
 #ifndef __BOOTLOADER
-   OS_INT_disable( ); //The second sequence 0xB480 should be written within 20 cycles of first
+  OS_INT_disable( ); //The second sequence 0xB480 should be written within 20 cycles of first
 #endif   /* BOOTLOADER  */
-
-   /* Kick (refresh) the Watchdog */
-   WDOG_REFRESH = 0xA602;
-   WDOG_REFRESH = 0xB480;
-
+  
+  /* Kick (refresh) the Watchdog */
+  WDOG_REFRESH = 0xA602;
+  WDOG_REFRESH = 0xB480;
+  
 #ifndef __BOOTLOADER
-   OS_INT_enable( );
+  OS_INT_enable( );
 #endif   /* BOOTLOADER  */
+#elif ( MCU_SELECTED == RA6E1 )
+  
+  R_IWDT_Refresh (&g_wdt0_ctrl);
+  
+#endif
 } /* end WDOG_Kick () */
 /*******************************************************************************
 
@@ -112,6 +141,7 @@ void WDOG_Kick ( void )
 
 void WDOG_Disable( void )
 {
+    #if ( MCU_SELECTED == NXP_K24 )
    WDOG_MemMapPtr reg = WDOG_BASE_PTR;
 
    /* NOTE: DO NOT SINGLE STEP THROUGH THIS FUNCTION!!!
@@ -125,4 +155,5 @@ void WDOG_Disable( void )
 
    /* disable watchdog */
    reg->STCTRLH &= ~( WDOG_STCTRLH_WDOGEN_MASK );
+   #endif
 }  /* End BL_MAIN_WdogDisable() */
