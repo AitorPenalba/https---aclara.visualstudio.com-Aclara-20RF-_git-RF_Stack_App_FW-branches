@@ -79,7 +79,7 @@ extern const uint8_t uStartUpTblCnt;
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
-#define PWRLG_PRINT_ENABLE       0  /* Enable to use LG_PRNT_INFO() */
+#define PWRLG_PRINT_ENABLE       1  /* Enable to use LG_PRNT_INFO() */
 
 #define ENABLE_LED               0  /* Set to non-zero to used LEDs for debugging purposes   */
 
@@ -186,7 +186,7 @@ static void             LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits,
 static void             LptmrEnable( bool bEnableInterrupt );
 static bool             powerStable( bool curState );
 #if ( PWRLG_PRINT_ENABLE != 0 )
-static uint32_t         polled_printf( char *fmt, ... );
+//static uint32_t         polled_printf( char *fmt, ... );
 static void             lg_putc( char c );
 static void             lg_init_uart( void );
 
@@ -2422,7 +2422,7 @@ static bool                   uartInitDone = ( bool ) false;
 #if ( MCU_SELECTED == RA6E1 )
 static volatile uint8_t       uart_event = 0;
 #endif
-static uint32_t polled_printf( char *fmt, ... )
+uint32_t polled_printf( char *fmt, ... )
 {
    char     pBuf[ 192 ];   /* Local buffer for printout  */
    uint32_t pOff;          /* offset into pBuf/length    */

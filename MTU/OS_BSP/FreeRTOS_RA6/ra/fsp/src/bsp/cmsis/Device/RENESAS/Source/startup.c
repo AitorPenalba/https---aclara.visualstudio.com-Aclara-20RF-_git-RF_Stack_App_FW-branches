@@ -81,6 +81,7 @@ void Default_Handler (void)
      *  or use of an invalid pointer. Use the Fault Status window in e2 studio or manually check the fault status
      *  registers for more information.
      */
+
     BSP_CFG_HANDLE_UNRECOVERABLE_ERROR(0);
 }
 
@@ -132,20 +133,20 @@ BSP_DONT_REMOVE const exc_ptr_t __Vectors[BSP_CORTEX_VECTOR_TABLE_ENTRIES] BSP_P
 {
     (exc_ptr_t) (&g_main_stack[0] + BSP_CFG_STACK_MAIN_BYTES), /*      Initial Stack Pointer     */
     Reset_Handler,                                             /*      Reset Handler             */
-    NMI_Handler,                                               /*      NMI Handler               */
+    HardFault_Handler,                                               /*      NMI Handler               */
     HardFault_Handler,                                         /*      Hard Fault Handler        */
-    MemManage_Handler,                                         /*      MPU Fault Handler         */
-    BusFault_Handler,                                          /*      Bus Fault Handler         */
-    UsageFault_Handler,                                        /*      Usage Fault Handler       */
-    SecureFault_Handler,                                       /*      Secure Fault Handler      */
+    HardFault_Handler,                                         /*      MPU Fault Handler         */
+    HardFault_Handler,                                          /*      Bus Fault Handler         */
+    HardFault_Handler,                                        /*      Usage Fault Handler       */
+    HardFault_Handler,                                       /*      Secure Fault Handler      */
     0,                                                         /*      Reserved                  */
     0,                                                         /*      Reserved                  */
     0,                                                         /*      Reserved                  */
-    SVC_Handler,                                               /*      SVCall Handler            */
-    DebugMon_Handler,                                          /*      Debug Monitor Handler     */
+    HardFault_Handler,                                               /*      SVCall Handler            */
+    HardFault_Handler,                                          /*      Debug Monitor Handler     */
     0,                                                         /*      Reserved                  */
-    PendSV_Handler,                                            /*      PendSV Handler            */
-    SysTick_Handler,                                           /*      SysTick Handler           */
+    HardFault_Handler,                                            /*      PendSV Handler            */
+    HardFault_Handler,                                           /*      SysTick Handler           */
 };
 
 /** @} (end addtogroup BSP_MCU) */
