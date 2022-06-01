@@ -938,14 +938,14 @@ returnStatus_t SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType i
    Returns: none
 ***********************************************************************************************************************/
 
-void SELF_testIWDT(void)
+void SELF_testIWDT( void )
 {
-  static uint32_t iwdt_counter;
+   static uint32_t iwdt_counter;
   
-  while (1)
-  {
-    R_IWDT_CounterGet(&g_wdt0_ctrl, &iwdt_counter);
+   while ( TRUE )
+   {
+      /* Read the current IWDT counter value. */
+      R_IWDT_CounterGet( &g_wdt0_ctrl, &iwdt_counter );
     
-  }
-  
+   }
 }

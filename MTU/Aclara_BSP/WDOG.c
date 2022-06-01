@@ -32,7 +32,6 @@
 #define WATCHDOG_CLOCK_DIVIDE_PRESCALER 4 /* This value is 1 less than the actual prescaler/divider used */
 #define WATCHDOG_HW_TIMEOUT 30 /* Time in seconds for the Watchdog hardware to reset the board if not refreshed */
 
-//BSP_DONT_REMOVE static const uint32_t BSP_PLACE_IN_SECTION(".option_setting_ofs0") g_bsp_rom_ofs0 = 0xFFFFFFF9;
 
 /* MACRO DEFINITIONS */
 
@@ -61,7 +60,7 @@
 *******************************************************************************/
 returnStatus_t WDOG_Init ( void )
 {
-    #if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED == NXP_K24 )
    /* Unlock the Watchdog Registers for writing/updating */
    WDOG_UNLOCK = 0xC520;
    WDOG_UNLOCK = 0xD928;
@@ -78,19 +77,20 @@ returnStatus_t WDOG_Init ( void )
    /* Set Prescaler to (4+1=5) - so Bus Clock / prescaler gives WDOG_CLK */
    WDOG_PRESC = WDOG_PRESC_PRESCVAL(WATCHDOG_CLOCK_DIVIDE_PRESCALER);
    
-   #elif ( MCU_SELECTED == RA6E1 )
-   
-     if (R_SYSTEM->RSTSR1_b.IWDTRF)
-    {
-        /* Clear the flag. */
-        R_SYSTEM->RSTSR1 = 0U;
-    }
-    
+#elif ( MCU_SELECTED == RA6E1 )
+   /* Check RESET source */
+   if ( R_SYSTEM->RSTSR1_b.IWDTRF )
+   {
+      /* Clear the flag. */
+      R_SYSTEM->RSTSR1 = 0U;
+   }
+   /* (Optional) Enable the IWDT to count and generate NMI or reset when the
+    * debugger is connected. */
    R_DEBUG->DBGSTOPCR_b.DBGSTOP_IWDT = 0;
-   
-   R_IWDT_Open (&g_wdt0_ctrl, &g_wdt0_cfg);
-   
-   R_IWDT_Refresh (&g_wdt0_ctrl); 
+   /* Initializes the module. */
+   R_IWDT_Open ( &g_wdt0_ctrl, &g_wdt0_cfg );
+   /* Refresh before the counter underflows to prevent reset or NMI based on the setting. */
+   R_IWDT_Refresh ( &g_wdt0_ctrl ); 
     
 #endif
    return(eSUCCESS);
@@ -113,20 +113,19 @@ void WDOG_Kick ( void )
 {
 #if ( MCU_SELECTED == NXP_K24 )
 #ifndef __BOOTLOADER
-  OS_INT_disable( ); //The second sequence 0xB480 should be written within 20 cycles of first
+   OS_INT_disable( ); //The second sequence 0xB480 should be written within 20 cycles of first
 #endif   /* BOOTLOADER  */
-  
+   
   /* Kick (refresh) the Watchdog */
-  WDOG_REFRESH = 0xA602;
-  WDOG_REFRESH = 0xB480;
+   WDOG_REFRESH = 0xA602;
+   WDOG_REFRESH = 0xB480;
   
 #ifndef __BOOTLOADER
-  OS_INT_enable( );
+   OS_INT_enable( );
 #endif   /* BOOTLOADER  */
 #elif ( MCU_SELECTED == RA6E1 )
-  
-  R_IWDT_Refresh (&g_wdt0_ctrl);
-  
+   /* Refresh before the counter underflows to prevent reset or NMI based on the setting. */
+   R_IWDT_Refresh ( &g_wdt0_ctrl );
 #endif
 } /* end WDOG_Kick () */
 /*******************************************************************************
@@ -141,7 +140,7 @@ void WDOG_Kick ( void )
 
 void WDOG_Disable( void )
 {
-    #if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED == NXP_K24 )
    WDOG_MemMapPtr reg = WDOG_BASE_PTR;
 
    /* NOTE: DO NOT SINGLE STEP THROUGH THIS FUNCTION!!!
@@ -155,5 +154,5 @@ void WDOG_Disable( void )
 
    /* disable watchdog */
    reg->STCTRLH &= ~( WDOG_STCTRLH_WDOGEN_MASK );
-   #endif
+#endif
 }  /* End BL_MAIN_WdogDisable() */

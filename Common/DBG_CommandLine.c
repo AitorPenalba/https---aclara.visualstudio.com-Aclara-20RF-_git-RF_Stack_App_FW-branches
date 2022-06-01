@@ -329,7 +329,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "help",         DBG_CommandLine_Help,            "Display list of commands" },
    { "h",            DBG_CommandLine_Help,            "help" },
    { "?",            DBG_CommandLine_Help,            "help" },
-   { "wdTest",       DBG_CommandLine_wdTest,          " To test watchdog Timer" },
+   { "watchDogTest",       DBG_CommandLine_wdTest,          "1 for refresh watchdog \
+                                                         2 for validate watchdog" },
 #if ( DAC_CODE_CONFIG == 1 )
    { "setdac0step",               DBG_CommandLine_DAC_SetDacStep,      "Set the DAC Step, range for steps is 0 - 4096 eg.) setdac0step 2200" },
    { "pwrsel",                    DBG_CommandLine_setPwrSel,           "Set/reset pwrsel pin" },
@@ -1159,24 +1160,37 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
 } /* end DBG_CommandLine_Help () */
 
 
-/************************************************************************/
+/***********************************************************************************************************************
+   Function Name: DBG_CommandLine_wdTest
+
+   Purpose: Test the IWDT 
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: none
+***********************************************************************************************************************/
 
 uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] )
 {
-  if ( 2 == argc )
+   if ( 2 == argc )
    {
       int16_t wdtNo = atoi( argv[1] );
-
-     if (wdtNo==1)
-     {
-       WDOG_Kick();
-     }
-     else if (wdtNo==2)
-     {
-       SELF_testIWDT();
-     }
+      if ( wdtNo == 1 )
+      {
+         /* Refresh counter value */
+         WDOG_Kick();
+      }
+      else if ( wdtNo == 2 )
+      {
+         /* Test the IWDT */
+         SELF_testIWDT();
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Select correct option for watchDogTest" );
+      }
    }
-
    return 0;
 }
 
@@ -2507,7 +2521,7 @@ uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
 //      default:
 //      {
 //         execute        = false;
-//         DBG_printf( "USAGE: PowerDownTest delay(ms) [no_of_sectors] [ 0: External NV; 1: Internal ]" );
+//         watchDogTest( "USAGE: PowerDownTest delay(ms) [no_of_sectors] [ 0: External NV; 1: Internal ]" );
 //         break;
 //      }
 //   }

@@ -294,14 +294,12 @@
 #endif
 
 
-            #define OFS_SEQ1 0xA001A001 | (1 << 1) | (3 << 2)
-            #define OFS_SEQ2 (15 << 4) | (3 << 8) | (3 << 10)
+            #define OFS_SEQ1 0xA001A001 | (0 << 1) | (3 << 2)
+            #define OFS_SEQ2 (5 << 4) | (3 << 8) | (3 << 10)
             #define OFS_SEQ3 (1 << 12) | (1 << 14) | (1 << 17)
             #define OFS_SEQ4 (3 << 18) |(15 << 20) | (3 << 24) | (3 << 26)
             #define OFS_SEQ5 (1 << 28) | (1 << 30)
-           // #define BSP_CFG_ROM_REG_OFS0 (OFS_SEQ1 | OFS_SEQ2 | OFS_SEQ3 | OFS_SEQ4 | OFS_SEQ5)
-
-#define BSP_CFG_ROM_REG_OFS0 (0xFFFFFFF9)
+            #define BSP_CFG_ROM_REG_OFS0 (OFS_SEQ1 | OFS_SEQ2 | OFS_SEQ3 | OFS_SEQ4 | OFS_SEQ5)
 
             /* Option Function Select Register 1 Security Attribution */
 #ifndef BSP_CFG_ROM_REG_OFS1_SEL
