@@ -195,7 +195,8 @@ static volatile bool g_b_flash_event_blank = false;
 static volatile bool g_b_flash_event_erase_complete = false;
 static volatile bool g_b_flash_event_write_complete = false;
 
-uint8_t localVar[BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE];
+uint8_t localVar[FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE]; // TODO: RA6E1 Currently using data flash erase size. Check whether localVar support needed for code flash write.
+                      // Modify the array size of minimal code flash erase size if erase must required to write in code flash (We mostly dont need it for code flash as the write happens with erasing the complete partition memory)
 #endif
 
 /* ****************************************************************************************************************** */
@@ -518,11 +519,73 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
    }
 #endif
 #else
+   uint32_t startAddr, eraseBytes, destAddrLocal, destAddrLocalComplete;
+   uint32_t initialBytes = 0;
    if ( 0 != memcmp( ( uint8_t * ) destAddr, pSrc, cnt ) ) /* Does flash need to be updated? */
    {  /* Flash has to be updated */
-      if ( eSUCCESS != flashWrite( destAddr, cnt, pSrc ) )
+      if( destAddr < FLASH_HP_CODEFLASH_END_ADDRESS )
       {
-         retVal = eFAILURE;
+         // TODO: RA6E1 Check whether erase and write required for code flash, if needed enable the below lines.
+         // Note: Code flash requires 8Kb of local memory. Can we use extNV for this?
+         // (We mostly dont need it for code flash as the write happens with erasing the complete partition memory)
+//         startAddr = FLASH_HP_CODEFLASH_START_ADDRESS +
+//                      ( FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE * ( ( destAddr - FLASH_HP_CODEFLASH_START_ADDRESS ) / FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE ) );
+//         eraseBytes = FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE;
+
+         /* TODO: RA6E1 Check whether erase needed for code flash memory. If write used without using partition erase,
+            we require flashErase in this line before writung into the memory */
+         if ( eSUCCESS != flashWrite( destAddr, cnt, pSrc ) )
+         {
+            retVal = eFAILURE;
+         }
+      }
+      else if( ( destAddr >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( destAddr < FLASH_HP_DATAFLASH_END_ADDRESS ) )
+      {
+         startAddr = FLASH_HP_DATAFLASH_START_ADDRESS +
+                      ( FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE * ( ( destAddr - FLASH_HP_DATAFLASH_START_ADDRESS ) / FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE ) );
+         eraseBytes = FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE;
+
+         // TODO: RA6E1 Check the below code required for code flash as well, if it is, move the below code out of the loop (We mostly dont need it for code flash as the write happens with erasing the complete partition memory)
+         destAddrLocal = destAddr;
+         if ( startAddr < destAddrLocal )
+         {
+            initialBytes = destAddrLocal - startAddr;
+            memcpy ( localVar, ( uint32_t * ) startAddr, initialBytes );
+         }
+         destAddrLocal = ( uint32_t ) pSrc;
+         do
+         {
+            if ( ( startAddr + eraseBytes ) <= ( destAddr + cnt ) )
+            {
+               memcpy ( &localVar[initialBytes], ( uint32_t * ) destAddrLocal, ( eraseBytes - initialBytes ) );
+            }
+            else
+            {
+               destAddrLocalComplete = ( destAddr + cnt ) - startAddr;
+               memcpy ( &localVar[initialBytes], ( uint32_t * ) destAddrLocal, destAddrLocalComplete );
+               memcpy ( &localVar[initialBytes + destAddrLocalComplete], ( uint32_t * )( destAddr + cnt ), ( eraseBytes - initialBytes - destAddrLocalComplete ) );
+            }
+
+            destAddrLocal = destAddrLocal + ( eraseBytes - initialBytes );
+
+            retVal = ( returnStatus_t ) R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );
+             /* Wait for the erase complete event flag, if BGO is SET  */
+             if ( true == g_flash0_cfg.data_flash_bgo )
+             {
+                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+                g_b_flash_event_erase_complete = false;
+             }
+
+            if ( eSUCCESS == retVal )
+            {
+               if ( eSUCCESS != flashWrite( startAddr, eraseBytes, localVar ) )
+               {
+                  retVal = eFAILURE;
+               }
+            }
+
+            startAddr = startAddr + eraseBytes;
+         } while ( ( eSUCCESS == retVal ) && ( startAddr < ( destAddr + cnt ) ) );
       }
    }
 #endif
@@ -999,7 +1062,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
           if (FSP_SUCCESS == retVal)
           {
              /* Wait for the write complete event flag, if BGO is SET  */
-             if (true == g_flash0_cfg.data_flash_bgo)
+             if ( ( cnt > 0 ) && ( true == g_flash0_cfg.data_flash_bgo ) )
              {
                 (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                 g_b_flash_event_write_complete = false;
@@ -1010,25 +1073,39 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        {
           uint32_t localSrcAddr, localDstAddr, remainingByte;
           uint32_t localCnt = BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE * ( cnt / BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
-          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
-          if ( FSP_SUCCESS == retVal )
+          if ( localCnt > 0 )
           {
-             /* Wait for the write complete event flag, if BGO is SET  */
-             if ( true == g_flash0_cfg.data_flash_bgo )
+             retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
+             if ( FSP_SUCCESS == retVal )
              {
-                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-                g_b_flash_event_write_complete = false;
+                /* Wait for the write complete event flag, if BGO is SET  */
+                if ( true == g_flash0_cfg.data_flash_bgo )
+                {
+                   (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+                   g_b_flash_event_write_complete = false;
+                }
              }
           }
 
           remainingByte = cnt - localCnt;
-          localSrcAddr = srcAddr - ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte );
-          localDstAddr = address - ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte );
-          retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, localSrcAddr, localDstAddr, BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
+          if ( ( address + localCnt + BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE ) < FLASH_HP_DATAFLASH_END_ADDRESS )
+          {
+             memcpy( localVar, ( uint8_t * )srcAddr + localCnt, remainingByte );
+             memcpy( &localVar[remainingByte], ( uint8_t * )( address + cnt ), ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte ) );
+             retVal = R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( address + localCnt ), BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
+          }
+          else
+          {
+             localDstAddr = ( address + localCnt ) - ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte );
+             memcpy( localVar, ( uint8_t * )localDstAddr, ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte ) );
+             memcpy( &localVar[BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte], ( uint8_t * )( srcAddr + localCnt ), remainingByte);
+             retVal = R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( uint32_t )localDstAddr, BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
+          }
+
           if ( FSP_SUCCESS == retVal )
           {
              /* Wait for the write complete event flag, if BGO is SET  */
-             if ( true == g_flash0_cfg.data_flash_bgo )
+             if ( ( true == g_flash0_cfg.data_flash_bgo ) )
              {
                 (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                 g_b_flash_event_write_complete = false;

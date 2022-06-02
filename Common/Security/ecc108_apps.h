@@ -264,12 +264,4 @@ extern uint8_t    ecc108e_Verify( uint8_t keyID, uint16_t msglen, uint8_t const 
 extern uint8_t    ecc108e_GetDeviceCert( Cert_type cert, uint8_t *dest, uint32_t *length);
 extern void       ecc108e_UpdateKeys( const intFlashNvMap_t *intKeys );
 extern void       ecc108e_InitKeys( void );
-// TODO: RA6E1 [name_Suriya] - Resolve with ecc108_mqx.c/.h "replacement"
-#if ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-#include "partitions.h"
-
-extern PartitionData_t const *SEC_GetSecPartHandle( void );
-extern returnStatus_t SEC_init( void );
-#endif
-
 #endif

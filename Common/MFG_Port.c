@@ -75,6 +75,8 @@
 #include "ecc108_lib_return_codes.h"
 #if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Seperate FreeRTOS header
 #include "ecc108_mqx.h"
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
 #endif
 #include "ecc108_apps.h"
 
