@@ -728,10 +728,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
 //   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
 //   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
-   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
-   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
-   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
-   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
+//   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
+//   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
+//   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
+//   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
 //   {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
 //#if ( DCU == 1 )
 //   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
@@ -1192,7 +1192,7 @@ static const char CRLF[] = { '\r', '\n' };
    ,MFGP_dtlsServerCertificateSN \
    ,MFGP_dtlsNetworkRootCA \
   once DTLS is in place
-//lint -e750    Lint is complaining about macro not referenced
+//lint -e750    Lint is complaining about macro not referenced */
 #define MFG_COMMON_CALLS \
    MFGP_CommandLine_Help \
    ,MFGP_amBuMaxTimeDiversity \
@@ -2708,7 +2708,7 @@ static void MFGP_hardwareVersion( uint32_t argc, char *argv[] )
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
    MFG_printf( "%s %s\n", argv[ 0 ], &string[0] );
 }
-#if 0 // TODO: RA6 [name_Balaji]: Add Support for RA6E1
+
 /***********************************************************************************************************************
    Function Name: MFGP_DeviceType
 
@@ -7078,7 +7078,7 @@ static void MFG_stRTCFailCount ( uint32_t argc, char *argv[] )
    }
    MFG_logPrintf( "%s %d\n", argv[ 0 ], SelfTestData->RTCFail );
 }
-#endif // 0 TODO: RA6E1 Bob: allow next commands for now
+
 /******************************************************************************
 
    Function Name: MFG_CommandLine_MacAddr
@@ -7192,7 +7192,7 @@ static void MFGP_MacChannelSets( uint32_t argc, char *argv[], MAC_ATTRIBUTES_e c
    }
    MFG_logPrintf( "\n" );
 }
-#if 0 // TODO: RA6E1 Bob: disable the commands that follow
+
 /******************************************************************************
 
    Function Name:  MFGP_MacChannelSetsSRFN

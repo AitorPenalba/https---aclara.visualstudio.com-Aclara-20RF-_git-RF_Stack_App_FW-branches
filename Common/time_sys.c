@@ -539,6 +539,7 @@ returnStatus_t TIME_SYS_SetTimeFromRTC(void)
    //Write the time state variable
    retVal = FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t, timeState),
                     (uint8_t *)&timeVars_.timeState, (lCnt)sizeof(timeVars_.timeState));
+#endif
    return(retVal);
 }
 
