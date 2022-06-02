@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)64)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)65)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -130,7 +130,7 @@ static char const HWVersionDefault[] =
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
-// Used to allow visibility for DFW file offset extraction post processing
+// Used to allow visability for DFW file offset extraction post processing
 #ifndef __BOOTLOADER
 typedef struct
 {
@@ -236,6 +236,7 @@ static FileHandle_t  verFileHndl_;                 //Contains the file handle in
  **********************************************************************************************************************/
 returnStatus_t VER_Init ( void )
 {
+#if 0 /* TODO: RA6: TODO: Add this code  */
    FileStatus_t     fileStatusCfg;              /* Contains the file status */
    returnStatus_t   retVal = eFAILURE;
    HWVerString_t    hWVer;                      /* HW Version string */
@@ -266,7 +267,9 @@ returnStatus_t VER_Init ( void )
          }
       }
    }
-
+#else
+   returnStatus_t   retVal = eSUCCESS;
+#endif
    return(retVal);
 }
 

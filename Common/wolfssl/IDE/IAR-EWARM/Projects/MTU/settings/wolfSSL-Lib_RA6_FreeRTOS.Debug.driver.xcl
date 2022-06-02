@@ -1,16 +1,18 @@
 "--endian=little" 
 
-"--cpu=Cortex-M4" 
+"--cpu=Cortex-M33" 
 
-"--fpu=VFPv4_SP" 
+"--cmse" 
+
+"--fpu=VFPv5_SP" 
 
 "-p" 
 
-"C:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\CONFIG\debugger\NXP\MK24FN1M0xxx12.ddf" 
+"C:\Program Files\IAR Systems\Embedded Workbench 9.0\arm\CONFIG\debugger\Renesas\R7FA6E10F.ddf" 
 
 "--semihosting" 
 
-"--device=MK24FN1M0xxx12" 
+"--device=R7FA6E10F" 
 
 "--multicore_nr_of_cores=1" 
 

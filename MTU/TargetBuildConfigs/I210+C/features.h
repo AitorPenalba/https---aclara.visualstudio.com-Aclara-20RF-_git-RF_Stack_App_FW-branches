@@ -57,15 +57,15 @@
 #define HMC_SNAPSHOT                      0
 #define ANSI_STANDARD_TABLES              1
 #define ANSI_LOGON                        1
-#define ANSI_SECURITY                     0
+#define ANSI_SECURITY                     1
 #define METER_TROUBLE_SIGNAL              1
 #define END_DEVICE_NEGOTIATION            0
 #define LOG_IN_METER                      1
 #define OPTICAL_PASS_THROUGH              0
 #define SAMPLE_METER_TEMPERATURE          0  /* Is sampling the meter's thermometer required, some meter's do this on their own */
 #define LOAD_CONTROL_DEVICE               0  /* 1 -> supports load control and signed multicast messages.   */
-#define END_DEVICE_PROGRAMMING_CONFIG     0  /* Supports configuration of the meter by programming/writing tables */
-#define END_DEVICE_PROGRAMMING_FLASH      0 //ED_PROG_FLASH_PATCH_ONLY  /* Supports programming of the meter Flash */
+#define END_DEVICE_PROGRAMMING_CONFIG     1  /* Supports configuration of the meter by programming/writing tables */
+#define END_DEVICE_PROGRAMMING_FLASH      ED_PROG_FLASH_PATCH_ONLY  /* Supports programming of the meter Flash */
 #define END_DEVICE_PROGRAMMING_DISPLAY    0  /* Supports the ability to write to the meter display */
 #define VSWR_MEASUREMENT                  0  /* Supports VSWR measurements of antenna */
 #define PHASE_DETECTION                   0  /* Supports Phase Detection */

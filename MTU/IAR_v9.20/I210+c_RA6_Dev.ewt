@@ -1433,6 +1433,12 @@
         </group>
         <group>
             <name>RA6_FreeRTOS_WolfSSL</name>
+            <group>
+                <name>Debug</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\wolfssl\IDE\IAR-EWARM\Projects\MTU\RA6_FreeRTOS Debug\Exe\wolfSSL-Lib_MTU_RA6_FreeRTOS.a</name>
+                </file>
+            </group>
         </group>
     </group>
     <group>
@@ -1468,6 +1474,24 @@
             <name>Common</name>
             <group>
                 <name>DFW</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_app.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_app.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_interface.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_interface.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_pckt.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\DFW\dfw_pckt.h</name>
+                </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\DFW\dfwtd_config.c</name>
                 </file>
@@ -1538,6 +1562,15 @@
             <group>
                 <name>NET</name>
                 <group>
+                    <name>DTLS</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\DTLS\dtls.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\DTLS\dtls.h</name>
+                    </file>
+                </group>
+                <group>
                     <name>IP</name>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\NET\IP\STACK.c</name>
@@ -1577,6 +1610,15 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\NET\MAC\MAC_Protocol.h</name>
+                    </file>
+                </group>
+                <group>
+                    <name>MTLS</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MTLS\mtls.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\NET\MTLS\mtls.h</name>
                     </file>
                 </group>
                 <group>
@@ -1865,6 +1907,12 @@
             <group>
                 <name>Util</name>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\ascii.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\ascii.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\byteswap.c</name>
                 </file>
                 <file>
@@ -1971,13 +2019,16 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\Common\MFG_Dtls.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\MFG_Port.c</name>
@@ -2069,7 +2120,7 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\cfg_hal.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\compileswitch.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\filenames.h</name>
@@ -2118,6 +2169,12 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_mtr_info.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_prg_mtr.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_prg_mtr.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_prot.c</name>
@@ -2184,7 +2241,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>

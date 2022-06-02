@@ -26,7 +26,9 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 
+#if ( RTOS_SELECTION == MQX_RTOS )
 time_t mqx_time(time_t* timer);
+#endif
 
 /*
 ASN Options:

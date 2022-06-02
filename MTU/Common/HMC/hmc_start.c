@@ -39,9 +39,7 @@
 #include <mqx.h>                       /* Needed for mqx typedefs, etc. */
 #include <fio.h>
 #endif
-#if 0 // TODO: RA6E1 - Enable wolfssl
 #include <wolfssl/internal.h>
-#endif
 #include "dvr_intFlash_cfg.h"          /* Internal flash variables structure  */
 #include "hmc_finish.h"
 #if ( ( END_DEVICE_PROGRAMMING_CONFIG == 1 ) || ( END_DEVICE_PROGRAMMING_FLASH >  ED_PROG_FLASH_NOT_SUPPORTED ) )
@@ -63,6 +61,8 @@
 #include "ecc108_comm_marshaling.h" /* ECC108 return values, keys sizes, etc. */
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"             /* SEC_GetSecPartHandle()  */
+#elif ( RTOS_SELECTION == FREE_RTOS ) // TODO: RA6E1 Create #include "ecc108_freeRTOS.h" and remove this header
+#include "ecc108_apps.h"
 #endif
 #include "DBG_SerialDebug.h"
 #if (HMC_KV == 1)
@@ -436,7 +436,6 @@ static void startTimer( uint32_t tmr_mS );
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
-#if 0 // TODO: RA6E1 - Enable wolfssl
 /***********************************************************************************************************************
 
    Function name: encryptBuffer
@@ -524,7 +523,6 @@ static int32_t validateMD5( uint8_t *buffer, int32_t size )
    return !result;
 }
 
-#endif
 #if ( ANSI_SECURITY == 1 )
 /***********************************************************************************************************************
    Function name: HMC_STRT_UpdatePasswords

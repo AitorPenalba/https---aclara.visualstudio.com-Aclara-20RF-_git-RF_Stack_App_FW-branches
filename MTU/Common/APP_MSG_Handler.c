@@ -458,7 +458,7 @@ void APP_MSG_HandlerTask ( taskParameter )
                if ( tn_tw_mp == ( enum_MessageResource )heepHdr.Resource )
                {
 #if ( USE_MTLS == 1 )
-                  if ( ( ( UDP_MTLS_PORT == port ) && ( eMULTICAST    == indication->dstAddr.addr_type ) )
+                  if ( ( ( UDP_MTLS_PORT == port ) && ( eMULTICAST    == indication->dstAddr.addr_type ) ) )
                   {
                      pass = ( bool )true;
                   }

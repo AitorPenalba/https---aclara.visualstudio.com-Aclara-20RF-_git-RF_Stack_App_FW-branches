@@ -146,7 +146,9 @@
 #define PART_ENCRYPT_KEY_SIZE       ENCRYPT_KEY_SIZE  /* Encryption Keys Size from linker script */
 #define PART_SWAP_STATE_SIZE        SWAP_STATE_SIZE   /* Flash Memory Swap State Size from linker script !ONLY use when swap is or has been enabled! */
 /* Sections in upper bank */
+#if ( MCU_SELECTED != RA6E1 )
 #define PART_APP_UPPER_CODE_SIZE    APP_UPPER_CODE_SIZE  /* Upper App Code Size from linker script */
+#endif
 #define PART_BL_BACKUP_SIZE         BL_BACKUP_SIZE       /* Bootloader Backup Size from linker script */
 #define PART_DFW_BL_INFO_SIZE       DFW_BL_INFO_SIZE     /* DFW Bootloader Info Size from linker script */
 
@@ -171,7 +173,9 @@ If we do not move the Encrypt Key partition and keep the swap indicator sector *
 #define PART_APP_CODE_OFFSET        APP_CODE_START
 #define PART_ENCRYPT_KEY_OFFSET     ENCRYPT_KEY_START
 #define PART_SWAP_STATE_OFFSET      SWAP_STATE_START
+#if ( MCU_SELECTED != RA6E1 )
 #define PART_APP_UPPER_CODE_OFFSET  APP_UPPER_CODE_START
+#endif
 #define PART_BL_BACKUP_OFFSET       BL_BACKUP_START
 #define PART_DFW_BL_INFO_OFFSET     DFW_BL_INFO_START
 /* MUST keep this reserved. If swap ever used, cannot write until this offset */

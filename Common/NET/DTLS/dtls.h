@@ -102,7 +102,7 @@ typedef struct
 
 /* FUNCTION PROTOTYPES */
 returnStatus_t DTLS_init( void );
-void DTLS_Task( uint32_t Arg0 );
+void DTLS_Task( taskParameter );
 void DTLS_Stats( bool option );
 void DTLS_Request( buffer_t *request );
 void DTLS_RegisterIndicationHandler( uint8_t port, DTLS_IndicationHandler pCallback );

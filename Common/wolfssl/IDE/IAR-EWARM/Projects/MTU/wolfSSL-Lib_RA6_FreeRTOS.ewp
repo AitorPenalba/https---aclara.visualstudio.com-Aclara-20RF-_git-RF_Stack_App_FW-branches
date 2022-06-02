@@ -74,7 +74,7 @@
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
-                    <state>MK24FN1M0xxx12	NXP MK24FN1M0xxx12</state>
+                    <state>R7FA6E10F	Renesas R7FA6E10F</state>
                 </option>
                 <option>
                     <name>GenLowLevelInterface</name>
@@ -99,7 +99,7 @@
                 <option>
                     <name>GBECoreSlave</name>
                     <version>31</version>
-                    <state>39</state>
+                    <state>59</state>
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
@@ -116,16 +116,16 @@
                 <option>
                     <name>CoreVariant</name>
                     <version>31</version>
-                    <state>39</state>
+                    <state>59</state>
                 </option>
                 <option>
                     <name>GFPUDeviceSlave</name>
-                    <state>MK24FN1M0xxx12	NXP MK24FN1M0xxx12</state>
+                    <state>R7FA6E10F	Renesas R7FA6E10F</state>
                 </option>
                 <option>
                     <name>FPU2</name>
                     <version>0</version>
-                    <state>4</state>
+                    <state>6</state>
                 </option>
                 <option>
                     <name>NrRegs</name>
@@ -139,7 +139,7 @@
                 <option>
                     <name>GFPUCoreSlave2</name>
                     <version>31</version>
-                    <state>39</state>
+                    <state>59</state>
                 </option>
                 <option>
                     <name>OGCMSISPackSelectDevice</name>
@@ -184,7 +184,7 @@
                 </option>
                 <option>
                     <name>TrustZone</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>TrustZoneModes</name>
@@ -214,7 +214,6 @@
                 <debug>1</debug>
                 <option>
                     <name>CCDefines</name>
-                    <state>RTOS_SELECTION=FREERTOS</state>
                     <state>WOLFSSL_USER_SETTINGS</state>
                 </option>
                 <option>
@@ -337,14 +336,24 @@
                 <option>
                     <name>CCIncludePath2</name>
                     <state>$PROJ_DIR$\..\..\..\..</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\MQX_Kinetis\config\common</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\MQX_Kinetis\config\ep_k24f120m</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\MQX_Kinetis\mqx\source\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\MQX_Kinetis\mqx\source\psp\cortex_m</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\MQX_Kinetis\mqx\source\psp\cortex_m\compiler\iar</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\MQX_Kinetis\mqx\source\psp\cortex_m\cpu</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\Common</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\Common</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\Common\BuildConfig\RA6_FreeRTOS</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra\arm\CMSIS_5\CMSIS\Core\Include</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra\fsp\inc</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra\fsp\inc\api</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra\fsp\inc\instances</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra\fsp\src\rm_freertos_port</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra_gen</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\src</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra_cfg\aws</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra_cfg\driver</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra\board</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra_cfg\fsp_cfg</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\MTU\OS_BSP\FreeRTOS_RA6\ra_cfg\fsp_cfg\bsp</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\Common\FreeRTOS\10.4.3\aws\amazon-freertos\freertos_kernel\include</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\..\Common\FreeRTOS\10.4.3\aws\amazon-freertos\libraries\freertos_plus\standard\freertos_plus_tcp\include</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>

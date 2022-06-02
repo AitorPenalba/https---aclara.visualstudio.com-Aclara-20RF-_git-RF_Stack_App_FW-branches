@@ -113,7 +113,7 @@
 //#include "stack_check.h"
 #include "SoftDemodulator.h"
 #include "SELF_test.h"
-//#include "dtls.h"
+#include "dtls.h"
 
 #if (SIGNAL_NW_STATUS == 1)
 #include "nw_connected.h"
@@ -400,13 +400,13 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eNW_CON_TSK_IDX,           SM_NwState_Task,               400,  36, (char *)pTskName_NwConn,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 #if ENABLE_DFW_TASKS
-   //{ eDFW_TSK_IDX,              DFWA_task,                    5400,  37, (char *)pTskName_Dfw,    DEFAULT_ATTR, 0, 0 },
+   { eDFW_TSK_IDX,              DFWA_task,                    5400,  37, (char *)pTskName_Dfw,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ( USE_DTLS == 1 )
-   //{ eDTLS_TSK_IDX,             DTLS_Task,                    5500,  38, (char *)pTskName_Dtls,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+//   { eDTLS_TSK_IDX,             DTLS_Task,                    5500,  38, (char *)pTskName_Dtls,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 #if ( USE_MTLS == 1 )
-   //{ eMTLS_TSK_IDX,             MTLS_Task,                    1100,  38, (char *)pTskName_Mtls,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eMTLS_TSK_IDX,             MTLS_Task,                    1100,  38, (char *)pTskName_Mtls,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
    { eAPP_TSK_IDX,              APP_MSG_HandlerTask,          2400,  38, (char *)pTskName_AppMsg, DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #if (USE_IPTUNNEL == 1)

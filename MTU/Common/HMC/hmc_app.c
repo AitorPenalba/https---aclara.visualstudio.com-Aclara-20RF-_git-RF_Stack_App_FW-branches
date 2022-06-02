@@ -64,10 +64,9 @@
 #if ( ( END_DEVICE_PROGRAMMING_CONFIG == 1 ) || ( END_DEVICE_PROGRAMMING_FLASH >  ED_PROG_FLASH_NOT_SUPPORTED ) )
 #include "intf_cim_cmd.h"
 #endif
-#if 0 // TODO: RA6E1 - Enable WolfSSL
 #include <wolfssl/quicksession.h>
 #include <wolfssl/internal.h>
-#endif
+
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 

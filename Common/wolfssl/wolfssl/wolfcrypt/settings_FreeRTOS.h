@@ -59,7 +59,7 @@
 /* #define WOLFSSL_MICROCHIP_PIC32MZ */
 
 /* Uncomment next line if using FreeRTOS */
-#define FREERTOS */
+#define FREERTOS
 
 /* Uncomment next line if using FreeRTOS+ TCP */
 /* #define FREERTOS_TCP */
@@ -83,7 +83,7 @@
 /* #define FREESCALE_MQX_4_0 */
 
 /* Uncomment next line if building for Freescale Classic MQX/RTCS/MFS */
-/* #define FREESCALE_MQX
+/* #define FREESCALE_MQX */
 
 /* Uncomment next line if building for Freescale KSDK MQX/RTCS/MFS */
 /* #define FREESCALE_KSDK_MQX */

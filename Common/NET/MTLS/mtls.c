@@ -29,10 +29,14 @@
 #include "pwr_task.h"
 #include "time_util.h"
 #include "time_sys.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "fio.h"
+#endif
 #include "ecc108_lib_return_codes.h"
 #include "ecc108_apps.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"
+#endif
 #include "byteswap.h"
 #include "App_Msg_Handler.h"
 #if ( EP == 1 )
@@ -50,7 +54,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define MTLS_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define MTLS_NUM_MSGQ_ITEMS 0 
+#define MTLS_NUM_MSGQ_ITEMS 0
 #endif
 
 
@@ -586,7 +590,7 @@ returnStatus_t MTLS_init( void )
    returnStatus_t ret = eSUCCESS; /* Return Value */
    mtlsFile_s     *pFile;
 
-   if ( false == OS_MSGQ_Create( &mtlsMSGQ, MTLS_NUM_MSGQ_ITEMS ) )
+   if ( false == OS_MSGQ_Create( &mtlsMSGQ, MTLS_NUM_MSGQ_ITEMS, "MTLS" ) )
    {
       ret = eFAILURE;
    }
@@ -649,7 +653,7 @@ returnStatus_t MTLS_init( void )
 
    Returns: none
 ***********************************************************************************************************************/
-void MTLS_Task( uint32_t Arg0 )
+void MTLS_Task( taskParameter )
 {
    buffer_t       *commandBuf;         /* MTLS command buffer */
    NWK_DataInd_t  *nwkIndication;      /* Incoming message type   */
