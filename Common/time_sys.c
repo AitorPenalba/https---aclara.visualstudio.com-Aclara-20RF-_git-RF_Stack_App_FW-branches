@@ -109,10 +109,8 @@ typedef struct my_isr_struct_mqx
 
 typedef struct
 {
-//#if (RTOS_SELECTION == MQX_RTOS) // TODO: RA6E1 - Queue handling in FreeRTOS Bob: not needed by MQX but still needed by this module
    OS_QUEUE_Handle pQueueHandle;    /* Queue handle, if not NULL, send message */
    OS_MSGQ_Handle  pMQueueHandle;   /* Message handle, if not NULL, send message */
-//#endif
    int64_t  timeChangeDelta;        /* number of system ticks of the time change */
    uint32_t ulAlarmDate;            /* Date for the Calendar alarm */
    uint32_t ulAlarmTime_Period;     /* Alarm Time/period */
@@ -1460,6 +1458,7 @@ returnStatus_t TIME_SYS_AddPerAlarm( tTimeSysPerAlarm *pData )
       pTimeSys = &_sTimeSys[alarmId];
       pTimeSys->bTimerSlotInUse     = (bool)true;
       pTimeSys->pQueueHandle        = pData->pQueueHandle;
+      pTimeSys->pMQueueHandle       = pData->pMQueueHandle;
       pTimeSys->ulAlarmTime_Period  = pData->ulPeriod;
       pTimeSys->ulOffset            = pData->ulOffset % pData->ulPeriod;
       pTimeSys->alarmId             = alarmId;
