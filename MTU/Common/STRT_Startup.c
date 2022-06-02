@@ -192,11 +192,11 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DVR_DAC0_init, STRT_FLAG_NONE ),
 #if ENABLE_HMC_TASKS
 #if END_DEVICE_PROGRAMMING_CONFIG == 1
-   INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
+   //INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
 #endif
-   INIT( HMC_STRT_init, STRT_FLAG_NONE ),
-   INIT( HMC_APP_RTOS_Init, STRT_FLAG_NONE ),
-   INIT( HMC_ENG_init, STRT_FLAG_NONE ),
+   //INIT( HMC_STRT_init, STRT_FLAG_NONE ),
+   //INIT( HMC_APP_RTOS_Init, STRT_FLAG_NONE ),
+   //INIT( HMC_ENG_init, STRT_FLAG_NONE ),
 #endif
    INIT( PAR_initRtos, STRT_FLAG_NONE ),
    INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
@@ -209,6 +209,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( MAC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( SMTDCFG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( APP_MSG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
 #if ( ENABLE_HMC_TASKS == 1 )
    INIT( HD_init, STRT_FLAG_NONE ),

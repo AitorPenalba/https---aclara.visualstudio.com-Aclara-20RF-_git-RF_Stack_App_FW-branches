@@ -4711,6 +4711,7 @@ static void wait_us(uint32_t time)
    }
    while (TimeDiff < time);
 #elif ( MCU_SELECTED == RA6E1 )
+   #if 0 // TODO: RA6E1 Bob: This does not appear to be working properly
    OS_TICK_Get_CurrentElapsedTicks(&time1);
 
    // Wait for a while
@@ -4719,6 +4720,10 @@ static void wait_us(uint32_t time)
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    }
    while (TimeDiff < time);
+   #else
+   #warning "Using the Renesas R_BSP_SoftwareDelay instead of OS_TICK_Get_Diff_InMicroseconds and dividing by 2!"
+   R_BSP_SoftwareDelay ((time+1)/2, BSP_DELAY_UNITS_MICROSECONDS);
+   #endif
 #endif
 
 }
@@ -5165,13 +5170,18 @@ void RADIO_Set_SyncError(uint8_t err)
                boost     - use boost capacitor if true
 
    Returns: RSSI array
+            function name returns the lowest observed super-Cap voltage if boost is non-zero
 
    Side Effects: The radio is not put back on its previous state
 
    Reentrant Code: No
 
  **********************************************************************************************************************/
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
 void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSamples, uint16_t rate, uint8_t boost)
+#else
+float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSamples, uint16_t rate, uint8_t boost)
+#endif
 {
    uint32_t     i; // Loop counter
    int8_t       FrontEndGain;
@@ -5183,6 +5193,9 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
    (void)boost;
 #endif
    union si446x_cmd_reply_union Si446xCmd;
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   float lowestCapVoltage = 9.99;
+#endif
    // Stop radio
    (void)si446x_change_state(radioNum, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_READY);
 
@@ -5199,16 +5212,36 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
                            SI446X_CMD_START_RX_ARG_NEXT_STATE3_RXINVALID_STATE_ENUM_REMAIN );
 
 #if ( EP == 1 )
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   fSuperCapV = ADC_Get_SC_Voltage();
+   if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
+#endif
    if ( boost ) {
+#if 0
       // Turn on boost
       PWR_USE_BOOST();
+#else
+      PWR_3V6BOOST_EN_TRIS_ON();
+      R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS);
+      PWR_3P6LDO_EN_TRIS_OFF();
+#endif
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       // Get voltage
       fSuperCapV = ADC_Get_SC_Voltage();
+#endif
       // Make sure the capacitor voltage is high enough to compute noise estimate with boost turned on.
       if ( fSuperCapV < SUPER_CAP_MIN_VOLTAGE ) {
+#if 0
+         PWR_3P6LDO_EN_TRIS_ON();
+         R_BSP_SoftwareDelay (((uint32_t)PWR_3P6LDO_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS);
+         PWR_3V6BOOST_EN_TRIS_OFF();
+#else
          PWR_USE_LDO();
+#endif
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+         INFO_printf("vf %u", (uint32_t)(fSuperCapV*100));
+#endif
       }
-      INFO_printf("vf %u", (uint32_t)(fSuperCapV*100));
    }
 #endif
    // Discard the first 4 samples because the radio internaly averages 4 symbols and the RSSI might not be stable yet.
@@ -5221,9 +5254,15 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
       buf[i] = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
    }
 #if ( EP == 1 )
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   fSuperCapV = ADC_Get_SC_Voltage();
+   if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
+#endif
    if ( boost ) {
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       // Get voltage
       fSuperCapV = ADC_Get_SC_Voltage();
+#endif
       // Turn off capacitor boost
       PWR_USE_LDO();
       // Make sure the capacitor voltage was high enough during the whole run
@@ -5234,12 +5273,9 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
    }
 #endif
    // Adjust RSSI to compensate for front end gain
-#if 1 //TODO: RA6E1 Melvin: should be able to remove this now that file system and PHY task are running
    GetReq.eAttribute = ePhyAttr_FrontEndGain;
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)&FrontEndGain);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#else
-   FrontEndGain = 0; // temporary until PHY is ready
-#endif // TODO: RA6E1 Bob
+
    for (i=0; i<nSamples; i++) {
       tempRSSI  = (int32_t)buf[i];
       tempRSSI += (int32_t)FrontEndGain;
@@ -5252,6 +5288,9 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
          buf[i] = (uint8_t)tempRSSI;
       }
    }
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   return ( lowestCapVoltage );
+#endif
 }
 
 /*!

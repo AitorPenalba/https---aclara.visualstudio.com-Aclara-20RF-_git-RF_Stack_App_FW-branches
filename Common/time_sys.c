@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2010-2021 Aclara.  All Rights Reserved.
+ * Copyright 2010-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -53,7 +53,7 @@
 #include "sys_clock.h"
 #include "buffer.h"
 #include "time_sync.h"
-#if 0 // TODO: RA6E1 GPIO files to be done
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "gpio.h"
 #endif
 #if ( USE_MTLS == 1 )
@@ -109,10 +109,10 @@ typedef struct my_isr_struct_mqx
 
 typedef struct
 {
-#if (RTOS_SELECTION == MQX_RTOS) // TODO: RA6E1 - Queue handling in FreeRTOS
+//#if (RTOS_SELECTION == MQX_RTOS) // TODO: RA6E1 - Queue handling in FreeRTOS Bob: not needed by MQX but still needed by this module
    OS_QUEUE_Handle pQueueHandle;    /* Queue handle, if not NULL, send message */
    OS_MSGQ_Handle  pMQueueHandle;   /* Message handle, if not NULL, send message */
-#endif
+//#endif
    int64_t  timeChangeDelta;        /* number of system ticks of the time change */
    uint32_t ulAlarmDate;            /* Date for the Calendar alarm */
    uint32_t ulAlarmTime_Period;     /* Alarm Time/period */
@@ -235,7 +235,9 @@ STATIC uint8_t          getUnusedAlarm( void );
 STATIC void             getNextCalAlarmDate( uint8_t alarmId, bool timeChangeOrNewAlarm );
 STATIC bool             isTimeForPeriodicAlarm( uint8_t alarmId );
 STATIC returnStatus_t   executeAlarm( uint8_t alarmId );
+#if ( RTOS_SELECTION == MQX_RTOS ) // The following is not required by FreeRTOS
 STATIC void             TIME_SYS_vApplicationTickHook( void * user_isr_ptr );
+#endif
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
@@ -382,9 +384,9 @@ returnStatus_t TIME_SYS_Init( void )
 #endif
       }
    }
-#if 0 // TODO: RA6E1 [name_Suriya] - Modify variable to get core clock from a function
+#if ( MCU_SELECTED == NXP_K24 )
    TIME_SYS_SetRealCpuFreq( getCoreClock(), eTIME_SYS_SOURCE_NONE, (bool)true ); // Nominal CPU clock rate
-#else
+#elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 [name_Suriya] - Verify variable to get core clock from a function
    TIME_SYS_SetRealCpuFreq( SystemCoreClock, eTIME_SYS_SOURCE_NONE, (bool)true ); // Nominal CPU clock rate
 #endif
 #if ( DCU == 1 )
@@ -528,17 +530,17 @@ returnStatus_t TIME_SYS_SetTimeFromRTC(void)
    (void)TIME_UTIL_ConvertDateFormatToSysFormat(&rtcTime, &sysTime); //Convert to system time format
    TIME_UTIL_ConvertSysFormatToSeconds(&sysTime, &mqxTime.SECONDS, &mqxTime.MILLISECONDS);
    mqxTime.MILLISECONDS = sysTime.time % TIME_TICKS_PER_SEC;
-#if 0 // TODO: RA6E1 - MQX dependant functions in FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - MQX dependant functions in FreeRTOS
    _time_set( &mqxTime );
 #endif
    TIME_SYS_SetSysDateTime(&sysTime);
 
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - File support to be added
+#if 1 // TODO: RA6E1 Bob: should remove now that file support works
    //Write the time state variable
    retVal = FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t, timeState),
                     (uint8_t *)&timeVars_.timeState, (lCnt)sizeof(timeVars_.timeState));
-#endif
+#endif // TODO: RA6E1 Bob: should remove now that file support works
 #endif
    return(retVal);
 }
@@ -650,9 +652,9 @@ returnStatus_t TIME_SYS_SetTimeRequestMaxTimeout( uint16_t timeoutValue )
    {
       OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
       timeVars_.timeRequestMaxTimeout = timeoutValue;
-#if 0 // TODO: RA6E1 - File support to be added
+#if 1 // TODO: RA6E1 Bob: should remove now that file support works
       (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t *)&timeVars_, sizeof(timeVars_));
-#endif
+#endif // TODO: RA6E1 Bob: should remove now that file support works
       OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
       retVal = eSUCCESS;
    }
@@ -704,9 +706,9 @@ void TIME_SYS_SetDateTimeLostCount( uint16_t dateTimeLostValue )
 {
    OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
    timeVars_.dateTimeLostCount = dateTimeLostValue;
-#if 0 // TODO: RA6E1 - File support to be added
+#if 1 // TODO: RA6E1 Bob: should remove now that file support works
    (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t *)&timeVars_, sizeof(timeVars_));
-#endif
+#endif // TODO: RA6E1 Bob: should remove now that file support works
    OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
 }
 #endif
@@ -910,9 +912,9 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
    __set_PRIMASK(primask); // Restore interrupts
    //OS_MUTEX_Unlock( &_timeVarsMutex );  // Function will not return if it fails
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - File support to be added
+#if 1 // TODO: RA6E1 Bob: should remove now that file support works
    (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t*)&timeVars_, (lCnt)sizeof(timeVars_));
-#endif
+#endif // TODO: RA6E1 Bob: should remove now that file support works
 #endif
 }
 
@@ -1041,10 +1043,10 @@ void TIME_SYS_SetInstallationDateTime( uint32_t instDateTime )
 {
    OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
    timeVars_.installDateTime = instDateTime;
-#if 0 // TODO: RA6E1 - File support to be added
+#if 1 // TODO: RA6E1 Bob: should remove now that file support works
    (void)FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t,installDateTime),
                     (uint8_t*)&timeVars_.installDateTime, (lCnt)sizeof(timeVars_.installDateTime));
-#endif
+#endif // TODO: RA6E1 Bob: should remove now that file support works
     OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
 }
 #endif
@@ -1095,11 +1097,11 @@ returnStatus_t TIME_SYS_SetTimeAcceptanceDelay( uint16_t setTimeAcceptanceDelay 
    {
       OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
       timeVars_.timeAcceptanceDelay = setTimeAcceptanceDelay;
-#if 0 // TODO: RA6E1 - File support to be added
+#if 1 // TODO: RA6E1 Bob: should remove now that file support works
       returnStatus = FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t,timeAcceptanceDelay),
                                 (uint8_t*)&timeVars_.timeAcceptanceDelay,
                                 (lCnt)sizeof(timeVars_.timeAcceptanceDelay));
-#endif
+#endif // TODO: RA6E1 Bob: should remove now that file support works
       OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
    }
 
@@ -1168,7 +1170,7 @@ STATIC void tickSystemClock ( uint32_t intTime )
       }
 #endif
 //TODO: Not used when RTC crystal is source for Sys Tick adjustment.  Put back in when using TCXO.
-#if 0
+#if 0 // This is removed in the starting point firmware, not by RA6E1 project
       if ( (_timeSys.time % 1000) == 0) {
          if ( DMAint != 0 ) {
             CYCdiff = DWT_CYCCNT - DMAint;
@@ -1311,7 +1313,7 @@ returnStatus_t TIME_SYS_AddCalAlarm( tTimeSysCalAlarm *pData )
    {  /* alarm slot available */
       pTimeSys = &_sTimeSys[alarmId];
       pTimeSys->bTimerSlotInUse    = (bool)true;
-#if 0 // TODO: RA6E1 - Queue handle for FreeRTOS
+#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
       pTimeSys->pQueueHandle       = pData->pQueueHandle;
       pTimeSys->pMQueueHandle      = pData->pMQueueHandle;
 #endif
@@ -1365,7 +1367,7 @@ returnStatus_t TIME_SYS_GetCalAlarm( tTimeSysCalAlarm *pData, uint8_t alarmId )
       pTimeSys = &_sTimeSys[alarmId];
       if ( pTimeSys->bCalAlarm )
       {
-#if 0 // TODO: RA6E1 - Queue handle for FreeRTOS
+#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
          pData->pQueueHandle    = pTimeSys->pQueueHandle;
          pData->pMQueueHandle   = pTimeSys->pMQueueHandle;
 #endif
@@ -1416,7 +1418,7 @@ returnStatus_t TIME_SYS_GetPeriodicAlarm( tTimeSysPerAlarm *pData, uint8_t alarm
       /*not Cal alram must be periodic*/
       if ( !(pTimeSys->bCalAlarm) )
       {
-#if 0 // TODO: RA6E1 - Queue handle for FreeRTOS
+#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
          pData->pQueueHandle    = pTimeSys->pQueueHandle;
          pData->pMQueueHandle   = pTimeSys->pMQueueHandle;
 #endif
@@ -1456,7 +1458,7 @@ returnStatus_t TIME_SYS_AddPerAlarm( tTimeSysPerAlarm *pData )
    tTimeSys *pTimeSys;        /* Pointer to alarm data structure */
 
    pData->ucAlarmId = NO_ALARM_FOUND; //Default, if no alarm available
-#if 0 // TODO: RA6E1 - Queue handle for FreeRTOS
+#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
    if ( (0 == pData->ulPeriod) ||
         (pData->ulOffset >= pData->ulPeriod) ||
         (pData->bOnInvalidTime && !pData->bOnValidTime && !pData->bSkipTimeChange) ||
@@ -1481,7 +1483,7 @@ returnStatus_t TIME_SYS_AddPerAlarm( tTimeSysPerAlarm *pData )
    {  /* Alarm slot available */
       pTimeSys = &_sTimeSys[alarmId];
       pTimeSys->bTimerSlotInUse     = (bool)true;
-#if 0 // TODO: RA6E1 - Queue handle for FreeRTOS
+#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
       pTimeSys->pQueueHandle        = pData->pQueueHandle;
       pTimeSys->pMQueueHandle       = pData->pMQueueHandle;
 #endif
@@ -1600,7 +1602,7 @@ STATIC returnStatus_t executeAlarm ( uint8_t alarmId )
 
    pTimeSys    = &_sTimeSys[alarmId];  // Point to alarm structure
 
-#if 0 // TODO: RA6E1 - buf functionality and queue handle
+#if 1 // TODO: RA6E1 - buf functionality and queue handle
    // send message only if queue or mailbox handle is not NULL
    if ( (pTimeSys->pQueueHandle != NULL) || (pTimeSys->pMQueueHandle != NULL) )
    {  /* Send power-up time, if any of the following conditions are true
@@ -2185,15 +2187,19 @@ void TIME_SYS_HandlerTask( taskParameter )
    CLOCK_INFO_t clockInfoCopy;
    uint32_t     error = 0;
 #else
+#if ( MCU_SELECTED == NXP_K24 )    //Use of RTC as synchronization source only works for K24, not RA6E1
    uint16_t     loopCnt = 0;       //Counts between RTC samples
+#endif
    uint32_t     sec;               //To get seconds from RTC
    uint32_t     usec;              //To get micro-seconds from RTC
 //TODO: Used when RTC crystal is source for Sys Tick adjustment.  Put back in when using TCXO.
+#if ( MCU_SELECTED == NXP_K24 )    //Use of RTC as synchronization source only works for K24, not RA6E1
    uint64_t     currTime;          //Current RTC time
    uint64_t     lastTime;          //Last RTC time
    int64_t      diffRTC;           //Difference between last and current time(RTC)
    int64_t      accDiffRTC = 0;    //Difference between last and current time(RTC), accumulated
    int64_t      lastAccDiffRTC = 0;//Difference between last and current time(RTC), accumulated
+#endif
 //End TODO
    sysTime_t    timeSys;
 //TODO: Not used when RTC crystal is source for Sys Tick adjustment.  Put back in when using TCXO.
@@ -2226,9 +2232,11 @@ void TIME_SYS_HandlerTask( taskParameter )
    getSysTime( &timeSys );
    DST_ComputeDSTParams(TIME_SYS_IsTimeValid(), timeSys.date, timeSys.time); // Compute the DST dates on power-up
    RTC_GetTimeInSecMicroSec( &sec, &usec); // Get RTC time and store the current time
+#if ( MCU_SELECTED == NXP_K24 )    //Use of RTC as synchronization source only works for K24, not RA6E1
 //TODO: Used when RTC crystal is source for Sys Tick adjustment.  Remove when using TCXO.
    lastTime = ((uint64_t)sec * 1000000) + usec;
 //End TODO
+#endif
 #endif
 
    for ( ; ; ) /* RTOS Task, keep running forever */
@@ -2288,7 +2296,9 @@ void TIME_SYS_HandlerTask( taskParameter )
       }
 #endif
 #if (EP == 1)  //TODO: Used when RTC crystal is source for Sys Tick adjustment.  Remove when using TCXO.
+#if ( MCU_SELECTED == NXP_K24 )    //Use of RTC as synchronization source only works for K24, not RA6E1
       accDiffRTC -= (portTICK_RATE_MS * 1000);
+#endif
 #endif         //End TODO
       if (0 == (--cnt))
       {
@@ -2300,7 +2310,7 @@ void TIME_SYS_HandlerTask( taskParameter )
 #if (EP == 1)
          if ( !TIME_SYS_IsTimeValid() )
          {  //System time not valid
-#if 0 // TODO: RA6E1 - Timer implementation
+#if 1 // TODO: RA6E1 Bob: timer_util.c is now implemented, should be able to remove this
            if (statusTimeRequest_ != STATUS_TIME_REQUEST_WAIT_STATE)
             {  //Send the request to request time
                timer_t timerCfg;      //Configure timer
@@ -2317,12 +2327,13 @@ void TIME_SYS_HandlerTask( taskParameter )
                   statusTimeRequest_ = STATUS_TIME_REQUEST_WAIT_STATE; //Wait for the time
                }
             }
-#endif
+#endif // TODO: RA6E1 Bob: timer_util.c is now implemented, should be able to remove this
          }
          else
          {  //System time valid
             //Check, if need to adjust SYST_RVR register.
 #if 0 //TODO: Not used when RTC crystal is source for Sys Tick adjustment.  Put back in when using TCXO.
+      //TODO: RA6E1 Bob: the above #if 0 was present in the baseline code.  Should this feature be part of RA6E1?
             if ( loopCnt >= 100 )  // 100 sys ticks i.e. one second
             {
                uint32_t cpuFreq, TCXOfreq;

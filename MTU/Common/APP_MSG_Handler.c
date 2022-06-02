@@ -397,7 +397,9 @@ void APP_MSG_HandlerTask ( taskParameter )
    for ( ;; )
    {
       (void)OS_MSGQ_Pend( &AppMsgHandler_MsgQ_, ( void * )&pBuf, OS_WAIT_FOREVER ); /* Message in the queue? */
+#if ( RTOS_SELECTION == MQX_RTOS )
       DBG_logPrintf( 'M', "Got  pBuf = 0x%08x", ( uint32_t )pBuf );
+#endif
 
       /* Got the message for the application, process it */
       if ( eSYSFMT_NWK_INDICATION == pBuf->eSysFmt )
@@ -576,7 +578,9 @@ void APP_MSG_HandlerTask ( taskParameter )
          APP_MSG_CheckRegistrationStatus();
       }
       //else Unrecognized message type, drop the message
+#if ( RTOS_SELECTION == MQX_RTOS )
       DBG_logPrintf( 'M', "Free pBuf = 0x%08x", ( uint32_t )pBuf );
+#endif
       BM_free( pBuf );
    }
 }

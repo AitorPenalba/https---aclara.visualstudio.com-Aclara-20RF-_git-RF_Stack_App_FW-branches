@@ -373,7 +373,7 @@ static void MFG_PhyDemodulator( uint32_t argc, char *argv[] );
 //static void MFGP_capableOfMeterReprogrammingOTA( uint32_t argc, char *argv[] );
 //static void MFG_printHex( char* msg, uint8_t const *pData, uint16_t numBytes);
 //static void MFG_appSecAuthMode               ( uint32_t argc, char *argv[] );
-//static void MFG_CommandLine_MacAddr          ( uint32_t argc, char *argv[] );
+static void MFG_CommandLine_MacAddr          ( uint32_t argc, char *argv[] );
 //static void MFG_DateTime                     ( uint32_t argc, char *argv[] );
 //static void MFG_enableDebug                  ( uint32_t argc, char *argv[] );
 //static void MFGP_enableOTATest               ( uint32_t argc, char *argv[] );
@@ -532,8 +532,8 @@ static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
 static void MFGP_engData2                    ( uint32_t argc, char *argv[] );
 #endif
 //static void MFGP_eventThreshold              ( uint32_t argc, char *argv[] );
-//static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
-//static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
+static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
+static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
 //static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
 //static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
 //static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
@@ -732,10 +732,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
 //   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
 //   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
-//   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
-//   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
-//   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
-//   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
+   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
+   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
+   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
+   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
 //   {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
 //#if ( DCU == 1 )
 //   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
@@ -2076,7 +2076,7 @@ void MFGP_uartRecvTask( taskParameter )
               /* Call the command */
               OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
 #if ( USE_USB_MFG != 0 )
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
               event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
 #elif ( RTOS_SELECTION == FREE_RTOS )
               event_flags = OS_EVNT_Wait ( &CMD_events, 0x00ffffff, (bool)false, ONE_SEC );
@@ -2676,7 +2676,6 @@ static void MFGP_CommandLine_Help ( uint32_t argc, char *argv[] )
    }/* end while() */
 }/* end MFGP_CommandLine_Help () */
 
-#if 0 // TODO: RA6 [name_Balaji]: Add Support for RA6E1
 /***********************************************************************************************************************
    Function Name: MFGP_firmwareVersion
 
@@ -2726,7 +2725,7 @@ static void MFGP_hardwareVersion( uint32_t argc, char *argv[] )
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
    MFG_printf( "%s %s\n", argv[ 0 ], &string[0] );
 }
-
+#if 0 // TODO: RA6 [name_Balaji]: Add Support for RA6E1
 /***********************************************************************************************************************
    Function Name: MFGP_DeviceType
 
@@ -7092,6 +7091,7 @@ static void MFG_stRTCFailCount ( uint32_t argc, char *argv[] )
    }
    MFG_logPrintf( "%s %d\n", argv[ 0 ], SelfTestData->RTCFail );
 }
+#endif // 0 TODO: RA6E1 Bob: allow next commands for now
 /******************************************************************************
 
    Function Name: MFG_CommandLine_MacAddr
@@ -7205,7 +7205,7 @@ static void MFGP_MacChannelSets( uint32_t argc, char *argv[], MAC_ATTRIBUTES_e c
    }
    MFG_logPrintf( "\n" );
 }
-
+#if 0 // TODO: RA6E1 Bob: disable the commands that follow
 /******************************************************************************
 
    Function Name:  MFGP_MacChannelSetsSRFN
