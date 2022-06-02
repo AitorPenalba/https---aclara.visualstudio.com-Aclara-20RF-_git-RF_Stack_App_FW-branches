@@ -51,10 +51,13 @@
 #include "dfw_interface.h"
 #include "pwr_task.h"
 #include "ecc108_apps.h"
+
+#include "user_settings.h"  // Added for WolfSSL crypt settings (ECC)  /* TODO: RA6E1: SG Determine if the need for this can be migrated to FreeRTOS headers */
 #include "wolfssl/wolfcrypt/aes.h"
 #include "wolfssl/wolfcrypt/ecc.h"
 #include "wolfssl/wolfcrypt/sha.h"
 #include "wolfssl/wolfcrypt/sha256.h"
+
 #include "ecc108_lib_return_codes.h"
 #include "EVL_event_log.h"
 #if ( DCU == 1 )
@@ -555,7 +558,7 @@ returnStatus_t DFWA_init( void )
                        eSUCCESS == (eStatus = PAR_partitionFptr.parOpen(&pAppCodePart_, ePART_APP_CODE, 0L)) )
 #endif
                   {
-                     if ((bool)true == OS_MSGQ_Create(&DFWA_MQueueHandle, DFWA_NUM_MSGQ_ITEMS))
+                     if ((bool)true == OS_MSGQ_Create(&DFWA_MQueueHandle, DFWA_NUM_MSGQ_ITEMS, "DFW"))
                      {
                         /* Semaphore correctly created, initialize the DFW packet module. */
                         eStatus = DFWP_init();
@@ -802,7 +805,7 @@ returnStatus_t DFWA_init( void )
    Notes:
 
 ******************************************************************************************************************** */
-void DFWA_task( uint32_t Arg0 )
+void DFWA_task( taskParameter )
 {
    DFW_vars_t  dfwVars; /* Contains all of the DFW file variables */
 
@@ -2527,7 +2530,7 @@ static eDfwErrorCodes_t validatePatchHeader( eValidatePatch_t valPatchCmd, dl_df
          }
          /* If decryption is ready(enabled) and the patch is not successfully decrypted */
          else if ( ( ( DFW_ENDPOINT_FIRMWARE_FILE_TYPE == fileType ) || IS_METER_FIRM_UPGRADE( fileType ) ) &&
-                   eSUCCESS != decryptPatch( &dfwVars, &patchHeader ) )
+                  eSUCCESS != decryptPatch( &dfwVars, &patchHeader ) )
          {
             EventKeyValuePair_s  keyVal;     /* Event key/value pair info  */
             EventData_s          event;      /* Event info  */

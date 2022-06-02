@@ -184,7 +184,7 @@ typedef struct {
    float    TickToGPSerror;    // Difference between the T-board 5 second transition and the GPS PPS interrupt
    int32_t  RawTickToGPSerror; // Raw error before filtering
    uint32_t WatchDogCounter;   // GPS watch dog. Positive value means GPS interrupts are being received. 0 means no GPS interrupt.
-   uint32_t FTMcount;          // How many FTM count between between 3 GPS interrupts (i.e. 10 seconds)
+   uint32_t FTMcount;          // How many FTM count between 3 GPS interrupts (i.e. 10 seconds)
    bool     sendCommand;       // Command to correct sysTick error
    bool     gotGpsTime;        // Got GPS time from main board
    bool     phaseLocked;       // SysyTick 5 seconds transition is locked (i.e. small error) to GPS interrupt
@@ -248,7 +248,7 @@ STATIC void             TIME_SYS_vApplicationTickHook( void * user_isr_ptr );
  *
  * Purpose: retrieve the system time
  *
- * Arguments: sysTime - struture to fill
+ * Arguments: sysTime - structure to fill
  *
  * Returns: None
  *
@@ -290,7 +290,7 @@ STATIC void getSysTime( sysTime_t *sysTime )
  *
  * Purpose: set the system time
  *
- * Arguments: sysTime - data used to update the system time struture
+ * Arguments: sysTime - data used to update the system time structure
  *
  * Returns: None
  *
@@ -304,7 +304,7 @@ STATIC void setSysTime( const sysTime_t *sysTime )
    uint32_t primask = __get_PRIMASK();
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
    (void)memcpy( &_timeSys, sysTime, sizeof(sysTime_t) );
-   _timeSys.tictoc       = 0; // Set to 0 since setSysTime is usualy rounded to 10ms so reset counter.
+   _timeSys.tictoc       = 0; // Set to 0 since setSysTime is usually rounded to 10ms so reset counter.
    _timeSys.elapsedCycle = 0; // Set to 0 since sysTime->elapsedCycle was likely not initialized
    __set_PRIMASK(primask);
 }
@@ -503,7 +503,7 @@ returnStatus_t TIME_SYS_SetTimeFromRTC(void)
    }
 #if ( DCU == 1 )
    else
-   {  /* This else clause was added to accomadate dfw patches from DCU v1.40 to v1.70.  The VBATREG_RTC_VALID
+   {  /* This else clause was added to accommodate dfw patches from DCU v1.40 to v1.70.  The VBATREG_RTC_VALID
          flag was not utilized by the DCU in version v1.40. When patching to v1.70, the RTC_Valid check will always
          fail since this bit was never set in the previous version.  The else clause will validate the RTC values,
          making a decision to use these values if the time in the RTC makes sense or else it will use invalid time.
@@ -530,18 +530,15 @@ returnStatus_t TIME_SYS_SetTimeFromRTC(void)
    (void)TIME_UTIL_ConvertDateFormatToSysFormat(&rtcTime, &sysTime); //Convert to system time format
    TIME_UTIL_ConvertSysFormatToSeconds(&sysTime, &mqxTime.SECONDS, &mqxTime.MILLISECONDS);
    mqxTime.MILLISECONDS = sysTime.time % TIME_TICKS_PER_SEC;
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - MQX dependant functions in FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - MQX dependent functions in FreeRTOS
    _time_set( &mqxTime );
 #endif
    TIME_SYS_SetSysDateTime(&sysTime);
 
 #if ( EP == 1 )
-#if 1 // TODO: RA6E1 Bob: should remove now that file support works
    //Write the time state variable
    retVal = FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t, timeState),
                     (uint8_t *)&timeVars_.timeState, (lCnt)sizeof(timeVars_.timeState));
-#endif // TODO: RA6E1 Bob: should remove now that file support works
-#endif
    return(retVal);
 }
 
@@ -652,9 +649,7 @@ returnStatus_t TIME_SYS_SetTimeRequestMaxTimeout( uint16_t timeoutValue )
    {
       OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
       timeVars_.timeRequestMaxTimeout = timeoutValue;
-#if 1 // TODO: RA6E1 Bob: should remove now that file support works
       (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t *)&timeVars_, sizeof(timeVars_));
-#endif // TODO: RA6E1 Bob: should remove now that file support works
       OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
       retVal = eSUCCESS;
    }
@@ -706,9 +701,7 @@ void TIME_SYS_SetDateTimeLostCount( uint16_t dateTimeLostValue )
 {
    OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
    timeVars_.dateTimeLostCount = dateTimeLostValue;
-#if 1 // TODO: RA6E1 Bob: should remove now that file support works
    (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t *)&timeVars_, sizeof(timeVars_));
-#endif // TODO: RA6E1 Bob: should remove now that file support works
    OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
 }
 #endif
@@ -912,9 +905,7 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
    __set_PRIMASK(primask); // Restore interrupts
    //OS_MUTEX_Unlock( &_timeVarsMutex );  // Function will not return if it fails
 #if ( EP == 1 )
-#if 1 // TODO: RA6E1 Bob: should remove now that file support works
    (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t*)&timeVars_, (lCnt)sizeof(timeVars_));
-#endif // TODO: RA6E1 Bob: should remove now that file support works
 #endif
 }
 
@@ -1043,10 +1034,8 @@ void TIME_SYS_SetInstallationDateTime( uint32_t instDateTime )
 {
    OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
    timeVars_.installDateTime = instDateTime;
-#if 1 // TODO: RA6E1 Bob: should remove now that file support works
    (void)FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t,installDateTime),
                     (uint8_t*)&timeVars_.installDateTime, (lCnt)sizeof(timeVars_.installDateTime));
-#endif // TODO: RA6E1 Bob: should remove now that file support works
     OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
 }
 #endif
@@ -1097,11 +1086,9 @@ returnStatus_t TIME_SYS_SetTimeAcceptanceDelay( uint16_t setTimeAcceptanceDelay 
    {
       OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
       timeVars_.timeAcceptanceDelay = setTimeAcceptanceDelay;
-#if 1 // TODO: RA6E1 Bob: should remove now that file support works
       returnStatus = FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t,timeAcceptanceDelay),
                                 (uint8_t*)&timeVars_.timeAcceptanceDelay,
                                 (lCnt)sizeof(timeVars_.timeAcceptanceDelay));
-#endif // TODO: RA6E1 Bob: should remove now that file support works
       OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
    }
 
@@ -1313,10 +1300,8 @@ returnStatus_t TIME_SYS_AddCalAlarm( tTimeSysCalAlarm *pData )
    {  /* alarm slot available */
       pTimeSys = &_sTimeSys[alarmId];
       pTimeSys->bTimerSlotInUse    = (bool)true;
-#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
       pTimeSys->pQueueHandle       = pData->pQueueHandle;
       pTimeSys->pMQueueHandle      = pData->pMQueueHandle;
-#endif
       pTimeSys->ulAlarmDate        = pData->ulAlarmDate;
       pTimeSys->ulAlarmTime_Period = pData->ulAlarmTime;
       pTimeSys->alarmId            = alarmId;
@@ -1367,10 +1352,8 @@ returnStatus_t TIME_SYS_GetCalAlarm( tTimeSysCalAlarm *pData, uint8_t alarmId )
       pTimeSys = &_sTimeSys[alarmId];
       if ( pTimeSys->bCalAlarm )
       {
-#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
          pData->pQueueHandle    = pTimeSys->pQueueHandle;
          pData->pMQueueHandle   = pTimeSys->pMQueueHandle;
-#endif
          pData->ulAlarmDate     = pTimeSys->ulAlarmDate;
          pData->ulAlarmTime     = pTimeSys->ulAlarmTime_Period;
          pData->bSkipTimeChange = pTimeSys->bSkipTimeChange;
@@ -1418,10 +1401,8 @@ returnStatus_t TIME_SYS_GetPeriodicAlarm( tTimeSysPerAlarm *pData, uint8_t alarm
       /*not Cal alram must be periodic*/
       if ( !(pTimeSys->bCalAlarm) )
       {
-#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
          pData->pQueueHandle    = pTimeSys->pQueueHandle;
          pData->pMQueueHandle   = pTimeSys->pMQueueHandle;
-#endif
          pData->bSkipTimeChange = pTimeSys->bSkipTimeChange;
          pData->bUseLocalTime   = pTimeSys->bUseLocalTime;
          pData->ucAlarmId       = pTimeSys->alarmId;
@@ -1458,16 +1439,10 @@ returnStatus_t TIME_SYS_AddPerAlarm( tTimeSysPerAlarm *pData )
    tTimeSys *pTimeSys;        /* Pointer to alarm data structure */
 
    pData->ucAlarmId = NO_ALARM_FOUND; //Default, if no alarm available
-#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
    if ( (0 == pData->ulPeriod) ||
         (pData->ulOffset >= pData->ulPeriod) ||
         (pData->bOnInvalidTime && !pData->bOnValidTime && !pData->bSkipTimeChange) ||
         (NULL == pData->pQueueHandle && NULL == pData->pMQueueHandle) )
-#else
-   if ( (0 == pData->ulPeriod) ||
-        (pData->ulOffset >= pData->ulPeriod) ||
-        (pData->bOnInvalidTime && !pData->bOnValidTime && !pData->bSkipTimeChange) )
-#endif
    {
       /* Periodic alarms with 0 period OR
          Offset can not be greater than or equala to period.
@@ -1483,10 +1458,7 @@ returnStatus_t TIME_SYS_AddPerAlarm( tTimeSysPerAlarm *pData )
    {  /* Alarm slot available */
       pTimeSys = &_sTimeSys[alarmId];
       pTimeSys->bTimerSlotInUse     = (bool)true;
-#if 1 // TODO: RA6E1 - Queue handle for FreeRTOS
       pTimeSys->pQueueHandle        = pData->pQueueHandle;
-      pTimeSys->pMQueueHandle       = pData->pMQueueHandle;
-#endif
       pTimeSys->ulAlarmTime_Period  = pData->ulPeriod;
       pTimeSys->ulOffset            = pData->ulOffset % pData->ulPeriod;
       pTimeSys->alarmId             = alarmId;
@@ -2310,7 +2282,6 @@ void TIME_SYS_HandlerTask( taskParameter )
 #if (EP == 1)
          if ( !TIME_SYS_IsTimeValid() )
          {  //System time not valid
-#if 1 // TODO: RA6E1 Bob: timer_util.c is now implemented, should be able to remove this
            if (statusTimeRequest_ != STATUS_TIME_REQUEST_WAIT_STATE)
             {  //Send the request to request time
                timer_t timerCfg;      //Configure timer
@@ -2327,7 +2298,6 @@ void TIME_SYS_HandlerTask( taskParameter )
                   statusTimeRequest_ = STATUS_TIME_REQUEST_WAIT_STATE; //Wait for the time
                }
             }
-#endif // TODO: RA6E1 Bob: timer_util.c is now implemented, should be able to remove this
          }
          else
          {  //System time valid

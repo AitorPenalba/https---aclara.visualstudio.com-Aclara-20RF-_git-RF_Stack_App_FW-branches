@@ -78,6 +78,9 @@
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
+#if ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Remove once byte typedefed elsewhere
+typedef unsigned char byte;
+#endif
 
 typedef uint8_t         dl_streamid_t;       /*!<  */
 typedef int16_t         dl_packetid_t;       /*!< This should be unsigned but it is signed to make missing Packet ID's more robust */
@@ -288,7 +291,7 @@ DFWA_EXTERN   OS_MSGQ_Obj DFWA_MQueueHandle;
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
 
-DFWA_EXTERN void           DFWA_task( uint32_t Arg0 );
+DFWA_EXTERN void           DFWA_task( taskParameter );
 DFWA_EXTERN returnStatus_t DFWA_init( void );
 DFWA_EXTERN returnStatus_t DFWA_setFileVars(DFW_vars_t const *pFile);
 DFWA_EXTERN returnStatus_t DFWA_getFileVars(DFW_vars_t *pFile);

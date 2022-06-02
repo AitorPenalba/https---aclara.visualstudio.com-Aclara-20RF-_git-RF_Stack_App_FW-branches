@@ -34,8 +34,8 @@
 #include "pwr_task.h"
 #include "pwr_last_gasp.h"
 #include "file_io.h"
-//#include "pwr_restore.h"
-//#include "pwr_config.h"
+#include "pwr_restore.h"
+#include "pwr_config.h"
 #include "hmc_app.h"
 #include "mode_config.h"
 #include "time_util.h"
@@ -50,7 +50,7 @@
 #include "dtls.h"
 #endif
 #include "radio_hal.h"
-//#include "RG_MD_Handler.h"
+#include "RG_MD_Handler.h"
 #include "buffer.h"
 
 #include "vbat_reg.h"
@@ -64,6 +64,7 @@
 #endif
 //#include "ID_intervaltask.h"
 //#include "historyd.h"
+//#include "lpm_app.h"  // TODO: RA6: DG: Remove
 
 /* MACRO DEFINITIONS */
 #define POWER_DOWN_SIGNATURE ((uint64_t)0x01020304abcdef7A)
@@ -208,7 +209,7 @@ void PWR_task( taskParameter )
    ShipMode();
 
    // Signal to outage restoration that the power task has initialized.
-//   PWROR_PWR_signal();  // TODO: RA6: DG: Add later
+   PWROR_PWR_signal();
 
 #if ( MCU_SELECTED == NXP_K24 )
    // Install ISR for Brown Out
@@ -255,9 +256,9 @@ void PWR_task( taskParameter )
    /* Before we can continue the power down process, we need to make sure no tasks are in the middle of updating
       critical information in NV or important system status flags tied to changes in NV such as last gasp flags.
       Lock the power mutex in the PWR_AND_EMBEDDED_PWR_MUTEX state.  This will ensure all NV writes have completed,
-	  important system flags have been updated, and the device is ready to complete the power down process.  Once
-	  the mutex is acquired, the power module will not release the mutex in order to prevent other tasks from making
-	  updates and will be released upon power restoration. */
+     important system flags have been updated, and the device is ready to complete the power down process.  Once
+     the mutex is acquired, the power module will not release the mutex in order to prevent other tasks from making
+     updates and will be released upon power restoration. */
    PWR_lockMutex( PWR_AND_EMBEDDED_PWR_MUTEX );
 
    /* Call all items in the power down list */
@@ -523,7 +524,7 @@ void PWR_setWatchDogResetCnt( uint16_t Count )
  **********************************************************************************************************************/
 returnStatus_t PWR_TSK_init( void )
 {
-#if 0 /* TODO: RA6: Add later */
+
    char                 dt[25];              /* time, in human readable format. */
    TIMESTAMP_t          t;                   /* Holds times to be printed  */
    returnStatus_t       retVal = eFAILURE;
@@ -604,16 +605,8 @@ returnStatus_t PWR_TSK_init( void )
             retVal |= FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* ) &pwrFileData, ( lCnt )sizeof( pwrFileData ) );  /*lint !e655 !e641 using bitwise operator on retVal OK   */
          }
       }
-   }
-#else
-//#include "lpm_app.h"  // TODO: RA6: DG: Remove
-   returnStatus_t       retVal = eSUCCESS;
-   //TODO RA6: NRJ: determine if semaphores need to be counting
-   if ( OS_MUTEX_Create( &PWR_Mutex ) && OS_MUTEX_Create(&Embedded_Pwr_Mutex) && OS_SEM_Create( &PWR_Sem, 0 ) )
-   {
 //      user_clocks_set(); /* TODO: RA6: DG: Move to appropriate location  */
    }
-#endif
    return( retVal );
 }
 
@@ -663,15 +656,15 @@ static void cfgAlarm()
                                        This mutex state is used to ensure all modifications are completed while losing
                                        power in the middle of the update process.
 
-            EMBEDDED_PWR_MUTEX -       Sometimes a scenario occurs where mutliple operation need to be completed at power
+            EMBEDDED_PWR_MUTEX -       Sometimes a scenario occurs where multiple operation need to be completed at power
                                        down, but the PWR_MUTEX is embedded and utilized by another function/process within
                                        the multiple operation process.  An example of this is during power restoration
                                        where multiple events must be logged.  While processing each event a function
-                                       call to log the event utilizes the PWR_Mutex. This mutex state utilizes a seperate mutex,
+                                       call to log the event utilizes the PWR_Mutex. This mutex state utilizes a separate mutex,
                                        PWR_Restore_Mutex, allowing the ability to bracket the entire operation process
                                        allowing the PWR_MUTEX to be acquired as many times as necessary during the process.
 
-            PWR_AND_EMBEDDED_PWR_MUTEX- This mutex state is utlized before starting the power down procedure/reset
+            PWR_AND_EMBEDDED_PWR_MUTEX- This mutex state is utilized before starting the power down procedure/reset
                                        procedure which results in the partitions being flushed.  This mutex state is
                                        required to acquire both the EMBEDDED_PWR_MUTEX and PWR_MUTEX_ONLY ensuring all
                                        NV updates have completed successfully.  This allows the power down process to
@@ -975,9 +968,9 @@ void PWR_SafeReset( void )
    /* Before we can continue the reset process, we need to make sure no tasks are in the middle of updating
       critical information in NV or important system status flags tied to changes in NV such as last gasp flags.
       Lock the power mutex in the PWR_AND_EMBEDDED_PWR_MUTEX state.  This will ensure all NV writes have completed,
-	  important system flags have been updated, and the device is ready to complete the reset process.  Once the mutex
-	  is acquired, the power module will not release the mutex in order to prevent other tasks from making updates
-	  and will be released upon reset completion. */
+     important system flags have been updated, and the device is ready to complete the reset process.  Once the mutex
+     is acquired, the power module will not release the mutex in order to prevent other tasks from making updates
+     and will be released upon reset completion. */
    PWR_lockMutex( PWR_AND_EMBEDDED_PWR_MUTEX );
    VBATREG_EnableRegisterAccess();
    pwrFileData.uPowerDownSignature  = 0;  /* Clear power down signature */
@@ -1093,7 +1086,7 @@ static void ShipMode( void )
          (void)TIME_UTIL_SetTimeFromSeconds(0, 0);
       }
 
-      /* if shipmode or decommission mode is equal to 1, clear network statisticsm, events, and metering values */
+      /* if shipmode or decommission mode is equal to 1, clear network statistics, events, and metering values */
       if( shipModeValue == 1  || meterShopModeValue == 1 )
       {
 
@@ -1136,7 +1129,7 @@ static void ShipMode( void )
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
          ( void )ALRM_clearAllAlarms ();
 #endif
-         PWRLG_RestLastGaspFlags(); // coming out of shipmode or decommision mode, clear the last gasp flags
+         PWRLG_RestLastGaspFlags(); // coming out of shipmode or decommission mode, clear the last gasp flags
       }
 
 #if 0 /* TODO: RA6: Add later */
@@ -1283,7 +1276,7 @@ returnStatus_t PWR_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(pwrFileData.uSpuriousResets) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-     	         *(uint16_t *)value = (uint16_t)PWR_getSpuriousResetCnt();
+               *(uint16_t *)value = (uint16_t)PWR_getSpuriousResetCnt();
                retVal = eSUCCESS;
                if (attr != NULL)
                {
@@ -1297,7 +1290,7 @@ returnStatus_t PWR_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(pwrFileData.uPowerDownCount) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-     	         *(uint16_t *)value = PWR_getPowerFailCount();
+               *(uint16_t *)value = PWR_getPowerFailCount();
                retVal = eSUCCESS;
                if (attr != NULL)
                {

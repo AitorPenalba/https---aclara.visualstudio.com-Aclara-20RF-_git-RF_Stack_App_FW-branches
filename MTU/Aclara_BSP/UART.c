@@ -190,7 +190,10 @@ returnStatus_t UART_init ( void )
 #elif (RTOS_SELECTION == FREE_RTOS)
    for( i = 0; i < (uint8_t)MAX_UART_ID; i++ )
    {
-      ( void )R_SCI_UART_Open( (void *)UartCtrl[ i ], (void *)UartCfg[ i ] );
+      if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)i ) )  // Only open DEBUG port in last gasp mode */
+      {
+         ( void )R_SCI_UART_Open( (void *)UartCtrl[ i ], (void *)UartCfg[ i ] );
+      }
    }
 #endif
 
@@ -804,7 +807,7 @@ void user_uart_callback( uart_callback_args_t *p_args )
 
   Function name: dbg_uart_callback
 
-  Purpose: Interrupt Handler for Debug UART Module,Postponds the semaphore wait
+  Purpose: Interrupt Handler for Debug UART Module, postpones the semaphore wait
             once one byte of data is read in SCI Channel 4 (DBG port)
 
   Returns: None

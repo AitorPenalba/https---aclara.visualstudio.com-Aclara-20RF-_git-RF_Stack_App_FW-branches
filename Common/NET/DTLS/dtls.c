@@ -42,11 +42,16 @@
 #include "timer_util.h"
 #include "time_util.h"
 #include "time_sys.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "fio.h"
+#endif
 #include "ecc108_lib_return_codes.h"
 #include "ecc108_apps.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"
+#endif
 #include "byteswap.h"
+#include "user_settings.h"  // Added for defining WOLFSSL_DTLS  /* TODO: RA6E1: SG Determine if the need for this can be migrated to FreeRTOS headers */
 #include <wolfssl/ssl.h>
 #include <wolfssl/internal.h>
 #include <wolfssl/error-ssl.h>
@@ -132,7 +137,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define DTLS_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
 #else
-#define DTLS_NUM_MSGQ_ITEMS 0 
+#define DTLS_NUM_MSGQ_ITEMS 0
 #endif
 /* TYPE DEFINITIONS */
 /* An indicator of which pipe the DTLS is connected to */
@@ -478,7 +483,7 @@ returnStatus_t DTLS_init( void )
 {
    returnStatus_t ret = eFAILURE; /* Return Value */
 
-   if (  ( !OS_MSGQ_Create( &_dtlsMSGQ, DTLS_NUM_MSGQ_ITEMS ) )         || ( !OS_EVNT_Create ( &_dtlsEvent ) ) ||
+   if (  ( !OS_MSGQ_Create( &_dtlsMSGQ, DTLS_NUM_MSGQ_ITEMS, "DTLS" ) )         || ( !OS_EVNT_Create ( &_dtlsEvent ) ) ||
          ( !OS_MUTEX_Create( &dtlsConfigMutex_ ) ) || ( eSUCCESS != DtlsInitializeSessionCache() ) )
    {
       return eFAILURE;
@@ -550,7 +555,7 @@ returnStatus_t DTLS_init( void )
 
    Returns: none
 ***********************************************************************************************************************/
-void DTLS_Task( uint32_t Arg0 )
+void DTLS_Task( taskParameter )
 {
    buffer_t       *commandBuf;   /* DTLS command buffer */
    DtlsMessage_s  *msg;          /* DTLS command message data */

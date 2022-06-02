@@ -37,6 +37,7 @@
 #include "dfw_app.h"
 
 #include "pwr_task.h"
+#include "dfw_interface.h"
 //#include "MIMT_info.h"
 
 #if ( EP == 1 )
@@ -96,9 +97,7 @@
 #if (USE_DTLS==1)
 #include "dtls.h"
 #include "wolfssl/wolfcrypt/aes.h"
-#if 0
 #include "wolfssl/wolfcrypt/sha256.h"
-#endif
 #endif
 
 #if (PHASE_DETECTION==1)
@@ -113,13 +112,10 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 //uint32_t DBG_CommandLine_SM_Set(    uint32_t argc, char *argv[] );
 //uint32_t DBG_CommandLine_SM_Get(    uint32_t argc, char *argv[] );
 
-#if 1 // TODO: RA6E1: Add later
 #if (EP == 1)
 #include "smtd_config.h"
 #endif  /* end of EP */
-#endif  /* end of if 0 */
 #include "dfwtd_config.h"
-#if 0 // TODO: RA6: Add later
 #if (EP == 1)
 #include "pwr_config.h"
 #include "ed_config.h"
@@ -142,7 +138,6 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #include "hmc_time.h"
 #endif
 #endif
-#endif // #if 0
 
 #if ( NOISE_HIST_ENABLED == 1 )
 #include "NH_NoiseHistData.h"
@@ -409,9 +404,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "demandto",     DBG_CommandLine_DMDTO,           "Get (no args) or set (arg1) the demand reset timeout" },
 //#endif
 //#endif
-//#if ENABLE_DFW_TASKS
-//   { "dfw",          DBG_CommandLine_DFW_Status,      "DFW - Status" },
-//#endif   //End of #if EP
+#if ENABLE_DFW_TASKS
+   { "dfw",          DBG_CommandLine_DFW_Status,      "DFW - Status" },
+#endif   //End of #if EP
 //#if ( EP == 1 )
 //   { "dfwtd",        DBG_CommandLine_DfwTimeDv,       "Get/Set DFW TimeDiversity 0-255 minutes (DLConfirm ApplyConfirm)" },
 //#if ( REMOTE_DISCONNECT == 1 )
@@ -463,24 +458,24 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "getstoprule",  DBG_CommandLine_getDstStopRule,  "Prints the DST stop rule" },
 ////   { "gettimezoneoffset", DBG_CommandLine_getTimezoneOffset, "Prints the timezone offset" },
 //#endif
-//#if ENABLE_HMC_TASKS
-//#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
-//   { "hmc",          DBG_CommandLine_HmcCmd,          "Host Meter Table Read, format is: hmc [m] id offset len" },
-//   { "hmcc",         DBG_CommandLine_HmcCurrent,      "Host Meter Read Current, format is: hmcc uom" },
-//   { "hmcd",         DBG_CommandLine_HmcDemand,       "Host Meter Demand, format is: hmcd uom" },
-//   { "hmceng",       DBG_CommandLine_HmcEng,          "print Host Meter Communication engineering stats"},
-//#endif
-//#if 0
-//   { "hmcdc",        DBG_CommandLine_HmcDemandCoin,   "Host Meter Demand Coincident, format is: hmcd uom coin" },
-//#endif
-//   { "hmcs",         DBG_CommandLine_HmcHist,         "Host Meter Read Shift, format is: hmcs uom" },
-//#if ( CLOCK_IN_METER == 1 )
-//   { "hmctime",      DBG_CommandLine_HMC_time,        "Get/Set Host Meter time" },
-//#endif
-//#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
+#if ENABLE_HMC_TASKS
+#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
+   { "hmc",          DBG_CommandLine_HmcCmd,          "Host Meter Table Read, format is: hmc [m] id offset len" },
+   { "hmcc",         DBG_CommandLine_HmcCurrent,      "Host Meter Read Current, format is: hmcc uom" },
+   { "hmcd",         DBG_CommandLine_HmcDemand,       "Host Meter Demand, format is: hmcd uom" },
+   { "hmceng",       DBG_CommandLine_HmcEng,          "print Host Meter Communication engineering stats"},
+#endif
+#if 0
+   { "hmcdc",        DBG_CommandLine_HmcDemandCoin,   "Host Meter Demand Coincident, format is: hmcd uom coin" },
+#endif
+   { "hmcs",         DBG_CommandLine_HmcHist,         "Host Meter Read Shift, format is: hmcs uom" },
+#if ( CLOCK_IN_METER == 1 )
+   { "hmctime",      DBG_CommandLine_HMC_time,        "Get/Set Host Meter time" },
+#endif
+#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
 //   { "hmcw",         DBG_CommandLine_HmcwCmd,         "Host Meter Table Write, format is: hmcw [m] id offset data" },
-//#endif
-//#endif
+#endif
+#endif
    { "hwinfo",       DBG_CommandLine_GetHWInfo,       "Display the HW Info" },
 //#ifdef TM_ID_TEST_CODE
 ////   { "idbufr",       DBG_CommandLine_IdBufRd,         "Reads from the interval data test buffer: bufIndex "},
@@ -3763,7 +3758,6 @@ uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
 
       DBG_logPrintf( 'R', "RTC=%02d/%02d/%04d %02d:%02d:%02d",
                      RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec );
-
    }
    else
    {
@@ -5082,255 +5076,255 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
 //}
 //#endif //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 //
-//#if (EP == 1)
-///*******************************************************************************
-//
-//   Function name: printMeterQty
-//
-//   Purpose:
-//
-//   Arguments:
-//
-//   Returns:
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static void printMeterQty( int64_t val, uint8_t pow10 )
-//{
-//   double   vald;
-//   uint64_t integer;       /* Integer portion of val              */
-//   uint32_t len;
-//   uint32_t power10;       /* pow10 converted to 10 ^ pow10       */
-//   uint32_t logVal;        /* (int)log( val )                     */
-//   char     outInt[21];
-//
-//
-//   if ( pow10 == 7 )    /* Special value; means 10^-9 */
-//   {
-//      pow10 = 9;
-//   }
-//   DBG_logPrintf( 'D', "Raw data: 0x%llx", val );
-//   power10 = ( uint32_t )pow( ( double )10, ( double )pow10 );
-//   integer = ( uint64_t )( ( double )val / power10 );
-//   len  = ( uint32_t )sprintf( outInt, "%llu.", integer );
-//   logVal = ( uint32_t )log10( ( double )val ) + 1;
-//   if( logVal >= pow10 )
-//   {
-//      len = logVal - ( len - 1 );   /* Take the '.' out of the length   */
-//   }
-//   else
-//   {
-//      len = pow10;   /* All the digits are after the decimal point. Need leading zeros */
-//   }
-//   /* Find the fractional portion of val  */
-//   vald = ( double )val;
-//   val = ( int64_t )( vald - ( ( double )integer * power10 ) );
-//   DBG_logPrintf( 'D', "%s%0*llu", outInt, len, val );
-//}
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_HmcCurrent
-//
-//   Purpose: This function will print out a quantity from the HMC CIM interface module
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_HmcCurrent ( uint32_t argc, char *argv[] )
-//{
-//   ValueInfo_t  readValue;
-//
-//   enum_CIM_QualityCode rdgStatus;
-//
-//   if ( argc == 2 )  /* The number of arguments must be 2 */
-//   {
-//      uint16_t reading = ( uint16_t )strtoul( argv[1], NULL, 0 );
-//      rdgStatus = INTF_CIM_CMD_getMeterReading( (meterReadingType)reading, &readValue );
-//      if ( CIM_QUALCODE_SUCCESS == rdgStatus )
-//      {
-//         printMeterQty( readValue.Value.intValue, readValue.power10 );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'D', "%s failed: %d", argv[ 0 ], ( int32_t )rdgStatus );
-//      }
-//#if (ACLARA_LC == 0 ) && (ACLARA_DA == 0)
-//      uint8_t powerOfTen = HMC_MTRINFO_getMeterReadingPowerOfTen( (meterReadingType)reading );
-//      DBG_logPrintf( 'D', "Power Of Ten: %d", powerOfTen );
-//#endif
-//   }
-//   return ( 0 );
-//}
-// /* end DBG_CommandLine_HmcCurrent() */
-//#endif
-//
-//#if (EP == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_HmcHist
-//
-//   Purpose: This function will print out a quantity from the HMC CIM interface module, this is the shifted value
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_HmcHist ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 2 )  /* The number of arguments must be 2 */
-//   {
-//      ValueInfo_t           readingInfo;
-//      sysTime_dateFormat_t  DateTime;      /* Converted date/time of associated value   */
-//      enum_CIM_QualityCode  resp;
-//      uint16_t              reading;
-//
-//      reading = ( uint16_t )strtoul( argv[1], NULL, 0 );
-//      resp = INTF_CIM_CMD_getMeterReading( ( meterReadingType )reading, &readingInfo );
-//      if ( CIM_QUALCODE_SUCCESS == resp )
-//      {
-//         DBG_logPrintf( 'R', "HMC Shifted: Val: %lld", readingInfo.Value.intValue );
-//         printMeterQty( readingInfo.Value.intValue, readingInfo.power10 );
-//         if ( readingInfo.cimInfo.timePresent != 0 )
-//         {
-//            ( void )TIME_UTIL_ConvertSysFormatToDateFormat( ( sysTime_t * )&readingInfo.timeStamp, &DateTime );
-//            DBG_logPrintf( 'R', "Shifted time: %02d/%02d/%04d %02d:%02d",
-//                           DateTime.month, DateTime.day, DateTime.year, DateTime.hour, DateTime.min );
-//         }
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "HMC Shifted Failed - %d", ( int32_t )resp );
-//      }
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_HmcHist() */
-//#endif
-//
-//#if (EP == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_HmcDemand
-//
-//   Purpose: This function will print out a demand value, peak time, coincidents, demand reset count, and its time.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_HmcDemand ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 2 )  /* The number of arguments must be 1 */
-//   {
-//      sysTime_dateFormat_t DateTime;      /* Converted date/time of associated value   */
-//      ValueInfo_t          readingInfo;
-//      meterReadingType     RdgType;       /* Demand reading type  */
-//      enum_CIM_QualityCode respReading;   /* Success/failure of reading request. */
-//      uint8_t              coincidentCount;
-//
-//      RdgType = ( meterReadingType )( strtoul( argv[1], NULL, 0 ) ); /* Get demand qty of interest */
-//
-//      /* Retrieve reading and metadata */
-//      respReading = INTF_CIM_CMD_getMeterReading( RdgType, &readingInfo );
-//
-//      if ( CIM_QUALCODE_SUCCESS == respReading )
-//      {
-//         printMeterQty( ( int64_t )readingInfo.Value.intValue, readingInfo.power10 );
-//         if ( readingInfo.cimInfo.timePresent != 0 )
-//         {
-//            ( void )TIME_UTIL_ConvertSysFormatToDateFormat( (sysTime_t *)&readingInfo.timeStamp, &DateTime );
-//            DBG_logPrintf( 'R', "Peak time: %02d/%02d/%04d %02d:%02d",
-//                           DateTime.month, DateTime.day, DateTime.year, DateTime.hour, DateTime.min );
-//         }
-//         DBG_logPrintf( 'R', "No. coin: %d", readingInfo.cimInfo.coincidentCount );
-//         coincidentCount = readingInfo.cimInfo.coincidentCount;
-//         for ( uint8_t coinCnt = 0; coinCnt < coincidentCount; coinCnt++ )
-//         {
-//            DBG_logPrintf( 'R', "Coin Number: %d", coinCnt );
-//            respReading = INTF_CIM_CMD_getDemandCoinc( RdgType, coinCnt, &readingInfo );
-//            if ( CIM_QUALCODE_SUCCESS == respReading )
-//            {
-//               DBG_logPrintf( 'R', "coincident reading type: %u", (uint16_t)readingInfo.readingType );
-//               printMeterQty( ( int64_t )readingInfo.Value.intValue, readingInfo.power10 );
-//            }
-//            else
-//            {
-//               DBG_logPrintf( 'R', "Failed reading coincident - %d",  ( int32_t )respReading );
-//            }
-//         }
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Failed reading demand value - %d",  ( int32_t )respReading );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid parameters" );
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_HmcDemand() */
-//#if 0
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_HmcDemandCoin
-//
-//   Purpose: This function will print out a coincident quantity from the HMC CIM interface module
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_HmcDemandCoin ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 3 )  /* The number of arguments must be 2 */
-//   {
-//      uint64_t             coinVal;
-//      meterReadingType     RdgType;
-//      meterReadingType     coinRdgType;
-//      uint8_t              pow10;
-//      uint8_t              whichCoin;
-//      enum_CIM_QualityCode respReading;
-//
-//      RdgType = ( meterReadingType )( atoi( argv[1] ) ); /* Get demand qty of interest */
-//
-//      whichCoin = ( uint8_t )strtoul( argv[2], NULL, 0 );
-//      respReading = INTF_CIM_CMD_getDemandCoincident( RdgType, whichCoin, &coinVal, &pow10, &coinRdgType );
-//      if ( CIM_QUALCODE_SUCCESS == respReading )
-//      {
-//         DBG_logPrintf( 'R', "coincident reading type: %d", coinRdgType );
-//         printMeterQty( (int64_t)coinVal, pow10 );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Failed Reading Current - %d",  respReading );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Failed - Invalid Parameters" );
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_HmcDemandCoin() */
-//#endif
-//#endif
+#if (EP == 1)
+/*******************************************************************************
+
+   Function name: printMeterQty
+
+   Purpose:
+
+   Arguments:
+
+   Returns:
+
+   Notes:
+
+*******************************************************************************/
+static void printMeterQty( int64_t val, uint8_t pow10 )
+{
+   double   vald;
+   uint64_t integer;       /* Integer portion of val              */
+   uint32_t len;
+   uint32_t power10;       /* pow10 converted to 10 ^ pow10       */
+   uint32_t logVal;        /* (int)log( val )                     */
+   char     outInt[21];
+
+
+   if ( pow10 == 7 )    /* Special value; means 10^-9 */
+   {
+      pow10 = 9;
+   }
+   DBG_logPrintf( 'D', "Raw data: 0x%llx", val );
+   power10 = ( uint32_t )pow( ( double )10, ( double )pow10 );
+   integer = ( uint64_t )( ( double )val / power10 );
+   len  = ( uint32_t )sprintf( outInt, "%llu.", integer );
+   logVal = ( uint32_t )log10( ( double )val ) + 1;
+   if( logVal >= pow10 )
+   {
+      len = logVal - ( len - 1 );   /* Take the '.' out of the length   */
+   }
+   else
+   {
+      len = pow10;   /* All the digits are after the decimal point. Need leading zeros */
+   }
+   /* Find the fractional portion of val  */
+   vald = ( double )val;
+   val = ( int64_t )( vald - ( ( double )integer * power10 ) );
+   DBG_logPrintf( 'D', "%s%0*llu", outInt, len, val );
+}
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_HmcCurrent
+
+   Purpose: This function will print out a quantity from the HMC CIM interface module
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_HmcCurrent ( uint32_t argc, char *argv[] )
+{
+   ValueInfo_t  readValue;
+
+   enum_CIM_QualityCode rdgStatus;
+
+   if ( argc == 2 )  /* The number of arguments must be 2 */
+   {
+      uint16_t reading = ( uint16_t )strtoul( argv[1], NULL, 0 );
+      rdgStatus = INTF_CIM_CMD_getMeterReading( (meterReadingType)reading, &readValue );
+      if ( CIM_QUALCODE_SUCCESS == rdgStatus )
+      {
+         printMeterQty( readValue.Value.intValue, readValue.power10 );
+      }
+      else
+      {
+         DBG_logPrintf( 'D', "%s failed: %d", argv[ 0 ], ( int32_t )rdgStatus );
+      }
+#if (ACLARA_LC == 0 ) && (ACLARA_DA == 0)
+      uint8_t powerOfTen = HMC_MTRINFO_getMeterReadingPowerOfTen( (meterReadingType)reading );
+      DBG_logPrintf( 'D', "Power Of Ten: %d", powerOfTen );
+#endif
+   }
+   return ( 0 );
+}
+ /* end DBG_CommandLine_HmcCurrent() */
+#endif
+
+#if (EP == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_HmcHist
+
+   Purpose: This function will print out a quantity from the HMC CIM interface module, this is the shifted value
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_HmcHist ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 2 )  /* The number of arguments must be 2 */
+   {
+      ValueInfo_t           readingInfo;
+      sysTime_dateFormat_t  DateTime;      /* Converted date/time of associated value   */
+      enum_CIM_QualityCode  resp;
+      uint16_t              reading;
+
+      reading = ( uint16_t )strtoul( argv[1], NULL, 0 );
+      resp = INTF_CIM_CMD_getMeterReading( ( meterReadingType )reading, &readingInfo );
+      if ( CIM_QUALCODE_SUCCESS == resp )
+      {
+         DBG_logPrintf( 'R', "HMC Shifted: Val: %lld", readingInfo.Value.intValue );
+         printMeterQty( readingInfo.Value.intValue, readingInfo.power10 );
+         if ( readingInfo.cimInfo.timePresent != 0 )
+         {
+            ( void )TIME_UTIL_ConvertSysFormatToDateFormat( ( sysTime_t * )&readingInfo.timeStamp, &DateTime );
+            DBG_logPrintf( 'R', "Shifted time: %02d/%02d/%04d %02d:%02d",
+                           DateTime.month, DateTime.day, DateTime.year, DateTime.hour, DateTime.min );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "HMC Shifted Failed - %d", ( int32_t )resp );
+      }
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_HmcHist() */
+#endif
+
+#if (EP == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_HmcDemand
+
+   Purpose: This function will print out a demand value, peak time, coincidents, demand reset count, and its time.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_HmcDemand ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 2 )  /* The number of arguments must be 1 */
+   {
+      sysTime_dateFormat_t DateTime;      /* Converted date/time of associated value   */
+      ValueInfo_t          readingInfo;
+      meterReadingType     RdgType;       /* Demand reading type  */
+      enum_CIM_QualityCode respReading;   /* Success/failure of reading request. */
+      uint8_t              coincidentCount;
+
+      RdgType = ( meterReadingType )( strtoul( argv[1], NULL, 0 ) ); /* Get demand qty of interest */
+
+      /* Retrieve reading and metadata */
+      respReading = INTF_CIM_CMD_getMeterReading( RdgType, &readingInfo );
+
+      if ( CIM_QUALCODE_SUCCESS == respReading )
+      {
+         printMeterQty( ( int64_t )readingInfo.Value.intValue, readingInfo.power10 );
+         if ( readingInfo.cimInfo.timePresent != 0 )
+         {
+            ( void )TIME_UTIL_ConvertSysFormatToDateFormat( (sysTime_t *)&readingInfo.timeStamp, &DateTime );
+            DBG_logPrintf( 'R', "Peak time: %02d/%02d/%04d %02d:%02d",
+                           DateTime.month, DateTime.day, DateTime.year, DateTime.hour, DateTime.min );
+         }
+         DBG_logPrintf( 'R', "No. coin: %d", readingInfo.cimInfo.coincidentCount );
+         coincidentCount = readingInfo.cimInfo.coincidentCount;
+         for ( uint8_t coinCnt = 0; coinCnt < coincidentCount; coinCnt++ )
+         {
+            DBG_logPrintf( 'R', "Coin Number: %d", coinCnt );
+            respReading = INTF_CIM_CMD_getDemandCoinc( RdgType, coinCnt, &readingInfo );
+            if ( CIM_QUALCODE_SUCCESS == respReading )
+            {
+               DBG_logPrintf( 'R', "coincident reading type: %u", (uint16_t)readingInfo.readingType );
+               printMeterQty( ( int64_t )readingInfo.Value.intValue, readingInfo.power10 );
+            }
+            else
+            {
+               DBG_logPrintf( 'R', "Failed reading coincident - %d",  ( int32_t )respReading );
+            }
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Failed reading demand value - %d",  ( int32_t )respReading );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid parameters" );
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_HmcDemand() */
+#if 0
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_HmcDemandCoin
+
+   Purpose: This function will print out a coincident quantity from the HMC CIM interface module
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_HmcDemandCoin ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 3 )  /* The number of arguments must be 2 */
+   {
+      uint64_t             coinVal;
+      meterReadingType     RdgType;
+      meterReadingType     coinRdgType;
+      uint8_t              pow10;
+      uint8_t              whichCoin;
+      enum_CIM_QualityCode respReading;
+
+      RdgType = ( meterReadingType )( atoi( argv[1] ) ); /* Get demand qty of interest */
+
+      whichCoin = ( uint8_t )strtoul( argv[2], NULL, 0 );
+      respReading = INTF_CIM_CMD_getDemandCoincident( RdgType, whichCoin, &coinVal, &pow10, &coinRdgType );
+      if ( CIM_QUALCODE_SUCCESS == respReading )
+      {
+         DBG_logPrintf( 'R', "coincident reading type: %d", coinRdgType );
+         printMeterQty( (int64_t)coinVal, pow10 );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Failed Reading Current - %d",  respReading );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Failed - Invalid Parameters" );
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_HmcDemandCoin() */
+#endif
+#endif
 
 #if ( FILE_IO == 1)
 /*******************************************************************************
@@ -5391,168 +5385,168 @@ uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 #endif // FILE_IO == 1
-//#if (EP == 1)
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_HmcCmd
-//
-//   Purpose: This function will print out the HMC table information
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:   If first argument is 'm' or 'M', use manufacturing tables (id offset by 2048)
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_HmcCmd  ( uint32_t argc, char *argv[] )
-//{
-//#define HMC_WAIT_TIME   ( 25 )            /* Number of seconds to wait for response */
-//
-//   char     respDataHex[ ( HMC_CMD_MSG_MAX * 4 ) +                      /* 2 hex digits + space per byte read  */
-//                         ( 15 * 3 ) +                                   /* up to 15 .. + space  in 1st line */
-//                         ( ( ( HMC_REQ_MAX_BYTES / 16 ) + 2 ) * 7 ) +   /* leading address and space per line */
-//                         ( HMC_REQ_MAX_BYTES / 16 ) + 2 + 1 ];          /* \n per line + final '\0' */
-//   buffer_t *pBuffer;            /* table read data   */
-//   char     *pPtr;
-//   uint16_t tableID = 0;
-//   uint32_t tblOffset = 0;
-//   uint16_t totalBytes;          /* Running count of bytes read, decreasing   */
-//   uint16_t bytesRead;           /* Bytes requested each pass. */
-//   uint8_t  arg;                 /* index into argv[]  */
-//   uint8_t  i;
-//
-//   // Allocate a buffer for a HMC data
-//   pBuffer = BM_alloc( HMC_CMD_MSG_MAX  );
-//   if ( pBuffer != NULL )
-//   {
-//      if ( ( argc == 4 ) || ( argc == 5 ) )  /* The number of arguments must be 4 or 5 */
-//      {
-//         arg = 1;
-//         if ( strcasecmp ( argv[ arg ], "m" ) == 0 )  /* Requesting Manufacturing table; offset ID by 2048. */
-//         {
-//            tableID = 2048U;
-//            arg++;
-//         }
-//
-//         /* Retrieve table ID, offset, length   */
-//         tableID    += ( uint16_t )strtoul( argv[arg++], NULL, 0 );
-//         tblOffset   = ( uint32_t )strtoul( argv[arg++], NULL, 0 );
-//         totalBytes  = ( uint16_t )strtoul( argv[arg], NULL, 0 );
-//
-//         pBuffer->x.dataLen  = HMC_CMD_MSG_MAX;
-//
-//         pPtr = respDataHex;
-//         for ( arg = 0; arg < argc; arg++ )
-//         {
-//            pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "%s ", argv[ arg ] );
-//         }
-//         DBG_logPrintf( 'D', "%s", respDataHex );
-//
-//         /* Loop until requested number of bytes have been read, or timed out. */
-//         while ( totalBytes != 0 )
-//         {
-//            bytesRead = min( totalBytes, HMC_CMD_MSG_MAX );
-//            if ( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_ansiRead( pBuffer->data, tableID, tblOffset, bytesRead ) )
-//            {
-//
-//               DBG_logPrintf( 'R', "table data (hex) @Offset: %p", tblOffset );
-//
-//               /* Print starting address                                */
-//               pPtr = respDataHex + snprintf( respDataHex, sizeof( respDataHex ), "%06x ", tblOffset - ( tblOffset % 16U ) );
-//
-//               if ( ( tblOffset % 16U ) != 0 )                       /* Not starting on hex 10 boundary? */
-//               {
-//                  for ( uint8_t pad = tblOffset % 16U; pad; pad-- )  /* Print calclated number of .. */
-//                  {
-//                     pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), ".. " );
-//                  }
-//               }
-//
-//               for ( i = 0; i < bytesRead; i++ )
-//               {
-//                  if ( ( ( tblOffset % 16U ) == 0 ) && ( i != 0 ) )     /* If on hex 10 boundary, new line  */
-//                  {
-//                     pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "\n%06x ", tblOffset );
-//                  }
-//                  pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "%02X ", pBuffer->data[i] );
-//                  tblOffset++;
-//               }
-//               *pPtr = '\0';
-//               DBG_printf( "       00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
-//               DBG_printf( "%s", &respDataHex[0] );
-//            }
-//            else
-//            {
-//               DBG_logPrintf( 'R', "ANSI read failed" );
-//               break;   /* Exit loop on failure.  */
-//            }
-//            totalBytes -= bytesRead;
-//         }
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Invalid Syntax" );
-//      }
-//      BM_free( pBuffer );
-//   }
-//
-//   return ( 0 );
-//} /* end DBG_CommandLine_HmcCmd() */
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_HmcEng
-//
-//   Purpose: This function will print out the hmc engineering stats.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_HmcEng ( uint32_t argc, char *argv[] )
-//{
-//  mtrEngFileData_t fileData;
-//  returnStatus_t retVal = eSUCCESS;
-//  uint32_t  numSessions = 0;
-//  retVal = HMC_ENG_getHmgEngStats( (void *) &fileData, sizeof(fileData) );
-//
-//  if( retVal == eSUCCESS )
-//  {
-//    numSessions = (uint32_t) fileData.perfSum.sessions[0]; //number of sessions for Port0
-//    DBG_logPrintf( 'R', "meter comm lockout count %d:", fileData.meterCommunicationLockoutCount);
-//    DBG_logPrintf( 'R', "meter session failure count: %d", fileData.meterSessionFailureCount);
-//    DBG_logPrintf( 'R', "port 0 error: %d", fileData.uErrBits.Bits.Port0Err);
-//    DBG_logPrintf( 'R', "password error: %d", fileData.uErrBits.Bits.ISCErr);
-//    DBG_logPrintf( 'R', "error count summary:");
-//    DBG_logPrintf( 'R', "   ae:    0x%02x", fileData.errCntSum.ae);
-//    DBG_logPrintf( 'R', "   ansie: 0x%02x", fileData.errCntSum.ansie);
-//    DBG_logPrintf( 'R', "   ato:   0x%02x", fileData.errCntSum.ato);
-//    DBG_logPrintf( 'R', "   dle:   0x%02x", fileData.errCntSum.dle);
-//    DBG_logPrintf( 'R', "   hw:    0x%02x", fileData.errCntSum.hwe);
-//    DBG_logPrintf( 'R', "   ir:    0x%02x", fileData.errCntSum.ir);
-//    DBG_logPrintf( 'R', "performance summary");
-//    DBG_logPrintf( 'R', "   Aborts:     %lu", fileData.perfSum.abort);
-//    DBG_logPrintf( 'R', "   Packets:    %lu", fileData.perfSum.packets);
-//    DBG_logPrintf( 'R', "   Sessions:   %lu", numSessions);
-//    DBG_logPrintf( 'R', "exeception counts");
-//    DBG_logPrintf( 'R', "   hmb:     0x%02x", fileData.exeCnts.hwb);
-//    DBG_logPrintf( 'R', "   nakr:    0x%02x", fileData.exeCnts.nakr);
-//    DBG_logPrintf( 'R', "   nakt:    0x%02x", fileData.exeCnts.nakt);
-//    DBG_logPrintf( 'R', "   or:      0x%02x", fileData.exeCnts.or);
-//    DBG_logPrintf( 'R', "   pto:     0x%02x", fileData.exeCnts.pto);
-//    DBG_logPrintf( 'R', "   retry:   0x%02x", fileData.exeCnts.retry);
-//    DBG_logPrintf( 'R', "   tog:     0x%02x", fileData.exeCnts.tog);
-//  }
-//  return 0;
-//}
-//#endif   /* end of ACLARA_LC == 0   */
-//
+#if (EP == 1)
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_HmcCmd
+
+   Purpose: This function will print out the HMC table information
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:   If first argument is 'm' or 'M', use manufacturing tables (id offset by 2048)
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_HmcCmd  ( uint32_t argc, char *argv[] )
+{
+#define HMC_WAIT_TIME   ( 25 )            /* Number of seconds to wait for response */
+
+   char     respDataHex[ ( HMC_CMD_MSG_MAX * 4 ) +                      /* 2 hex digits + space per byte read  */
+                         ( 15 * 3 ) +                                   /* up to 15 .. + space  in 1st line */
+                         ( ( ( HMC_REQ_MAX_BYTES / 16 ) + 2 ) * 7 ) +   /* leading address and space per line */
+                         ( HMC_REQ_MAX_BYTES / 16 ) + 2 + 1 ];          /* \n per line + final '\0' */
+   buffer_t *pBuffer;            /* table read data   */
+   char     *pPtr;
+   uint16_t tableID = 0;
+   uint32_t tblOffset = 0;
+   uint16_t totalBytes;          /* Running count of bytes read, decreasing   */
+   uint16_t bytesRead;           /* Bytes requested each pass. */
+   uint8_t  arg;                 /* index into argv[]  */
+   uint8_t  i;
+
+   // Allocate a buffer for a HMC data
+   pBuffer = BM_alloc( HMC_CMD_MSG_MAX  );
+   if ( pBuffer != NULL )
+   {
+      if ( ( argc == 4 ) || ( argc == 5 ) )  /* The number of arguments must be 4 or 5 */
+      {
+         arg = 1;
+         if ( strcasecmp ( argv[ arg ], "m" ) == 0 )  /* Requesting Manufacturing table; offset ID by 2048. */
+         {
+            tableID = 2048U;
+            arg++;
+         }
+
+         /* Retrieve table ID, offset, length   */
+         tableID    += ( uint16_t )strtoul( argv[arg++], NULL, 0 );
+         tblOffset   = ( uint32_t )strtoul( argv[arg++], NULL, 0 );
+         totalBytes  = ( uint16_t )strtoul( argv[arg], NULL, 0 );
+
+         pBuffer->x.dataLen  = HMC_CMD_MSG_MAX;
+
+         pPtr = respDataHex;
+         for ( arg = 0; arg < argc; arg++ )
+         {
+            pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "%s ", argv[ arg ] );
+         }
+         DBG_logPrintf( 'D', "%s", respDataHex );
+
+         /* Loop until requested number of bytes have been read, or timed out. */
+         while ( totalBytes != 0 )
+         {
+            bytesRead = min( totalBytes, HMC_CMD_MSG_MAX );
+            if ( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_ansiRead( pBuffer->data, tableID, tblOffset, bytesRead ) )
+            {
+
+               DBG_logPrintf( 'R', "table data (hex) @Offset: %p", tblOffset );
+
+               /* Print starting address                                */
+               pPtr = respDataHex + snprintf( respDataHex, sizeof( respDataHex ), "%06x ", tblOffset - ( tblOffset % 16U ) );
+
+               if ( ( tblOffset % 16U ) != 0 )                       /* Not starting on hex 10 boundary? */
+               {
+                  for ( uint8_t pad = tblOffset % 16U; pad; pad-- )  /* Print calclated number of .. */
+                  {
+                     pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), ".. " );
+                  }
+               }
+
+               for ( i = 0; i < bytesRead; i++ )
+               {
+                  if ( ( ( tblOffset % 16U ) == 0 ) && ( i != 0 ) )     /* If on hex 10 boundary, new line  */
+                  {
+                     pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "\n%06x ", tblOffset );
+                  }
+                  pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "%02X ", pBuffer->data[i] );
+                  tblOffset++;
+               }
+               *pPtr = '\0';
+               DBG_printf( "       00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
+               DBG_printf( "%s", &respDataHex[0] );
+            }
+            else
+            {
+               DBG_logPrintf( 'R', "ANSI read failed" );
+               break;   /* Exit loop on failure.  */
+            }
+            totalBytes -= bytesRead;
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Invalid Syntax" );
+      }
+      BM_free( pBuffer );
+   }
+
+   return ( 0 );
+} /* end DBG_CommandLine_HmcCmd() */
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_HmcEng
+
+   Purpose: This function will print out the hmc engineering stats.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_HmcEng ( uint32_t argc, char *argv[] )
+{
+  mtrEngFileData_t fileData;
+  returnStatus_t retVal = eSUCCESS;
+  uint32_t  numSessions = 0;
+  retVal = HMC_ENG_getHmgEngStats( (void *) &fileData, sizeof(fileData) );
+
+  if( retVal == eSUCCESS )
+  {
+    numSessions = (uint32_t) fileData.perfSum.sessions[0]; //number of sessions for Port0
+    DBG_logPrintf( 'R', "meter comm lockout count %d:", fileData.meterCommunicationLockoutCount);
+    DBG_logPrintf( 'R', "meter session failure count: %d", fileData.meterSessionFailureCount);
+    DBG_logPrintf( 'R', "port 0 error: %d", fileData.uErrBits.Bits.Port0Err);
+    DBG_logPrintf( 'R', "password error: %d", fileData.uErrBits.Bits.ISCErr);
+    DBG_logPrintf( 'R', "error count summary:");
+    DBG_logPrintf( 'R', "   ae:    0x%02x", fileData.errCntSum.ae);
+    DBG_logPrintf( 'R', "   ansie: 0x%02x", fileData.errCntSum.ansie);
+    DBG_logPrintf( 'R', "   ato:   0x%02x", fileData.errCntSum.ato);
+    DBG_logPrintf( 'R', "   dle:   0x%02x", fileData.errCntSum.dle);
+    DBG_logPrintf( 'R', "   hw:    0x%02x", fileData.errCntSum.hwe);
+    DBG_logPrintf( 'R', "   ir:    0x%02x", fileData.errCntSum.ir);
+    DBG_logPrintf( 'R', "performance summary");
+    DBG_logPrintf( 'R', "   Aborts:     %lu", fileData.perfSum.abort);
+    DBG_logPrintf( 'R', "   Packets:    %lu", fileData.perfSum.packets);
+    DBG_logPrintf( 'R', "   Sessions:   %lu", numSessions);
+    DBG_logPrintf( 'R', "exeception counts");
+    DBG_logPrintf( 'R', "   hmb:     0x%02x", fileData.exeCnts.hwb);
+    DBG_logPrintf( 'R', "   nakr:    0x%02x", fileData.exeCnts.nakr);
+    DBG_logPrintf( 'R', "   nakt:    0x%02x", fileData.exeCnts.nakt);
+    DBG_logPrintf( 'R', "   or:      0x%02x", fileData.exeCnts.or);
+    DBG_logPrintf( 'R', "   pto:     0x%02x", fileData.exeCnts.pto);
+    DBG_logPrintf( 'R', "   retry:   0x%02x", fileData.exeCnts.retry);
+    DBG_logPrintf( 'R', "   tog:     0x%02x", fileData.exeCnts.tog);
+  }
+  return 0;
+}
+#endif   /* end of ACLARA_LC == 0   */
+
 ///*******************************************************************************
 //
 //   Function name: DBG_CommandLine_Cmd
@@ -5594,7 +5588,7 @@ uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
 //            if ( !HmcCmdSemCreated )
 //            {
 //               //TODO RA6: NRJ: determine if semaphores need to be counting
-//               if ( OS_SEM_Create ( &HMC_CMD_SEM ) )
+//               if ( OS_SEM_Create ( &HMC_CMD_SEM, 0 ) )
 //               {
 //                  HmcCmdSemCreated = ( bool )true;
 //               } /* end if() */
@@ -5658,7 +5652,7 @@ uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //} /* end DBG_CommandLine_HmcwCmd() */
 //#endif /* ACLARA_ILC */
-//#endif
+#endif
 //
 //#ifdef TM_ID_TEST_CODE
 ///*******************************************************************************

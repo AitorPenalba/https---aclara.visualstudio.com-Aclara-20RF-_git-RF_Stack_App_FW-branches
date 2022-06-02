@@ -165,13 +165,12 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
-   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
-
    INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
+   INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
+   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
    INIT( VBATREG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),    // Needed early to check validity of RTC. // TODO: RA6E1: DG: Move this to appropriate position
    INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
    INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
-   INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
    INIT( TIME_SYS_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),   // NOTE: This needs to be called as soon as possible in order to create the time mutexes early on
                                                                                     //       because the error logging (ERR_printf, DBG_logPrintf, etc) uses the clock
                                                                                     //       to time stamp the message and, in the process, uses the time mutex.
@@ -180,10 +179,18 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SYSBUSY_init, STRT_FLAG_NONE ),
+#if ENABLE_DFW_TASKS
+   INIT( DFWA_init, STRT_FLAG_NONE ),
+   INIT( DFWTDCFG_init, STRT_FLAG_NONE ),
+#endif
 #if ENABLE_PWR_TASKS
    INIT( PWRCFG_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                         /* Must be before PWR_TSK_init so restoration delay is available*/
    INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( PWROR_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+#endif
+#if ENABLE_ALRM_TASKS
+   INIT( ALRM_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+   INIT( TEMPERATURE_init, STRT_FLAG_NONE ),
 #endif
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
@@ -209,6 +216,12 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( MAC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   #if ( USE_DTLS == 1 )
+   INIT( DTLS_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+#endif
+#if ( USE_MTLS == 1 )
+   INIT( MTLS_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+#endif
    INIT( SMTDCFG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( APP_MSG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
 #if ( ENABLE_HMC_TASKS == 1 )
@@ -550,13 +563,11 @@ void STRT_StartupTask ( taskParameter )
 #endif
 #endif // #if 0
          response = pFunct->pFxnStrt();
-#if 0
          if ( pFunct->pFxnStrt == MODECFG_init )
          {
             quiet = MODECFG_get_quiet_mode();
             rfTest = MODECFG_get_rfTest_mode();
          }
-#endif
          if ( eSUCCESS != response )
          {
             /* This condition should only show up in development.  This infinite loop should help someone figure out

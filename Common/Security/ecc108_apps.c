@@ -60,8 +60,6 @@
 #include "project.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>                       /* Needed for mqx typedefs, etc. */
-#endif
-#if 0 // TODO: RA6E1 - File support
 #include <fio.h>                       /* Needed for mqx version of (void)file i/o  */
 #endif
 #include <string.h>                    /* needed for memset(), (void)memcpy() */
@@ -77,10 +75,8 @@
 #include "ecc108_apps.h"               /* definitions and declarations for example functions */
 #include "cert-builder.h"
 #include "CRC.h"
-#if 0 // TODO: RA6E1 - WolfSSL integration
 #include "pwr_task.h"
 #include "wolfssl/wolfcrypt/sha256.h"
-#endif
 #include "DBG_SerialDebug.h"
 
 /* MACRO DEFINITIONS */
@@ -207,8 +203,8 @@ static uint8_t    ecc108e_SignMessage( uint8_t keyID,
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
-/* First, data kept in separate memory space for security information   */
 static const __no_init intFlashNvMap_t secROM;   /*lint !e728 not explicitly initialized  */
+
 /*lint -esym(765,AclaraFWkey) May not be referenced   */
 const uint8_t AclaraFWkey[ ECC108_KEY_SIZE ] =  /* Used to derive FW key   */
 {
@@ -657,12 +653,28 @@ static uint8_t    RNGseed[ ECC108_KEY_SIZE ];      /* Value to be used as Secure
 static keyConfig  keycfg[ 16 ];                    /* key configuration bits read from device   */
 static slotConfig slotcfg[ 16 ];                   /* slot configuration bits read from device   */
 
+
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 
 /* TODO: RA6E1 [name_Suriya] Handling all the calls in a separate file. For now as these definitions were in ecc108_mqx.c,
  * kept the functions in this same file */
 #if ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+static PartitionData_t const *   pSecurePart;   /* Partion handle for security information         */
+
+/***********************************************************************************************************************
+   Function Name: SEC_GetSecPartHandle
+
+   Purpose: Return the SEC_test file handle
+
+   Arguments: none
+
+   Returns: Security partition handle
+***********************************************************************************************************************/
+PartitionData_t const *SEC_GetSecPartHandle( void )
+{
+   return pSecurePart;
+}
 
 /**************************************************************************************************
 
@@ -754,6 +766,12 @@ returnStatus_t SEC_init( void )
    ecc108_close();
 
 #else
+    retVal = PAR_partitionFptr.parOpen(&pSecurePart, ePART_ENCRYPT_KEY, 0);
+    if (retVal != eSUCCESS)
+    {  /* Partition opened failed  */
+       return retVal;
+    }
+
     uint8_t err = ecc108_open();
     /* handle error */
     if (ECC108_SUCCESS != err)
@@ -1041,7 +1059,6 @@ uint8_t ecc108e_verify_config( void )
    return ret_code;
 }
 
-#if 0 // TODO: RA6E1 - Support  WolfSSL to complete security features
 /**************************************************************************************************
 
    Function: keyIsBlank
@@ -1496,7 +1513,7 @@ uint8_t ecc108e_WriteKey( uint16_t keyID, uint8_t keyLen, const uint8_t *keyData
 
    return ret_code;
 }
-#endif
+
 /**************************************************************************************************
    Function: ecc108e_GetSerialNumber
    Purpose:  Read the device serial number for use by many apps
@@ -1800,7 +1817,6 @@ static uint8_t ecc108e_read_config_zone(uint8_t *config_data)
    return ret_code;
 }
 
-#if 0 // TODO: RA6E1 - Support  WolfSSL to complete security features
 /**************************************************************************************************
 
    Function: NonceTempKey
@@ -2928,7 +2944,6 @@ static uint8_t ecc108e_verifyDevicePKI( void )
    return ret_code;
 }
 
-#endif
 /**************************************************************************************************
 
    Function: ecc108e_bfc
@@ -3127,7 +3142,6 @@ uint8_t ecc108e_Random( bool seed, uint8_t len, uint8_t *result )
    return ret_code;
 }
 
-#if 0 // TODO: RA6E1 - Support  WolfSSL to complete security features
 /**************************************************************************************************
    Function:   ecc108e_Sign
    Purpose:    External interface to request sign a message
@@ -3342,7 +3356,11 @@ uint8_t ecc108e_EncryptedKeyWrite( uint16_t keyID, uint8_t *key, uint8_t keyLen 
       }
       else     /* Key is NULL; generate new one (either random, or regenerate default based on flash security mode. */
       {
+#if 0 // TODO: RA6E1 Flash security to be enabled
          if ( NV_FSEC_SEC( NV_FSEC ) != 2 )     /* Value of 2 means unsecured; all others secured. */
+#else
+         if ( 0 )
+#endif
          {
             /* ecc108e_SecureRandom does an open/close operation. Move before the open in this routine   */
             newKey = ecc108e_SecureRandom();       /* Generate new secret key */
@@ -4069,5 +4087,3 @@ uint8_t ecc108e_GetDeviceCert( Cert_type cert, uint8_t *dest, uint32_t *length )
    }
    return ret_code;
 }
-
-#endif /* #if 0 */

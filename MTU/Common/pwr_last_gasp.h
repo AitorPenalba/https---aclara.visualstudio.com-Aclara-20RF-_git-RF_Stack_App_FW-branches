@@ -1,8 +1,8 @@
 /***********************************************************************************************************************
  *
- * Filename:   pwr_last_gasp.h
+ * Filename: pwr_last_gasp.h
  *
- * Global Designator: PWR_
+ * Global Designator: PWRLG_
  *
  * Contents: Last gasp message build and transmission.
  *
@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2018-2020 Aclara.  All Rights Reserved.
+ * Copyright 2018-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -35,19 +35,10 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-/* TODO: RA6: DG: Not required -- Start */
-//#include <stdint.h>
-//#include <stdbool.h>
-//#include <string.h>
-/* TODO: RA6: DG: Not required -- End */
-/* TODO: RA6: Add later -- Start */
-//#include "buffer.h"
-//#include "error_codes.h"
-//#include "time_util.h"
-//#include "MAC.h"
-//#include "MAC_Protocol.h"
-/* TODO: RA6: Add later -- End */
+
 #include "vbat_reg.h"
+
+
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTIONS */
 
@@ -74,7 +65,7 @@ typedef struct PWRLG_SysRegisterFile
    uint32_t timeOutage;                /* System time at initial power failure   */
    uint32_t uMilliseconds;             /* Total outage time based on capacity.   */
    uint16_t uSleepSeconds;             /* Seconds portion of time to sleep until next message.  */
-   uint16_t uSleepMilliseconds;        /* Millseconds portion of time to sleep until next message.  */
+   uint16_t uSleepMilliseconds;        /* Milliseconds portion of time to sleep until next message.  */
    union
    {
       struct
@@ -196,9 +187,9 @@ typedef struct PWRLG_SysRegisterFile
 /*lint -esym(765,PWRLG_Startup) PWRLG_Startup called from outside PCLint scope  */
 PWRLG_EXTERN void     PWRLG_Startup(void);
 PWRLG_EXTERN void     PWRLG_Begin( uint16_t anomalyCount );
-PWRLG_EXTERN void     PWRLG_Task(taskParameter);
-PWRLG_EXTERN void     PWRLG_Idle_Task(taskParameter);
-PWRLG_EXTERN uint8_t  PWRLG_LastGasp(void);
+PWRLG_EXTERN void     PWRLG_Task( taskParameter );
+PWRLG_EXTERN void     PWRLG_Idle_Task( taskParameter );
+PWRLG_EXTERN uint8_t  PWRLG_LastGasp( void );
 PWRLG_EXTERN void     PWRLG_BSP_Setup( void );
 #if 0 // Not used
 PWRLG_EXTERN uint32_t PWRLG_RandomRange(uint32_t uLow, uint32_t uHigh);

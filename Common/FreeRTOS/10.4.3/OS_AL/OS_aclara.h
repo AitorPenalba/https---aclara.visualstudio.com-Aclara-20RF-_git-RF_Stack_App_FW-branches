@@ -354,7 +354,6 @@ typedef UBaseType_t taskCreateReturnValue_t;
 
 /* CONSTANTS */
 /* This list of const needs to match the list in Task.c   These values are used for Get/Set Task Priority */
-#if 0
 extern const char pTskName_Strt[];
 extern const char pTskName_Sm[];
 extern const char pTskName_Phy[];
@@ -366,7 +365,6 @@ extern const char pTskName_Mac[];
 extern const char pTskName_Dbg[];
 extern const char pTskName_Par[];
 extern const char pTskName_Print[];
-#endif
 
 extern const char pTskName_Pwr[];
 extern const char pTskName_PhyTx[];

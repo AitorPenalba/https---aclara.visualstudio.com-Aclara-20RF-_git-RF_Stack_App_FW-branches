@@ -143,15 +143,15 @@ typedef struct PACK_MID
                                      the MAC or HMAC commands. When this key is used to generate or modify TempKey, then
                                      that value may not be used by the MAC and HMAC commands.
                                  0 = The key stored in the slot can be used by all commands */
-   uint16_t limitedUse  : 1;  /* 1 = The key stored in the slot is ìLimited Useî. See Sections 3.2.5, High Endurance
+   uint16_t limitedUse  : 1;  /* 1 = The key stored in the slot is ‚ÄúLimited Use‚Äù. See Sections 3.2.5, High Endurance
                                      Monotonic Counters and 3.2.6, Limited Use Key (Slot 15 only).
                                  0 = There are no usage limitations. */
    uint16_t encryptRead : 1;  /* 1 = Reads from this slot will be encrypted using the procedure specified in the Read
-                                     command (Section 9.1.4, Address Encoding) using ReadKey (bits 0 ñ 3 in this table)
+                                     command (Section 9.1.4, Address Encoding) using ReadKey (bits 0 ‚Äì 3 in this table)
                                      to generate the encryption key. No input MAC is required. If this bit is set, then
                                      IsSecret must also be set (in addition, see the following Table 2-6).
                                  0 = Clear text reads may be permitted. */
-   uint16_t isSecret    : 1;  /* 1 = The contents of this slot are secret ñ Clear text reads are prohibited and both
+   uint16_t isSecret    : 1;  /* 1 = The contents of this slot are secret ‚Äì Clear text reads are prohibited and both
                                      4-byte reads and writes are prohibited. This bit must be set if EncryptRead is a
                                      one or if WriteConfig has any value other than Always to ensure proper operation of
                                      the device.
@@ -182,7 +182,7 @@ typedef struct PACK_MID
                                        Verify command will only use a stored public key to verify a signature if it has
                                        been validated. The Sign and Info commands are used to report the validity
                                        state. The public key validity feature is ignored by all other commands and
-                                       applies only to Slots 8 ñ 15.
+                                       applies only to Slots 8 ‚Äì 15.
                                        0 = The public key in this slot can be used by the Verify command without being
                                            validated.
                                        1 = The public key in this slot can be used by the Verify command only if the
@@ -264,8 +264,11 @@ extern uint8_t    ecc108e_Verify( uint8_t keyID, uint16_t msglen, uint8_t const 
 extern uint8_t    ecc108e_GetDeviceCert( Cert_type cert, uint8_t *dest, uint32_t *length);
 extern void       ecc108e_UpdateKeys( const intFlashNvMap_t *intKeys );
 extern void       ecc108e_InitKeys( void );
-// TODO: RA6E1 [name_Suriya] - Create a new file and move
+// TODO: RA6E1 [name_Suriya] - Resolve with ecc108_mqx.c/.h "replacement"
 #if ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+#include "partitions.h"
+
+extern PartitionData_t const *SEC_GetSecPartHandle( void );
 extern returnStatus_t SEC_init( void );
 #endif
 
