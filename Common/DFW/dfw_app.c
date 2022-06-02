@@ -52,7 +52,7 @@
 #include "pwr_task.h"
 #include "ecc108_apps.h"
 
-#include "user_settings.h"  // Added for WolfSSL crypt settings (ECC)
+#include "user_settings.h"  // Added for WolfSSL crypt settings (ECC)  /* TODO: RA6E1: SG Determine if the need for this can be migrated to FreeRTOS headers */
 #include "wolfssl/wolfcrypt/aes.h"
 #include "wolfssl/wolfcrypt/ecc.h"
 #include "wolfssl/wolfcrypt/sha.h"
