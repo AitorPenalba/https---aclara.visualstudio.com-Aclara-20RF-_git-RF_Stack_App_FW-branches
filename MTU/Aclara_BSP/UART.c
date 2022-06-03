@@ -21,6 +21,7 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include "meter.h"
+#include "stdarg.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
@@ -109,6 +110,8 @@ static char             DbgPrintBuffer[MAX_DBG_COMMAND_CHARS + 1];
 extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
 #endif
 /* FUNCTION PROTOTYPES */
+static void             polled_putc( char c );
+static void             polled_init_uart( void );
 
 /* FUNCTION DEFINITIONS */
 
@@ -789,3 +792,148 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
    }/* end switch () */
 }/* end user_uart_callback () */
 #endif
+/***********************************************************************************************************************
+
+   Function name: UART_polled_printf
+
+   Purpose: Low level printf suitable for use in last gasp mode.
+
+   Arguments: variable
+
+   Returns: Same as printf
+
+   Re-entrant Code: No
+
+   Notes:
+
+ **********************************************************************************************************************/
+#if ( MCU_SELECTED == NXP_K24 )
+static const UART_MemMapPtr   uart = UART2_BASE_PTR;
+#endif
+static bool                   uartInitDone = ( bool ) false;
+#if ( MCU_SELECTED == RA6E1 )
+static volatile uint8_t       uart_event = 0;
+#endif
+uint32_t UART_polled_printf( char *fmt, ... )
+{
+   char     pBuf[ 192 ];   /* Local buffer for printout  */
+   uint32_t pOff;          /* offset into pBuf/length    */
+   va_list  ap;
+
+   (void)memset(&pBuf[0], 0, sizeof(pBuf));
+   va_start( ap, fmt );
+   if ( !uartInitDone  )
+   {
+      polled_init_uart();
+      polled_putc( '\n' );
+      polled_putc( '\n' );
+   }
+   pOff =  vsnprintf( pBuf, sizeof( pBuf ), fmt, ap );  /* "print" to the buffer.  */
+   va_end( ap );
+#if ( MCU_SELECTED == NXP_K24 )
+   for ( pOff = 0; pBuf[ pOff ] != 0; pOff++ )  /* Loop through the buffer, sending each to the UART. */
+   {
+      lg_putc( pBuf[ pOff ] );
+      if ( pBuf[ pOff ] == '\n' )
+      {
+         lg_putc( '\r' );  /* \n should include a \r, also. */
+      }
+   }
+   while( ( uart->S1 & UART_S1_TC_MASK ) == 0 );   /* Wait for last character to be fully transmitted.   */
+#elif ( MCU_SELECTED == RA6E1 )
+   uart_event = 0;
+
+   pOff +=  snprintf( &pBuf[pOff], (sizeof( pBuf ) - pOff), "\r\n" );  /* Add CR and New Line  */
+   fsp_err_t err = R_SCI_UART_Write( &g_uart_lpm_dbg_ctrl, (uint8_t *)&pBuf[0], pOff );
+   assert(FSP_SUCCESS == err);
+   while ( UART_EVENT_TX_COMPLETE != uart_event )  /* Wait for last character to be fully transmitted.   */
+   {
+   }
+#endif
+   return( pOff );
+}
+
+/***********************************************************************************************************************
+
+   Function name: polled_putc
+
+   Purpose: Low level putc suitable for use in last gasp mode.
+
+   Arguments: variable
+
+   Returns: none
+
+   Re-entrant Code: No
+
+   Notes:
+
+ **********************************************************************************************************************/
+static void polled_putc( char c )
+{
+#if ( MCU_SELECTED == NXP_K24 )
+   const UART_MemMapPtr luart = uart;
+   while( ( luart->S1 & UART_S1_TDRE_MASK ) == 0 )  /* Wait for Transmit Data Register Empty  */
+   {}
+   luart->D = c;
+#elif ( MCU_SELECTED == RA6E1 )
+   uart_event = 0;
+
+   (void)R_SCI_UART_Write( &g_uart_lpm_dbg_ctrl, (uint8_t*)&c, sizeof( char ) );
+   /* Check for event transfer complete */
+   while ( UART_EVENT_TX_COMPLETE != uart_event )
+   {
+   }
+#endif
+}
+
+/***********************************************************************************************************************
+
+   Function name: polled_init_uart
+
+   Purpose: Low level UART init suitable for use in last gasp mode.
+
+   Arguments: variable
+
+   Returns: none
+
+   Re-entrant Code: No
+
+   Notes:
+
+ **********************************************************************************************************************/
+static void polled_init_uart( void )
+{
+#if ( MCU_SELECTED == NXP_K24 )
+   const UART_MemMapPtr luart = uart;
+   SIM_SCGC4 &= !( uint16_t )SIM_SCGC4_UART2_MASK;    /* Disable the clock to UART2  */
+   SIM_SCGC4 |= ( uint16_t )SIM_SCGC4_UART2_MASK;     /* Enable the clock to UART2  */
+   luart->C2 = 0;                                     /* Temporarily disable the UART. */
+    /* Set to 115200 baud */
+   luart->BDH = 0;
+   luart->BDL = 0x20;
+   luart->C4 = 0x12;
+   luart->C2 = UART_C2_TE_MASK;                       /* Enable only the transmitter.  */
+   PORTD_PCR3 = PORT_PCR_MUX(3);                      /* Make PTD3 be the UART TX pin. */
+   uartInitDone = ( bool )true;
+#elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err = FSP_SUCCESS;
+
+   err = R_SCI_UART_Open(&g_uart_lpm_dbg_ctrl, &g_uart_lpm_dbg_cfg);
+   assert(FSP_SUCCESS == err);
+#endif
+}
+
+/*******************************************************************************
+
+  Function name: lpm_dbg_uart_callback
+
+  Purpose: Interrupt Handler for UART Module
+
+  Returns: None
+
+*******************************************************************************/
+void lpm_dbg_uart_callback( uart_callback_args_t *p_args )
+{
+   /* Handle the UART event */
+   uart_event = (uint8_t)p_args->event;
+}

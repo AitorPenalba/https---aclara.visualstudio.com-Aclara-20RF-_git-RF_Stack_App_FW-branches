@@ -537,7 +537,64 @@ void task_exception_handler(_mqx_uint para, void * stack_ptr)
     void * expt_frm_ptr = (void *)__get_PSP();
     expt_frm_dump(expt_frm_ptr);
 }
+#elif ( RTOS_SELECTION == FREE_RTOS )
+static void expt_frm_dump(void const * ext_frm_ptr)
+{
+   static const char * const expt_name[] =
+   {
+      "None",
+      "Reset",
+      "NMI",
+      "HardFault",
+      "MemManage",
+      "BusFault",
+      "UsageFault",
+      "SecureFault",
+      "Rsvd",
+      "Rsvd",
+      "Rsvd",
+      "SVCall",
+      "Debug Monitor",
+      "Rsvd",
+      "PendSV",
+      "SysTick"
+   };
 
+   char                             pBuf[ 192 ];   /* Local buffer for printout  */
+   uint16_t                         pOff;          /* offset into pBuf/length    */
+   uint32_t                         i;             /* loop counter               */
+
+
+   uint32_t excpt_num = __get_PSR() & 0x1FF;
+   if(excpt_num < 16)
+   {
+      pOff =  (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ), "\r\nExcpt [%s] in TASK 0x%x\r\n", expt_name[excpt_num] , OS_TASK_GetId() );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R0:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R1:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 1 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R2:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 2 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R3:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 3 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R12: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 4 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );
+   }
+   else
+   {
+      pOff = (uint16_t)snprintf( pBuf, (int32_t)sizeof( pBuf ), "External interrupt %u occured with no handler to serve it.", excpt_num );
+   }
+
+   //need Exclusion of rtos to print
+    UART_polled_printf( "%s", pBuf );
+}
+/*lint +esym(818, ext_frm_ptr)   */
+
+/*lint -esym(818,stack_ptr)   could be pointer to const  */
+void HardFault_Handler(_void)
+{
+
+    void * expt_frm_ptr = (void *)__get_PSP();
+    expt_frm_dump(expt_frm_ptr);
+}
 #endif // ( RTOS_SELECTION == MQX_RTOS )
 
 /***********************************************************************************************************************
