@@ -254,6 +254,7 @@ extern uint8_t     UART_close                ( enum_UART_ID UartId );
 extern uint8_t     UART_open                 ( enum_UART_ID UartId );
 extern bool        UART_gotChar              ( enum_UART_ID UartId );
 extern void *      UART_getHandle            ( enum_UART_ID UartId );
+extern uint32_t    UART_polled_printf        ( char *fmt, ... );
 #endif   /* BOOTLOADER  */
 extern void        WDOG_Kick                 ( void );
 extern void        WDOG_Disable              ( void );
