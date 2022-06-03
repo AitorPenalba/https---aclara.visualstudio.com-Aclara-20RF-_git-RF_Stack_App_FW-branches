@@ -204,6 +204,7 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
 #endif
 #else
 #define EnterVLLS(counter, eUnits, uMode)  /* TODO: RA6: DG: Remove later */
+#define EnterLLS(counter, eUnits )         /* TODO: RA6: DG: Remove later */
 #endif // if 0
 
 #if ( MCU_SELECTED == NXP_K24 )
@@ -1204,7 +1205,7 @@ static void NextSleep( void )
 #if ( MCU_SELECTED == NXP_K24 )
          EnterVLLS( 1, LPTMR_MILLISECONDS, 1 );
 #elif ( MCU_SELECTED == RA6E1 )
-         EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */
+         EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */ // TODO: RA6E1: Verify
 #endif
       }
    }
