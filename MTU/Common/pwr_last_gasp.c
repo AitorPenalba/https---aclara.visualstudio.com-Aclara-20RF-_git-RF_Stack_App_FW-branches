@@ -2361,7 +2361,6 @@ static void LptmrEnable( bool bEnableInterrupt )
 #endif
 }
 
-
 /***********************************************************************************************************************
 
    Function name: PWRLG_MacConfigHandle()
@@ -2447,7 +2446,7 @@ static bool powerStable( bool curState )
    } while ( powerGoodCount < PWR_STABLE_MILLISECONDS );
    return ( powerGoodCount != 0 );
 }
-#endif
+
 /***********************************************************************************************************************
 
    Function name: PWRLG_RestLastGaspFlags
