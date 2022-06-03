@@ -226,7 +226,11 @@ static bool mtls_ValidateHeader( const MTLS_Packet_t *msg )
       {
          /* Potentially good header.   */
          /* Need the key. If no DTLS session is established, can't accept MTLS messages.  */
+#if ( USE_DTLS == 1 )  // Only enable when DTLS is enabled
          if ( !DTLS_IsSessionEstablished() )
+#else
+         if ( 1 )
+#endif
          {
             /* Bad Header - no DTLS session established.   */
             mtlsAttribs.mtlsNoSesstionCount++;

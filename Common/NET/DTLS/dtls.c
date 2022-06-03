@@ -4626,7 +4626,7 @@ static void wolfSSL_LogMessage( const int32_t logLevel, const char *const logMes
 }
 
 #endif
-#endif
+//#endif  // Removed this endif to remove the compilation error of DTLS usage when DTLS is turned off. Added at the EOF
 /*!
  **********************************************************************************************************************
 
@@ -4949,4 +4949,4 @@ uint16_t computeCertLength( uint8_t *cert )
 
    return ( uint16_t )min( sizeof( NetWorkRootCA_t ), certLen ); /* return the value that is appropriate. */
 }
-
+#endif
