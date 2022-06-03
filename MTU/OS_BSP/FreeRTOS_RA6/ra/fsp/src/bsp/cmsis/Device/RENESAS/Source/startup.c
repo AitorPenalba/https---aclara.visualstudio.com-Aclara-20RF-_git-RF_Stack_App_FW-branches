@@ -133,20 +133,21 @@ BSP_DONT_REMOVE const exc_ptr_t __Vectors[BSP_CORTEX_VECTOR_TABLE_ENTRIES] BSP_P
 {
     (exc_ptr_t) (&g_main_stack[0] + BSP_CFG_STACK_MAIN_BYTES), /*      Initial Stack Pointer     */
     Reset_Handler,                                             /*      Reset Handler             */
-    HardFault_Handler,                                               /*      NMI Handler               */
+    NMI_Handler,                                               /*      NMI Handler               */
+                                                               /*      TODO NRJ: RA6E1 May change NMI to Hardfault handler if not handled by BSP */
     HardFault_Handler,                                         /*      Hard Fault Handler        */
     HardFault_Handler,                                         /*      MPU Fault Handler         */
-    HardFault_Handler,                                          /*      Bus Fault Handler         */
-    HardFault_Handler,                                        /*      Usage Fault Handler       */
-    HardFault_Handler,                                       /*      Secure Fault Handler      */
+    HardFault_Handler,                                         /*      Bus Fault Handler         */
+    HardFault_Handler,                                         /*      Usage Fault Handler       */
+    HardFault_Handler,                                         /*      Secure Fault Handler      */
     0,                                                         /*      Reserved                  */
     0,                                                         /*      Reserved                  */
     0,                                                         /*      Reserved                  */
-    HardFault_Handler,                                               /*      SVCall Handler            */
-    HardFault_Handler,                                          /*      Debug Monitor Handler     */
+    SVC_Handler,                                               /*      SVCall Handler            */
+    DebugMon_Handler,                                          /*      Debug Monitor Handler     */
     0,                                                         /*      Reserved                  */
-    HardFault_Handler,                                            /*      PendSV Handler            */
-    HardFault_Handler,                                           /*      SysTick Handler           */
+    PendSV_Handler,                                            /*      PendSV Handler            */
+    SysTick_Handler,                                           /*      SysTick Handler           */
 };
 
 /** @} (end addtogroup BSP_MCU) */

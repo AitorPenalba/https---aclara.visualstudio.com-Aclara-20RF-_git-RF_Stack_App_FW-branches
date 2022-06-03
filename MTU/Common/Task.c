@@ -549,7 +549,7 @@ static void expt_frm_dump(void const * ext_frm_ptr)
       "MemManage",
       "BusFault",
       "UsageFault",
-      "Rsvd",
+      "SecureFault",
       "Rsvd",
       "Rsvd",
       "Rsvd",
@@ -582,10 +582,9 @@ static void expt_frm_dump(void const * ext_frm_ptr)
    {
       pOff = (uint16_t)snprintf( pBuf, (int32_t)sizeof( pBuf ), "External interrupt %u occured with no handler to serve it.", excpt_num );
    }
-   for ( i = 0; i < pOff; i++ )
-   {
-      polled_printf( "%s", pBuf );
-   }
+
+   //need Exclusion of rtos to print
+    UART_polled_printf( "%s", pBuf );
 }
 /*lint +esym(818, ext_frm_ptr)   */
 
