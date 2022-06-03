@@ -68,7 +68,7 @@
 #if ( EP == 1 )
 #define MAX_TEMP_LIMIT     ((int32_t)80) /* Maximum Operating Temperature of CPU is 105 Deg C and Radio is 85 Deg C. */
 #define MIN_TEMP_LIMIT     ((int32_t)-40) /* Minimum Operating Temperature of CPU and Radio is -40 Deg C*/
-#define STACK_HYSTERISIS   5 /* Stack enable/disable temperature hysteris */
+#define STACK_HYSTERISIS   5 /* Stack enable/disable temperature hysteresis */
 #endif
 
 #define BSP_IS_GLOBAL_INT_ENABLED()  (bool)(0 == __get_PRIMASK() ? TRUE : FALSE)
@@ -176,7 +176,7 @@ uint32_t MILLISECONDS;
 extern const uint8_t AES_128_KEY[];
 
 /* KTL - 16 byte initialization vector: "mysecretpassword" - This is temporary and will change to external value later
- * (may also be refered as nonce? */
+ * (may also be referred as nonce? */
 extern const uint8_t AES_128_INIT_VECTOR[];
 
 
@@ -268,6 +268,7 @@ extern returnStatus_t UART_init      ( void );
 extern returnStatus_t UART_reset     ( enum_UART_ID UartId );
 extern returnStatus_t WDOG_Init      ( void );
 extern returnStatus_t IO_init        ( void );
+extern returnStatus_t CRC_Shutdown   ( void );
 #endif /* ERROR_CODES_H_ */
 
 
@@ -279,6 +280,12 @@ extern void AES_128_EncryptData ( uint8_t *pDest, const uint8_t *pSrc, uint32_t 
 extern void AES_128_DecryptData ( uint8_t *pDest, const uint8_t *pSrc, uint32_t cnt, aesKey_T const *pAesKey );
 extern void AES_128_UnitTest( void );
 #endif /* ENABLE_AES_CODE */
+
+#if ( MCU_SELECTED == RA6E1 )
+extern fsp_err_t CGC_Stop_Unused_Clocks         ( void );
+extern void      CGC_Switch_SystemClock_to_MOCO ( void );
+/* TODO: RA6: Move AGT function prototypes here */
+#endif
 
 /* FUNCTION DEFINITIONS */
 

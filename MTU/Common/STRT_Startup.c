@@ -196,7 +196,9 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
-   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),
+#if ( DAC_CODE_CONFIG == 1 )
+   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),  /* TODO: RA6E1: Review the order */
+#endif
 #if ENABLE_HMC_TASKS
 #if END_DEVICE_PROGRAMMING_CONFIG == 1
    INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */

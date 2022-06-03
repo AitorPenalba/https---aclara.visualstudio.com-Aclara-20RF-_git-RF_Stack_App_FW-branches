@@ -67,7 +67,6 @@ static OS_EVNT_Obj      SELF_events;      /* Self test Events   */
 static OS_EVNT_Obj *    SELF_notify;      /* Event handler to "notify" when test results are completed.     */
 static uint32_t         event_flags;      /* Event flags returned by self test routine.                     */
 static SELF_TestData_t  SELF_TestData;
-#if (FILE_IO == 1)
 static SELF_file_t      SELF_testFile =
 {
    .ePartition      = ePART_SEARCH_BY_TIMING,
@@ -78,7 +77,6 @@ static SELF_file_t      SELF_testFile =
    .Size            = sizeof(SELF_TestData),
    .UpdateFreq      = DVR_BANKED_MAX_UPDATE_RATE_SEC  /* Updated often enough to force into banked area. */
 }; /*lint !e785 too few initializers.  */
-#endif
 
 // For internal flash checking
 uint8_t flashBuffer[512];
@@ -106,7 +104,6 @@ static uint16_t RunSelfTest( void );
 returnStatus_t SELF_init( void )
 {
    returnStatus_t retVal = eFAILURE;
-#if ( FILE_IO == 1)
    FileStatus_t   fileStatus;
    SELF_file_t    *pFile = &SELF_testFile;
 
@@ -136,12 +133,10 @@ returnStatus_t SELF_init( void )
          }
       }
    }
-#else
-   retVal = eSUCCESS;
-#endif
+
    return(retVal);
 }
-#if 0
+
 /***********************************************************************************************************************
    Function Name: SELF_eventHandle
 
@@ -168,7 +163,7 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 {
    SELF_notify = handle;
 }
-#endif
+
 /***********************************************************************************************************************
    Function Name: SELF_testTask
 
@@ -469,7 +464,7 @@ static uint16_t RunSelfTest()
    return 0;
 #endif
 }
-#if (FILE_IO != 0)
+
 /***********************************************************************************************************************
    Function Name: SELF_GetTestFileHandle
 
@@ -502,7 +497,6 @@ returnStatus_t SELF_UpdateTestResults( void )
    }
    return retVal;
 }
-#endif
 
 /***********************************************************************************************************************
    Function Name: SELF_testInternalFlash
@@ -519,7 +513,7 @@ returnStatus_t SELF_testInternalFlash( void )
 {
    returnStatus_t retVal;
    static PartitionData_t const *pDFWBLInfoPar_;
-   static PartitionData_t const *pDFWAppCode_;
+//   static PartitionData_t const *pDFWAppCode_;
 
    /* Test Internal flash mechanism */
    for (uint32_t index = 0; index < 512; index++)

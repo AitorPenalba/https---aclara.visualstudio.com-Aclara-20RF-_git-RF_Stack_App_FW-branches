@@ -1134,6 +1134,9 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\CGC.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\CRC.c</name>
             </file>
             <file>
@@ -1406,7 +1409,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1968,6 +1971,12 @@
                 <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Common\lpm_app.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\lpm_app.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Common\OR_MR_Handler.c</name>
             </file>
             <file>
@@ -2027,15 +2036,6 @@
         </group>
         <group>
             <name>FSP_Gen</name>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board_init.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board_init.h</name>
-            </file>
             <file>
                 <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\src\hal_entry.c</name>
             </file>

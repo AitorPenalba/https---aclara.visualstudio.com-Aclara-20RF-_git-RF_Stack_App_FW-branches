@@ -39,13 +39,12 @@
 #include "pwr_task.h"
 #include "dfw_interface.h"
 //#include "MIMT_info.h"
-#if 0 // TODO: RA6: Add later
+
 #if ( EP == 1 )
 #include "pwr_last_gasp.h"
 #include "vbat_reg.h"
 #include "time_DST.h"
 #include "crc16_m.h"
-#endif
 #endif
 
 //#include "mode_config.h"
@@ -71,7 +70,7 @@
 #if ( USE_MTLS == 1 )
 #include "mtls.h"
 #endif
-//#include "time_util.h"
+#include "time_util.h"
 #include "partitions.h"
 #if ( DCU == 1 )
 #include "MAINBD_Handler.h"
@@ -92,7 +91,7 @@
 //#include "si446x_api_lib.h"
 //#include "time_sync.h"
 //#include "SELF_test.h"
-//#include "mode_config.h"
+#include "mode_config.h"
 //#include "EVL_event_log.h"
 //#include "ascii.h"
 #if (USE_DTLS==1)
@@ -232,9 +231,6 @@ static PartitionData_t const  *pTestPartition_;    /* Pointer to partition infor
 
 static char                   DbgCommandBuffer[MAX_DBG_COMMAND_CHARS + 1];
 static char                   *argvar[MAX_CMDLINE_ARGS + 1];
-#if ( MCU_SELECTED == RA6E1 )
-static uint16_t         DBGP_numBytes = 0;               /* Number of bytes currently in the command buffer */
-#endif
 //static void PrintECC_error( uint8_t ECCstatus ); //TODO: RA6E1 Bob: temporarily removed
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
@@ -489,7 +485,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "lpstats",      DBG_CommandLine_lpstats,         "Dump Load Profile info. Usage: lptstats [first_block [last_block]]" },
 //#endif
 //#endif
-//   { "mac_time",     DBG_CommandLine_MacTimeCmd,      "Send a 'mac_time set' (DCU) or 'mac_time req' (EP) command" },
+   { "mac_time",     DBG_CommandLine_MacTimeCmd,      "Send a 'mac_time set' (DCU) or 'mac_time req' (EP) command" },
 //   { "mac_tsync",    DBG_CommandLine_TimeSync,        "Set/Get the TimeSync parameters" },
    { "macaddr",      DBG_CommandLine_MacAddr,         "Set/Get the MAC address" },
 //   { "macconfig",    DBG_CommandLine_MacConfig,       "Print the MAC Configuration" },
@@ -654,8 +650,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "syncerror",    DBG_CommandLine_SyncError,       "Set SYNC bit error " },
 //#endif
 //   { "tasksummary",  DBG_CommandLine_TaskSummary,     "print tasks summary" },
-//   { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
-//                   "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
+   { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
+                   "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #if ( DCU == 1 )
 //   { "read_res",     CommandLine_ReadResource,       "Read a resource and value."},
    { "slot",         DBG_CommandLine_getTBslot,        "Get the slot of this TB." },
@@ -3517,110 +3513,113 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
 //   return 0;
 //}
 //#endif
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_time
-//
-//   Purpose: This function will print out the current time or set the time
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_time ( uint32_t argc, char *argv[] )
-//{
-//   if ( 1 == argc ) /* No parameters will read the RTC time and system time */
-//   {
-//      sysTime_dateFormat_t sysTime;
-//      sysTime_dateFormat_t RTC_time;
-//      sysTime_t            sTime;
-//      TIME_STRUCT          mqxTime;
-//      sysTime_t            pupTime;
-//      uint32_t             sysSeconds;
-//      uint32_t             sysFracSecs;
-//      char valid[]         = "";
-//      char invalid[]       = " (Invalid time)";
-//      returnStatus_t       retVal;
-//
-//      // Display MQX time
-//      _time_get( &mqxTime );
-//      TIME_UTIL_ConvertSecondsToSysFormat( mqxTime.SECONDS, mqxTime.MILLISECONDS, &sTime );
-//      ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sysTime );
-//      DBG_logPrintf( 'R', "MQX:   %02u/%02u/%04u %02u:%02u:%02u.%03u",
-//                     sysTime.month, sysTime.day, sysTime.year, sysTime.hour, sysTime.min, sysTime.sec, mqxTime.MILLISECONDS );
-//
-//      // Display RTC time
-//      RTC_GetDateTime ( &RTC_time );
-//      DBG_logPrintf( 'R', "RTC:   %02u/%02u/%04u %02u:%02u:%02u.%03u",
-//                     RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec, RTC_time.msec);
-//
-//      // Display system time
-//      retVal = TIME_UTIL_GetTimeInDateFormat( &sysTime );
-//      TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &sysSeconds, &sysFracSecs);
-//      DBG_logPrintf( 'R', "Sys:   %02u/%02u/%04u %02u:%02u:%02u.%03u%s, combined: %08lX",
-//                     sysTime.month, sysTime.day, sysTime.year, sysTime.hour, sysTime.min, sysTime.sec, sysTime.msec,
-//                     retVal == eSUCCESS ? valid : invalid,
-//                     sysSeconds );
-//#if ( EP == 1 )
-//      // Display local time
-//      ( void )DST_getLocalTime( &sTime );
-//      ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sysTime );
-//      DBG_logPrintf( 'R', "Local: %02u/%02u/%04u %02u:%02u:%02u.%03u%s",
-//                     sysTime.month, sysTime.day, sysTime.year, sysTime.hour, sysTime.min, sysTime.sec, sysTime.msec,
-//                     retVal == eSUCCESS ? valid : invalid );
-//#endif
-//      TIME_SYS_GetPupDateTime( &pupTime );
-//      ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &pupTime, &sysTime );
-//      DBG_logPrintf( 'R', "Pup:   % 5u days %02u:%02u:%02u.%03u",
-//                     pupTime.date, sysTime.hour, sysTime.min, sysTime.sec, sysTime.msec );
-//   }
-//   else if ( 2 == argc )
-//   {
-//      char *endptr;
-//      uint32_t locdateTime;
-//
-//      locdateTime = strtoul( argv[1], &endptr, 0 );
-//
-//      if ( eSUCCESS == TIME_UTIL_SetTimeFromSeconds( locdateTime, 0 ) )
-//      {
-//         DBG_logPrintf( 'R', "%s %d", argv[ 0 ], locdateTime );
-//      }
-//   }
-//   else
-//   {
-//      if ( 7 == argc ) /* Need all six parameters to set the RTC and System time. */
-//      {
-//         sysTime_dateFormat_t rtcTime;
-//         rtcTime.year   = ( uint16_t )( atoi( argv[1] ) + 2000 ); /* Adjust the 2 digit date to 20xx */
-//         rtcTime.month  = ( uint8_t )( atoi( argv[2] ) );
-//         rtcTime.day    = ( uint8_t )( atoi( argv[3] ) );
-//         rtcTime.hour   = ( uint8_t )( atoi( argv[4] ) );
-//         rtcTime.min    = ( uint8_t )( atoi( argv[5] ) );
-//         rtcTime.sec    = ( uint8_t )( atoi( argv[6] ) );
-//         rtcTime.msec   = 0;  /* Not used, but ensure cleared */
-//
-//         if ( eSUCCESS == TIME_UTIL_SetTimeFromDateFormat( &rtcTime ) )
-//         {
-//            DBG_logPrintf( 'R', "RTC and System time set successfully" );
-//         }
-//         else
-//         {
-//            DBG_logPrintf( 'R', "Failed to set system time!" );
-//         }
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read, 6 params to set date/time" );
-//      }
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_time () */
-//
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_time
+
+   Purpose: This function will print out the current time or set the time
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_time ( uint32_t argc, char *argv[] )
+{
+   if ( 1 == argc ) /* No parameters will read the RTC time and system time */
+   {
+      sysTime_dateFormat_t sysTime;
+      sysTime_dateFormat_t RTC_time;
+      sysTime_t            sTime;
+#if ( RTOS_SELECTION == MQX_RTOS )
+      TIME_STRUCT          mqxTime;
+#endif
+      sysTime_t            pupTime;
+      uint32_t             sysSeconds;
+      uint32_t             sysFracSecs;
+      char valid[]         = "";
+      char invalid[]       = " (Invalid time)";
+      returnStatus_t       retVal;
+
+#if ( RTOS_SELECTION == MQX_RTOS )
+      // Display MQX time
+      _time_get( &mqxTime );
+      TIME_UTIL_ConvertSecondsToSysFormat( mqxTime.SECONDS, mqxTime.MILLISECONDS, &sTime );
+      ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sysTime );
+      DBG_logPrintf( 'R', "MQX:   %02u/%02u/%04u %02u:%02u:%02u.%03u",
+                     sysTime.month, sysTime.day, sysTime.year, sysTime.hour, sysTime.min, sysTime.sec, mqxTime.MILLISECONDS );
+#endif
+      // Display RTC time
+      RTC_GetDateTime ( &RTC_time );
+      DBG_logPrintf( 'R', "RTC:   %02u/%02u/%04u %02u:%02u:%02u.%03u",
+                     RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec, RTC_time.msec);
+
+      // Display system time
+      retVal = TIME_UTIL_GetTimeInDateFormat( &sysTime );
+      TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &sysSeconds, &sysFracSecs);
+      DBG_logPrintf( 'R', "Sys:   %02u/%02u/%04u %02u:%02u:%02u.%03u%s, combined: %08lX",
+                     sysTime.month, sysTime.day, sysTime.year, sysTime.hour, sysTime.min, sysTime.sec, sysTime.msec,
+                     retVal == eSUCCESS ? valid : invalid,
+                     sysSeconds );
+#if ( EP == 1 )
+      // Display local time
+      ( void )DST_getLocalTime( &sTime );
+      ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sysTime );
+      DBG_logPrintf( 'R', "Local: %02u/%02u/%04u %02u:%02u:%02u.%03u%s",
+                     sysTime.month, sysTime.day, sysTime.year, sysTime.hour, sysTime.min, sysTime.sec, sysTime.msec,
+                     retVal == eSUCCESS ? valid : invalid );
+#endif
+      TIME_SYS_GetPupDateTime( &pupTime );
+      ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &pupTime, &sysTime );
+      DBG_logPrintf( 'R', "Pup:   % 5u days %02u:%02u:%02u.%03u",
+                     pupTime.date, sysTime.hour, sysTime.min, sysTime.sec, sysTime.msec );
+   }
+   else if ( 2 == argc )
+   {
+      char *endptr;
+      uint32_t locdateTime;
+
+      locdateTime = strtoul( argv[1], &endptr, 0 );
+
+      if ( eSUCCESS == TIME_UTIL_SetTimeFromSeconds( locdateTime, 0 ) )
+      {
+         DBG_logPrintf( 'R', "%s %d", argv[ 0 ], locdateTime );
+      }
+   }
+   else
+   {
+      if ( 7 == argc ) /* Need all six parameters to set the RTC and System time. */
+      {
+         sysTime_dateFormat_t rtcTime;
+         rtcTime.year   = ( uint16_t )( atoi( argv[1] ) + 2000 ); /* Adjust the 2 digit date to 20xx */
+         rtcTime.month  = ( uint8_t )( atoi( argv[2] ) );
+         rtcTime.day    = ( uint8_t )( atoi( argv[3] ) );
+         rtcTime.hour   = ( uint8_t )( atoi( argv[4] ) );
+         rtcTime.min    = ( uint8_t )( atoi( argv[5] ) );
+         rtcTime.sec    = ( uint8_t )( atoi( argv[6] ) );
+         rtcTime.msec   = 0;  /* Not used, but ensure cleared */
+
+         if ( eSUCCESS == TIME_UTIL_SetTimeFromDateFormat( &rtcTime ) )
+         {
+            DBG_logPrintf( 'R', "RTC and System time set successfully" );
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Failed to set system time!" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read, 6 params to set date/time" );
+      }
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_time () */
+
 //#if ( EP == 1 ) && ( TEST_TDMA == 1 )
 ///*******************************************************************************
 //
@@ -3678,6 +3677,7 @@ uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
 
       DBG_logPrintf( 'R', "RTC=%02d/%02d/%04d %02d:%02d:%02d",
                      RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec );
+
    }
    else
    {
@@ -5246,7 +5246,6 @@ uint32_t DBG_CommandLine_HmcDemandCoin ( uint32_t argc, char *argv[] )
 #endif
 #endif
 
-#if ( FILE_IO == 1)
 /*******************************************************************************
 
    Function name: DBG_CommandLine_PrintFiles
@@ -5304,7 +5303,7 @@ uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
 #endif
    return ( 0 );
 }
-#endif // FILE_IO == 1
+
 #if (EP == 1)
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 /*******************************************************************************
@@ -7835,62 +7834,62 @@ uint32_t DBG_CommandLine_InsertMacMsg ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacTimeCmd ( uint32_t argc, char *argv[] )
-//
-//   Purpose: This function is used to send a time_set or time_req command
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:  time set <cr> (DCU)
-//            time req <cr> (EP)
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacTimeCmd ( uint32_t argc, char *argv[] )
-//{
-//   char* option = "mac_time";
-//   if ( argc > 1 )
-//   {
-//      if ( strcasecmp( "set", argv[1] ) == 0 )
-//      {
-//         if( eMAC_TIME_SUCCESS != MAC_TimePush_Request(BROADCAST_MODE, NULL, NULL, 0 ) )
-//         {
-//            INFO_printf( "mac_time set : Not executed or pending" );
-//         }
-//      }
-//      else
-//#if ( EP == 1 )
-//         if ( strcasecmp( "req", argv[1] ) == 0 )
-//         {
-//            if( !MAC_TimeQueryReq() )
-//            {
-//               INFO_printf( "mac_time req : Not executed" );
-//            }
-//         }
-//         else
-//#endif
-//         {
-//            INFO_printf( "mac_time : Invalid option" );
-//         }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Usage:", option );
-//#if ( DCU == 1 )
-//      DBG_logPrintf( 'R', "%s set <cr>", option );
-//#endif
-//#if ( EP == 1 )
-//      DBG_logPrintf( 'R', "%s req <cr>", option );
-//#endif
-//   }
-//   return ( 0 );
-//}
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacTimeCmd ( uint32_t argc, char *argv[] )
+
+   Purpose: This function is used to send a time_set or time_req command
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:  time set <cr> (DCU)
+           time req <cr> (EP)
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacTimeCmd ( uint32_t argc, char *argv[] )
+{
+   char* option = "mac_time";
+   if ( argc > 1 )
+   {
+      if ( strcasecmp( "set", argv[1] ) == 0 )
+      {
+         if( eMAC_TIME_SUCCESS != MAC_TimePush_Request(BROADCAST_MODE, NULL, NULL, 0 ) )
+         {
+            INFO_printf( "mac_time set : Not executed or pending" );
+         }
+      }
+      else
+#if ( EP == 1 )
+         if ( strcasecmp( "req", argv[1] ) == 0 )
+         {
+            if( !MAC_TimeQueryReq() )
+            {
+               INFO_printf( "mac_time req : Not executed" );
+            }
+         }
+         else
+#endif
+         {
+            INFO_printf( "mac_time : Invalid option" );
+         }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Usage:", option );
+#if ( DCU == 1 )
+      DBG_logPrintf( 'R', "%s set <cr>", option );
+#endif
+#if ( EP == 1 )
+      DBG_logPrintf( 'R', "%s req <cr>", option );
+#endif
+   }
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_MacPingCmd ( uint32_t argc, char *argv[] )

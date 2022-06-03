@@ -84,9 +84,7 @@
 /* */
 #define ACLARA_DVR_ABSTRACTION            1
 #if ( ACLARA_DVR_ABSTRACTION != 0 )
-   #define FILE_IO                        1  /* TODO: RA6:  Remove these features */
    #define PARTITION_MANAGER              1 /* 0 = No PARTITION_MANAGER, 1 = Partition Manager */
-   #define TIMER_UTIL                     0
    #define RTC                            1
 #endif
 #define SUPPORT_HEEP                      0 /* TODO: RA6E1: Temporary conditional*/
@@ -100,5 +98,6 @@
 #define MCU_SELECTED                      RA6E1
 // TODO: RA6 [name_Balaji]: Move to appropriate place
 #define DAC_CODE_CONFIG                   1  /* Supports DAC0 for TX Power Control */
+#define LAST_GASP_RECONFIGURE_CLK         0  /* If enabled, the System Clock will be re-configured to use MOCO instead of Main Clock */
 #endif
 

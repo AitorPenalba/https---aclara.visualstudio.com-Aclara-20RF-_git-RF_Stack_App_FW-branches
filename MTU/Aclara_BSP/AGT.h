@@ -53,7 +53,9 @@
 fsp_err_t AGT_LPM_Timer_Init            ( void );
 fsp_err_t AGT_LPM_Timer_Start           ( void );
 fsp_err_t AGT_LPM_Timer_Stop            ( void );
-fsp_err_t AGT_LPM_Timer_Configure   ( uint32_t const period );
+fsp_err_t AGT_LPM_Timer_Configure       ( uint32_t const period );
+void      AGT_LPM_Timer_Wait            ( void );
+
 
 
 #endif /* AGT_H */

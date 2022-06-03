@@ -200,6 +200,7 @@ static void             lg_init_uart( void );
 static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint8_t uMode );
 
 #define EnterVLLS(counter, eUnits, uMode)    EnterLowPowerMode(counter, eUnits, uMode)  // TODO: RA6: DG: Convert the old code or the new?
+#define EnterLLS(counter, eUnits )           EnterLowPowerMode(counter, eUnits, 0)  // TODO: RA6: DG: Convert the old code or the new?
 #endif
 #else
 #define EnterVLLS(counter, eUnits, uMode)  /* TODO: RA6: DG: Remove later */
@@ -716,8 +717,6 @@ void PWRLG_TxFailure( void )
       if ( eSimLGDisabled == EVL_GetLGSimState() )
       {
 #endif
-
-#if ( MCU_SELECTED == NXP_K24 )
          /* The CSMA back-off is long, switch to LLS mode.  */
 #if ( PWRLG_PRINT_ENABLE == 0 )
          EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
@@ -725,7 +724,6 @@ void PWRLG_TxFailure( void )
          /* Subtracting the sleep delay added for print*/
          EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS );
 #endif
-#endif // #if ( MCU_SELECTED == NXP_K24 )  // TODO: RA6: Add SS Support for RA6
 #if ( LAST_GASP_SIMULATION == 1 )
       }
       else
@@ -851,9 +849,9 @@ void PWRLG_Startup( void )
                if( RTC_Valid() )
                {
 #if ( MCU_SELECTED == NXP_K24 )
-                  RESTORATION_TIME_SET ( RTC_TSR );   /* Record RTC seconds at power restored time.   */
+                  RESTORATION_TIME_SET ( RTC_TSR );         /* Record RTC seconds at power restored time.   */
 #elif ( MCU_SELECTED == RA6E1 )
-                  /* TODO: RA6: DG: Update Restoration Time */
+                  RESTORATION_TIME_SET( R_RTC->RSECCNT );   /* Record RTC seconds at power restored time.   */
 #endif
                }
                VBATREG_PWR_QUAL_COUNT++;           /* Increment the power quality count.  */
@@ -914,7 +912,11 @@ void PWRLG_Startup( void )
                {
                   LG_PRNT_INFO( "Wait for LP EXIT\n\r" );
                   PWRLG_STATE_SET( PWRLG_STATE_WAIT_LP_EXIT );
+#if ( MCU_SELECTED == NXP_K24 )
                   EnterVLLS( VBATREG_POWER_RESTORATION_TIMER, LPTMR_MILLISECONDS, 1 );  //DG: Why???
+#elif ( MCU_SELECTED == RA6E1 )
+                  EnterVLLS( VBATREG_POWER_RESTORATION_TIMER, LPTMR_SECONDS, 1 );   /* Forcing the MCU to go through reset after timer expires */
+#endif
                }
             }
          }
@@ -955,9 +957,9 @@ void PWRLG_Startup( void )
                if( RTC_Valid() )
                {
 #if ( MCU_SELECTED == NXP_K24 )
-                  RESTORATION_TIME_SET ( RTC_TSR );   /* Record RTC seconds at power restored time.   */
+                  RESTORATION_TIME_SET ( RTC_TSR );         /* Record RTC seconds at power restored time.   */
 #elif ( MCU_SELECTED == RA6E1 )
-                  /* TODO: RA6: DG: Update Restoration Time */
+                  RESTORATION_TIME_SET( R_RTC->RSECCNT );   /* Record RTC seconds at power restored time.   */
 #endif
                }
                VBATREG_PWR_QUAL_COUNT++;              /* Increment the power quality count.  */
@@ -1011,7 +1013,11 @@ void PWRLG_Startup( void )
                   if ( PWRLG_MESSAGE_NUM() < PWRLG_MESSAGE_COUNT() ) /* Any messages left?   */
                   {
                      PWRLG_STATE_SET( PWRLG_STATE_TRANSMIT );
+#if ( MCU_SELECTED == NXP_K24 )
                      EnterVLLS( ( uint16_t ) 0, LPTMR_MILLISECONDS, 1 );   /* Continue with current time out value.  */
+#elif ( MCU_SELECTED == RA6E1 )
+                     EnterVLLS( ( uint16_t ) 0, LPTMR_SECONDS, 1 );        /* Continue with current time out value.  */
+#endif
                   }
                   else  /* All messages sent, wait for power restored.   */
                   {
@@ -1072,8 +1078,10 @@ void PWRLG_Restoration( uint16_t powerAnomalyCount )
          {
             if( RTC_Valid() )
             {
-#if ( MCU_SELECTED == NXP_K24 ) /* TODO: RA6: DG:  Set restoration time for RA6 */
-               RESTORATION_TIME_SET ( RTC_TSR );                  /* Record RTC seconds at power restored time. */
+#if ( MCU_SELECTED == NXP_K24 )
+               RESTORATION_TIME_SET ( RTC_TSR );       /* Record RTC seconds at power restored time. */
+#elif ( MCU_SELECTED == RA6E1 )
+               RESTORATION_TIME_SET( R_RTC->RSECCNT ); /* Record RTC seconds at power restored time. */
 #endif
             }
             VBATREG_PWR_QUAL_COUNT = powerAnomalyCount + 1;    /* Increment the power quality/anomaly count. */
@@ -1190,12 +1198,15 @@ static void NextSleep( void )
       /* Check to see if power restored during transmission of last gasp message. If so, set timer to very short
          duration so next reset handles this, rather than duplicate all of that logic here. */
       bool brnOut = ( bool )BRN_OUT();
-#if ( MCU_SELECTED == NXP_K24 )  // TODO: RA6E1: DG: Add Support for RA6
+
       if ( !brnOut && powerStable( brnOut ) )
       {
+#if ( MCU_SELECTED == NXP_K24 )
          EnterVLLS( 1, LPTMR_MILLISECONDS, 1 );
-      }
+#elif ( MCU_SELECTED == RA6E1 )
+         EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */
 #endif
+      }
    }
    if ( PWRLG_MESSAGE_NUM() >= PWRLG_MESSAGE_COUNT() )   /* Sent all the messages planned?   */
    {
@@ -1222,12 +1233,16 @@ static void NextSleep( void )
          PWRLG_STATE_SET( PWRLG_STATE_TRANSMIT );  /* Next wakeup should transmit. */
          VBATREG_CURR_TX_ATTEMPT = 0;              /* Reset the Tx attempts for this message */
          EnterVLLS( uCounter, LPTMR_MILLISECONDS, 1 );
+#if ( MCU_SELECTED == RA6E1 ) /* TODO: DG: Review */
+         /* In K24, above line make the MCU go through a reset, where as for RA6, we need to force that by using Deep SW Standby Mode */
+         EnterVLLS( 0, LPTMR_SECONDS, 1 );  // TODO: RA6E1: Verify
+#endif
       }
    }
    /* At this point, the initial outage declaration delay has just been met. Calling routine sets outage declared flag
       and computes time to sleep before first transmission. */
 }
-#if 1 //( MCU_SELECTED == NXP_K24 )
+#if 1
 /***********************************************************************************************************************
 
    Function name: PWRLG_Begin
@@ -1306,6 +1321,10 @@ void PWRLG_Begin( uint16_t anomalyCount )
    DBG_LW_printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
                   uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
    OS_TASK_Sleep( 10 );    // let print out finish
+
+#if ( ( MCU_SELECTED == RA6E1 ) && ( PWRLG_PRINT_ENABLE == 0 ) && ( LAST_GASP_RECONFIGURE_CLK == 1 ) )
+   CGC_Switch_SystemClock_to_MOCO();  /* TODO: RA6E1: DG: Revisit the ()call order */
+#endif
    PWRLG_FLAGS().byte = 0;
    HardwareShutdown();
 
@@ -2193,6 +2212,8 @@ static void EnterLLS( uint16_t uCounter, PWRLG_LPTMR_Units eUnits )
 #endif
 
 }
+#endif // #if ( MCU_SELECTED == NXP_K24 )
+
 
 /***********************************************************************************************************************
 
@@ -2214,9 +2235,14 @@ static void EnterLLS( uint16_t uCounter, PWRLG_LPTMR_Units eUnits )
             This code is called from mqx_main, before the OS is running. So, in that case, no OS dependent routines may
             be used ( e.g., DBG_logPrintf, OS_TASK_sleep, etc. )
 
+            In RA6E1,
+               - RTC Calendar Alarm is used if the eUnits is LPTMR_SECONDS, AGT alarm is used if the eUnits is LPTMR_MILLISECONDS
+               - LPTMR_MODE_PROGRAM_ONLY only supported if the eUnits in LPTMR_MILLISECONDS i.e. using the AGT.
+
  **********************************************************************************************************************/
 static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    // Select RTC 32.768kHz oscillator as source for LPTMR.
    SIM_SOPT1 = ( SIM_SOPT1 & ~SIM_SOPT1_OSC32KSEL_MASK ) | SIM_SOPT1_OSC32KSEL( 2 );
 
@@ -2225,30 +2251,51 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
    /* Setup the Low Power Timer (LPTMR)
       Clear Timer Compare Flag and disable LPTMR for programming. */
    LPTMR0_CSR = LPTMR_CSR_TCF_MASK;
-
+#endif
    if ( uCounter != 0 ) /* If 0 time requested, resume with existing settings.   */
    {
       if ( LPTMR_SECONDS == eUnits )
       {
+#if ( MCU_SELECTED == NXP_K24 )
          /* Select ERCLK32K and prescale 32K for one second per tick timer. Prescaler is 2^(n+1).
             To achieve 32768, n = 14. LPTMR_PSR_PCS( 2 ) selects the external 32KHz oscillator as the source. */
          LPTMR0_PSR = LPTMR_PSR_PRESCALE( 14 ) | LPTMR_PSR_PCS( 2u );
+#elif ( MCU_SELECTED == RA6E1 )
+         RTC_ConfigureRTCCalendarAlarm( uCounter );
+#endif
       }
+#if ( MCU_SELECTED == NXP_K24 )
       else
+#elif ( MCU_SELECTED == RA6E1 )
+      else if( LPTMR_MILLISECONDS == eUnits )
+#endif
       {
+#if ( MCU_SELECTED == NXP_K24 )
          /* Select ERCLK32K and prescale 32 for millisecond timer.
             Again, prescaler = 2^(n+1), so for divide by 32, n = 4. Note, this results in 1024Hz counter. */
          LPTMR0_PSR = LPTMR_PSR_PRESCALE( 4u ) | LPTMR_PSR_PCS( 2u );
+#elif ( MCU_SELECTED == RA6E1 )
+         AGT_LPM_Timer_Configure( uCounter );
+#endif
       }
-
+#if ( MCU_SELECTED == RA6E1 )
+      else // LPTMR_SLEEP_FOREVER
+      {
+         /* No need to set the timer */
+         // TODO: RA6: Review: 1. Disable RTC ALARM ? OR Set Timer to max value? OR Reconfigure Deep SW Standby?
+      }
+#endif
+#if ( MCU_SELECTED == NXP_K24 )
       // Set the time out value.
       LPTMR0_CMR = uCounter;
+#endif
    }
+#if ( MCU_SELECTED == NXP_K24 )
    else  if ( LPTMR0_CMR == 0 )  /* Make sure that there is a non-zero value in the compare register! */
    {
       LPTMR0_CMR = 1;
    }
-
+#endif
    if ( LPTMR_MODE_PROGRAM_ONLY != eMode )
    {
       if ( LPTMR_MODE_ENBLE_INT == eMode )
@@ -2263,6 +2310,7 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
 
          if ( LPTMR_MODE_WAIT == eMode )
          {
+#if ( MCU_SELECTED == NXP_K24 )
             while ( 0 == ( LPTMR0_CSR & LPTMR_CSR_TCF_MASK ) ) /* Wait for Timer Compare Flag - time out */
             {
 #if ( DEBUG_PWRLG != 0 )
@@ -2272,8 +2320,10 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
                __asm( "cpsie i" );
 #endif
             }
-
             LPTMR0_CSR = LPTMR_CSR_TCF_MASK;   /* Disable the LP timer.   */
+#elif ( MCU_SELECTED == RA6E1 )
+            AGT_LPM_Timer_Wait();
+#endif // #if ( MCU_SELECTED == NXP_K24 )
          }
       }
    }
@@ -2297,6 +2347,7 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
  **********************************************************************************************************************/
 static void LptmrEnable( bool bEnableInterrupt )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    if ( bEnableInterrupt )
    {
       // Enable the LPTMR and the LPTMR interrupt.
@@ -2307,8 +2358,12 @@ static void LptmrEnable( bool bEnableInterrupt )
       // Enable the LPTMR.
       LPTMR0_CSR = LPTMR_CSR_TCF_MASK | LPTMR_CSR_TEN_MASK;
    }
+#elif ( MCU_SELECTED == RA6E1 )
+   ( void )bEnableInterrupt;  /* Not used */
+   ( void )AGT_LPM_Timer_Start();
+#endif
 }
-#endif // #if ( MCU_SELECTED == NXP_K24 )
+
 
 /***********************************************************************************************************************
 
@@ -2329,7 +2384,6 @@ mac_config_t * PWRLG_MacConfigHandle( void )
 {
    return( &VBATREG_RFSYS_BASE_PTR->mac_config );
 }
-
 
 #if 0 // DG: Not used
 /***********************************************************************************************************************
@@ -2360,7 +2414,6 @@ uint32_t PWRLG_RandomRange( uint32_t uLow, uint32_t uHigh )
 }
 #endif
 
-#if ( MCU_SELECTED == NXP_K24 )  /* TODO: RA6E1: Add support for RA6 */
 /***********************************************************************************************************************
 
    Function name: powerStable
@@ -2397,7 +2450,7 @@ static bool powerStable( bool curState )
    } while ( powerGoodCount < PWR_STABLE_MILLISECONDS );
    return ( powerGoodCount != 0 );
 }
-#endif
+
 
 #if ( PWRLG_PRINT_ENABLE != 0 )
 /***********************************************************************************************************************
@@ -2616,6 +2669,7 @@ uint8_t PWRLG_GetSleepCancelSource( void )
 
 }
 
+#if 0 // Remove
 /***********************************************************************************************************************
 
    Function name: LptmrStart
@@ -2636,36 +2690,53 @@ uint8_t PWRLG_GetSleepCancelSource( void )
             This code is called from mqx_main, before the OS is running. So, in that case, no OS dependent routines may
             be used ( e.g., DBG_logPrintf, OS_TASK_sleep, etc. )
 
+            In RA6E1, LPTMR_MODE_PROGRAM_ONLY only supported if the eUnits in LPTMR_MILLISECONDS i.e. using the AGT.
+
  **********************************************************************************************************************/
 static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode )
 {
    /* Note: In RA6E1, RTC Alarm is used for LPTMR_SECONDS and Deep Software Standby Mode
            In RA6E1, AGT Alarm is used for LPTMR_MILLISECONDS and Software Standby Mode */
-   (void)eMode; /* Not used for this function */
 
-   switch( eUnits )
+   if ( uCounter != 0 ) /* If 0 time requested, resume with existing settings.   */
    {
-      case LPTMR_SECONDS:
+      switch( eUnits )
       {
-         RTC_ConfigureRTCCalendarAlarm(uCounter);
-         break;
-      }
-      case LPTMR_MILLISECONDS:
-      {
-         AGT_LPM_Timer_Configure(uCounter);
-         break;
-      }
-      case LPTMR_SLEEP_FOREVER:
-      {
-         /* No need to set the timer */
-         // TODO: RA6: Review: 1. Disable RTC ALARM ? OR Set Timer to max value? OR Reconfigure Deep SW Standby?
-         break;
-      }
-      default:
-      {
-         break;
+         case LPTMR_SECONDS:
+         {
+            RTC_ConfigureRTCCalendarAlarm(uCounter);
+            break;
+         }
+         case LPTMR_MILLISECONDS:
+         {
+            AGT_LPM_Timer_Configure(uCounter);
+            break;
+         }
+         case LPTMR_SLEEP_FOREVER:
+         default:
+         {
+            /* No need to set the timer */
+            // TODO: RA6: Review: 1. Disable RTC ALARM ? OR Set Timer to max value? OR Reconfigure Deep SW Standby?
+            break;
+         }
       }
    }
+   else
+   {
+      /* TODO: RA6: DG: Do we need to support this case */
+   }
+   if ( LPTMR_MODE_PROGRAM_ONLY != eMode )
+   {
+      LptmrEnable( ( bool )true );
+
+      if ( LPTMR_MODE_WAIT == eMode )
+      {
+         AGT_LPM_Timer_Wait();
+      }
+
+   }
 }
+
+#endif
 
 #endif // #if ( MCU_SELECTED == RA6E1 )

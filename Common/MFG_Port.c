@@ -189,6 +189,7 @@
 #define MFG_NUM_MSGQ_ITEMS 0
 #endif
 
+#if 0 // TODO: RA6E1: Review this section of the code
 /* Temporary definition of MFG_logPrintf()   */
 // TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if (USE_DTLS == 1)
@@ -213,6 +214,7 @@
 //#define MFG_logPrintf MFG_printf
 //#define MFG_printf (void)DBG_printfNoCr
 #endif
+#endif // #if 0
 // TODO: RA6 [name_Balaji]:Check for _mqx_int once integrated
 #define MFG_logPrintf MFG_printf
 #define MFG_printf(fmt, args...) \
@@ -355,8 +357,8 @@ static void MacAttrSetGet(uint32_t argc, char *argv[], MAC_ATTRIBUTES_e eAttribu
 static void PhyAttrSetGet(uint32_t argc, char *argv[], PHY_ATTRIBUTES_e eAttribute, ValueType_e valueType);
 
 #if ( EP == 1 )
-static void MFGP_watchDogResetCount( uint32_t argc, char *argv[] );
-static void MFG_PhyDemodulator( uint32_t argc, char *argv[] );
+//static void MFGP_watchDogResetCount( uint32_t argc, char *argv[] );
+//static void MFG_PhyDemodulator( uint32_t argc, char *argv[] );
 #endif
 
 static void MFGP_macReliabilityHighCount     ( uint32_t argc, char *argv[] );
@@ -473,16 +475,16 @@ static void MFGP_fngVswrShutdownSet          ( uint32_t argc, char *argv[] );
 static void MFG_TxThrottleDisable            ( uint32_t argc, char *argv[] );
 #endif
 
-static void MFG_TimePrecision                ( uint32_t argc, char *argv[] );
-static void MFG_TimeDefaultAccuracy          ( uint32_t argc, char *argv[] );
-static void MFG_TimeQueryResponseMode        ( uint32_t argc, char *argv[] );
+//static void MFG_TimePrecision                ( uint32_t argc, char *argv[] );
+//static void MFG_TimeDefaultAccuracy          ( uint32_t argc, char *argv[] );
+//static void MFG_TimeQueryResponseMode        ( uint32_t argc, char *argv[] );
 
 #if ( EP == 1 )
-static void MFG_TimeSetStart                 ( uint32_t argc, char *argv[] );
-static void MFG_TimeSetMaxOffset             ( uint32_t argc, char *argv[] );
-static void MFG_TimeSetPeriod                ( uint32_t argc, char *argv[] );
-static void MFG_TimeSource                   ( uint32_t argc, char *argv[] );
-static void MFGP_timeSigOffset               ( uint32_t argc, char *argv[] );
+//static void MFG_TimeSetStart                 ( uint32_t argc, char *argv[] );
+//static void MFG_TimeSetMaxOffset             ( uint32_t argc, char *argv[] );
+//static void MFG_TimeSetPeriod                ( uint32_t argc, char *argv[] );
+//static void MFG_TimeSource                   ( uint32_t argc, char *argv[] );
+//static void MFGP_timeSigOffset               ( uint32_t argc, char *argv[] );
 static void MFGP_powerQuality                ( uint32_t argc, char *argv[] );
 #endif
 
@@ -513,26 +515,27 @@ static void MFGP_MacChannelSetsSTAR          ( uint32_t argc, char *argv[] );
 #endif
 
 static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
-static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsMfgSubject2             ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsNetworkHESubject        ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsNetworkMSSubject        ( uint32_t argc, char *argv[] );
-static void MFGP_dtlsNetworkRootCA           ( uint32_t argc, char *argv[] );
-static void MFGP_engBuEnabled                ( uint32_t argc, char *argv[] );
+// TODO: RA6 [name_Balaji]: Support functions below for RA6E1
+//static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsMfgSubject2             ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsNetworkHESubject        ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsNetworkMSSubject        ( uint32_t argc, char *argv[] );
+//static void MFGP_dtlsNetworkRootCA           ( uint32_t argc, char *argv[] );
+//static void MFGP_engBuEnabled                ( uint32_t argc, char *argv[] );
 static void MFGP_engData1                    ( uint32_t argc, char *argv[] );
-static void MFGP_engBuTrafficClass           ( uint32_t argc, char *argv[] );
+//static void MFGP_engBuTrafficClass           ( uint32_t argc, char *argv[] );
 #if ( EP == 1 )
 static void MFGP_engData2                    ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_eventThreshold              ( uint32_t argc, char *argv[] );
-static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
-static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
-static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
-static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
-static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
-static void MFGP_nvtest                      ( uint32_t argc, char *argv[] );
+//static void MFGP_eventThreshold              ( uint32_t argc, char *argv[] );
+//static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
+//static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
+//static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
+//static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
+//static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
+//static void MFGP_nvtest                      ( uint32_t argc, char *argv[] );
 
 static void MFGP_ProcessCommand( char *command, uint16_t numBytes );
 
@@ -540,23 +543,23 @@ static void MFGP_shipMode                    ( uint32_t argc, char *argv[] );
 static void MFGP_SpuriousResetCount          ( uint32_t argc, char *argv[] );
 static void MFGP_stSecurityFailCount         ( uint32_t argc, char *argv[] );
 static void MFGP_stSecurityFailTest          ( uint32_t argc, char *argv[] );
-static void MFGP_FlashSecurity               ( uint32_t argc, char *argv[] );
+//static void MFGP_FlashSecurity               ( uint32_t argc, char *argv[] );
 static void MFGP_virgin                      ( uint32_t argc, char *argv[] );
 static void MFGP_virginDelay                 ( uint32_t argc, char *argv[] );
-static void MFGP_opportunisticAlarmIndexId   ( uint32_t argc, char *argv[] );
-static void MFGP_realTimeAlarmIndexId        ( uint32_t argc, char *argv[] );
-static void MFGP_temperature                 ( uint32_t argc, char *argv[] );
+//static void MFGP_opportunisticAlarmIndexId   ( uint32_t argc, char *argv[] );
+//static void MFGP_realTimeAlarmIndexId        ( uint32_t argc, char *argv[] );
+//static void MFGP_temperature                 ( uint32_t argc, char *argv[] );
 #if ( EP == 1 )
-static void MFGP_epMaxTemperature            ( uint32_t argc, char *argv[] );
-static void MFGP_epMinTemperature            ( uint32_t argc, char *argv[] );
-static void MFGP_EpTempHysteresis            ( uint32_t argc, char *argv[] );
-static void MFGP_HighTempThreshold           ( uint32_t argc, char *argv[] );
-static void MFGP_EpTempMinThreshold          ( uint32_t argc, char *argv[] );
+//static void MFGP_epMaxTemperature            ( uint32_t argc, char *argv[] );
+//static void MFGP_epMinTemperature            ( uint32_t argc, char *argv[] );
+//static void MFGP_EpTempHysteresis            ( uint32_t argc, char *argv[] );
+//static void MFGP_HighTempThreshold           ( uint32_t argc, char *argv[] );
+//static void MFGP_EpTempMinThreshold          ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_installationDateTime        ( uint32_t argc, char *argv[] );
-static void MFGP_getRealTimeAlarm            ( uint32_t argc, char *argv[] );
-static void MFGP_timeLastUpdated             ( uint32_t argc, char *argv[] );
-static void MFGP_timeState                   ( uint32_t argc, char *argv[] );
+//static void MFGP_installationDateTime        ( uint32_t argc, char *argv[] );
+//static void MFGP_getRealTimeAlarm            ( uint32_t argc, char *argv[] );
+//static void MFGP_timeLastUpdated             ( uint32_t argc, char *argv[] );
+//static void MFGP_timeState                   ( uint32_t argc, char *argv[] );
 
 #if (EP == 1)
 #if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
@@ -564,36 +567,36 @@ static void MFGP_dfwCompatibilityTestStatus  ( uint32_t argc, char *argv[] );
 static void MFGP_dfwProgramScriptStatus      ( uint32_t argc, char *argv[] );
 static void MFGP_dfwAuditTestStatus          ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_timeZoneDSTHash             ( uint32_t argc, char *argv[] );
-static void MFGP_timeZoneOffset              ( uint32_t argc, char *argv[] );
-static void MFGP_dfwDupDiscardPacketQty      ( uint32_t argc, char *argv[] );
-static void MFGP_dstEnabled                  ( uint32_t argc, char *argv[] );
-static void MFGP_dstEndRule                  ( uint32_t argc, char *argv[] );
+//static void MFGP_timeZoneDSTHash             ( uint32_t argc, char *argv[] );
+//static void MFGP_timeZoneOffset              ( uint32_t argc, char *argv[] );
+//static void MFGP_dfwDupDiscardPacketQty      ( uint32_t argc, char *argv[] );
+//static void MFGP_dstEnabled                  ( uint32_t argc, char *argv[] );
+//static void MFGP_dstEndRule                  ( uint32_t argc, char *argv[] );
 static void MFGP_dstOffset                   ( uint32_t argc, char *argv[] );
-static void MFGP_dstStartRule                ( uint32_t argc, char *argv[] );
+//static void MFGP_dstStartRule                ( uint32_t argc, char *argv[] );
 #if ( SAMPLE_METER_TEMPERATURE == 1 )
 static void MFGP_edTemperatureHystersis      ( uint32_t argc, char *argv[] );
 static void MFGP_edTempSampleRate            ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_dateTimeLostCount           ( uint32_t argc, char *argv[] );
-static void MFGP_timeRequestMaxTimeout       ( uint32_t argc, char *argv[] );
-static void MFGP_initialRegistrationTimemout ( uint32_t argc, char *argv[] );
-static void MFGP_minRegistrationTimemout     ( uint32_t argc, char *argv[] );
-static void MFGP_maxRegistrationTimemout     ( uint32_t argc, char *argv[] );
-static void MFGP_stP0LoopbackFailCount       ( uint32_t argc, char *argv[] );
-static void MFGP_stP0LoopbackFailTest        ( uint32_t argc, char *argv[] );
+//static void MFGP_dateTimeLostCount           ( uint32_t argc, char *argv[] );
+//static void MFGP_timeRequestMaxTimeout       ( uint32_t argc, char *argv[] );
+//static void MFGP_initialRegistrationTimemout ( uint32_t argc, char *argv[] );
+//static void MFGP_minRegistrationTimemout     ( uint32_t argc, char *argv[] );
+//static void MFGP_maxRegistrationTimemout     ( uint32_t argc, char *argv[] );
+//static void MFGP_stP0LoopbackFailCount       ( uint32_t argc, char *argv[] );
+//static void MFGP_stP0LoopbackFailTest        ( uint32_t argc, char *argv[] );
 static void MFGP_quietMode                   ( uint32_t argc, char *argv[] );
 static void MFGP_rfTestMode                  ( uint32_t argc, char *argv[] );
-static void MFGP_newRegistrationRequired     ( uint32_t argc, char *argv[] );
-static void MFGP_smLogTimeDiversity          ( uint32_t argc, char *argv[] );
-static void MFGP_timeAcceptanceDelay         ( uint32_t argc, char *argv[] );
+//static void MFGP_newRegistrationRequired     ( uint32_t argc, char *argv[] );
+//static void MFGP_smLogTimeDiversity          ( uint32_t argc, char *argv[] );
+//static void MFGP_timeAcceptanceDelay         ( uint32_t argc, char *argv[] );
 #if ( ENABLE_HMC_TASKS == 1 )
-static void MFG_bulkQuantity                 ( uint32_t argc, char *argv[] );
+//static void MFG_bulkQuantity                 ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_outageDeclarationDelay      ( uint32_t argc, char *argv[] );
-static void MFGP_restorationDelay            ( uint32_t argc, char *argv[] );
+//static void MFGP_outageDeclarationDelay      ( uint32_t argc, char *argv[] );
+//static void MFGP_restorationDelay            ( uint32_t argc, char *argv[] );
 static void MFGP_powerQualityEventDuration   ( uint32_t argc, char *argv[] );
-static void MFGP_lastGaspMaxNumAttempts      ( uint32_t argc, char *argv[] );
+//static void MFGP_lastGaspMaxNumAttempts      ( uint32_t argc, char *argv[] );
 #if ( LAST_GASP_SIMULATION == 1 ) && ( EP == 1 )
 static void MFGP_simulateLastGaspStart       ( uint32_t argc, char *argv[] );
 static void MFGP_simulateLastGaspDuration    ( uint32_t argc, char *argv[] );
@@ -603,23 +606,23 @@ static void MFGP_simulateLastGaspStatCcaAttempts( uint32_t argc, char *argv[] );
 static void MFGP_simulateLastGaspStatPPersistAttempts( uint32_t argc, char *argv[] );
 static void MFGP_simulateLastGaspStatMsgsSent( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_edInfo                      ( uint32_t argc, char *argv[] );
+//static void MFGP_edInfo                      ( uint32_t argc, char *argv[] );
 static void MFGP_edFwVersion                 ( uint32_t argc, char *argv[] );
-static void MFGP_invalidAddressModeCount     ( uint32_t argc, char *argv[] );
+//static void MFGP_invalidAddressModeCount     ( uint32_t argc, char *argv[] );
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 static void MFG_logoff                       ( uint32_t argc, char *argv[] );
 static void OptoPortTimerReset ( void );
 #endif
 #if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-static void MFGP_edHwVersion                 ( uint32_t argc, char *argv[] );
-static void MFGP_edModel                     ( uint32_t argc, char *argv[] );
+//static void MFGP_edHwVersion                 ( uint32_t argc, char *argv[] );
+//static void MFGP_edModel                     ( uint32_t argc, char *argv[] );
 #endif
 #if ( ANSI_STANDARD_TABLES == 1 )
-static void MFGP_AnsiTblOID                  ( uint32_t argc, char *argv[] );
-static void MFGP_edManufacturer              ( uint32_t argc, char *argv[] );
-static void MFGP_edProgrammedDateTime        ( uint32_t argc, char *argv[] );
-static void MFGP_edProgramId                 ( uint32_t argc, char *argv[] );
-static void MFGP_edProgrammerName            ( uint32_t argc, char *argv[] );
+//static void MFGP_AnsiTblOID                  ( uint32_t argc, char *argv[] );
+//static void MFGP_edManufacturer              ( uint32_t argc, char *argv[] );
+//static void MFGP_edProgrammedDateTime        ( uint32_t argc, char *argv[] );
+//static void MFGP_edProgramId                 ( uint32_t argc, char *argv[] );
+//static void MFGP_edProgrammerName            ( uint32_t argc, char *argv[] );
 #elif ( ACLARA_DA == 1 )
 static void MFGP_edManufacturer              ( uint32_t argc, char *argv[] );
 #endif
@@ -628,11 +631,11 @@ static void MFGP_meterCommunicationLockoutCount( uint32_t argc, char *argv[] );
 #if ( LP_IN_METER == 0 )
 static void MFGP_lpBuChannel                 ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_lpBuDataRedundancy          ( uint32_t argc, char *argv[] );
-static void MFGP_lpBuMaxTimeDiversity        ( uint32_t argc, char *argv[] );
-static void MFGP_lpBuSchedule                ( uint32_t argc, char *argv[] );
-static void MFGP_lpBuTrafficClass            ( uint32_t argc, char *argv[] );
-static void MFGP_orReadList                  ( uint32_t argc, char *argv[] );
+//static void MFGP_lpBuDataRedundancy          ( uint32_t argc, char *argv[] );
+//static void MFGP_lpBuMaxTimeDiversity        ( uint32_t argc, char *argv[] );
+//static void MFGP_lpBuSchedule                ( uint32_t argc, char *argv[] );
+//static void MFGP_lpBuTrafficClass            ( uint32_t argc, char *argv[] );
+//static void MFGP_orReadList                  ( uint32_t argc, char *argv[] );
 static void MFG_meterPassword                ( uint32_t argc, char *argv[] );
 static void MFGP_passwordPort0Master         ( uint32_t argc, char *argv[] );
 static void MFGP_lpBuEnabled                 ( uint32_t argc, char *argv[] );
@@ -687,7 +690,7 @@ static void MFGP_ConfigTest                  ( uint32_t argc, char *argv[] );
 static void MFGP_ConfigUpdate                ( uint32_t argc, char *argv[] );
 #endif
 
-static void MFGP_NwPassActTimeout            ( uint32_t argc, char *argv[] );
+//static void MFGP_NwPassActTimeout            ( uint32_t argc, char *argv[] );
 static void MFGP_NwActiveActTimeout          ( uint32_t argc, char *argv[] );
 
 #endif   //#if ( EP == 1 )
@@ -704,7 +707,7 @@ static void MFGP_dtlsServerCertificateSN     ( uint32_t argc, char *argv[] );
 static void MFGP_mtlsAuthenticationWindow    ( uint32_t argc, char *argv[] );
 static void MFGP_mtlsNetworkTimeVariation    ( uint32_t argc, char *argv[] );
 #endif
-static void MFGP_macRSSI                     ( uint32_t argc, char *argv[] );
+//static void MFGP_macRSSI                     ( uint32_t argc, char *argv[] );
 
 #if (VSWR_MEASUREMENT == 1)
 extern float cachedVSWR;
@@ -756,7 +759,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
 //   {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
 //   {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
-//   {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
+   {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
 //#if ( EP == 1 )
 //   {  "engData2",                   MFGP_engData2,                   "Get the engData2 stats" },
 //   {  "epMaxTemperature",           MFGP_epMaxTemperature,           "Get/Set EP Max Temperature" },
@@ -875,31 +878,31 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //#if ( EP == 1 )
 //   {  "phyDemodulator",             MFG_PhyDemodulator,              "Get/Set the demodulator used by the each receiver" },
 //#endif
-//   {  "phyFrontEndGain",            MFG_PhyFrontEndGain,             "Get/Set the front end gain (half dBm steps)" },
-//   {  "phyMaxTxPayload",            MFG_PhyMaxTxPayload,             "Get/Set the maximum transmitable PHY payload size" },
-//   {  "phyNoiseEstimate",           MFG_PhyNoiseEstimate,            "Get the PHY noise for each channel" },
-//   {  "phyNoiseEstimateRate",       MFG_PhyNoiseEstimateRate,        "Get/Set the PHY noise estimate rate" },
-//   {  "phyNumChannels",             MFG_PhyNumchannels,              "Get the number of channels programmed into and usable by the PHY" },
-//   {  "phyRcvrCount",               MFG_PhyRcvrCount,                "Get the number receivers" },
-//   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
-//   {  "phyRxDetection",             MFG_PhyRxDetection,              "Get/Set the detection configuration" },
-//   {  "phyRxFraming",               MFG_PhyRxFraming,                "Get/Set the framing configuration" },
-//   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
-//   {  "phyRxMode",                  MFG_PhyRxMode,                   "Get/Set the PHY mode configuration" },
-//   {  "phyThermalControlEnable",    MFG_PhyThermalControlEnable,     "Get/Set PHY thermal control feature" },
-//   {  "phyThermalProtectionEnable", MFG_PhyThermalProtectionEnable,  "Get/Set PHY thermal protection feature" },
-//   {  "phyThermalProtectionCount",  MFG_PhyThermalProtectionCount,   "Get The number of times a peripheral temperature exceeding a given limit."},
-//   {  "phyThermalProtectionEngaged",MFG_PhyThermalProtectionEngaged, "Get if a PHY peripheral has exceeded an allowed temperature limit"},
-//   {  "phyTxChannels",              MFG_PhyTxChannels,               "Get/Set radio Transmitter channels" },
-//   {  "phyTxFrequencies",           MFG_PhyTxFrequencies,            "Get/Set radio Transmitter frequencies" },
-//   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
-//   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
-//   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
-//   {  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
-//   {  "phyFailedHeaderDecodeCount", MFG_PhyFailedHeaderDecodeCount,  "Get the number of received PHY frame headers that failed FEC decoding"},
-//   {  "phySyncDetectCount",         MFG_PhySyncDetectCount,          "Get the number of times a valid sync word was detected on each reciever"},
+   {  "phyFrontEndGain",            MFG_PhyFrontEndGain,             "Get/Set the front end gain (half dBm steps)" },
+   {  "phyMaxTxPayload",            MFG_PhyMaxTxPayload,             "Get/Set the maximum transmitable PHY payload size" },
+   {  "phyNoiseEstimate",           MFG_PhyNoiseEstimate,            "Get the PHY noise for each channel" },
+   {  "phyNoiseEstimateRate",       MFG_PhyNoiseEstimateRate,        "Get/Set the PHY noise estimate rate" },
+   {  "phyNumChannels",             MFG_PhyNumchannels,              "Get the number of channels programmed into and usable by the PHY" },
+   {  "phyRcvrCount",               MFG_PhyRcvrCount,                "Get the number receivers" },
+   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
+   {  "phyRxDetection",             MFG_PhyRxDetection,              "Get/Set the detection configuration" },
+   {  "phyRxFraming",               MFG_PhyRxFraming,                "Get/Set the framing configuration" },
+   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
+   {  "phyRxMode",                  MFG_PhyRxMode,                   "Get/Set the PHY mode configuration" },
+   {  "phyThermalControlEnable",    MFG_PhyThermalControlEnable,     "Get/Set PHY thermal control feature" },
+   {  "phyThermalProtectionEnable", MFG_PhyThermalProtectionEnable,  "Get/Set PHY thermal protection feature" },
+   {  "phyThermalProtectionCount",  MFG_PhyThermalProtectionCount,   "Get The number of times a peripheral temperature exceeding a given limit."},
+   {  "phyThermalProtectionEngaged",MFG_PhyThermalProtectionEngaged, "Get if a PHY peripheral has exceeded an allowed temperature limit"},
+   {  "phyTxChannels",              MFG_PhyTxChannels,               "Get/Set radio Transmitter channels" },
+   {  "phyTxFrequencies",           MFG_PhyTxFrequencies,            "Get/Set radio Transmitter frequencies" },
+   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
+   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
+   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
+   {  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
+   {  "phyFailedHeaderDecodeCount", MFG_PhyFailedHeaderDecodeCount,  "Get the number of received PHY frame headers that failed FEC decoding"},
+   {  "phySyncDetectCount",         MFG_PhySyncDetectCount,          "Get the number of times a valid sync word was detected on each reciever"},
 //#if ( EP == 1 )
-//   {  "powerQuality",               MFGP_powerQuality,               "Get power quality counter reading"},
+   {  "powerQuality",               MFGP_powerQuality,               "Get power quality counter reading"},
 //#endif
 //#if (VSWR_MEASUREMENT == 1)
 //   {  "vswr",                       MFGP_Vswr,                       "Get last VSWR reading." },
@@ -960,9 +963,9 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "demandResetLockoutPeriod",   MFGP_demandResetLockoutPeriod,   "Get/Set the demand reset lockout period" },
 //#endif // ( ENABLE_DEMAND_TASKS == 1 )
 //#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
-//   {  "dfwAuditTestStatus",         MFGP_dfwAuditTestStatus,         "Get the dfwAuditTestStatus parameter value"},
-//   {  "dfwCompatibilityTestStatus", MFGP_dfwCompatibilityTestStatus, "Get the dfwCompatibilityTestStatus parameter value"},
-//   {  "dfwProgramScriptStatus",     MFGP_dfwProgramScriptStatus,     "Get the dfwProgramScriptStatus parameter value"},
+   {  "dfwAuditTestStatus",         MFGP_dfwAuditTestStatus,         "Get the dfwAuditTestStatus parameter value"},
+   {  "dfwCompatibilityTestStatus", MFGP_dfwCompatibilityTestStatus, "Get the dfwCompatibilityTestStatus parameter value"},
+   {  "dfwProgramScriptStatus",     MFGP_dfwProgramScriptStatus,     "Get the dfwProgramScriptStatus parameter value"},
 //#endif  // endif ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
 //   {  "dfwApplyConfirmTimeDiversity", MFGP_dfwApplyConfirmTimeDiversity, "xxx" },
 //   {  "dfwDownloadConfirmTimeDiversity", MFGP_dfwDownloadConfirmTimeDiversity, "xxx" },
@@ -1030,7 +1033,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },
 //#if ( SAMPLE_METER_TEMPERATURE == 1 )
 //   {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
-//   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter’s thermometer" },
+//   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter's thermometer" },
 //#endif
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
@@ -1075,17 +1078,17 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "netkWh",                     MFG_bulkQuantity,                "Read net kWh from meter" },
 //#endif
 //   {  "newRegistrationRequired",    MFGP_newRegistrationRequired,    "Get/Set registration state" },
-//   {  "nwActiveActTimeout",         MFGP_NwActiveActTimeout,         "Get or set active network activity timeout" },
+   {  "nwActiveActTimeout",         MFGP_NwActiveActTimeout,         "Get or set active network activity timeout" },
 //   {  "nwPassActTimeout",           MFGP_NwPassActTimeout,           "Get or set passive network activity timeout" },
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "orReadList",                 MFGP_orReadList,                 "Get/Set on demand read list" },
 //#endif
-//   {  "PhyAfcEnable",               MFGP_PhyAfcEnable,               "Enable/disable AFC" },
+   {  "PhyAfcEnable",               MFGP_PhyAfcEnable,               "Enable/disable AFC" },
 //   {  "PhyAfcRssiThreshold",        MFGP_PhyAfcRSSIThreshold,        "Get/Set AFC RSSI threshold" },
 //   {  "PhyAfcTemperaturerange",     MFGP_PhyAfcTemperatureRange,     "Get/Set AFC temperature range" },
 //   {  "outageDeclarationDelay",     MFGP_outageDeclarationDelay,     "Get/Set outage declaration delay in seconds" },
 //   {  "restorationDeclarationDelay",MFGP_restorationDelay,           "Get/Set restoration delay in seconds" },
-//   {  "powerQualityEventDuration",  MFGP_powerQualityEventDuration,  "Get/Set power quality event duration in seconds" },
+   {  "powerQualityEventDuration",  MFGP_powerQualityEventDuration,  "Get/Set power quality event duration in seconds" },
 //#if ( ENABLE_DEMAND_TASKS == 1 )
 //#if ( DEMAND_IN_METER == 0 )
 //   {  "scheduledDemandResetDay",    MFGP_scheduledDemandResetDay,    "xxx" },
@@ -1191,7 +1194,7 @@ static const char CRLF[] = { '\r', '\n' };
    ,MFGP_dtlsNetworkMSSubject \
    ,MFGP_dtlsServerCertificateSN \
    ,MFGP_dtlsNetworkRootCA \
-  once DTLS is in place
+  once DTLS is in place */
 //lint -e750    Lint is complaining about macro not referenced
 #define MFG_COMMON_CALLS \
    MFGP_CommandLine_Help \
@@ -1661,7 +1664,7 @@ returnStatus_t MFGP_cmdInit( void )
 #endif
    return(retVal);
 }
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED == NXP_K24 )  /* TODO: RA6E1: Add support */
 /***********************************************************************************************************************
    Function Name: mfgpReadByte
 
@@ -1784,7 +1787,8 @@ static void mfgpReadByte( uint8_t rxByte )
       }
    }
 }
-#endif
+#endif // #if ( MCU_SELECTED == NXP_K24 )
+
 /***********************************************************************************************************************
    Function Name: MFGP_uartTask
 
@@ -1864,6 +1868,7 @@ void MFGP_uartRecvTask( taskParameter )
    }
 #endif
 #endif
+#if 0 // TODO: RA6E1: Review this section of code
 #if (USE_DTLS == 1)
    _MfgPortState = MFG_SERIAL_IO_e;
    MFGP_DtlsInit( mfgUart );
@@ -1913,6 +1918,7 @@ void MFGP_uartRecvTask( taskParameter )
 #else
             mfgpReadByte( rxByte );
 #endif
+#endif // #if 0
          }
       }
    }
@@ -1951,7 +1957,7 @@ void MFGP_uartRecvTask( taskParameter )
         MFGP_CommandBuffer[ MFGP_numBytes++ ] = rxByte;
         MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
         rxByte = 0x0;
-        for ( MFGP_numBytes ; MFGP_numBytes < MFGP_MAX_MFG_COMMAND_CHARS ; MFGP_numBytes++ )
+        for ( ; MFGP_numBytes < MFGP_MAX_MFG_COMMAND_CHARS ; MFGP_numBytes++ )
          {
             /* UART_read used to read characters while doing Copy/Paste */
             ( void )UART_read ( mfgUart, &rxByte, sizeof(rxByte) );
@@ -2074,7 +2080,7 @@ void MFGP_uartRecvTask( taskParameter )
               /* Call the command */
               OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
 #if ( USE_USB_MFG != 0 )
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
               event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
 #elif ( RTOS_SELECTION == FREE_RTOS )
               event_flags = OS_EVNT_Wait ( &CMD_events, 0x00ffffff, (bool)false, ONE_SEC );
@@ -2504,6 +2510,7 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
             {
                /* This is the line of code that is actually calling the handler function
                   for the command that was received */
+#if 0 // TODO: RA6E1: Add this section of code when we have all the MFG commands are available
 _Pragma ( "calls = \
                  MFG_COMMON_CALLS \
                  MFG_DCU_CALLS \
@@ -2525,6 +2532,7 @@ _Pragma ( "calls = \
                  MFG_REMOTE_DISCONNECT_CALLS \
                  MFG_EP_LGSIM_CALLS \
                  " )
+#endif // if 0
                    CmdEntry->pfnCmd( argc, argvar );
 #if ( EP == 1 )
                /***************************************************************************
@@ -9514,6 +9522,7 @@ static void MFGP_dtlsHelper( uint32_t argc, char *argv[], uint16_t offset, uint1
    uint8_t           *pCert;                            /* Pointer to next byte in cert                    */
    uint16_t          i;                                 /* Loop counter, used to limit number of characters received  */
    PartitionData_t   const *pPart;                      /* Used to access the security info partition  */
+
    pPart = SEC_GetSecPartHandle();
    // Read the data from secROM
    if ( eSUCCESS == PAR_partitionFptr.parRead( cert, ( dSize )offset, ( lCnt )len, pPart ) )

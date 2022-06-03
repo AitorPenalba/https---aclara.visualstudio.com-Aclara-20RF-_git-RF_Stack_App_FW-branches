@@ -82,7 +82,7 @@ const sci_uart_instance_ctrl_t *UartCtrl[MAX_UART_ID] =
 #if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
    &g_uart9_ctrl, /* Optical Port */
 #endif
-   &g_uart4_ctrl, /* DBG Port */
+   &g_uart_DBG_ctrl, /* DBG Port */
    &g_uart2_ctrl  /* Meter Port */
 };
 
@@ -92,7 +92,7 @@ const uart_cfg_t *UartCfg[MAX_UART_ID] =
 #if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
    &g_uart9_cfg,
 #endif
-   &g_uart4_cfg,
+   &g_uart_DBG_cfg,
    &g_uart2_cfg
 };
 #endif
@@ -347,7 +347,7 @@ uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 *******************************************************************************/
 void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 {
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
    (void)fgets( DataBuffer, (int32_t)DataLength, UartHandle[UartId] );
 #elif ( RTOS_SELECTION == FREE_RTOS )
    // TODO: RA6 [name_Balaji]: To process the copy paste of multiple commands
@@ -380,13 +380,13 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
          DataBuffer[DBGP_numBytes++] = rxByte;
          DbgPrintBuffer[DBGP_numPrintBytes++] = rxByte;
          rxByte = 0x0;
-         for (DBGP_numBytes;DBGP_numBytes<DataLength;DBGP_numBytes++)
+         for ( ;DBGP_numBytes<DataLength;DBGP_numBytes++)
          {
             /* UART_read used to read characters while doing Copy/Paste */
             ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
             /* 10millisecond is the delay timing where a successful UART_read happens */
             ( void )OS_SEM_Pend( &dbgReceiveSem_, ( portTICK_RATE_MS * 2) );
-            
+
             if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
                ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
                ( rxByte == 0xC0 ) )           /* Left over SLIP protocol characters in buffer */

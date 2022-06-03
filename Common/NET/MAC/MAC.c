@@ -354,9 +354,9 @@ typedef struct
    uint8_t  CsmaMaxAttempts;              /*!< The maximum number of attempts by the MAC to gain access to the channel
                                                before failing the transaction request. (0-20) */
    uint16_t CsmaMaxBackOffTime;           /*!< The maximum amount of back off time in milliseconds for the CSMA
-                                               algorithm. (macCsmaMinBackOffTime to 500 */
+                                               algorithm. (macCsmaMinBackOffTime to 500 */
    uint16_t CsmaMinBackOffTime;           /*!< The minimum amount of back off time in milliseconds for the CSMA
-                                               algorithm (0 – 100) */
+                                               algorithm (0 - 100) */
    float    CsmaPValue;                   /*!< The probability that the CSMA algorithm will decide to transmit when an
                                                idle channel is found.  (0-1, default 0.1) */
    bool     CsmaQuickAbort;               /*!< Indicates if the CSMA algorithm will abort frame transmission upon the
@@ -709,7 +709,7 @@ void MAC_SaveConfig_To_BkupRAM(void)
       pMacConfig->PacketId                          = (CachedAttr.PacketId + 1 ) % 4;
    }
 }
-#endif
+#endif  // #if ( EP == 1 )
 
 /*!
  *   This function returns the next packet id.
