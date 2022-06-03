@@ -105,21 +105,22 @@
 
                     /* Aclara Added -- Start */
 #if 0  // TODO: RA6: DG: Add later
-//                    PWRLG_Startup();  // TODO: RA6: DG: Add
-//                    if ( PWRLG_LastGasp() )
+                    PWRLG_Startup();  // TODO: RA6: DG: Add
+                    if ( PWRLG_LastGasp() )
                     {
                        /* Clear DPSRSTF flag */
-                       R_SYSTEM->RSTSR0_b.DPSRSTF = 0;  //TODO: RA6: DG: Move it to PWRLG_LastGasp()? 
+                       R_SYSTEM->RSTSR0_b.DPSRSTF = 0;  //TODO: RA6: DG: Move it to PWRLG_LastGasp()?
                        /* Init LastGasp tasks. */
                        OS_TASK_Create_PWRLG();
                     }
+                    OS_TASK_Create_PWRLG();  // TODO: Remove
                     else
 #else
                     {
                        if ( PWRLG_LastGasp() )
                        {
                           /* Clear DPSRSTF flag */
-                          R_SYSTEM->RSTSR0_b.DPSRSTF = 0;  //TODO: RA6: DG: Remove later 
+                          R_SYSTEM->RSTSR0_b.DPSRSTF = 0;  //TODO: RA6: DG: Remove later
                        }
                        /* Init Normal Mode tasks. */
                        OS_TASK_Create_STRT();
