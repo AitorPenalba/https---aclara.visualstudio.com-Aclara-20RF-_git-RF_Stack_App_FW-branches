@@ -711,6 +711,11 @@ void compbyte(uint8_t group, uint8_t number);
 void compare(void);
 #endif
 
+#if RADIO_TASK
+bool bRadio_ready = FALSE; 
+#endif
+   
+
 #if 0  // TODO: RA6E1 Bob: This was removed from original project
 void RF_SetHardwareMode(RFHardwareMode_e newMode)
 {
@@ -2548,9 +2553,11 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    OS_TASK_Sleep( FIFTY_MSEC );
 #endif
 
-   // Start triming CPU or TCXO frequency
-#if 0  //TODO Melvin: add the below code once PHY  module is added
+
    RADIO_Update_Freq();
+
+#if RADIO_TASK 
+   bRadio_ready = TRUE; 
 #endif
 }
 
@@ -6411,6 +6418,93 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
    return (bool)true;
 }
 
+/*
+   Function name: RADIO_Get_Current_Temperature
+
+   Purpose: To get Radio Temperature and compute average of an array of floats;
+
+   Arguments:  float    bSoft_demod - to verify if this function was called from softdemod
+              .  
+*/
+
+#if RADIO_TASK
+
+float RADIO_Get_Current_Temperature( bool bSoft_demod )
+{
+  union si446x_cmd_reply_union Si446xCmd;
+  static uint8_t avg_index = 0;
+  static float temperature[RADIO_TEMP_SAMPLE];
+  static bool bAvg_done = FALSE;
+  float temp = 0;
+  static float RADIO_Temperature;
+  
+  
+  if ( ( radio [ ( uint8_t ) RADIO_0 ].demodulator == 0 ) ) // if soft-demod disabled 
+  {
+    if ( si446x_get_adc_reading ( RADIO_0, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd ) == SI446X_SUCCESS ) 
+    {
+      RADIO_Temperature = ( int16_t ) ( ( ( 899.0/4096.0 ) * Si446xCmd.GET_ADC_READING.TEMP_ADC ) - 293 );
+      
+      // TODO: averaging mechanism 
+    }    
+  }
+  
+  else {
+    if ( TRUE == bSoft_demod )
+    {
+      if ( si446x_get_adc_reading ( RADIO_0, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd ) == SI446X_SUCCESS )
+      {
+        temperature[avg_index] = ( int16_t ) ( ( ( 899.0/4096.0 ) * Si446xCmd.GET_ADC_READING.TEMP_ADC ) - 293 );
+        avg_index++ ;
+        
+        //five samples to determine temperature
+        if ( avg_index >= RADIO_TEMP_SAMPLE )
+        {
+          avg_index = 0;
+          bAvg_done = TRUE;     
+        }
+        
+        for ( uint8_t i = 0; i < RADIO_TEMP_SAMPLE; i++ )
+        {
+          temp += temperature[i];        
+        }
+        
+        if ( FALSE == bAvg_done )
+        {
+          RADIO_Temperature = temp/avg_index;  // avg value for first five cycles
+        }
+        
+        else 
+        {
+          RADIO_Temperature = temp/RADIO_TEMP_SAMPLE; // avg value
+        } 
+        
+      }
+    }   
+  }
+  
+  // Sanitize output 
+  if ( RADIO_Temperature < TEMPERATURE_MIN ) 
+  {
+    RADIO_Temperature = TEMPERATURE_MIN;
+  } 
+  else if ( RADIO_Temperature > TEMPERATURE_MAX )
+  {
+    RADIO_Temperature = TEMPERATURE_MAX;
+  } 
+  
+  return RADIO_Temperature;
+} 
+
+/*
+Used to check Radio initialized
+*/
+ 
+bool Is_Radio_ready ()
+{
+  return bRadio_ready;
+}
+#endif
 /*!
  *  Used to get the transmit buffer
  *

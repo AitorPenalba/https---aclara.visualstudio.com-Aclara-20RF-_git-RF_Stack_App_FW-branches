@@ -134,6 +134,8 @@ static bool setup_ADC1 ( void );
 #if ( TM_ADC_UNIT_TEST == 1 )
 bool ADC_UnitTest(void);
 #endif
+extern float RADIO_Get_Current_Temperature(bool bSoft_demod);
+extern bool Is_Radio_ready(void);
 /* FUNCTION DEFINITIONS */
 
 /*******************************************************************************
@@ -695,9 +697,11 @@ float ADC_Get_Man_Temperature  ( void )
 *******************************************************************************/
 float ADC_Get_uP_Temperature  (bool bFahrenheit)
 {
+   
 #if ( MCU_SELECTED == NXP_K24 )
    float voltage;
    float Temperature;
+
 
    voltage = ADC_Get_Ch_Voltage( ADC0_PROC_TEMPERATURE_CH );
 
@@ -724,8 +728,22 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
    }
 
    return ( Temperature );
-#else                     //TODO: RA6E1 for renesas MCU
-    float Temperature=0.0;
+#elif ( MCU_SELECTED == RA6E1 )                     //TODO: RA6E1 for renesas MCU
+   float Temperature;
+   bool bDemodcall;
+
+   
+   if ( Is_Radio_ready() ) // make sure radio initialize 
+   {
+     bDemodcall = FALSE; // make sure RADIO_Get_Current_Temperature () called from ADC_Get_uP_Temperature ()
+   Temperature = RADIO_Get_Current_Temperature ( bDemodcall ); 
+   }
+   
+   if (bFahrenheit)
+   {
+      /* Convert from Celcius to Farenheit */
+      Temperature = (((Temperature * 9.0f) / 5.0f) + 32.0f);
+   }
     return ( Temperature );
 #endif
 }

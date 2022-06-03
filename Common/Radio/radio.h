@@ -47,6 +47,10 @@
 #define VSWR_AVERAGE_COUNT      8 /* Number of samples that go into VSWR average */
 #endif
 
+#define RADIO_TASK 1 // 
+#define RADIO_TEMP_SAMPLE 5
+
+
 /*****************************************************************************
  *  Global Typedefs & Enums
  *****************************************************************************/
