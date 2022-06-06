@@ -163,7 +163,7 @@ static fsp_err_t meter_trouble_isr_init( void )
    if(FSP_SUCCESS == err)
    {
       /* Enable ICU module */
-      DBG_printf("\nOpen Meter Trouble Busy IRQ");
+//      DBG_printf("\nOpen Meter Trouble Busy IRQ");
       err = R_ICU_ExternalIrqEnable( &hmc_trouble_busy_ctrl );
    }
    return err;

@@ -357,7 +357,7 @@ static void MacAttrSetGet(uint32_t argc, char *argv[], MAC_ATTRIBUTES_e eAttribu
 static void PhyAttrSetGet(uint32_t argc, char *argv[], PHY_ATTRIBUTES_e eAttribute, ValueType_e valueType);
 
 #if ( EP == 1 )
-//static void MFGP_watchDogResetCount( uint32_t argc, char *argv[] );
+static void MFGP_watchDogResetCount( uint32_t argc, char *argv[] );
 //static void MFG_PhyDemodulator( uint32_t argc, char *argv[] );
 #endif
 
@@ -593,10 +593,10 @@ static void MFGP_rfTestMode                  ( uint32_t argc, char *argv[] );
 #if ( ENABLE_HMC_TASKS == 1 )
 //static void MFG_bulkQuantity                 ( uint32_t argc, char *argv[] );
 #endif
-//static void MFGP_outageDeclarationDelay      ( uint32_t argc, char *argv[] );
-//static void MFGP_restorationDelay            ( uint32_t argc, char *argv[] );
+static void MFGP_outageDeclarationDelay      ( uint32_t argc, char *argv[] );
+static void MFGP_restorationDelay            ( uint32_t argc, char *argv[] );
 static void MFGP_powerQualityEventDuration   ( uint32_t argc, char *argv[] );
-//static void MFGP_lastGaspMaxNumAttempts      ( uint32_t argc, char *argv[] );
+static void MFGP_lastGaspMaxNumAttempts      ( uint32_t argc, char *argv[] );
 #if ( LAST_GASP_SIMULATION == 1 ) && ( EP == 1 )
 static void MFGP_simulateLastGaspStart       ( uint32_t argc, char *argv[] );
 static void MFGP_simulateLastGaspDuration    ( uint32_t argc, char *argv[] );
@@ -1041,7 +1041,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //#endif
 //   {  "initialRegistrationTimeout", MFGP_initialRegistrationTimemout,"Get/Set the initial registration timeout" },
 //   {  "invalidAddressModeCount",    MFGP_invalidAddressModeCount,    "Get the invalid address mode count." },
-//   {  "lastGaspMaxNumAttempts",     MFGP_lastGaspMaxNumAttempts,     "Get/Set maximum number of last gasps" },
+   {  "lastGaspMaxNumAttempts",     MFGP_lastGaspMaxNumAttempts,     "Get/Set maximum number of last gasps" },
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //#if ( LP_IN_METER == 0 )
 //   {  "lpBuChannel1",               MFGP_lpBuChannel,                "xxx" },
@@ -1086,8 +1086,8 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "PhyAfcEnable",               MFGP_PhyAfcEnable,               "Enable/disable AFC" },
 //   {  "PhyAfcRssiThreshold",        MFGP_PhyAfcRSSIThreshold,        "Get/Set AFC RSSI threshold" },
 //   {  "PhyAfcTemperaturerange",     MFGP_PhyAfcTemperatureRange,     "Get/Set AFC temperature range" },
-//   {  "outageDeclarationDelay",     MFGP_outageDeclarationDelay,     "Get/Set outage declaration delay in seconds" },
-//   {  "restorationDeclarationDelay",MFGP_restorationDelay,           "Get/Set restoration delay in seconds" },
+   {  "outageDeclarationDelay",     MFGP_outageDeclarationDelay,     "Get/Set outage declaration delay in seconds" },
+   {  "restorationDeclarationDelay",MFGP_restorationDelay,           "Get/Set restoration delay in seconds" },
    {  "powerQualityEventDuration",  MFGP_powerQualityEventDuration,  "Get/Set power quality event duration in seconds" },
 //#if ( ENABLE_DEMAND_TASKS == 1 )
 //#if ( DEMAND_IN_METER == 0 )
@@ -1117,7 +1117,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "totkWh",                     MFG_bulkQuantity,                "Read total kWh from meter" },
 //#endif
-//   {  "watchdogResetCount",         MFGP_watchDogResetCount,         "Get/Set watchdoge reset counter" },
+   {  "watchdogResetCount",         MFGP_watchDogResetCount,         "Get/Set watchdoge reset counter" },
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "0.0.0.1.1.1.12.0.0.0.0.0.0.0.0.3.72.0",  MFG_bulkQuantity,    "Read forward kWh from meter" },
 //   {  "0.0.0.1.20.1.12.0.0.0.0.0.0.0.0.3.72.0", MFG_bulkQuantity,    "Read total kWh from meter" },
