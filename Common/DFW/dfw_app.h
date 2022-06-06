@@ -67,7 +67,7 @@
 
 #define DFW_PROTOCOL_SUPPORT           (2u)          // Only protocol 2 is supported
 #define DFW_PATCH_VERSION              (4u)          // normal patch type with DeviceType version
-#define DFW_PATCH_METERMATE_SCHEMA_FORMAT (uint8_t)100  // expectected patch format for meter configuration updates
+#define DFW_PATCH_METERMATE_SCHEMA_FORMAT (uint8_t)100  // expected patch format for meter configuration updates
 
 #define COM_DEVICE_TYPE_LEN      ((uint8_t)20)     /* Com device type length of the string */
 
@@ -78,9 +78,6 @@
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
-#if ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Remove once byte typedefed elsewhere
-typedef unsigned char byte;
-#endif
 
 typedef uint8_t         dl_streamid_t;       /*!<  */
 typedef int16_t         dl_packetid_t;       /*!< This should be unsigned but it is signed to make missing Packet ID's more robust */

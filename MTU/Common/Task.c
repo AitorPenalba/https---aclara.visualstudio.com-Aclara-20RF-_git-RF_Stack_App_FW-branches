@@ -211,10 +211,10 @@ typedef enum
    eLAST_TSK_IDX // Keep this last
 }eOsTaskIndex_t;
 
-static uint32_t TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track of the CPU load for each task for the last 10 seconds.
+//static uint32_t TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track of the CPU load for each task for the last 10 seconds.
 //static TD_STRUCT *TASK_TD[eLAST_TSK_IDX];                       // Task descriptor list
-static uint32_t cpuLoadIndex = 0;
-static uint32_t CPUTotal;
+//static uint32_t cpuLoadIndex = 0;
+//static uint32_t CPUTotal;
 
 /* The following structure will be used to store task handle information for FreeRTOS. Each
    task handle will be tied to a specific task name as each task is created. When a task
@@ -302,11 +302,11 @@ const char pTskName_Idle[]          = "IDL";
 #if (SIGNAL_NW_STATUS == 1)
 const char pTskName_NwConn[]        = "NWCON";
 #endif
-static const char pTskName_SdPsListener[]        = "PSLSNR";
-static const char pTskName_SdPreambleDetector[]  = "PREDET";
-static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
-static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
-static const char pTskName_TimeSys[]             = "TIMESYS"; // TODO: RA6E1 Bob: Not referenced.  Is this replaced by pTskName_Time[] = "TIME" ?
+//static const char pTskName_SdPsListener[]        = "PSLSNR";
+//static const char pTskName_SdPreambleDetector[]  = "PREDET";
+//static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
+//static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
+//static const char pTskName_TimeSys[]             = "TIMESYS"; // TODO: RA6E1 Bob: Not referenced.  Is this replaced by pTskName_Time[] = "TIME" ?
 
 /* NOTE: The Highest Priority we should use is 9.  This excerpt was taken from AN3905.pdf on freesclale.com
    Task priority. Lower number is for higher priorities.  More than one task can have the same priority level.  Having
@@ -562,8 +562,6 @@ static void expt_frm_dump(void const * ext_frm_ptr)
 
    char                             pBuf[ 192 ];   /* Local buffer for printout  */
    uint16_t                         pOff;          /* offset into pBuf/length    */
-   uint32_t                         i;             /* loop counter               */
-
 
    uint32_t excpt_num = __get_PSR() & 0x1FF;
    if(excpt_num < 16)

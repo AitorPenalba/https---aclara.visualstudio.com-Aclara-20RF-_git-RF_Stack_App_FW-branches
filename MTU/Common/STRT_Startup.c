@@ -156,7 +156,7 @@
 /* FILE VARIABLE DEFINITIONS */
 static bool initSuccess_ = true; //Default, system init successful
 
-static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
+//static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
 
 
 /* Power Up Table - Define all modules that require initialization below. */
@@ -366,6 +366,7 @@ static OS_MSGQ_Obj TestMsgq_MSGQ;
 
 /* FUNCTION DEFINITIONS */
 
+#if 0 // TODO: RA6E1: Add support
 /*******************************************************************************
 
   Function name: STRT_EnableCpuLoadPrint
@@ -388,7 +389,7 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
       CpuLoadPrint = mode;
    }
 }
-
+#endif
 /*******************************************************************************
 
    Function name: STRT_StartupTask

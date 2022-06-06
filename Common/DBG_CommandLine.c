@@ -1522,7 +1522,6 @@ uint32_t DBG_CommandLine_TimeNanoSec( uint32_t argc, char *argv[] )
    OS_TICK_Struct tickValue1 ;
    OS_TICK_Struct tickValue2 ;
    uint32_t delayNanoSec;
-   int64_t diffInArg;
    uint32_t diffInSec;
    if ( argc == 1 )
    {
@@ -1726,7 +1725,6 @@ uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
    uint64_t delaySec1;
    uint64_t delaySec2;
    int64_t diffInArg;
-   uint64_t diffTicksCount;
    uint32_t diffInSec;
    uint32_t diffInArg_Check;
    if ( argc < 3 )
@@ -1977,8 +1975,7 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   OS_TICK_Struct timeMilliSec ;
-   OS_TICK_Struct *isdelayValueSame ;
+   OS_TICK_Struct timeMilliSec;
    OS_TICK_Struct_Ptr isdelayptr;
    uint32_t argvMilliSec;
    uint32_t prevTickValue;
