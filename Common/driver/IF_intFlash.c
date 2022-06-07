@@ -452,7 +452,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
    ASSERT(Cnt <= INTERNAL_FLASH_SIZE);    /* Count must be <= the sector size. */
    dvr_shm_lock();
 
-#if ( MCU_SELECTED != RA6E1 )
+#if ( MCU_SELECTED == NXP_K24 )
 #if !defined( __BOOTLOADER ) && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_3 )
    {
@@ -518,7 +518,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
       retVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
    }
 #endif
-#else
+#elif ( MCU_SELECTED == RA6E1 )
    uint32_t startAddr, eraseBytes, destAddrLocal, destAddrLocalComplete;
    uint32_t initialBytes = 0;
    if ( 0 != memcmp( ( uint8_t * ) destAddr, pSrc, cnt ) ) /* Does flash need to be updated? */
@@ -568,7 +568,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
 
             destAddrLocal = destAddrLocal + ( eraseBytes - initialBytes );
 
-            retVal = ( returnStatus_t ) R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );
+            retVal = ( returnStatus_t ) R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );  // Erase 1 Block
              /* Wait for the erase complete event flag, if BGO is SET  */
              if ( true == g_flash0_cfg.data_flash_bgo )
              {
@@ -588,7 +588,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
          } while ( ( eSUCCESS == retVal ) && ( startAddr < ( destAddr + cnt ) ) );
       }
    }
-#endif
+#endif  //  MCU_SELECTED == NXP_K24
 
    dvr_shm_unlock();
 
@@ -642,7 +642,7 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
    /*lint -efunc( 715, erase ) : pNextDvr is not used.  It is a part of the common API. */
    /*lint -efunc( 818, erase ) : pNextDvr is declared correctly.  It is a part of the common API. */
 
-#if ( MCU_SELECTED != RA6E1 )
+#if ( MCU_SELECTED == NXP_K24 )
 #if !defined( __BOOTLOADER ) && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_3 )
    {
@@ -706,7 +706,7 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
       eRetVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
    }
 #endif
-#else
+#elif ( MCU_SELECTED == RA6E1 )
    lCnt destAddr = destOffset + pParData->PhyStartingAddress; /* Get the actual address in NV. */
    eRetVal = eSUCCESS; /* Assume Success */
    dvr_shm_lock(); /* Take mutex, critical section */
@@ -857,7 +857,7 @@ static bool timeSlice(PartitionData_t const *pParData, DeviceDriverMem_t const *
 static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 {
    returnStatus_t eRetVal = eFAILURE;
-#if ( MCU_SELECTED != RA6E1 )
+#if ( MCU_SELECTED == NXP_K24 )
    /* Make sure the dest is on boundary & cnt is a x sector */
    if ( (0 == (numBytes % ERASE_SECTOR_SIZE_BYTES)) && (0 == (dest % ERASE_SECTOR_SIZE_BYTES)) )
    {
@@ -895,7 +895,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 //      _ICACHE_ENABLE();
 #endif   /* BOOTLOADER  */
    }
-#else
+#elif ( MCU_SELECTED == RA6E1 )
    lCnt blockCount;
    fsp_err_t retVal;
    if( dest < FLASH_HP_CODEFLASH_END_ADDRESS )
@@ -991,7 +991,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const *pSrc )
 {
    returnStatus_t retVal = eFAILURE;
-#if ( MCU_SELECTED != RA6E1 )
+#if ( MCU_SELECTED == NXP_K24 )
    /* Erased state are all 8 bytes of 0xFF */
    static const uint8_t erasedState_[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
@@ -1023,7 +1023,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
       _ICACHE_ENABLE();
 #endif   /* BOOTLOADER  */
    }
-#else
+#elif ( MCU_SELECTED == RA6E1 )
     uint32_t srcAddr = ( uint32_t ) pSrc;
     if( address < FLASH_HP_CODEFLASH_END_ADDRESS )
     {
