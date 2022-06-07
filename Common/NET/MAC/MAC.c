@@ -993,11 +993,7 @@ returnStatus_t MAC_init ( void )
       FileStatus_t fileStatus;
       uint8_t i;
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - lastgasp
       if(PWRLG_LastGasp() == false)
-#else // TODO: RA6E1 - lastgasp
-      if ( 1 )
-#endif
 #endif
       {  // Normal Mode
          for( i=0; i < (sizeof(Files)/sizeof(*(Files))); i++ )
@@ -3463,12 +3459,8 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
    if (eStatus == eMAC_SET_SUCCESS)
    {
 #if EP == 1
-#if 0 // TODO: RA6E1 - lastgasp
       // Only allow configuration changes if NOT in Last Gasp Mode
       if( PWRLG_LastGasp() == false )
-#else
-      if(1)
-#endif
 #endif
       {
          file_t *pFile = (file_t *)Files[0];

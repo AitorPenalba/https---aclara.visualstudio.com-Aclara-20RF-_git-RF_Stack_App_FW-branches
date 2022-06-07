@@ -522,7 +522,6 @@ returnStatus_t PHY_init( void )
    if ( OS_SEM_Create(&PHY_AttributeSem_, 0) && OS_MUTEX_Create(&PHY_AttributeMutex_) && OS_MUTEX_Create(&PHY_Mutex_) &&
         OS_EVNT_Create(&events) && OS_MSGQ_Create(&PHY_msgQueue, PHY_NUM_MSGQ_ITEMS, "PHY") )
    {
-#if 0 // TODO: attempt to get through PHY_init without a working file system
       // Open PHY cached data (mainly counters)
       if ( eSUCCESS == FIO_fopen(&PHYcachedFileHndl_,              /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
@@ -533,7 +532,6 @@ returnStatus_t PHY_init( void )
                                  &fileStatus)) {                   /* Contains the file status */
          if ( fileStatus.bFileCreated )
          {  //File was created for the first time, set defaults.
-#endif // 0
             (void)memset(&CachedAttr, 0, sizeof(CachedAttr));
             (void)TIME_UTIL_GetTimeInSecondsFormat(&CachedAttr.LastResetTime);
             for (i=0; i<PHY_MAX_CHANNEL; i++)
@@ -543,7 +541,6 @@ returnStatus_t PHY_init( void )
                CachedAttr.NoiseEstimateBoostOn[i] = PHY_CCA_THRESHOLD_MAX;
 #endif
             }
-#if 0 // TODO: attempt to get through PHY_init without a working file system
             retVal = FIO_fwrite( &PHYcachedFileHndl_, 0, (uint8_t*)&CachedAttr, sizeof(CachedAttr));
          }
          else
@@ -552,17 +549,16 @@ returnStatus_t PHY_init( void )
          }
          if (eSUCCESS == retVal)
          {
-#endif
             // Open PHY config data (configuration data that doesn't change often)
             if ( eSUCCESS == FIO_fopen(&PHYconfigFileHndl_,              /* File Handle so that PHY access the file. */
-                                       ePART_NV_APP_CACHED, // TODO: RA6E1 ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
+                                       ePART_SEARCH_BY_TIMING,           /* Search for the best partition according to the timing. */
                                        (uint16_t)eFN_PHY_CONFIG,         /* File ID (filename) */
                                        (lCnt)sizeof(ConfigAttr),         /* Size of the data in the file. */
                                        FILE_IS_NOT_CHECKSUMED,           /* File attributes to use. */
                                        PHY_CONFIG_FILE_UPDATE_RATE,      /* The update rate of the data in the file. */
                                        &fileStatus) )                    /* Contains the file status */
             {
-               if (1) // ( fileStatus.bFileCreated ) // TODO: RA6E1 Bob: temporarily ALWAYS initialize PHY config to defaults
+               if ( fileStatus.bFileCreated )
                {  // File was created for the first time, set defaults.
                   retVal = FIO_fwrite( &PHYconfigFileHndl_, 0, (uint8_t*)&ConfigAttr, sizeof(ConfigAttr));
                }
@@ -577,10 +573,8 @@ returnStatus_t PHY_init( void )
                // Update shadow data
                (void)memcpy( ShadowAttr.AfcAdjustment, ConfigAttr.AfcAdjustment, sizeof( ShadowAttr.AfcAdjustment ));
             }
-#if 0 // TODO: attempt to get through PHY_init without a working file system
          }
       }
-#endif
    }
 #if ( EP == 1 )
    if (retVal == eSUCCESS)
@@ -2439,11 +2433,9 @@ static bool Process_CCAReq( PHY_Request_t const *pReq )
                   noiseEstimate = CachedAttr.NoiseEstimate[i];
 #if ( EP == 1 )
                   // Use a different noise estimate when in last gasp
-#if 0 // TODO: RA6E1 Bob: defer this until the Last Gasp module is ready
                   if ( PWRLG_LastGasp() ) {
                      noiseEstimate = CachedAttr.NoiseEstimateBoostOn[i];
                   }
-#endif
 #endif
                   if (rssi_dbm >= (noiseEstimate+ConfigAttr.CcaOffset)) { // Test rssi against the noise of this channel
                      // channel is busy

@@ -518,7 +518,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#if ( CLOCK_IN_METER == 1 )
 //   { "mtrtime",      DBG_CommandLine_mtrTime,         "Convert meter time mm dd yy hh mm to system time" },
 //#endif
-//   { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
+   { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
    { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
    { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
    { "noiseestimatecount", DBG_CommandLine_NoiseEstimateCount, "Display/Set the noise estimate count" },
@@ -576,10 +576,10 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#endif
    { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
    { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
-//#if ( EP == 1 )
-//   { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
-//   { "regtimeouts",  DBG_CommandLine_RegTimeouts,     "Get or Set the Registration Timeouts" },
-//#endif
+#if ( EP == 1 )
+   { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
+   { "regtimeouts",  DBG_CommandLine_RegTimeouts,     "Get or Set the Registration Timeouts" },
+#endif
 //#if BOB_IS_LAZY == 1
 //   { "reset",        DBG_ResetAllStats,               "Reset PHY, MAC and NWK stats" },
 //#endif
@@ -6793,163 +6793,164 @@ uint32_t DBG_CommandLine_InsertMacMsg ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-//#if ( EP == 1 )
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_RegTimeouts
-//
-//   Purpose: This function will print out or set the reigstration timeout values
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_RegTimeouts ( uint32_t argc, char *argv[] )
-//{
-//   bool     allParamsValid = ( bool )true;
-//   uint32_t nextTimeout = RegistrationInfo.nextRegistrationTimeout;
-//   uint32_t maxTimeout  = RegistrationInfo.maxRegistrationTimeout;
-//   uint16_t minTimeout  = RegistrationInfo.minRegistrationTimeout;
-//
-//   switch ( argc )
-//   {
-//      case 1:  /* No parameters will print the registration timeouts */
-//         DBG_logPrintf( 'R', "MinRegistrationTimeout (seconds): %hd", RegistrationInfo.minRegistrationTimeout );
-//         DBG_logPrintf( 'R', "MaxRegistrationTimeout (seconds): %d", RegistrationInfo.maxRegistrationTimeout );
-//         DBG_logPrintf( 'R', "NextRegistrationTimeout (seconds): %d", RegistrationInfo.nextRegistrationTimeout );
-//         DBG_logPrintf( 'R', "ActiveRegistrationTimeout (seconds): %d", RegistrationInfo.activeRegistrationTimeout );
-//         allParamsValid = ( bool )false; // so it won't try to save any values below
-//         break;
-//      case 4:
-//         nextTimeout = ( uint32_t )atoi( argv[3] );
-//         if ( nextTimeout == 0 )
-//         {
-//            DBG_logPrintf( 'R', "Invalid NextRegistrationTimeout value (must be > 0)" );
-//            allParamsValid = ( bool )false;
-//         }
-//      //lint -fallthrough
-//      case 3:
-//         maxTimeout = ( uint32_t )atoi( argv[2] );
-//         if ( maxTimeout < 30 )
-//         {
-//            DBG_logPrintf( 'R', "Invalid MaxRegistrationTimeout value (must be >= 30)" );
-//            allParamsValid = ( bool )false;
-//         }
-//      //lint -fallthrough
-//      case 2:
-//         minTimeout = ( uint16_t )atoi( argv[1] );
-//         if ( minTimeout < 30 )
-//         {
-//            DBG_logPrintf( 'R', "Invalid MinRegistrationTimeout value (must be >= 30)" );
-//            allParamsValid = ( bool )false;
-//         }
-//         break;
-//      default:
-//         DBG_logPrintf( 'R',
-//                        "Invalid number of parameters!"
-//                        " No params for read, 1, 2, or 3 to set min, max, next Registration Timeouts" );
-//   }
-//
-//   if ( allParamsValid && ( maxTimeout < minTimeout ) )
-//   {
-//      DBG_logPrintf( 'R', "MaxRegistrationTimeout must be >= MinRegistrationTimeout" );
-//      allParamsValid = ( bool )false;
-//   }
-//
-//   if ( allParamsValid )
-//   {
-//      RegistrationInfo.minRegistrationTimeout  = minTimeout;
-//      RegistrationInfo.maxRegistrationTimeout  = maxTimeout;
-//      RegistrationInfo.nextRegistrationTimeout = nextTimeout;
-//      APP_MSG_UpdateRegistrationFile();
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_RegTimeouts () */
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_RegState
-//
-//   Purpose: This function will print out or set the reigstration state
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
-//{
-//   sysTime_dateFormat_t formattedDate;    /* Installation date/time in yy, mm, dd, hh, mm, dd, ss  */
-//   char                 *currRegState;    /* String representation of registration state  */
-//   uint32_t             installSeconds;   /* Installation date/time in seconds  */
-//   sysTime_t            installTime;      /* Installation date/time in system format   */
-//
-//   switch ( argc )
-//   {
-//      case 1:  /* No parameters will print the registration state */
-//         switch ( RegistrationInfo.registrationStatus )
-//         {
-//            case REG_STATUS_NOT_SENT:
-//               currRegState = "NotSent";
-//               break;
-//            case REG_STATUS_NOT_CONFIRMED:
-//               currRegState = "Sent";
-//               break;
-//            case REG_STATUS_CONFIRMED:
-//               currRegState = "Complete";
-//               break;
-//            default:
-//               currRegState = "??";  //lint !e585 not a trigraph
-//               break;
-//         }
-//         DBG_logPrintf( 'R', "Current Registration State: %s", currRegState );
-//         installSeconds = TIME_SYS_GetInstallationDateTime();
-//         TIME_UTIL_ConvertSecondsToSysFormat( installSeconds, 0, &installTime );
-//         ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &installTime, &formattedDate );
-//
-//         DBG_logPrintf( 'R', "Installation date/time: %02d/%02d/%02d %02d:%02d:%02d (%d)",
-//                         formattedDate.month, formattedDate.day, formattedDate.year, formattedDate.hour,
-//                         formattedDate.min, formattedDate.sec, installSeconds);
-//         break;
-//      case 2:
-//         if ( ( strcasecmp( argv[1], "NotSent" ) == 0 ) || ( strcasecmp( argv[1], "0" ) == 0 ) )
-//         {
-//            APP_MSG_ReEnableRegistration();
-//         }
-//         else if ( ( strcasecmp( argv[1], "Sent" ) == 0 ) || ( strcasecmp( argv[1], "1" ) == 0 ) )
-//         {
-//            sysTimeCombined_t currentTime;   // Get current time
-//
-//            APP_MSG_initRegistrationInfo();
-//            RegistrationInfo.registrationStatus   = REG_STATUS_NOT_CONFIRMED;
-//            ( void )TIME_UTIL_GetTimeInSysCombined( &currentTime );
-//            RegistrationInfo.timeRegistrationSent = ( uint32_t )( currentTime / TIME_TICKS_PER_SEC );
-//            APP_MSG_UpdateRegistrationFile();
-//         }
-//         else if ( ( strcasecmp( argv[1], "Complete" ) == 0 ) || ( strcasecmp( argv[1], "2" ) == 0 ) )
-//         {
-//            RegistrationInfo.registrationStatus      = REG_STATUS_CONFIRMED;
-//            RegistrationInfo.nextRegistrationTimeout = RegistrationInfo.minRegistrationTimeout;
-//            APP_MSG_UpdateRegistrationFile();
-//         }
-//         else
-//         {
-//            DBG_logPrintf( 'R', "Invalid Registration State value - must be { NotSent | Sent | Complete }" );
-//         }
-//         break;
-//      default:
-//         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read; {NotSent | Sent | Complete} to set" );
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_RegState () */
-//#endif
-//
+#if ( EP == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_RegTimeouts
+
+   Purpose: This function will print out or set the reigstration timeout values
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_RegTimeouts ( uint32_t argc, char *argv[] )
+{
+   bool     allParamsValid = ( bool )true;
+   uint32_t nextTimeout = RegistrationInfo.nextRegistrationTimeout;
+   uint32_t maxTimeout  = RegistrationInfo.maxRegistrationTimeout;
+   uint16_t minTimeout  = RegistrationInfo.minRegistrationTimeout;
+
+   switch ( argc )
+   {
+      case 1:  /* No parameters will print the registration timeouts */
+         DBG_logPrintf( 'R', "MinRegistrationTimeout (seconds): %hd", RegistrationInfo.minRegistrationTimeout );
+         DBG_logPrintf( 'R', "MaxRegistrationTimeout (seconds): %d", RegistrationInfo.maxRegistrationTimeout );
+         DBG_logPrintf( 'R', "NextRegistrationTimeout (seconds): %d", RegistrationInfo.nextRegistrationTimeout );
+         DBG_logPrintf( 'R', "ActiveRegistrationTimeout (seconds): %d", RegistrationInfo.activeRegistrationTimeout );
+         allParamsValid = ( bool )false; // so it won't try to save any values below
+         break;
+      case 4:
+         nextTimeout = ( uint32_t )atoi( argv[3] );
+         if ( nextTimeout == 0 )
+         {
+            DBG_logPrintf( 'R', "Invalid NextRegistrationTimeout value (must be > 0)" );
+            allParamsValid = ( bool )false;
+         }
+      //lint -fallthrough
+      case 3:
+         maxTimeout = ( uint32_t )atoi( argv[2] );
+         if ( maxTimeout < 30 )
+         {
+            DBG_logPrintf( 'R', "Invalid MaxRegistrationTimeout value (must be >= 30)" );
+            allParamsValid = ( bool )false;
+         }
+      //lint -fallthrough
+      case 2:
+         minTimeout = ( uint16_t )atoi( argv[1] );
+         if ( minTimeout < 30 )
+         {
+            DBG_logPrintf( 'R', "Invalid MinRegistrationTimeout value (must be >= 30)" );
+            allParamsValid = ( bool )false;
+         }
+         break;
+      default:
+         DBG_logPrintf( 'R',
+                        "Invalid number of parameters!"
+                        " No params for read, 1, 2, or 3 to set min, max, next Registration Timeouts" );
+   }
+
+   if ( allParamsValid && ( maxTimeout < minTimeout ) )
+   {
+      DBG_logPrintf( 'R', "MaxRegistrationTimeout must be >= MinRegistrationTimeout" );
+      allParamsValid = ( bool )false;
+   }
+
+   if ( allParamsValid )
+   {
+      RegistrationInfo.minRegistrationTimeout  = minTimeout;
+      RegistrationInfo.maxRegistrationTimeout  = maxTimeout;
+      RegistrationInfo.nextRegistrationTimeout = nextTimeout;
+      APP_MSG_UpdateRegistrationFile();
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_RegTimeouts () */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_RegState
+
+   Purpose: This function will print out or set the reigstration state
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
+{
+   sysTime_dateFormat_t formattedDate;    /* Installation date/time in yy, mm, dd, hh, mm, dd, ss  */
+   char                 *currRegState;    /* String representation of registration state  */
+   uint32_t             installSeconds;   /* Installation date/time in seconds  */
+   sysTime_t            installTime;      /* Installation date/time in system format   */
+
+   switch ( argc )
+   {
+      case 1:  /* No parameters will print the registration state */
+         switch ( RegistrationInfo.registrationStatus )
+         {
+            case REG_STATUS_NOT_SENT:
+               currRegState = "NotSent";
+               break;
+            case REG_STATUS_NOT_CONFIRMED:
+               currRegState = "Sent";
+               break;
+            case REG_STATUS_CONFIRMED:
+               currRegState = "Complete";
+               break;
+            default:
+               currRegState = "??";  //lint !e585 not a trigraph
+               break;
+         }
+         DBG_logPrintf( 'R', "Current Registration State: %s", currRegState );
+         installSeconds = TIME_SYS_GetInstallationDateTime();
+         TIME_UTIL_ConvertSecondsToSysFormat( installSeconds, 0, &installTime );
+         ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &installTime, &formattedDate );
+
+         DBG_logPrintf( 'R', "Installation date/time: %02d/%02d/%02d %02d:%02d:%02d (%d)",
+                         formattedDate.month, formattedDate.day, formattedDate.year, formattedDate.hour,
+                         formattedDate.min, formattedDate.sec, installSeconds);
+         break;
+      case 2:
+         if ( ( strcasecmp( argv[1], "NotSent" ) == 0 ) || ( strcasecmp( argv[1], "0" ) == 0 ) )
+         {
+            APP_MSG_ReEnableRegistration();
+         }
+         else if ( ( strcasecmp( argv[1], "Sent" ) == 0 ) || ( strcasecmp( argv[1], "1" ) == 0 ) )
+         {
+            sysTimeCombined_t currentTime;   // Get current time
+
+            APP_MSG_initRegistrationInfo();
+            RegistrationInfo.registrationStatus   = REG_STATUS_NOT_CONFIRMED;
+            ( void )TIME_UTIL_GetTimeInSysCombined( &currentTime );
+            RegistrationInfo.timeRegistrationSent = ( uint32_t )( currentTime / TIME_TICKS_PER_SEC );
+            APP_MSG_UpdateRegistrationFile();
+         }
+         else if ( ( strcasecmp( argv[1], "Complete" ) == 0 ) || ( strcasecmp( argv[1], "2" ) == 0 ) )
+         {
+            RegistrationInfo.registrationStatus      = REG_STATUS_CONFIRMED;
+            RegistrationInfo.nextRegistrationTimeout = RegistrationInfo.minRegistrationTimeout;
+            APP_MSG_UpdateRegistrationFile();
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Invalid Registration State value - must be { NotSent | Sent | Complete }" );
+         }
+         break;
+      default:
+         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read; {NotSent | Sent | Complete} to set" );
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_RegState () */
+#endif // #if ( EP == 1 )
+
 ///*******************************************************************************
 //   Function name: DBG_CommandLine_chksum
 //
@@ -12542,43 +12543,43 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 //   return( 0 );
 //}
 //#endif
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_NetworkId
-//
-//   Purpose: This function sets/gets the network ID
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_NetworkId ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t networkId;
-//
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else if ( argc == 2 )
-//   {
-//      networkId = ( uint8_t )atoi( argv[1] );
-//      MAC_NetworkId_Set( networkId );
-//   }
-//
-//   else if ( argc == 1 )
-//   {
-//      DBG_printf( "Network ID is %d", MAC_NetworkId_Get() );
-//   }
-//   return ( 0 );
-//}
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NetworkId
+
+   Purpose: This function sets/gets the network ID
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_NetworkId ( uint32_t argc, char *argv[] )
+{
+   uint8_t networkId;
+
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else if ( argc == 2 )
+   {
+      networkId = ( uint8_t )atoi( argv[1] );
+      MAC_NetworkId_Set( networkId );
+   }
+
+   else if ( argc == 1 )
+   {
+      DBG_printf( "Network ID is %d", MAC_NetworkId_Get() );
+   }
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_RxTimeout

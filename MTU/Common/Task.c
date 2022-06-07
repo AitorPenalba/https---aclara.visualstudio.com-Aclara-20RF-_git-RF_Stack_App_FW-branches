@@ -997,7 +997,7 @@ void OS_TASK_ExitId ( char const *pTaskName )
    taskHandlePtr = getFreeRtosTaskHandle( pTaskName );
    if(NULL != taskHandlePtr)
    {  // we found a task handle, delete the task
-   	  vTaskDelete(*taskHandlePtr);
+      vTaskDelete(*taskHandlePtr);
    }
 #endif
 } /* end OS_TASK_ExitId () */
