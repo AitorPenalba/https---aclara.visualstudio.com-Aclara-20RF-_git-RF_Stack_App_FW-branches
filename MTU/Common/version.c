@@ -381,7 +381,7 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
 {
    returnStatus_t   retVal = eFAILURE;
-#if 0
+#if 0 // TODO: RA6E1: Add Support
    uint8_t          len;
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails

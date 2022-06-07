@@ -73,7 +73,7 @@
 #include "pwr_task.h"
 #include "eng_res.h"
 #include "ecc108_lib_return_codes.h"
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Seperate FreeRTOS header
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Separate FreeRTOS header
 #include "ecc108_mqx.h"
 #endif
 #include "ecc108_apps.h"
@@ -530,7 +530,7 @@ static void MFGP_engData1                    ( uint32_t argc, char *argv[] );
 static void MFGP_engData2                    ( uint32_t argc, char *argv[] );
 #endif
 //static void MFGP_eventThreshold              ( uint32_t argc, char *argv[] );
-//static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
+static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
 //static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
 //static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
 //static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
@@ -731,7 +731,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
 //   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
 //   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
-//   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
+   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
 //   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
 //   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
 //   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
