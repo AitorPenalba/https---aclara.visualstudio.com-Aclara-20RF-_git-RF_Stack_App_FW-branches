@@ -475,16 +475,16 @@ static void MFGP_fngVswrShutdownSet          ( uint32_t argc, char *argv[] );
 static void MFG_TxThrottleDisable            ( uint32_t argc, char *argv[] );
 #endif
 
-//static void MFG_TimePrecision                ( uint32_t argc, char *argv[] );
-//static void MFG_TimeDefaultAccuracy          ( uint32_t argc, char *argv[] );
-//static void MFG_TimeQueryResponseMode        ( uint32_t argc, char *argv[] );
+static void MFG_TimePrecision                ( uint32_t argc, char *argv[] );
+static void MFG_TimeDefaultAccuracy          ( uint32_t argc, char *argv[] );
+static void MFG_TimeQueryResponseMode        ( uint32_t argc, char *argv[] );
 
 #if ( EP == 1 )
-//static void MFG_TimeSetStart                 ( uint32_t argc, char *argv[] );
-//static void MFG_TimeSetMaxOffset             ( uint32_t argc, char *argv[] );
-//static void MFG_TimeSetPeriod                ( uint32_t argc, char *argv[] );
-//static void MFG_TimeSource                   ( uint32_t argc, char *argv[] );
-//static void MFGP_timeSigOffset               ( uint32_t argc, char *argv[] );
+static void MFG_TimeSetStart                 ( uint32_t argc, char *argv[] );
+static void MFG_TimeSetMaxOffset             ( uint32_t argc, char *argv[] );
+static void MFG_TimeSetPeriod                ( uint32_t argc, char *argv[] );
+static void MFG_TimeSource                   ( uint32_t argc, char *argv[] );
+static void MFGP_timeSigOffset               ( uint32_t argc, char *argv[] );
 static void MFGP_powerQuality                ( uint32_t argc, char *argv[] );
 #endif
 
@@ -558,8 +558,8 @@ static void MFGP_virginDelay                 ( uint32_t argc, char *argv[] );
 #endif
 //static void MFGP_installationDateTime        ( uint32_t argc, char *argv[] );
 //static void MFGP_getRealTimeAlarm            ( uint32_t argc, char *argv[] );
-//static void MFGP_timeLastUpdated             ( uint32_t argc, char *argv[] );
-//static void MFGP_timeState                   ( uint32_t argc, char *argv[] );
+static void MFGP_timeLastUpdated             ( uint32_t argc, char *argv[] );
+static void MFGP_timeState                   ( uint32_t argc, char *argv[] );
 
 #if (EP == 1)
 #if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
@@ -825,21 +825,21 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "macReliabilityMedCount",     MFGP_macReliabilityMedCount,     "Get/Set the number of retries to satisfy the QOS reliability level of medium" },
 //   {  "macReliabilityLowCount",     MFGP_macReliabilityLowCount,     "Get/Set the number of retries to satisfy the QOS reliability level of low" },
 //   {  "macRSSI",                    MFGP_macRSSI,                    "Display the RSSI of a specified radio" },
-//#if ( EP == 1 )
-//   {  "macTimeSetMaxOffset",        MFG_TimeSetMaxOffset,            "Get/Set the TimeSet MaxOffset"},
-//   {  "macTimeSetPeriod",           MFG_TimeSetPeriod,               "Get/Set the TimeSet Period" },
-//   {  "macTimeSetStart",            MFG_TimeSetStart,                "Get/Set the TimeSet Start"},
-//   {  "macTimeSource",              MFG_TimeSource,                  "Get/Set the Time Source"},
-//#endif
-//#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
-//   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
-//   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
-//   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
-//   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
-//#endif
-//#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
-//   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
-//#endif
+#if ( EP == 1 )
+   {  "macTimeSetMaxOffset",        MFG_TimeSetMaxOffset,            "Get/Set the TimeSet MaxOffset"},
+   {  "macTimeSetPeriod",           MFG_TimeSetPeriod,               "Get/Set the TimeSet Period" },
+   {  "macTimeSetStart",            MFG_TimeSetStart,                "Get/Set the TimeSet Start"},
+   {  "macTimeSource",              MFG_TimeSource,                  "Get/Set the Time Source"},
+#endif
+#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
+   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
+   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
+   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
+   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
+#endif
+#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
+   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
+#endif
 //   {  "macTransactionTimeout",      MFG_TransactionTimeout,          "Get/Set MAC transaction timeout" },
 //   {  "macTransactionTimeoutCount", MFG_TransactionTimeoutCount,     "Get the number of times there was a MAC transaction timeout"},
 //   {  "macTxLinkDelayCount",        MFG_macTxLinkDelayCount,         "Amount of MAC delays incurred"},
@@ -913,8 +913,8 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "reboot",                     MFG_reboot,                      "Reboot device"   },
 //   {  "repairInformation",          MFGP_repairInformation,          "(MIMT)Get/Set the repair information of the endpoint of the endpoint" },
 //   {  "rtcDateTime",                MFGP_rtcDateTime,                "Get/Set the RTC value"   },
-//   {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
-//   {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
+   {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
+   {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
 //   {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
 //   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
 //   {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
@@ -936,12 +936,12 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "TBImageTarget",              MFGP_DCUVersion,                 "Get/Set DCU operating mode {DCU2|DCU2+}" },
 //#endif
 //   {  "temperature",                MFGP_temperature,                "Get device temperature" },
-//   {  "timeDefaultAccuracy",        MFG_TimeDefaultAccuracy,         "Get/Set the Default Time Accuracy"},
+   {  "timeDefaultAccuracy",        MFG_TimeDefaultAccuracy,         "Get/Set the Default Time Accuracy"},
 //   {  "timeLastUpdated",            MFGP_timeLastUpdated,            "The time that date/time was last updated" },
-//   {  "timePrecision",              MFG_TimePrecision,               "Get the Time Precision"},
-//   {  "macTimePrecision",           MFG_TimePrecision,               "Alias for timePrecision"},
-//   {  "timeQueryResponseMode",      MFG_TimeQueryResponseMode,       "Get/Set the time query response behavior to broadcast(0), unicast(1) or ignore the request (2)" },
-//   {  "timeState",                  MFGP_timeState,                  "State of system clock: 0=INVALID 1=VALID_NO_SYNC 2=VALID"},
+   {  "timePrecision",              MFG_TimePrecision,               "Get the Time Precision"},
+   {  "macTimePrecision",           MFG_TimePrecision,               "Alias for timePrecision"},
+   {  "timeQueryResponseMode",      MFG_TimeQueryResponseMode,       "Get/Set the time query response behavior to broadcast(0), unicast(1) or ignore the request (2)" },
+   {  "timeState",                  MFGP_timeState,                  "State of system clock: 0=INVALID 1=VALID_NO_SYNC 2=VALID"},
    {  "virgin",                     MFGP_virgin,                     "Virgin unit" },
    {  "virginDelay",                MFGP_virginDelay,                "Erases signature; continues. Allows new code load and then virgin"},
    { 0, 0, 0 }
@@ -4534,7 +4534,6 @@ static void MFGP_nvFailCount( uint32_t argc, char *argv[] )
    MFG_logPrintf( "%s %d\n", argv[0], pSELF_test->Data->nvFail );
 }
 
-#if 1
 /***********************************************************************************************************************
    Function Name: MFGP_SpuriousResetCount
 
@@ -4560,7 +4559,6 @@ static void MFGP_SpuriousResetCount( uint32_t argc, char *argv[] )
    SpuriousResetCount =  ( uint16_t )PWR_getSpuriousResetCnt();
    MFG_logPrintf( "%s %d\n", argv[0], SpuriousResetCount );
 }
-#endif
 
 #if ( EP == 1 )
 /***********************************************************************************************************************
