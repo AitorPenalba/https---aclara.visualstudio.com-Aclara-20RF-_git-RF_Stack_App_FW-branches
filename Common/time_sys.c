@@ -648,9 +648,7 @@ returnStatus_t TIME_SYS_SetTimeRequestMaxTimeout( uint16_t timeoutValue )
    {
       OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
       timeVars_.timeRequestMaxTimeout = timeoutValue;
-#if 0 // TODO: RA6E1 - File support to be added
       (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t *)&timeVars_, sizeof(timeVars_));
-#endif
       OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
       retVal = eSUCCESS;
    }
@@ -702,9 +700,7 @@ void TIME_SYS_SetDateTimeLostCount( uint16_t dateTimeLostValue )
 {
    OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
    timeVars_.dateTimeLostCount = dateTimeLostValue;
-#if 0 // TODO: RA6E1 - File support to be added
    (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t *)&timeVars_, sizeof(timeVars_));
-#endif
    OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
 }
 #endif
@@ -798,11 +794,7 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
 #if (EP == 1)
       /* Only set installation date/time if not already set AND NOT in ship mode */
       /* NOTE: For the T-board, the equivalent of installDateTime is stored in RegistrationInfo.installationDateTime */
-#if 0 // TODO: RA6E1 - Ship mode support to be added
       if ( ( 0 == timeVars_.installDateTime ) && (0 == MODECFG_get_ship_mode()) )
-#else
-      if ( ( 0 == timeVars_.installDateTime ) )
-#endif
       {  //store the first time-sync or timeset command ever
          uint32_t date_Time;   //Used since cannot pass pointer to uint32_t member of a packed struct
          TIME_UTIL_ConvertSysFormatToSeconds(pSysTime, &date_Time, &fractionalSec);
@@ -908,9 +900,7 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
    __set_PRIMASK(primask); // Restore interrupts
    //OS_MUTEX_Unlock( &_timeVarsMutex );  // Function will not return if it fails
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - File support to be added
    (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t*)&timeVars_, (lCnt)sizeof(timeVars_));
-#endif
 #endif
 }
 
@@ -1039,10 +1029,8 @@ void TIME_SYS_SetInstallationDateTime( uint32_t instDateTime )
 {
    OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
    timeVars_.installDateTime = instDateTime;
-#if 0 // TODO: RA6E1 - File support to be added
    (void)FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t,installDateTime),
                     (uint8_t*)&timeVars_.installDateTime, (lCnt)sizeof(timeVars_.installDateTime));
-#endif
     OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
 }
 #endif
@@ -1093,11 +1081,9 @@ returnStatus_t TIME_SYS_SetTimeAcceptanceDelay( uint16_t setTimeAcceptanceDelay 
    {
       OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
       timeVars_.timeAcceptanceDelay = setTimeAcceptanceDelay;
-#if 0 // TODO: RA6E1 - File support to be added
       returnStatus = FIO_fwrite(&fileHndlTimeSys_, (uint16_t)offsetof(time_vars_t,timeAcceptanceDelay),
                                 (uint8_t*)&timeVars_.timeAcceptanceDelay,
                                 (lCnt)sizeof(timeVars_.timeAcceptanceDelay));
-#endif
       OS_MUTEX_Unlock( &_timeVarsMutex ); // Function will not return if it fails
    }
 
@@ -2817,7 +2803,7 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
    }
    return retVal;
 }
-#endif
+#endif  //#if ( EP == 1 )
 
 
 /***********************************************************************************************************************

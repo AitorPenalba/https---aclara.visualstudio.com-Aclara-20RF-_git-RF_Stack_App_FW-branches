@@ -175,9 +175,7 @@ void TIME_SYS_HandlerTask( taskParameter );
 
 #if ( EP == 1 )
 void           TIME_SYS_SetDSTAlarm(uint32_t date, uint32_t time);
-#if 0 // TODO: RA6E1 - Not ported for now
 returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd);
-#endif
 uint32_t       TIME_SYS_GetInstallationDateTime(void);
 void           TIME_SYS_SetInstallationDateTime(uint32_t dateTime);
 uint16_t       TIME_SYS_GetTimeAcceptanceDelay( void );

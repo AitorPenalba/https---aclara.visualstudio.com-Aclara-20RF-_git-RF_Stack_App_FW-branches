@@ -4207,9 +4207,7 @@ static void Process_CmdFrame(MAC_DataInd_t const *pDataInd)
 #if ( EP == 1 )
       case MAC_TIME_SET_CMD:
       {  // Handle a time set command (EP Only)
-#if 0 // TODO: RA6E1 Bob: now that we have PHY running, we might get this command
          (void)TIME_SYS_SetDateTimeFromMAC(pDataInd);
-#endif
       }
       break;
 #endif
