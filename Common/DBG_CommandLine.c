@@ -329,8 +329,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "help",         DBG_CommandLine_Help,            "Display list of commands" },
    { "h",            DBG_CommandLine_Help,            "help" },
    { "?",            DBG_CommandLine_Help,            "help" },
-   { "watchDogTest",       DBG_CommandLine_wdTest,          "1 for refresh watchdog \
-                                                         2 for validate watchdog" },
+   { "watchDogTest", DBG_CommandLine_wdTest,          "1 for refreshing the watchdog timer 2 for validating the watchdog timer" },
 #if ( DAC_CODE_CONFIG == 1 )
    { "setdac0step",               DBG_CommandLine_DAC_SetDacStep,      "Set the DAC Step, range for steps is 0 - 4096 eg.) setdac0step 2200" },
    { "pwrsel",                    DBG_CommandLine_setPwrSel,           "Set/reset pwrsel pin" },
@@ -1188,7 +1187,9 @@ uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] )
       }
       else
       {
-         DBG_logPrintf( 'R', "Select correct option for watchDogTest" );
+         DBG_logPrintf( 'R', "watchDogTest 1 (for refreshing the watchdog timer)" );
+         DBG_logPrintf( 'R', "watchDogTest 2 (for validating the watchdog timer)" );
+         
       }
    }
    return 0;
@@ -2521,7 +2522,7 @@ uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
 //      default:
 //      {
 //         execute        = false;
-//         watchDogTest( "USAGE: PowerDownTest delay(ms) [no_of_sectors] [ 0: External NV; 1: Internal ]" );
+//         DBG_printf( "USAGE: PowerDownTest delay(ms) [no_of_sectors] [ 0: External NV; 1: Internal ]" );
 //         break;
 //      }
 //   }
