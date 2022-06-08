@@ -202,6 +202,7 @@ uint16_t HMC_PROTO_Protocol(uint8_t ucCmd, HMC_COM_INFO *pData)
       {
          /* Update the message command process */
          sMMPStatus.uiStatus = HMC_MSG_Processor((uint8_t)HMC_MSG_CMD_PROCESS, pData);
+//         DBG_logPrintf('R', "Prot layer" );
          status_.Bits.bCPUTime = sMMPStatus.Bits.bCPUTime;
          /* Process Results from the message handler, if any */
          if (!sMMPStatus.Bits.bBusy)   /* Not Busy? */

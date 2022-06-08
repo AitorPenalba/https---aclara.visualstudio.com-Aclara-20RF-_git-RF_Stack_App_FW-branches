@@ -781,7 +781,7 @@ uint8_t HMC_TIME_Set_Time( uint8_t ucCmd, void *pData )
                      offsetLocal += (int32_t)(TIME_TICKS_PER_HR * 12); //Local noon
                      offsetLocal %= (int32_t)TIME_TICKS_PER_DAY; //Local noon, same day
 
-                     ( void )OS_QUEUE_Create( &hmcTimeQueueHandle, HMC_TIME_QUEUE_SIZE );
+                     ( void )OS_QUEUE_Create( &hmcTimeQueueHandle, HMC_TIME_QUEUE_SIZE, "HMC_TIME" );
                      alarmSettings.pMQueueHandle = NULL;             /* Don't use the message queue */
                      alarmSettings.bOnInvalidTime = false;           /* Only alarmed on valid time, not invalid */
                      alarmSettings.bOnValidTime = true;              /* Alarmed on valid time */

@@ -101,6 +101,9 @@ enum HMC_MSG_MODE
 static uint16_t resExpiredTimerId_ = 0;
 static uint16_t taDelayExpiredTimerId_ = 0;
 static uint16_t comTimerExpiredTimerId_ = 0;
+#if ( MCU_SELECTED == RA6E1 )
+//extern OS_SEM_Obj       hmcReceiveSem_;
+#endif
 
 /* ************************************************************************* */
 /* FUNCTION DEFINITIONS */
@@ -266,6 +269,7 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
 #if 0 // TODO: RA6E1 Implement UART flush command
          (void)UART_flush(UART_HOST_COMM_PORT);
 #endif
+//         DBG_logPrintf('R', "UART Flush---");
          HMC_MSG_PRNT_HEX_INFO( 'H', "Send:", pTxRx_, offsetof(sMtrTxPacket,uTxData) +
                            BIG_ENDIAN_16BIT( pData->TxPacket.uiPacketLength.n16 ) );
          break;
@@ -281,11 +285,14 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
             if ( sendAckNak_ )                                         /* Need to send an Ack or Nak? */
             {
               (void)TMR_ResetTimer(taDelayExpiredTimerId_, comSettings_.ucTurnAroundDelay); /* Start the TA Delay */
+//              DBG_logPrintf('R', "About to send an ACK/NAK %X", sendAckNak_ );
+//              HMC_MSG_PRNT_HEX_INFO( 'H', "About to send an ACK/NAK", ( uint8_t *)sendAckNak_, 1 );
                if ( 1 == UART_write(UART_HOST_COMM_PORT, &sendAckNak_, sizeof(sendAckNak_)) ) /* Send ACK or NAK */
                {
                   /* No UART error, so continue */
                   sendAckNak_ = 0;
                }
+//               DBG_logPrintf('R', "UART write--- %X",sendAckNak_);
             }
             /* ****************************************************************************************************** */
             // <editor-fold defaultstate="collapsed" desc="RX Mode">
@@ -312,10 +319,12 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
 #endif
                   timerCfg.usiTimerId = resExpiredTimerId_;
                   (void)TMR_ReadTimer(&timerCfg);
-                  if ( (timerCfg.bExpired) && (0 == numRxBytes) ) /* Did a Time-out occur &no data received? */
+//                  if ( (timerCfg.bExpired) && (0 == numRxBytes) ) /* Did a Time-out occur &no data received? */
                   if ( timerCfg.bExpired) /* Did a Time-out occur &no data received? */
                   {
+//                     DBG_logPrintf('R', "timerCfg.bExpired");
                      sStatus_.Bits.bTxWait = false; /* Clear the TX Wait Flag */
+//                     DBG_logPrintf('R', "retries left %d",retries_);
                      if ( retries_ != 0 ) /* Any retries left? */
                      {
                         /* Yes, there are retries left */
@@ -332,6 +341,7 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                         {
                            /* No response from the host meter, try sending the same data again, per ANSI C12 */
                            eMode_ = HMC_MSG_MODE_TX;  /* Get ready to TX data again */
+//                           DBG_logPrintf('R', "entering HMC_MSG_MODE_TX Mode");
                         }
                         pTxRx_ = &pData->TxPacket.ucSTP;  /* Reset the pointer */
                         (void)TMR_ResetTimer( resExpiredTimerId_, comSettings_.uiResponseTimeOut_mS );
@@ -340,12 +350,14 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                      {
                         /* No retries left, need to return with error */
                         eMode_ = HMC_MSG_MODE_IDLE;
+//                        DBG_logPrintf('R', "entering Idle Mode");
                         sStatus_.Bits.bTimeOut = true; /* Yes, set return value to Timeout */
                         HMC_ENG_Execute((uint8_t)HMC_ENG_TIME_OUT, pData);
                      }
                   }
                   else /* See if we have data to process */
                   {
+//                     DBG_logPrintf('R', "Not timerCfg.bExpired");
                      while ( (0 != numRxBytes) && (HMC_MSG_MODE_RX == eMode_) ) /* Buffer Not Empty? */
                      {
                         if ( expectingACK_ )
@@ -353,6 +365,8 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                            // This should be an ACK (or a NAK of course).
                            if ( PSEM_ACK == ucResult ) /* if ACK in buffer, Still doing protocol */
                            {
+//                              DBG_logPrintf('R', "PSEM_ACK %X",ucResult);
+//                              HMC_MSG_PRNT_HEX_INFO( 'H', "PSEM_ACK",( uint8_t *)ucResult, 1);
                               (void)TMR_StopTimer(resExpiredTimerId_); /* we received the ACK, stop the response timeout timer */
                               (void)TMR_ResetTimer(comTimerExpiredTimerId_, comSettings_.uiTrafficTimeOut_mS); /* reset the session timer */
                               expectingACK_ = false;
@@ -360,6 +374,8 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                            }
                            else if ( PSEM_NAK == ucResult )
                            {
+//                              DBG_logPrintf('R', "PSEM_NAK %X",ucResult);
+//                              HMC_MSG_PRNT_HEX_INFO( 'H', "PSEM_NAK",( uint8_t *)ucResult, 1);
                               expectingACK_ = false;
 
                               // Either an NAK or something else.  It's not an ACK which is all we really need to know.
@@ -603,6 +619,7 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                {
                   /* Transmit next byte, store the result in ucResult */
                   ucResult = (uint8_t)UART_write(UART_HOST_COMM_PORT, pTxRx_, 1);  /* Send 1 byte */
+//                  DBG_logPrintf('R', "UART write--- %X",pTxRx_);
                   if ( 1 == ucResult )  /* Was the transmit successful?  1 byte transmitted (ucResult == 1) */
                   {  /* Successful */
                      sStatus_.Bits.bCPUTime = true;

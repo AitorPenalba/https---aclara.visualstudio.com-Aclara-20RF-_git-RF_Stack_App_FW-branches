@@ -109,6 +109,10 @@ static uint16_t      hmcAppletTimerId_ = 0;/* Timer Id for applets */ // Timeout
 #if ( ( END_DEVICE_PROGRAMMING_CONFIG == 1 ) || ( END_DEVICE_PROGRAMMING_FLASH >  ED_PROG_FLASH_NOT_SUPPORTED ) )
 static bool SkipToLogoff = false;
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+//OS_SEM_Obj              hmcReceiveSem_;
+//extern OS_SEM_Obj       transferSem[MAX_UART_ID];
+#endif
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
@@ -182,11 +186,14 @@ returnStatus_t HMC_APP_RTOS_Init( void )
       /* Queue create failed */
       retVal = eFAILURE;
    }
-
+//   if(OS_SEM_Create( &transferSem[UART_HOST_COMM_PORT], 0 ) && OS_SEM_Create( &hmcReceiveSem_ , 0))
+//   {
+//      retVal = eSUCCESS;
+//   }
    ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_INIT, NULL ); /* Initialize the HMC App, lower layers and applets. */
    return retVal;
 }
-#if RTOS
+#if ( RTOS == 1 )
 /***********************************************************************************************************************
 
    Function name: HMC_APP_Task()
@@ -212,10 +219,11 @@ void HMC_APP_Task( taskParameter )
       BM_free( password );
    }
 #endif
-
+//   DBG_logPrintf('R', "HMC_APP_CMD_ENABLE---");
    ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_ENABLE, NULL ); /* Enable the HMC */
    for ( ; ; )
    {
+#if 0
       /* See if there is a message in the queue */
       pSysQueue = OS_QUEUE_Dequeue( &HMC_APP_QueueHandle ); // THIS QUEUE IS NEVER USED! (RCZ,1/25/18)
       if ( NULL != pSysQueue )                            // Is for messages from RTOS ? (RCZ,1/25/18)
@@ -223,10 +231,12 @@ void HMC_APP_Task( taskParameter )
          /* Got message, this message can be for applet serviced by this task */
          ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_MSG, pSysQueue );
       }
+#endif
+//      DBG_logPrintf('R', "HMC_APP_CMD_PROCESS!!!");
       ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_PROCESS, NULL ); /* Process HMC application */
 
       /* Todo:  This next section may 'go away' if HMC only communicates when a message is received in the queue. */
-
+//      DBG_logPrintf('R', "HMC_APP_CMD_STATUS###");
       if ( HMC_APP_main( ( uint8_t )HMC_APP_CMD_STATUS, NULL ) == ( uint8_t )HMC_APP_STATUS_LOGGED_OFF ) /* Logged in? */
       {
          if ( bHmcBusy )
@@ -732,6 +742,7 @@ uint8_t HMC_APP_main( uint8_t ucCmd, void *pData )
                      ( ( HMC_APP_API_RPLY_LOGGING_IN == eLogInStatus ) && ( APPLET_INDEX_LOGOFF == appletIndex_ ) ) )
                {
                   /* We are already logged in, start another packet */
+//                  DBG_logPrintf('R', "checking Logged in HMC_APP_API_CMD_PROCESS ");
                   appletResponse_ = HMC_APP_MeterFunctions[appletIndex_]( ( uint8_t )HMC_APP_API_CMD_PROCESS,
                                     ( void far * )&hmcRxTx_ );
                   if (  ( ( uint8_t )HMC_APP_API_RPLY_READY_COM == appletResponse_ ) ||
@@ -748,6 +759,7 @@ uint8_t HMC_APP_main( uint8_t ucCmd, void *pData )
                {
                   /* Not logged in, start the log in process.  Can't send a message unless we're logged in */
                   ( void )HMC_PROTO_Protocol( ( uint8_t )HMC_PROTO_CMD_NEW_SESSION, &hmcRxTx_ );
+//                  DBG_logPrintf('R', "asking for Login HMC_APP_API_CMD_ACTIVATE");
                   ( void )HMC_STRT_LogOn( ( uint8_t )HMC_APP_API_CMD_ACTIVATE, ( uint8_t far * )0 );
                   appletIndex_ = 0;   /* Process the log on first, reset the index */
                   HMC_ENG_Execute( ( uint8_t )HMC_ENG_TOTAL_SESSIONS, HMC_ENG_VARDATA ); /* Increment Session Count */

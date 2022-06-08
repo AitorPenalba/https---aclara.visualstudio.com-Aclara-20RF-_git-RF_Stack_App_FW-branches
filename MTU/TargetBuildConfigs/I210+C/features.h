@@ -38,7 +38,7 @@
 #define ED_PROGRAMMER_NAME_LENTGH         10 /* Aclara Meters Manufacturing table field */
 
 #define COMMERCIAL_METER                  2  /* Not a commercial meter, but can have more than one phase voltage */
-#define CLOCK_IN_METER                    0  // TODO: RA6E1 Bob: this should probably be changed to 1 but we need to verify what happens with an I-210+c demand-only meter (e.g., no TOU)
+#define CLOCK_IN_METER                    1  // TODO: RA6E1 Bob: this should probably be changed to 1 but we need to verify what happens with an I-210+c demand-only meter (e.g., no TOU)
 #define LP_IN_METER                       1
 #define DEMAND_IN_METER                   1
 #define COINCIDENT_SUPPORT                0
@@ -49,8 +49,8 @@
 #define ID_MAX_CHANNELS                   (8)
 #endif
 
-#define REMOTE_DISCONNECT                 0
-#define HMC_SNAPSHOT                      0
+#define REMOTE_DISCONNECT                 1
+#define HMC_SNAPSHOT                      1
 #define ANSI_STANDARD_TABLES              1
 #define ANSI_LOGON                        1
 #define ANSI_SECURITY                     1

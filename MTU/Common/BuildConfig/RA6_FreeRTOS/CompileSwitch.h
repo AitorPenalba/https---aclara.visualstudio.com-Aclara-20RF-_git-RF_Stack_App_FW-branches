@@ -161,22 +161,22 @@
 #define ENABLE_PRINT_ADC               0
 
 /* HMC - send/receive hmc packets   */
-#define ENABLE_PRNT_HMC_MSG_INFO       0
-#define ENABLE_PRNT_HMC_MSG_WARN       0
-#define ENABLE_PRNT_HMC_MSG_ERROR      0
+#define ENABLE_PRNT_HMC_MSG_INFO       1
+#define ENABLE_PRNT_HMC_MSG_WARN       1
+#define ENABLE_PRNT_HMC_MSG_ERROR      1
 
 /* HMC - protocol assemble/decode results */
-#define ENABLE_PRNT_HMC_PROT_INFO      0
-#define ENABLE_PRNT_HMC_PROT_WARN      0
-#define ENABLE_PRNT_HMC_PROT_ERROR     0
+#define ENABLE_PRNT_HMC_PROT_INFO      1
+#define ENABLE_PRNT_HMC_PROT_WARN      1
+#define ENABLE_PRNT_HMC_PROT_ERROR     1
 
 /* HMC - Diags */
-#define ENABLE_PRNT_HMC_DIAGS_INFO     0
-#define ENABLE_PRNT_HMC_DIAGS_WARN     0   /* TODO: RA6E1: Enable later */
-#define ENABLE_PRNT_HMC_DIAGS_ERROR    0   /* TODO: RA6E1: Enable later */
+#define ENABLE_PRNT_HMC_DIAGS_INFO     1
+#define ENABLE_PRNT_HMC_DIAGS_WARN     1   /* TODO: RA6E1: Enable later */
+#define ENABLE_PRNT_HMC_DIAGS_ERROR    1   /* TODO: RA6E1: Enable later */
 
 /* HMC - Finish */
-#define ENABLE_PRNT_HMC_FINISH_INFO    0
+#define ENABLE_PRNT_HMC_FINISH_INFO    1
 #define ENABLE_PRNT_HMC_FINISH_WARN    1
 #define ENABLE_PRNT_HMC_FINISH_ERROR   1
 
@@ -186,22 +186,22 @@
 #define ENABLE_PRNT_HMC_INFO_ERROR     1
 
 /* HMC - Request */
-#define ENABLE_PRNT_HMC_REQ_INFO       0
+#define ENABLE_PRNT_HMC_REQ_INFO       1
 #define ENABLE_PRNT_HMC_REQ_WARN       1
 #define ENABLE_PRNT_HMC_REQ_ERROR      1
 
 /* HMC - Snapshot */
-#define ENABLE_PRNT_HMC_SS_INFO        0
+#define ENABLE_PRNT_HMC_SS_INFO        1
 #define ENABLE_PRNT_HMC_SS_WARN        1
 #define ENABLE_PRNT_HMC_SS_ERROR       1
 
 /* HMC - Start */
-#define ENABLE_PRNT_HMC_START_INFO     0
-#define ENABLE_PRNT_HMC_START_WARN     0  /* TODO: RA6E1: Enable HMC Print Later */
-#define ENABLE_PRNT_HMC_START_ERROR    0  /* TODO: RA6E1: Enable HMC Print Later */
+#define ENABLE_PRNT_HMC_START_INFO     1
+#define ENABLE_PRNT_HMC_START_WARN     1  /* TODO: RA6E1: Enable HMC Print Later */
+#define ENABLE_PRNT_HMC_START_ERROR    1  /* TODO: RA6E1: Enable HMC Print Later */
 
 /* HMC - Sync */
-#define ENABLE_PRNT_HMC_SYNC_INFO      0
+#define ENABLE_PRNT_HMC_SYNC_INFO      1
 #define ENABLE_PRNT_HMC_SYNC_WARN      1
 #define ENABLE_PRNT_HMC_SYNC_ERROR     1
 
@@ -216,9 +216,9 @@
 #define ENABLE_PRNT_HMC_PRG_MTR_ERROR  1
 
 /* HMC - Disp */
-#define ENABLE_PRNT_HMC_DISP_INFO      0
-#define ENABLE_PRNT_HMC_DISP_WARN      0
-#define ENABLE_PRNT_HMC_DISP_ERROR     0
+#define ENABLE_PRNT_HMC_DISP_INFO      1
+#define ENABLE_PRNT_HMC_DISP_WARN      1
+#define ENABLE_PRNT_HMC_DISP_ERROR     1
 
 /* DFW Module */
 #define ENABLE_PRNT_DFW_INFO           1

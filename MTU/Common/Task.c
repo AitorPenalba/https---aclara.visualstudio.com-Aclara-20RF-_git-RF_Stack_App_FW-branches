@@ -350,7 +350,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_HMC_TASKS
-//   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
+   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_SRFN_ILC_TASKS
    { eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
@@ -362,7 +362,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eDA_HOST_RST_TSK_IDX,      HostResetTask,                 600,  28, (char *)pTskName_HostReset,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_MFG_TASKS
-   { eMFGP_CMD_TSK_IDX,         MFGP_uartCmdTask,             2000,  29, (char *)pTskName_MfgUartCmd, DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eMFGP_CMD_TSK_IDX,         MFGP_uartCmdTask,             3000,  29, (char *)pTskName_MfgUartCmd, DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
@@ -382,9 +382,9 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 
 #if ( TEST_QUIET_MODE == 0 )
-//   { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #else
-//   { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 
    // TODO: RA6 [name_Balaji]: Check for Priority and change if required

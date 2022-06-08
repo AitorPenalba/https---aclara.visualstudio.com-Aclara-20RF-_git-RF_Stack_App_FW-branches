@@ -5928,25 +5928,43 @@ Function Name: MFGP_rtcDateTime
 static void MFGP_rtcDateTime( uint32_t argc, char *argv[] )
 {
 
-   sysTime_t sysTime;
-   sysTime_dateFormat_t rtcTime;
-   uint32_t fracSec, uRtcDateTime;
-
-   if ( argc <= 2 )
+   if ( 1 == argc ) /* No parameters will read the RTC time */
    {
-      if ( 2 == argc )
+      sysTime_dateFormat_t RTC_time;
+
+      RTC_GetDateTime ( &RTC_time );
+
+      DBG_logPrintf( 'R', "RTC=%02d/%02d/%04d %02d:%02d:%02d",
+                     RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec );
+
+   }
+   else
+   {
+      if ( 6 == argc ) /* Need all six parameters to set the RTC and System time. */
       {
-         uRtcDateTime = ( uint32_t )atol( argv[1] );
-         TIME_UTIL_ConvertSecondsToSysFormat(uRtcDateTime, (uint32_t) 0, &sysTime);
-         (void)TIME_UTIL_ConvertSysFormatToDateFormat(&sysTime, &rtcTime);  //convert sys time to RTC time format
-         (void)RTC_SetDateTime (&rtcTime);
+         sysTime_dateFormat_t rtcTime;
+         rtcTime.year   = ( uint16_t )( atoi( argv[1] ) + 2000 ); /* Adjust the 2 digit date to 20xx */
+         rtcTime.month  = ( uint8_t )( atoi( argv[2] ) );
+         rtcTime.day    = ( uint8_t )( atoi( argv[3] ) );
+         rtcTime.hour   = ( uint8_t )( atoi( argv[4] ) );
+         rtcTime.min    = ( uint8_t )( atoi( argv[5] ) );
+         rtcTime.sec    = ( uint8_t )( atoi( argv[6] ) );
+
+         if ( RTC_SetDateTime ( &rtcTime ) )
+         {
+            DBG_logPrintf( 'R', "RTC time set successfully" );
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Failed to set system time!" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read, 6 params to set date/time" );
       }
    }
-
-   RTC_GetDateTime ( &rtcTime );
-   (void)TIME_UTIL_ConvertDateFormatToSysFormat(&rtcTime, &sysTime);
-   TIME_UTIL_ConvertSysFormatToSeconds(&sysTime, &uRtcDateTime, &fracSec);
-   MFG_printf( "%s %u\n", argv[0], uRtcDateTime );
+//   return ( 0 );
 }
 
 

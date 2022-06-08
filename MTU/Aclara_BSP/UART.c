@@ -35,6 +35,8 @@
 #endif
 
 #include "MFG_Port.h"
+#include "hmc_msg.h"
+
 /* #DEFINE DEFINITIONS */
 #if ( MCU_SELECTED == RA6E1 )  //To process the input byte in RA6E1
 #define MAX_DBG_COMMAND_CHARS     1602
@@ -140,6 +142,7 @@ static bool              transmitUARTEnable[MAX_UART_ID];
 static const char       CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
 //extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
 //extern OS_SEM_Obj       mfgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+extern OS_SEM_Obj       hmcReceiveSem_;
 static char             DbgPrintBuffer[MAX_DBG_COMMAND_CHARS + 1];
 // TODO: RA6 [name_Balaji]: Make the transferSem work without extern
 //extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
@@ -977,17 +980,17 @@ uint8_t UART_open ( enum_UART_ID UartId )
 }
 
 #if ( MCU_SELECTED == RA6E1 )
-/* Configured in RASC for future use of Optical port and Meter port integration */
+/* Configured in RASC for future use of Optical port integration */
 /*******************************************************************************
 
-  Function name: user_uart_callback
+  Function name: opcal_uart_callback
 
   Purpose: Interrupt Handler for UART Module
 
   Returns: None
 
 *******************************************************************************/
-void user_uart_callback( uart_callback_args_t *p_args )
+void opcal_uart_callback( uart_callback_args_t *p_args )
 {
 
    /* Handle the UART event */
@@ -1001,18 +1004,69 @@ void user_uart_callback( uart_callback_args_t *p_args )
       /* Transmit complete */
       case UART_EVENT_TX_COMPLETE:
       {
-         // TODO: RA6 [name_Balaji]: Discuss requirement for feature - print is completed or not
          break;
       }
       default:
       {
       }
    }
-}/* end user_uart_callback () */
+}/* end opcal_uart_callback () */
 
-#endif
+/*******************************************************************************
 
-#if ( MCU_SELECTED == RA6E1 )
+  Function name: hmc_uart_callback
+
+  Purpose: Interrupt Handler for UART Module
+
+  Returns: None
+
+*******************************************************************************/
+void hmc_uart_callback( uart_callback_args_t *p_args )
+{
+   /* Handle the UART event */
+   switch ( p_args->event )
+   {
+      /* Receive complete */
+      case UART_EVENT_RX_COMPLETE:
+      {
+         break;
+      }
+      /* Transmit complete */
+      case UART_EVENT_TX_COMPLETE:
+      {
+//         OS_SEM_Post_fromISR( &UART_semHandle[UART_HOST_COMM_PORT].echoUART_sem );
+         if ( transmitUARTEnable[UART_HOST_COMM_PORT] )
+         {
+            OS_SEM_Post_fromISR( &UART_semHandle[UART_HOST_COMM_PORT].transmitUART_sem );
+            transmitUARTEnable[UART_HOST_COMM_PORT] = false;
+         }
+         break;
+      }
+      /* Received single byte */
+      case UART_EVENT_RX_CHAR:
+      {
+         uartRingBuf[UART_HOST_COMM_PORT].head &= RING_BUFFER_MASK;
+         if ( ( ( uartRingBuf[UART_HOST_COMM_PORT].head + 1 ) & RING_BUFFER_MASK ) ==
+                ( uartRingBuf[UART_HOST_COMM_PORT].tail ) )
+         {
+            ringBufoverflow[UART_HOST_COMM_PORT] = true;
+         }
+         else
+         {
+            uartRingBuf[UART_HOST_COMM_PORT].buffer[uartRingBuf[UART_HOST_COMM_PORT].head++] = ( uint8_t )p_args->data;
+            uartRingBuf[UART_HOST_COMM_PORT].head &= RING_BUFFER_MASK;
+            OS_SEM_Post_fromISR( &UART_semHandle[UART_HOST_COMM_PORT].receiveUART_sem );
+         }
+
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }/* end switch () */
+}/* end hmc_uart_callback () */
+
 /*******************************************************************************
 
   Function name: dbg_uart_callback
@@ -1045,7 +1099,7 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
          break;
       }
    }/* end switch () */
-}/* end user_uart_callback () */
+}/* end dbg_uart_callback () */
 #endif
 /***********************************************************************************************************************
 

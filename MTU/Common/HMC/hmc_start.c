@@ -178,6 +178,7 @@ static MtrStartFileData_t  mtrFileData;               /* Contains the meter star
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
+
 #if ( ANSI_SECURITY == 1 )
 static const uint8_t HMC_PASSWORD[] =
 {
@@ -190,7 +191,6 @@ static const uint8_t HMC_MASTER_PASSWORD[] =
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 #endif
-
 
 #if (ANSI_LOGON == 1)
 static const uint8_t HMC_MTR_USER_NAME[] =
@@ -564,8 +564,8 @@ returnStatus_t HMC_STRT_UpdatePasswords( void )
                /* Save unencrypted data   */
                (void)memset( mtrFileData.pad, 0, sizeof( mtrFileData.pad ) );
                (void)memcpy( mtrFile->data, (uint8_t *)&mtrFileData, sizeof( mtrFileData ) );   /* Copy unencrypted passwords to mtrFile->data  */
-               generateMD5( (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ) ); /* Compute integrity check over the file  */
-               encryptBuffer( (uint8_t *)&mtrFileData, (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ), key );        /* Encrypt in place  */
+//               generateMD5( (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ) ); /* Compute integrity check over the file  */
+//               encryptBuffer( (uint8_t *)&mtrFileData, (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ), key );        /* Encrypt in place  */
                retVal = FIO_fwrite( &fileHndlStart, 0, ( uint8_t * )&mtrFileData, ( lCnt )sizeof( mtrFileData ) );   /* Update the file   */
             }
             else
@@ -615,7 +615,7 @@ returnStatus_t HMC_STRT_init( void )
    {
       if ( eSUCCESS == FIO_fopen( &fileHndlStart, ePART_SEARCH_BY_TIMING, ( uint16_t )eFN_HMC_START,
                                   ( lCnt )sizeof( MtrStartFileData_t ), FILE_IS_NOT_CHECKSUMED,
-                                  0xFFFFFFFF, &fileStatus ) )
+                                  0xffffffff, &fileStatus ) )
       {
          if ( fileStatus.bFileCreated )
          {
@@ -1068,11 +1068,21 @@ returnStatus_t HMC_STRT_GetPassword( uint8_t *pwd )
 {
    returnStatus_t retVal = eFAILURE;
 #if ( ANSI_SECURITY == 1 )
+#if 0
    if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) )               &&
       ( eSUCCESS == HMC_STRT_UpdatePasswords() ) )                            /* Decrypt the values from the file.   */
    {
       (void)memcpy( pwd, mtrFileData.password, sizeof( mtrFileData.password ) );
       retVal = eSUCCESS;
+   }
+#endif
+   if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) ) )               
+   {
+      if ( eSUCCESS == HMC_STRT_UpdatePasswords() )                            /* Decrypt the values from the file.   */
+      {
+      (void)memcpy( pwd, mtrFileData.password, sizeof( mtrFileData.password ) );
+      retVal = eSUCCESS;
+      }
    }
 #else
    retVal = eSUCCESS;

@@ -295,7 +295,8 @@ typedef enum
 #elif ( MCU_SELECTED == RA6E1 )
 
 //This is the CBF_BK_KV_METER (Comm Board Force/Busy KV) signal connector pin 27
-#define HMC_COMM_FORCE()            1  // TODO: RA6E1 Setting to 1 for now
+//#define HMC_COMM_FORCE()            1  // TODO: RA6E1 Setting to 1 for now
+#define HMC_COMM_FORCE()            R_BSP_PinRead(BSP_IO_PORT_00_PIN_02)
 #define HMC_COMM_FORCE_TRIS()
 
 //This is the CBS_BM_KV_METER (Comm Board Sense/Busy Modem) signal connector pin 28
@@ -355,10 +356,10 @@ typedef enum
 #define HMC_MSG_MAX_RX_LEN             (64U)          /* This includes the 8 bytes of packet overhead */
 #define HMC_MSG_MAX_TX_LEN             (64U)
 #define HMC_REQ_MAX_BYTES              (HMC_MSG_MAX_RX_LEN-12U)   /* Max # of byte read/written when performing partial table access. */
-#define HMC_MSG_RETRIES                ((uint8_t)3)
+#define HMC_MSG_RETRIES                ((uint8_t)5)
 #define HMC_MSG_ERROR_TIME_OUT_mS      ((uint8_t)60)
-#define HMC_MSG_RESPONSE_TIME_OUT_mS   ((uint16_t)4000)
-#define HMC_MSG_TURN_AROUND_TIME_mS    ((uint8_t)1)      /* Ms */
+#define HMC_MSG_RESPONSE_TIME_OUT_mS   ((uint16_t)1000)
+#define HMC_MSG_TURN_AROUND_TIME_mS    ((uint8_t)5)      /* Ms */
 #define HMC_MSG_BUSY_DELAY_mS          ((uint16_t)2000)
 #define HMC_MSG_ICHAR_TIME_OUT_mS      ((uint16_t)1000)  /* Inter-character Time Out */
 #define HMC_MSG_TRAFFIC_TIME_OUT_mS    ((uint16_t)30000)

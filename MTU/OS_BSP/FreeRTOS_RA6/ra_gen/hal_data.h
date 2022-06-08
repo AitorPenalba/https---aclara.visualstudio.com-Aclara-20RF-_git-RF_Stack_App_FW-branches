@@ -243,8 +243,8 @@ void NULL(adc_callback_args_t * p_args);
             extern const uart_cfg_t g_uart9_cfg;
             extern const sci_uart_extended_cfg_t g_uart9_cfg_extend;
 
-            #ifndef user_uart_callback
-            void user_uart_callback(uart_callback_args_t * p_args);
+            #ifndef opcal_uart_callback
+            void opcal_uart_callback(uart_callback_args_t * p_args);
             #endif
 /** UART on SCI Instance. */
             extern const uart_instance_t      g_uart_DBG;
@@ -299,8 +299,8 @@ extern const crc_cfg_t g_crc0_cfg;
             extern const uart_cfg_t g_uart2_cfg;
             extern const sci_uart_extended_cfg_t g_uart2_cfg_extend;
 
-            #ifndef user_uart_callback
-            void user_uart_callback(uart_callback_args_t * p_args);
+            #ifndef hmc_uart_callback
+            void hmc_uart_callback(uart_callback_args_t * p_args);
             #endif
 void hal_entry(void);
 void g_hal_init(void);
