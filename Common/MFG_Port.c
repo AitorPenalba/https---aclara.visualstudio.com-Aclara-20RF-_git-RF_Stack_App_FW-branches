@@ -358,7 +358,7 @@ static void PhyAttrSetGet(uint32_t argc, char *argv[], PHY_ATTRIBUTES_e eAttribu
 
 #if ( EP == 1 )
 static void MFGP_watchDogResetCount( uint32_t argc, char *argv[] );
-//static void MFG_PhyDemodulator( uint32_t argc, char *argv[] );
+static void MFG_PhyDemodulator( uint32_t argc, char *argv[] );
 #endif
 
 static void MFGP_macReliabilityHighCount     ( uint32_t argc, char *argv[] );
@@ -515,27 +515,26 @@ static void MFGP_MacChannelSetsSTAR          ( uint32_t argc, char *argv[] );
 #endif
 
 static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
-// TODO: RA6 [name_Balaji]: Support functions below for RA6E1
-//static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
-//static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
-//static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
-//static void MFGP_dtlsMfgSubject2             ( uint32_t argc, char *argv[] );
-//static void MFGP_dtlsNetworkHESubject        ( uint32_t argc, char *argv[] );
-//static void MFGP_dtlsNetworkMSSubject        ( uint32_t argc, char *argv[] );
-//static void MFGP_dtlsNetworkRootCA           ( uint32_t argc, char *argv[] );
-//static void MFGP_engBuEnabled                ( uint32_t argc, char *argv[] );
+static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
+static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
+static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
+static void MFGP_dtlsMfgSubject2             ( uint32_t argc, char *argv[] );
+static void MFGP_dtlsNetworkHESubject        ( uint32_t argc, char *argv[] );
+static void MFGP_dtlsNetworkMSSubject        ( uint32_t argc, char *argv[] );
+static void MFGP_dtlsNetworkRootCA           ( uint32_t argc, char *argv[] );
+static void MFGP_engBuEnabled                ( uint32_t argc, char *argv[] );
 static void MFGP_engData1                    ( uint32_t argc, char *argv[] );
-//static void MFGP_engBuTrafficClass           ( uint32_t argc, char *argv[] );
+static void MFGP_engBuTrafficClass           ( uint32_t argc, char *argv[] );
 #if ( EP == 1 )
 static void MFGP_engData2                    ( uint32_t argc, char *argv[] );
 #endif
-//static void MFGP_eventThreshold              ( uint32_t argc, char *argv[] );
+static void MFGP_eventThreshold              ( uint32_t argc, char *argv[] );
 static void MFGP_firmwareVersion             ( uint32_t argc, char *argv[] );
-//static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
-//static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
-//static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
-//static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
-//static void MFGP_nvtest                      ( uint32_t argc, char *argv[] );
+static void MFGP_hardwareVersion             ( uint32_t argc, char *argv[] );
+static void MFGP_ipHEContext                 ( uint32_t argc, char *argv[] );
+static void MFGP_macNetworkId                ( uint32_t argc, char *argv[] );
+static void MFGP_nvFailCount                 ( uint32_t argc, char *argv[] );
+static void MFGP_nvtest                      ( uint32_t argc, char *argv[] );
 
 static void MFGP_ProcessCommand( char *command, uint16_t numBytes );
 
@@ -543,21 +542,21 @@ static void MFGP_shipMode                    ( uint32_t argc, char *argv[] );
 static void MFGP_SpuriousResetCount          ( uint32_t argc, char *argv[] );
 static void MFGP_stSecurityFailCount         ( uint32_t argc, char *argv[] );
 static void MFGP_stSecurityFailTest          ( uint32_t argc, char *argv[] );
-//static void MFGP_FlashSecurity               ( uint32_t argc, char *argv[] );
+static void MFGP_FlashSecurity               ( uint32_t argc, char *argv[] );
 static void MFGP_virgin                      ( uint32_t argc, char *argv[] );
 static void MFGP_virginDelay                 ( uint32_t argc, char *argv[] );
-//static void MFGP_opportunisticAlarmIndexId   ( uint32_t argc, char *argv[] );
-//static void MFGP_realTimeAlarmIndexId        ( uint32_t argc, char *argv[] );
-//static void MFGP_temperature                 ( uint32_t argc, char *argv[] );
+static void MFGP_opportunisticAlarmIndexId   ( uint32_t argc, char *argv[] );
+static void MFGP_realTimeAlarmIndexId        ( uint32_t argc, char *argv[] );
+static void MFGP_temperature                 ( uint32_t argc, char *argv[] );
 #if ( EP == 1 )
-//static void MFGP_epMaxTemperature            ( uint32_t argc, char *argv[] );
-//static void MFGP_epMinTemperature            ( uint32_t argc, char *argv[] );
-//static void MFGP_EpTempHysteresis            ( uint32_t argc, char *argv[] );
-//static void MFGP_HighTempThreshold           ( uint32_t argc, char *argv[] );
-//static void MFGP_EpTempMinThreshold          ( uint32_t argc, char *argv[] );
+static void MFGP_epMaxTemperature            ( uint32_t argc, char *argv[] );
+static void MFGP_epMinTemperature            ( uint32_t argc, char *argv[] );
+static void MFGP_EpTempHysteresis            ( uint32_t argc, char *argv[] );
+static void MFGP_HighTempThreshold           ( uint32_t argc, char *argv[] );
+static void MFGP_EpTempMinThreshold          ( uint32_t argc, char *argv[] );
 #endif
-//static void MFGP_installationDateTime        ( uint32_t argc, char *argv[] );
-//static void MFGP_getRealTimeAlarm            ( uint32_t argc, char *argv[] );
+static void MFGP_installationDateTime        ( uint32_t argc, char *argv[] );
+static void MFGP_getRealTimeAlarm            ( uint32_t argc, char *argv[] );
 static void MFGP_timeLastUpdated             ( uint32_t argc, char *argv[] );
 static void MFGP_timeState                   ( uint32_t argc, char *argv[] );
 
@@ -567,31 +566,31 @@ static void MFGP_dfwCompatibilityTestStatus  ( uint32_t argc, char *argv[] );
 static void MFGP_dfwProgramScriptStatus      ( uint32_t argc, char *argv[] );
 static void MFGP_dfwAuditTestStatus          ( uint32_t argc, char *argv[] );
 #endif
-//static void MFGP_timeZoneDSTHash             ( uint32_t argc, char *argv[] );
-//static void MFGP_timeZoneOffset              ( uint32_t argc, char *argv[] );
-//static void MFGP_dfwDupDiscardPacketQty      ( uint32_t argc, char *argv[] );
-//static void MFGP_dstEnabled                  ( uint32_t argc, char *argv[] );
-//static void MFGP_dstEndRule                  ( uint32_t argc, char *argv[] );
+static void MFGP_timeZoneDSTHash             ( uint32_t argc, char *argv[] );
+static void MFGP_timeZoneOffset              ( uint32_t argc, char *argv[] );
+static void MFGP_dfwDupDiscardPacketQty      ( uint32_t argc, char *argv[] );
+static void MFGP_dstEnabled                  ( uint32_t argc, char *argv[] );
+static void MFGP_dstEndRule                  ( uint32_t argc, char *argv[] );
 static void MFGP_dstOffset                   ( uint32_t argc, char *argv[] );
-//static void MFGP_dstStartRule                ( uint32_t argc, char *argv[] );
+static void MFGP_dstStartRule                ( uint32_t argc, char *argv[] );
 #if ( SAMPLE_METER_TEMPERATURE == 1 )
 static void MFGP_edTemperatureHystersis      ( uint32_t argc, char *argv[] );
 static void MFGP_edTempSampleRate            ( uint32_t argc, char *argv[] );
 #endif
-//static void MFGP_dateTimeLostCount           ( uint32_t argc, char *argv[] );
-//static void MFGP_timeRequestMaxTimeout       ( uint32_t argc, char *argv[] );
-//static void MFGP_initialRegistrationTimemout ( uint32_t argc, char *argv[] );
-//static void MFGP_minRegistrationTimemout     ( uint32_t argc, char *argv[] );
-//static void MFGP_maxRegistrationTimemout     ( uint32_t argc, char *argv[] );
-//static void MFGP_stP0LoopbackFailCount       ( uint32_t argc, char *argv[] );
-//static void MFGP_stP0LoopbackFailTest        ( uint32_t argc, char *argv[] );
+static void MFGP_dateTimeLostCount           ( uint32_t argc, char *argv[] );
+static void MFGP_timeRequestMaxTimeout       ( uint32_t argc, char *argv[] );
+static void MFGP_initialRegistrationTimemout ( uint32_t argc, char *argv[] );
+static void MFGP_minRegistrationTimemout     ( uint32_t argc, char *argv[] );
+static void MFGP_maxRegistrationTimemout     ( uint32_t argc, char *argv[] );
+static void MFGP_stP0LoopbackFailCount       ( uint32_t argc, char *argv[] );
+static void MFGP_stP0LoopbackFailTest        ( uint32_t argc, char *argv[] );
 static void MFGP_quietMode                   ( uint32_t argc, char *argv[] );
 static void MFGP_rfTestMode                  ( uint32_t argc, char *argv[] );
-//static void MFGP_newRegistrationRequired     ( uint32_t argc, char *argv[] );
-//static void MFGP_smLogTimeDiversity          ( uint32_t argc, char *argv[] );
-//static void MFGP_timeAcceptanceDelay         ( uint32_t argc, char *argv[] );
+static void MFGP_newRegistrationRequired     ( uint32_t argc, char *argv[] );
+static void MFGP_smLogTimeDiversity          ( uint32_t argc, char *argv[] );
+static void MFGP_timeAcceptanceDelay         ( uint32_t argc, char *argv[] );
 #if ( ENABLE_HMC_TASKS == 1 )
-//static void MFG_bulkQuantity                 ( uint32_t argc, char *argv[] );
+static void MFG_bulkQuantity                 ( uint32_t argc, char *argv[] );
 #endif
 static void MFGP_outageDeclarationDelay      ( uint32_t argc, char *argv[] );
 static void MFGP_restorationDelay            ( uint32_t argc, char *argv[] );
@@ -606,23 +605,23 @@ static void MFGP_simulateLastGaspStatCcaAttempts( uint32_t argc, char *argv[] );
 static void MFGP_simulateLastGaspStatPPersistAttempts( uint32_t argc, char *argv[] );
 static void MFGP_simulateLastGaspStatMsgsSent( uint32_t argc, char *argv[] );
 #endif
-//static void MFGP_edInfo                      ( uint32_t argc, char *argv[] );
+static void MFGP_edInfo                      ( uint32_t argc, char *argv[] );
 static void MFGP_edFwVersion                 ( uint32_t argc, char *argv[] );
-//static void MFGP_invalidAddressModeCount     ( uint32_t argc, char *argv[] );
+static void MFGP_invalidAddressModeCount     ( uint32_t argc, char *argv[] );
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 static void MFG_logoff                       ( uint32_t argc, char *argv[] );
 static void OptoPortTimerReset ( void );
 #endif
 #if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-//static void MFGP_edHwVersion                 ( uint32_t argc, char *argv[] );
-//static void MFGP_edModel                     ( uint32_t argc, char *argv[] );
+static void MFGP_edHwVersion                 ( uint32_t argc, char *argv[] );
+static void MFGP_edModel                     ( uint32_t argc, char *argv[] );
 #endif
 #if ( ANSI_STANDARD_TABLES == 1 )
-//static void MFGP_AnsiTblOID                  ( uint32_t argc, char *argv[] );
-//static void MFGP_edManufacturer              ( uint32_t argc, char *argv[] );
-//static void MFGP_edProgrammedDateTime        ( uint32_t argc, char *argv[] );
-//static void MFGP_edProgramId                 ( uint32_t argc, char *argv[] );
-//static void MFGP_edProgrammerName            ( uint32_t argc, char *argv[] );
+static void MFGP_AnsiTblOID                  ( uint32_t argc, char *argv[] );
+static void MFGP_edManufacturer              ( uint32_t argc, char *argv[] );
+static void MFGP_edProgrammedDateTime        ( uint32_t argc, char *argv[] );
+static void MFGP_edProgramId                 ( uint32_t argc, char *argv[] );
+static void MFGP_edProgrammerName            ( uint32_t argc, char *argv[] );
 #elif ( ACLARA_DA == 1 )
 static void MFGP_edManufacturer              ( uint32_t argc, char *argv[] );
 #endif
@@ -631,11 +630,11 @@ static void MFGP_meterCommunicationLockoutCount( uint32_t argc, char *argv[] );
 #if ( LP_IN_METER == 0 )
 static void MFGP_lpBuChannel                 ( uint32_t argc, char *argv[] );
 #endif
-//static void MFGP_lpBuDataRedundancy          ( uint32_t argc, char *argv[] );
-//static void MFGP_lpBuMaxTimeDiversity        ( uint32_t argc, char *argv[] );
-//static void MFGP_lpBuSchedule                ( uint32_t argc, char *argv[] );
-//static void MFGP_lpBuTrafficClass            ( uint32_t argc, char *argv[] );
-//static void MFGP_orReadList                  ( uint32_t argc, char *argv[] );
+static void MFGP_lpBuDataRedundancy          ( uint32_t argc, char *argv[] );
+static void MFGP_lpBuMaxTimeDiversity        ( uint32_t argc, char *argv[] );
+static void MFGP_lpBuSchedule                ( uint32_t argc, char *argv[] );
+static void MFGP_lpBuTrafficClass            ( uint32_t argc, char *argv[] );
+static void MFGP_orReadList                  ( uint32_t argc, char *argv[] );
 static void MFG_meterPassword                ( uint32_t argc, char *argv[] );
 static void MFGP_passwordPort0Master         ( uint32_t argc, char *argv[] );
 static void MFGP_lpBuEnabled                 ( uint32_t argc, char *argv[] );
@@ -690,7 +689,7 @@ static void MFGP_ConfigTest                  ( uint32_t argc, char *argv[] );
 static void MFGP_ConfigUpdate                ( uint32_t argc, char *argv[] );
 #endif
 
-//static void MFGP_NwPassActTimeout            ( uint32_t argc, char *argv[] );
+static void MFGP_NwPassActTimeout            ( uint32_t argc, char *argv[] );
 static void MFGP_NwActiveActTimeout          ( uint32_t argc, char *argv[] );
 
 #endif   //#if ( EP == 1 )
@@ -707,7 +706,7 @@ static void MFGP_dtlsServerCertificateSN     ( uint32_t argc, char *argv[] );
 static void MFGP_mtlsAuthenticationWindow    ( uint32_t argc, char *argv[] );
 static void MFGP_mtlsNetworkTimeVariation    ( uint32_t argc, char *argv[] );
 #endif
-//static void MFGP_macRSSI                     ( uint32_t argc, char *argv[] );
+static void MFGP_macRSSI                     ( uint32_t argc, char *argv[] );
 
 #if (VSWR_MEASUREMENT == 1)
 extern float cachedVSWR;
