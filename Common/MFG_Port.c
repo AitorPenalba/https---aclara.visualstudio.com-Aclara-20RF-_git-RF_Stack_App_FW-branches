@@ -2056,8 +2056,8 @@ void MFGP_uartCmdTask( taskParameter )
 /*lint -esym(715,Arg0) not referenced but required by API   */
 void MFGP_uartRecvTask( taskParameter )
 {
-   uint8_t rxByte = 0;
 #if ( RTOS_SELECTION == MQX_RTOS )
+   uint8_t rxByte = 0;
    ( void )Arg0;
 
    SELF_notify = SELF_getEventHandle();   /* Find out the handle used to request a test.  */
@@ -2075,36 +2075,33 @@ void MFGP_uartRecvTask( taskParameter )
       ( void )_io_set_handle( IO_STDOUT, fh_ptr );
       //MFG_printf("MFGP_uartTask: _io_set_handle SUCCESS!\n");
    }
-#endif
-#endif
+#endif   // USE_USB_MFG
+#endif   // RTOS_SELECTION
 #if (USE_DTLS == 1)
    _MfgPortState = MFG_SERIAL_IO_e;
    MFGP_DtlsInit( mfgUart );
 
    for( ;; )
    {
+#if ( MCU_SELECTED == NXP_K24 )
 #if ( USE_USB_MFG != 0 )
       rxByte = usb_getc(); /* Task will suspend until input available.  */
 #else
-#if ( MCU_SELECTED == NXP_K24 )
       while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) )
-#elif ( MCU_SELECTED == RA6E1 )
-      mfgpReadCommandProcess();
-#endif   // MCU_SELECTED
 #endif   // USE_USB_MFG
       {
          if ( _MfgPortState == DTLS_SERIAL_IO_e )
          {
             MFGP_UartRead( rxByte );
-         }
+         }/* end of if() */
          else
          {
 #if ( ECHO_OPTICAL_PORT != 0 )
             if ( ( mfgUart == UART_OPTICAL_PORT ) && ( rxByte != UART_SWITCH_CHAR ) )
             {
                UART_Transmit( mfgUart, &rxByte, 1 );
-            }
-#endif
+            }/* end of if() */
+#endif   // ECHO_OPTICAL_PORT
 #if ( ENABLE_B2B_COMM == 1 )
             if ( _MfgPortState == MFG_SERIAL_IO_e )
             {
@@ -2117,25 +2114,31 @@ void MFGP_uartRecvTask( taskParameter )
                      flags = IO_SERIAL_RAW_IO;     /* Settings for the UART */
                      (void)UART_ioctl( mfgUart, IO_IOCTL_SERIAL_SET_FLAGS, &flags );
                   }
-               }
-            }
+               }/* end of if() */
+            }/* end of if() */
             if ( _MfgPortState == B2B_SERIAL_IO_e )
             {
                hdlc_on_rx_u8(rxByte);
-            }
+            }/* end of if() */
             else
             {
                mfgpReadByte( rxByte );
-            }
+            }/* end of else() */
 #else
-#if ( MCU_SELECTED == NXP_K24 )
             mfgpReadByte( rxByte );
-#endif
-            /* In RA6E1 Bytes are already processed in mfgpReadCommandProcess() */
 #endif   // ENABLE_B2B_COMM
-         }
-      }
-   }
+
+         }/* end of else() */
+      }/* end of while() */
+#elif ( MCU_SELECTED == RA6E1 )
+      // TODO: RA6 [name_Balaji]: Support MFGP_UartRead function for RA6E1
+      /* USE_USB_MFG is used for 9985T and 
+       * ENABLE_B2B_COMM is used for DCU3 XCVR these are not supported 
+       * for RA6E1 */
+      // TODO: RA6 [name_Balaji]: Support ECHO_OPTICAL_PORT function for RA6E1
+      mfgpReadCommandProcess();
+#endif   // MCU_SELECTED
+   }/* end of for () */
 #else
    for( ;; )
    {
