@@ -192,7 +192,10 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( ALRM_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( TEMPERATURE_init, STRT_FLAG_NONE ),
 #endif
+#if ENABLE_MFG_TASKS
+   INIT( MFGP_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+#endif
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */

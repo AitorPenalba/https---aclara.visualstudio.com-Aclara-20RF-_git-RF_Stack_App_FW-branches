@@ -2059,10 +2059,11 @@ void MFGP_uartRecvTask( taskParameter )
 #if ( RTOS_SELECTION == MQX_RTOS )
    uint8_t rxByte = 0;
    ( void )Arg0;
+#endif
 
-   SELF_notify = SELF_getEventHandle();   /* Find out the handle used to request a test.  */
+   SELF_notify = (OS_EVNT_Obj *)SELF_getEventHandle();   /* Find out the handle used to request a test.  */
    SELF_setEventNotify( &MFG_notify );    /* Set event handler to "notify" when test results are completed.  */
-
+#if ( RTOS_SELECTION == MQX_RTOS )
 #if USE_USB_MFG
    USB_SetEventNotify( &MFG_notify );     /* Set event handler to "notify" when USB reconnected.  */
    USB_App_Init();
@@ -2135,7 +2136,7 @@ void MFGP_uartRecvTask( taskParameter )
       /* USE_USB_MFG is used for 9985T and 
        * ENABLE_B2B_COMM is used for DCU3 XCVR these are not supported 
        * for RA6E1 */
-      // TODO: RA6 [name_Balaji]: Support ECHO_OPTICAL_PORT function for RA6E1
+      // TODO: RA6 [name_Balaji]: Verify the support of ECHO_OPTICAL_PORT functionality in RA6E1
       mfgpReadCommandProcess();
 #endif   // MCU_SELECTED
    }/* end of for () */

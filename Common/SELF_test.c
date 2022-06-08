@@ -141,7 +141,7 @@ returnStatus_t SELF_init( void )
 #endif
    return(retVal);
 }
-#if 0
+
 /***********************************************************************************************************************
    Function Name: SELF_eventHandle
 
@@ -168,7 +168,7 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 {
    SELF_notify = handle;
 }
-#endif
+
 /***********************************************************************************************************************
    Function Name: SELF_testTask
 
