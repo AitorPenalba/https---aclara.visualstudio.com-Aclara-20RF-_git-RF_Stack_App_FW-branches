@@ -719,10 +719,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
-   {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" },
+   {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" }, //TODO: RA6E1 [name_Siva]:Has to be moved to the correct place in the next commit
 
 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
-//   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
+//   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" }, 
 //   {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
 //   {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
 //   {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
