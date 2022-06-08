@@ -378,7 +378,7 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
 {
    returnStatus_t   retVal = eFAILURE;
-   uint8_t          len    = 0;
+   uint8_t          len;
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
    len = ( uint8_t )strlen( (char *)string) + 1;
