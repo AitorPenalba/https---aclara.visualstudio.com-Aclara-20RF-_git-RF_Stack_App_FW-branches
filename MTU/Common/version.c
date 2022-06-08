@@ -345,7 +345,6 @@ const firmwareVersionDT_s * VER_getFirmwareVersionDT ( void )
 returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 {
    returnStatus_t   retVal = eFAILURE;
-#if 0
    HWVerString_t    hWVer;                      /* HW Version string */
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
@@ -356,9 +355,7 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
       retVal = eSUCCESS;
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
-#else
-   retVal = eSUCCESS;
-#endif
+
    return (retVal);
 }
 
@@ -381,8 +378,7 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
 {
    returnStatus_t   retVal = eFAILURE;
-#if 0 // TODO: RA6E1: Add Support
-   uint8_t          len;
+   uint8_t          len    = 0;
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
    len = ( uint8_t )strlen( (char *)string) + 1;
@@ -397,9 +393,7 @@ returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
       retVal = eSUCCESS;
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
-#else
-   retVal = eSUCCESS;
-#endif
+
    return (retVal);
 }
 
