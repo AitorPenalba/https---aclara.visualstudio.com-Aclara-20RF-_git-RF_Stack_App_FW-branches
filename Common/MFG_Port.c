@@ -719,6 +719,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
+   {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" },
 
 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
 //   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
@@ -728,11 +729,11 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
 //   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
 //   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
-//   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
+   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
 //   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
 //   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
 //   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
-//   {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
+   {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
 //#if ( DCU == 1 )
 //   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
 //#endif
@@ -805,7 +806,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "macIsIAG",                       MFGP_macIsIAG,                       "Get/Set macIsIAG"},
 //   {  "macIsRouter",                    MFGP_macIsRouter,                    "Get/Set macIsRouter"},
 //
-//   {  "macChannelSets",             MFGP_MacChannelSetsSRFN,         "Get/Set SRFN MAC channel sets" },
+   {  "macChannelSets",             MFGP_MacChannelSetsSRFN,         "Get/Set SRFN MAC channel sets" },
 //#if ( DCU == 1 )
 //   {  "macChannelSetsSTAR",         MFGP_MacChannelSetsSTAR,         "Get/Set STAR MAC channel sets" },
 //#endif
@@ -1052,7 +1053,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "lpBuChannel8",               MFGP_lpBuChannel,                "xxx" },
 //#endif
 //#endif
-//   {  "lpBuEnabled",                MFGP_lpBuEnabled,                "Get/Set whether LP Data is allowed to Bubble up" },
+   {  "lpBuEnabled",                MFGP_lpBuEnabled,                "Get/Set whether LP Data is allowed to Bubble up" },
 //   {  "lpBuDataRedundancy",         MFGP_lpBuDataRedundancy,         "xxx" },
 //   {  "lpBuMaxTimeDiversity",       MFGP_lpBuMaxTimeDiversity,       "xxx" },
 //   {  "lpBuSchedule",               MFGP_lpBuSchedule,               "xxx" },
@@ -1100,7 +1101,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "simulateLastGaspStatPPersistAttempts", MFGP_simulateLastGaspStatPPersistAttempts,  "Get simulateLastGaspStatPPersistAttempts stats" },
 //   {  "simulateLastGaspStatMsgsSent",         MFGP_simulateLastGaspStatMsgsSent,          "Get simulateLastGaspStatMsgsSent stats" },
 //#endif
-//   {  "smLogTimeDiversity",         MFGP_smLogTimeDiversity,         "Get/Set Stack Manager Log Time Diversity" },
+   {  "smLogTimeDiversity",         MFGP_smLogTimeDiversity,         "Get/Set Stack Manager Log Time Diversity" },
 //   {  "stP0LoopbackFailCount",      MFGP_stP0LoopbackFailCount,      "Get/Set P0 Loopback Fail Count" },
 //   {  "stp0loopbackfailtest",       MFGP_stP0LoopbackFailTest,       "Test P0 (HMC port) - requires loopback cable" },
 //#if ( REMOTE_DISCONNECT == 1 )
