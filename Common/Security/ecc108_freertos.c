@@ -33,6 +33,7 @@
 #include "project.h"
 
 #if ( RTOS_SELECTION == MQX_RTOS )
+#error "This file supports only in FreeRTOS. Check the RTOS_SELECTION define and modify considering the OS usage."
 #include <mqx.h>
 #include <fio.h>
 #include <i2c.h>

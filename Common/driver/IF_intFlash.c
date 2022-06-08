@@ -519,8 +519,8 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
    }
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
-   uint32_t startAddr, eraseBytes, destAddrLocal, destAddrLocalComplete;
-   uint32_t initialBytes = 0;
+   uint32_t startAddr, eraseBytes, destAddrLocal;
+   uint32_t initialBytes = 0, finalBytes = 0;
    if ( 0 != memcmp( ( uint8_t * ) destAddr, pSrc, cnt ) ) /* Does flash need to be updated? */
    {  /* Flash has to be updated */
       if( destAddr < FLASH_HP_CODEFLASH_END_ADDRESS )
@@ -539,7 +539,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
             retVal = eFAILURE;
          }
       }
-      else if( ( destAddr >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( destAddr < FLASH_HP_DATAFLASH_END_ADDRESS ) )
+      else if( ( destAddr >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( destAddr <= FLASH_HP_DATAFLASH_END_ADDRESS ) )
       {
          startAddr = FLASH_HP_DATAFLASH_START_ADDRESS +
                       ( FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE * ( ( destAddr - FLASH_HP_DATAFLASH_START_ADDRESS ) / FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE ) );
@@ -550,20 +550,20 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
          if ( startAddr < destAddrLocal )
          {
             initialBytes = destAddrLocal - startAddr;
-            memcpy ( localVar, ( uint32_t * ) startAddr, initialBytes );
+            memcpy ( localVar, ( uint8_t * ) startAddr, initialBytes );
          }
          destAddrLocal = ( uint32_t ) pSrc;
          do
          {
             if ( ( startAddr + eraseBytes ) <= ( destAddr + cnt ) )
             {
-               memcpy ( &localVar[initialBytes], ( uint32_t * ) destAddrLocal, ( eraseBytes - initialBytes ) );
+               memcpy ( &localVar[initialBytes], ( uint8_t * ) destAddrLocal, ( eraseBytes - initialBytes ) );
             }
             else
             {
-               destAddrLocalComplete = ( destAddr + cnt ) - startAddr;
-               memcpy ( &localVar[initialBytes], ( uint32_t * ) destAddrLocal, destAddrLocalComplete );
-               memcpy ( &localVar[initialBytes + destAddrLocalComplete], ( uint32_t * )( destAddr + cnt ), ( eraseBytes - initialBytes - destAddrLocalComplete ) );
+               finalBytes = ( destAddr + cnt ) - startAddr;
+               memcpy ( &localVar[initialBytes], ( uint8_t * ) destAddrLocal, finalBytes );
+               memcpy ( &localVar[initialBytes + finalBytes], ( uint8_t * )( destAddr + cnt ), ( eraseBytes - initialBytes - finalBytes ) );
             }
 
             destAddrLocal = destAddrLocal + ( eraseBytes - initialBytes );
@@ -585,6 +585,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
             }
 
             startAddr = startAddr + eraseBytes;
+            initialBytes = 0;
          } while ( ( eSUCCESS == retVal ) && ( startAddr < ( destAddr + cnt ) ) );
       }
    }
@@ -1062,7 +1063,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
           if (FSP_SUCCESS == retVal)
           {
              /* Wait for the write complete event flag, if BGO is SET  */
-             if ( ( cnt > 0 ) && ( true == g_flash0_cfg.data_flash_bgo ) )
+             if ( true == g_flash0_cfg.data_flash_bgo )
              {
                 (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                 g_b_flash_event_write_complete = false;
@@ -1071,46 +1072,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        }
        else
        {
-          uint32_t localSrcAddr, localDstAddr, remainingByte;
-          uint32_t localCnt = BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE * ( cnt / BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
-          if ( localCnt > 0 )
-          {
-             retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
-             if ( FSP_SUCCESS == retVal )
-             {
-                /* Wait for the write complete event flag, if BGO is SET  */
-                if ( true == g_flash0_cfg.data_flash_bgo )
-                {
-                   (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-                   g_b_flash_event_write_complete = false;
-                }
-             }
-          }
-
-          remainingByte = cnt - localCnt;
-          if ( ( address + localCnt + BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE ) < FLASH_HP_DATAFLASH_END_ADDRESS )
-          {
-             memcpy( localVar, ( uint8_t * )srcAddr + localCnt, remainingByte );
-             memcpy( &localVar[remainingByte], ( uint8_t * )( address + cnt ), ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte ) );
-             retVal = R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( address + localCnt ), BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
-          }
-          else
-          {
-             localDstAddr = ( address + localCnt ) - ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte );
-             memcpy( localVar, ( uint8_t * )localDstAddr, ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte ) );
-             memcpy( &localVar[BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte], ( uint8_t * )( srcAddr + localCnt ), remainingByte);
-             retVal = R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( uint32_t )localDstAddr, BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
-          }
-
-          if ( FSP_SUCCESS == retVal )
-          {
-             /* Wait for the write complete event flag, if BGO is SET  */
-             if ( ( true == g_flash0_cfg.data_flash_bgo ) )
-             {
-                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-                g_b_flash_event_write_complete = false;
-             }
-          }
+          retVal = ( returnStatus_t ) eFAILURE;
        }
     }
     else
