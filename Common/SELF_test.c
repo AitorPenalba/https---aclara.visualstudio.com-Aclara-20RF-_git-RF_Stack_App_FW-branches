@@ -42,7 +42,7 @@
 //#include "buffer.h"
 #include "partition_cfg.h"
 //#include "file_io.h"
-//#include "ecc108_lib_return_codes.h"
+#include "ecc108_lib_return_codes.h"
 //#include "ecc108_mqx.h"
 #include "ecc108_apps.h"
 #include "EVL_event_log.h"
@@ -141,7 +141,7 @@ returnStatus_t SELF_init( void )
 #endif
    return(retVal);
 }
-#if 0
+
 /***********************************************************************************************************************
    Function Name: SELF_eventHandle
 
@@ -168,7 +168,7 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 {
    SELF_notify = handle;
 }
-#endif
+
 /***********************************************************************************************************************
    Function Name: SELF_testTask
 
@@ -335,8 +335,6 @@ static uint16_t RunSelfTest()
       }
    }
 
-#if 0 // TODO: RA6 Melvin: new self test modules to be added
-
    /* Test the security device   */
    if( eSUCCESS == SELF_testSecurity() )
    {
@@ -392,7 +390,6 @@ static uint16_t RunSelfTest()
       }
    }
 #endif
-#endif
 #if 0 // TODO: RA6: DG: To review and Add
    // Can be removed if not required - Currently in place for testing
    if( eSUCCESS != SELF_testInternalFlash() )
@@ -406,11 +403,7 @@ static uint16_t RunSelfTest()
       // TODO: Error handling
    }
 #endif
-   // TODO: RA6E1 [name_Suriya] - Remove this call and add SelfTestSecurity to do complete SelfTest. Will be done once WolfSSL is done.
-   if( eSUCCESS != SEC_init() )
-   {
-      // TODO: Error handling
-   }
+
 #if ( TM_RTC_UNIT_TEST == 1 )
    /* Execute the RTC Test last (to allow sufficient time for VBAT to come up and the OSC to start?)
       otherwise if the RTC SuperCap is completely discharged on the T-board the RTC test may fail on
@@ -715,7 +708,7 @@ returnStatus_t SELF_testRTC( void )
 //   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    return retVal;
 }
-#if 0
+
 /***********************************************************************************************************************
    Function Name: SELF_testSecurity
 
@@ -747,7 +740,6 @@ returnStatus_t SELF_testSecurity( void )
    }
    return retVal;
 }
-#endif // FILE_IO TODO:Check why FILE_IO is not included
 
 /***********************************************************************************************************************
    Function Name: SELF_testNV

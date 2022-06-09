@@ -117,14 +117,14 @@ extern returnStatus_t   SELF_init( void );
 #if ( FILE_IO !=0 )
 extern SELF_file_t      *SELF_GetTestFileHandle( void );
 #endif
-#if (RTOS_SELECTION == MQX_RTOS)
+
 extern OS_EVNT_Obj      *SELF_getEventHandle( void );
 extern void SELF_setEventNotify( OS_EVNT_Obj *handle );
-#endif
+
 extern returnStatus_t   SELF_UpdateTestResults( void );
 extern void             SELF_testTask( taskParameter );
 extern returnStatus_t   SELF_testRTC( void );
-//extern returnStatus_t   SELF_testSecurity( void );
+extern returnStatus_t   SELF_testSecurity( void );
 extern returnStatus_t   SELF_testNV( void );
 extern returnStatus_t   SELF_testInternalFlash( void );
 extern returnStatus_t   SELF_testTimeCompound( void );
