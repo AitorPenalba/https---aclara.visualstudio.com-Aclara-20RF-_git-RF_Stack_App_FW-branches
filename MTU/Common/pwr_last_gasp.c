@@ -2209,8 +2209,6 @@ static void EnterLLS( uint16_t uCounter, PWRLG_LPTMR_Units eUnits )
 #endif
 
 }
-#endif // #if ( MCU_SELECTED == NXP_K24 )
-
 
 /***********************************************************************************************************************
 
@@ -2226,20 +2224,15 @@ static void EnterLLS( uint16_t uCounter, PWRLG_LPTMR_Units eUnits )
 
    Re-entrant Code: No
 
-   Notes:
+   Notes:   This is K24 Only function!!
             If the counter value is 0, continue with existing count. If the existing count is 0, set to 1.
 
             This code is called from mqx_main, before the OS is running. So, in that case, no OS dependent routines may
             be used ( e.g., DBG_logPrintf, OS_TASK_sleep, etc. )
 
-            In RA6E1,
-               - RTC Calendar Alarm is used if the eUnits is LPTMR_SECONDS, AGT alarm is used if the eUnits is LPTMR_MILLISECONDS
-               - LPTMR_MODE_PROGRAM_ONLY only supported if the eUnits in LPTMR_MILLISECONDS i.e. using the AGT.
-
  **********************************************************************************************************************/
 static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode )
 {
-#if ( MCU_SELECTED == NXP_K24 )
    // Select RTC 32.768kHz oscillator as source for LPTMR.
    SIM_SOPT1 = ( SIM_SOPT1 & ~SIM_SOPT1_OSC32KSEL_MASK ) | SIM_SOPT1_OSC32KSEL( 2 );
 
@@ -2248,51 +2241,28 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
    /* Setup the Low Power Timer (LPTMR)
       Clear Timer Compare Flag and disable LPTMR for programming. */
    LPTMR0_CSR = LPTMR_CSR_TCF_MASK;
-#endif
+
    if ( uCounter != 0 ) /* If 0 time requested, resume with existing settings.   */
    {
       if ( LPTMR_SECONDS == eUnits )
       {
-#if ( MCU_SELECTED == NXP_K24 )
          /* Select ERCLK32K and prescale 32K for one second per tick timer. Prescaler is 2^(n+1).
             To achieve 32768, n = 14. LPTMR_PSR_PCS( 2 ) selects the external 32KHz oscillator as the source. */
          LPTMR0_PSR = LPTMR_PSR_PRESCALE( 14 ) | LPTMR_PSR_PCS( 2u );
-#elif ( MCU_SELECTED == RA6E1 )
-         RTC_ConfigureRTCCalendarAlarm( uCounter );
-#endif
       }
-#if ( MCU_SELECTED == NXP_K24 )
       else
-#elif ( MCU_SELECTED == RA6E1 )
-      else if( LPTMR_MILLISECONDS == eUnits )
-#endif
       {
-#if ( MCU_SELECTED == NXP_K24 )
          /* Select ERCLK32K and prescale 32 for millisecond timer.
             Again, prescaler = 2^(n+1), so for divide by 32, n = 4. Note, this results in 1024Hz counter. */
          LPTMR0_PSR = LPTMR_PSR_PRESCALE( 4u ) | LPTMR_PSR_PCS( 2u );
-#elif ( MCU_SELECTED == RA6E1 )
-         AGT_LPM_Timer_Configure( uCounter );
-#endif
       }
-#if ( MCU_SELECTED == RA6E1 )
-      else // LPTMR_SLEEP_FOREVER
-      {
-         /* No need to set the timer */
-         // TODO: RA6: Review: 1. Disable RTC ALARM ? OR Set Timer to max value? OR Reconfigure Deep SW Standby?
-      }
-#endif
-#if ( MCU_SELECTED == NXP_K24 )
       // Set the time out value.
       LPTMR0_CMR = uCounter;
-#endif
    }
-#if ( MCU_SELECTED == NXP_K24 )
    else  if ( LPTMR0_CMR == 0 )  /* Make sure that there is a non-zero value in the compare register! */
    {
       LPTMR0_CMR = 1;
    }
-#endif
    if ( LPTMR_MODE_PROGRAM_ONLY != eMode )
    {
       if ( LPTMR_MODE_ENBLE_INT == eMode )
@@ -2307,7 +2277,6 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
 
          if ( LPTMR_MODE_WAIT == eMode )
          {
-#if ( MCU_SELECTED == NXP_K24 )
             while ( 0 == ( LPTMR0_CSR & LPTMR_CSR_TCF_MASK ) ) /* Wait for Timer Compare Flag - time out */
             {
 #if ( DEBUG_PWRLG != 0 )
@@ -2318,13 +2287,11 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
 #endif
             }
             LPTMR0_CSR = LPTMR_CSR_TCF_MASK;   /* Disable the LP timer.   */
-#elif ( MCU_SELECTED == RA6E1 )
-            AGT_LPM_Timer_Wait();
-#endif // #if ( MCU_SELECTED == NXP_K24 )
          }
       }
    }
 }
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 
 /***********************************************************************************************************************
 
@@ -2516,7 +2483,6 @@ uint8_t PWRLG_GetSleepCancelSource( void )
 
 }
 
-#if 0 // Remove
 /***********************************************************************************************************************
 
    Function name: LptmrStart
@@ -2531,13 +2497,16 @@ uint8_t PWRLG_GetSleepCancelSource( void )
 
    Re-entrant Code: No
 
-   Notes:
+   Notes:   This is RA6E1 Only function!!
             If the counter value is 0, continue with existing count. If the existing count is 0, set to 1.
 
             This code is called from mqx_main, before the OS is running. So, in that case, no OS dependent routines may
             be used ( e.g., DBG_logPrintf, OS_TASK_sleep, etc. )
 
-            In RA6E1, LPTMR_MODE_PROGRAM_ONLY only supported if the eUnits in LPTMR_MILLISECONDS i.e. using the AGT.
+           In RA6E1,
+             - RTC Calendar Alarm is used if the eUnits is LPTMR_SECONDS, AGT alarm is used if the eUnits is LPTMR_MILLISECONDS
+             - LPTMR_MODE_PROGRAM_ONLY only supported if the eUnits in LPTMR_MILLISECONDS i.e. using the AGT.
+
 
  **********************************************************************************************************************/
 static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode )
@@ -2583,7 +2552,4 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
 
    }
 }
-
-#endif
-
 #endif // #if ( MCU_SELECTED == RA6E1 )
