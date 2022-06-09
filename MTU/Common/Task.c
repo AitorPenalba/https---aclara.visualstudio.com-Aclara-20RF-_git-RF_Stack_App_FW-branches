@@ -590,8 +590,8 @@ static void expt_frm_dump(void const * ext_frm_ptr)
 void HardFault_Handler( void )
 {
 
-    void * expt_frm_ptr = (void *)__get_PSP();
-    expt_frm_dump(expt_frm_ptr);
+   void * expt_frm_ptr = (void *)__get_PSP();
+   expt_frm_dump(expt_frm_ptr);
 }
 #endif // ( RTOS_SELECTION == MQX_RTOS )
 
