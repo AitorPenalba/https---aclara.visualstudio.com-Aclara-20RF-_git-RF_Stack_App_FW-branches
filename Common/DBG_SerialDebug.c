@@ -191,7 +191,7 @@ returnStatus_t DBG_init( void )
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
    {
 #if (FILE_IO == 1 )
-#if 0 // TODO: RA6: DG: Enable this code when the FIO issue is resolved.
+#if 1 // TODO: RA6: DG: Enable this code when the FIO issue is resolved.
       if ( eSUCCESS == FIO_fopen(&dbgFileHndl_,                 /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,        /* Search for the best partition according to the timing. */
                                  (uint16_t) eFN_DBG_CONFIG,     /* File ID (filename) */

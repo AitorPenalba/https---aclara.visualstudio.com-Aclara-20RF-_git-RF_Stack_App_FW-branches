@@ -47,8 +47,8 @@
 #include "crc16_m.h"
 #endif
 
-//#include "mode_config.h"
-//#include "MFG_Port.h"
+#include "mode_config.h"
+#include "MFG_Port.h"
 //#include "MAC_Protocol.h"
 //#include "STACK_Protocol.h"
 //#include "COMM.h"
@@ -89,7 +89,7 @@
 //#include "compiler_types.h"
 //#include "si446x_cmd.h"
 //#include "si446x_api_lib.h"
-//#include "time_sync.h"
+#include "time_sync.h"
 //#include "SELF_test.h"
 #include "mode_config.h"
 //#include "EVL_event_log.h"
@@ -231,9 +231,7 @@ static PartitionData_t const  *pTestPartition_;    /* Pointer to partition infor
 
 static char                   DbgCommandBuffer[MAX_DBG_COMMAND_CHARS + 1];
 static char                   *argvar[MAX_CMDLINE_ARGS + 1];
-#if ( MCU_SELECTED == RA6E1 )
-static uint16_t         DBGP_numBytes = 0;               /* Number of bytes currently in the command buffer */
-#endif
+
 //static void PrintECC_error( uint8_t ECCstatus ); //TODO: RA6E1 Bob: temporarily removed
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
@@ -502,9 +500,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#endif
 //#endif
    { "mac_time",     DBG_CommandLine_MacTimeCmd,      "Send a 'mac_time set' (DCU) or 'mac_time req' (EP) command" },
-//   { "mac_tsync",    DBG_CommandLine_TimeSync,        "Set/Get the TimeSync parameters" },
+   { "mac_tsync",    DBG_CommandLine_TimeSync,        "Set/Get the TimeSync parameters" },
    { "macaddr",      DBG_CommandLine_MacAddr,         "Set/Get the MAC address" },
-//   { "macconfig",    DBG_CommandLine_MacConfig,       "Print the MAC Configuration" },
+   { "macconfig",    DBG_CommandLine_MacConfig,       "Print the MAC Configuration" },
 ////   { "macflush",     DBG_CommandLine_MacFlush,        "mac flush" },
 ////   { "macget",       DBG_CommandLine_MacGet,          "mac get"   },
 ////   { "macpurge",     DBG_CommandLine_MacPurge,        "mac purge" },
@@ -514,7 +512,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "macreset",     DBG_CommandLine_MacReset,        "mac reset" },
 ////   { "macset",       DBG_CommandLine_MacSet,          "mac set"   },
 ////   { "macstart",     DBG_CommandLine_MacStart,        "mac start" },
-//   { "macstats",     DBG_CommandLine_MacStats,        "Print the MAC stats" },
+   { "macstats",     DBG_CommandLine_MacStats,        "Print the MAC stats" },
 //#if ( DCU == 1 )
 //   { "macpacketdelay",DBG_CommandLine_TxPacketDelay,   "get (no args) or set (arg1) MAC TxPacketDelay attribute" },
 //#endif
@@ -580,10 +578,10 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "packettimeout", DBG_CommandLine_PacketTimeout,  "get (no args) or set (arg1) MAC Packet Timeout in ms" },
    { "part",         DBG_CommandLine_Partition,       "Prints partition data" },
 ////   { "phymaxtxlen",  DBG_CommandLine_GetPhyMaxTxPayload, "Usage:  'phymaxtxlen' get phy maximum TX payload" },
-//   { "phyreset",     DBG_CommandLine_PhyReset,        "phy reset" },
+   { "phyreset",     DBG_CommandLine_PhyReset,        "phy reset" },
 ////   { "phystart",     DBG_CommandLine_PhyStart,        "phy start" },
    { "phystats",     DBG_CommandLine_PhyStats,        "Print the PHY stats" },
-//   { "phyconfig",    DBG_CommandLine_PhyConfig,       "Print the PHY Configuration" },
+   { "phyconfig",    DBG_CommandLine_PhyConfig,       "Print the PHY Configuration" },
 ////   { "phystop",      DBG_CommandLine_PhyStop,         "phy stop"  },
 //   { "ping",         DBG_CommandLine_MacPingCmd,      "Send a 'ping' request to EP"},
    { "power",        DBG_CommandLine_Power,           "Get power level when no arguments. Set power level (0-5)" },
@@ -592,10 +590,10 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#endif
    { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
    { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
-//#if ( EP == 1 )
-//   { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
-//   { "regtimeouts",  DBG_CommandLine_RegTimeouts,     "Get or Set the Registration Timeouts" },
-//#endif
+#if ( EP == 1 )
+   { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
+   { "regtimeouts",  DBG_CommandLine_RegTimeouts,     "Get or Set the Registration Timeouts" },
+#endif
 //#if BOB_IS_LAZY == 1
 //   { "reset",        DBG_ResetAllStats,               "Reset PHY, MAC and NWK stats" },
 //#endif
@@ -1087,12 +1085,12 @@ static void DBG_CommandLine_Process ( void )
             ****************************************************************************/
             if ( DBG_IsPortEnabled () )
             {
-//               DBG_PortTimer_Manage ( );// TODO: RA6 [name_Balaji]: Integrate Timer for DBG module
+               DBG_PortTimer_Manage ( );// TODO: RA6 [name_Balaji]: Integrate Timer for DBG module
             }
             /***************************************************************************
                Reset the rfTestmode timer upon execution of a valid command
             ****************************************************************************/
-#if 0 // TODO: RA6: Add later
+#if 1 // TODO: RA6E1 Bob: This should be OK to include now.
 #if ( EP == 1 )
             if ( MODECFG_get_rfTest_mode() != 0 )
             {
@@ -6884,163 +6882,163 @@ uint32_t DBG_CommandLine_InsertMacMsg ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-//#if ( EP == 1 )
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_RegTimeouts
-//
-//   Purpose: This function will print out or set the reigstration timeout values
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_RegTimeouts ( uint32_t argc, char *argv[] )
-//{
-//   bool     allParamsValid = ( bool )true;
-//   uint32_t nextTimeout = RegistrationInfo.nextRegistrationTimeout;
-//   uint32_t maxTimeout  = RegistrationInfo.maxRegistrationTimeout;
-//   uint16_t minTimeout  = RegistrationInfo.minRegistrationTimeout;
-//
-//   switch ( argc )
-//   {
-//      case 1:  /* No parameters will print the registration timeouts */
-//         DBG_logPrintf( 'R', "MinRegistrationTimeout (seconds): %hd", RegistrationInfo.minRegistrationTimeout );
-//         DBG_logPrintf( 'R', "MaxRegistrationTimeout (seconds): %d", RegistrationInfo.maxRegistrationTimeout );
-//         DBG_logPrintf( 'R', "NextRegistrationTimeout (seconds): %d", RegistrationInfo.nextRegistrationTimeout );
-//         DBG_logPrintf( 'R', "ActiveRegistrationTimeout (seconds): %d", RegistrationInfo.activeRegistrationTimeout );
-//         allParamsValid = ( bool )false; // so it won't try to save any values below
-//         break;
-//      case 4:
-//         nextTimeout = ( uint32_t )atoi( argv[3] );
-//         if ( nextTimeout == 0 )
-//         {
-//            DBG_logPrintf( 'R', "Invalid NextRegistrationTimeout value (must be > 0)" );
-//            allParamsValid = ( bool )false;
-//         }
-//      //lint -fallthrough
-//      case 3:
-//         maxTimeout = ( uint32_t )atoi( argv[2] );
-//         if ( maxTimeout < 30 )
-//         {
-//            DBG_logPrintf( 'R', "Invalid MaxRegistrationTimeout value (must be >= 30)" );
-//            allParamsValid = ( bool )false;
-//         }
-//      //lint -fallthrough
-//      case 2:
-//         minTimeout = ( uint16_t )atoi( argv[1] );
-//         if ( minTimeout < 30 )
-//         {
-//            DBG_logPrintf( 'R', "Invalid MinRegistrationTimeout value (must be >= 30)" );
-//            allParamsValid = ( bool )false;
-//         }
-//         break;
-//      default:
-//         DBG_logPrintf( 'R',
-//                        "Invalid number of parameters!"
-//                        " No params for read, 1, 2, or 3 to set min, max, next Registration Timeouts" );
-//   }
-//
-//   if ( allParamsValid && ( maxTimeout < minTimeout ) )
-//   {
-//      DBG_logPrintf( 'R', "MaxRegistrationTimeout must be >= MinRegistrationTimeout" );
-//      allParamsValid = ( bool )false;
-//   }
-//
-//   if ( allParamsValid )
-//   {
-//      RegistrationInfo.minRegistrationTimeout  = minTimeout;
-//      RegistrationInfo.maxRegistrationTimeout  = maxTimeout;
-//      RegistrationInfo.nextRegistrationTimeout = nextTimeout;
-//      APP_MSG_UpdateRegistrationFile();
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_RegTimeouts () */
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_RegState
-//
-//   Purpose: This function will print out or set the reigstration state
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
-//{
-//   sysTime_dateFormat_t formattedDate;    /* Installation date/time in yy, mm, dd, hh, mm, dd, ss  */
-//   char                 *currRegState;    /* String representation of registration state  */
-//   uint32_t             installSeconds;   /* Installation date/time in seconds  */
-//   sysTime_t            installTime;      /* Installation date/time in system format   */
-//
-//   switch ( argc )
-//   {
-//      case 1:  /* No parameters will print the registration state */
-//         switch ( RegistrationInfo.registrationStatus )
-//         {
-//            case REG_STATUS_NOT_SENT:
-//               currRegState = "NotSent";
-//               break;
-//            case REG_STATUS_NOT_CONFIRMED:
-//               currRegState = "Sent";
-//               break;
-//            case REG_STATUS_CONFIRMED:
-//               currRegState = "Complete";
-//               break;
-//            default:
-//               currRegState = "??";  //lint !e585 not a trigraph
-//               break;
-//         }
-//         DBG_logPrintf( 'R', "Current Registration State: %s", currRegState );
-//         installSeconds = TIME_SYS_GetInstallationDateTime();
-//         TIME_UTIL_ConvertSecondsToSysFormat( installSeconds, 0, &installTime );
-//         ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &installTime, &formattedDate );
-//
-//         DBG_logPrintf( 'R', "Installation date/time: %02d/%02d/%02d %02d:%02d:%02d (%d)",
-//                         formattedDate.month, formattedDate.day, formattedDate.year, formattedDate.hour,
-//                         formattedDate.min, formattedDate.sec, installSeconds);
-//         break;
-//      case 2:
-//         if ( ( strcasecmp( argv[1], "NotSent" ) == 0 ) || ( strcasecmp( argv[1], "0" ) == 0 ) )
-//         {
-//            APP_MSG_ReEnableRegistration();
-//         }
-//         else if ( ( strcasecmp( argv[1], "Sent" ) == 0 ) || ( strcasecmp( argv[1], "1" ) == 0 ) )
-//         {
-//            sysTimeCombined_t currentTime;   // Get current time
-//
-//            APP_MSG_initRegistrationInfo();
-//            RegistrationInfo.registrationStatus   = REG_STATUS_NOT_CONFIRMED;
-//            ( void )TIME_UTIL_GetTimeInSysCombined( &currentTime );
-//            RegistrationInfo.timeRegistrationSent = ( uint32_t )( currentTime / TIME_TICKS_PER_SEC );
-//            APP_MSG_UpdateRegistrationFile();
-//         }
-//         else if ( ( strcasecmp( argv[1], "Complete" ) == 0 ) || ( strcasecmp( argv[1], "2" ) == 0 ) )
-//         {
-//            RegistrationInfo.registrationStatus      = REG_STATUS_CONFIRMED;
-//            RegistrationInfo.nextRegistrationTimeout = RegistrationInfo.minRegistrationTimeout;
-//            APP_MSG_UpdateRegistrationFile();
-//         }
-//         else
-//         {
-//            DBG_logPrintf( 'R', "Invalid Registration State value - must be { NotSent | Sent | Complete }" );
-//         }
-//         break;
-//      default:
-//         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read; {NotSent | Sent | Complete} to set" );
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_RegState () */
-//#endif
-//
+#if ( EP == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_RegTimeouts
+
+   Purpose: This function will print out or set the reigstration timeout values
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_RegTimeouts ( uint32_t argc, char *argv[] )
+{
+   bool     allParamsValid = ( bool )true;
+   uint32_t nextTimeout = RegistrationInfo.nextRegistrationTimeout;
+   uint32_t maxTimeout  = RegistrationInfo.maxRegistrationTimeout;
+   uint16_t minTimeout  = RegistrationInfo.minRegistrationTimeout;
+
+   switch ( argc )
+   {
+      case 1:  /* No parameters will print the registration timeouts */
+         DBG_logPrintf( 'R', "MinRegistrationTimeout (seconds): %hd", RegistrationInfo.minRegistrationTimeout );
+         DBG_logPrintf( 'R', "MaxRegistrationTimeout (seconds): %d", RegistrationInfo.maxRegistrationTimeout );
+         DBG_logPrintf( 'R', "NextRegistrationTimeout (seconds): %d", RegistrationInfo.nextRegistrationTimeout );
+         DBG_logPrintf( 'R', "ActiveRegistrationTimeout (seconds): %d", RegistrationInfo.activeRegistrationTimeout );
+         allParamsValid = ( bool )false; // so it won't try to save any values below
+         break;
+      case 4:
+         nextTimeout = ( uint32_t )atoi( argv[3] );
+         if ( nextTimeout == 0 )
+         {
+            DBG_logPrintf( 'R', "Invalid NextRegistrationTimeout value (must be > 0)" );
+            allParamsValid = ( bool )false;
+         }
+      //lint -fallthrough
+      case 3:
+         maxTimeout = ( uint32_t )atoi( argv[2] );
+         if ( maxTimeout < 30 )
+         {
+            DBG_logPrintf( 'R', "Invalid MaxRegistrationTimeout value (must be >= 30)" );
+            allParamsValid = ( bool )false;
+         }
+      //lint -fallthrough
+      case 2:
+         minTimeout = ( uint16_t )atoi( argv[1] );
+         if ( minTimeout < 30 )
+         {
+            DBG_logPrintf( 'R', "Invalid MinRegistrationTimeout value (must be >= 30)" );
+            allParamsValid = ( bool )false;
+         }
+         break;
+      default:
+         DBG_logPrintf( 'R',
+                        "Invalid number of parameters!"
+                        " No params for read, 1, 2, or 3 to set min, max, next Registration Timeouts" );
+   }
+
+   if ( allParamsValid && ( maxTimeout < minTimeout ) )
+   {
+      DBG_logPrintf( 'R', "MaxRegistrationTimeout must be >= MinRegistrationTimeout" );
+      allParamsValid = ( bool )false;
+   }
+
+   if ( allParamsValid )
+   {
+      RegistrationInfo.minRegistrationTimeout  = minTimeout;
+      RegistrationInfo.maxRegistrationTimeout  = maxTimeout;
+      RegistrationInfo.nextRegistrationTimeout = nextTimeout;
+      APP_MSG_UpdateRegistrationFile();
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_RegTimeouts () */
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_RegState
+
+   Purpose: This function will print out or set the reigstration state
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
+{
+   sysTime_dateFormat_t formattedDate;    /* Installation date/time in yy, mm, dd, hh, mm, dd, ss  */
+   char                 *currRegState;    /* String representation of registration state  */
+   uint32_t             installSeconds;   /* Installation date/time in seconds  */
+   sysTime_t            installTime;      /* Installation date/time in system format   */
+
+   switch ( argc )
+   {
+      case 1:  /* No parameters will print the registration state */
+         switch ( RegistrationInfo.registrationStatus )
+         {
+            case REG_STATUS_NOT_SENT:
+               currRegState = "NotSent";
+               break;
+            case REG_STATUS_NOT_CONFIRMED:
+               currRegState = "Sent";
+               break;
+            case REG_STATUS_CONFIRMED:
+               currRegState = "Complete";
+               break;
+            default:
+               currRegState = "??";  //lint !e585 not a trigraph
+               break;
+         }
+         DBG_logPrintf( 'R', "Current Registration State: %s", currRegState );
+         installSeconds = TIME_SYS_GetInstallationDateTime();
+         TIME_UTIL_ConvertSecondsToSysFormat( installSeconds, 0, &installTime );
+         ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &installTime, &formattedDate );
+
+         DBG_logPrintf( 'R', "Installation date/time: %02d/%02d/%02d %02d:%02d:%02d (%d)",
+                         formattedDate.month, formattedDate.day, formattedDate.year, formattedDate.hour,
+                         formattedDate.min, formattedDate.sec, installSeconds);
+         break;
+      case 2:
+         if ( ( strcasecmp( argv[1], "NotSent" ) == 0 ) || ( strcasecmp( argv[1], "0" ) == 0 ) )
+         {
+            APP_MSG_ReEnableRegistration();
+         }
+         else if ( ( strcasecmp( argv[1], "Sent" ) == 0 ) || ( strcasecmp( argv[1], "1" ) == 0 ) )
+         {
+            sysTimeCombined_t currentTime;   // Get current time
+
+            APP_MSG_initRegistrationInfo();
+            RegistrationInfo.registrationStatus   = REG_STATUS_NOT_CONFIRMED;
+            ( void )TIME_UTIL_GetTimeInSysCombined( &currentTime );
+            RegistrationInfo.timeRegistrationSent = ( uint32_t )( currentTime / TIME_TICKS_PER_SEC );
+            APP_MSG_UpdateRegistrationFile();
+         }
+         else if ( ( strcasecmp( argv[1], "Complete" ) == 0 ) || ( strcasecmp( argv[1], "2" ) == 0 ) )
+         {
+            RegistrationInfo.registrationStatus      = REG_STATUS_CONFIRMED;
+            RegistrationInfo.nextRegistrationTimeout = RegistrationInfo.minRegistrationTimeout;
+            APP_MSG_UpdateRegistrationFile();
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "Invalid Registration State value - must be { NotSent | Sent | Complete }" );
+         }
+         break;
+      default:
+         DBG_logPrintf( 'R', "Invalid number of parameters!  No params for read; {NotSent | Sent | Complete} to set" );
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_RegState () */
+#endif
+
 ///*******************************************************************************
 //   Function name: DBG_CommandLine_chksum
 //
@@ -7889,39 +7887,39 @@ uint32_t DBG_CommandLine_InsertMacMsg ( uint32_t argc, char *argv[] )
 //   return 0;
 //}
 //#endif
-//
-///*!
-// * \fn DBG_CommandLine_PhyReset
-// *
-// * \brief This function is used to reset the phy
-// *
-// */
-//uint32_t DBG_CommandLine_PhyReset ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      (void) PHY_ResetRequest( ePHY_RESET_STATISTICS, NULL );
-//      return ( 0 );
-//   }
-//   else if ( argc == 2 )
-//   {
-//      // One parameter
-//      if ( strcasecmp( "all", argv[1] ) == 0 )
-//      {
-//         (void) PHY_ResetRequest( ePHY_RESET_ALL,        NULL );
-//         return ( 0 );
-//      }
-//      if ( strcasecmp( "stats", argv[1] ) == 0 )
-//      {
-//         (void) PHY_ResetRequest( ePHY_RESET_STATISTICS, NULL );
-//         return ( 0 );
-//      }
-//   }
-//   DBG_logPrintf( 'R', "Usage: 'phyreset stats|all'" );
-//   return ( 0 );
-//}
-//
+
+/*!
+ * \fn DBG_CommandLine_PhyReset
+ *
+ * \brief This function is used to reset the phy
+ *
+ */
+uint32_t DBG_CommandLine_PhyReset ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      (void) PHY_ResetRequest( ePHY_RESET_STATISTICS, NULL );
+      return ( 0 );
+   }
+   else if ( argc == 2 )
+   {
+      // One parameter
+      if ( strcasecmp( "all", argv[1] ) == 0 )
+      {
+         (void) PHY_ResetRequest( ePHY_RESET_ALL,        NULL );
+         return ( 0 );
+      }
+      if ( strcasecmp( "stats", argv[1] ) == 0 )
+      {
+         (void) PHY_ResetRequest( ePHY_RESET_STATISTICS, NULL );
+         return ( 0 );
+      }
+   }
+   DBG_logPrintf( 'R', "Usage: 'phyreset stats|all'" );
+   return ( 0 );
+}
+
 
 /******************************************************************************
 
@@ -8070,93 +8068,93 @@ uint32_t DBG_CommandLine_MacTimeCmd ( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_TimeSync ( uint32_t argc, char *argv[] )
-//
-//   Purpose: This function is used to set/get the Time Sync Parameters
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_TimeSync ( uint32_t argc, char *argv[] )
-//{
-//   struct
-//   {
-//      char*            name;
-//   } field[] =
-//     {
-//      {"leap"},
-//      {"precision" },
-//      {"offset" },
-//      {"period" },
-//      {"start" },
-//      {"source" },
-//   };
-//
-//   if ( argc > 1 )
-//   {
-//      if ( strcasecmp( "get", argv[1] ) == 0 )
-//      {
-//         TIME_SYNC_Parameters_Print();
-//      }
-//      else if ( strcasecmp( "set", argv[1] ) == 0 )
-//      {
-//         if( argc >= 4 )
-//         {
-//            int index = 0;
-//            do
-//            {
-//               if ( strcasecmp( field[index].name, argv[2] ) == 0 )
-//               {
-//                  uint32_t value;
-//                  value = ( uint32_t )atoi( argv[3] );
-//                  if ( index == 2 )
-//                  {
-//                     (void)TIME_SYNC_TimeSetMaxOffset_Set((uint16_t)value);
-//                  }
-//                  else if ( index == 3 )
-//                  {
-//                     (void)TIME_SYNC_TimeSetPeriod_Set(value);
-//                  }
-//                  else if ( index == 4 )
-//                  {
-//                     (void)TIME_SYNC_TimeSetStart_Set(value);
-//                  }
-//                  else if ( index == 5 )
-//                  {
-//                     (void)TIME_SYNC_TimeSource_Set((uint8_t)value);
-//                  }
-//                  TIME_SYNC_Parameters_Print();
-//                  break;
-//               }
-//            }
-//            while ( index++ < 5 );
-//            if( index > 5 )
-//            {
-//               INFO_printf( "error" );
-//            }
-//         }
-//         else
-//         {
-//            INFO_printf( "error" );
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "mac_tsync get <cr>" );
-//      DBG_logPrintf( 'R', "mac_tsync set %s|%s|%s|%s|%s val<cr>",
-//                     field[0].name, field[1].name, field[2].name, field[3].name, field[4].name );
-//   }
-//   return ( 0 );
-//}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_TimeSync ( uint32_t argc, char *argv[] )
+
+   Purpose: This function is used to set/get the Time Sync Parameters
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_TimeSync ( uint32_t argc, char *argv[] )
+{
+   struct
+   {
+      char*            name;
+   } field[] =
+     {
+      {"leap"},
+      {"precision" },
+      {"offset" },
+      {"period" },
+      {"start" },
+      {"source" },
+   };
+
+   if ( argc > 1 )
+   {
+      if ( strcasecmp( "get", argv[1] ) == 0 )
+      {
+         TIME_SYNC_Parameters_Print();
+      }
+      else if ( strcasecmp( "set", argv[1] ) == 0 )
+      {
+         if( argc >= 4 )
+         {
+            int index = 0;
+            do
+            {
+               if ( strcasecmp( field[index].name, argv[2] ) == 0 )
+               {
+                  uint32_t value;
+                  value = ( uint32_t )atoi( argv[3] );
+                  if ( index == 2 )
+                  {
+                     (void)TIME_SYNC_TimeSetMaxOffset_Set((uint16_t)value);
+                  }
+                  else if ( index == 3 )
+                  {
+                     (void)TIME_SYNC_TimeSetPeriod_Set(value);
+                  }
+                  else if ( index == 4 )
+                  {
+                     (void)TIME_SYNC_TimeSetStart_Set(value);
+                  }
+                  else if ( index == 5 )
+                  {
+                     (void)TIME_SYNC_TimeSource_Set((uint8_t)value);
+                  }
+                  TIME_SYNC_Parameters_Print();
+                  break;
+               }
+            }
+            while ( index++ < 5 );
+            if( index > 5 )
+            {
+               INFO_printf( "error" );
+            }
+         }
+         else
+         {
+            INFO_printf( "error" );
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "mac_tsync get <cr>" );
+      DBG_logPrintf( 'R', "mac_tsync set %s|%s|%s|%s|%s val<cr>",
+                     field[0].name, field[1].name, field[2].name, field[3].name, field[4].name );
+   }
+   return ( 0 );
+}
 
 /******************************************************************************
 
@@ -8349,33 +8347,33 @@ uint32_t DBG_CommandLine_PhyStats ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_PhyConfig
-//
-//   Purpose: Used to print the PHY Configuration
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_PhyConfig ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      PHY_ConfigPrint();
-//      return ( 0 );
-//   }
-//   DBG_logPrintf( 'R', "Usage:  'phyconfig'" );
-//   return ( 0 );
-//}
-//
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_PhyConfig
+
+   Purpose: Used to print the PHY Configuration
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_PhyConfig ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      PHY_ConfigPrint();
+      return ( 0 );
+   }
+   DBG_logPrintf( 'R', "Usage:  'phyconfig'" );
+   return ( 0 );
+}
+
+
 
 /******************************************************************************
 
@@ -8447,53 +8445,53 @@ uint32_t DBG_CommandLine_SM_Config ( uint32_t argc, char *argv[] )
 }
 
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacStats
-//
-//   Purpose: Used to print the MAC Statistics
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacStats ( uint32_t argc, char *argv[] )
-//{
-//   MAC_Stats ();
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacConfig
-//
-//   Purpose: Used to print the MAC Configuration
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacConfig ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      MAC_ConfigPrint();
-//      return ( 0 );
-//   }
-//   DBG_logPrintf( 'R', "Usage:  'macconfig'" );
-//
-//   return ( 0 );
-//}
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacStats
+
+   Purpose: Used to print the MAC Statistics
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacStats ( uint32_t argc, char *argv[] )
+{
+   MAC_Stats ();
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacConfig
+
+   Purpose: Used to print the MAC Configuration
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacConfig ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      MAC_ConfigPrint();
+      return ( 0 );
+   }
+   DBG_logPrintf( 'R', "Usage:  'macconfig'" );
+
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_NwkStats

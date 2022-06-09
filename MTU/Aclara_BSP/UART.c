@@ -330,8 +330,23 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 #endif
    return ( DataSent );
 #elif ( MCU_SELECTED == RA6E1 )
-   ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-   ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+#if 1 // TODO: RA6E1 Bob: attempt to get CRLF instead of just LF
+   if ( ( DataLength > 0 ) && ( DataBuffer[DataLength-1] == '\n' ) )
+   {
+      if ( DataLength > 1 )
+      {
+         ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength-1 );
+         ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+      }
+      ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], (uint8_t *)&CRLF, sizeof(CRLF) );
+      ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+   }
+   else
+#endif
+   {
+      ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+      ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+   }
 
    return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif

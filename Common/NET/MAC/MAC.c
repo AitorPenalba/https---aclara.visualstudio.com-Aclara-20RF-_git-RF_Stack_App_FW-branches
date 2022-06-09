@@ -60,6 +60,7 @@
 #include "time_util.h"
 #include "timer_util.h"
 #include "time_sync.h"
+#include "time_sys.h"
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
 #endif
@@ -4215,9 +4216,9 @@ static void Process_CmdFrame(MAC_DataInd_t const *pDataInd)
 #if ( EP == 1 )
       case MAC_TIME_SET_CMD:
       {  // Handle a time set command (EP Only)
-#if 0 // TODO: RA6E1 Bob: now that we have PHY running, we might get this command
+#if 1 // TODO: RA6E1 Bob: this should now be able to operate.  Remove #if on check-in
          (void)TIME_SYS_SetDateTimeFromMAC(pDataInd);
-#endif
+#endif // TODO: RA6E1 Bob: this should now be able to operate.  Remove #if on check-in
       }
       break;
 #endif
