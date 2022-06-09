@@ -49,6 +49,8 @@
 #include "ecc108_apps.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
 #endif
 #include "byteswap.h"
 #include "user_settings.h"  // Added for defining WOLFSSL_DTLS  /* TODO: RA6E1: SG Determine if the need for this can be migrated to FreeRTOS headers */
@@ -4626,7 +4628,7 @@ static void wolfSSL_LogMessage( const int32_t logLevel, const char *const logMes
 }
 
 #endif
-#endif // #if ( USE_DTLS == 1 ) // TODO: RA6E1: This doesn't seem right
+//#endif // #if ( USE_DTLS == 1 ) // TODO: RA6E1: This doesn't seem right
 /*!
  **********************************************************************************************************************
 
@@ -4950,4 +4952,4 @@ uint16_t computeCertLength( uint8_t *cert )
    return ( uint16_t )min( sizeof( NetWorkRootCA_t ), certLen ); /* return the value that is appropriate. */
 }
 
-//#endif // #if ( USE_DTLS == 1 )  // TODO: RA6E1: Compile should be enabled here not
+#endif // #if ( USE_DTLS == 1 )  // TODO: RA6E1: Compile should be enabled here

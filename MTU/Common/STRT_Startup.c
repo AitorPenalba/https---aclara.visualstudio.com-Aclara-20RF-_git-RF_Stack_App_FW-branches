@@ -127,6 +127,8 @@
 #include "SELF_test.h"
 #if( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
 #endif
 #include "pwr_last_gasp.h"
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
@@ -193,7 +195,10 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( ALRM_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( TEMPERATURE_init, STRT_FLAG_NONE ),
 #endif
+#if ENABLE_MFG_TASKS
+   INIT( MFGP_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+#endif
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
@@ -230,6 +235,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( HD_init, STRT_FLAG_NONE ),
    INIT( OR_MR_init, STRT_FLAG_NONE ),
 #endif   /* end of ENABLE_HMC_TASKS  == 1 */
+   INIT( SEC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
 

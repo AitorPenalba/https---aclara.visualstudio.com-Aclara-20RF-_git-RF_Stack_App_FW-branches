@@ -28,7 +28,7 @@
 #include "r_adc.h"
 #include "r_adc_api.h"
 #include "r_sci_uart.h"
-            #include "r_uart_api.h"
+#include "r_uart_api.h"
 #include "r_iic_master.h"
 #include "r_i2c_master_api.h"
 FSP_HEADER

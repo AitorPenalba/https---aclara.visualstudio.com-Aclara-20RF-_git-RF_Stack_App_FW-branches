@@ -36,6 +36,8 @@
 #include "ecc108_apps.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
 #endif
 #include "byteswap.h"
 #include "App_Msg_Handler.h"
@@ -226,7 +228,11 @@ static bool mtls_ValidateHeader( const MTLS_Packet_t *msg )
       {
          /* Potentially good header.   */
          /* Need the key. If no DTLS session is established, can't accept MTLS messages.  */
+#if ( USE_DTLS == 1 )
          if ( !DTLS_IsSessionEstablished() )
+#else
+         if ( 1 )
+#endif
          {
             /* Bad Header - no DTLS session established.   */
             mtlsAttribs.mtlsNoSesstionCount++;

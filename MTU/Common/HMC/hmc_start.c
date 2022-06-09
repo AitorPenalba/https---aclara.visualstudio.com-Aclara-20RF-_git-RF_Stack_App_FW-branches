@@ -61,8 +61,8 @@
 #include "ecc108_comm_marshaling.h" /* ECC108 return values, keys sizes, etc. */
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"             /* SEC_GetSecPartHandle()  */
-#elif ( RTOS_SELECTION == FREE_RTOS ) // TODO: RA6E1 Create #include "ecc108_freeRTOS.h" and remove this header
-#include "ecc108_apps.h"
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
 #endif
 #include "DBG_SerialDebug.h"
 #if (HMC_KV == 1)

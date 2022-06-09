@@ -195,7 +195,8 @@ static volatile bool g_b_flash_event_blank = false;
 static volatile bool g_b_flash_event_erase_complete = false;
 static volatile bool g_b_flash_event_write_complete = false;
 
-uint8_t localVar[BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE];
+uint8_t localVar[FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE]; // TODO: RA6E1 Currently using data flash erase size. Check whether localVar support needed for code flash write.
+                      // Modify the array size of minimal code flash erase size if erase must required to write in code flash (We mostly dont need it for code flash as the write happens with erasing the complete partition memory)
 #endif
 
 /* ****************************************************************************************************************** */
@@ -451,7 +452,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
    ASSERT(Cnt <= INTERNAL_FLASH_SIZE);    /* Count must be <= the sector size. */
    dvr_shm_lock();
 
-#if ( MCU_SELECTED != RA6E1 )
+#if ( MCU_SELECTED == NXP_K24 )
 #if !defined( __BOOTLOADER ) && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_3 )
    {
@@ -517,15 +518,78 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
       retVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
    }
 #endif
-#else
+#elif ( MCU_SELECTED == RA6E1 )
+   uint32_t startAddr, eraseBytes, destAddrLocal;
+   uint32_t initialBytes = 0, finalBytes = 0;
    if ( 0 != memcmp( ( uint8_t * ) destAddr, pSrc, cnt ) ) /* Does flash need to be updated? */
    {  /* Flash has to be updated */
-      if ( eSUCCESS != flashWrite( destAddr, cnt, pSrc ) )
+      if( destAddr < FLASH_HP_CODEFLASH_END_ADDRESS )
       {
-         retVal = eFAILURE;
+         // TODO: RA6E1 Check whether erase and write required for code flash, if needed enable the below lines.
+         // Note: Code flash requires 8Kb of local memory. Can we use extNV for this?
+         // (We mostly dont need it for code flash as the write happens with erasing the complete partition memory)
+//         startAddr = FLASH_HP_CODEFLASH_START_ADDRESS +
+//                      ( FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE * ( ( destAddr - FLASH_HP_CODEFLASH_START_ADDRESS ) / FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE ) );
+//         eraseBytes = FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE;
+
+         /* TODO: RA6E1 Check whether erase needed for code flash memory. If write used without using partition erase,
+            we require flashErase in this line before writung into the memory */
+         if ( eSUCCESS != flashWrite( destAddr, cnt, pSrc ) )
+         {
+            retVal = eFAILURE;
+         }
+      }
+      else if( ( destAddr >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( destAddr <= FLASH_HP_DATAFLASH_END_ADDRESS ) )
+      {
+         startAddr = FLASH_HP_DATAFLASH_START_ADDRESS +
+                      ( FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE * ( ( destAddr - FLASH_HP_DATAFLASH_START_ADDRESS ) / FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE ) );
+         eraseBytes = FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE;
+
+         // TODO: RA6E1 Check the below code required for code flash as well, if it is, move the below code out of the loop (We mostly dont need it for code flash as the write happens with erasing the complete partition memory)
+         destAddrLocal = destAddr;
+         if ( startAddr < destAddrLocal )
+         {
+            initialBytes = destAddrLocal - startAddr;
+            memcpy ( localVar, ( uint8_t * ) startAddr, initialBytes );
+         }
+         destAddrLocal = ( uint32_t ) pSrc;
+         do
+         {
+            if ( ( startAddr + eraseBytes ) <= ( destAddr + cnt ) )
+            {
+               memcpy ( &localVar[initialBytes], ( uint8_t * ) destAddrLocal, ( eraseBytes - initialBytes ) );
+            }
+            else
+            {
+               finalBytes = ( destAddr + cnt ) - startAddr;
+               memcpy ( &localVar[initialBytes], ( uint8_t * ) destAddrLocal, finalBytes );
+               memcpy ( &localVar[initialBytes + finalBytes], ( uint8_t * )( destAddr + cnt ), ( eraseBytes - initialBytes - finalBytes ) );
+            }
+
+            destAddrLocal = destAddrLocal + ( eraseBytes - initialBytes );
+
+            retVal = ( returnStatus_t ) R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );  // Erase 1 Block
+             /* Wait for the erase complete event flag, if BGO is SET  */
+             if ( true == g_flash0_cfg.data_flash_bgo )
+             {
+                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+                g_b_flash_event_erase_complete = false;
+             }
+
+            if ( eSUCCESS == retVal )
+            {
+               if ( eSUCCESS != flashWrite( startAddr, eraseBytes, localVar ) )
+               {
+                  retVal = eFAILURE;
+               }
+            }
+
+            startAddr = startAddr + eraseBytes;
+            initialBytes = 0;
+         } while ( ( eSUCCESS == retVal ) && ( startAddr < ( destAddr + cnt ) ) );
       }
    }
-#endif
+#endif  //  MCU_SELECTED == NXP_K24
 
    dvr_shm_unlock();
 
@@ -579,7 +643,7 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
    /*lint -efunc( 715, erase ) : pNextDvr is not used.  It is a part of the common API. */
    /*lint -efunc( 818, erase ) : pNextDvr is declared correctly.  It is a part of the common API. */
 
-#if ( MCU_SELECTED != RA6E1 )
+#if ( MCU_SELECTED == NXP_K24 )
 #if !defined( __BOOTLOADER ) && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_3 )
    {
@@ -643,7 +707,7 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
       eRetVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
    }
 #endif
-#else
+#elif ( MCU_SELECTED == RA6E1 )
    lCnt destAddr = destOffset + pParData->PhyStartingAddress; /* Get the actual address in NV. */
    eRetVal = eSUCCESS; /* Assume Success */
    dvr_shm_lock(); /* Take mutex, critical section */
@@ -794,7 +858,7 @@ static bool timeSlice(PartitionData_t const *pParData, DeviceDriverMem_t const *
 static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 {
    returnStatus_t eRetVal = eFAILURE;
-#if ( MCU_SELECTED != RA6E1 )
+#if ( MCU_SELECTED == NXP_K24 )
    /* Make sure the dest is on boundary & cnt is a x sector */
    if ( (0 == (numBytes % ERASE_SECTOR_SIZE_BYTES)) && (0 == (dest % ERASE_SECTOR_SIZE_BYTES)) )
    {
@@ -832,7 +896,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 //      _ICACHE_ENABLE();
 #endif   /* BOOTLOADER  */
    }
-#else
+#elif ( MCU_SELECTED == RA6E1 )
    lCnt blockCount;
    fsp_err_t retVal;
    if( dest < FLASH_HP_CODEFLASH_END_ADDRESS )
@@ -928,7 +992,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const *pSrc )
 {
    returnStatus_t retVal = eFAILURE;
-#if ( MCU_SELECTED != RA6E1 )
+#if ( MCU_SELECTED == NXP_K24 )
    /* Erased state are all 8 bytes of 0xFF */
    static const uint8_t erasedState_[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
@@ -960,7 +1024,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
       _ICACHE_ENABLE();
 #endif   /* BOOTLOADER  */
    }
-#else
+#elif ( MCU_SELECTED == RA6E1 )
     uint32_t srcAddr = ( uint32_t ) pSrc;
     if( address < FLASH_HP_CODEFLASH_END_ADDRESS )
     {
@@ -999,7 +1063,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
           if (FSP_SUCCESS == retVal)
           {
              /* Wait for the write complete event flag, if BGO is SET  */
-             if (true == g_flash0_cfg.data_flash_bgo)
+             if ( true == g_flash0_cfg.data_flash_bgo )
              {
                 (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                 g_b_flash_event_write_complete = false;
@@ -1008,32 +1072,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        }
        else
        {
-          uint32_t localSrcAddr, localDstAddr, remainingByte;
-          uint32_t localCnt = BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE * ( cnt / BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
-          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
-          if ( FSP_SUCCESS == retVal )
-          {
-             /* Wait for the write complete event flag, if BGO is SET  */
-             if ( true == g_flash0_cfg.data_flash_bgo )
-             {
-                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-                g_b_flash_event_write_complete = false;
-             }
-          }
-
-          remainingByte = cnt - localCnt;
-          localSrcAddr = srcAddr - ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte );
-          localDstAddr = address - ( BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE - remainingByte );
-          retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, localSrcAddr, localDstAddr, BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE );
-          if ( FSP_SUCCESS == retVal )
-          {
-             /* Wait for the write complete event flag, if BGO is SET  */
-             if ( true == g_flash0_cfg.data_flash_bgo )
-             {
-                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-                g_b_flash_event_write_complete = false;
-             }
-          }
+          retVal = ( returnStatus_t ) eFAILURE;
        }
     }
     else
