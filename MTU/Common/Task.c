@@ -587,7 +587,7 @@ static void expt_frm_dump(void const * ext_frm_ptr)
 /*lint +esym(818, ext_frm_ptr)   */
 
 /*lint -esym(818,stack_ptr)   could be pointer to const  */
-void HardFault_Handler(_void)
+void HardFault_Handler( void )
 {
 
     void * expt_frm_ptr = (void *)__get_PSP();
