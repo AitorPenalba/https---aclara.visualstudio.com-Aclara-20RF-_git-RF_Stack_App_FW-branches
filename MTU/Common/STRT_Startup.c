@@ -208,11 +208,11 @@ const STRT_FunctionList_t startUpTbl[] =
 #endif
 #if ENABLE_HMC_TASKS
 #if END_DEVICE_PROGRAMMING_CONFIG == 1
-   //INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
+   INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
 #endif
-   //INIT( HMC_STRT_init, STRT_FLAG_NONE ),
-   //INIT( HMC_APP_RTOS_Init, STRT_FLAG_NONE ),
-   //INIT( HMC_ENG_init, STRT_FLAG_NONE ),
+   INIT( HMC_STRT_init, STRT_FLAG_NONE ),
+   INIT( HMC_APP_RTOS_Init, STRT_FLAG_NONE ),
+   INIT( HMC_ENG_init, STRT_FLAG_NONE ),
 #endif
    INIT( PAR_initRtos, STRT_FLAG_NONE ),
    INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
