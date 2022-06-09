@@ -1458,6 +1458,9 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\CGC.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\CRC.c</name>
             </file>
             <file>
@@ -1724,7 +1727,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1895,6 +1898,12 @@
                     <name>$PROJ_DIR$\..\..\Common\Security\ecc108_config.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_freertos.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Security\ecc108_freertos.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\Security\ecc108_i2c.c</name>
                 </file>
                 <file>
@@ -2019,7 +2028,7 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
@@ -2120,7 +2129,7 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\cfg_hal.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\compileswitch.h</name>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\filenames.h</name>
@@ -2241,7 +2250,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>
@@ -2342,15 +2351,6 @@
         </group>
         <group>
             <name>FSP_Gen</name>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board_init.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra\board\board_init.h</name>
-            </file>
             <file>
                 <name>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\src\hal_entry.c</name>
             </file>

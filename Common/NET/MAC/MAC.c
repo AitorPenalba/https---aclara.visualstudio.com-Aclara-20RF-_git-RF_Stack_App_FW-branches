@@ -355,9 +355,9 @@ typedef struct
    uint8_t  CsmaMaxAttempts;              /*!< The maximum number of attempts by the MAC to gain access to the channel
                                                before failing the transaction request. (0-20) */
    uint16_t CsmaMaxBackOffTime;           /*!< The maximum amount of back off time in milliseconds for the CSMA
-                                               algorithm. (macCsmaMinBackOffTime to 500 */
+                                               algorithm. (macCsmaMinBackOffTime to 500 */
    uint16_t CsmaMinBackOffTime;           /*!< The minimum amount of back off time in milliseconds for the CSMA
-                                               algorithm (0 – 100) */
+                                               algorithm (0 - 100) */
    float    CsmaPValue;                   /*!< The probability that the CSMA algorithm will decide to transmit when an
                                                idle channel is found.  (0-1, default 0.1) */
    bool     CsmaQuickAbort;               /*!< Indicates if the CSMA algorithm will abort frame transmission upon the
@@ -710,7 +710,7 @@ void MAC_SaveConfig_To_BkupRAM(void)
       pMacConfig->PacketId                          = (CachedAttr.PacketId + 1 ) % 4;
    }
 }
-#endif
+#endif  // #if ( EP == 1 )
 
 /*!
  *   This function returns the next packet id.
@@ -994,11 +994,7 @@ returnStatus_t MAC_init ( void )
       FileStatus_t fileStatus;
       uint8_t i;
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - lastgasp
       if(PWRLG_LastGasp() == false)
-#else // TODO: RA6E1 - lastgasp
-      if ( 1 )
-#endif
 #endif
       {  // Normal Mode
          for( i=0; i < (sizeof(Files)/sizeof(*(Files))); i++ )
@@ -3464,12 +3460,8 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
    if (eStatus == eMAC_SET_SUCCESS)
    {
 #if EP == 1
-#if 0 // TODO: RA6E1 - lastgasp
       // Only allow configuration changes if NOT in Last Gasp Mode
       if( PWRLG_LastGasp() == false )
-#else
-      if(1)
-#endif
 #endif
       {
          file_t *pFile = (file_t *)Files[0];
@@ -4216,9 +4208,7 @@ static void Process_CmdFrame(MAC_DataInd_t const *pDataInd)
 #if ( EP == 1 )
       case MAC_TIME_SET_CMD:
       {  // Handle a time set command (EP Only)
-#if 1 // TODO: RA6E1 Bob: this should now be able to operate.  Remove #if on check-in
          (void)TIME_SYS_SetDateTimeFromMAC(pDataInd);
-#endif // TODO: RA6E1 Bob: this should now be able to operate.  Remove #if on check-in
       }
       break;
 #endif

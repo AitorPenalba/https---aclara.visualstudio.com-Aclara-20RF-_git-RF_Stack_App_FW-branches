@@ -177,9 +177,8 @@ void DBG_printfDirect( const char *fmt, ... )
 returnStatus_t DBG_init( void )
 {
    returnStatus_t retVal = eFAILURE;
-#if (FILE_IO == 1)
-   FileStatus_t fileStatus;
-#endif
+   FileStatus_t   fileStatus;
+
    if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS, "DBG" ) && /* "DBG" only used with FreeRTOS */
          OS_MUTEX_Create( &mutex_ ) &&
 #if ( RTOS_SELECTION == FREE_RTOS )
@@ -190,7 +189,6 @@ returnStatus_t DBG_init( void )
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
    {
-#if (FILE_IO == 1 )
 #if 1 // TODO: RA6: DG: Enable this code when the FIO issue is resolved.
       if ( eSUCCESS == FIO_fopen(&dbgFileHndl_,                 /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,        /* Search for the best partition according to the timing. */
@@ -220,9 +218,6 @@ returnStatus_t DBG_init( void )
       ConfigAttr.echoState      = DBG_PORT_ECHO_DEFAULT;     // Echo ON
       retVal = eSUCCESS;
 #endif
-#else
-      retVal = eSUCCESS;
-#endif /* FILE_IO */
    }
 #if (TM_SEMAPHORE == 1)
 OS_SEM_TestCreate();
@@ -595,9 +590,8 @@ bool DBG_PortEcho_Get( void )
 void DBG_PortEcho_Set ( bool val )
 {
    ConfigAttr.echoState = val;
-#if (FILE_IO == 1)
+
    (void)FIO_fwrite( &dbgFileHndl_, 0, (uint8_t const *)&ConfigAttr, (lCnt)sizeof(DBG_ConfigAttr_t));
-#endif
 //   (void)UART_SetEcho( UART_DEBUG_PORT, val );
 }
 /*******************************************************************************
@@ -629,9 +623,8 @@ uint8_t DBG_PortTimer_Get( void )
 void DBG_PortTimer_Set ( uint8_t val )
 {
    ConfigAttr.PortTimeout_hh = val;
-#if (FILE_IO == 1)
+
    (void)FIO_fwrite( &dbgFileHndl_, 0, (uint8_t const *)&ConfigAttr, (lCnt)sizeof(DBG_ConfigAttr_t));
-#endif
    DBG_PortTimer_Manage ( );
 }
 /*******************************************************************************
@@ -659,9 +652,7 @@ static void PortTimer_CallBack( uint8_t cmd, const void *pData )
 
    // Disable DBG port timeout
    ConfigAttr.PortTimeout_hh = 0;
-#if (FILE_IO == 1)
    (void)FIO_fwrite( &dbgFileHndl_, 0, (uint8_t const *)&ConfigAttr, (lCnt)sizeof(DBG_ConfigAttr_t));
-#endif
 #endif
 #endif
 }  /*lint !e818 pData could be pointer to const */
@@ -681,7 +672,6 @@ void DBG_PortTimer_Manage ( void )
    /* Initialize/update timer used to automatically disable port if no activity is detected before the timer expires  */
    if(ConfigAttr.PortTimeout_hh > 0)
    {
-#if (TIMER_UTIL == 1)
       // Create timer if not already created
       if ( PortTimerID == INVALID_TIMER_ID )
       {
@@ -696,7 +686,6 @@ void DBG_PortTimer_Manage ( void )
       {
          ( void )TMR_ResetTimer( PortTimerID, TIME_TICKS_PER_HR * ConfigAttr.PortTimeout_hh );
       }
-#endif
       EnableDebugPrint_ = ( bool )true;
    }
 #if ( ENABLE_DEBUG_PORT == 0 )

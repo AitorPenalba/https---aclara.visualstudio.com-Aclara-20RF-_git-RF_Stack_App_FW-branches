@@ -261,3 +261,23 @@ void CRC_ecc108_crc ( uint32_t length, uint8_t *data, uint8_t *crc, uint32_t see
 } /*lint !e454 !e456 mutex unlocked when full CRC complete  */
 #endif   /* BOOTLOADER  */
 /* end CRC_ecc108_crc() */
+
+
+/*******************************************************************************
+
+  Function name: CRC_Shutdown
+
+  Purpose: This function is used to stop the CRC Module in RA6
+
+  Arguments: None
+
+  Returns: None
+
+*******************************************************************************/
+returnStatus_t CRC_Shutdown ( void )
+{
+#if ( MCU_SELECTED == RA6E1 )
+   R_CRC_Close( &g_crc1_ctrl );
+#endif
+   return (eSUCCESS);
+}

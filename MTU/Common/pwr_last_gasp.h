@@ -98,7 +98,6 @@ typedef struct PWRLG_SysRegisterFile
    uint8_t  llwu_f3;
    uint8_t  pad;
    uint8_t  llwu_filt1;
-
 } *PWRLG_SysRegisterFilePtr, PWRLG_SysRegisterFile;
 
 

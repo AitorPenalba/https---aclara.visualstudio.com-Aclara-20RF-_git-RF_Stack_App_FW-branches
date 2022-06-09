@@ -794,11 +794,7 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
 #if (EP == 1)
       /* Only set installation date/time if not already set AND NOT in ship mode */
       /* NOTE: For the T-board, the equivalent of installDateTime is stored in RegistrationInfo.installationDateTime */
-#if 0 // TODO: RA6E1 - Ship mode support to be added
       if ( ( 0 == timeVars_.installDateTime ) && (0 == MODECFG_get_ship_mode()) )
-#else
-      if ( ( 0 == timeVars_.installDateTime ) )
-#endif
       {  //store the first time-sync or timeset command ever
          uint32_t date_Time;   //Used since cannot pass pointer to uint32_t member of a packed struct
          TIME_UTIL_ConvertSysFormatToSeconds(pSysTime, &date_Time, &fractionalSec);
@@ -2800,7 +2796,7 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
    }
    return retVal;
 }
-#endif
+#endif  //#if ( EP == 1 )
 
 
 /***********************************************************************************************************************

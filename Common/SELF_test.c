@@ -42,7 +42,7 @@
 //#include "buffer.h"
 #include "partition_cfg.h"
 //#include "file_io.h"
-//#include "ecc108_lib_return_codes.h"
+#include "ecc108_lib_return_codes.h"
 //#include "ecc108_mqx.h"
 #include "ecc108_apps.h"
 #include "EVL_event_log.h"
@@ -67,7 +67,6 @@ static OS_EVNT_Obj      SELF_events;      /* Self test Events   */
 static OS_EVNT_Obj *    SELF_notify;      /* Event handler to "notify" when test results are completed.     */
 static uint32_t         event_flags;      /* Event flags returned by self test routine.                     */
 static SELF_TestData_t  SELF_TestData;
-#if (FILE_IO == 1)
 static SELF_file_t      SELF_testFile =
 {
    .ePartition      = ePART_SEARCH_BY_TIMING,
@@ -78,7 +77,6 @@ static SELF_file_t      SELF_testFile =
    .Size            = sizeof(SELF_TestData),
    .UpdateFreq      = DVR_BANKED_MAX_UPDATE_RATE_SEC  /* Updated often enough to force into banked area. */
 }; /*lint !e785 too few initializers.  */
-#endif
 
 // For internal flash checking
 uint8_t flashBuffer[512];
@@ -106,7 +104,6 @@ static uint16_t RunSelfTest( void );
 returnStatus_t SELF_init( void )
 {
    returnStatus_t retVal = eFAILURE;
-#if ( FILE_IO == 1)
    FileStatus_t   fileStatus;
    SELF_file_t    *pFile = &SELF_testFile;
 
@@ -136,9 +133,7 @@ returnStatus_t SELF_init( void )
          }
       }
    }
-#else
-   retVal = eSUCCESS;
-#endif
+
    return(retVal);
 }
 
@@ -335,8 +330,6 @@ static uint16_t RunSelfTest()
       }
    }
 
-#if 0 // TODO: RA6 Melvin: new self test modules to be added
-
    /* Test the security device   */
    if( eSUCCESS == SELF_testSecurity() )
    {
@@ -392,7 +385,6 @@ static uint16_t RunSelfTest()
       }
    }
 #endif
-#endif
 #if 0 // TODO: RA6: DG: To review and Add
    // Can be removed if not required - Currently in place for testing
    if( eSUCCESS != SELF_testInternalFlash() )
@@ -406,11 +398,7 @@ static uint16_t RunSelfTest()
       // TODO: Error handling
    }
 #endif
-   // TODO: RA6E1 [name_Suriya] - Remove this call and add SelfTestSecurity to do complete SelfTest. Will be done once WolfSSL is done.
-   if( eSUCCESS != SEC_init() )
-   {
-      // TODO: Error handling
-   }
+
 #if ( TM_RTC_UNIT_TEST == 1 )
    /* Execute the RTC Test last (to allow sufficient time for VBAT to come up and the OSC to start?)
       otherwise if the RTC SuperCap is completely discharged on the T-board the RTC test may fail on
@@ -469,7 +457,7 @@ static uint16_t RunSelfTest()
    return 0;
 #endif
 }
-#if (FILE_IO != 0)
+
 /***********************************************************************************************************************
    Function Name: SELF_GetTestFileHandle
 
@@ -502,7 +490,6 @@ returnStatus_t SELF_UpdateTestResults( void )
    }
    return retVal;
 }
-#endif
 
 /***********************************************************************************************************************
    Function Name: SELF_testInternalFlash
@@ -519,7 +506,7 @@ returnStatus_t SELF_testInternalFlash( void )
 {
    returnStatus_t retVal;
    static PartitionData_t const *pDFWBLInfoPar_;
-   static PartitionData_t const *pDFWAppCode_;
+//   static PartitionData_t const *pDFWAppCode_;
 
    /* Test Internal flash mechanism */
    for (uint32_t index = 0; index < 512; index++)
@@ -715,7 +702,7 @@ returnStatus_t SELF_testRTC( void )
 //   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
    return retVal;
 }
-#if 0
+
 /***********************************************************************************************************************
    Function Name: SELF_testSecurity
 
@@ -747,7 +734,6 @@ returnStatus_t SELF_testSecurity( void )
    }
    return retVal;
 }
-#endif // FILE_IO TODO:Check why FILE_IO is not included
 
 /***********************************************************************************************************************
    Function Name: SELF_testNV

@@ -623,6 +623,7 @@ void EVL_AlarmHandlerTask ( taskParameter )
    else
    {
       ERR_printf("Did not successfully initialize EVL" );
+      DBG_logPrintf( 'I', "Exiting." );
 #if ( RTOS_SELECTION == FREE_RTOS )
       /* NOTE from FreeRTOS: Tasks must not attempt to return from their implementing
       function or otherwise exit.  In newer FreeRTOS port

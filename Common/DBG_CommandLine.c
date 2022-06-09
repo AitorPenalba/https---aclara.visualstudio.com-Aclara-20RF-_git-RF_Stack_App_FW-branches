@@ -231,7 +231,6 @@ static PartitionData_t const  *pTestPartition_;    /* Pointer to partition infor
 
 static char                   DbgCommandBuffer[MAX_DBG_COMMAND_CHARS + 1];
 static char                   *argvar[MAX_CMDLINE_ARGS + 1];
-
 //static void PrintECC_error( uint8_t ECCstatus ); //TODO: RA6E1 Bob: temporarily removed
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
@@ -317,10 +316,6 @@ static uint32_t DBG_CommandLine_usbaddr( uint32_t argc, char *argv[] );
 
 #if ( TEST_SYNC_ERROR == 1 )
 static uint32_t DBG_CommandLine_SyncError( uint32_t argc, char *argv[] );
-#endif
-
-#if 1 // TODO: RA6E1 Bob: Added temporarily from MFG port
-static uint32_t DBG_CommandLine_engBuEnabled( uint32_t argc, char *argv[] );
 #endif
 
 static const struct_CmdLineEntry DBG_CmdTable[] =
@@ -423,9 +418,6 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "dumpdemand",   DBG_CommandLine_DMDDump,         "Prints the demand file/variables" },
 //#endif
 //#endif
-#if 1 // TODO: RA6E1 Bob: temporarily added from MFP port
-   { "engbuenabled", DBG_CommandLine_engBuEnabled,    "Check/change status of /en/bu configuration" },
-#endif // 1
 //   { "evladd",       DBG_CommandLine_EVLADD,          "Add an event to the log" },
 //   { "evlcmd",       DBG_CommandLine_EVLCMD,          "Send Commands to EVL" },
 //   { "evlgetlog",    DBG_CommandLine_EVLGETLOG,       "Get an event log" },
@@ -532,7 +524,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //#if ( CLOCK_IN_METER == 1 )
 //   { "mtrtime",      DBG_CommandLine_mtrTime,         "Convert meter time mm dd yy hh mm to system time" },
 //#endif
-//   { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
+   { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
    { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
    { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
    { "noiseestimatecount", DBG_CommandLine_NoiseEstimateCount, "Display/Set the noise estimate count" },
@@ -1090,13 +1082,11 @@ static void DBG_CommandLine_Process ( void )
             /***************************************************************************
                Reset the rfTestmode timer upon execution of a valid command
             ****************************************************************************/
-#if 1 // TODO: RA6E1 Bob: This should be OK to include now.
 #if ( EP == 1 )
             if ( MODECFG_get_rfTest_mode() != 0 )
             {
                MFGP_rfTestTimerReset();
             }
-#endif
 #endif
             break;
          } /* end if() */
@@ -1537,7 +1527,6 @@ uint32_t DBG_CommandLine_TimeNanoSec( uint32_t argc, char *argv[] )
    OS_TICK_Struct tickValue1 ;
    OS_TICK_Struct tickValue2 ;
    uint32_t delayNanoSec;
-   int64_t diffInArg;
    uint32_t diffInSec;
    if ( argc == 1 )
    {
@@ -1741,7 +1730,6 @@ uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
    uint64_t delaySec1;
    uint64_t delaySec2;
    int64_t diffInArg;
-   uint64_t diffTicksCount;
    uint32_t diffInSec;
    uint32_t diffInArg_Check;
    if ( argc < 3 )
@@ -1992,8 +1980,7 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   OS_TICK_Struct timeMilliSec ;
-   OS_TICK_Struct *isdelayValueSame ;
+   OS_TICK_Struct timeMilliSec;
    OS_TICK_Struct_Ptr isdelayptr;
    uint32_t argvMilliSec;
    uint32_t prevTickValue;
@@ -3756,6 +3743,7 @@ uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
 
       DBG_logPrintf( 'R', "RTC=%02d/%02d/%04d %02d:%02d:%02d",
                      RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec );
+
    }
    else
    {
@@ -5324,7 +5312,6 @@ uint32_t DBG_CommandLine_HmcDemandCoin ( uint32_t argc, char *argv[] )
 #endif
 #endif
 
-#if ( FILE_IO == 1)
 /*******************************************************************************
 
    Function name: DBG_CommandLine_PrintFiles
@@ -5382,7 +5369,7 @@ uint32_t DBG_CommandLine_DumpFiles  ( uint32_t argc, char *argv[] )
 #endif
    return ( 0 );
 }
-#endif // FILE_IO == 1
+
 #if (EP == 1)
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 /*******************************************************************************
@@ -6958,6 +6945,7 @@ uint32_t DBG_CommandLine_RegTimeouts ( uint32_t argc, char *argv[] )
    }
    return ( 0 );
 } /* end DBG_CommandLine_RegTimeouts () */
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_RegState
@@ -7001,7 +6989,6 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
          installSeconds = TIME_SYS_GetInstallationDateTime();
          TIME_UTIL_ConvertSecondsToSysFormat( installSeconds, 0, &installTime );
          ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &installTime, &formattedDate );
-
          DBG_logPrintf( 'R', "Installation date/time: %02d/%02d/%02d %02d:%02d:%02d (%d)",
                          formattedDate.month, formattedDate.day, formattedDate.year, formattedDate.hour,
                          formattedDate.min, formattedDate.sec, installSeconds);
@@ -7037,8 +7024,8 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
    }
    return ( 0 );
 } /* end DBG_CommandLine_RegState () */
-#endif
-
+#endif // (EP == 1)
+//
 ///*******************************************************************************
 //   Function name: DBG_CommandLine_chksum
 //
@@ -12721,43 +12708,43 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 //   return( 0 );
 //}
 //#endif
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_NetworkId
-//
-//   Purpose: This function sets/gets the network ID
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_NetworkId ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t networkId;
-//
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else if ( argc == 2 )
-//   {
-//      networkId = ( uint8_t )atoi( argv[1] );
-//      MAC_NetworkId_Set( networkId );
-//   }
-//
-//   else if ( argc == 1 )
-//   {
-//      DBG_printf( "Network ID is %d", MAC_NetworkId_Get() );
-//   }
-//   return ( 0 );
-//}
-//
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NetworkId
+
+   Purpose: This function sets/gets the network ID
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_NetworkId ( uint32_t argc, char *argv[] )
+{
+   uint8_t networkId;
+
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else if ( argc == 2 )
+   {
+      networkId = ( uint8_t )atoi( argv[1] );
+      MAC_NetworkId_Set( networkId );
+   }
+
+   else if ( argc == 1 )
+   {
+      DBG_printf( "Network ID is %d", MAC_NetworkId_Get() );
+   }
+   return ( 0 );
+}
+
 ///******************************************************************************
 //
 //   Function Name: DBG_CommandLine_RxTimeout
@@ -13698,43 +13685,4 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif
-
-#if 1 // TODO: RA6E1 Bob: temporarily added from MFG port
-/***********************************************************************************************************************
-   Function Name: MFGP_engBuEnabled
-
-   Purpose: Set or Print the Eng Bubbleup Stats enabled flag
-
-   Arguments:
-      argc - Number of Arguments passed to this function
-      argv - pointer to the list of arguments passed to this function
-
-   Returns: void
-***********************************************************************************************************************/
-static uint32_t DBG_CommandLine_engBuEnabled( uint32_t argc, char *argv[] )
-{
-   uint8_t nEngBuEnabled;
-
-   if ( argc <= 2 )
-   {
-      if ( 2 == argc )
-      {
-         // Write engBuEnabled
-         nEngBuEnabled = ( uint8_t )atol( argv[1] );
-         if ( eSUCCESS != SMTDCFG_setEngBuEnabled( nEngBuEnabled ) )
-         {
-            DBG_logPrintf( 'R', "Unsuccessful return from SMTDCFG_setEngBuEnabled()" );
-         }
-      }
-   }
-   else
-   {
-      DBG_logPrintf( 'R', "Invalid number of parameters" );
-   }
-
-   /* Always print read back value  */
-   DBG_logPrintf( 'I', "Engineering stats bubble up = %d", SMTDCFG_getEngBuEnabled( ) );
-   return ( 0 );
-}
-#endif // 1
 ///*lint +esym(818, argc, argv) argc, argv could be const */

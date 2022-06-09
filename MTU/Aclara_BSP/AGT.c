@@ -25,6 +25,7 @@
  /* INCLUDE FILES */
 
 #include "project.h"
+#if ( MCU_SELECTED == RA6E1 )
 #include "AGT.h"
 #include "DBG_SerialDebug.h"
 
@@ -33,7 +34,7 @@
 #define USE_AGTS_IN_CASCADE   0     /* This feature enables the use of AGT0 and AGT1 in cascade for Low Power Mode
                                        To use this feature, there might be a modification required for AGT configs */
 
-
+#define AGT_EVENT_INVALID     255
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
@@ -47,6 +48,7 @@
 
 /* FILE VARIABLE DEFINITIONS */
 
+static volatile uint8_t agt_event_ = AGT_EVENT_INVALID;
 
 /* ******************************************************************************************************************* */
 /* FUNCTION PROTOTYPES */
@@ -96,6 +98,7 @@ fsp_err_t AGT_LPM_Timer_Start(void)
 	if(FSP_SUCCESS == err)
 #endif
 	{
+      agt_event_ = AGT_EVENT_INVALID; // Set it to invalid value
 		/* Start AGT1 timer */
 		err = R_AGT_Start(&agt1_timer_cascade_lpm_trigger_ctrl);
       if(err != FSP_SUCCESS)
@@ -148,6 +151,7 @@ fsp_err_t AGT_LPM_Timer_Stop(void)
 		{
 			/* Stop Timer */
 			err = R_AGT_Stop(&agt1_timer_cascade_lpm_trigger_ctrl);
+         agt_event_ = AGT_EVENT_INVALID; // Set it to invalid value
 			if(FSP_SUCCESS == err)
 			{
 				/* Reset counter */
@@ -209,11 +213,39 @@ fsp_err_t AGT_LPM_Timer_Configure( uint32_t period )
    err = R_AGT_PeriodSet(&agt1_timer_cascade_lpm_trigger_ctrl, period_counts);
 #endif
    assert(FSP_SUCCESS == err);
+   agt_event_ = AGT_EVENT_INVALID; // Set it to invalid value
 
-   err = AGT_LPM_Timer_Start();
 #if 0  /* DBG Code */
    (void) R_AGT_InfoGet(&agt1_timer_cascade_lpm_trigger_ctrl, &info);
    printf("Period:%ld",info.period_counts);
 #endif
    return err;
 }
+
+#if ( USE_AGTS_IN_CASCADE == 0 )
+/*******************************************************************************************************************//**
+ * @brief       Callback function called when the AGT1 Timer expires
+ * @param[OUT]   timer_callback_args_t * p_args
+ * @retval      None
+ **********************************************************************************************************************/
+void agt1_timer_callback(timer_callback_args_t * p_args)
+{
+   agt_event_ = p_args->event;
+}
+
+/*******************************************************************************************************************//**
+ * @brief       A wait function waits till the AGT1 timer expires
+ * @param[IN]   None
+ * @retval      None
+ **********************************************************************************************************************/
+void AGT_LPM_Timer_Wait( void )
+{
+   while( TIMER_EVENT_CYCLE_END != (timer_event_t)agt_event_ )
+   {
+      // CLRWDT(); TODO: RA6: Review if we need to clear WatchDog
+   }
+
+   (void)AGT_LPM_Timer_Stop();
+}
+#endif
+#endif // #if ( MCU_SELECTED == RA6E1 )

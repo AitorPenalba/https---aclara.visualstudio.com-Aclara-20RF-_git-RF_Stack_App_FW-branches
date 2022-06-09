@@ -211,10 +211,10 @@ typedef enum
    eLAST_TSK_IDX // Keep this last
 }eOsTaskIndex_t;
 
-static uint32_t TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track of the CPU load for each task for the last 10 seconds.
+//static uint32_t TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track of the CPU load for each task for the last 10 seconds.
 //static TD_STRUCT *TASK_TD[eLAST_TSK_IDX];                       // Task descriptor list
-static uint32_t cpuLoadIndex = 0;
-static uint32_t CPUTotal;
+//static uint32_t cpuLoadIndex = 0;
+//static uint32_t CPUTotal;
 
 /* The following structure will be used to store task handle information for FreeRTOS. Each
    task handle will be tied to a specific task name as each task is created. When a task
@@ -302,11 +302,11 @@ const char pTskName_Idle[]          = "IDL";
 #if (SIGNAL_NW_STATUS == 1)
 const char pTskName_NwConn[]        = "NWCON";
 #endif
-static const char pTskName_SdPsListener[]        = "PSLSNR";
-static const char pTskName_SdPreambleDetector[]  = "PREDET";
-static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
-static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
-static const char pTskName_TimeSys[]             = "TIMESYS"; // TODO: RA6E1 Bob: Not referenced.  Is this replaced by pTskName_Time[] = "TIME" ?
+//static const char pTskName_SdPsListener[]        = "PSLSNR";
+//static const char pTskName_SdPreambleDetector[]  = "PREDET";
+//static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
+//static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
+//static const char pTskName_TimeSys[]             = "TIMESYS"; // TODO: RA6E1 Bob: Not referenced.  Is this replaced by pTskName_Time[] = "TIME" ?
 
 /* NOTE: The Highest Priority we should use is 9.  This excerpt was taken from AN3905.pdf on freesclale.com
    Task priority. Lower number is for higher priorities.  More than one task can have the same priority level.  Having
@@ -437,14 +437,14 @@ const OS_TASK_Template_t  OS_template_list_last_gasp[] =
    { eTIME_TSK_IDX,     TIME_SYS_HandlerTask,   1200,  11, (char *)pTskName_Time,   DEFAULT_ATTR, 0, 0 },
 #endif
    { eSM_TSK_IDX,       SM_Task,                1000,  12, (char *)pTskName_Sm,     DEFAULT_ATTR, 0, 0 },
-//   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, 0, 0 },
+   { ePHY_TSK_IDX,      PHY_Task,               1700,  13, (char *)pTskName_Phy,    DEFAULT_ATTR, 0, 0 },
    { eMAC_TSK_IDX,      MAC_Task,               1500,  14, (char *)pTskName_Mac,    DEFAULT_ATTR, 0, 0 },
    { eSTACK_TSK_IDX,    NWK_Task,               1500,  15, (char *)pTskName_Nwk,    DEFAULT_ATTR, 0, 0 },
 
 #if ( USE_DTLS == 1 )
    { eDTLS_TSK_IDX,     DTLS_Task,              5400,  16, (char *)pTskName_Dtls,   DEFAULT_ATTR, 0, 0 },
 #endif
-//   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, 0, 0 },
+   { eAPP_TSK_IDX,      APP_MSG_HandlerTask,    2400,  17, (char *)pTskName_AppMsg, DEFAULT_ATTR, 0, 0 },
 
    { eDBG_PRNT_TSK_IDX, DBG_TxTask,              680,  18, (char *)pTskName_Print,  DEFAULT_ATTR, 0, 0 },
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -537,7 +537,62 @@ void task_exception_handler(_mqx_uint para, void * stack_ptr)
     void * expt_frm_ptr = (void *)__get_PSP();
     expt_frm_dump(expt_frm_ptr);
 }
+#elif ( RTOS_SELECTION == FREE_RTOS )
+static void expt_frm_dump(void const * ext_frm_ptr)
+{
+   static const char * const expt_name[] =
+   {
+      "None",
+      "Reset",
+      "NMI",
+      "HardFault",
+      "MemManage",
+      "BusFault",
+      "UsageFault",
+      "SecureFault",
+      "Rsvd",
+      "Rsvd",
+      "Rsvd",
+      "SVCall",
+      "Debug Monitor",
+      "Rsvd",
+      "PendSV",
+      "SysTick"
+   };
 
+   char                             pBuf[ 192 ];   /* Local buffer for printout  */
+   uint16_t                         pOff;          /* offset into pBuf/length    */
+
+   uint32_t excpt_num = __get_PSR() & 0x1FF;
+   if(excpt_num < 16)
+   {
+      pOff =  (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ), "\r\nExcpt [%s] in TASK 0x%x\r\n", expt_name[excpt_num] , OS_TASK_GetId() );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R0:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R1:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 1 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R2:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 2 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R3:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 3 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R12: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 4 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );
+   }
+   else
+   {
+      pOff = (uint16_t)snprintf( pBuf, (int32_t)sizeof( pBuf ), "External interrupt %u occured with no handler to serve it.", excpt_num );
+   }
+
+   //need Exclusion of rtos to print
+    UART_polled_printf( "%s", pBuf );
+}
+/*lint +esym(818, ext_frm_ptr)   */
+
+/*lint -esym(818,stack_ptr)   could be pointer to const  */
+void HardFault_Handler( void )
+{
+
+   void * expt_frm_ptr = (void *)__get_PSP();
+   expt_frm_dump(expt_frm_ptr);
+}
 #endif // ( RTOS_SELECTION == MQX_RTOS )
 
 /***********************************************************************************************************************
@@ -942,7 +997,7 @@ void OS_TASK_ExitId ( char const *pTaskName )
    taskHandlePtr = getFreeRtosTaskHandle( pTaskName );
    if(NULL != taskHandlePtr)
    {  // we found a task handle, delete the task
-   	  vTaskDelete(*taskHandlePtr);
+      vTaskDelete(*taskHandlePtr);
    }
 #endif
 } /* end OS_TASK_ExitId () */

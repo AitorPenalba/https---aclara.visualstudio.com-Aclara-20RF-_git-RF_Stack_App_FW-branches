@@ -6,6 +6,27 @@
 #define ADC_TRIGGER_ADC0_B      ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1        ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1_B      ADC_TRIGGER_SYNC_ELC
+dac_instance_ctrl_t g_dac0_ULPC_ctrl;
+const dac_extended_cfg_t g_dac0_ULPC_ext_cfg =
+{
+    .enable_charge_pump   = 0,
+    .data_format         = DAC_DATA_FORMAT_FLUSH_RIGHT,
+    .output_amplifier_enabled = 1,
+    .internal_output_enabled = false,
+};
+const dac_cfg_t g_dac0_ULPC_cfg =
+{
+    .channel             = 0,
+    .ad_da_synchronized  = false,
+    .p_extend            = &g_dac0_ULPC_ext_cfg
+};
+/* Instance structure to use this module. */
+const dac_instance_t g_dac0_ULPC =
+{
+    .p_ctrl    = &g_dac0_ULPC_ctrl,
+    .p_cfg     = &g_dac0_ULPC_cfg,
+    .p_api     = &g_dac_on_dac
+};
 icu_instance_ctrl_t hmc_trouble_busy_ctrl;
 const external_irq_cfg_t hmc_trouble_busy_cfg =
 {
@@ -233,7 +254,7 @@ const timer_cfg_t agt1_timer_cascade_lpm_trigger_cfg =
     .mode                = TIMER_MODE_ONE_SHOT,
     /* Actual period: 10 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0xa000, .duty_cycle_counts = 0x5000, .source_div = (timer_source_div_t)3,
     .channel             = 1,
-    .p_callback          = NULL,
+    .p_callback          = agt1_timer_callback,
     /** If NULL then do not add & */
 #if defined(NULL)
     .p_context           = NULL,
@@ -299,27 +320,6 @@ const crc_instance_t g_crc1 =
     .p_ctrl        = &g_crc1_ctrl,
     .p_cfg         = &g_crc1_cfg,
     .p_api         = &g_crc_on_crc
-};
-dac_instance_ctrl_t g_dac0_ctrl;
-const dac_extended_cfg_t g_dac0_ext_cfg =
-{
-    .enable_charge_pump   = 0,
-    .data_format         = DAC_DATA_FORMAT_FLUSH_RIGHT,
-    .output_amplifier_enabled = 1,
-    .internal_output_enabled = false,
-};
-const dac_cfg_t g_dac0_cfg =
-{
-    .channel             = 0,
-    .ad_da_synchronized  = false,
-    .p_extend            = &g_dac0_ext_cfg
-};
-/* Instance structure to use this module. */
-const dac_instance_t g_dac0 =
-{
-    .p_ctrl    = &g_dac0_ctrl,
-    .p_cfg     = &g_dac0_cfg,
-    .p_api     = &g_dac_on_dac
 };
 agt_instance_ctrl_t g_timer0_ctrl;
 const agt_extended_cfg_t g_timer0_extend =
@@ -920,9 +920,9 @@ const uart_instance_t g_uart9 =
     .p_cfg         = &g_uart9_cfg,
     .p_api         = &g_uart_on_sci
 };
-sci_uart_instance_ctrl_t     g_uart4_ctrl;
+sci_uart_instance_ctrl_t     g_uart_DBG_ctrl;
 
-            baud_setting_t               g_uart4_baud_setting =
+            baud_setting_t               g_uart_DBG_baud_setting =
             {
 #if ( DEBUG_BAUD_RATE == 115200 )
                 /* Baud rate 115200 calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false
@@ -934,13 +934,13 @@ sci_uart_instance_ctrl_t     g_uart4_ctrl;
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */
-            const sci_uart_extended_cfg_t g_uart4_cfg_extend =
+            const sci_uart_extended_cfg_t g_uart_DBG_cfg_extend =
             {
                 .clock                = SCI_UART_CLOCK_INT,
                 .rx_edge_start          = SCI_UART_START_BIT_FALLING_EDGE,
                 .noise_cancel         = SCI_UART_NOISE_CANCELLATION_DISABLE,
                 .rx_fifo_trigger        = SCI_UART_RX_FIFO_TRIGGER_MAX,
-                .p_baud_setting         = &g_uart4_baud_setting,
+                .p_baud_setting         = &g_uart_DBG_baud_setting,
                 .flow_control           = SCI_UART_FLOW_CONTROL_RTS,
                 #if 0xFF != 0xFF
                 .flow_control_pin       = BSP_IO_PORT_FF_PIN_0xFF,
@@ -950,7 +950,7 @@ sci_uart_instance_ctrl_t     g_uart4_ctrl;
             };
 
             /** UART interface configuration */
-            const uart_cfg_t g_uart4_cfg =
+            const uart_cfg_t g_uart_DBG_cfg =
             {
                 .channel             = 4,
                 .data_bits           = UART_DATA_BITS_8,
@@ -958,7 +958,7 @@ sci_uart_instance_ctrl_t     g_uart4_ctrl;
                 .stop_bits           = UART_STOP_BITS_1,
                 .p_callback          = dbg_uart_callback,
                 .p_context           = NULL,
-                .p_extend            = &g_uart4_cfg_extend,
+                .p_extend            = &g_uart_DBG_cfg_extend,
 #define RA_NOT_DEFINED (1)
 #if (RA_NOT_DEFINED == RA_NOT_DEFINED)
                 .p_transfer_tx       = NULL,
@@ -998,10 +998,10 @@ sci_uart_instance_ctrl_t     g_uart4_ctrl;
             };
 
 /* Instance structure to use this module. */
-const uart_instance_t g_uart4 =
+const uart_instance_t g_uart_DBG =
 {
-    .p_ctrl        = &g_uart4_ctrl,
-    .p_cfg         = &g_uart4_cfg,
+    .p_ctrl        = &g_uart_DBG_ctrl,
+    .p_cfg         = &g_uart_DBG_cfg,
     .p_api         = &g_uart_on_sci
 };
 sci_uart_instance_ctrl_t     g_uart3_ctrl;

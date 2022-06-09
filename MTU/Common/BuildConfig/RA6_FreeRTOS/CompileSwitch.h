@@ -232,7 +232,7 @@
 #define ENABLE_PRNT_ALRM_ERROR         1
 
 /* ------------------------------------------------------------------------------------------------------------------ */
-#define USE_DTLS                       0     // TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
+#define USE_DTLS                       1
 #if ( ACLARA_LC == 1 ) || (ACLARA_DA == 1)
 #define DTLS_FIELD_TRIAL               0     /* Disable feature to allows unsecured comm. until session established   */
 #else // TODO: RA6E1 Enable DTLS_FIELD_TRIAL
@@ -307,8 +307,8 @@
 #define TM_MSGQ                           0
 #define TM_EVENTS                         0
 #define TM_LINKED_LIST                    0
-#define TM_CRC_UNIT_TEST                  1
-#define TM_TIME_COMPOUND_TEST             1
+#define TM_CRC_UNIT_TEST                  0
+#define TM_TIME_COMPOUND_TEST             0
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

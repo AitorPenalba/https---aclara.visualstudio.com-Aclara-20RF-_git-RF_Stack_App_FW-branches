@@ -3554,11 +3554,8 @@ uint8_t RADIO_Get_CurrentRSSI(uint8_t radioNum)
    // Adjust RSSI to compensate for front end gain
    PHY_GetReq_t GetReq;
    GetReq.eAttribute = ePhyAttr_FrontEndGain;
-#if 1 // TODO: RA6E1 Bob: should be able to remove this now that the file system and PHY task are running
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)&FrontEndGain);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#else
-   FrontEndGain = 0;
-#endif
+
    rssi += FrontEndGain;
    if ( rssi < MINIMUM_RSSI_VALUE ){
       rssi = MINIMUM_RSSI_VALUE;
@@ -3696,9 +3693,7 @@ static void processRadioInt(uint8_t radioNum)
 
             // Retrieve PHY state
             GetReq.eAttribute = ePhyAttr_State;
-#if 1 //TODO: RA6E1 Melvin: should be able to remove this now that file system and PHY task are running
             (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&state); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
             if (state == ePHY_STATE_READY_TX) {
                // Keep FEM in TX mode and shutdown PA to save power until next transmission
@@ -3904,7 +3899,7 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 
    INFO_printf("Start RX radio %hu on channel = %hu (%u Hz)", radioNum, chan, CHANNEL_TO_FREQ(chan));
 
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO: RA6E1 Melvin: timer module
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO: RA6E1: Melvin: timer module
    // Get current time
    OS_TICK_Get_CurrentElapsedTicks(&CurrentTime);
 
@@ -3928,9 +3923,8 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 #endif
    // Update RSSI jump threshold if it changed
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
-#if 1 // TODO: RA6E1 Melvin: should be able to remove this now that file system and PHY task are running
+
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&CurrentRssiJumpThreshold);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
    if (radio[radioNum].RssiJumpThreshold != CurrentRssiJumpThreshold) {
       radio[radioNum].RssiJumpThreshold = CurrentRssiJumpThreshold;
       // Configure RSSI jump threshold
@@ -4103,9 +4097,7 @@ void RADIO_SetPower( uint32_t frequency, float powerOutput)
    uint8_t PowerSetting;
 
    GetReq.eAttribute = ePhyAttr_PowerSetting;
-#if 1 //TODO: RA6E1 Melvin: should be able to remove this now that file system and PHY task are running
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&PowerSetting); //lint !e826   Suspicious pointer-to-pointer conversion
-#endif
    RADIO_Power_Level_Set( PowerSetting );       /* Radio chip internal gain setting. Default 20 for 9975T and 60 for 9985T.   */
    (void)BSP_PaDAC_Set_dBm_Out( powerOutput );
 #endif
@@ -4402,14 +4394,10 @@ static PHY_DATA_STATUS_e SendData(uint8_t radioNum, uint16_t chan, PHY_MODE_e mo
       EventData_s  progEvent;     /* Event info */
 
       getReq.eAttribute = ePhyAttr_fngVswrNotificationSet;
-#if 1 //TODO: RA6E1 Melvin: should be able to remove this now that file system and PHY task are running
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&notifySetPoint);   //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
       getReq.eAttribute = ePhyAttr_fngVswrShutdownSet;
-#if 1 //TODO: RA6E1 Melvin: should be able to remove this now that file system and PHY task are running
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&shutDownSetPoint); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
       getReq.eAttribute = ePhyAttr_fngFowardPowerLowSet;
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&lowPowerSetPoint); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
@@ -5217,7 +5205,7 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
    if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
 #endif
    if ( boost ) {
-#if 0
+#if 0 // TODO: RA6E1 Bob: this was done temporarily since the other delay function did not seem to be working.  Need to debug original function.
       // Turn on boost
       PWR_USE_BOOST();
 #else

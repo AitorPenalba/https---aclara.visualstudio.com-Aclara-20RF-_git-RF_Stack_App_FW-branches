@@ -103,7 +103,7 @@ FSP Configuration
       P006 94 IRQ_IRQ11-DS PF_METER - IRQ11-DS "IRQ mode" - - "ADC0: AN006; IRQ: IRQ11-DS" PF_Meter IO - /PF_METER 
       P007 93 ADC0_AN007 - - - "Analog mode" - - "ADC0: AN007" ADC_SC0 I - "ADC_SC0 / Super Cap Voltage" 
       P008 92 ADC0_AN008 - - - "Analog mode" - - "ADC0: AN008; IRQ: IRQ12-DS" ADC_4V0 I - "ADC_4V0 / Analog input from potential divider P4V0" 
-      P014 85 DAC120_DA0 - - - "Analog mode" - - "ADC0: AN012; DAC120: DA0" - O - VPC_Power_Control 
+      P014 85 DAC120_DA0 - - - "Analog mode" - - "ADC0: AN012; DAC120: DA0" Open O - VPC_Power_Control 
       P015 84 IRQ_IRQ13 - - IRQ13 "IRQ mode" - - "ADC0: AN013; IRQ: IRQ13" IRQ_SI4467 IO - /IRQ_SI4460 
       P100 75 SPI1_MISO1 - M None "Peripheral mode" - - "AGT0: AGTIO0; GPT5: GTIOC5B; GPT_POEG: GTETRGA; IRQ: IRQ2; QSPI: QSPCLK; SCI0: RXD0; SCI1: SCK1; SPI1: MISO1" SPIB_MISO IO - SPI1_MISO 
       P101 74 SPI1_MOSI1 - M None "Peripheral mode" - - "AGT0: AGTEE0; GPT5: GTIOC5A; GPT_POEG: GTETRGB; IRQ: IRQ1; QSPI: QIO1; SCI0: TXD0; SCI1: CTS_RTS1; SPI1: MOSI1" SPIB_MOSI IO - SPI1_MOSI 
@@ -204,7 +204,7 @@ FSP Configuration
       P006 94 IRQ_IRQ11-DS PF_METER - IRQ11-DS "IRQ mode" - - "ADC0: AN006; IRQ: IRQ11-DS" PF_Meter IO - /PF_METER 
       P007 93 GPIO - - - "Input mode" - - "ADC0: AN007" ADC_SC0 I - "ADC_SC0 / Super Cap Voltage" 
       P008 92 GPIO - - - "Input mode" - - "ADC0: AN008; IRQ: IRQ12-DS" ADC_4V0 I - "ADC_4V0 / Analog input from potential divider P4V0" 
-      P014 85 GPIO - L - "Input mode" - - "ADC0: AN012; DAC120: DA0" Open IO - VPC_Power_Control 
+      P014 85 GPIO - - - "Input mode" - - "ADC0: AN012; DAC120: DA0" Open O - VPC_Power_Control 
       P015 84 GPIO - - None "Input mode" - - "ADC0: AN013; IRQ: IRQ13" IRQ_SI4467 IO - /IRQ_SI4460 
       P100 75 GPIO - L None "Input mode" - - "AGT0: AGTIO0; GPT5: GTIOC5B; GPT_POEG: GTETRGA; IRQ: IRQ2; QSPI: QSPCLK; SCI0: RXD0; SCI1: SCK1; SPI1: MISO1" SPIB_MISO IO - SPI1_MISO 
       P101 74 GPIO - L None "Input mode" - - "AGT0: AGTEE0; GPT5: GTIOC5A; GPT_POEG: GTETRGB; IRQ: IRQ1; QSPI: QIO1; SCI0: TXD0; SCI1: CTS_RTS1; SPI1: MOSI1" SPIB_MOSI IO - SPI1_MOSI 
@@ -365,6 +365,9 @@ FSP Configuration
   Module "Clock Generation Circuit (r_cgc)"
     Parameter Checking: Default (BSP)
     
+  Module "DAC (r_dac)"
+    Parameter Checking: Default (BSP)
+    
   FreeRTOS
     General: Custom FreeRTOSConfig.h: 
     General: Use Preemption: Enabled
@@ -517,8 +520,8 @@ FSP Configuration
       Interrupts: Transmit End Interrupt Priority: Priority 12
       Interrupts: Error Interrupt Priority: Priority 12
       
-    Instance "g_uart4 UART (r_sci_uart)"
-      General: Name: g_uart4
+    Instance "g_uart_DBG UART (r_sci_uart)"
+      General: Name: g_uart_DBG
       General: Channel: 4
       General: Data Bits: 8bits
       General: Parity: None
@@ -812,7 +815,7 @@ FSP Configuration
       Input: Input Filter: No Filter
       Input: Enable Pin: Enable Pin Not Used
       Input: Trigger Edge: Trigger Edge Rising
-      Interrupts: Callback: NULL
+      Interrupts: Callback: agt1_timer_callback
       Interrupts: Underflow Interrupt Priority: Priority 3
       
     Instance "agt0_timer_lpm_cascade_trigger Timer, Low-Power (r_agt)"
@@ -895,4 +898,14 @@ FSP Configuration
       Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
       Callback: meter_trouble_isr_busy
       Pin Interrupt Priority: Priority 12
+      
+    Instance "g_dac0_ULPC DAC (r_dac)"
+      Name: g_dac0_ULPC
+      Channel: 0
+      Synchronize with ADC: Disabled
+      Data Format: Right Justified
+      Output Amplifier: Enabled
+      Charge Pump (Requires MOCO active): Disabled
+      Internal Output: Enabled by default
+      ELC Trigger Source: Disabled
       

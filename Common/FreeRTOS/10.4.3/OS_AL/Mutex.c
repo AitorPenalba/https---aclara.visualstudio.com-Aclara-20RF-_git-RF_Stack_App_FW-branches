@@ -84,7 +84,7 @@ bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle )
          Function will not return if it fails
 
 *******************************************************************************/
-static char const * const fmtSpec = "task: %s, file: %s, line: %d %s 0x%p\n";
+//static char const * const fmtSpec = "task: %s, file: %s, line: %d %s 0x%p\n";
 void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
 {
 

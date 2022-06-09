@@ -36,6 +36,8 @@
 #include "ecc108_apps.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
 #endif
 #include "byteswap.h"
 #include "App_Msg_Handler.h"
