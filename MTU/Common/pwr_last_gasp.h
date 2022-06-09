@@ -98,7 +98,6 @@ typedef struct PWRLG_SysRegisterFile
    uint8_t  llwu_f3;
    uint8_t  pad;
    uint8_t  llwu_filt1;
-
 } *PWRLG_SysRegisterFilePtr, PWRLG_SysRegisterFile;
 
 
@@ -204,6 +203,7 @@ PWRLG_EXTERN void           PWRLG_SetCsmaParameters( void );
 PWRLG_EXTERN uint16_t       PWRLG_CalculateMessages( void );
 PWRLG_EXTERN void           PWRLG_CalculateSleep( uint8_t step );
 PWRLG_EXTERN void           PWRLG_SetupLastGasp( void );
+
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 

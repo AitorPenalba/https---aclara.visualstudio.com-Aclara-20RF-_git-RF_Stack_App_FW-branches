@@ -535,7 +535,7 @@ void APP_MSG_HandlerTask ( taskParameter )
 
 #if ( PHASE_DETECTION == 1 )
                     // If this was a phase detection resource, then save the time stamp
-                    // This is required becuase the application level does get the time!
+                    // This is required because the application level does get the time!
                      if(heepHdr.Resource == ( uint8_t )pd)
                      {
                         PD_SyncTime_Set(indication->timeStamp);
@@ -568,7 +568,6 @@ void APP_MSG_HandlerTask ( taskParameter )
       else if ( eSYSFMT_STACK_DATA_CONF == pBuf->eSysFmt )
       {
          //Process data confirm
-
       }
       else if ( eSYSFMT_TIME == pBuf->eSysFmt )
       {

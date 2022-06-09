@@ -81,7 +81,6 @@ void Default_Handler (void)
      *  or use of an invalid pointer. Use the Fault Status window in e2 studio or manually check the fault status
      *  registers for more information.
      */
-
     BSP_CFG_HANDLE_UNRECOVERABLE_ERROR(0);
 }
 

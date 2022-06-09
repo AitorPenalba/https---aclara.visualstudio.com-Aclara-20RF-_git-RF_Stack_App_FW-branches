@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)67)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)68)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -345,7 +345,6 @@ const firmwareVersionDT_s * VER_getFirmwareVersionDT ( void )
 returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 {
    returnStatus_t   retVal = eFAILURE;
-#if 0
    HWVerString_t    hWVer;                      /* HW Version string */
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
@@ -356,9 +355,7 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
       retVal = eSUCCESS;
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
-#else
-   retVal = eSUCCESS;
-#endif
+
    return (retVal);
 }
 
@@ -381,7 +378,6 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
 {
    returnStatus_t   retVal = eFAILURE;
-#if 0
    uint8_t          len;
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
@@ -397,9 +393,7 @@ returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
       retVal = eSUCCESS;
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
-#else
-   retVal = eSUCCESS;
-#endif
+
    return (retVal);
 }
 

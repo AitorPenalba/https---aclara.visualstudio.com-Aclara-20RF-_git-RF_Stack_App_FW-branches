@@ -15,10 +15,13 @@
  *****************************************************************************/
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
+#include "project.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
+#endif
+#if ( MCU_SELECTED == NXP_K24 )
 #include <bsp.h>
+#endif
 #include "BSP_aclara.h"
 #include "DBG_SerialDebug.h"
 
@@ -33,12 +36,14 @@
 /* CONSTANTS */
 
 /* FILE VARIABLE DEFINITIONS */
+#if ( MCU_SELECTED == NXP_K24 )
 static bool Vref_Initialized = false;
-
+#endif
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
 
+#if ( RTOS_SELECTION == MQX_RTOS )
 /*******************************************************************************
 
   Function name: BSP_Get_BspRevision
@@ -92,7 +97,7 @@ char const *BSP_Get_PspRevision ( void )
 {
   return ( _mqx_psp_revision ); /*lint !e605*/
 }
-
+#endif // #if ( RTOS_SELECTION == MQX_RTOS )
 /*******************************************************************************
 
   Function name: BSP_Get_ResetStatus
@@ -108,6 +113,7 @@ char const *BSP_Get_PspRevision ( void )
 *******************************************************************************/
 uint16_t BSP_Get_ResetStatus ( void )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    uint8_t ResetReg, srs0, srs1;
    uint16_t ResetStatus = 0x0000;
    static bool firstCall = (bool)true;
@@ -170,8 +176,13 @@ uint16_t BSP_Get_ResetStatus ( void )
    }
 
    return ( ResetStatus );
+#else  // TODO: RA6E1: Add Support
+   return 0;
+#endif
 }
 
+#if ( MCU_SELECTED == NXP_K24 )
+/* DG: Not used */
 /*******************************************************************************
 
   Function name: BSP_Setup_VREF
@@ -204,3 +215,4 @@ void BSP_Setup_VREF ( void )
       Vref_Initialized = true;
    }
 }
+#endif

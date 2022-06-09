@@ -476,7 +476,6 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
       {
          alarm_time_set.time.tm_sec = ((config_time.tm_sec + alarm_secs) % SECONDS_PER_MINUTE);
          alarm_mins++; // Accommodate rollover
-         DBG_printf("RTC Sec Rollover\n");
       }
       else
       {
@@ -491,7 +490,6 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
       {
          alarm_time_set.time.tm_min = ((config_time.tm_min + alarm_mins) % MINUTES_PER_HOUR);
          alarm_hours++; // Accommodate rollover
-         DBG_printf("RTC min Rollover\n");
       }
       else
       {
@@ -508,7 +506,6 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
          // Accommodate rollover
          alarm_time_set.dayofweek_match = true;
          alarm_time_set.time.tm_wday++;  // Add One day to accommodate rollover
-         DBG_printf("RTC Hour Rollover\n");
       }
       else
       {
@@ -516,10 +513,7 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
       }
    }
 
-   if( FSP_SUCCESS == R_RTC_CalendarAlarmSet( &g_rtc0_ctrl , &alarm_time_set ) )
-   {
-      DBG_printf("RTC Calendar Alarm Set \n");
-   }
+   ( void )R_RTC_CalendarAlarmSet( &g_rtc0_ctrl , &alarm_time_set );
 }
 
 /*******************************************************************************

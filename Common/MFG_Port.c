@@ -73,7 +73,7 @@
 #include "pwr_task.h"
 #include "eng_res.h"
 #include "ecc108_lib_return_codes.h"
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Seperate FreeRTOS header
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "ecc108_mqx.h"
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "ecc108_freertos.h"
@@ -730,7 +730,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
 //   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
 //   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
-//   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
+   {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
 //   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
 //   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
 //   {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
@@ -758,7 +758,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
 //   {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
 //   {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
-//   {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
+   {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
 //#if ( EP == 1 )
 //   {  "engData2",                   MFGP_engData2,                   "Get the engData2 stats" },
 //   {  "epMaxTemperature",           MFGP_epMaxTemperature,           "Get/Set EP Max Temperature" },
@@ -824,21 +824,21 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "macReliabilityMedCount",     MFGP_macReliabilityMedCount,     "Get/Set the number of retries to satisfy the QOS reliability level of medium" },
 //   {  "macReliabilityLowCount",     MFGP_macReliabilityLowCount,     "Get/Set the number of retries to satisfy the QOS reliability level of low" },
 //   {  "macRSSI",                    MFGP_macRSSI,                    "Display the RSSI of a specified radio" },
-//#if ( EP == 1 )
-//   {  "macTimeSetMaxOffset",        MFG_TimeSetMaxOffset,            "Get/Set the TimeSet MaxOffset"},
-//   {  "macTimeSetPeriod",           MFG_TimeSetPeriod,               "Get/Set the TimeSet Period" },
-//   {  "macTimeSetStart",            MFG_TimeSetStart,                "Get/Set the TimeSet Start"},
-//   {  "macTimeSource",              MFG_TimeSource,                  "Get/Set the Time Source"},
-//#endif
-//#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
-//   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
-//   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
-//   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
-//   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
-//#endif
-//#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
-//   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
-//#endif
+#if ( EP == 1 )
+   {  "macTimeSetMaxOffset",        MFG_TimeSetMaxOffset,            "Get/Set the TimeSet MaxOffset"},
+   {  "macTimeSetPeriod",           MFG_TimeSetPeriod,               "Get/Set the TimeSet Period" },
+   {  "macTimeSetStart",            MFG_TimeSetStart,                "Get/Set the TimeSet Start"},
+   {  "macTimeSource",              MFG_TimeSource,                  "Get/Set the Time Source"},
+#endif
+#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
+   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
+   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
+   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
+   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
+#endif
+#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
+   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
+#endif
 //   {  "macTransactionTimeout",      MFG_TransactionTimeout,          "Get/Set MAC transaction timeout" },
 //   {  "macTransactionTimeoutCount", MFG_TransactionTimeoutCount,     "Get the number of times there was a MAC transaction timeout"},
 //   {  "macTxLinkDelayCount",        MFG_macTxLinkDelayCount,         "Amount of MAC delays incurred"},
@@ -877,31 +877,31 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //#if ( EP == 1 )
 //   {  "phyDemodulator",             MFG_PhyDemodulator,              "Get/Set the demodulator used by the each receiver" },
 //#endif
-//   {  "phyFrontEndGain",            MFG_PhyFrontEndGain,             "Get/Set the front end gain (half dBm steps)" },
-//   {  "phyMaxTxPayload",            MFG_PhyMaxTxPayload,             "Get/Set the maximum transmitable PHY payload size" },
-//   {  "phyNoiseEstimate",           MFG_PhyNoiseEstimate,            "Get the PHY noise for each channel" },
-//   {  "phyNoiseEstimateRate",       MFG_PhyNoiseEstimateRate,        "Get/Set the PHY noise estimate rate" },
-//   {  "phyNumChannels",             MFG_PhyNumchannels,              "Get the number of channels programmed into and usable by the PHY" },
-//   {  "phyRcvrCount",               MFG_PhyRcvrCount,                "Get the number receivers" },
-//   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
-//   {  "phyRxDetection",             MFG_PhyRxDetection,              "Get/Set the detection configuration" },
-//   {  "phyRxFraming",               MFG_PhyRxFraming,                "Get/Set the framing configuration" },
-//   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
-//   {  "phyRxMode",                  MFG_PhyRxMode,                   "Get/Set the PHY mode configuration" },
-//   {  "phyThermalControlEnable",    MFG_PhyThermalControlEnable,     "Get/Set PHY thermal control feature" },
-//   {  "phyThermalProtectionEnable", MFG_PhyThermalProtectionEnable,  "Get/Set PHY thermal protection feature" },
-//   {  "phyThermalProtectionCount",  MFG_PhyThermalProtectionCount,   "Get The number of times a peripheral temperature exceeding a given limit."},
-//   {  "phyThermalProtectionEngaged",MFG_PhyThermalProtectionEngaged, "Get if a PHY peripheral has exceeded an allowed temperature limit"},
-//   {  "phyTxChannels",              MFG_PhyTxChannels,               "Get/Set radio Transmitter channels" },
-//   {  "phyTxFrequencies",           MFG_PhyTxFrequencies,            "Get/Set radio Transmitter frequencies" },
-//   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
-//   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
-//   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
-//   {  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
-//   {  "phyFailedHeaderDecodeCount", MFG_PhyFailedHeaderDecodeCount,  "Get the number of received PHY frame headers that failed FEC decoding"},
-//   {  "phySyncDetectCount",         MFG_PhySyncDetectCount,          "Get the number of times a valid sync word was detected on each reciever"},
+   {  "phyFrontEndGain",            MFG_PhyFrontEndGain,             "Get/Set the front end gain (half dBm steps)" },
+   {  "phyMaxTxPayload",            MFG_PhyMaxTxPayload,             "Get/Set the maximum transmitable PHY payload size" },
+   {  "phyNoiseEstimate",           MFG_PhyNoiseEstimate,            "Get the PHY noise for each channel" },
+   {  "phyNoiseEstimateRate",       MFG_PhyNoiseEstimateRate,        "Get/Set the PHY noise estimate rate" },
+   {  "phyNumChannels",             MFG_PhyNumchannels,              "Get the number of channels programmed into and usable by the PHY" },
+   {  "phyRcvrCount",               MFG_PhyRcvrCount,                "Get the number receivers" },
+   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
+   {  "phyRxDetection",             MFG_PhyRxDetection,              "Get/Set the detection configuration" },
+   {  "phyRxFraming",               MFG_PhyRxFraming,                "Get/Set the framing configuration" },
+   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
+   {  "phyRxMode",                  MFG_PhyRxMode,                   "Get/Set the PHY mode configuration" },
+   {  "phyThermalControlEnable",    MFG_PhyThermalControlEnable,     "Get/Set PHY thermal control feature" },
+   {  "phyThermalProtectionEnable", MFG_PhyThermalProtectionEnable,  "Get/Set PHY thermal protection feature" },
+   {  "phyThermalProtectionCount",  MFG_PhyThermalProtectionCount,   "Get The number of times a peripheral temperature exceeding a given limit."},
+   {  "phyThermalProtectionEngaged",MFG_PhyThermalProtectionEngaged, "Get if a PHY peripheral has exceeded an allowed temperature limit"},
+   {  "phyTxChannels",              MFG_PhyTxChannels,               "Get/Set radio Transmitter channels" },
+   {  "phyTxFrequencies",           MFG_PhyTxFrequencies,            "Get/Set radio Transmitter frequencies" },
+   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
+   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
+   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
+   {  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
+   {  "phyFailedHeaderDecodeCount", MFG_PhyFailedHeaderDecodeCount,  "Get the number of received PHY frame headers that failed FEC decoding"},
+   {  "phySyncDetectCount",         MFG_PhySyncDetectCount,          "Get the number of times a valid sync word was detected on each reciever"},
 //#if ( EP == 1 )
-//   {  "powerQuality",               MFGP_powerQuality,               "Get power quality counter reading"},
+   {  "powerQuality",               MFGP_powerQuality,               "Get power quality counter reading"},
 //#endif
 //#if (VSWR_MEASUREMENT == 1)
 //   {  "vswr",                       MFGP_Vswr,                       "Get last VSWR reading." },
@@ -912,8 +912,8 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "reboot",                     MFG_reboot,                      "Reboot device"   },
 //   {  "repairInformation",          MFGP_repairInformation,          "(MIMT)Get/Set the repair information of the endpoint of the endpoint" },
 //   {  "rtcDateTime",                MFGP_rtcDateTime,                "Get/Set the RTC value"   },
-//   {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
-//   {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
+   {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
+   {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
 //   {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
 //   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
 //   {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
@@ -935,12 +935,12 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "TBImageTarget",              MFGP_DCUVersion,                 "Get/Set DCU operating mode {DCU2|DCU2+}" },
 //#endif
 //   {  "temperature",                MFGP_temperature,                "Get device temperature" },
-//   {  "timeDefaultAccuracy",        MFG_TimeDefaultAccuracy,         "Get/Set the Default Time Accuracy"},
+   {  "timeDefaultAccuracy",        MFG_TimeDefaultAccuracy,         "Get/Set the Default Time Accuracy"},
 //   {  "timeLastUpdated",            MFGP_timeLastUpdated,            "The time that date/time was last updated" },
-//   {  "timePrecision",              MFG_TimePrecision,               "Get the Time Precision"},
-//   {  "macTimePrecision",           MFG_TimePrecision,               "Alias for timePrecision"},
-//   {  "timeQueryResponseMode",      MFG_TimeQueryResponseMode,       "Get/Set the time query response behavior to broadcast(0), unicast(1) or ignore the request (2)" },
-//   {  "timeState",                  MFGP_timeState,                  "State of system clock: 0=INVALID 1=VALID_NO_SYNC 2=VALID"},
+   {  "timePrecision",              MFG_TimePrecision,               "Get the Time Precision"},
+   {  "macTimePrecision",           MFG_TimePrecision,               "Alias for timePrecision"},
+   {  "timeQueryResponseMode",      MFG_TimeQueryResponseMode,       "Get/Set the time query response behavior to broadcast(0), unicast(1) or ignore the request (2)" },
+   {  "timeState",                  MFGP_timeState,                  "State of system clock: 0=INVALID 1=VALID_NO_SYNC 2=VALID"},
    {  "virgin",                     MFGP_virgin,                     "Virgin unit" },
    {  "virginDelay",                MFGP_virginDelay,                "Erases signature; continues. Allows new code load and then virgin"},
    { 0, 0, 0 }
@@ -962,9 +962,9 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "demandResetLockoutPeriod",   MFGP_demandResetLockoutPeriod,   "Get/Set the demand reset lockout period" },
 //#endif // ( ENABLE_DEMAND_TASKS == 1 )
 //#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
-//   {  "dfwAuditTestStatus",         MFGP_dfwAuditTestStatus,         "Get the dfwAuditTestStatus parameter value"},
-//   {  "dfwCompatibilityTestStatus", MFGP_dfwCompatibilityTestStatus, "Get the dfwCompatibilityTestStatus parameter value"},
-//   {  "dfwProgramScriptStatus",     MFGP_dfwProgramScriptStatus,     "Get the dfwProgramScriptStatus parameter value"},
+   {  "dfwAuditTestStatus",         MFGP_dfwAuditTestStatus,         "Get the dfwAuditTestStatus parameter value"},
+   {  "dfwCompatibilityTestStatus", MFGP_dfwCompatibilityTestStatus, "Get the dfwCompatibilityTestStatus parameter value"},
+   {  "dfwProgramScriptStatus",     MFGP_dfwProgramScriptStatus,     "Get the dfwProgramScriptStatus parameter value"},
 //#endif  // endif ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
 //   {  "dfwApplyConfirmTimeDiversity", MFGP_dfwApplyConfirmTimeDiversity, "xxx" },
 //   {  "dfwDownloadConfirmTimeDiversity", MFGP_dfwDownloadConfirmTimeDiversity, "xxx" },
@@ -1032,7 +1032,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },
 //#if ( SAMPLE_METER_TEMPERATURE == 1 )
 //   {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
-//   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter’s thermometer" },
+//   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter's thermometer" },
 //#endif
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
@@ -1040,7 +1040,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //#endif
 //   {  "initialRegistrationTimeout", MFGP_initialRegistrationTimemout,"Get/Set the initial registration timeout" },
 //   {  "invalidAddressModeCount",    MFGP_invalidAddressModeCount,    "Get the invalid address mode count." },
-//   {  "lastGaspMaxNumAttempts",     MFGP_lastGaspMaxNumAttempts,     "Get/Set maximum number of last gasps" },
+   {  "lastGaspMaxNumAttempts",     MFGP_lastGaspMaxNumAttempts,     "Get/Set maximum number of last gasps" },
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //#if ( LP_IN_METER == 0 )
 //   {  "lpBuChannel1",               MFGP_lpBuChannel,                "xxx" },
@@ -1077,17 +1077,17 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "netkWh",                     MFG_bulkQuantity,                "Read net kWh from meter" },
 //#endif
 //   {  "newRegistrationRequired",    MFGP_newRegistrationRequired,    "Get/Set registration state" },
-//   {  "nwActiveActTimeout",         MFGP_NwActiveActTimeout,         "Get or set active network activity timeout" },
+   {  "nwActiveActTimeout",         MFGP_NwActiveActTimeout,         "Get or set active network activity timeout" },
 //   {  "nwPassActTimeout",           MFGP_NwPassActTimeout,           "Get or set passive network activity timeout" },
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "orReadList",                 MFGP_orReadList,                 "Get/Set on demand read list" },
 //#endif
-//   {  "PhyAfcEnable",               MFGP_PhyAfcEnable,               "Enable/disable AFC" },
+   {  "PhyAfcEnable",               MFGP_PhyAfcEnable,               "Enable/disable AFC" },
 //   {  "PhyAfcRssiThreshold",        MFGP_PhyAfcRSSIThreshold,        "Get/Set AFC RSSI threshold" },
 //   {  "PhyAfcTemperaturerange",     MFGP_PhyAfcTemperatureRange,     "Get/Set AFC temperature range" },
-//   {  "outageDeclarationDelay",     MFGP_outageDeclarationDelay,     "Get/Set outage declaration delay in seconds" },
-//   {  "restorationDeclarationDelay",MFGP_restorationDelay,           "Get/Set restoration delay in seconds" },
-//   {  "powerQualityEventDuration",  MFGP_powerQualityEventDuration,  "Get/Set power quality event duration in seconds" },
+   {  "outageDeclarationDelay",     MFGP_outageDeclarationDelay,     "Get/Set outage declaration delay in seconds" },
+   {  "restorationDeclarationDelay",MFGP_restorationDelay,           "Get/Set restoration delay in seconds" },
+   {  "powerQualityEventDuration",  MFGP_powerQualityEventDuration,  "Get/Set power quality event duration in seconds" },
 //#if ( ENABLE_DEMAND_TASKS == 1 )
 //#if ( DEMAND_IN_METER == 0 )
 //   {  "scheduledDemandResetDay",    MFGP_scheduledDemandResetDay,    "xxx" },
@@ -1116,7 +1116,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "totkWh",                     MFG_bulkQuantity,                "Read total kWh from meter" },
 //#endif
-//   {  "watchdogResetCount",         MFGP_watchDogResetCount,         "Get/Set watchdoge reset counter" },
+   {  "watchdogResetCount",         MFGP_watchDogResetCount,         "Get/Set watchdoge reset counter" },
 //#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "0.0.0.1.1.1.12.0.0.0.0.0.0.0.0.3.72.0",  MFG_bulkQuantity,    "Read forward kWh from meter" },
 //   {  "0.0.0.1.20.1.12.0.0.0.0.0.0.0.0.3.72.0", MFG_bulkQuantity,    "Read total kWh from meter" },
@@ -1193,7 +1193,7 @@ static const char CRLF[] = { '\r', '\n' };
    ,MFGP_dtlsNetworkMSSubject \
    ,MFGP_dtlsServerCertificateSN \
    ,MFGP_dtlsNetworkRootCA \
-   once DTLS is in place */
+  once DTLS is in place */
 //lint -e750    Lint is complaining about macro not referenced
 #define MFG_COMMON_CALLS \
    MFGP_CommandLine_Help \
@@ -1663,7 +1663,7 @@ returnStatus_t MFGP_cmdInit( void )
 #endif
    return(retVal);
 }
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED == NXP_K24 )  /* TODO: RA6E1: Add support */
 /***********************************************************************************************************************
    Function Name: mfgpReadByte
 
@@ -1786,7 +1786,7 @@ static void mfgpReadByte( uint8_t rxByte )
       }
    }
 }
-#endif
+#endif  // #if ( MCU_SELECTED == NXP_K24 )
 
 #if ( MCU_SELECTED == RA6E1 )
 /***********************************************************************************************************************
@@ -1950,8 +1950,8 @@ static void mfgpReadCommandProcess( void )
             /* Call the command */
             OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
 #if ( USE_USB_MFG != 0 )
-#if ( RTOS_SELECTION == MQX_RTOS ) 
-            event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
+#if ( RTOS_SELECTION == MQX_RTOS )
+              event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
 #elif ( RTOS_SELECTION == FREE_RTOS )
             event_flags = OS_EVNT_Wait ( &CMD_events, 0x00ffffff, (bool)false, ONE_SEC );
 #endif
@@ -4563,7 +4563,6 @@ static void MFGP_nvFailCount( uint32_t argc, char *argv[] )
    MFG_logPrintf( "%s %d\n", argv[0], pSELF_test->Data->nvFail );
 }
 
-#if 1
 /***********************************************************************************************************************
    Function Name: MFGP_SpuriousResetCount
 
@@ -4589,7 +4588,6 @@ static void MFGP_SpuriousResetCount( uint32_t argc, char *argv[] )
    SpuriousResetCount =  ( uint16_t )PWR_getSpuriousResetCnt();
    MFG_logPrintf( "%s %d\n", argv[0], SpuriousResetCount );
 }
-#endif
 
 #if ( EP == 1 )
 /***********************************************************************************************************************
@@ -9551,6 +9549,7 @@ static void MFGP_dtlsHelper( uint32_t argc, char *argv[], uint16_t offset, uint1
    uint8_t           *pCert;                            /* Pointer to next byte in cert                    */
    uint16_t          i;                                 /* Loop counter, used to limit number of characters received  */
    PartitionData_t   const *pPart;                      /* Used to access the security info partition  */
+
    pPart = SEC_GetSecPartHandle();
    // Read the data from secROM
    if ( eSUCCESS == PAR_partitionFptr.parRead( cert, ( dSize )offset, ( lCnt )len, pPart ) )

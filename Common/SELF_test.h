@@ -114,10 +114,7 @@ typedef struct
 /* FUNCTION DEFINITIONS */
 
 extern returnStatus_t   SELF_init( void );
-#if ( FILE_IO !=0 )
 extern SELF_file_t      *SELF_GetTestFileHandle( void );
-#endif
-
 extern OS_EVNT_Obj      *SELF_getEventHandle( void );
 extern void SELF_setEventNotify( OS_EVNT_Obj *handle );
 
@@ -131,7 +128,7 @@ extern returnStatus_t   SELF_testTimeCompound( void );
 #if (SUPPORT_HEEP != 0)
 extern returnStatus_t   SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 #endif
-#if ( DCU == 1 )  /* DCU will always support externam RAM */
+#if ( DCU == 1 )  /* DCU will always support external RAM */
 extern returnStatus_t   SELF_testSDRAM( uint32_t LoopCount );
 #endif
 

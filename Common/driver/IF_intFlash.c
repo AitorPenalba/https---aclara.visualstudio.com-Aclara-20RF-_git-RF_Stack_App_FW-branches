@@ -209,7 +209,7 @@ uint8_t localVar[FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE]; // TODO: RA6E1 Currentl
    Purpose: Callback mentioning the flash status - write complete, erase complete, event blank and not blank
 
    Arguments:
-      flash_callback_args_t *p_args - Mentions the event that happenned p_args->event
+      flash_callback_args_t *p_args - Mentions the event that happened p_args->event
 
    Returns: Nothing
 
@@ -527,13 +527,13 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
       {
          // TODO: RA6E1 Check whether erase and write required for code flash, if needed enable the below lines.
          // Note: Code flash requires 8Kb of local memory. Can we use extNV for this?
-         // (We mostly dont need it for code flash as the write happens with erasing the complete partition memory)
+         // (We mostly don't need it for code flash as the write happens with erasing the complete partition memory)
 //         startAddr = FLASH_HP_CODEFLASH_START_ADDRESS +
 //                      ( FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE * ( ( destAddr - FLASH_HP_CODEFLASH_START_ADDRESS ) / FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE ) );
 //         eraseBytes = FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE;
 
          /* TODO: RA6E1 Check whether erase needed for code flash memory. If write used without using partition erase,
-            we require flashErase in this line before writung into the memory */
+            we require flashErase in this line before writing into the memory */
          if ( eSUCCESS != flashWrite( destAddr, cnt, pSrc ) )
          {
             retVal = eFAILURE;
@@ -659,7 +659,7 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
 
          if ( (phDestOffset + cnt) <= INTERNAL_FLASH_SIZE )
          {
-            eRetVal = eSUCCESS; /* Assume Seccess - Also checked in while loop below. */
+            eRetVal = eSUCCESS; /* Assume Success - Also checked in while loop below. */
 
             dvr_shm_lock(); /* Take mutex, critical section */
 
@@ -868,7 +868,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
       eRetVal= exeFlashCmdSeq(dest);                        /* Execute Command sequence - ISRs enabled */
 
 #if 0
-      /* Unlock device when erease sector 0 */
+      /* Unlock device when erase sector 0 */
 #if BLOCK_1K
       if ( (dest >= 0x400) && (dest < 0x800) )
 #else

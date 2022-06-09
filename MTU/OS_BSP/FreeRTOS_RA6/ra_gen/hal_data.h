@@ -32,7 +32,12 @@
 #include "r_iic_master.h"
 #include "r_i2c_master_api.h"
 FSP_HEADER
+/** DAC on DAC Instance. */
+extern const dac_instance_t g_dac0_ULPC;
 
+/** Access the DAC instance using these structures when calling API functions directly (::p_api is not used). */
+extern dac_instance_ctrl_t g_dac0_ULPC_ctrl;
+extern const dac_cfg_t g_dac0_ULPC_cfg;
 /** External IRQ on ICU Instance. */
 extern const external_irq_instance_t hmc_trouble_busy;
 
@@ -85,8 +90,8 @@ extern const timer_instance_t agt1_timer_cascade_lpm_trigger;
 extern agt_instance_ctrl_t agt1_timer_cascade_lpm_trigger_ctrl;
 extern const timer_cfg_t agt1_timer_cascade_lpm_trigger_cfg;
 
-#ifndef NULL
-void NULL(timer_callback_args_t * p_args);
+#ifndef agt1_timer_callback
+void agt1_timer_callback(timer_callback_args_t * p_args);
 #endif
 /** External IRQ on ICU Instance. */
 extern const external_irq_instance_t g_external_irq0;
@@ -101,12 +106,6 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
 extern const crc_instance_t g_crc1;
 extern crc_instance_ctrl_t g_crc1_ctrl;
 extern const crc_cfg_t g_crc1_cfg;
-/** DAC on DAC Instance. */
-extern const dac_instance_t g_dac0;
-
-/** Access the DAC instance using these structures when calling API functions directly (::p_api is not used). */
-extern dac_instance_ctrl_t g_dac0_ctrl;
-extern const dac_cfg_t g_dac0_cfg;
 /** AGT Timer Instance */
 extern const timer_instance_t g_timer0;
 
@@ -224,12 +223,12 @@ void NULL(adc_callback_args_t * p_args);
             void user_uart_callback(uart_callback_args_t * p_args);
             #endif
 /** UART on SCI Instance. */
-            extern const uart_instance_t      g_uart4;
+            extern const uart_instance_t      g_uart_DBG;
 
             /** Access the UART instance using these structures when calling API functions directly (::p_api is not used). */
-            extern sci_uart_instance_ctrl_t     g_uart4_ctrl;
-            extern const uart_cfg_t g_uart4_cfg;
-            extern const sci_uart_extended_cfg_t g_uart4_cfg_extend;
+            extern sci_uart_instance_ctrl_t     g_uart_DBG_ctrl;
+            extern const uart_cfg_t g_uart_DBG_cfg;
+            extern const sci_uart_extended_cfg_t g_uart_DBG_cfg_extend;
 
             #ifndef dbg_uart_callback
             void dbg_uart_callback(uart_callback_args_t * p_args);

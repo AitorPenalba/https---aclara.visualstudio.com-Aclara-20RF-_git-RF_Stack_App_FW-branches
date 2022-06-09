@@ -847,9 +847,9 @@ void RADIO_RX_Watchdog(void)
       timeStamp = radio[(uint8_t)RADIO_0].lastFIFOFullTimeStamp;
       OS_INT_enable( ); // Enable interrupts.
     #if ( MCU_SELECTED == NXP_K24 )
-      if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {        
+      if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
     #elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Modify variable to get core clock from a function
-      if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {  
+      if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
     #endif
          INFO_printf("Soft-Demod FIFO purged");
          // Read through the buffer
@@ -3554,11 +3554,8 @@ uint8_t RADIO_Get_CurrentRSSI(uint8_t radioNum)
    // Adjust RSSI to compensate for front end gain
    PHY_GetReq_t GetReq;
    GetReq.eAttribute = ePhyAttr_FrontEndGain;
-#if 0 // TODO: RA6E1 Bob: Until the file system problem is fixed, this needs to be 0
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)&FrontEndGain);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#else
-   FrontEndGain = 0;
-#endif
+
    rssi += FrontEndGain;
    if ( rssi < MINIMUM_RSSI_VALUE ){
       rssi = MINIMUM_RSSI_VALUE;
@@ -3902,7 +3899,7 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 
    INFO_printf("Start RX radio %hu on channel = %hu (%u Hz)", radioNum, chan, CHANNEL_TO_FREQ(chan));
 
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: timer module
+#if ( RTOS_SELECTION == MQX_RTOS ) //TODO: RA6E1: Melvin: timer module
    // Get current time
    OS_TICK_Get_CurrentElapsedTicks(&CurrentTime);
 
@@ -3926,9 +3923,8 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 #endif
    // Update RSSI jump threshold if it changed
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
+
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&CurrentRssiJumpThreshold);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
    if (radio[radioNum].RssiJumpThreshold != CurrentRssiJumpThreshold) {
       radio[radioNum].RssiJumpThreshold = CurrentRssiJumpThreshold;
       // Configure RSSI jump threshold
@@ -5232,12 +5228,9 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
    }
 #endif
    // Adjust RSSI to compensate for front end gain
-#if 0  // TODO: RA6E1 Bob: When file system problem is fixed, this can be removed
    GetReq.eAttribute = ePhyAttr_FrontEndGain;
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)&FrontEndGain);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#else
-   FrontEndGain = 0; // temporary until PHY is ready
-#endif // TODO: RA6E1 Bob
+
    for (i=0; i<nSamples; i++) {
       tempRSSI  = (int32_t)buf[i];
       tempRSSI += (int32_t)FrontEndGain;

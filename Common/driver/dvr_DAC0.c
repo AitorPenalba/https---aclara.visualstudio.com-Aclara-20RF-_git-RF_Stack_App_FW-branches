@@ -753,9 +753,9 @@ returnStatus_t DVR_DAC0_init ( void )
 
    DAC0_C0 = DAC_C0_DACEN_MASK | DAC_C0_DACRFS_MASK;    /* Enable DAC0 and select DACREF_2 as the reference voltage */
    DAC0_C1 = 0;
-   DAC0_C2 = 0; 
+   DAC0_C2 = 0;
 #elif ( MCU_SELECTED == RA6E1 )
-   (void)R_DAC_Open(&g_dac0_ctrl, &g_dac0_cfg);
+   (void)R_DAC_Open(&g_dac0_ULPC_ctrl, &g_dac0_ULPC_cfg);
    //Enable access to the PFS registers
    R_BSP_PinAccessEnable();
    // 3V6LDO_EN
@@ -796,9 +796,9 @@ void DVR_DAC0_setVoltageStep ( uint16_t stepValue )
    DAC0_DAT0L = 0xFF & stepValue;           /* DAC0 DATA0 Low Register (8-Bits LSB) */
    DAC0_DAT0H = 0x0F & ( stepValue >> 8 );  /* DAC0 DATA1 High Register (4-Bits MSB) */
 #elif ( MCU_SELECTED == RA6E1 )
-      (void)R_DAC_Write(&g_dac0_ctrl, stepValue );
+      (void)R_DAC_Write(&g_dac0_ULPC_ctrl, stepValue );
       /* Start DAC conversion */
-      (void)R_DAC_Start (&g_dac0_ctrl);
+      (void)R_DAC_Start (&g_dac0_ULPC_ctrl);
 #endif
 }
 #if ( MCU_SELECTED == NXP_K24 )

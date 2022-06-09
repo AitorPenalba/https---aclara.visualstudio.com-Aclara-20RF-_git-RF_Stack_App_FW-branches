@@ -158,7 +158,7 @@
 /* FILE VARIABLE DEFINITIONS */
 static bool initSuccess_ = true; //Default, system init successful
 
-static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
+//static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
 
 
 /* Power Up Table - Define all modules that require initialization below. */
@@ -180,6 +180,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( TMR_HandlerInit, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( TIME_SYNC_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SYSBUSY_init, STRT_FLAG_NONE ),
 #if ENABLE_DFW_TASKS
    INIT( DFWA_init, STRT_FLAG_NONE ),
@@ -201,7 +202,9 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
-   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),
+#if ( DAC_CODE_CONFIG == 1 )
+   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),  /* TODO: RA6E1: Review the order */
+#endif
 #if ENABLE_HMC_TASKS
 #if END_DEVICE_PROGRAMMING_CONFIG == 1
    INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
@@ -370,6 +373,7 @@ static OS_MSGQ_Obj TestMsgq_MSGQ;
 
 /* FUNCTION DEFINITIONS */
 
+#if 0 // TODO: RA6E1: Add support
 /*******************************************************************************
 
   Function name: STRT_EnableCpuLoadPrint
@@ -392,7 +396,7 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
       CpuLoadPrint = mode;
    }
 }
-
+#endif
 /*******************************************************************************
 
    Function name: STRT_StartupTask
