@@ -1570,7 +1570,6 @@ STATIC returnStatus_t executeAlarm ( uint8_t alarmId )
 
    pTimeSys    = &_sTimeSys[alarmId];  // Point to alarm structure
 
-#if 1 // TODO: RA6E1 - buf functionality and queue handle
    // send message only if queue or mailbox handle is not NULL
    if ( (pTimeSys->pQueueHandle != NULL) || (pTimeSys->pMQueueHandle != NULL) )
    {  /* Send power-up time, if any of the following conditions are true
@@ -1625,7 +1624,6 @@ STATIC returnStatus_t executeAlarm ( uint8_t alarmId )
          pTimeSys->bRetryAlarm         = (bool)true;
       }
    }
-#endif
 
    return retVal;
 }
