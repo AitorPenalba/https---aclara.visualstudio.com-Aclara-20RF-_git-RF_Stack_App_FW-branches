@@ -724,7 +724,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" }, //TODO: RA6E1 [name_Siva]:Has to be moved to the correct place in the next commit
 
 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
-//   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" }, 
+//   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
 //   {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
 //   {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
 //   {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
@@ -733,7 +733,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
    {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
 //   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
-//   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
+   {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
    {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
    {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
 //#if ( DCU == 1 )
@@ -757,11 +757,11 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
 //
 //   {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
-//   {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
-//   {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
+   {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
+   {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
    {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
 //#if ( EP == 1 )
-//   {  "engData2",                   MFGP_engData2,                   "Get the engData2 stats" },
+   {  "engData2",                   MFGP_engData2,                   "Get the engData2 stats" },
 //   {  "epMaxTemperature",           MFGP_epMaxTemperature,           "Get/Set EP Max Temperature" },
 //   {  "epMinTemperature",           MFGP_epMinTemperature,           "Get/Set EP Min Temperature" },
 //   {  "epTempHysteresis",           MFGP_EpTempHysteresis,           "Get/Set EP Temperature Hysteresis" },
@@ -2136,8 +2136,8 @@ void MFGP_uartRecvTask( taskParameter )
       }/* end of while() */
 #elif ( MCU_SELECTED == RA6E1 )
       // TODO: RA6 [name_Balaji]: Support MFGP_UartRead function for RA6E1
-      /* USE_USB_MFG is used for 9985T and 
-       * ENABLE_B2B_COMM is used for DCU3 XCVR these are not supported 
+      /* USE_USB_MFG is used for 9985T and
+       * ENABLE_B2B_COMM is used for DCU3 XCVR these are not supported
        * for RA6E1 */
       // TODO: RA6 [name_Balaji]: Verify the support of ECHO_OPTICAL_PORT functionality in RA6E1
       mfgpReadCommandProcess();

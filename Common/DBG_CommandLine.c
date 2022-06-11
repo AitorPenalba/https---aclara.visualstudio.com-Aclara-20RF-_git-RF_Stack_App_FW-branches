@@ -4832,6 +4832,11 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
 #if ( EP == 1 )
       DBG_logPrintf( 'R', "SuperCap    = %-6sV", DBG_printFloat( floatStr, ADC_Get_SC_Voltage(), 3 ) );
       DBG_logPrintf( 'R', "Vin         = %-6sV", DBG_printFloat( floatStr, ADC_Get_4V0_Voltage(), 3 ) );
+#if ( MCU_SELECTED == RA6E1 )
+      uint8_t string[VER_HW_STR_LEN];
+      ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+      DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] ); /* No harm in providing a little more information */
+#endif
 #elif ( DCU == 1 )
       temperatureC = (int32_t)( 10 * ADC_Get_PS_Temperature( TEMP_IN_DEG_C ) );
       temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
@@ -6162,13 +6167,6 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
                   ver.field.version, ver.field.revision, ver.field.build);
 #endif
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
-#if ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Bob: this needs a better implementation
-   if        ( ( ADC_GetHWRevLetter() == 'B' ) && ( string[2] == 'x' ) ) { /* Maxim boost chip = Y84580-1 */
-      string[2] = '1';
-   } else if ( ( ADC_GetHWRevLetter() == 'C' ) && ( string[2] == 'x' ) ) { /* TI boost chip = Y84580-2 */
-      string[2] = '2';
-   }
-#endif
    DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] );
 #if 0  // TODO: RA6: Add the following lines for RA6 and FreeRTOS
    DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
