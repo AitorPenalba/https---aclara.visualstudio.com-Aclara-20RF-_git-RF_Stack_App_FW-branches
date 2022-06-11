@@ -2144,7 +2144,6 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Clear all variables
    (void)memset(radio, 0, sizeof(radio));
 
-#if 1 //TODO RA6E1 Bob: As long as the file system and PHY task is running, these lines can be enabled
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&RssiJumpThreshold);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
 
@@ -2167,14 +2166,6 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Get AFC error
    GetReq.eAttribute = ePhyAttr_AfcAdjustment;
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)AfcAdjustment);   //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#else // TODO: RA6E1 Bob: temporary code to set default values until PHY_Attribute_Get is ready
-   RssiJumpThreshold  = PHY_RSSI_JUMP_THRESHOLD_DEFAULT;
-   detectionList[0]   = ePHY_DETECTION_0;
-   framingList[0]     = ePHY_FRAMING_0;
-   modeList[0]        = ePHY_MODE_1;
-   demodulatorList[0] = 0; // Hard demodulator
-   AfcAdjustment[0]   = 0;
-#endif
 
    // Configure radio SDN pin and hold all radios in reset while configuring
    RDO_SDN_TRIS();      // First radio on Frodo and Samwise
@@ -2182,7 +2173,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 
    // Configure CPU pin connected to radio 0 GPIO0 pin
    RDO_0_GPIO0_TRIS(); // Digital input on Samwise and Frodo.
-#if 1 //TODO: RA6E1 Bob: These have tentatively been completed, to be tested
+
    // Configure CPU pin connected to radio 0 GPIO1 pin
    RDO_0_GPIO1_TRIS(); // Digital input on Samwise and Frodo.
 
@@ -2200,7 +2191,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 
    // Turn on radio oscillator effectively starting the radio
    RDO_OSC_EN_TRIS(); // On Samwise only
-#endif
+
    RDO_OSC_EN_ON();
    OS_TASK_Sleep( FIVE_MSEC ); // Wait at least 3 ms as per datasheet
 
@@ -2323,9 +2314,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
       // Set power level
       if (radioNum == (uint8_t)RADIO_0) {
          GetReq.eAttribute = ePhyAttr_PowerSetting;
-#if 1  //TODO RA6E1 Bob: As long as the file system and PHY task is running, this can remain 1
          (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&PowerSetting); //lint !e826   Suspicious pointer-to-pointer conversion
-#endif
          RADIO_Power_Level_Set(PowerSetting);
       }
 
@@ -3278,9 +3267,7 @@ static void validatePhyPayload(uint8_t radioNum)
 
             // Get temperature variable
             GetReq.eAttribute = ePhyAttr_AfcTemperatureRange;
-#if 1 // TODO: RA6E1 Melvin: should be able to remove this now that file system and PHY task are working
             (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)AfcTemperatureRange);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
             if ((Temperature >= AfcTemperatureRange[0]) && (Temperature <= AfcTemperatureRange[1])) {
                // Clip frequency if needed
