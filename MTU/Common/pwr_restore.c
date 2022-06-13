@@ -316,14 +316,10 @@ void PWROR_Task( taskParameter )
       }
       else
       {
-#if 0 // TODO: RA6E1 Bob: Removed while debugging noiseband to avoid serial traffic
          DBG_logPrintf( 'I', "Outage NOT Declared." );
-#endif
       }
    }
-#if 0 // TODO: RA6E1 Bob: Removed while debugging noiseband to avoid serial traffic
    DBG_logPrintf( 'I', "Exiting." );
-#endif
 #if ( RTOS_SELECTION == FREE_RTOS )
    /* NOTE from FreeRTOS: Tasks must not attempt to return from their implementing
    function or otherwise exit.  In newer FreeRTOS port

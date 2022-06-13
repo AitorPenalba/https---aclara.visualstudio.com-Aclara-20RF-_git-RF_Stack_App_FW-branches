@@ -264,7 +264,7 @@ static uint32_t DBG_CommandLine_clockswtest( uint32_t argc, char *argv[] );
 #endif //( DCU == 1 )
 
 #if ( EP == 1 )
-static uint32_t DBG_CommandLine_crc16m( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_crc16m( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_PWR_BoostMode( uint32_t argc, char *argv[] );
 #if ( TEST_TDMA == 1 )
 static uint32_t DBG_CommandLine_CsmaSkip( uint32_t argc, char *argv[] );
@@ -274,15 +274,15 @@ static uint32_t DBG_CommandLine_TxSlot( uint32_t argc, char *argv[] );
 //static uint32_t DBG_CommandLine_HmcwCmd( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
 #endif
 #if ( LP_IN_METER != 0 )
-static uint32_t DBG_CommandLine_lpstats( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_lpstats( uint32_t argc, char *argv[] );
 #endif
 #if ( MULTIPLE_MAC != 0 )
-static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] );
 #endif
 #if ( ENABLE_DEMAND_TASKS == 1 )
 #if ( DEMAND_IN_METER == 1 )
 //static void DBGC_DemandResetCallBack( returnStatus_t result ); //TODO: RA6E1 Bob: temporarily removed
-static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] );
 #endif
 #endif
 #if ( CLOCK_IN_METER == 1 )
@@ -2129,7 +2129,7 @@ uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] )
 {
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Bob: Need to create the FreeRTOS equivalent and add to the code
    _task_id tid;
    if ( argc > 1 )
    {

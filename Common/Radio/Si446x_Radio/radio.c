@@ -5197,7 +5197,7 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
       PWR_USE_BOOST();
 #else
       PWR_3V6BOOST_EN_TRIS_ON();
-      R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS);
+      R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS); // TODO: RA6E1 Bob: should not need '/2' -- test it in HW
       PWR_3P6LDO_EN_TRIS_OFF();
 #endif
 #if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
