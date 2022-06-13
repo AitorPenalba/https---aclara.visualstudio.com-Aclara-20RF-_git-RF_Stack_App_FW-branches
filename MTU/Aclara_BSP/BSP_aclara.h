@@ -266,6 +266,10 @@ extern returnStatus_t CRC_initialize ( void );
 extern returnStatus_t LED_init       ( void );
 extern returnStatus_t RNG_init       ( void );
 extern returnStatus_t UART_init      ( void );
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+extern char *         UART_getName   ( enum_UART_ID uartId );
+extern returnStatus_t UART_setBaud   ( enum_UART_ID uartId, baud_setting_t *baudSetting );
+#endif
 extern returnStatus_t UART_reset     ( enum_UART_ID UartId );
 extern returnStatus_t WDOG_Init      ( void );
 extern returnStatus_t IO_init        ( void );

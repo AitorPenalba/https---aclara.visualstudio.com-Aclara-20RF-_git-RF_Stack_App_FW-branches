@@ -3,13 +3,13 @@
  *
  * Filename: hal.h
  *
- * Contents: SRFN Y84020-1-SCH Rev A Definitions
+ * Contents: SRFN Target Hardware Definition
  *
  ***********************************************************************************************************************
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2016 Aclara.  All Rights Reserved.
+ * Copyright 2016-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -31,7 +31,7 @@
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTION */
 
-#define HAL_TARGET_HARDWARE HAL_TARGET_RENESAS_REV_A
+#define HAL_TARGET_HARDWARE HAL_TARGET_Y84580_x_REV_A
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */

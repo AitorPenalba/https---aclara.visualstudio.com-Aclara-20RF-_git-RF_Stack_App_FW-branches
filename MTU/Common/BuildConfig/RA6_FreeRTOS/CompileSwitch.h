@@ -127,6 +127,11 @@
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 #define ENABLE_DEBUG_PORT              0  /* Use to enable/disable the Debug port */
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define DEBUG_PORT_BAUD_RATE           0
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define DEBUG_PORT_BAUD_RATE           1  /* Enable command to change the debug port baud rate */
+#endif
 
 /* For using trace signals on debugger - replaces LED signals! */
 #define TRACE_MODE                     0

@@ -1212,7 +1212,7 @@ void PHY_Task( taskParameter )
    bool     delayRssiStats;
 #endif
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // used to check RS codes
    static uint8_t original[256] = {0};
    static uint8_t corrupted[256] = {0};
@@ -3335,7 +3335,7 @@ uint16_t Frame_Encode(TX_FRAME_t const *txFrame)
 
       // Compute FEC
       if ( (pData[2] & 0x4) == 0) {
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
          // todo: 01/24/17 2:12 PM [MKD] - This code might not work for message length 43 and 44 bytes (not sure 45 is legal). Need to investigate. I know the decoder doesn't work so I put the old code back.
          RS_Encode(RS_STAR_63_59, pData, &pData[num_bytes], (uint8_t)num_bytes);
 #else
@@ -3348,7 +3348,7 @@ uint16_t Frame_Encode(TX_FRAME_t const *txFrame)
    else
    {
       INFO_printf("FrameEncode - Mode %u is not supported", txFrame->Mode);
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
       // Code not need but able to generate STAR Gen I message but it doesn't follow all the STAR  Gen I requierments.
       // Use to test the TB receivers.
 
@@ -3433,7 +3433,7 @@ uint16_t Frame_Encode(TX_FRAME_t const *txFrame)
    return(num_bytes);
 }
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
 static void decode_frame(PHY_FRAME_t*  rxFrame, phy_buffer_t* rx_buffer)
 {
 
@@ -3461,7 +3461,7 @@ PHY_SET_STATUS_e  PHY_Attribute_Set( PHY_SetReq_t const *pSetReq)
 {
    PHY_SET_STATUS_e eStatus = ePHY_SET_SERVICE_UNAVAILABLE;
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // This function should only be called inside the PHY task
    if ( _task_get_id() != _task_get_id_from_name( "PHY" ) ) {
      ERR_printf("WARNING: PHY_Attribute_Set should only be called from the PHY task. Please use PHY_SetRequest instead.");
@@ -3623,7 +3623,7 @@ PHY_GET_STATUS_e PHY_Attribute_Get( PHY_GetReq_t const *pGetReq, PHY_ATTRIBUTES_
 {
    PHY_GET_STATUS_e eStatus = ePHY_GET_SUCCESS;
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // This function should only be called inside the PHY task
    if ( ( _task_get_id() != _task_get_id_from_name( "PHY" ) )     &&
         ( _task_get_id() != _task_get_id_from_name( "PSLSNR" ) ) ) {
@@ -4022,7 +4022,7 @@ bool PHY_TxChannel_Set(uint8_t index, uint16_t chan)
    return retVal;
 }
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
 /*!
   Set cached attribute values. Bypasses check for READ ONLY. Should only be called from a "friend" function (e.g., radio.c).
 */

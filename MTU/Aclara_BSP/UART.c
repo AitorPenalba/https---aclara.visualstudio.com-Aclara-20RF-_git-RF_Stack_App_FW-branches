@@ -96,7 +96,14 @@ const uart_cfg_t *UartCfg[MAX_UART_ID] =
    &g_uart_DBG_cfg,
    &g_uart2_cfg
 };
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+static const char *uart_name[MAX_UART_ID] = {"MFG", /* Order must match UartCtrl and UartCfg above */
+#if 0 //TODO: RA6 Bob: Add Optical port support
+                                             "Optical",
 #endif
+                                             "DBG", "Meter" };
+#endif
+#endif // (RTOS_SELECTION)
 /* FILE VARIABLE DEFINITIONS */
 #if ( RTOS_SELECTION == MQX_RTOS )
 static MQX_FILE_PTR UartHandle[MAX_UART_ID];
@@ -195,6 +202,47 @@ returnStatus_t UART_init ( void )
 
    return ( retVal );
 }
+
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+/*******************************************************************************
+
+  Function name: UART_getName
+
+  Purpose: Gets the ASCII string name of the corresponding UART port
+
+  Arguments: UartId - Identifier of the particular UART on which to change baud rate
+
+  Returns: pointer to string (null terminated) with name of this UART port
+
+  Notes:
+
+*******************************************************************************/
+char * UART_getName ( enum_UART_ID uartId )
+{
+   return ( (char *)uart_name[ (uint32_t) uartId ] );
+}
+
+/*******************************************************************************
+
+  Function name: UART_setBaudRate
+
+  Purpose: Sets the baud rate for a specified UART port
+
+  Arguments: UartId - Identifier of the particular UART on which to change baud rate
+             baudSetting - baud_setting_t structure for the desired baud rate
+
+  Returns: returnStatus_t err
+
+  Notes:
+
+*******************************************************************************/
+returnStatus_t UART_setBaud ( enum_UART_ID uartId, baud_setting_t *baudSetting )
+{
+   fsp_err_t err = R_SCI_UART_BaudSet( (void *)UartCtrl[ (uint32_t)uartId ], baudSetting );
+   return ( (returnStatus_t)err );
+}
+#endif
+
 /* No function calls for UART_reset */
 #if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
@@ -285,8 +333,23 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 #endif
    return ( DataSent );
 #elif ( MCU_SELECTED == RA6E1 )
-   ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-   ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+#if 1 // TODO: RA6E1 Bob: convert \n to \r\n on manufacturing port so that Radiated PSR can run
+   if ( ( UartId == UART_MANUF_TEST ) && ( DataLength > 0 ) && ( DataBuffer[DataLength-1] == '\n' ) )
+   {
+      if ( DataLength > 1 )
+      {
+         ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength-1 );
+         ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+      }
+      ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], (uint8_t *)&CRLF, sizeof(CRLF) );
+      ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+   }
+   else
+#endif
+   {
+      ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+      ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+   }
 
    return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif

@@ -372,7 +372,7 @@ static const tModeConfiguration modeConfiguration [] = {
    { 0x21, 0x21, { 0xF0, 0xF0, 0x00, 0xFC, 0xC0, 0xC0, 0xC0, 0xF0 } },
    { 0x21, 0x22, { 0xFF, 0xFF, 0xFF, 0x03, 0xFF, 0xFF, 0xFF, 0xFF } },
    { 0x21, 0x23, { 0x03, 0x03, 0x0F, 0x00, 0x0F, 0x0F, 0x0F, 0x03 } },
-#if 0
+#if 0  // Not RA6E1.  This was already removed in the K24 baseline code
    // This is not working for now
    { 0x22, 0x00, { 0x25, 0x25, 0x25, 0x25, 0x25, 0x25, 0x25, 0x25 } }, // SYNTH
    { 0x22, 0x01, { 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A } }, // 50kHz loop BW as per AN866.pdf
@@ -451,7 +451,7 @@ static const tModeConfiguration modeConfiguration [] = {
    { 0x21, 0x21, { 0xF0, 0xF0, 0x00, 0xFC } },
    { 0x21, 0x22, { 0xFF, 0xFF, 0xFF, 0x03 } },
    { 0x21, 0x23, { 0x03, 0x03, 0x0F, 0x00 } },
-#if 0
+#if 0  // Not RA6E1.  This was already removed in the K24 baseline code
    // This is not working for now
    { 0x22, 0x00, { 0x25, 0x25, 0x25, 0x25 } }, // SYNTH
    { 0x22, 0x01, { 0x0A, 0x0A, 0x0A, 0x0A } }, // 50kHz loop BW as per AN866.pdf
@@ -598,7 +598,7 @@ static const tModeConfiguration modeConfiguration [] = {
    { 0x21, 0x22, { 0xFF, 0xFF, 0xFF, 0x03 } },
    { 0x21, 0x23, { 0x03, 0x03, 0x03, 0x00 } },
 #endif
-#if 0
+#if 0  // Not RA6E1.  This was already removed in the K24 baseline code
    // This is not working for now
    { 0x22, 0x00, { 0x25, 0x25, 0x25, 0x25 } }, // SYNTH
    { 0x22, 0x01, { 0x0A, 0x0A, 0x0A, 0x0A } }, // 50kHz loop BW as per AN866.pdf
@@ -2144,7 +2144,6 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Clear all variables
    (void)memset(radio, 0, sizeof(radio));
 
-#if 1 //TODO RA6E1 Bob: As long as the PHY task is running, these lines can be enabled
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&RssiJumpThreshold);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
 
@@ -2167,14 +2166,6 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Get AFC error
    GetReq.eAttribute = ePhyAttr_AfcAdjustment;
    (void) PHY_Attribute_Get(&GetReq, (PHY_ATTRIBUTES_u*)(void *)AfcAdjustment);   //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#else // TODO: RA6E1 Bob: temporary code to set default values until PHY_Attribute_Get is ready
-   RssiJumpThreshold  = PHY_RSSI_JUMP_THRESHOLD_DEFAULT;
-   detectionList[0]   = ePHY_DETECTION_0;
-   framingList[0]     = ePHY_FRAMING_0;
-   modeList[0]        = ePHY_MODE_1;
-   demodulatorList[0] = 0; // Hard demodulator
-   AfcAdjustment[0]   = 0;
-#endif
 
    // Configure radio SDN pin and hold all radios in reset while configuring
    RDO_SDN_TRIS();      // First radio on Frodo and Samwise
@@ -2182,7 +2173,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 
    // Configure CPU pin connected to radio 0 GPIO0 pin
    RDO_0_GPIO0_TRIS(); // Digital input on Samwise and Frodo.
-#if 1 //TODO: RA6E1 Bob: These have tentatively been completed, to be tested
+
    // Configure CPU pin connected to radio 0 GPIO1 pin
    RDO_0_GPIO1_TRIS(); // Digital input on Samwise and Frodo.
 
@@ -2200,7 +2191,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 
    // Turn on radio oscillator effectively starting the radio
    RDO_OSC_EN_TRIS(); // On Samwise only
-#endif
+
    RDO_OSC_EN_ON();
    OS_TASK_Sleep( FIVE_MSEC ); // Wait at least 3 ms as per datasheet
 
@@ -2323,9 +2314,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
       // Set power level
       if (radioNum == (uint8_t)RADIO_0) {
          GetReq.eAttribute = ePhyAttr_PowerSetting;
-#if 1  //TODO RA6E1 Bob: As long as the PHY task is running, this can remain 1
          (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&PowerSetting); //lint !e826   Suspicious pointer-to-pointer conversion
-#endif
          RADIO_Power_Level_Set(PowerSetting);
       }
 
@@ -2408,7 +2397,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
                                  0x78,  // DSA_RSSI
                                  0x24); // DSA_MISC
 #endif
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
       // Configure GPIO0 to handle sync interrupt
       if (radioNum != (uint8_t)RADIO_0) {
          si446x_gpio_pin_cfg( radioNum,
@@ -2501,7 +2490,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 //TODO Melvin: Add AGT Timer
 #endif
 #endif
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    for (radioNum=(uint8_t)RADIO_0; radioNum<(uint8_t)MAX_RADIO; radioNum++) {
 
       // Program GPIO2 for RSSI jump test from Marius
@@ -2566,7 +2555,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
 #endif
 }
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
 static uint8_t reverseByte(uint8_t val)
 {
    uint8_t result = 0;
@@ -2615,7 +2604,7 @@ void printHex ( char const *rawStr, const uint8_t *str, uint16_t num_bytes )
    }
    usb_putc( '\n' );
 #else
-#if 0 //TODO: is this file pointer needed
+#if 0 //TODO: RA6E1 Bob: need to figure out why this was needed and map to different printf function
    MQX_FILE_PTR stdout_ptr;       /* mqx file pointer for UART  */
    stdout_ptr = fopen("ittya:", NULL);
 
@@ -2853,7 +2842,7 @@ static bool ValidateGenII(uint8_t radioNum)
    length = FrameLength_Get(radio[radioNum].framing, radio[radioNum].mode, ePHY_MODE_PARAMETERS_0, radio[radioNum].RadioBuffer);
    // Decode message with RS if FEC is present
    if ((radio[radioNum].RadioBuffer[2] & 0x04) == 0) {
-#if 0
+#if 0  // Not RA6E1.  This was already removed in the K24 baseline code
       // todo: 01/24/17 1:11 PM [MKD] - This code doesn't work for message length 43 and 44 bytes (not sure 45 is legal). Need to investigate.
 
       // Decode message using Reed-Solomon
@@ -2893,7 +2882,7 @@ static bool ValidateGenII(uint8_t radioNum)
       }
    }
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // [MKD] 2019-01-31 11:46 I disable this code section because it increases false positive. It's better to have lower false positive then higher performance.
    // I keep the code incase we find a way to filter false positive out.
 
@@ -2927,7 +2916,7 @@ static bool ValidateGenII(uint8_t radioNum)
 
          // Force length field
          radio[radioNum].RadioBuffer[2] = (uint8_t)((radio[radioNum].RadioBuffer[2] & 0x7) | ((length-overhead) << 3)); // Remove header and CRC size
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
          // todo: 01/24/17 1:11 PM [MKD] - This code doesn't work for message length 43 and 44 bytes (not sure 45 is legal). Need to investigate.
 
          // Decode message
@@ -3278,9 +3267,7 @@ static void validatePhyPayload(uint8_t radioNum)
 
             // Get temperature variable
             GetReq.eAttribute = ePhyAttr_AfcTemperatureRange;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
             (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)AfcTemperatureRange);  //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
             if ((Temperature >= AfcTemperatureRange[0]) && (Temperature <= AfcTemperatureRange[1])) {
                // Clip frequency if needed
@@ -3614,7 +3601,7 @@ static void processRXRadioInt(uint8_t radioNum, struct si446x_reply_GET_INT_STAT
       //                     if header is valid but we are missing more than the few last bytes
       if ((restart == false) && (getIntStatus.MODEM_PEND & SI446X_CMD_GET_INT_STATUS_REP_MODEM_PEND_RSSI_JUMP_PEND_BIT)) {
          INFO_printf("RSSI jump detected on radio %u, position %u", radioNum, radio[radioNum].bytePos);
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
          // The idea of this code was to try to salvage a message is the RSSI jump happend toward the end
          // but we decided to not do that for now.
          if ( (radio[radioNum].validHeader == (bool)false) ||
@@ -3656,7 +3643,7 @@ static void processRadioInt(uint8_t radioNum)
       (void)si446x_get_int_status_fast_clear_read(radioNum, &Si446xCmd);
 
       getIntStatus = Si446xCmd.GET_INT_STATUS; // Save all Interrupts
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
       INFO_printf("INT %u %02X %02X %02X %02X %02X %02X %02X %02X", radioNum, getIntStatus.INT_PEND, getIntStatus.INT_STATUS, getIntStatus.PH_PEND, getIntStatus.PH_STATUS,
                      getIntStatus.MODEM_PEND, getIntStatus.MODEM_STATUS, getIntStatus.CHIP_PEND, getIntStatus.CHIP_STATUS);
 #endif
@@ -3693,9 +3680,7 @@ static void processRadioInt(uint8_t radioNum)
 
             // Retrieve PHY state
             GetReq.eAttribute = ePhyAttr_State;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
             (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&state); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
             if (state == ePHY_STATE_READY_TX) {
                // Keep FEM in TX mode and shutdown PA to save power until next transmission
@@ -3859,7 +3844,9 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
    OS_TICK_Struct CurrentTime;
    PHY_GetReq_t   GetReq;
    uint8_t        CurrentRssiJumpThreshold;
+#if ( RTOS_SELECTION == MQX_RTOS ) // The overflow flag is only needed by the MQX _time_diff_hours function
    bool           overflow;
+#endif
    union          si446x_cmd_reply_union Si446xCmd;
 
    if (!radio[radioNum].configured) {
@@ -4097,9 +4084,7 @@ void RADIO_SetPower( uint32_t frequency, float powerOutput)
    uint8_t PowerSetting;
 
    GetReq.eAttribute = ePhyAttr_PowerSetting;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
    (void)PHY_Attribute_Get( &GetReq, (PHY_ATTRIBUTES_u*)(void *)&PowerSetting); //lint !e826   Suspicious pointer-to-pointer conversion
-#endif
    RADIO_Power_Level_Set( PowerSetting );       /* Radio chip internal gain setting. Default 20 for 9975T and 60 for 9985T.   */
    (void)BSP_PaDAC_Set_dBm_Out( powerOutput );
 #endif
@@ -4136,7 +4121,7 @@ static PHY_DATA_STATUS_e SendData(uint8_t radioNum, uint16_t chan, PHY_MODE_e mo
    PHY_GetReq_t   getReq;
 #endif
 
-#if 0
+#if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // Code needed to help debug soft-modem
    uint32_t i;
    uint32_t end=1;
@@ -4396,14 +4381,10 @@ static PHY_DATA_STATUS_e SendData(uint8_t radioNum, uint16_t chan, PHY_MODE_e mo
       EventData_s  progEvent;     /* Event info */
 
       getReq.eAttribute = ePhyAttr_fngVswrNotificationSet;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&notifySetPoint);   //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
       getReq.eAttribute = ePhyAttr_fngVswrShutdownSet;
-#if 0  //TODO Melvin: add the below code once PHY  module is added
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&shutDownSetPoint); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
-#endif
 
       getReq.eAttribute = ePhyAttr_fngFowardPowerLowSet;
       (void)PHY_Attribute_Get( &getReq, (PHY_ATTRIBUTES_u*)(void *)&lowPowerSetPoint); //lint !e826 !e433  Suspicious pointer-to-pointer conversion
@@ -4705,6 +4686,7 @@ static void wait_us(uint32_t time)
    }
    while (TimeDiff < time);
 #elif ( MCU_SELECTED == RA6E1 )
+   #if 0 // TODO: RA6E1 Bob: This does not appear to be working properly
    OS_TICK_Get_CurrentElapsedTicks(&time1);
 
    // Wait for a while
@@ -4713,6 +4695,10 @@ static void wait_us(uint32_t time)
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    }
    while (TimeDiff < time);
+   #else
+   #warning "Using the Renesas R_BSP_SoftwareDelay instead of OS_TICK_Get_Diff_InMicroseconds and dividing by 2!"
+   R_BSP_SoftwareDelay ((time+1)/2, BSP_DELAY_UNITS_MICROSECONDS);
+   #endif
 #endif
 
 }
@@ -5159,13 +5145,18 @@ void RADIO_Set_SyncError(uint8_t err)
                boost     - use boost capacitor if true
 
    Returns: RSSI array
+            function name returns the lowest observed super-Cap voltage if boost is non-zero
 
    Side Effects: The radio is not put back on its previous state
 
    Reentrant Code: No
 
  **********************************************************************************************************************/
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
 void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSamples, uint16_t rate, uint8_t boost)
+#else
+float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSamples, uint16_t rate, uint8_t boost)
+#endif
 {
    uint32_t     i; // Loop counter
    int8_t       FrontEndGain;
@@ -5177,6 +5168,9 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
    (void)boost;
 #endif
    union si446x_cmd_reply_union Si446xCmd;
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   float lowestCapVoltage = 9.99;
+#endif
    // Stop radio
    (void)si446x_change_state(radioNum, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_READY);
 
@@ -5193,16 +5187,36 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
                            SI446X_CMD_START_RX_ARG_NEXT_STATE3_RXINVALID_STATE_ENUM_REMAIN );
 
 #if ( EP == 1 )
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   fSuperCapV = ADC_Get_SC_Voltage();
+   if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
+#endif
    if ( boost ) {
+#if 0 // TODO: RA6E1 Bob: this was done temporarily since the other delay function did not seem to be working.  Need to debug original function.
       // Turn on boost
       PWR_USE_BOOST();
+#else
+      PWR_3V6BOOST_EN_TRIS_ON();
+      R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS); // TODO: RA6E1 Bob: should not need '/2' -- test it in HW
+      PWR_3P6LDO_EN_TRIS_OFF();
+#endif
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       // Get voltage
       fSuperCapV = ADC_Get_SC_Voltage();
+#endif
       // Make sure the capacitor voltage is high enough to compute noise estimate with boost turned on.
       if ( fSuperCapV < SUPER_CAP_MIN_VOLTAGE ) {
+#if 0
+         PWR_3P6LDO_EN_TRIS_ON();
+         R_BSP_SoftwareDelay (((uint32_t)PWR_3P6LDO_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS);
+         PWR_3V6BOOST_EN_TRIS_OFF();
+#else
          PWR_USE_LDO();
+#endif
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+         INFO_printf("vf %u", (uint32_t)(fSuperCapV*100));
+#endif
       }
-      INFO_printf("vf %u", (uint32_t)(fSuperCapV*100));
    }
 #endif
    // Discard the first 4 samples because the radio internaly averages 4 symbols and the RSSI might not be stable yet.
@@ -5215,9 +5229,15 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
       buf[i] = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
    }
 #if ( EP == 1 )
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   fSuperCapV = ADC_Get_SC_Voltage();
+   if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
+#endif
    if ( boost ) {
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       // Get voltage
       fSuperCapV = ADC_Get_SC_Voltage();
+#endif
       // Turn off capacitor boost
       PWR_USE_LDO();
       // Make sure the capacitor voltage was high enough during the whole run
@@ -5243,6 +5263,9 @@ void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSam
          buf[i] = (uint8_t)tempRSSI;
       }
    }
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   return ( lowestCapVoltage );
+#endif
 }
 
 /*!

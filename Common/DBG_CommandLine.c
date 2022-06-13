@@ -47,8 +47,8 @@
 #include "crc16_m.h"
 #endif
 
-//#include "mode_config.h"
-//#include "MFG_Port.h"
+#include "mode_config.h"
+#include "MFG_Port.h"
 //#include "MAC_Protocol.h"
 //#include "STACK_Protocol.h"
 //#include "COMM.h"
@@ -59,11 +59,11 @@
 #include "xradio.h" // TODO: RA6E1 Bob: temporary include for vRadioInit for noiseband
 #include "PHY.h"
 #include "PHY_Protocol.h"
-//#include "MAC_Protocol.h"
-//#include "SM_Protocol.h"     // Stack Manager
-//#include "SM.h"              // Stack Manager
+#include "MAC_Protocol.h"
+#include "SM_Protocol.h"     // Stack Manager
+#include "SM.h"              // Stack Manager
 #include "MAC.h"
-//#include "STACK.h"
+#include "STACK.h"
 #if ( USE_DTLS == 1 )
 #include "dtls.h"
 #endif
@@ -82,17 +82,22 @@
 #ifdef TM_PARTITION_USAGE
 #include "filenames.h"
 #endif
-//#include "ecc108_apps.h"
-//#include "ecc108_config.h"
+#include "ecc108_apps.h"
+#include "ecc108_config.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
 //#include "ecc108_mqx.h"
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
+#include "ecc108_lib_return_codes.h"
+#endif
 #include "ecc108_physical.h" // TODO: RA6E1 Bob: This is needed by DBG_CommandLine_MacAddr
 //#include "compiler_types.h"
 //#include "si446x_cmd.h"
 //#include "si446x_api_lib.h"
-//#include "time_sync.h"
+#include "time_sync.h"
 //#include "SELF_test.h"
 #include "mode_config.h"
-//#include "EVL_event_log.h"
+#include "EVL_event_log.h"
 //#include "ascii.h"
 #if (USE_DTLS==1)
 #include "dtls.h"
@@ -105,12 +110,12 @@
 uint32_t DBG_CommandLine_PhaseDetectCmd( uint32_t argc, char *argv[] );
 #endif
 
-//uint32_t DBG_CommandLine_SM_Start(  uint32_t argc, char *argv[] );
-//uint32_t DBG_CommandLine_SM_Stop(   uint32_t argc, char *argv[] );
+//uint32_t DBG_CommandLine_SM_Start(  uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
+//uint32_t DBG_CommandLine_SM_Stop(   uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
 uint32_t DBG_CommandLine_SM_Stats(  uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
-//uint32_t DBG_CommandLine_SM_Set(    uint32_t argc, char *argv[] );
-//uint32_t DBG_CommandLine_SM_Get(    uint32_t argc, char *argv[] );
+//uint32_t DBG_CommandLine_SM_Set(    uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
+//uint32_t DBG_CommandLine_SM_Get(    uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
 
 #if (EP == 1)
 #include "smtd_config.h"
@@ -234,18 +239,20 @@ static char                   *argvar[MAX_CMDLINE_ARGS + 1];
 //static void PrintECC_error( uint8_t ECCstatus ); //TODO: RA6E1 Bob: temporarily removed
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
-//static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
-//static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] );
-//static uint32_t DBG_CommandLine_SendHeepMsg( uint32_t argc, char *argv[] );
-//static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[]);
-//static uint32_t DBG_CommandLine_SM_NwPassiveActTimeout(uint32_t argc, char *argv[]);
+static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
+static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] );
+static uint32_t DBG_CommandLine_SendHeepMsg( uint32_t argc, char *argv[] );
+static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[]);
+static uint32_t DBG_CommandLine_SM_NwPassiveActTimeout(uint32_t argc, char *argv[]);
 static uint32_t DBG_CommandLine_virginDelay( uint32_t argc, char *argv[] );
-
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+static uint32_t DBG_CommandLine_DebugBaudRate( uint32_t argc, char *argv[] );
+#endif
 #if ( DCU == 1 )
 static uint32_t DBG_CommandLine_sdtest( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_getTBslot( uint32_t argc, char *argv[] );
-//static uint32_t CommandLine_ReadResource ( uint32_t argc, char *argv[] );
-//static uint32_t DBG_TraceRoute( uint32_t argc, char *argv[] );
+//static uint32_t CommandLine_ReadResource ( uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
+//static uint32_t DBG_TraceRoute( uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
 
 #if OTA_CHANNELS_ENABLED == 1
 static uint32_t CommandLine_OTA_Cmd( uint32_t argc, char *argv[] );
@@ -257,7 +264,7 @@ static uint32_t DBG_CommandLine_clockswtest( uint32_t argc, char *argv[] );
 #endif //( DCU == 1 )
 
 #if ( EP == 1 )
-//static uint32_t DBG_CommandLine_crc16m( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_crc16m( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_PWR_BoostMode( uint32_t argc, char *argv[] );
 #if ( TEST_TDMA == 1 )
 static uint32_t DBG_CommandLine_CsmaSkip( uint32_t argc, char *argv[] );
@@ -267,15 +274,15 @@ static uint32_t DBG_CommandLine_TxSlot( uint32_t argc, char *argv[] );
 //static uint32_t DBG_CommandLine_HmcwCmd( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
 #endif
 #if ( LP_IN_METER != 0 )
-//static uint32_t DBG_CommandLine_lpstats( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_lpstats( uint32_t argc, char *argv[] );
 #endif
 #if ( MULTIPLE_MAC != 0 )
-//static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] );
 #endif
 #if ( ENABLE_DEMAND_TASKS == 1 )
 #if ( DEMAND_IN_METER == 1 )
 //static void DBGC_DemandResetCallBack( returnStatus_t result ); //TODO: RA6E1 Bob: temporarily removed
-//static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] ); //TODO: RA6E1 Bob: temporarily removed
+static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] );
 #endif
 #endif
 #if ( CLOCK_IN_METER == 1 )
@@ -325,123 +332,125 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( DAC_CODE_CONFIG == 1 )
    { "setdac0step",               DBG_CommandLine_DAC_SetDacStep,      "Set the DAC Step, range for steps is 0 - 4096 eg.) setdac0step 2200" },
    { "pwrsel",                    DBG_CommandLine_setPwrSel,           "Set/reset pwrsel pin" },
-//   { "setdaccode",                DBG_CommandLine_DAC_Code,            "Set DAC Code Eg: setdaccode <channelNumber> <dBM>" },
+//   { "setdaccode",                DBG_CommandLine_DAC_Code,            "Set DAC Code Eg: setdaccode <channelNumber> <dBM>" }, // TODO: RA6E1 Bob: not needed yet
 #endif
-//#if ( FAKE_TRAFFIC == 1 )
-//   { "bhgencount",   DBG_CommandLine_ipBhaulGenCount, "get (no args) or set (arg1) backhaul fake record gen count" },
-//#endif
-//#if ( EP == 1 )
-////   { "afcenable",    DBG_CommandLine_AfcEnable,       "Enable/disable AFC" },
-////   { "afcrssithreshold", DBG_CommandLine_AfcRSSIThreshold, "display/Set AFC RSSI threshold" },
-////   { "afctemperaturerange", DBG_CommandLine_AfcTemperatureRange, "display/Set AFC temperature range" },
-//#endif
-//#if ( USE_USB_MFG != 0 )
-//   {  "bdt",         DBG_CommandLine_BDT,             "Print USB buffer descriptor table(s)" },
-//#endif
-//#if ( EP == 1 )
+#if ( FAKE_TRAFFIC == 1 )
+   { "bhgencount",   DBG_CommandLine_ipBhaulGenCount, "get (no args) or set (arg1) backhaul fake record gen count" },
+#endif
+#if ( EP == 1 )
+//   { "afcenable",    DBG_CommandLine_AfcEnable,       "Enable/disable AFC" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "afcrssithreshold", DBG_CommandLine_AfcRSSIThreshold, "display/Set AFC RSSI threshold" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "afctemperaturerange", DBG_CommandLine_AfcTemperatureRange, "display/Set AFC temperature range" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+#endif
+#if ( USE_USB_MFG != 0 )
+   {  "bdt",         DBG_CommandLine_BDT,             "Print USB buffer descriptor table(s)" },
+#endif
+#if ( EP == 1 )
    { "boost",        DBG_CommandLine_PWR_BoostTest,   "PWR - Boost Test" },
    { "boostmode",    DBG_CommandLine_PWR_BoostMode,   "Turn boost supply on/off" },
-//#endif
-//#if ENABLE_PWR_TASKS
-//#if 0
-//   { "brown",        DBG_CommandLine_PWR_BrownOut,    "PWR - Signal Brown Out" },
-//#endif
-//#endif
+#endif
+#if ENABLE_PWR_TASKS
+#if 0 // TODO: RA6E1 Bob: This command was removed from original K24 code
+   { "brown",        DBG_CommandLine_PWR_BrownOut,    "PWR - Signal Brown Out" },
+#endif
+#endif
    { "buffers",      DBG_CommandLine_Buffers,         "Display buffers allocated and statitics" },
-//#endif
 #if ( EP == 1 )
    { "cap",          DBG_CommandLine_PWR_SuperCap,    "PWR - Read Super Cap Voltage" },
 #endif
-//   { "cca",          DBG_CommandLine_CCA,             "Display/Set the CCA threshold" },
-//   { "ccaadaptivethreshold", DBG_CommandLine_CCAAdaptiveThreshold, "Display the CCA adaptive threshold" },
-//   { "ccaadaptivethresholdenable", DBG_CommandLine_CCAAdaptiveThresholdEnable, "Display/Set the CCA adaptive threshold enable" },
-//   { "ccaoffset",    DBG_CommandLine_CCAOffset,       "Display/Set the CCA offset" },
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//   { "clockswtest",  DBG_CommandLine_clockswtest,     "Count cycle counter at 2 different clock settings over 5 seconds" },
-//#endif
-//   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" },
+   { "cca",          DBG_CommandLine_CCA,             "Display/Set the CCA threshold" },
+   { "ccaadaptivethreshold", DBG_CommandLine_CCAAdaptiveThreshold, "Display the CCA adaptive threshold" },
+   { "ccaadaptivethresholdenable", DBG_CommandLine_CCAAdaptiveThresholdEnable, "Display/Set the CCA adaptive threshold enable" },
+   { "ccaoffset",    DBG_CommandLine_CCAOffset,       "Display/Set the CCA offset" },
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+   { "clockswtest",  DBG_CommandLine_clockswtest,     "Count cycle counter at 2 different clock settings over 5 seconds" },
+#endif
+//   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" }, // TODO: RA6E1 Bob: this commmand needs to have GPIOs redefined
    { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
-//#if ( EP == 1 )
+#if ( EP == 1 )
    { "counters",     DBG_CommandLine_Counters,        "Display the current counters like reset counts etc" },
-//#endif
-//   { "cpuloaddis",   DBG_CommandLine_CpuLoadDisable,  "Disable CPU Load Output" },
-//   { "cpuloaden",    DBG_CommandLine_CpuLoadEnable,   "Enable CPU Load Output" },
-//   { "cpuloadsmart", DBG_CommandLine_CpuLoadSmart,    "Print CPU Load only when > 30%" },
-//   { "crc",          DBG_CommandLine_crc,             "calculate crc over hex string" },
-////   { "crc16",        DBG_CommandLine_crc16,           "calculate DCU hack 16 bit crc over hex string" },
-//#if ( EP == 1 )
-//   { "crcm",         DBG_CommandLine_crc16m,          "calculate ANSI psem 16 bit crc over hex string" },
-//#if ( TEST_TDMA == 1 )
-//   { "csmaskip",     DBG_CommandLine_CsmaSkip,        "Skip CCA" },
-//#endif
-//#endif
-////   { "dbgdis",       DBG_CommandLine_DebugDisable,    "Disable Debug Output" },
-////   { "dbgen",        DBG_CommandLine_DebugEnable,     "Enable Debug Output" },
-//   { "dbgfilter",    DBG_CommandLine_DebugFilter,     "Set debug port print filter task id" },
-//#if ( EP == 1 )
-//#if ( TEST_TDMA == 1 )
-//   { "Delay",        DBG_CommandLine_Delay,           "Set/Get the Slot Time Delay betwen 0 and 100 ms" },
-//#endif
-//#if ( ENABLE_DEMAND_TASKS == 1 )
-//#if ( DEMAND_IN_METER == 1 )
-//   { "demandreset",  DBG_CommandLine_DemandReset,     "Execute a demand reset (in the meter)" },
-//#endif
-//#if( DEMAND_IN_METER == 0 )
-//   { "schDmdRst",    DBG_CommandLine_SchDmdRst,       "Get (no args) or set (arg1) the scheduled demand reset date of month" },
-//#endif
-////   { "demandto",     DBG_CommandLine_DMDTO,           "Get (no args) or set (arg1) the demand reset timeout" },
-//#endif
-//#endif
+#endif
+//   { "cpuloaddis",   DBG_CommandLine_CpuLoadDisable,  "Disable CPU Load Output" },        // TODO: RA6E1 Bob: Need to enable task usage in task.c first
+//   { "cpuloaden",    DBG_CommandLine_CpuLoadEnable,   "Enable CPU Load Output" },         // TODO: RA6E1 Bob: Need to enable task usage in task.c first
+//   { "cpuloadsmart", DBG_CommandLine_CpuLoadSmart,    "Print CPU Load only when > 30%" }, // TODO: RA6E1 Bob: Need to enable task usage in task.c first
+   { "crc",          DBG_CommandLine_crc,             "calculate crc over hex string" },
+//   { "crc16",        DBG_CommandLine_crc16,           "calculate DCU hack 16 bit crc over hex string" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+#if ( EP == 1 )
+   { "crcm",         DBG_CommandLine_crc16m,          "calculate ANSI psem 16 bit crc over hex string" },
+#if ( TEST_TDMA == 1 )
+   { "csmaskip",     DBG_CommandLine_CsmaSkip,        "Skip CCA" },
+#endif
+#endif
+//   { "dbgdis",       DBG_CommandLine_DebugDisable,    "Disable Debug Output" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "dbgen",        DBG_CommandLine_DebugEnable,     "Enable Debug Output" },  // TODO: RA6E1 Bob: This command was removed from original K24 code
+   { "dbgfilter",    DBG_CommandLine_DebugFilter,     "Set debug port print filter task id" },
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+   { "dbgbaudrate",  DBG_CommandLine_DebugBaudRate,   "Set debug port baud rate to 11520 or 38400" }, // New for RA6E1 to support Uplink Power Control testing */
+#endif
+#if ( EP == 1 )
+#if ( TEST_TDMA == 1 )
+   { "Delay",        DBG_CommandLine_Delay,           "Set/Get the Slot Time Delay betwen 0 and 100 ms" },
+#endif
+#if ( ENABLE_DEMAND_TASKS == 1 )
+#if ( DEMAND_IN_METER == 1 )
+   { "demandreset",  DBG_CommandLine_DemandReset,     "Execute a demand reset (in the meter)" },
+#endif
+#if( DEMAND_IN_METER == 0 )
+   { "schDmdRst",    DBG_CommandLine_SchDmdRst,       "Get (no args) or set (arg1) the scheduled demand reset date of month" },
+#endif
+//   { "demandto",     DBG_CommandLine_DMDTO,           "Get (no args) or set (arg1) the demand reset timeout" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+#endif
+#endif
 #if ENABLE_DFW_TASKS
    { "dfw",          DBG_CommandLine_DFW_Status,      "DFW - Status" },
 #endif   //End of #if EP
-//#if ( EP == 1 )
-//   { "dfwtd",        DBG_CommandLine_DfwTimeDv,       "Get/Set DFW TimeDiversity 0-255 minutes (DLConfirm ApplyConfirm)" },
-//#if ( REMOTE_DISCONNECT == 1 )
-//#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
-//   { "ds",           DBG_CommandLine_ds,              "Open/Close switch. Format ds close or ds open [ msgID ]" },
-//#endif
-//#endif
-////   { "dstimedv",     DBG_CommandLine_DsTimeDv,        "Get (no args) or set (one arg) Daily Shift Time Diversity" },
-//#endif
-//#if ( USE_DTLS == 1 )
-//   { "dtls",         DBG_CommandLine_Dtls,            "Gets or resets DTLS session state" },
-//   { "dtlsstats",    DBG_CommandLine_DtlsStats,       "Print the DTLS stats" },
-//#endif
-//#if ( EP == 1 )
-//#if ( ENABLE_DEMAND_TASKS == 1 ) /* If Demand Feature is enabled */
-//   { "dumpdemand",   DBG_CommandLine_DMDDump,         "Prints the demand file/variables" },
-//#endif
-//#endif
-//   { "evladd",       DBG_CommandLine_EVLADD,          "Add an event to the log" },
-//   { "evlcmd",       DBG_CommandLine_EVLCMD,          "Send Commands to EVL" },
-//   { "evlgetlog",    DBG_CommandLine_EVLGETLOG,       "Get an event log" },
-//   { "evlq",         DBG_CommandLine_EVLQ,            "Query event log" },
-//   { "evlsend",      DBG_CommandLine_EVLSEND,         "Mark Events as Sent" },
-//#if ( EVL_UNIT_TESTING == 1 )
-//   { "evlUnitTest",  DBG_CommandLine_EVL_UNIT_TESTING, "Run and event log unit test" },
-//#endif
+#if ( EP == 1 )
+   { "dfwtd",        DBG_CommandLine_DfwTimeDv,       "Get/Set DFW TimeDiversity 0-255 minutes (DLConfirm ApplyConfirm)" },
+#if ( REMOTE_DISCONNECT == 1 )
+#if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
+   { "ds",           DBG_CommandLine_ds,              "Open/Close switch. Format ds close or ds open [ msgID ]" },
+#endif
+#endif
+//   { "dstimedv",     DBG_CommandLine_DsTimeDv,        "Get (no args) or set (one arg) Daily Shift Time Diversity" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+#endif
+#if ( USE_DTLS == 1 )
+   { "dtls",         DBG_CommandLine_Dtls,            "Gets or resets DTLS session state" },
+   { "dtlsstats",    DBG_CommandLine_DtlsStats,       "Print the DTLS stats" },
+#endif
+#if ( EP == 1 )
+#if ( ENABLE_DEMAND_TASKS == 1 ) /* If Demand Feature is enabled */
+   { "dumpdemand",   DBG_CommandLine_DMDDump,         "Prints the demand file/variables" },
+#endif
+#endif
+   { "evladd",       DBG_CommandLine_EVLADD,          "Add an event to the log" },
+   { "evlcmd",       DBG_CommandLine_EVLCMD,          "Send Commands to EVL" },
+   { "evlgetlog",    DBG_CommandLine_EVLGETLOG,       "Get an event log" },
+   { "evlq",         DBG_CommandLine_EVLQ,            "Query event log" },
+   { "evlsend",      DBG_CommandLine_EVLSEND,         "Mark Events as Sent" },
+#if ( EVL_UNIT_TESTING == 1 )
+   { "evlUnitTest",  DBG_CommandLine_EVL_UNIT_TESTING, "Run and event log unit test" },
+#endif
    { "file",         DBG_CommandLine_PrintFiles,      "Print File list or file content (optional param, filename)" },
    { "filedump",     DBG_CommandLine_DumpFiles,       "Print the contents of files in the un-named partitions" },
-//   { "freeram",      DBG_CommandLine_FreeRAM,         "Display remaining free internal RAM" },
-//#if ( DCU == 1 )
-//   { "frontendgain", DBG_CommandLine_FrontEndGain,    "Display/Set the front end gain" },
-//#endif
-//#if ( BUILD_DFW_TST_CMD_CHANGE == 0 )
-//   { "GenDFWkey",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
-//#else
-//   { "DfwKeyGen",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
-//#endif
+   { "freeram",      DBG_CommandLine_FreeRAM,         "Display remaining free internal RAM" },
+#if ( DCU == 1 )
+   { "frontendgain", DBG_CommandLine_FrontEndGain,    "Display/Set the front end gain" },
+#endif
+#if ( BUILD_DFW_TST_CMD_CHANGE == 0 )
+   { "GenDFWkey",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
+#else
+   { "DfwKeyGen",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
+#endif
 //#if ( EP == 1 )
-////   { "getdstenable", DBG_CommandLine_getDstEnable,    "Prints the DST enable" },
-////   { "getdsthash",   DBG_CommandLine_getDstHash,      "Prints the DST hash" },
-////   { "getdstoffset", DBG_CommandLine_getDstOffset,    "Prints the DST offset" },
+////   { "getdstenable", DBG_CommandLine_getDstEnable,    "Prints the DST enable" },             // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "getdsthash",   DBG_CommandLine_getDstHash,      "Prints the DST hash" },               // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "getdstoffset", DBG_CommandLine_getDstOffset,    "Prints the DST offset" },             // TODO: RA6E1 Bob: This command was removed from original K24 code
 //#endif
    { "getfreq",      DBG_CommandLine_GetFreq,         "print list of available frequencies" },
 //#if ( EP == 1 )
-////   { "getstartrule", DBG_CommandLine_getDstStartRule, "Prints the DST start rule" },
-////   { "getstoprule",  DBG_CommandLine_getDstStopRule,  "Prints the DST stop rule" },
-////   { "gettimezoneoffset", DBG_CommandLine_getTimezoneOffset, "Prints the timezone offset" },
+////   { "getstartrule", DBG_CommandLine_getDstStartRule, "Prints the DST start rule" },         // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "getstoprule",  DBG_CommandLine_getDstStopRule,  "Prints the DST stop rule" },          // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "gettimezoneoffset", DBG_CommandLine_getTimezoneOffset, "Prints the timezone offset" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
 //#endif
 #if ENABLE_HMC_TASKS
 #if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
@@ -451,7 +460,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "hmceng",       DBG_CommandLine_HmcEng,          "print Host Meter Communication engineering stats"},
 #endif
 #if 0
-   { "hmcdc",        DBG_CommandLine_HmcDemandCoin,   "Host Meter Demand Coincident, format is: hmcd uom coin" },
+   { "hmcdc",        DBG_CommandLine_HmcDemandCoin,   "Host Meter Demand Coincident, format is: hmcd uom coin" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
 #endif
    { "hmcs",         DBG_CommandLine_HmcHist,         "Host Meter Read Shift, format is: hmcs uom" },
 #if ( CLOCK_IN_METER == 1 )
@@ -463,61 +472,62 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
    { "hwinfo",       DBG_CommandLine_GetHWInfo,       "Display the HW Info" },
 //#ifdef TM_ID_TEST_CODE
-////   { "idbufr",       DBG_CommandLine_IdBufRd,         "Reads from the interval data test buffer: bufIndex "},
-////   { "idbufw",       DBG_CommandLine_IdBufWr,         "Reads from the interval data test buffer: bufIndex floatVal"},
-////   { "idcfg",        DBG_CommandLine_IdCfg,           "Configure Interval Data: ch smpl_mS store mult div mode rti" },
-////   { "idcfgr",       DBG_CommandLine_IdCfgR,          "Read Interval Data Configuration" },
-////   { "idparams",     DBG_CommandLine_IdParams,        "Read/Write Parameters\n"
-////                   "                                   Read: No Params, Set: SamplePeriod BuSchedule" },
-////   { "idrd",         DBG_CommandLine_IdRd,            "Read Interval: ch yy mm dd hh mm" },
-////   { "idtimedv",     DBG_CommandLine_IdTimeDv,        "Get (no args) or set (one arg) Interval Data Time Diversity" },
+////   { "idbufr",       DBG_CommandLine_IdBufRd,         "Reads from the interval data test buffer: bufIndex "},          // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "idbufw",       DBG_CommandLine_IdBufWr,         "Reads from the interval data test buffer: bufIndex floatVal"},  // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "idcfg",        DBG_CommandLine_IdCfg,           "Configure Interval Data: ch smpl_mS store mult div mode rti" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "idcfgr",       DBG_CommandLine_IdCfgR,          "Read Interval Data Configuration" },                            // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "idparams",     DBG_CommandLine_IdParams,        "Read/Write Parameters\n"                                        // TODO: RA6E1 Bob: This command was removed from original K24 code
+////                   "                                   Read: No Params, Set: SamplePeriod BuSchedule" },               // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "idrd",         DBG_CommandLine_IdRd,            "Read Interval: ch yy mm dd hh mm" },                            // TODO: RA6E1 Bob: This command was removed from original K24 code
+////   { "idtimedv",     DBG_CommandLine_IdTimeDv,        "Get (no args) or set (one arg) Interval Data Time Diversity" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
 //#endif
 //#ifdef TM_ID_UNIT_TEST
-////   { "idut",         DBG_CommandLine_IdUt,            "Run interval data self test: idut ch"},
+////   { "idut",         DBG_CommandLine_IdUt,            "Run interval data self test: idut ch"},                         // TODO: RA6E1 Bob: This command was removed from original K24 code
 //#endif
-
+//
    { "insertappmsg", DBG_CommandLine_InsertAppMsg,    "send NWK payload (arg1) into the bottom of the APP layer" },
-   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\n"
+   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\r\n"
                    "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
-//#if ( EP == 1 )
-//   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" },
-//#if ( LP_IN_METER != 0 )
-//   { "lpstats",      DBG_CommandLine_lpstats,         "Dump Load Profile info. Usage: lptstats [first_block [last_block]]" },
-//#endif
-//#endif
+#if ( EP == 1 )
+//   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" }, // TODO: RA6E1 Bob: Do we want to replace this with our temporary test LED?
+#if ( LP_IN_METER != 0 )
+   { "lpstats",      DBG_CommandLine_lpstats,         "Dump Load Profile info. Usage: lptstats [first_block [last_block]]" },
+#endif
+#endif
    { "mac_time",     DBG_CommandLine_MacTimeCmd,      "Send a 'mac_time set' (DCU) or 'mac_time req' (EP) command" },
-//   { "mac_tsync",    DBG_CommandLine_TimeSync,        "Set/Get the TimeSync parameters" },
+   { "mac_tsync",    DBG_CommandLine_TimeSync,        "Set/Get the TimeSync parameters" },
    { "macaddr",      DBG_CommandLine_MacAddr,         "Set/Get the MAC address" },
-//   { "macconfig",    DBG_CommandLine_MacConfig,       "Print the MAC Configuration" },
-////   { "macflush",     DBG_CommandLine_MacFlush,        "mac flush" },
-////   { "macget",       DBG_CommandLine_MacGet,          "mac get"   },
-////   { "macpurge",     DBG_CommandLine_MacPurge,        "mac purge" },
-//#if ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
-//   { "mac_lp",       DBG_CommandLine_MAC_LinkParameters,"Get/Send MAC Link Parameters Config/Command" },
-//#endif
-//   { "macreset",     DBG_CommandLine_MacReset,        "mac reset" },
-////   { "macset",       DBG_CommandLine_MacSet,          "mac set"   },
-////   { "macstart",     DBG_CommandLine_MacStart,        "mac start" },
-//   { "macstats",     DBG_CommandLine_MacStats,        "Print the MAC stats" },
-//#if ( DCU == 1 )
-//   { "macpacketdelay",DBG_CommandLine_TxPacketDelay,   "get (no args) or set (arg1) MAC TxPacketDelay attribute" },
-//#endif
-////   { "macstop",      DBG_CommandLine_MacStop,         "mac stop"  },
-//   { "macrxtimeout", DBG_CommandLine_RxTimeout,       "get (no args) or set (arg1) MAC Reassembly Timeout in seconds" },
-//   { "macrelhigh",   DBG_CommandLine_RelHighCnt,      "get (no args) or set (arg1) MAC ReliabilityHighCount attribute" },
-//   { "macrelmed",    DBG_CommandLine_RelMedCnt,       "get (no args) or set (arg1) MAC ReliabilityMediumCount attribute" },
-//   { "macrellow",    DBG_CommandLine_RelLowCnt,       "get (no args) or set (arg1) MAC ReliabilityLowCount attribute" },
-//   { "mactxpause",   DBG_CommandLine_MacTxPause,      "pause transmit of mac for QoS testing" },
-//   { "mactxunpause", DBG_CommandLine_MacTxUnPause,    "unpause transmit of mac for QoS testing" },
-//#if ( OVERRIDE_TEMPERATURE == 1 )
-//   { "manTemp",      DBG_CommandLine_ManualTemperature, "Set/Get manual (temporary override) temperture" },
-//#endif
-//#if ( USE_MTLS == 1 )
-//   { "mtlsstats",    DBG_CommandLine_mtlsStats,       "Get/Reset the MTLS stats 'mtlsstats reset' to reset" },
-//#endif
-//#if ( CLOCK_IN_METER == 1 )
-//   { "mtrtime",      DBG_CommandLine_mtrTime,         "Convert meter time mm dd yy hh mm to system time" },
-//#endif
+   { "macconfig",    DBG_CommandLine_MacConfig,       "Print the MAC Configuration" },
+//   { "macflush",     DBG_CommandLine_MacFlush,        "mac flush" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "macget",       DBG_CommandLine_MacGet,          "mac get"   }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "macpurge",     DBG_CommandLine_MacPurge,        "mac purge" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+#if ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
+   { "mac_lp",       DBG_CommandLine_MAC_LinkParameters,"Get/Send MAC Link Parameters Config/Command" },
+#endif
+   { "macreset",     DBG_CommandLine_MacReset,        "mac reset" },
+//   { "macset",       DBG_CommandLine_MacSet,          "mac set"   }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "macstart",     DBG_CommandLine_MacStart,        "mac start" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+   { "macstats",     DBG_CommandLine_MacStats,        "Print the MAC stats" },
+#if ( DCU == 1 )
+   { "macpacketdelay",DBG_CommandLine_TxPacketDelay,   "get (no args) or set (arg1) MAC TxPacketDelay attribute" },
+#endif
+//   { "macstop",      DBG_CommandLine_MacStop,         "mac stop"  }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+   { "macrxtimeout", DBG_CommandLine_RxTimeout,       "get (no args) or set (arg1) MAC Reassembly Timeout in seconds" },
+   { "macrelhigh",   DBG_CommandLine_RelHighCnt,      "get (no args) or set (arg1) MAC ReliabilityHighCount attribute" },
+   { "macrelmed",    DBG_CommandLine_RelMedCnt,       "get (no args) or set (arg1) MAC ReliabilityMediumCount attribute" },
+   { "macrellow",    DBG_CommandLine_RelLowCnt,       "get (no args) or set (arg1) MAC ReliabilityLowCount attribute" },
+   { "mactxpause",   DBG_CommandLine_MacTxPause,      "pause transmit of mac for QoS testing" },
+   { "mactxunpause", DBG_CommandLine_MacTxUnPause,    "unpause transmit of mac for QoS testing" },
+#if ( OVERRIDE_TEMPERATURE == 1 )
+   { "manTemp",      DBG_CommandLine_ManualTemperature, "Set/Get manual (temporary override) temperture" },
+#endif
+#if ( USE_MTLS == 1 )
+   { "mtlsstats",    DBG_CommandLine_mtlsStats,       "Get/Reset the MTLS stats 'mtlsstats reset' to reset" },
+#endif
+#if ( CLOCK_IN_METER == 1 )
+   { "mtrtime",      DBG_CommandLine_mtrTime,         "Convert meter time mm dd yy hh mm to system time" },
+#endif
    { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
    { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
    { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
@@ -528,48 +538,48 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "noiseburst",   DBG_CommandLine_NoiseBurst,      "Display noise bursts for channel(s)" },
    { "bursthist",    DBG_CommandLine_BurstHistogram,  "Display histgram of noise bursts for channel(s)" },
 #endif
-//#if ( ( MULTIPLE_MAC != 0 ) && ( EP == 1 ) )
-//   { "NumMac",          DBG_CommandLine_NumMac,       "Set/Get number of mac addresses emulated (1-50)" },
-//#endif
+#if ( ( MULTIPLE_MAC != 0 ) && ( EP == 1 ) )
+   { "NumMac",       DBG_CommandLine_NumMac,          "Set/Get number of mac addresses emulated (1-50)" },
+#endif
    { "nvr",          DBG_CommandLine_NvRead,          "NV memory Read: Params - Partition Addr Len" },
 #ifdef TM_DVR_EXT_FL_UNIT_TEST
    { "nvtest",       DBG_CommandLine_NvTest,          "[count (default=100)] Test a sector of external NV" },
 #endif
-//   { "nwkget",       DBG_CommandLine_NwkGet,          "nwk get"  },
-//   { "nwkreset",     DBG_CommandLine_NwkReset,        "nwk reset"},
-//   { "nwkset",       DBG_CommandLine_NwkSet,          "nwk set"  },
-//   { "nwkstart",     DBG_CommandLine_NwkStart,        "nwk start"},
-//   { "nwkstats",     DBG_CommandLine_NwkStats,        "Print the NWK stats" },
-//   { "nwkstop",      DBG_CommandLine_NwkStop,         "nwk stop" },
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//#if ( EP == 1 )
-//   { "ondemandread", DBG_CommandLine_OnDemandRead,    "Does on demand read of pre-set quantities" },
-//#endif
-//#endif
-//#if OTA_CHANNELS_ENABLED == 1
-//#if DCU == 1
-//   { "ota",          CommandLine_OTA_Cmd,             "Over the air command"},
-//#endif
-//#endif
+   { "nwkget",       DBG_CommandLine_NwkGet,          "nwk get"  },
+   { "nwkreset",     DBG_CommandLine_NwkReset,        "nwk reset"},
+   { "nwkset",       DBG_CommandLine_NwkSet,          "nwk set"  },
+   { "nwkstart",     DBG_CommandLine_NwkStart,        "nwk start"},
+   { "nwkstats",     DBG_CommandLine_NwkStats,        "Print the NWK stats" },
+   { "nwkstop",      DBG_CommandLine_NwkStop,         "nwk stop" },
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+#if ( EP == 1 )
+   { "ondemandread", DBG_CommandLine_OnDemandRead,    "Does on demand read of pre-set quantities" },
+#endif
+#endif
+#if OTA_CHANNELS_ENABLED == 1
+#if DCU == 1
+   { "ota",          CommandLine_OTA_Cmd,             "Over the air command"},
+#endif
+#endif
 //#if ( PHASE_DETECTION == 1 )
-//   { "pd",           DBG_CommandLine_PhaseDetectCmd,  "Phase Detect Info : pd <info> <freq>" },
+//   { "pd",           DBG_CommandLine_PhaseDetectCmd,  "Phase Detect Info : pd <info> <freq>" }, // TODO: RA6E1 Bob: Phase detect is not yet implemented
 //#endif
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//   { "padac",        DBG_CommandLine_PaDAC,           "Prints Power Amplifier DAC output" },
-//#if ( ENGINEERING_BUILD == 1 )
-//   { "PaDBMtoDAC",   DBG_CommandLine_PaCoeff,         "Get/Set Power Amplifier output" },
-//   { "PaVFWDtoDBM",  DBG_CommandLine_PaCoeff,         "Get/Set Power Amplifier output" },
-//#endif   //( ENGINEERING_BUILD == 1 )
-//#endif   //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-////   { "packettimeout", DBG_CommandLine_PacketTimeout,  "get (no args) or set (arg1) MAC Packet Timeout in ms" },
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+   { "padac",        DBG_CommandLine_PaDAC,           "Prints Power Amplifier DAC output" },
+#if ( ENGINEERING_BUILD == 1 )
+   { "PaDBMtoDAC",   DBG_CommandLine_PaCoeff,         "Get/Set Power Amplifier output" },
+   { "PaVFWDtoDBM",  DBG_CommandLine_PaCoeff,         "Get/Set Power Amplifier output" },
+#endif   //( ENGINEERING_BUILD == 1 )
+#endif   //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+//   { "packettimeout", DBG_CommandLine_PacketTimeout,  "get (no args) or set (arg1) MAC Packet Timeout in ms" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
    { "part",         DBG_CommandLine_Partition,       "Prints partition data" },
-////   { "phymaxtxlen",  DBG_CommandLine_GetPhyMaxTxPayload, "Usage:  'phymaxtxlen' get phy maximum TX payload" },
-//   { "phyreset",     DBG_CommandLine_PhyReset,        "phy reset" },
-////   { "phystart",     DBG_CommandLine_PhyStart,        "phy start" },
+//   { "phymaxtxlen",  DBG_CommandLine_GetPhyMaxTxPayload, "Usage:  'phymaxtxlen' get phy maximum TX payload" },  // TODO: RA6E1 Bob: This command was removed from original K24 code
+   { "phyreset",     DBG_CommandLine_PhyReset,        "phy reset" },
+//   { "phystart",     DBG_CommandLine_PhyStart,        "phy start" },                                            // TODO: RA6E1 Bob: This command was removed from original K24 code
    { "phystats",     DBG_CommandLine_PhyStats,        "Print the PHY stats" },
-//   { "phyconfig",    DBG_CommandLine_PhyConfig,       "Print the PHY Configuration" },
-////   { "phystop",      DBG_CommandLine_PhyStop,         "phy stop"  },
-//   { "ping",         DBG_CommandLine_MacPingCmd,      "Send a 'ping' request to EP"},
+   { "phyconfig",    DBG_CommandLine_PhyConfig,       "Print the PHY Configuration" },
+//   { "phystop",      DBG_CommandLine_PhyStop,         "phy stop"  },                                            // TODO: RA6E1 Bob: This command was removed from original K24 code
+   { "ping",         DBG_CommandLine_MacPingCmd,      "Send a 'ping' request to EP"},
    { "power",        DBG_CommandLine_Power,           "Get power level when no arguments. Set power level (0-5)" },
 //#if ( EP == 1 )
 //   { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
@@ -619,7 +629,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "sendtunmsg",   DBG_CommandLine_SendIpTunMsg,    "send data (arg1) to address (arg2) with qos (arg3)" },
 //#endif
 //   { "sendheadendmsg", DBG_CommandLine_SendHeadEndMsg,  "send data (arg1) to head end with qos (arg2)" },
-//   { "sendheepmsg",  DBG_CommandLine_SendHeepMsg,     "send dummy alarm header HEEP_MSG_TxHeepHdrOnly" },
+   { "sendheepmsg",  DBG_CommandLine_SendHeepMsg,     "send dummy alarm header HEEP_MSG_TxHeepHdrOnly" },
 //   { "sendmtlsmsg",  DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
 ////   { "sendmeta",     DBG_CommandLine_SendMetadata,    "Trigger transmission of a Metadata message" },
 //#if ( EP == 1 )
@@ -640,17 +650,18 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 ////   { "smstop",       DBG_CommandLine_SM_Stop,          "SM stop"  },
 ////   { "smget",        DBG_CommandLine_SM_Get,           "SM get"   },
 ////   { "smset",        DBG_CommandLine_SM_Set,           "SM set"   },
-//   { "nwPassActTimeout",   DBG_CommandLine_SM_NwPassiveActTimeout, "Get or set passive network activity timeout" },
-//   { "nwActiveActTimeout", DBG_CommandLine_SM_NwActiveActTimeout,  "Get or set active network activity timeout" },
-//   { "smstats",      DBG_CommandLine_SM_Stats,        "Print the SM stats" },
-//   { "smconfig",     DBG_CommandLine_SM_Config,       "Print the SM Configuration" },
+   { "nwPassActTimeout",   DBG_CommandLine_SM_NwPassiveActTimeout, "Get or set passive network activity timeout" },
+   { "nwActiveActTimeout", DBG_CommandLine_SM_NwActiveActTimeout,  "Get or set active network activity timeout" },
+   { "smstats",      DBG_CommandLine_SM_Stats,        "Print the SM stats" },
+   { "smconfig",     DBG_CommandLine_SM_Config,       "Print the SM Configuration" },
 //
 //   { "stackusage",   DBG_CommandLine_StackUsage,      "print the stack of active tasks" },
 //#if ( TEST_SYNC_ERROR == 1 )
 //   { "syncerror",    DBG_CommandLine_SyncError,       "Set SYNC bit error " },
 //#endif
 //   { "tasksummary",  DBG_CommandLine_TaskSummary,     "print tasks summary" },
-   { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
+   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "time",         DBG_CommandLine_time,            "RTC and SYS time.\r\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #if ( DCU == 1 )
 //   { "read_res",     CommandLine_ReadResource,       "Read a resource and value."},
@@ -670,7 +681,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
                    "                                   4 = 4GFSK BER with manufacturing print out,\r\n"
                    "                                   5 = Old PHY (freq dev 600Hz, RS(63,59)" },
 #else
-                   "                                   4 = 4GFSK BER with manufacturing print out,\r\n" },
+                   "                                   4 = 4GFSK BER with manufacturing print out," },
 #endif
 
 //#if ( EP == 1 ) && ( TEST_TDMA == 1 )
@@ -1070,18 +1081,16 @@ static void DBG_CommandLine_Process ( void )
             ****************************************************************************/
             if ( DBG_IsPortEnabled () )
             {
-//               DBG_PortTimer_Manage ( );// TODO: RA6 [name_Balaji]: Integrate Timer for DBG module
+               DBG_PortTimer_Manage ( );// TODO: RA6 [name_Balaji]: Integrate Timer for DBG module
             }
             /***************************************************************************
                Reset the rfTestmode timer upon execution of a valid command
             ****************************************************************************/
-#if 0 // TODO: RA6: Add later
 #if ( EP == 1 )
             if ( MODECFG_get_rfTest_mode() != 0 )
             {
                MFGP_rfTestTimerReset();
             }
-#endif
 #endif
             break;
          } /* end if() */
@@ -2104,33 +2113,97 @@ uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //} /* end DBG_CommandLine_CpuLoadEnable () */
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_DebugFilter
-//
-//   Purpose: This function sets the debug print filter task id
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] )
-//{
-//#if ( RTOS_SELECTION == MQX_RTOS )
-//   _task_id tid;
-//   if ( argc > 1 )
-//   {
-//      tid = strtoul( argv[1], NULL, 0 );
-//      DBG_SetTaskFilter( tid );
-//   }
-//#endif
-//   return 0;
-//}
-//
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_DebugFilter
+
+   Purpose: This function sets the debug print filter task id
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] )
+{
+#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Bob: Need to create the FreeRTOS equivalent and add to the code
+   _task_id tid;
+   if ( argc > 1 )
+   {
+      tid = strtoul( argv[1], NULL, 0 );
+      DBG_SetTaskFilter( tid );
+   }
+#endif
+   return 0;
+}
+
+#if ( DEBUG_PORT_BAUD_RATE == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_DebugBaudRate
+
+   Purpose: This function sets the debug port baud rate to 115200 or 38400
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_DebugBaudRate( uint32_t argc, char *argv[] )
+{
+   /* The following definitions were copied from hal_data.c, as generated by the Renesas smart configurator */
+   static const baud_setting_t baud115200 =
+   {  /* Baud rate 115200 calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false };
+   static const baud_setting_t baud38400 =
+   {  /* Baud rate  38400 calculated with 0.677% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 96, .mddr = (uint8_t) 256, .brme = false };
+   baud_setting_t *pBaudRate;
+
+   if ( argc != 2 )
+   {
+      DBG_logPrintf( 'R', "Usage: dbgbaudrate {115200 | 38400}" );
+   }
+   else
+   {
+      uint32_t baudRate = atoi (argv[1] );
+      if ( ( baudRate != 115200 ) && ( baudRate != 38400 ) )
+      {
+         DBG_logPrintf( 'R', "Command only accepts baud rates of 115200 or 38400" );
+      }
+      else
+      {
+         if (baudRate == 115200 )
+         {
+            pBaudRate = (void *)&baud115200; /* The cast is required because of the const attribute of the source */
+         }
+         else
+         {
+            pBaudRate = (void *)&baud38400;  /* The cast is required because of the const attribute of the source */
+         }
+         DBG_logPrintf( 'I', "Will change baud rate of '%s' UART to %u bps in 10 seconds; please change your terminal emulator", UART_getName(UART_DEBUG_PORT), baudRate );
+         OS_TASK_Sleep ( (uint32_t) 10000 ); /* Make sure nothing is still echoing and wait for user to change baud rate */
+
+         returnStatus_t retVal = UART_setBaud ( UART_DEBUG_PORT, pBaudRate);
+
+         if ( eSUCCESS == retVal )
+         {
+            DBG_logPrintf( 'I', "Changed '%s' UART baud rate to %u bps", UART_getName(UART_DEBUG_PORT), baudRate );
+         }
+         else
+         {
+            OS_TASK_Sleep ( (uint32_t) 20000 ); /* Wait for the user to change the baud rate back to previous */
+            DBG_logPrintf( 'R', "Attempt to set baud rate of '%s' UART to %u bps failed, retVal = %u", UART_getName(UART_DEBUG_PORT), baudRate, retVal );
+         }
+      }
+   }
+   return 0;
+}
+#endif
 ///*******************************************************************************
 //
 //   Function name: DBG_CommandLine_CpuLoadSmart
@@ -2894,67 +2967,67 @@ uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
 //}
 //#endif /* INCLUDE_ECC */
 //#if 0
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_GenDFWkey
-//
-//   Purpose: Derive the DFW encryption/decryption key
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//PACK_BEGIN
-//struct ver PACK_MID
-//{
-//   uint8_t  major;
-//   uint8_t  minor;
-//   uint16_t build;
-//};
-//PACK_END
-//
-//static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] )
-//{
-//   uint8_t     response[ 32 ];   /* Value ecc108e routine                  */
-//   struct
-//   {
-//      uint8_t     comDevType[ 20 ]; /* Com Device Type is 20 characters max   */
-//      struct ver  from;
-//      struct ver  to;
-//      uint8_t     zero[ 4 ];        /* 4 bytes of trailing zeroes             */
-//   } dfwChallenge;
-//   uint8_t     ECCstatus;
-//
-//   if ( argc != 4 )
-//   {
-//      DBG_logPrintf( 'R', "Usage: GenDFWkey ComDeviceType FromVer(MM.mm.bbbb) ToVer(MM.mm.bbbb)" );
-//   }
-//   else
-//   {
-//      ( void )memset( ( uint8_t * )&dfwChallenge, 0, sizeof( dfwChallenge ) );
-//      ( void )strncpy( ( char * )dfwChallenge.comDevType, argv[ 1 ], sizeof( dfwChallenge.comDevType ) );
-//      ( void )sscanf( argv[ 2 ], "%hhu.%hhu.%hu", &dfwChallenge.from.major,
-//                      &dfwChallenge.from.minor, & dfwChallenge.from.build );
-//      ( void )sscanf( argv[ 3 ], "%hhu.%hhu.%hu", &dfwChallenge.to.major, &dfwChallenge.to.minor, & dfwChallenge.to.build );
-//      /* Convert build fields to big endian   */
-//      dfwChallenge.from.build = ( uint16_t )( dfwChallenge.from.build << 8 ) | ( dfwChallenge.from.build >> 8 );
-//      dfwChallenge.to.build = ( uint16_t )( dfwChallenge.to.build << 8 ) | ( dfwChallenge.to.build >> 8 );
-//      ECCstatus = ecc108e_DeriveFWDecryptionKey( ( uint8_t * )&dfwChallenge, response );
-//      if ( ECCstatus == ECC108_SUCCESS )
-//      {
-//         for ( uint32_t i = 0; i < sizeof( response ); i++ )
-//         {
-//            DBG_printfNoCr( "%02x", response[ i ] );
-//         }
-//         DBG_printf( "" );
-//      }
-//   }
-//   return 0;
-//}
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_GenDFWkey
+
+   Purpose: Derive the DFW encryption/decryption key
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+PACK_BEGIN
+struct ver PACK_MID
+{
+   uint8_t  major;
+   uint8_t  minor;
+   uint16_t build;
+};
+PACK_END
+
+static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] )
+{
+   uint8_t     response[ 32 ];   /* Value ecc108e routine                  */
+   struct
+   {
+      uint8_t     comDevType[ 20 ]; /* Com Device Type is 20 characters max   */
+      struct ver  from;
+      struct ver  to;
+      uint8_t     zero[ 4 ];        /* 4 bytes of trailing zeroes             */
+   } dfwChallenge;
+   uint8_t     ECCstatus;
+
+   if ( argc != 4 )
+   {
+      DBG_logPrintf( 'R', "Usage: GenDFWkey ComDeviceType FromVer(MM.mm.bbbb) ToVer(MM.mm.bbbb)" );
+   }
+   else
+   {
+      ( void )memset( ( uint8_t * )&dfwChallenge, 0, sizeof( dfwChallenge ) );
+      ( void )strncpy( ( char * )dfwChallenge.comDevType, argv[ 1 ], sizeof( dfwChallenge.comDevType ) );
+      ( void )sscanf( argv[ 2 ], "%hhu.%hhu.%hu", &dfwChallenge.from.major,
+                      &dfwChallenge.from.minor, & dfwChallenge.from.build );
+      ( void )sscanf( argv[ 3 ], "%hhu.%hhu.%hu", &dfwChallenge.to.major, &dfwChallenge.to.minor, & dfwChallenge.to.build );
+      /* Convert build fields to big endian   */
+      dfwChallenge.from.build = ( uint16_t )( dfwChallenge.from.build << 8 ) | ( dfwChallenge.from.build >> 8 );
+      dfwChallenge.to.build = ( uint16_t )( dfwChallenge.to.build << 8 ) | ( dfwChallenge.to.build >> 8 );
+      ECCstatus = ecc108e_DeriveFWDecryptionKey( ( uint8_t * )&dfwChallenge, response );
+      if ( ECCstatus == ECC108_SUCCESS )
+      {
+         for ( uint32_t i = 0; i < sizeof( response ); i++ )
+         {
+            DBG_printfNoCr( "%02x", response[ i ] );
+         }
+         DBG_printf( "" );
+      }
+   }
+   return 0;
+}
 //#endif // #if 0
 ///*******************************************************************************
 //
@@ -3352,73 +3425,73 @@ uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
 //}
 //#endif   /* HAL_TARGET_XCVR_9985_REV_A  */
 //
-//#if 0//(DBG_TESTS == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_clocktst
-//
-//   Purpose: This function allows user to turn the clkout signal on or off
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
-//{
-//   uint32_t on;
-//   uint8_t string[VER_HW_STR_LEN];   /* Version string including the two '.' and a NULL */
-//
-//   ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
-//
-//   /* Rev C HW, PTC3/CLKOUT pin is grounded */
-//   if ( 'C' == string[0] )
-//   {
-//      DBG_printf( "This is Rev C HW, PTC3/CLKOUT pin is grounded" );
-//
-//      return( 0 );
-//   }
-//
-//   if( argc != 2 )      /* Must be at least on parameter */
-//   {
-//      DBG_logPrintf( 'R', "1/0 (on/off) parameter required" );
-//   }
-//   else
-//   {
-//      ( void )sscanf( argv[1], "%lu", &on ); /* Get user's request   */
-//      if( on == 0 )
-//      {
-//         SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
-//         OSC_CR &= ~( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Disable the clock output   */
-//#if ( DCU == 1 )
-//         PORTE_PCR0 &= ~PORT_PCR_MUX( 7 );
-//         PORTE_PCR0 |= PORT_PCR_MUX( 1 );          /* Set PTE0 as normal GPIO    */
-//#else
-//         PORTC_PCR3 &= ~PORT_PCR_MUX( 7 );
-//         PORTC_PCR3 |= PORT_PCR_MUX( 1 );          /* Set PTC3 as normal GPIO    */
-//#endif
-//      }
-//      else
-//      {
-//         SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
-//         SIM_SOPT2 |= ( SIM_SOPT2_CLKOUTSEL( 6 ) ); /* Select the external oscillator as the source clock */
-//#if ( DCU == 1 )
-////         RTC_CR |= ( uint8_t )( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Enable the clock output    */
-////         PORTE_PCR0 |= PORT_PCR_MUX( 7 );    /* Set PTE0 as RTC_CLKOUT signal  */
-//         PORTE_PCR0 |= PORT_PCR_MUX( 5 );    /* Set PTE0 as TRACE_CLKOUT signal (i.e. 60MHz) */
-//#else
-//         OSC_CR |= ( uint8_t )( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Enable the clock output    */
-//         PORTC_PCR3 |= PORT_PCR_MUX( 5 );    /* Set PTC3 as CLKOUT signal  */
-//#endif
-//      }
-//      DBG_logPrintf( 'R', "clock: %s", on == 0 ? "off" : "on" );
-//   }
-//   return 0;
-//}
-//#endif //DBG_TESTS
+#if 0//(DBG_TESTS == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_clocktst
+
+   Purpose: This function allows user to turn the clkout signal on or off
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
+{
+   uint32_t on;
+   uint8_t string[VER_HW_STR_LEN];   /* Version string including the two '.' and a NULL */
+
+   ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+
+   /* Rev C HW, PTC3/CLKOUT pin is grounded */
+   if ( 'C' == string[0] )
+   {
+      DBG_printf( "This is Rev C HW, PTC3/CLKOUT pin is grounded" );
+
+      return( 0 );
+   }
+
+   if( argc != 2 )      /* Must be at least on parameter */
+   {
+      DBG_logPrintf( 'R', "1/0 (on/off) parameter required" );
+   }
+   else
+   {
+      ( void )sscanf( argv[1], "%lu", &on ); /* Get user's request   */
+      if( on == 0 )
+      {
+         SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
+         OSC_CR &= ~( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Disable the clock output   */
+#if ( DCU == 1 )
+         PORTE_PCR0 &= ~PORT_PCR_MUX( 7 );
+         PORTE_PCR0 |= PORT_PCR_MUX( 1 );          /* Set PTE0 as normal GPIO    */
+#else
+         PORTC_PCR3 &= ~PORT_PCR_MUX( 7 );
+         PORTC_PCR3 |= PORT_PCR_MUX( 1 );          /* Set PTC3 as normal GPIO    */
+#endif
+      }
+      else
+      {
+         SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
+         SIM_SOPT2 |= ( SIM_SOPT2_CLKOUTSEL( 6 ) ); /* Select the external oscillator as the source clock */
+#if ( DCU == 1 )
+//         RTC_CR |= ( uint8_t )( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Enable the clock output    */
+//         PORTE_PCR0 |= PORT_PCR_MUX( 7 );    /* Set PTE0 as RTC_CLKOUT signal  */
+         PORTE_PCR0 |= PORT_PCR_MUX( 5 );    /* Set PTE0 as TRACE_CLKOUT signal (i.e. 60MHz) */
+#else
+         OSC_CR |= ( uint8_t )( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Enable the clock output    */
+         PORTC_PCR3 |= PORT_PCR_MUX( 5 );    /* Set PTC3 as CLKOUT signal  */
+#endif
+      }
+      DBG_logPrintf( 'R', "clock: %s", on == 0 ? "off" : "on" );
+   }
+   return 0;
+}
+#endif //DBG_TESTS
 
 /*******************************************************************************
 
@@ -3803,127 +3876,127 @@ uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
 //}
 #endif // #if ( MCU_SELECTED == NXP_K24 )
 #endif  // #if (RTC == 1)
-//
-//#if (EP == 1)
-//
-///***********************************************************************************************************************
-//   Function Name: DBG_CommandLine_lpstats
-//
-//   Purpose: Print out Load Profile configuration info and status
-//
-//   Arguments:
-//      argc - Number of Arguments passed to this function
-//      argv - pointer to the list of arguments passed to this function
-//
-//   Returns: void
-//***********************************************************************************************************************/
-//#if ( LP_IN_METER != 0 )
-//static uint32_t DBG_CommandLine_lpstats ( uint32_t argc, char *argv[] )
-//{
-//   stdTbl61_t                    tbl61;         /* Full table 61  (13 bytes)  */
-//   stdTbl63_t                    tbl63;         /* Full table 63  (13 bytes)  */
-//   MtrTimeFormatHighPrecision_t  tblTime;       /* Time from meter ( yy mm dd hh mm ) */
-//   sysTime_dateFormat_t          mtrTime;       /* Meter time in mm dd yy hh mm format                                                                             */
-//   sysTime_t                     sTime;         /* Meter time converted to system time */
-//   sysTimeCombined_t             startTime;     /* Meter block start time  */
-//   uint32_t                      offset;        /* byte offset into table 64  */
-//   uint32_t                      fracSecs= 0;   /* Unused, but required fractional seconds  */
-//   uint32_t                      seconds;       /* System time converted to seconds since epoch */
-//   uint16_t                      block;         /* tbl64 block index */
-//   uint16_t                      endBlock;      /* Last  block to report (0 based)   */
-//   uint16_t                      startBlock;    /* First block to report (0 based), default to last valid block   */
-//   uint16_t                      blockSize;     /* computed size of each block */
-//   uint8_t                       statusBytes;   /* Number of status bytes per interval (for all channels)   */
-//   uint8_t                       dataBytes;     /* Number of data bytes (for all channels)   */
-//   uint8_t                       readOffset;    /* offset where the intervals in the block start */
-//
-//   DBG_logPrintf( 'R', "Reading tables 61 and 63" );
-//   if ( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_ansiRead( &tbl61, STD_TBL_ACTUAL_LOAD_PROFILE_LIMITING, 0, (uint16_t)sizeof( stdTbl61_t ) ) )
-//   {
-//      DBG_logPrintf( 'R', "memory length: %u (0x%x), number of blocks: %hu, intervals per block: %hu, no. channels: %hhu, interval time: %hhu",
-//            tbl61.lpMemoryLen, tbl61.lpMemoryLen, tbl61.lpDataSet1.nbrBlksSet, tbl61.lpDataSet1.nbrBlksIntsSet, tbl61.lpDataSet1.nbrChnsSet,
-//            tbl61.lpDataSet1.nbrMaxIntTimeSet );
-//   }
-//   if ( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_ansiRead( &tbl63, STD_TBL_LOAD_PROFILE_STATUS, 0, (uint16_t)sizeof( stdTbl63_t ) ) )
-//   {
-//      DBG_logPrintf( 'R', "no. valid blocks: %hu , last block element %hu, no. valid intervals: %hu",
-//            tbl63.nbrValidBlocks, tbl63.lastBlockElement, tbl63.nbrValidInt );
-//   }
-//
-//   startBlock = tbl63.lastBlockElement;
-//   endBlock   = startBlock;
-//
-//   if ( argc >= 2 )  /* Requested starting block;  */
-//   {
-//      startBlock  = (uint16_t)min( (uint16_t)strtoul( argv[1], NULL, 0), tbl63.lastBlockElement );
-//      endBlock    = startBlock;
-//   }
-//   if ( argc > 2 )  /* Requested ending block;  */
-//   {
-//      endBlock = (uint16_t)max( startBlock, (uint16_t)strtoul( argv[2], NULL, 0 ) );
-//      endBlock = (uint16_t)min( endBlock, tbl63.lastBlockElement );
-//   }
-//
-//   statusBytes = ( tbl61.lpDataSet1.nbrChnsSet / 2U ) + 1U;                   /* Bytes for status  */
-//   dataBytes = tbl61.lpDataSet1.nbrChnsSet * 2U;                              /*lint !e734 (9 bits to 8 bits, bytes for data, 2 per channel) */
-//   readOffset = sizeof( stdTbl64Time_t );                                     /* Bytes for the date and time of the last read */
-//   readOffset += ( 6U * tbl61.lpDataSet1.nbrChnsSet );                        /*lint !e734 Bytes for end block reads */
-//   blockSize = ( statusBytes + dataBytes ) * tbl61.lpDataSet1.nbrBlksIntsSet; /*lint !e734 (Bytes for all the readings in block) */
-//   blockSize += readOffset;
-//   offset = startBlock * blockSize;
-//
-//   /* Loop through all the valid blocks. Note tbl63.lastBlockElement is an index, so include that value in the loop.  */
-//   for ( block = startBlock; block <= endBlock; block++ )
-//   {
-//      if ( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_ansiRead( &tblTime, STD_TBL_LOAD_PROFILE_DATASET_1, offset, ( uint16_t )sizeof( tblTime ) ) )
-//      {
-//         /* Print block end times in local and UTC */
-//         tblTime.seconds = 0;                                                 /* Meter doesn't record the seconds value */
-//         (void)TIME_UTIL_ConvertMtrHighFormatToSysFormat( &tblTime, &sTime);  /* sTime is meter UTC date in sysTime_t  */
-//         DST_ConvertUTCtoLocal( &sTime );                                     /* Convert meter UTC time to local time  */
-//         DBG_logPrintf( 'R', "block %hhu, @ 0x%p", block, offset );
-//         DBG_logPrintf( 'R', "block end   local date = %02hhu/%02hhu/%4hu %02hhu:%02hhu:00", tblTime.month, tblTime.day,
-//                        tblTime.year + 2000U, tblTime.hours, tblTime.minutes );
-//
-//         DST_ConvertLocaltoUTC( &sTime );                                     /* Convert meter local time to UTC time  */
-//         TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &seconds, &fracSecs);
-//         (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &mtrTime );    /* convert to date format  */
-//         DBG_logPrintf( 'R', "block end   UTC   date = %02hhu/%02hhu/%4hu %02hhu:%02hhu:00 (0x%08lX)", mtrTime.month, mtrTime.day, mtrTime.year,
-//                        mtrTime.hour, mtrTime.min, seconds );
-//
-//         /* Print block start times in local and UTC */
-//         /* Compute and display block start time  */
-//         startTime = TIME_UTIL_ConvertSysFormatToSysCombined( &sTime );       /* Convert block end time (UTC) to seconds since epoch   */
-//         if ( block != tbl63.lastBlockElement )
-//         {
-//            /* Start time of first block = end time - ( number of intervals * number of minutes per block * TIME_TICKS_PER_MIN ).   */
-//            startTime -= ( tbl61.lpDataSet1.nbrBlksIntsSet * tbl61.lpDataSet1.nbrMaxIntTimeSet * TIME_TICKS_PER_MIN );
-//         }
-//         else
-//         {
-//            /* Start time of first block = end time - ( number of intervals in this block * number of minutes per block * TIME_TICKS_PER_MIN ).   */
-//            startTime -= ( tbl63.nbrValidInt * tbl61.lpDataSet1.nbrMaxIntTimeSet * TIME_TICKS_PER_MIN );
-//
-//         }
-//
-//         TIME_UTIL_ConvertSysCombinedToSysFormat( &startTime, &sTime );
-//         (void)TIME_UTIL_ConvertSysFormatToMtrHighFormat( &sTime, &tblTime ); /* convert start time to meter format (local)   */
-//         (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &mtrTime );    /* convert to date format (UTC)  */
-//         TIME_UTIL_ConvertSysCombinedToSeconds( &startTime, &seconds, &fracSecs);
-//         DBG_logPrintf( 'R', "block start local date = %02hhu/%02hhu/%4hu %02hhu:%02hhu:00", tblTime.month, tblTime.day,
-//                        tblTime.year + 2000U, tblTime.hours, tblTime.minutes );
-//
-//         DST_ConvertLocaltoUTC( &sTime );                                     /* Convert meter system time to UTC time  */
-//         TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &seconds, &fracSecs);
-//         DBG_logPrintf( 'R', "block start UTC   date = %02hhu/%02hhu/%4hu %02hhu:%02hhu:00 (0x%08lX)", mtrTime.month, mtrTime.day, mtrTime.year,
-//                        mtrTime.hour, mtrTime.min, seconds );
-//      }
-//      offset += blockSize;
-//   }
-//   return 0;
-//}
-//#endif //( LP_IN_METER != 0 )
-//
+
+#if (EP == 1)
+
+/***********************************************************************************************************************
+   Function Name: DBG_CommandLine_lpstats
+
+   Purpose: Print out Load Profile configuration info and status
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: void
+***********************************************************************************************************************/
+#if ( LP_IN_METER != 0 )
+static uint32_t DBG_CommandLine_lpstats ( uint32_t argc, char *argv[] )
+{
+   stdTbl61_t                    tbl61;         /* Full table 61  (13 bytes)  */
+   stdTbl63_t                    tbl63;         /* Full table 63  (13 bytes)  */
+   MtrTimeFormatHighPrecision_t  tblTime;       /* Time from meter ( yy mm dd hh mm ) */
+   sysTime_dateFormat_t          mtrTime;       /* Meter time in mm dd yy hh mm format                                                                             */
+   sysTime_t                     sTime;         /* Meter time converted to system time */
+   sysTimeCombined_t             startTime;     /* Meter block start time  */
+   uint32_t                      offset;        /* byte offset into table 64  */
+   uint32_t                      fracSecs= 0;   /* Unused, but required fractional seconds  */
+   uint32_t                      seconds;       /* System time converted to seconds since epoch */
+   uint16_t                      block;         /* tbl64 block index */
+   uint16_t                      endBlock;      /* Last  block to report (0 based)   */
+   uint16_t                      startBlock;    /* First block to report (0 based), default to last valid block   */
+   uint16_t                      blockSize;     /* computed size of each block */
+   uint8_t                       statusBytes;   /* Number of status bytes per interval (for all channels)   */
+   uint8_t                       dataBytes;     /* Number of data bytes (for all channels)   */
+   uint8_t                       readOffset;    /* offset where the intervals in the block start */
+
+   DBG_logPrintf( 'R', "Reading tables 61 and 63" );
+   if ( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_ansiRead( &tbl61, STD_TBL_ACTUAL_LOAD_PROFILE_LIMITING, 0, (uint16_t)sizeof( stdTbl61_t ) ) )
+   {
+      DBG_logPrintf( 'R', "memory length: %u (0x%x), number of blocks: %hu, intervals per block: %hu, no. channels: %hhu, interval time: %hhu",
+            tbl61.lpMemoryLen, tbl61.lpMemoryLen, tbl61.lpDataSet1.nbrBlksSet, tbl61.lpDataSet1.nbrBlksIntsSet, tbl61.lpDataSet1.nbrChnsSet,
+            tbl61.lpDataSet1.nbrMaxIntTimeSet );
+   }
+   if ( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_ansiRead( &tbl63, STD_TBL_LOAD_PROFILE_STATUS, 0, (uint16_t)sizeof( stdTbl63_t ) ) )
+   {
+      DBG_logPrintf( 'R', "no. valid blocks: %hu , last block element %hu, no. valid intervals: %hu",
+            tbl63.nbrValidBlocks, tbl63.lastBlockElement, tbl63.nbrValidInt );
+   }
+
+   startBlock = tbl63.lastBlockElement;
+   endBlock   = startBlock;
+
+   if ( argc >= 2 )  /* Requested starting block;  */
+   {
+      startBlock  = (uint16_t)min( (uint16_t)strtoul( argv[1], NULL, 0), tbl63.lastBlockElement );
+      endBlock    = startBlock;
+   }
+   if ( argc > 2 )  /* Requested ending block;  */
+   {
+      endBlock = (uint16_t)max( startBlock, (uint16_t)strtoul( argv[2], NULL, 0 ) );
+      endBlock = (uint16_t)min( endBlock, tbl63.lastBlockElement );
+   }
+
+   statusBytes = ( tbl61.lpDataSet1.nbrChnsSet / 2U ) + 1U;                   /* Bytes for status  */
+   dataBytes = tbl61.lpDataSet1.nbrChnsSet * 2U;                              /*lint !e734 (9 bits to 8 bits, bytes for data, 2 per channel) */
+   readOffset = sizeof( stdTbl64Time_t );                                     /* Bytes for the date and time of the last read */
+   readOffset += ( 6U * tbl61.lpDataSet1.nbrChnsSet );                        /*lint !e734 Bytes for end block reads */
+   blockSize = ( statusBytes + dataBytes ) * tbl61.lpDataSet1.nbrBlksIntsSet; /*lint !e734 (Bytes for all the readings in block) */
+   blockSize += readOffset;
+   offset = startBlock * blockSize;
+
+   /* Loop through all the valid blocks. Note tbl63.lastBlockElement is an index, so include that value in the loop.  */
+   for ( block = startBlock; block <= endBlock; block++ )
+   {
+      if ( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_ansiRead( &tblTime, STD_TBL_LOAD_PROFILE_DATASET_1, offset, ( uint16_t )sizeof( tblTime ) ) )
+      {
+         /* Print block end times in local and UTC */
+         tblTime.seconds = 0;                                                 /* Meter doesn't record the seconds value */
+         (void)TIME_UTIL_ConvertMtrHighFormatToSysFormat( &tblTime, &sTime);  /* sTime is meter UTC date in sysTime_t  */
+         DST_ConvertUTCtoLocal( &sTime );                                     /* Convert meter UTC time to local time  */
+         DBG_logPrintf( 'R', "block %hhu, @ 0x%p", block, offset );
+         DBG_logPrintf( 'R', "block end   local date = %02hhu/%02hhu/%4hu %02hhu:%02hhu:00", tblTime.month, tblTime.day,
+                        tblTime.year + 2000U, tblTime.hours, tblTime.minutes );
+
+         DST_ConvertLocaltoUTC( &sTime );                                     /* Convert meter local time to UTC time  */
+         TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &seconds, &fracSecs);
+         (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &mtrTime );    /* convert to date format  */
+         DBG_logPrintf( 'R', "block end   UTC   date = %02hhu/%02hhu/%4hu %02hhu:%02hhu:00 (0x%08lX)", mtrTime.month, mtrTime.day, mtrTime.year,
+                        mtrTime.hour, mtrTime.min, seconds );
+
+         /* Print block start times in local and UTC */
+         /* Compute and display block start time  */
+         startTime = TIME_UTIL_ConvertSysFormatToSysCombined( &sTime );       /* Convert block end time (UTC) to seconds since epoch   */
+         if ( block != tbl63.lastBlockElement )
+         {
+            /* Start time of first block = end time - ( number of intervals * number of minutes per block * TIME_TICKS_PER_MIN ).   */
+            startTime -= ( tbl61.lpDataSet1.nbrBlksIntsSet * tbl61.lpDataSet1.nbrMaxIntTimeSet * TIME_TICKS_PER_MIN );
+         }
+         else
+         {
+            /* Start time of first block = end time - ( number of intervals in this block * number of minutes per block * TIME_TICKS_PER_MIN ).   */
+            startTime -= ( tbl63.nbrValidInt * tbl61.lpDataSet1.nbrMaxIntTimeSet * TIME_TICKS_PER_MIN );
+
+         }
+
+         TIME_UTIL_ConvertSysCombinedToSysFormat( &startTime, &sTime );
+         (void)TIME_UTIL_ConvertSysFormatToMtrHighFormat( &sTime, &tblTime ); /* convert start time to meter format (local)   */
+         (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &mtrTime );    /* convert to date format (UTC)  */
+         TIME_UTIL_ConvertSysCombinedToSeconds( &startTime, &seconds, &fracSecs);
+         DBG_logPrintf( 'R', "block start local date = %02hhu/%02hhu/%4hu %02hhu:%02hhu:00", tblTime.month, tblTime.day,
+                        tblTime.year + 2000U, tblTime.hours, tblTime.minutes );
+
+         DST_ConvertLocaltoUTC( &sTime );                                     /* Convert meter system time to UTC time  */
+         TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &seconds, &fracSecs);
+         DBG_logPrintf( 'R', "block start UTC   date = %02hhu/%02hhu/%4hu %02hhu:%02hhu:00 (0x%08lX)", mtrTime.month, mtrTime.day, mtrTime.year,
+                        mtrTime.hour, mtrTime.min, seconds );
+      }
+      offset += blockSize;
+   }
+   return 0;
+}
+#endif //( LP_IN_METER != 0 )
+
 ///***********************************************************************************************************************
 //   Function Name: DBG_CommandLine_LED
 //
@@ -4089,7 +4162,7 @@ uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
 //
 //   return( 0 );
 //}
-//#endif
+#endif
 //#if (EP == 1)
 ///*******************************************************************************
 //
@@ -4649,66 +4722,66 @@ static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
 //}
 //#endif
 //
-//#if (EP == 1) && ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_OnDemandRead
-//
-//   Purpose: Performs on demand read of the pre-selected values.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_OnDemandRead ( uint32_t argc, char *argv[] )
-//{
-//   HEEP_APPHDR_t heepHdr;
-//   union TimeSchRdgQty_u qtys;      // For Time Qty and Reading Qty
-//   uint16_t dummy=0;
-//
-//   qtys.TimeSchRdgQty = 0; //No quantities, send default
-//   heepHdr.Method_Status = ( uint8_t )method_get;
-//   OR_MR_MsgHandler( &heepHdr, (uint8_t *)&qtys, dummy );
-//   return ( 0 );
-//}
-//#endif
-//
-//#if ( OVERRIDE_TEMPERATURE == 1 )
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_ManualTemperature
-//
-//   Purpose: This function will temporarily override the current processor Temperature
-//            If temperature is less than 255 the measured temperature is overridden by this setting
-//            This is a volatile setting and will be disabled over a reset
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_ManualTemperature ( uint32_t argc, char *argv[] )
-//{
-//   char           floatStr[PRINT_FLOAT_SIZE];
-//   returnStatus_t retVal = eSUCCESS;
-//
-//   if ( 2 == argc )
-//   {
-//      int16_t newTemperature = atoi( argv[1] );
-//
-//      ADC_Set_Man_Temperature( (float)newTemperature );
-//   }
-//   DBG_logPrintf( 'R', "Manual Temperature: %8sC", DBG_printFloat(floatStr, ADC_Get_Man_Temperature(  ),  1) );
-//   return ( uint32_t )retVal;
-//}
-//#endif
+#if (EP == 1) && ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OnDemandRead
+
+   Purpose: Performs on demand read of the pre-selected values.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OnDemandRead ( uint32_t argc, char *argv[] )
+{
+   HEEP_APPHDR_t heepHdr;
+   union TimeSchRdgQty_u qtys;      // For Time Qty and Reading Qty
+   uint16_t dummy=0;
+
+   qtys.TimeSchRdgQty = 0; //No quantities, send default
+   heepHdr.Method_Status = ( uint8_t )method_get;
+   OR_MR_MsgHandler( &heepHdr, (uint8_t *)&qtys, dummy );
+   return ( 0 );
+}
+#endif
+
+#if ( OVERRIDE_TEMPERATURE == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_ManualTemperature
+
+   Purpose: This function will temporarily override the current processor Temperature
+            If temperature is less than 255 the measured temperature is overridden by this setting
+            This is a volatile setting and will be disabled over a reset
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_ManualTemperature ( uint32_t argc, char *argv[] )
+{
+   char           floatStr[PRINT_FLOAT_SIZE];
+   returnStatus_t retVal = eSUCCESS;
+
+   if ( 2 == argc )
+   {
+      int16_t newTemperature = atoi( argv[1] );
+
+      ADC_Set_Man_Temperature( (float)newTemperature );
+   }
+   DBG_logPrintf( 'R', "Manual Temperature: %8sC", DBG_printFloat(floatStr, ADC_Get_Man_Temperature(  ),  1) );
+   return ( uint32_t )retVal;
+}
+#endif
 
 /*******************************************************************************
 
@@ -4763,6 +4836,11 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
 #if ( EP == 1 )
       DBG_logPrintf( 'R', "SuperCap    = %-6sV", DBG_printFloat( floatStr, ADC_Get_SC_Voltage(), 3 ) );
       DBG_logPrintf( 'R', "Vin         = %-6sV", DBG_printFloat( floatStr, ADC_Get_4V0_Voltage(), 3 ) );
+#if ( MCU_SELECTED == RA6E1 )
+      uint8_t string[VER_HW_STR_LEN];
+      ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+      DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] ); /* No harm in providing a little more information */
+#endif
 #elif ( DCU == 1 )
       temperatureC = (int32_t)( 10 * ADC_Get_PS_Temperature( TEMP_IN_DEG_C ) );
       temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
@@ -4799,168 +4877,168 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_GetHWInfo () */
 
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_PaDAC
-//
-//   Purpose: This function will print out the value in the DAC ouput register for the RF Power Amplifier
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes: In an engineering build, the function will also let you set the DAC register value
-//
-//*******************************************************************************/
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//uint32_t DBG_CommandLine_PaDAC( uint32_t argc, char *argv[] )
-//{
-//   char    floatStr[PRINT_FLOAT_SIZE];
-//
-//   if ( argc == 1) // No Parameters
-//   {
-//      // NOTE: All conversion scaled up by 10 to get 0.1 degree resolution and avoid a floating point printf
-//      DBG_printf( "%s %sdBm", argv[0], DBG_printFloat( floatStr, BSP_PaDAC_Get_dBm_Out(), 6 ) );
-//   }
-//#if ( ENGINEERING_BUILD == 1 )
-//   else if ( argc == 2 )
-//   {
-//#if 0  //Raw register input
-//      uint16_t output = (uint16_t)atoi( argv[1] );
-//
-//      returnStatus_t retVal = BSP_PaDAC_SetValue(output); //<0xfff or 4095
-//      dBm = (int32_t)(10 * BSP_PaDAC_Get_dBm_Out());
-//      DBG_printf( "%s %d.%1ddBm", argv[0], dBm/10, dBm%10 );
-//
-//      if ( retVal != eSUCCESS )
-//      {
-//         DBG_logPrintf( 'R', "ERROR - Invalid range. Must be 0-4095" );
-//      }
-//#else  //Float dBm input
-//      float output = (float)atof( argv[1] );
-//
-//      if ( eSUCCESS == BSP_PaDAC_Set_dBm_Out( output ) )
-//      {
-//         DBG_printf( "%s %sdBm", argv[0], DBG_printFloat( floatStr, BSP_PaDAC_Get_dBm_Out(), 6 ) );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "ERROR - Invalid range. Must be 0.0, or 28.0 to 36.0" );
-//      }
-//#endif
-//   }
-//#endif
-//   else
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//   return ( 0 );
-//}
-//#endif //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_PaDACCoeff
-//
-//   Purpose: This function will print out the value in the DAC ouput register for the RF Power Amplifier
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes: In an engineering build, the function will also let you set the DAC register value
-//
-//*******************************************************************************/
-//#if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) && ( ENGINEERING_BUILD == 1 ) )
-//uint32_t DBG_CommandLine_PaCoeff( uint32_t argc, char *argv[] )
-//{
-//#define EXPONENT_STR_NONE ""
-//#define EXPONENT_STR_EM6  "E-6"
-//   uint8_t        type    = 0;
-//   uint8_t        device  = 0;
-//   char           *expStr = EXPONENT_STR_NONE;
-//   float          A;
-//   char           floatStrA[PRINT_FLOAT_SIZE];
-//   float          B;
-//   char           floatStrB[PRINT_FLOAT_SIZE];
-//   float          C;
-//   char           floatStrC[PRINT_FLOAT_SIZE];
-//
-//   if ( !strcasecmp( argv[0], "PaDBMtoDAC" ) )
-//   {
-//      type = 1;
-//   }
-//   else if ( !strcasecmp( argv[0], "PaVFWDtoDBM" ) )
-//   {
-//      type = 2;
-//   }
-//   if ( argc == 1 )     // Print all devices
-//   {
-//      while ( eSUCCESS == BSP_PaDAC_GetCoeff( type, device, &A, &B, &C ) )
-//      {
-//         DBG_printf( "%s %d %s%s %s %s", argv[0], device, DBG_printFloat( floatStrA, A, 6 ), expStr,
-//                                                          DBG_printFloat( floatStrB, B, 6 ),
-//                                                          DBG_printFloat( floatStrC, C, 6 ) );
-//         device++;
-//      }
-//   }
-//   else if ( argc == 2 )   // Print specific device only
-//   {
-//      device = (uint8_t)atoi( argv[1] );
-//      if ( eSUCCESS == BSP_PaDAC_GetCoeff( type, device, &A, &B, &C ) )
-//      {
-//         if ( 1 == type )
-//         {
-//            A *= 1.0e6;
-//            expStr = EXPONENT_STR_EM6;
-//         }
-//         DBG_printf( "%s %d %s%s %s %s", argv[0], device, DBG_printFloat( floatStrA, A, 6 ), expStr,
-//                                                            DBG_printFloat( floatStrB, B, 6 ),
-//                                                            DBG_printFloat( floatStrC, C, 6 ) );
-//      }
-//      else
-//      {
-//         DBG_printf( "%d is an invalid device", device );
-//      }
-//   }
-//   else if ( argc == 5)    // Update and print specific device
-//   {
-//      float   a;
-//      float   b;
-//      float   c;
-//
-//      device = (uint8_t)atoi( argv[1] );
-//      a      = (float)atof( argv[2] );
-//      b      = (float)atof( argv[3] );
-//      c      = (float)atof( argv[4] );
-//
-//      if ( eSUCCESS == BSP_PaDAC_SetCoeff(type, device, a, b, c) )
-//      {
-//         BSP_PaDAC_GetCoeff( type, device, &A, &B, &C );
-//         if ( 1 == type )
-//         {
-//            A *= 1.0e6;
-//            expStr = EXPONENT_STR_EM6;
-//         }
-//         DBG_printf( "%s %d %s%s %s %s", argv[0], device, DBG_printFloat( floatStrA, A, 6 ), expStr,
-//                                                            DBG_printFloat( floatStrB, B, 6 ),
-//                                                            DBG_printFloat( floatStrC, C, 6 ) );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "ERROR - Invalid range" );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "ERROR - invalid arguments. Rqd: device a b c" );
-//   }
-//   return ( 0 );
-//}
-//#endif //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) && ( ENGINEERING_BUILD == 1 )
-//
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_PaDAC
+
+   Purpose: This function will print out the value in the DAC ouput register for the RF Power Amplifier
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: In an engineering build, the function will also let you set the DAC register value
+
+*******************************************************************************/
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+uint32_t DBG_CommandLine_PaDAC( uint32_t argc, char *argv[] )
+{
+   char    floatStr[PRINT_FLOAT_SIZE];
+
+   if ( argc == 1) // No Parameters
+   {
+      // NOTE: All conversion scaled up by 10 to get 0.1 degree resolution and avoid a floating point printf
+      DBG_printf( "%s %sdBm", argv[0], DBG_printFloat( floatStr, BSP_PaDAC_Get_dBm_Out(), 6 ) );
+   }
+#if ( ENGINEERING_BUILD == 1 )
+   else if ( argc == 2 )
+   {
+#if 0  //Raw register input
+      uint16_t output = (uint16_t)atoi( argv[1] );
+
+      returnStatus_t retVal = BSP_PaDAC_SetValue(output); //<0xfff or 4095
+      dBm = (int32_t)(10 * BSP_PaDAC_Get_dBm_Out());
+      DBG_printf( "%s %d.%1ddBm", argv[0], dBm/10, dBm%10 );
+
+      if ( retVal != eSUCCESS )
+      {
+         DBG_logPrintf( 'R', "ERROR - Invalid range. Must be 0-4095" );
+      }
+#else  //Float dBm input
+      float output = (float)atof( argv[1] );
+
+      if ( eSUCCESS == BSP_PaDAC_Set_dBm_Out( output ) )
+      {
+         DBG_printf( "%s %sdBm", argv[0], DBG_printFloat( floatStr, BSP_PaDAC_Get_dBm_Out(), 6 ) );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "ERROR - Invalid range. Must be 0.0, or 28.0 to 36.0" );
+      }
+#endif
+   }
+#endif
+   else
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   return ( 0 );
+}
+#endif //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_PaDACCoeff
+
+   Purpose: This function will print out the value in the DAC ouput register for the RF Power Amplifier
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: In an engineering build, the function will also let you set the DAC register value
+
+*******************************************************************************/
+#if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) && ( ENGINEERING_BUILD == 1 ) )
+uint32_t DBG_CommandLine_PaCoeff( uint32_t argc, char *argv[] )
+{
+#define EXPONENT_STR_NONE ""
+#define EXPONENT_STR_EM6  "E-6"
+   uint8_t        type    = 0;
+   uint8_t        device  = 0;
+   char           *expStr = EXPONENT_STR_NONE;
+   float          A;
+   char           floatStrA[PRINT_FLOAT_SIZE];
+   float          B;
+   char           floatStrB[PRINT_FLOAT_SIZE];
+   float          C;
+   char           floatStrC[PRINT_FLOAT_SIZE];
+
+   if ( !strcasecmp( argv[0], "PaDBMtoDAC" ) )
+   {
+      type = 1;
+   }
+   else if ( !strcasecmp( argv[0], "PaVFWDtoDBM" ) )
+   {
+      type = 2;
+   }
+   if ( argc == 1 )     // Print all devices
+   {
+      while ( eSUCCESS == BSP_PaDAC_GetCoeff( type, device, &A, &B, &C ) )
+      {
+         DBG_printf( "%s %d %s%s %s %s", argv[0], device, DBG_printFloat( floatStrA, A, 6 ), expStr,
+                                                          DBG_printFloat( floatStrB, B, 6 ),
+                                                          DBG_printFloat( floatStrC, C, 6 ) );
+         device++;
+      }
+   }
+   else if ( argc == 2 )   // Print specific device only
+   {
+      device = (uint8_t)atoi( argv[1] );
+      if ( eSUCCESS == BSP_PaDAC_GetCoeff( type, device, &A, &B, &C ) )
+      {
+         if ( 1 == type )
+         {
+            A *= 1.0e6;
+            expStr = EXPONENT_STR_EM6;
+         }
+         DBG_printf( "%s %d %s%s %s %s", argv[0], device, DBG_printFloat( floatStrA, A, 6 ), expStr,
+                                                            DBG_printFloat( floatStrB, B, 6 ),
+                                                            DBG_printFloat( floatStrC, C, 6 ) );
+      }
+      else
+      {
+         DBG_printf( "%d is an invalid device", device );
+      }
+   }
+   else if ( argc == 5)    // Update and print specific device
+   {
+      float   a;
+      float   b;
+      float   c;
+
+      device = (uint8_t)atoi( argv[1] );
+      a      = (float)atof( argv[2] );
+      b      = (float)atof( argv[3] );
+      c      = (float)atof( argv[4] );
+
+      if ( eSUCCESS == BSP_PaDAC_SetCoeff(type, device, a, b, c) )
+      {
+         BSP_PaDAC_GetCoeff( type, device, &A, &B, &C );
+         if ( 1 == type )
+         {
+            A *= 1.0e6;
+            expStr = EXPONENT_STR_EM6;
+         }
+         DBG_printf( "%s %d %s%s %s %s", argv[0], device, DBG_printFloat( floatStrA, A, 6 ), expStr,
+                                                            DBG_printFloat( floatStrB, B, 6 ),
+                                                            DBG_printFloat( floatStrC, C, 6 ) );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "ERROR - Invalid range" );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "ERROR - invalid arguments. Rqd: device a b c" );
+   }
+   return ( 0 );
+}
+#endif //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) && ( ENGINEERING_BUILD == 1 )
+
 ///*******************************************************************************
 //
 //   Function name: DBG_CommandLine_VSWR
@@ -5880,51 +5958,51 @@ uint32_t DBG_CommandLine_HmcEng ( uint32_t argc, char *argv[] )
 //} /* end DBG_CommandLine_IdRd () */
 //#endif
 //#endif
-//
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//#if (EP == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_DsTimeDv
-//
-//   Purpose: This function will get or set the daily shift time diversity.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - Pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_DsTimeDv( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t retVal = eFAILURE;
-//   uint8_t uDsBuMaxTimeDiversity;
-//
-//   if ( 1 == argc )
-//   {
-//      DBG_logPrintf( 'R', "%s %u", argv[ 0 ], HD_getDsBuMaxTimeDiversity() );
-//   }
-//   else if ( 2 == argc )
-//   {
-//      // Write dsBuMaxTimeDiversity
-//      uDsBuMaxTimeDiversity = ( uint8_t )atoi( argv[1] );
-//      retVal = HD_setDsBuMaxTimeDiversity( uDsBuMaxTimeDiversity );
-//
-//      if ( eSUCCESS != retVal )
-//      {
-//         DBG_logPrintf( 'R', "Error writing dsBuMaxTimeDiversity. Error code %u", ( uint32_t )retVal );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//
-//   return( 0 );
-//} /* end DBG_CommandLine_DsTimeDv () */
-//
+
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+#if (EP == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_DsTimeDv
+
+   Purpose: This function will get or set the daily shift time diversity.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - Pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_DsTimeDv( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t uDsBuMaxTimeDiversity;
+
+   if ( 1 == argc )
+   {
+      DBG_logPrintf( 'R', "%s %u", argv[ 0 ], HD_getDsBuMaxTimeDiversity() );
+   }
+   else if ( 2 == argc )
+   {
+      // Write dsBuMaxTimeDiversity
+      uDsBuMaxTimeDiversity = ( uint8_t )atoi( argv[1] );
+      retVal = HD_setDsBuMaxTimeDiversity( uDsBuMaxTimeDiversity );
+
+      if ( eSUCCESS != retVal )
+      {
+         DBG_logPrintf( 'R', "Error writing dsBuMaxTimeDiversity. Error code %u", ( uint32_t )retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+
+   return( 0 );
+} /* end DBG_CommandLine_DsTimeDv () */
+
 ///*******************************************************************************
 //
 //   Function name: DBG_CommandLine_IdTimeDv
@@ -6001,8 +6079,8 @@ uint32_t DBG_CommandLine_HmcEng ( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //} /* end DBG_CommandLine_IdRd () */
-//#endif   /* end of EP == 1   */
-//#endif   /* end of if ( ACLARA_LC == 0 )  */
+#endif   /* end of EP == 1   */
+#endif   /* end of if ( ACLARA_LC == 0 )  */
 //
 //#if ( PORTABLE_DCU == 1)
 ///*******************************************************************************
@@ -6586,32 +6664,32 @@ static returnStatus_t atoh( uint8_t *pHex, char const *pAscii )
 //
 //   return ( 0 );
 //}
-///*******************************************************************************
-//   Function name: DBG_CommandLine_SendHeepMsg
-//
-//   Purpose: This command will send a HEEP header, only, to the head end
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - status of this function - currently always 0 (success)
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_SendHeepMsg ( uint32_t argc, char *argv[] )
-//{
-//   HEEP_APPHDR_t        heepMsgInfo;         /* HEEP header */
-//   static uint8_t       alarmID = 0;
-//
-//   HEEP_initHeader( &heepMsgInfo );          /* Set up the header info with defaults   */
-//   heepMsgInfo.TransactionType   = ( uint8_t )TT_ASYNC;
-//   heepMsgInfo.Resource          = ( uint8_t )bu_am;
-//   heepMsgInfo.Method_Status     = ( uint8_t )method_post;
-//   heepMsgInfo.Req_Resp_ID       = alarmID++;
-//   heepMsgInfo.qos               = 0x39;     /* Per the RF Electric Phase 1 spreadsheet   */
-//   heepMsgInfo.callback          = NULL;
-//   ( void )HEEP_MSG_TxHeepHdrOnly( &heepMsgInfo );
-//
-//   return ( 0 );
-//}
+/*******************************************************************************
+   Function name: DBG_CommandLine_SendHeepMsg
+
+   Purpose: This command will send a HEEP header, only, to the head end
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - status of this function - currently always 0 (success)
+*******************************************************************************/
+static uint32_t DBG_CommandLine_SendHeepMsg ( uint32_t argc, char *argv[] )
+{
+   HEEP_APPHDR_t        heepMsgInfo;         /* HEEP header */
+   static uint8_t       alarmID = 0;
+
+   HEEP_initHeader( &heepMsgInfo );          /* Set up the header info with defaults   */
+   heepMsgInfo.TransactionType   = ( uint8_t )TT_ASYNC;
+   heepMsgInfo.Resource          = ( uint8_t )bu_am;
+   heepMsgInfo.Method_Status     = ( uint8_t )method_post;
+   heepMsgInfo.Req_Resp_ID       = alarmID++;
+   heepMsgInfo.qos               = 0x39;     /* Per the RF Electric Phase 1 spreadsheet   */
+   heepMsgInfo.callback          = NULL;
+   ( void )HEEP_MSG_TxHeepHdrOnly( &heepMsgInfo );
+
+   return ( 0 );
+}
 
 /*******************************************************************************
    Function name: DBG_CommandLine_InsertAppMsg
@@ -6913,7 +6991,6 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
          installSeconds = TIME_SYS_GetInstallationDateTime();
          TIME_UTIL_ConvertSecondsToSysFormat( installSeconds, 0, &installTime );
          ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &installTime, &formattedDate );
-
          DBG_logPrintf( 'R', "Installation date/time: %02d/%02d/%02d %02d:%02d:%02d (%d)",
                          formattedDate.month, formattedDate.day, formattedDate.year, formattedDate.hour,
                          formattedDate.min, formattedDate.sec, installSeconds);
@@ -6949,8 +7026,8 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
    }
    return ( 0 );
 } /* end DBG_CommandLine_RegState () */
-#endif // #if ( EP == 1 )
-
+#endif // (EP == 1)
+//
 ///*******************************************************************************
 //   Function name: DBG_CommandLine_chksum
 //
@@ -7084,59 +7161,59 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
 //
 //   return ( 0 );
 //}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_crc
-//
-//   Purpose: This command will calculate a crc over a passed in hex string
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - status of this function - currently always 0 (success)
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_crc ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t        data[MAX_ATOH_CHARS];
-//   uint16_t       dataLen;
-//   uint16_t       bufIndex;
-//   uint16_t       srcIndex;
-//   uint32_t       crc_value;
-//
-//   DBG_logPrintf( 'R', "Received DBG_CommandLine_crc command" );
-//   if ( argc == 2 )  /* The number of arguments must be 1 */
-//   {
-//      dataLen = ( uint16_t )strlen( argv[1] );
-//      if ( ( dataLen % 2 ) != 0 )
-//      {
-//         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'crc 135455'" );
-//      }
-//      else if ( dataLen > ( MAX_ATOH_CHARS * 2 ) )
-//      {
-//         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
-//
-//      }
-//      else
-//      {
-//         /* convert ascii data to hex data */
-//         for ( bufIndex = 0, srcIndex = 0;
-//               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
-//               srcIndex += 2, bufIndex++ )
-//         {
-//            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
-//         }
-//
-//         crc_value = CRC_32_Calculate( data, ( dataLen / 2 ) );
-//         DBG_logPrintf( 'R', "CRC value is : 0x%08x", crc_value );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid, expected format:  'crc <data>' : eg. 'crc 1354AB'" );
-//   }
-//
-//   return ( 0 );
-//}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_crc
+
+   Purpose: This command will calculate a crc over a passed in hex string
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - status of this function - currently always 0 (success)
+*******************************************************************************/
+uint32_t DBG_CommandLine_crc ( uint32_t argc, char *argv[] )
+{
+   uint8_t        data[MAX_ATOH_CHARS];
+   uint16_t       dataLen;
+   uint16_t       bufIndex;
+   uint16_t       srcIndex;
+   uint32_t       crc_value;
+
+   DBG_logPrintf( 'R', "Received DBG_CommandLine_crc command" );
+   if ( argc == 2 )  /* The number of arguments must be 1 */
+   {
+      dataLen = ( uint16_t )strlen( argv[1] );
+      if ( ( dataLen % 2 ) != 0 )
+      {
+         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'crc 135455'" );
+      }
+      else if ( dataLen > ( MAX_ATOH_CHARS * 2 ) )
+      {
+         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
+
+      }
+      else
+      {
+         /* convert ascii data to hex data */
+         for ( bufIndex = 0, srcIndex = 0;
+               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
+               srcIndex += 2, bufIndex++ )
+         {
+            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
+         }
+
+         crc_value = CRC_32_Calculate( data, ( dataLen / 2 ) );
+         DBG_logPrintf( 'R', "CRC value is : 0x%08x", crc_value );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid, expected format:  'crc <data>' : eg. 'crc 1354AB'" );
+   }
+
+   return ( 0 );
+}
 //#if 0
 ///*******************************************************************************
 //   Function name: DBG_CommandLine_crc16
@@ -7191,206 +7268,206 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif
-//#if ( EP == 1 )
-///*******************************************************************************
-//   Function name: DBG_CommandLine_crc16m
-//
-//   Purpose: This command will calculate a ANSI psem crc over a passed in hex string
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - status of this function - currently always 0 (success)
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_crc16m ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t        data[MAX_ATOH_CHARS];
-//   uint16_t       maxIndex;
-//   uint16_t       dataLen;
-//   uint16_t       bufIndex;
-//   uint16_t       srcIndex;
-//
-//   DBG_logPrintf( 'R', "Received DBG_CommandLine_crc command" );
-//   if ( argc == 2 )  /* The number of arguments must be 1 */
-//   {
-//      dataLen = ( uint16_t )strlen( argv[1] );
-//      if ( ( dataLen % 2 ) != 0 )
-//      {
-//         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'crcm 135455'" );
-//      }
-//      else if ( dataLen > ( MAX_ATOH_CHARS * 2 ) )
-//      {
-//         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
-//
-//      }
-//      else
-//      {
-//         /* convert ascii data to hex data */
-//         for ( bufIndex = 0, srcIndex = 0;
-//               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
-//               srcIndex += 2, bufIndex++ )
-//         {
-//            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
-//         }
-//
-//         CRC16_InitMtr( data );  /* "Consumes" first two bytes.   *//*lint !e772 data is initialized.  */
-//         maxIndex = dataLen  / 2;
-//         for ( bufIndex = 2; bufIndex < maxIndex; bufIndex++ )
-//         {
-//            CRC16_CalcMtr( data[ bufIndex ] );
-//         }
-//         CRC16_CalcMtr( 0 );
-//         CRC16_CalcMtr( 0 );
-//         DBG_logPrintf( 'R', "CRC value is : 0x%04x", CRC16_ResultMtr() );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid, expected format:  'crcm <data>' : eg. 'crc ee8020'" );
-//   }
-//
-//   return ( 0 );
-//}
-//#endif
-//
-//uint32_t DBG_CommandLine_NwkStart ( uint32_t argc, char *argv[] )
-//{
-//   ( void )NWK_StartRequest( NULL );
-//   return 0;
-//}
-//
-//uint32_t DBG_CommandLine_NwkStop ( uint32_t argc, char *argv[] )
-//{
-//   ( void )NWK_StopRequest( NULL );
-//   return 0;
-//}
-//
-//uint32_t DBG_CommandLine_NwkReset ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      ( void )NWK_ResetRequest( eNWK_RESET_STATISTICS, NULL );
-//      return ( 0 );
-//   }
-//   else if ( argc == 2 )
-//   {
-//      // One parameter
-//      if ( strcasecmp( "all", argv[1] ) == 0 )
-//      {
-//         ( void )NWK_ResetRequest( eNWK_RESET_ALL,        NULL );
-//         return ( 0 );
-//      }
-//      if ( strcasecmp( "stats", argv[1] ) == 0 )
-//      {
-//         ( void )NWK_ResetRequest( eNWK_RESET_STATISTICS, NULL );
-//         return ( 0 );
-//      }
-//   }
-//   DBG_logPrintf( 'R', "Usage: 'nwkreset start|all'" );
-//   return ( 0 );
-//}
-//
-//uint32_t DBG_CommandLine_NwkGet ( uint32_t argc, char *argv[] )
-//{
-//   int option = 0;
-//
-//   if ( argc > 1 )
-//   {
-//      option = ( uint16_t )( atoi( argv[1] ) );
-//   }
-//
-//   ( void )NWK_GetRequest( ( NWK_ATTRIBUTES_e )option );
-//#if 0
-//
-//   switch ( option )
-//   {
-//      case  eStackAttr_ipIfInDiscards                     :
-//         NWK_GetRequest( eStackAttr_ipIfInDiscards                       , NULL );
-//         break;
-//      case  eStackAttr_ipIfInErrors                       :
-//         NWK_GetRequest( eStackAttr_ipIfInErrors                         , NULL );
-//         break;
-//      case  eStackAttr_ipIfInMulticastPkts                :
-//         NWK_GetRequest( eStackAttr_ipIfInMulticastPkts                  , NULL );
-//         break;
-//      case  eStackAttr_ipIfInOctets                       :
-//         NWK_GetRequest( eStackAttr_ipIfInOctets                         , NULL );
-//         break;
-//      case  eStackAttr_ipIfInUcastPkts                    :
-//         NWK_GetRequest( eStackAttr_ipIfInUcastPkts                      , NULL );
-//         break;
-//      case  eStackAttr_ipIfInUnknownProtos                :
-//         NWK_GetRequest( eStackAttr_ipIfInUnknownProtos                  , NULL );
-//         break;
-//      case  eStackAttr_ipIfLastResetTime                  :
-//         NWK_GetRequest( eStackAttr_ipIfLastResetTime                    , NULL );
-//         break;
-//      case  eStackAttr_ipIfOutDiscards                    :
-//         NWK_GetRequest( eStackAttr_ipIfOutDiscards                      , NULL );
-//         break;
-//      case  eStackAttr_ipIfOutErrors                      :
-//         NWK_GetRequest( eStackAttr_ipIfOutErrors                        , NULL );
-//         break;
-//      case  eStackAttr_ipIfOutMulticastPkts               :
-//         NWK_GetRequest( eStackAttr_ipIfOutMulticastPkts                 , NULL );
-//         break;
-//      case  eStackAttr_ipIfOutOctets                      :
-//         NWK_GetRequest( eStackAttr_ipIfOutOctets                        , NULL );
-//         break;
-//      case  eStackAttr_ipIfOutUcastPkts                   :
-//         NWK_GetRequest( eStackAttr_ipIfOutUcastPkts                     , NULL );
-//         break;
-//      case  eStackAttr_ipLowerLinkCount                   :
-//         NWK_GetRequest( eStackAttr_ipLowerLinkCount                     , NULL );
-//         break;
-//#if ( EP == 1 )
-//      case  eStackAttr_ipRoutingMaxPacketCount            :
-//         NWK_GetRequest( eStackAttr_ipRoutingMaxPacketCount              , NULL );
-//         break;
-//      case  eStackAttr_ipRoutingEntryExpirationThreshold  :
-//         NWK_GetRequest( eStackAttr_ipRoutingEntryExpirationThreshold    , NULL );
-//         break;
-//#endif
-//      case  eStackAttr_ipHEContext                        :
-//         NWK_GetRequest( eStackAttr_ipHEContext                         , NULL );
-//         break;
-//#if ( HE == 1 )
-//      case  eStackAttr_ipPacketHistory                    :
-//         NWK_GetRequest( eStackAttr_ipPacketHistory                      , NULL );
-//         break;
-//      case  eStackAttr_ipRoutingHistory                   :
-//         NWK_GetRequest( eStackAttr_ipRoutingHistory                     , NULL );
-//         break;
-//      case  eStackAttr_ipRoutingMaxDcuCount               :
-//         NWK_GetRequest( eStackAttr_ipRoutingMaxDcuCount                 , NULL );
-//         break;
-//      case  eStackAttr_ipRoutingFrequency                 :
-//         NWK_GetRequest( eStackAttr_ipRoutingFrequency                   , NULL );
-//         break;
-//      case  eStackAttr_ipMultipathForwardingEnabled       :
-//         NWK_GetRequest( eStackAttr_ipMultipathForwardingEnabled         , NULL );
-//         break;
-//#endif
-//   }
-//#endif
-//   return ( 0 );
-//}
-//
-//uint32_t DBG_CommandLine_NwkSet ( uint32_t argc, char *argv[] )
-//{
-//// todo: 7/31/2015 12:38:41 PM [BAH] - This is not completed yet
-//#if 0
-//   int option = 0;
-//   if ( argc > 1 )
-//   {
-//      option = ( uint16_t )( atoi( argv[1] ) );
-//   }
-//   ( void )NWK_SetRequest( ( NWK_ATTRIBUTES_e )option , NULL );
-//#endif
-//   return 0;
-//}
-//
+#if ( EP == 1 )
+/*******************************************************************************
+   Function name: DBG_CommandLine_crc16m
+
+   Purpose: This command will calculate a ANSI psem crc over a passed in hex string
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - status of this function - currently always 0 (success)
+*******************************************************************************/
+static uint32_t DBG_CommandLine_crc16m ( uint32_t argc, char *argv[] )
+{
+   uint8_t        data[MAX_ATOH_CHARS];
+   uint16_t       maxIndex;
+   uint16_t       dataLen;
+   uint16_t       bufIndex;
+   uint16_t       srcIndex;
+
+   DBG_logPrintf( 'R', "Received DBG_CommandLine_crc command" );
+   if ( argc == 2 )  /* The number of arguments must be 1 */
+   {
+      dataLen = ( uint16_t )strlen( argv[1] );
+      if ( ( dataLen % 2 ) != 0 )
+      {
+         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'crcm 135455'" );
+      }
+      else if ( dataLen > ( MAX_ATOH_CHARS * 2 ) )
+      {
+         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
+
+      }
+      else
+      {
+         /* convert ascii data to hex data */
+         for ( bufIndex = 0, srcIndex = 0;
+               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
+               srcIndex += 2, bufIndex++ )
+         {
+            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
+         }
+
+         CRC16_InitMtr( data );  /* "Consumes" first two bytes.   *//*lint !e772 data is initialized.  */
+         maxIndex = dataLen  / 2;
+         for ( bufIndex = 2; bufIndex < maxIndex; bufIndex++ )
+         {
+            CRC16_CalcMtr( data[ bufIndex ] );
+         }
+         CRC16_CalcMtr( 0 );
+         CRC16_CalcMtr( 0 );
+         DBG_logPrintf( 'R', "CRC value is : 0x%04x", CRC16_ResultMtr() );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid, expected format:  'crcm <data>' : eg. 'crc ee8020'" );
+   }
+
+   return ( 0 );
+}
+#endif
+
+uint32_t DBG_CommandLine_NwkStart ( uint32_t argc, char *argv[] )
+{
+   ( void )NWK_StartRequest( NULL );
+   return 0;
+}
+
+uint32_t DBG_CommandLine_NwkStop ( uint32_t argc, char *argv[] )
+{
+   ( void )NWK_StopRequest( NULL );
+   return 0;
+}
+
+uint32_t DBG_CommandLine_NwkReset ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      ( void )NWK_ResetRequest( eNWK_RESET_STATISTICS, NULL );
+      return ( 0 );
+   }
+   else if ( argc == 2 )
+   {
+      // One parameter
+      if ( strcasecmp( "all", argv[1] ) == 0 )
+      {
+         ( void )NWK_ResetRequest( eNWK_RESET_ALL,        NULL );
+         return ( 0 );
+      }
+      if ( strcasecmp( "stats", argv[1] ) == 0 )
+      {
+         ( void )NWK_ResetRequest( eNWK_RESET_STATISTICS, NULL );
+         return ( 0 );
+      }
+   }
+   DBG_logPrintf( 'R', "Usage: 'nwkreset start|all'" );
+   return ( 0 );
+}
+
+uint32_t DBG_CommandLine_NwkGet ( uint32_t argc, char *argv[] )
+{
+   int option = 0;
+
+   if ( argc > 1 )
+   {
+      option = ( uint16_t )( atoi( argv[1] ) );
+   }
+
+   ( void )NWK_GetRequest( ( NWK_ATTRIBUTES_e )option );
+#if 0
+
+   switch ( option )
+   {
+      case  eStackAttr_ipIfInDiscards                     :
+         NWK_GetRequest( eStackAttr_ipIfInDiscards                       , NULL );
+         break;
+      case  eStackAttr_ipIfInErrors                       :
+         NWK_GetRequest( eStackAttr_ipIfInErrors                         , NULL );
+         break;
+      case  eStackAttr_ipIfInMulticastPkts                :
+         NWK_GetRequest( eStackAttr_ipIfInMulticastPkts                  , NULL );
+         break;
+      case  eStackAttr_ipIfInOctets                       :
+         NWK_GetRequest( eStackAttr_ipIfInOctets                         , NULL );
+         break;
+      case  eStackAttr_ipIfInUcastPkts                    :
+         NWK_GetRequest( eStackAttr_ipIfInUcastPkts                      , NULL );
+         break;
+      case  eStackAttr_ipIfInUnknownProtos                :
+         NWK_GetRequest( eStackAttr_ipIfInUnknownProtos                  , NULL );
+         break;
+      case  eStackAttr_ipIfLastResetTime                  :
+         NWK_GetRequest( eStackAttr_ipIfLastResetTime                    , NULL );
+         break;
+      case  eStackAttr_ipIfOutDiscards                    :
+         NWK_GetRequest( eStackAttr_ipIfOutDiscards                      , NULL );
+         break;
+      case  eStackAttr_ipIfOutErrors                      :
+         NWK_GetRequest( eStackAttr_ipIfOutErrors                        , NULL );
+         break;
+      case  eStackAttr_ipIfOutMulticastPkts               :
+         NWK_GetRequest( eStackAttr_ipIfOutMulticastPkts                 , NULL );
+         break;
+      case  eStackAttr_ipIfOutOctets                      :
+         NWK_GetRequest( eStackAttr_ipIfOutOctets                        , NULL );
+         break;
+      case  eStackAttr_ipIfOutUcastPkts                   :
+         NWK_GetRequest( eStackAttr_ipIfOutUcastPkts                     , NULL );
+         break;
+      case  eStackAttr_ipLowerLinkCount                   :
+         NWK_GetRequest( eStackAttr_ipLowerLinkCount                     , NULL );
+         break;
+#if ( EP == 1 )
+      case  eStackAttr_ipRoutingMaxPacketCount            :
+         NWK_GetRequest( eStackAttr_ipRoutingMaxPacketCount              , NULL );
+         break;
+      case  eStackAttr_ipRoutingEntryExpirationThreshold  :
+         NWK_GetRequest( eStackAttr_ipRoutingEntryExpirationThreshold    , NULL );
+         break;
+#endif
+      case  eStackAttr_ipHEContext                        :
+         NWK_GetRequest( eStackAttr_ipHEContext                         , NULL );
+         break;
+#if ( HE == 1 )
+      case  eStackAttr_ipPacketHistory                    :
+         NWK_GetRequest( eStackAttr_ipPacketHistory                      , NULL );
+         break;
+      case  eStackAttr_ipRoutingHistory                   :
+         NWK_GetRequest( eStackAttr_ipRoutingHistory                     , NULL );
+         break;
+      case  eStackAttr_ipRoutingMaxDcuCount               :
+         NWK_GetRequest( eStackAttr_ipRoutingMaxDcuCount                 , NULL );
+         break;
+      case  eStackAttr_ipRoutingFrequency                 :
+         NWK_GetRequest( eStackAttr_ipRoutingFrequency                   , NULL );
+         break;
+      case  eStackAttr_ipMultipathForwardingEnabled       :
+         NWK_GetRequest( eStackAttr_ipMultipathForwardingEnabled         , NULL );
+         break;
+#endif
+   }
+#endif
+   return ( 0 );
+}
+
+uint32_t DBG_CommandLine_NwkSet ( uint32_t argc, char *argv[] )
+{
+// todo: 7/31/2015 12:38:41 PM [BAH] - This is not completed yet
+#if 0
+   int option = 0;
+   if ( argc > 1 )
+   {
+      option = ( uint16_t )( atoi( argv[1] ) );
+   }
+   ( void )NWK_SetRequest( ( NWK_ATTRIBUTES_e )option , NULL );
+#endif
+   return 0;
+}
+
 //#if 0
 //uint32_t DBG_CommandLine_MacStart ( uint32_t argc, char *argv[] )
 //{
@@ -7499,33 +7576,33 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
 //   return 0;
 //}
 //#endif
-//
-//uint32_t DBG_CommandLine_MacReset ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      ( void )MAC_ResetRequest( eMAC_RESET_STATISTICS, NULL );
-//      return ( 0 );
-//   }
-//   else if ( argc == 2 )
-//   {
-//      // One parameter
-//      if ( strcasecmp( "all", argv[1] ) == 0 )
-//      {
-//         ( void )MAC_ResetRequest( eMAC_RESET_ALL,        NULL );
-//         return ( 0 );
-//      }
-//      if ( strcasecmp( "stats", argv[1] ) == 0 )
-//      {
-//         ( void )MAC_ResetRequest( eMAC_RESET_STATISTICS, NULL );
-//         return ( 0 );
-//      }
-//   }
-//   DBG_logPrintf( 'R', "Usage: 'macreset start|all'" );
-//   return ( 0 );
-//}
-//
+
+uint32_t DBG_CommandLine_MacReset ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      ( void )MAC_ResetRequest( eMAC_RESET_STATISTICS, NULL );
+      return ( 0 );
+   }
+   else if ( argc == 2 )
+   {
+      // One parameter
+      if ( strcasecmp( "all", argv[1] ) == 0 )
+      {
+         ( void )MAC_ResetRequest( eMAC_RESET_ALL,        NULL );
+         return ( 0 );
+      }
+      if ( strcasecmp( "stats", argv[1] ) == 0 )
+      {
+         ( void )MAC_ResetRequest( eMAC_RESET_STATISTICS, NULL );
+         return ( 0 );
+      }
+   }
+   DBG_logPrintf( 'R', "Usage: 'macreset start|all'" );
+   return ( 0 );
+}
+
 //#if 0
 //uint32_t DBG_CommandLine_MacFlush ( uint32_t argc, char *argv[] )
 //{
@@ -7683,31 +7760,31 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
 //
 //@return 0
 //*/
-//static uint32_t DBG_CommandLine_SM_NwPassiveActTimeout(uint32_t argc, char *argv[])
-//{
-//   if (argc > 1)
-//   {
-//      SM_ATTRIBUTES_u val;
-//
-//      val.SmActivityTimeout = strtoul(argv[1], NULL, 10);
-//
-//      (void)SM_SetRequest(eSmAttr_NetworkActivityTimeoutPassive, &val);
-//   }
-//
-//   SM_GetConf_t resp = SM_GetRequest(eSmAttr_NetworkActivityTimeoutPassive);
-//
-//   if (resp.eStatus == eSM_GET_SUCCESS)
-//   {
-//      DBG_logPrintf('R', "%s %u", argv[0], resp.val.SmActivityTimeout);
-//   }
-//   else
-//   {
-//      DBG_logPrintf('R', "%s Error", argv[0]);
-//   }
-//
-//   return 0;
-//}
-//
+static uint32_t DBG_CommandLine_SM_NwPassiveActTimeout(uint32_t argc, char *argv[])
+{
+   if (argc > 1)
+   {
+      SM_ATTRIBUTES_u val;
+
+      val.SmActivityTimeout = strtoul(argv[1], NULL, 10);
+
+      (void)SM_SetRequest(eSmAttr_NetworkActivityTimeoutPassive, &val);
+   }
+
+   SM_GetConf_t resp = SM_GetRequest(eSmAttr_NetworkActivityTimeoutPassive);
+
+   if (resp.eStatus == eSM_GET_SUCCESS)
+   {
+      DBG_logPrintf('R', "%s %u", argv[0], resp.val.SmActivityTimeout);
+   }
+   else
+   {
+      DBG_logPrintf('R', "%s Error", argv[0]);
+   }
+
+   return 0;
+}
+
 ///**
 //Gets or sets the active network activity timeout.
 //
@@ -7716,122 +7793,122 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
 //
 //@return 0
 //*/
-//static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[])
-//{
-//   if (argc > 1)
-//   {
-//      SM_ATTRIBUTES_u val;
-//
-//      val.SmActivityTimeout = strtoul(argv[1], NULL, 10);
-//
-//      (void)SM_SetRequest(eSmAttr_NetworkActivityTimeoutActive, &val);
-//   }
-//
-//   SM_GetConf_t resp = SM_GetRequest(eSmAttr_NetworkActivityTimeoutActive);
-//
-//   if (resp.eStatus == eSM_GET_SUCCESS)
-//   {
-//      DBG_logPrintf('R', "%s %u", argv[0], resp.val.SmActivityTimeout);
-//   }
-//   else
-//   {
-//      DBG_logPrintf('R', "%s Error", argv[0]);
-//   }
-//
-//   return 0;
-//}
-//#if ( BOB_IS_LAZY == 1 )
-//uint32_t DBG_ResetAllStats ( uint32_t argc, char *argv[] )
-//{
-//   (void) DBG_CommandLine_PhyReset ( (uint32_t)1, argv );
-//   (void) DBG_CommandLine_MacReset ( (uint32_t)1, argv );
-//   (void) DBG_CommandLine_NwkReset ( (uint32_t)1, argv );
-//   return ( 0 );
-//}
-//uint32_t DBG_ShowAllStats  ( uint32_t argc, char *argv[] )
-//{
-//   (void) DBG_CommandLine_PhyStats ( (uint32_t)1, argv );
-//   (void) DBG_CommandLine_MacStats ( (uint32_t)1, argv );
-//   return ( 0 );
-//}
-//#endif
-//
-//#if 0
-///*!
-// * \fn DBG_CommandLine_PhyStart
-// *
-// * \brief This function is used to start the phy
-// *
-// * \param
-// * \param
-// *
-// * \return     none
-// *
-// * \details
-// *
-// *  phystart  option
-// *     0 - ePHY_START_STANDBY
-// *     1 - ePHY_START_READY
-// *     2 - ePHY_START_READY_TX
-// *     3 - ePHY_START_READY_RX
-// *
-// */
-//uint32_t DBG_CommandLine_PhyStart ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 2 )
-//   {
-//      uint16_t mode = ( uint16_t )( atoi( argv[1] ) );
-//      ( void )PHY_StartRequest( (PHY_START_e) mode,   NULL );
-//      return 0;
-//   }
-//   DBG_logPrintf( 'R', "Usage: 'phystart mode'" );
-//   return 0;
-//}
-///*!
-// * \fn DBG_CommandLine_PhyStop
-// *
-// * \brief This function is used to stop the phy
-// *
-// */
-//uint32_t DBG_CommandLine_PhyStop ( uint32_t argc, char *argv[] )
-//{
-//   (void) PHY_StopRequest( NULL );
-//   return 0;
-//}
-//#endif
-//
-///*!
-// * \fn DBG_CommandLine_PhyReset
-// *
-// * \brief This function is used to reset the phy
-// *
-// */
-//uint32_t DBG_CommandLine_PhyReset ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      (void) PHY_ResetRequest( ePHY_RESET_STATISTICS, NULL );
-//      return ( 0 );
-//   }
-//   else if ( argc == 2 )
-//   {
-//      // One parameter
-//      if ( strcasecmp( "all", argv[1] ) == 0 )
-//      {
-//         (void) PHY_ResetRequest( ePHY_RESET_ALL,        NULL );
-//         return ( 0 );
-//      }
-//      if ( strcasecmp( "stats", argv[1] ) == 0 )
-//      {
-//         (void) PHY_ResetRequest( ePHY_RESET_STATISTICS, NULL );
-//         return ( 0 );
-//      }
-//   }
-//   DBG_logPrintf( 'R', "Usage: 'phyreset stats|all'" );
-//   return ( 0 );
-//}
-//
+static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[])
+{
+   if (argc > 1)
+   {
+      SM_ATTRIBUTES_u val;
+
+      val.SmActivityTimeout = strtoul(argv[1], NULL, 10);
+
+      (void)SM_SetRequest(eSmAttr_NetworkActivityTimeoutActive, &val);
+   }
+
+   SM_GetConf_t resp = SM_GetRequest(eSmAttr_NetworkActivityTimeoutActive);
+
+   if (resp.eStatus == eSM_GET_SUCCESS)
+   {
+      DBG_logPrintf('R', "%s %u", argv[0], resp.val.SmActivityTimeout);
+   }
+   else
+   {
+      DBG_logPrintf('R', "%s Error", argv[0]);
+   }
+
+   return 0;
+}
+#if ( BOB_IS_LAZY == 1 )
+uint32_t DBG_ResetAllStats ( uint32_t argc, char *argv[] )
+{
+   (void) DBG_CommandLine_PhyReset ( (uint32_t)1, argv );
+   (void) DBG_CommandLine_MacReset ( (uint32_t)1, argv );
+   (void) DBG_CommandLine_NwkReset ( (uint32_t)1, argv );
+   return ( 0 );
+}
+uint32_t DBG_ShowAllStats  ( uint32_t argc, char *argv[] )
+{
+   (void) DBG_CommandLine_PhyStats ( (uint32_t)1, argv );
+   (void) DBG_CommandLine_MacStats ( (uint32_t)1, argv );
+   return ( 0 );
+}
+#endif
+
+#if 0
+/*!
+ * \fn DBG_CommandLine_PhyStart
+ *
+ * \brief This function is used to start the phy
+ *
+ * \param
+ * \param
+ *
+ * \return     none
+ *
+ * \details
+ *
+ *  phystart  option
+ *     0 - ePHY_START_STANDBY
+ *     1 - ePHY_START_READY
+ *     2 - ePHY_START_READY_TX
+ *     3 - ePHY_START_READY_RX
+ *
+ */
+uint32_t DBG_CommandLine_PhyStart ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 2 )
+   {
+      uint16_t mode = ( uint16_t )( atoi( argv[1] ) );
+      ( void )PHY_StartRequest( (PHY_START_e) mode,   NULL );
+      return 0;
+   }
+   DBG_logPrintf( 'R', "Usage: 'phystart mode'" );
+   return 0;
+}
+/*!
+ * \fn DBG_CommandLine_PhyStop
+ *
+ * \brief This function is used to stop the phy
+ *
+ */
+uint32_t DBG_CommandLine_PhyStop ( uint32_t argc, char *argv[] )
+{
+   (void) PHY_StopRequest( NULL );
+   return 0;
+}
+#endif
+
+/*!
+ * \fn DBG_CommandLine_PhyReset
+ *
+ * \brief This function is used to reset the phy
+ *
+ */
+uint32_t DBG_CommandLine_PhyReset ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      (void) PHY_ResetRequest( ePHY_RESET_STATISTICS, NULL );
+      return ( 0 );
+   }
+   else if ( argc == 2 )
+   {
+      // One parameter
+      if ( strcasecmp( "all", argv[1] ) == 0 )
+      {
+         (void) PHY_ResetRequest( ePHY_RESET_ALL,        NULL );
+         return ( 0 );
+      }
+      if ( strcasecmp( "stats", argv[1] ) == 0 )
+      {
+         (void) PHY_ResetRequest( ePHY_RESET_STATISTICS, NULL );
+         return ( 0 );
+      }
+   }
+   DBG_logPrintf( 'R', "Usage: 'phyreset stats|all'" );
+   return ( 0 );
+}
+
 
 /******************************************************************************
 
@@ -7888,185 +7965,185 @@ uint32_t DBG_CommandLine_MacTimeCmd ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacPingCmd ( uint32_t argc, char *argv[] )
-//
-//   Purpose: This function is used to send a ping request to an EP via the RF link
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:   ping  handle reset_count rsp_mode dst_addr <cr> (DCU)
-//            ping  0 0 0 0.1.0.0.5 <CR>
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacPingCmd ( uint32_t argc, char *argv[] )
-//{
-//   uint16_t handle        = 0;
-//   uint8_t  rsp_mode      = 0; // 0=Unicast, 1=Broadcast
-//   uint8_t  reset_counter = 0; // Reset Count Option 0 = No, 1 = Yes
-//#if BOB_PADDED_PING == 1
-//   uint16_t extra_DL_bytes = 0, extra_UL_bytes = 0; // No extra bytes by default
-//   if ( argc > 5 )
-//   {
-//      extra_DL_bytes   = ( uint16_t )atoi( argv[5] );
-//   }
-//   if ( argc > 6 )
-//   {
-//      extra_UL_bytes   = ( uint16_t )atoi( argv[6] );
-//   }
-//   if ( ( 5 <= argc ) && ( argc <= 7 ) )
-//#else
-//   if( argc == 5 )
-//#endif
-//   {
-//      handle        = ( uint16_t )atoi( argv[1] );
-//      reset_counter = ( uint8_t ) atoi( argv[2] );
-//      rsp_mode      = ( uint8_t ) atoi( argv[3] );
-//
-//      // Destination EUI Address
-//      eui_addr_t eui_addr = { 0 };
-//      char delimiter[] = ":.";   // Allows delimiter to be ':' or '.'
-//      uint32_t num_tokens = 0;
-//      char* pch;
-//
-//      pch = strtok( argv[4], delimiter );
-//      while ( pch != NULL )
-//      {
-//         // Convert the token to address bytes
-//         ( void )sscanf( pch, "%02hhx", &eui_addr[num_tokens] );
-//         num_tokens++;
-//         if( num_tokens > sizeof( eui_addr ) )
-//         {
-//            // no more room!
-//            break;
-//         }
-//         pch = strtok ( NULL, delimiter );
-//      }
-//
-//      if( num_tokens == sizeof( eui_addr_t ) )
-//      {
-//#if ( BOB_THIN_DEBUG == 0 )
-//         DBG_logPrintf( 'R', "rsp_mode=%d reset_counter=%d", rsp_mode, reset_counter );
-//#endif
-//#if BOB_PADDED_PING == 1
-//         ( void )MAC_PingRequest( handle, eui_addr, reset_counter, rsp_mode, extra_DL_bytes, extra_UL_bytes );
-//#else
-//         ( void )MAC_PingRequest( handle, eui_addr, reset_counter, rsp_mode );
-//#endif
-//      }
-//      else
-//      {
-//         // error
-//#if BOB_PADDED_PING == 1
-//         DBG_logPrintf( 'R', "ping <handle> <reset_flag> <rsp_mode> <dst_eui_addr> <extra_DL_bytes> <extra_UL_bytes>" );
-//#else
-//         DBG_logPrintf( 'R', "ping <handle> <reset_flag> <rsp_mode> <dst_eui_addr>" );
-//#endif
-//      }
-//
-//   }
-//   else
-//   {
-//#if BOB_PADDED_PING == 1
-//      DBG_logPrintf( 'R', "ping <handle> <reset_flag> <rsp_mode> <dst_eui_addr> <extra_DL_bytes> <extra_UL_bytes>" );
-//#else
-//      DBG_logPrintf( 'R', "ping <handle> <reset_flag> <rsp_mode> <dst_eui_addr>" );
-//#endif
-//   }
-//
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_TimeSync ( uint32_t argc, char *argv[] )
-//
-//   Purpose: This function is used to set/get the Time Sync Parameters
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_TimeSync ( uint32_t argc, char *argv[] )
-//{
-//   struct
-//   {
-//      char*            name;
-//   } field[] =
-//     {
-//      {"leap"},
-//      {"precision" },
-//      {"offset" },
-//      {"period" },
-//      {"start" },
-//      {"source" },
-//   };
-//
-//   if ( argc > 1 )
-//   {
-//      if ( strcasecmp( "get", argv[1] ) == 0 )
-//      {
-//         TIME_SYNC_Parameters_Print();
-//      }
-//      else if ( strcasecmp( "set", argv[1] ) == 0 )
-//      {
-//         if( argc >= 4 )
-//         {
-//            int index = 0;
-//            do
-//            {
-//               if ( strcasecmp( field[index].name, argv[2] ) == 0 )
-//               {
-//                  uint32_t value;
-//                  value = ( uint32_t )atoi( argv[3] );
-//                  if ( index == 2 )
-//                  {
-//                     (void)TIME_SYNC_TimeSetMaxOffset_Set((uint16_t)value);
-//                  }
-//                  else if ( index == 3 )
-//                  {
-//                     (void)TIME_SYNC_TimeSetPeriod_Set(value);
-//                  }
-//                  else if ( index == 4 )
-//                  {
-//                     (void)TIME_SYNC_TimeSetStart_Set(value);
-//                  }
-//                  else if ( index == 5 )
-//                  {
-//                     (void)TIME_SYNC_TimeSource_Set((uint8_t)value);
-//                  }
-//                  TIME_SYNC_Parameters_Print();
-//                  break;
-//               }
-//            }
-//            while ( index++ < 5 );
-//            if( index > 5 )
-//            {
-//               INFO_printf( "error" );
-//            }
-//         }
-//         else
-//         {
-//            INFO_printf( "error" );
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "mac_tsync get <cr>" );
-//      DBG_logPrintf( 'R', "mac_tsync set %s|%s|%s|%s|%s val<cr>",
-//                     field[0].name, field[1].name, field[2].name, field[3].name, field[4].name );
-//   }
-//   return ( 0 );
-//}
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacPingCmd ( uint32_t argc, char *argv[] )
+
+   Purpose: This function is used to send a ping request to an EP via the RF link
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:   ping  handle reset_count rsp_mode dst_addr <cr> (DCU)
+            ping  0 0 0 0.1.0.0.5 <CR>
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacPingCmd ( uint32_t argc, char *argv[] )
+{
+   uint16_t handle        = 0;
+   uint8_t  rsp_mode      = 0; // 0=Unicast, 1=Broadcast
+   uint8_t  reset_counter = 0; // Reset Count Option 0 = No, 1 = Yes
+#if BOB_PADDED_PING == 1
+   uint16_t extra_DL_bytes = 0, extra_UL_bytes = 0; // No extra bytes by default
+   if ( argc > 5 )
+   {
+      extra_DL_bytes   = ( uint16_t )atoi( argv[5] );
+   }
+   if ( argc > 6 )
+   {
+      extra_UL_bytes   = ( uint16_t )atoi( argv[6] );
+   }
+   if ( ( 5 <= argc ) && ( argc <= 7 ) )
+#else
+   if( argc == 5 )
+#endif
+   {
+      handle        = ( uint16_t )atoi( argv[1] );
+      reset_counter = ( uint8_t ) atoi( argv[2] );
+      rsp_mode      = ( uint8_t ) atoi( argv[3] );
+
+      // Destination EUI Address
+      eui_addr_t eui_addr = { 0 };
+      char delimiter[] = ":.";   // Allows delimiter to be ':' or '.'
+      uint32_t num_tokens = 0;
+      char* pch;
+
+      pch = strtok( argv[4], delimiter );
+      while ( pch != NULL )
+      {
+         // Convert the token to address bytes
+         ( void )sscanf( pch, "%02hhx", &eui_addr[num_tokens] );
+         num_tokens++;
+         if( num_tokens > sizeof( eui_addr ) )
+         {
+            // no more room!
+            break;
+         }
+         pch = strtok ( NULL, delimiter );
+      }
+
+      if( num_tokens == sizeof( eui_addr_t ) )
+      {
+#if ( BOB_THIN_DEBUG == 0 )
+         DBG_logPrintf( 'R', "rsp_mode=%d reset_counter=%d", rsp_mode, reset_counter );
+#endif
+#if BOB_PADDED_PING == 1
+         ( void )MAC_PingRequest( handle, eui_addr, reset_counter, rsp_mode, extra_DL_bytes, extra_UL_bytes );
+#else
+         ( void )MAC_PingRequest( handle, eui_addr, reset_counter, rsp_mode );
+#endif
+      }
+      else
+      {
+         // error
+#if BOB_PADDED_PING == 1
+         DBG_logPrintf( 'R', "ping <handle> <reset_flag> <rsp_mode> <dst_eui_addr> <extra_DL_bytes> <extra_UL_bytes>" );
+#else
+         DBG_logPrintf( 'R', "ping <handle> <reset_flag> <rsp_mode> <dst_eui_addr>" );
+#endif
+      }
+
+   }
+   else
+   {
+#if BOB_PADDED_PING == 1
+      DBG_logPrintf( 'R', "ping <handle> <reset_flag> <rsp_mode> <dst_eui_addr> <extra_DL_bytes> <extra_UL_bytes>" );
+#else
+      DBG_logPrintf( 'R', "ping <handle> <reset_flag> <rsp_mode> <dst_eui_addr>" );
+#endif
+   }
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_TimeSync ( uint32_t argc, char *argv[] )
+
+   Purpose: This function is used to set/get the Time Sync Parameters
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_TimeSync ( uint32_t argc, char *argv[] )
+{
+   struct
+   {
+      char*            name;
+   } field[] =
+     {
+      {"leap"},
+      {"precision" },
+      {"offset" },
+      {"period" },
+      {"start" },
+      {"source" },
+   };
+
+   if ( argc > 1 )
+   {
+      if ( strcasecmp( "get", argv[1] ) == 0 )
+      {
+         TIME_SYNC_Parameters_Print();
+      }
+      else if ( strcasecmp( "set", argv[1] ) == 0 )
+      {
+         if( argc >= 4 )
+         {
+            int index = 0;
+            do
+            {
+               if ( strcasecmp( field[index].name, argv[2] ) == 0 )
+               {
+                  uint32_t value;
+                  value = ( uint32_t )atoi( argv[3] );
+                  if ( index == 2 )
+                  {
+                     (void)TIME_SYNC_TimeSetMaxOffset_Set((uint16_t)value);
+                  }
+                  else if ( index == 3 )
+                  {
+                     (void)TIME_SYNC_TimeSetPeriod_Set(value);
+                  }
+                  else if ( index == 4 )
+                  {
+                     (void)TIME_SYNC_TimeSetStart_Set(value);
+                  }
+                  else if ( index == 5 )
+                  {
+                     (void)TIME_SYNC_TimeSource_Set((uint8_t)value);
+                  }
+                  TIME_SYNC_Parameters_Print();
+                  break;
+               }
+            }
+            while ( index++ < 5 );
+            if( index > 5 )
+            {
+               INFO_printf( "error" );
+            }
+         }
+         else
+         {
+            INFO_printf( "error" );
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "mac_tsync get <cr>" );
+      DBG_logPrintf( 'R', "mac_tsync set %s|%s|%s|%s|%s val<cr>",
+                     field[0].name, field[1].name, field[2].name, field[3].name, field[4].name );
+   }
+   return ( 0 );
+}
 
 /******************************************************************************
 
@@ -8182,62 +8259,62 @@ uint32_t DBG_CommandLine_MacAddr ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacTxPause
-//
-//   Purpose: This function will pause transmission for packet QoS testing
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacTxPause ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      MAC_PauseTx ( ( bool )true );
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "ERROR - too many arguments:  Usage:  'mactxpause'" );
-//   }
-//
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacTxUnPause
-//
-//   Purpose: This function will unpause transmission (for packet QoS testing)
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacTxUnPause ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      MAC_PauseTx ( ( bool )false );
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "ERROR - too many arguments:  Usage:  'mactxunpause'" );
-//   }
-//
-//   return ( 0 );
-//}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacTxPause
+
+   Purpose: This function will pause transmission for packet QoS testing
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacTxPause ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      MAC_PauseTx ( ( bool )true );
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "ERROR - too many arguments:  Usage:  'mactxpause'" );
+   }
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacTxUnPause
+
+   Purpose: This function will unpause transmission (for packet QoS testing)
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacTxUnPause ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      MAC_PauseTx ( ( bool )false );
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "ERROR - too many arguments:  Usage:  'mactxunpause'" );
+   }
+
+   return ( 0 );
+}
 
 /******************************************************************************
 
@@ -8259,245 +8336,245 @@ uint32_t DBG_CommandLine_PhyStats ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_PhyConfig
-//
-//   Purpose: Used to print the PHY Configuration
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_PhyConfig ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      PHY_ConfigPrint();
-//      return ( 0 );
-//   }
-//   DBG_logPrintf( 'R', "Usage:  'phyconfig'" );
-//   return ( 0 );
-//}
-//
-//
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_SM_Stats
-//
-//   Purpose: Used to print the SM Statistics
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_SM_Stats ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      SM_Stats ( ( bool )false );
-//      return ( 0 );
-//   }
-//
-//   if ( argc == 2 )
-//   {
-//      // One parameter
-//      if ( strcasecmp( "y", argv[1] ) == 0 )
-//      {
-//         SM_Stats ( ( bool )true );
-//         return ( 0 );
-//      }
-//      if ( strcasecmp( "n", argv[1] ) == 0 )
-//      {
-//         SM_Stats ( ( bool )false );
-//         return ( 0 );
-//      }
-//   }
-//   DBG_logPrintf( 'R', "Usage:  'smstats y|n'" );
-//   return ( 0 );
-//}
-//
-//
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_SM_Config
-//
-//   Purpose: Used to print the SM Configuration
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_SM_Config ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      SM_ConfigPrint();
-//      return ( 0 );
-//   }
-//   DBG_logPrintf( 'R', "Usage:  'smconfig'" );
-//   return ( 0 );
-//}
-//
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacStats
-//
-//   Purpose: Used to print the MAC Statistics
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacStats ( uint32_t argc, char *argv[] )
-//{
-//   MAC_Stats ();
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MacConfig
-//
-//   Purpose: Used to print the MAC Configuration
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MacConfig ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      MAC_ConfigPrint();
-//      return ( 0 );
-//   }
-//   DBG_logPrintf( 'R', "Usage:  'macconfig'" );
-//
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_NwkStats
-//
-//   Purpose: Used to print the MAC Statistics
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_NwkStats ( uint32_t argc, char *argv[] )
-//{
-//   NWK_Stats ( );
-//   return ( 0 );
-//}
-//
-//#if (USE_DTLS == 1)
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_DtlsStats
-//
-//   Purpose: Used to print the DTLS Statistics
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_DtlsStats ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc == 1 )
-//   {
-//      // No parameters
-//      DTLS_Stats ( ( bool )false );
-//      return ( 0 );
-//   }
-//
-//   if ( argc == 2 )
-//   {
-//      // One parameter
-//      if ( strcasecmp( "y", argv[1] ) == 0 )
-//      {
-//         DTLS_Stats ( ( bool )true );
-//         return ( 0 );
-//      }
-//      if ( strcasecmp( "n", argv[1] ) == 0 )
-//      {
-//         DTLS_Stats ( ( bool )false );
-//         return ( 0 );
-//      }
-//   }
-//   DBG_logPrintf( 'R', "Usage:  'dtlsstats y|n'" );
-//   return ( 0 );
-//}
-//#endif
-//
-//#if (USE_MTLS == 1)
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_mtlsStats
-//
-//   Purpose: Used to print the MTLS Statistics
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_mtlsStats ( uint32_t argc, char *argv[] )
-//{
-//
-//   if ( ( argc > 1 ) && ( strcasecmp( argv[ 1 ], "reset" ) == 0 ) )
-//   {
-//      if ( eSUCCESS != MTLS_Reset() )
-//      {
-//         DBG_logPrintf( 'E', "Failed to reset mtls readonly stats!" );
-//      }
-//   }
-//   MTLS_Stats();
-//
-//   return ( 0 );
-//}
-//#endif
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_PhyConfig
+
+   Purpose: Used to print the PHY Configuration
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_PhyConfig ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      PHY_ConfigPrint();
+      return ( 0 );
+   }
+   DBG_logPrintf( 'R', "Usage:  'phyconfig'" );
+   return ( 0 );
+}
+
+
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_SM_Stats
+
+   Purpose: Used to print the SM Statistics
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_SM_Stats ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      SM_Stats ( ( bool )false );
+      return ( 0 );
+   }
+
+   if ( argc == 2 )
+   {
+      // One parameter
+      if ( strcasecmp( "y", argv[1] ) == 0 )
+      {
+         SM_Stats ( ( bool )true );
+         return ( 0 );
+      }
+      if ( strcasecmp( "n", argv[1] ) == 0 )
+      {
+         SM_Stats ( ( bool )false );
+         return ( 0 );
+      }
+   }
+   DBG_logPrintf( 'R', "Usage:  'smstats y|n'" );
+   return ( 0 );
+}
+
+
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_SM_Config
+
+   Purpose: Used to print the SM Configuration
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_SM_Config ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      SM_ConfigPrint();
+      return ( 0 );
+   }
+   DBG_logPrintf( 'R', "Usage:  'smconfig'" );
+   return ( 0 );
+}
+
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacStats
+
+   Purpose: Used to print the MAC Statistics
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacStats ( uint32_t argc, char *argv[] )
+{
+   MAC_Stats ();
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MacConfig
+
+   Purpose: Used to print the MAC Configuration
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MacConfig ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      MAC_ConfigPrint();
+      return ( 0 );
+   }
+   DBG_logPrintf( 'R', "Usage:  'macconfig'" );
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NwkStats
+
+   Purpose: Used to print the MAC Statistics
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_NwkStats ( uint32_t argc, char *argv[] )
+{
+   NWK_Stats ( );
+   return ( 0 );
+}
+
+#if (USE_DTLS == 1)
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_DtlsStats
+
+   Purpose: Used to print the DTLS Statistics
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_DtlsStats ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      // No parameters
+      DTLS_Stats ( ( bool )false );
+      return ( 0 );
+   }
+
+   if ( argc == 2 )
+   {
+      // One parameter
+      if ( strcasecmp( "y", argv[1] ) == 0 )
+      {
+         DTLS_Stats ( ( bool )true );
+         return ( 0 );
+      }
+      if ( strcasecmp( "n", argv[1] ) == 0 )
+      {
+         DTLS_Stats ( ( bool )false );
+         return ( 0 );
+      }
+   }
+   DBG_logPrintf( 'R', "Usage:  'dtlsstats y|n'" );
+   return ( 0 );
+}
+#endif
+
+#if (USE_MTLS == 1)
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_mtlsStats
+
+   Purpose: Used to print the MTLS Statistics
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_mtlsStats ( uint32_t argc, char *argv[] )
+{
+
+   if ( ( argc > 1 ) && ( strcasecmp( argv[ 1 ], "reset" ) == 0 ) )
+   {
+      if ( eSUCCESS != MTLS_Reset() )
+      {
+         DBG_logPrintf( 'E', "Failed to reset mtls readonly stats!" );
+      }
+   }
+   MTLS_Stats();
+
+   return ( 0 );
+}
+#endif
+
 ///******************************************************************************
 //   Function Name: DBG_CommandLine_PWR_BrownOut
 //
@@ -8983,139 +9060,139 @@ uint32_t DBG_CommandLine_GetFreq ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-//#if DCU == 1
-//#if OTA_CHANNELS_ENABLED == 1
-///*
-// * Over the Air (OTA) Commands
-// */
-//static uint32_t CommandLine_OTA_Cmd ( uint32_t argc, char *argv[] )
-//{
-//   if ( argc > 1 )
-//   {
-//      if (      strcasecmp( "phyTxChannels"       , argv[1] ) == 0 ){ return SetChannels ( phyTxChannels,        argc-1, &argv[1] ) ;}
-//      else if ( strcasecmp( "phyRxChannels"       , argv[1] ) == 0 ){ return SetChannels ( phyRxChannels,        argc-1, &argv[1] ) ;}
-//      else if ( strcasecmp( "phyAvailableChannels", argv[1] ) == 0 ){ return SetChannels ( phyAvailableChannels, argc-1, &argv[1] ) ;
-//      }
-//      else{
-//         DBG_logPrintf( 'R', "usage: ota phyTxChannels        xx.xx.xx.xx.xx 1,2,3,4,5 " );
-//         DBG_logPrintf( 'R', "usage: ota phyRxChannels        xx.xx.xx.xx.xx 1,2,3,4,5 " );
-//         DBG_logPrintf( 'R', "usage: ota phyAvailableChannels xx.xx.xx.xx.xx 1,2,3,4,5 " );
-//      }
-//   }
-//   return 0;
-//}
-//
-///*
-// *
-// * These functions are used to set the available channels, tx channels and rx channels
-// *
-// */
-//
-///* Command Line Interface for generic Set Channels */
-//static uint32_t SetChannels ( uint16_t ReadingType, uint32_t argc, char *argv[] )
-//{
-//
-//   bool bStatus = ( bool )false;
-//   xid_addr_t xid_addr = {0,0,0,0,0};
-//
-//   struct ui_list_s channel_list;
-//   channel_list.num_elements = 0;
-//
-//   if ( argc > 1 )
-//   {
-//      // First get the MAC ID
-//      char delimiter[] = ":.";   // Allows delimiter to be ':' or '.'
-//      uint16_t num_tokens = 0;
-//      char* pch;
-//
-//      pch = strtok( argv[1], delimiter );
-//      while ( pch != NULL )
-//      {
-//         // Convert the token to address bytes
-//         ( void )sscanf( pch, "%02hhx", &xid_addr[num_tokens] );
-//         num_tokens++;
-//         if( num_tokens > ( uint16_t )sizeof( xid_addr ) )
-//         {
-//            // no more room!
-//            break;
-//         }
-//         pch = strtok ( NULL, delimiter );
-//      }
-//
-//      if( num_tokens == ( uint16_t )sizeof( xid_addr_t ) )
-//      {
-//         bStatus = ( bool )true;
-//      }
-//      else
-//      {
-//         // need to print the usage
-//         DBG_logPrintf( 'R', "parameter error!" );
-//         return 0;
-//      }
-//
-//      {
-//         // Get a list of channel numbers
-//         char delimiter[] = ",";   // Allows delimiter to be ','
-//         char* pch;
-//
-//         pch = strtok( argv[2], delimiter );
-//         while ( pch != NULL )
-//         {
-//            // Convert the token to channel
-//            /* h modifier since destination is a uint16_t */
-//           ( void )sscanf( pch, "%hd", &channel_list.data[channel_list.num_elements] );
-//            channel_list.num_elements++;
-//            if( channel_list.num_elements >= MAX_UI_LIST_ELEMENTS)
-//            {
-//               // no more room!
-//               break;
-//            }
-//            pch = strtok ( NULL, delimiter );
-//         }
-//      }
-//
-//      // build the heep command and send it
-//      // todo: 1/8/2016 12:28:08 PM [BAH]
-//      uint8_t buffer[200];
-//      memset(buffer, 0, 200);
-//
-//      // todo: 1/8/2016 9:20:31 AM [BAH]
-//      buffer[0] = 0x00;       // InterfaceRevision
-//      buffer[1] = or_pm;      // resource
-//      buffer[2] = method_put; // verb
-//      buffer[3] = 0x00;       // id
-//
-//      struct readings_s readings;
-//
-//      // Initialize the CompactMeterRead Header
-//      HEEP_ReadingsInit(&readings, 0, &buffer[4] );
-//
-//      // Add this to to message
-//      HEEP_Put_ui_list(&readings, ReadingType, &channel_list );
-//
-//      uint8_t offset = 4 + readings.size;
-//
-//      {
-//         COMM_Tx_t tx_data;
-//
-//         tx_data.dst_address.addr_type = eEXTENSION_ID;
-//
-//         ( void )memcpy( tx_data.dst_address.ExtensionAddr, xid_addr, MAC_ADDRESS_SIZE );
-//
-//          tx_data.data   = buffer;
-//          tx_data.length = offset;
-//          tx_data.qos    = 0;
-//          tx_data.callback = NULL;
-//          tx_data.override.linkOverride = eNWK_LINK_OVERRIDE_NULL;
-//          COMM_transmit( &tx_data );
-//      }
-//   }
-//   return 0;
-//}
-//#endif
-//#endif
-//
-//
+#if DCU == 1
+#if OTA_CHANNELS_ENABLED == 1
+/*
+ * Over the Air (OTA) Commands
+ */
+static uint32_t CommandLine_OTA_Cmd ( uint32_t argc, char *argv[] )
+{
+   if ( argc > 1 )
+   {
+      if (      strcasecmp( "phyTxChannels"       , argv[1] ) == 0 ){ return SetChannels ( phyTxChannels,        argc-1, &argv[1] ) ;}
+      else if ( strcasecmp( "phyRxChannels"       , argv[1] ) == 0 ){ return SetChannels ( phyRxChannels,        argc-1, &argv[1] ) ;}
+      else if ( strcasecmp( "phyAvailableChannels", argv[1] ) == 0 ){ return SetChannels ( phyAvailableChannels, argc-1, &argv[1] ) ;
+      }
+      else{
+         DBG_logPrintf( 'R', "usage: ota phyTxChannels        xx.xx.xx.xx.xx 1,2,3,4,5 " );
+         DBG_logPrintf( 'R', "usage: ota phyRxChannels        xx.xx.xx.xx.xx 1,2,3,4,5 " );
+         DBG_logPrintf( 'R', "usage: ota phyAvailableChannels xx.xx.xx.xx.xx 1,2,3,4,5 " );
+      }
+   }
+   return 0;
+}
+
+/*
+ *
+ * These functions are used to set the available channels, tx channels and rx channels
+ *
+ */
+
+/* Command Line Interface for generic Set Channels */
+static uint32_t SetChannels ( uint16_t ReadingType, uint32_t argc, char *argv[] )
+{
+
+   bool bStatus = ( bool )false;
+   xid_addr_t xid_addr = {0,0,0,0,0};
+
+   struct ui_list_s channel_list;
+   channel_list.num_elements = 0;
+
+   if ( argc > 1 )
+   {
+      // First get the MAC ID
+      char delimiter[] = ":.";   // Allows delimiter to be ':' or '.'
+      uint16_t num_tokens = 0;
+      char* pch;
+
+      pch = strtok( argv[1], delimiter );
+      while ( pch != NULL )
+      {
+         // Convert the token to address bytes
+         ( void )sscanf( pch, "%02hhx", &xid_addr[num_tokens] );
+         num_tokens++;
+         if( num_tokens > ( uint16_t )sizeof( xid_addr ) )
+         {
+            // no more room!
+            break;
+         }
+         pch = strtok ( NULL, delimiter );
+      }
+
+      if( num_tokens == ( uint16_t )sizeof( xid_addr_t ) )
+      {
+         bStatus = ( bool )true;
+      }
+      else
+      {
+         // need to print the usage
+         DBG_logPrintf( 'R', "parameter error!" );
+         return 0;
+      }
+
+      {
+         // Get a list of channel numbers
+         char delimiter[] = ",";   // Allows delimiter to be ','
+         char* pch;
+
+         pch = strtok( argv[2], delimiter );
+         while ( pch != NULL )
+         {
+            // Convert the token to channel
+            /* h modifier since destination is a uint16_t */
+           ( void )sscanf( pch, "%hd", &channel_list.data[channel_list.num_elements] );
+            channel_list.num_elements++;
+            if( channel_list.num_elements >= MAX_UI_LIST_ELEMENTS)
+            {
+               // no more room!
+               break;
+            }
+            pch = strtok ( NULL, delimiter );
+         }
+      }
+
+      // build the heep command and send it
+      // todo: 1/8/2016 12:28:08 PM [BAH]
+      uint8_t buffer[200];
+      memset(buffer, 0, 200);
+
+      // todo: 1/8/2016 9:20:31 AM [BAH]
+      buffer[0] = 0x00;       // InterfaceRevision
+      buffer[1] = or_pm;      // resource
+      buffer[2] = method_put; // verb
+      buffer[3] = 0x00;       // id
+
+      struct readings_s readings;
+
+      // Initialize the CompactMeterRead Header
+      HEEP_ReadingsInit(&readings, 0, &buffer[4] );
+
+      // Add this to to message
+      HEEP_Put_ui_list(&readings, ReadingType, &channel_list );
+
+      uint8_t offset = 4 + readings.size;
+
+      {
+         COMM_Tx_t tx_data;
+
+         tx_data.dst_address.addr_type = eEXTENSION_ID;
+
+         ( void )memcpy( tx_data.dst_address.ExtensionAddr, xid_addr, MAC_ADDRESS_SIZE );
+
+          tx_data.data   = buffer;
+          tx_data.length = offset;
+          tx_data.qos    = 0;
+          tx_data.callback = NULL;
+          tx_data.override.linkOverride = eNWK_LINK_OVERRIDE_NULL;
+          COMM_transmit( &tx_data );
+      }
+   }
+   return 0;
+}
+#endif
+#endif
+
+
 //#if ( DCU == 1 )
 //#if 0
 //// Kept in case it is needed later
@@ -10484,248 +10561,248 @@ uint32_t DBG_CommandLine_RadioStatus ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-//#if (EP == 1)
-//#if ( ENABLE_DEMAND_TASKS == 1 )
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_DMDDump
-//
-//   Purpose: Prints the demand file/variables
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_DMDDump ( uint32_t argc, char *argv[] )
-//{
-//   DEMAND_DumpFile();
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_SchDmdRst
-//
-//   Purpose: Get or set the scheduled demand reset date of month
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes: SCHD DMD RESET not in meters within meter demand
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_SchDmdRst ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t              dateOfMonth=255;
-//   sysTime_t            sTime;
-//   sysTime_dateFormat_t sysTime;
-//
-//   //Command only, get Scheduled date
-//   if ( 1 == argc )
-//   {
-//      DEMAND_GetResetDay( &dateOfMonth );
-//   }
-//   //Command and parameter, set scheduled date of month
-//   else if ( 2 == argc )
-//   {
-//         // Write ScheduledDemandResetDay
-//      dateOfMonth = ( uint8_t )atol( argv[1] );
-//      ( void )DEMAND_SetResetDay( dateOfMonth );
-//   }
-//   if ( 2 >= argc )
-//   {
-//      DEMAND_GetSchDmdRst( &sTime.date, &sTime.time );
-//      (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sysTime );
-//      DBG_printf( "Demand Reset Date: %u, Schedule(Local): %02d/%02d/%04d %02d:%02d:%02d", dateOfMonth,
-//                sysTime.month, sysTime.day, sysTime.year, sysTime.hour, sysTime.min, sysTime.sec);
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_DMDTO
-//
-//   Purpose: Get or set the demand reset timeout
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_DMDTO ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t timeout = 0;   /*lint !e578 local name same as enum OK   */
-//
-//   //Command only, get Timeout
-//   if ( 1 == argc )
-//   {
-//      DEMAND_GetTimeout( &timeout );
-//   }
-//   //Command and parameter, set timeout
-//   else if ( 2 == argc )
-//   {
-//      timeout = ( uint32_t )atol( argv[1] );
-//      ( void )DEMAND_SetTimeout( timeout );
-//   }
-//   if ( 2 >= argc )
-//   {
-//      DBG_printf( "Demand Reset Timeout: %u", timeout );
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//   return ( 0 );
-//}
-//#if ( DEMAND_IN_METER == 1 )
-///******************************************************************************
-//
-//   Function Name: DBGC_DemandResetCallBack
-//
-//   Purpose: Called upon completion (or failure) of demand reset command
-//
-//   Arguments:  result - success/failure of procedure.
-//
-//   Returns: none
-//
-//   Notes:
-//
-//******************************************************************************/
-//static volatile bool             dmdResetDone;
-//static volatile returnStatus_t   dmdResetResult;
-//static void DBGC_DemandResetCallBack( returnStatus_t result )
-//{
-//   dmdResetDone = (bool)true;
-//   dmdResetResult = result;
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_DemandReset
-//
-//   Purpose: Execute a demand reset in the meter
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] )
-//{
-//   uint8_t retries;
-//   dmdResetDone = false;
-//   //Command only, get Timeout
-//   if ( 1 == argc )
-//   {
-//      /* Request a demand reset and set the callback function  */
-//      ( void )HMC_DMD_Reset( ( uint8_t )HMC_APP_API_CMD_ACTIVATE, (void *)DBGC_DemandResetCallBack ); /*lint !e611 cast
-//                                                                                                        is correct   */
-//      for( retries = 120; retries && !dmdResetDone; retries-- ) /* Wait for results              */
-//      {
-//         OS_TASK_Sleep( 250 );
-//      }
-//      /* Display results   */
-//      DBG_printf( "Demand Reset: %s.", dmdResetDone ? "completed" : "not complete" );
-//      if ( dmdResetDone )
-//      {
-//         if ( eSUCCESS == dmdResetResult )
-//         {
-//            DBG_printf( "Demand Reset: success." );
-//         }
-//         else
-//         {
-//            DBG_printf( "Demand Reset: %u.", ( uint32_t )dmdResetResult );
-//         }
-//      }
-//   }
-//   return 0;
-//}
-//#endif //#if ( DEMAND_IN_METER == 1 )
-//#endif // #if ( ENABLE_DEMAND_TASKS == 1 )
-//#if ( CLOCK_IN_METER == 1 )
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_HMC_time
-//
-//   Purpose: This function will get or set the KV2C time
-//   Usage:   hmc_time - reads meter time
-//            hmc_time yy mm dd hh mm ss - set meter's time
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_HMC_time( uint32_t argc, char *argv[] )
-//{
-//   ( void )HMC_TIME_Set_Time( ( uint8_t )HMC_APP_API_CMD_ACTIVATE, NULL );  // Read/Update meter's time
-//
-//   return 0;
-//}
-//#endif
-//
-//#if ( MULTIPLE_MAC != 0 )
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_NumMac
-//
-//   Purpose: This function sets/gets the number of mac addresses emulated by this device.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] )
-//{
-//   uint8_t           NumMac;
-//
-//
-//   if ( argc == 2 )
-//   {
-//      MAC_SetConf_t SetConf;
-//      NumMac = ( uint8_t )strtoul( argv[1], NULL, 0 );
-//      SetConf = MAC_SetRequest( eMacAttr_NumMac, &NumMac);
-//      if (SetConf.eStatus != eMAC_SET_SUCCESS) {
-//          DBG_printf( "MAC set API returned an error" );
-//      }
-//   }
-//
-//   if ( argc <= 2 )
-//   {
-//      MAC_GetConf_t GetConf;
-//      GetConf = MAC_GetRequest( eMacAttr_NumMac );
-//      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//         DBG_printf( "NumMac: %d", GetConf.val.NumMac );
-//      }
-//   }
-//   return ( 0 );
-//}
-//#endif
-//#endif // (EP == 1)
+#if (EP == 1)
+#if ( ENABLE_DEMAND_TASKS == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_DMDDump
+
+   Purpose: Prints the demand file/variables
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_DMDDump ( uint32_t argc, char *argv[] )
+{
+   DEMAND_DumpFile();
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_SchDmdRst
+
+   Purpose: Get or set the scheduled demand reset date of month
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: SCHD DMD RESET not in meters within meter demand
+
+******************************************************************************/
+uint32_t DBG_CommandLine_SchDmdRst ( uint32_t argc, char *argv[] )
+{
+   uint8_t              dateOfMonth=255;
+   sysTime_t            sTime;
+   sysTime_dateFormat_t sysTime;
+
+   //Command only, get Scheduled date
+   if ( 1 == argc )
+   {
+      DEMAND_GetResetDay( &dateOfMonth );
+   }
+   //Command and parameter, set scheduled date of month
+   else if ( 2 == argc )
+   {
+         // Write ScheduledDemandResetDay
+      dateOfMonth = ( uint8_t )atol( argv[1] );
+      ( void )DEMAND_SetResetDay( dateOfMonth );
+   }
+   if ( 2 >= argc )
+   {
+      DEMAND_GetSchDmdRst( &sTime.date, &sTime.time );
+      (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sysTime );
+      DBG_printf( "Demand Reset Date: %u, Schedule(Local): %02d/%02d/%04d %02d:%02d:%02d", dateOfMonth,
+                sysTime.month, sysTime.day, sysTime.year, sysTime.hour, sysTime.min, sysTime.sec);
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_DMDTO
+
+   Purpose: Get or set the demand reset timeout
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_DMDTO ( uint32_t argc, char *argv[] )
+{
+   uint32_t timeout = 0;   /*lint !e578 local name same as enum OK   */
+
+   //Command only, get Timeout
+   if ( 1 == argc )
+   {
+      DEMAND_GetTimeout( &timeout );
+   }
+   //Command and parameter, set timeout
+   else if ( 2 == argc )
+   {
+      timeout = ( uint32_t )atol( argv[1] );
+      ( void )DEMAND_SetTimeout( timeout );
+   }
+   if ( 2 >= argc )
+   {
+      DBG_printf( "Demand Reset Timeout: %u", timeout );
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   return ( 0 );
+}
+#if ( DEMAND_IN_METER == 1 )
+/******************************************************************************
+
+   Function Name: DBGC_DemandResetCallBack
+
+   Purpose: Called upon completion (or failure) of demand reset command
+
+   Arguments:  result - success/failure of procedure.
+
+   Returns: none
+
+   Notes:
+
+******************************************************************************/
+static volatile bool             dmdResetDone;
+static volatile returnStatus_t   dmdResetResult;
+static void DBGC_DemandResetCallBack( returnStatus_t result )
+{
+   dmdResetDone = (bool)true;
+   dmdResetResult = result;
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_DemandReset
+
+   Purpose: Execute a demand reset in the meter
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] )
+{
+   uint8_t retries;
+   dmdResetDone = false;
+   //Command only, get Timeout
+   if ( 1 == argc )
+   {
+      /* Request a demand reset and set the callback function  */
+      ( void )HMC_DMD_Reset( ( uint8_t )HMC_APP_API_CMD_ACTIVATE, (void *)DBGC_DemandResetCallBack ); /*lint !e611 cast
+                                                                                                        is correct   */
+      for( retries = 120; retries && !dmdResetDone; retries-- ) /* Wait for results              */
+      {
+         OS_TASK_Sleep( 250 );
+      }
+      /* Display results   */
+      DBG_printf( "Demand Reset: %s.", dmdResetDone ? "completed" : "not complete" );
+      if ( dmdResetDone )
+      {
+         if ( eSUCCESS == dmdResetResult )
+         {
+            DBG_printf( "Demand Reset: success." );
+         }
+         else
+         {
+            DBG_printf( "Demand Reset: %u.", ( uint32_t )dmdResetResult );
+         }
+      }
+   }
+   return 0;
+}
+#endif //#if ( DEMAND_IN_METER == 1 )
+#endif // #if ( ENABLE_DEMAND_TASKS == 1 )
+#if ( CLOCK_IN_METER == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_HMC_time
+
+   Purpose: This function will get or set the KV2C time
+   Usage:   hmc_time - reads meter time
+            hmc_time yy mm dd hh mm ss - set meter's time
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_HMC_time( uint32_t argc, char *argv[] )
+{
+   ( void )HMC_TIME_Set_Time( ( uint8_t )HMC_APP_API_CMD_ACTIVATE, NULL );  // Read/Update meter's time
+
+   return 0;
+}
+#endif
+
+#if ( MULTIPLE_MAC != 0 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NumMac
+
+   Purpose: This function sets/gets the number of mac addresses emulated by this device.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] )
+{
+   uint8_t           NumMac;
+
+
+   if ( argc == 2 )
+   {
+      MAC_SetConf_t SetConf;
+      NumMac = ( uint8_t )strtoul( argv[1], NULL, 0 );
+      SetConf = MAC_SetRequest( eMacAttr_NumMac, &NumMac);
+      if (SetConf.eStatus != eMAC_SET_SUCCESS) {
+          DBG_printf( "MAC set API returned an error" );
+      }
+   }
+
+   if ( argc <= 2 )
+   {
+      MAC_GetConf_t GetConf;
+      GetConf = MAC_GetRequest( eMacAttr_NumMac );
+      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+         DBG_printf( "NumMac: %d", GetConf.val.NumMac );
+      }
+   }
+   return ( 0 );
+}
+#endif
+#endif // (EP == 1)
 
 /******************************************************************************
 
@@ -10779,28 +10856,48 @@ uint32_t DBG_CommandLine_Buffers( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_FreeRAM
-//
-//   Purpose: This function displays the available free internal RAM
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_FreeRAM ( uint32_t argc, char *argv[] )
-//{
-//   DBG_printf( "Free Internal RAM High Water Mark = %u bytes \n Current RAM Free = %u bytes ",
-//               ( uint32_t )BSP_DEFAULT_END_OF_KERNEL_MEMORY - ( uint32_t )_mem_get_highwater(),
-//               ( uint32_t )_mem_get_free() );
-//
-//   return ( 0 );
-//}
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_FreeRAM
+
+   Purpose: This function displays the available free internal RAM
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_FreeRAM ( uint32_t argc, char *argv[] )
+{
+#if ( RTOS_SELECTION == MQX_RTOS )
+   DBG_printf( "Free Internal RAM High Water Mark = %u bytes \n Current RAM Free = %u bytes ",
+               ( uint32_t )BSP_DEFAULT_END_OF_KERNEL_MEMORY - ( uint32_t )_mem_get_highwater(),
+               ( uint32_t )_mem_get_free() );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   HeapStats_t heepInfo;
+   (void)vPortGetHeapStats( &heepInfo );
+   DBG_printf( "Heap Statistics: \r\n"
+               "  Availale Heap Space          %6u \r\n"
+               "  Size of Largest Free Block   %6u \r\n"
+               "  Size of Smallest Free Block  %6u \r\n"
+               "  Number of Free Blocks        %6u \r\n"
+               "  Minimum Ever Free Remaining  %6u \r\n"
+               "  Number of Successful Allocs  %6u \r\n"
+               "  Number of Successful Frees   %6u \r\n",
+               heepInfo.xAvailableHeapSpaceInBytes,
+               heepInfo.xSizeOfLargestFreeBlockInBytes,
+               heepInfo.xSizeOfSmallestFreeBlockInBytes,
+               heepInfo.xNumberOfFreeBlocks,
+               heepInfo.xMinimumEverFreeBytesRemaining,
+               heepInfo.xNumberOfSuccessfulAllocations,
+               heepInfo.xNumberOfSuccessfulFrees         );
+#endif
+   return ( 0 );
+}
+
 
 /******************************************************************************
 
@@ -10927,188 +11024,188 @@ uint32_t DBG_CommandLine_RSSIJumpThreshold ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 #endif
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_CCA
-//
-//   Purpose: This function displays/Set the CCA threshold
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_CCA ( uint32_t argc, char *argv[] )
-//{
-//   int16_t threshold;
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         PHY_GetConf_t GetConf;
-//         // Get the CCA threshold
-//         GetConf = PHY_GetRequest( ePhyAttr_CcaThreshold );
-//         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//            DBG_printf( "CCA Threshold is %d dBm", GetConf.val.CcaThreshold );
-//         }
-//      } else {
-//         PHY_SetConf_t SetConf;
-//         threshold = ( int16_t )atoi( argv[1] );
-//         SetConf = PHY_SetRequest( ePhyAttr_CcaThreshold, &threshold);
-//         if (SetConf.eStatus == ePHY_SET_INVALID_PARAMETER) {
-//            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between %d and %d",
-//                           PHY_CCA_THRESHOLD_MIN, PHY_CCA_THRESHOLD_MAX );
-//         }
-//         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
-//            DBG_printf( "Failed to set CCA" );
-//         }
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_CCAAdaptiveThreshold
-//
-//   Purpose: This function displays the CCA adaptive threshold
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_CCAAdaptiveThreshold ( uint32_t argc, char *argv[] )
-//{
-//   PHY_GetConf_t GetConf;
-//   uint8_t numChannels;
-//   uint32_t i;
-//
-//   // Get the number of channels
-//   GetConf = PHY_GetRequest( ePhyAttr_NumChannels );
-//   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//      numChannels = GetConf.val.NumChannels;
-//
-//      // Get the CCA adaptive threshold
-//      GetConf = PHY_GetRequest( ePhyAttr_CcaAdaptiveThreshold );
-//      if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//         for ( i = 0; i < numChannels; i++ )
-//         {
-//            DBG_printf( "%d dBm", GetConf.val.CcaAdaptiveThreshold[i] );
-//         }
-//      }
-//   }
-//   return ( 0 );
-//}
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_CCAAdaptiveThresholdEnable
-//
-//   Purpose: This function displays/Set the CCA adaptive threshold enable
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_CCAAdaptiveThresholdEnable ( uint32_t argc, char *argv[] )
-//{
-//   bool enable;
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//   else
-//   {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         PHY_GetConf_t GetConf;
-//         // Get the CCA adaptive threshold enable
-//         GetConf = PHY_GetRequest( ePhyAttr_CcaAdaptiveThresholdEnable );
-//         if (GetConf.eStatus == ePHY_GET_SUCCESS)
-//         {
-//            DBG_printf( "CCA Threshold Enable is %u", ( uint32_t )GetConf.val.CcaAdaptiveThresholdEnable );
-//         }
-//      }
-//      else
-//      {
-//         PHY_SetConf_t SetConf;
-//         enable = ( bool )atoi( argv[1] );
-//         SetConf = PHY_SetRequest( ePhyAttr_CcaAdaptiveThresholdEnable, &enable);
-//         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE)
-//         {
-//            DBG_printf( "Failed to set CCA adaptive threshold enable" );
-//         }
-//      }
-//   }
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_CCAOffset
-//
-//   Purpose: This function displays/Set the CCA offset
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_CCAOffset ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t CcaOffset;
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         PHY_GetConf_t GetConf;
-//         // Get the CCA offset
-//         GetConf = PHY_GetRequest( ePhyAttr_CcaOffset );
-//         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//            DBG_printf( "CCA Offset is %u dBm", GetConf.val.CcaOffset );
-//         }
-//      } else {
-//         PHY_SetConf_t SetConf;
-//         CcaOffset = ( uint8_t )atoi( argv[1] );
-//         SetConf = PHY_SetRequest( ePhyAttr_CcaOffset, &CcaOffset);
-//         if (SetConf.eStatus == ePHY_SET_INVALID_PARAMETER) {
-//            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between %d and %d", 0, PHY_CCA_OFFSET_MAX );
-//         }
-//         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
-//            DBG_printf( "Failed to set CCA offset" );
-//         }
-//      }
-//   }
-//   return ( 0 );
-//}
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_CCA
+
+   Purpose: This function displays/Set the CCA threshold
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_CCA ( uint32_t argc, char *argv[] )
+{
+   int16_t threshold;
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      // No parameters
+      if ( argc == 1 )
+      {
+         PHY_GetConf_t GetConf;
+         // Get the CCA threshold
+         GetConf = PHY_GetRequest( ePhyAttr_CcaThreshold );
+         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+            DBG_printf( "CCA Threshold is %d dBm", GetConf.val.CcaThreshold );
+         }
+      } else {
+         PHY_SetConf_t SetConf;
+         threshold = ( int16_t )atoi( argv[1] );
+         SetConf = PHY_SetRequest( ePhyAttr_CcaThreshold, &threshold);
+         if (SetConf.eStatus == ePHY_SET_INVALID_PARAMETER) {
+            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between %d and %d",
+                           PHY_CCA_THRESHOLD_MIN, PHY_CCA_THRESHOLD_MAX );
+         }
+         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
+            DBG_printf( "Failed to set CCA" );
+         }
+      }
+   }
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_CCAAdaptiveThreshold
+
+   Purpose: This function displays the CCA adaptive threshold
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_CCAAdaptiveThreshold ( uint32_t argc, char *argv[] )
+{
+   PHY_GetConf_t GetConf;
+   uint8_t numChannels;
+   uint32_t i;
+
+   // Get the number of channels
+   GetConf = PHY_GetRequest( ePhyAttr_NumChannels );
+   if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+      numChannels = GetConf.val.NumChannels;
+
+      // Get the CCA adaptive threshold
+      GetConf = PHY_GetRequest( ePhyAttr_CcaAdaptiveThreshold );
+      if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+         for ( i = 0; i < numChannels; i++ )
+         {
+            DBG_printf( "%d dBm", GetConf.val.CcaAdaptiveThreshold[i] );
+         }
+      }
+   }
+   return ( 0 );
+}
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_CCAAdaptiveThresholdEnable
+
+   Purpose: This function displays/Set the CCA adaptive threshold enable
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_CCAAdaptiveThresholdEnable ( uint32_t argc, char *argv[] )
+{
+   bool enable;
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   else
+   {
+      // No parameters
+      if ( argc == 1 )
+      {
+         PHY_GetConf_t GetConf;
+         // Get the CCA adaptive threshold enable
+         GetConf = PHY_GetRequest( ePhyAttr_CcaAdaptiveThresholdEnable );
+         if (GetConf.eStatus == ePHY_GET_SUCCESS)
+         {
+            DBG_printf( "CCA Threshold Enable is %u", ( uint32_t )GetConf.val.CcaAdaptiveThresholdEnable );
+         }
+      }
+      else
+      {
+         PHY_SetConf_t SetConf;
+         enable = ( bool )atoi( argv[1] );
+         SetConf = PHY_SetRequest( ePhyAttr_CcaAdaptiveThresholdEnable, &enable);
+         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE)
+         {
+            DBG_printf( "Failed to set CCA adaptive threshold enable" );
+         }
+      }
+   }
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_CCAOffset
+
+   Purpose: This function displays/Set the CCA offset
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_CCAOffset ( uint32_t argc, char *argv[] )
+{
+   uint8_t CcaOffset;
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      // No parameters
+      if ( argc == 1 )
+      {
+         PHY_GetConf_t GetConf;
+         // Get the CCA offset
+         GetConf = PHY_GetRequest( ePhyAttr_CcaOffset );
+         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+            DBG_printf( "CCA Offset is %u dBm", GetConf.val.CcaOffset );
+         }
+      } else {
+         PHY_SetConf_t SetConf;
+         CcaOffset = ( uint8_t )atoi( argv[1] );
+         SetConf = PHY_SetRequest( ePhyAttr_CcaOffset, &CcaOffset);
+         if (SetConf.eStatus == ePHY_SET_INVALID_PARAMETER) {
+            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between %d and %d", 0, PHY_CCA_OFFSET_MAX );
+         }
+         if (SetConf.eStatus == ePHY_SET_SERVICE_UNAVAILABLE) {
+            DBG_printf( "Failed to set CCA offset" );
+         }
+      }
+   }
+   return ( 0 );
+}
+
 //#if ( EP == 1 ) && ( TEST_TDMA == 1 )
 ///******************************************************************************
 //
@@ -11196,52 +11293,52 @@ uint32_t DBG_CommandLine_RSSIJumpThreshold ( uint32_t argc, char *argv[] )
 //}
 //
 //#endif
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_FrontEndGain
-//
-//   Purpose: This function displays/Set the front end gain
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//#if ( DCU == 1 )
-//uint32_t DBG_CommandLine_FrontEndGain ( uint32_t argc, char *argv[] )
-//{
-//   int8_t gain;
-//   char   floatStr[PRINT_FLOAT_SIZE];
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         // Get the front end gain
-//         if ( PHY_FrontEndGain_Get(&gain) ) {
-//            DBG_printf( "Front end gain is %s dBm", DBG_printFloat( floatStr, ( float )gain / 2, 1 ) );
-//         }
-//      } else {
-//         DBG_printf( "NOTE: the gain entered is treated as half steps (e.g. 20 would be 10dBm)" );
-//         gain = ( int8_t )atoi( argv[1] );
-//         if ( PHY_FrontEndGain_Set(&gain) ) {
-//            DBG_printf( "Front end gain set to %i (i.e. %s dBm)", gain, DBG_printFloat( floatStr, ( float )gain / 2, 1 ) );
-//         } else {
-//            DBG_printf( "Failed to set front end gain" );
-//         }
-//      }
-//   }
-//   return ( 0 );
-//}
-//#endif
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_FrontEndGain
+
+   Purpose: This function displays/Set the front end gain
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+#if ( DCU == 1 )
+uint32_t DBG_CommandLine_FrontEndGain ( uint32_t argc, char *argv[] )
+{
+   int8_t gain;
+   char   floatStr[PRINT_FLOAT_SIZE];
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      // No parameters
+      if ( argc == 1 )
+      {
+         // Get the front end gain
+         if ( PHY_FrontEndGain_Get(&gain) ) {
+            DBG_printf( "Front end gain is %s dBm", DBG_printFloat( floatStr, ( float )gain / 2, 1 ) );
+         }
+      } else {
+         DBG_printf( "NOTE: the gain entered is treated as half steps (e.g. 20 would be 10dBm)" );
+         gain = ( int8_t )atoi( argv[1] );
+         if ( PHY_FrontEndGain_Set(&gain) ) {
+            DBG_printf( "Front end gain set to %i (i.e. %s dBm)", gain, DBG_printFloat( floatStr, ( float )gain / 2, 1 ) );
+         } else {
+            DBG_printf( "Failed to set front end gain" );
+         }
+      }
+   }
+   return ( 0 );
+}
+#endif
 
 /******************************************************************************
 
@@ -11552,6 +11649,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static uint16_t end   = 3200;
    static uint16_t step  = 2;
    static uint8_t  boost = 0;
+   static uint32_t channelsBeforeDelay = 3200 / 2;
 #else
    static uint16_t waittime, nSamples, samplingRate;
    static uint16_t start = 0;
@@ -11563,6 +11661,9 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static ports_s  portPins, ports = { '_', '_', '_', '_', '_', '_', '_', '_' };
    OS_TICK_Struct time1,time2;
    uint32_t       TimeDiff;
+#if ( MCU_SELECTED == RA6E1 )
+   static float    lowestCapVoltage = 9.99;
+#endif
 #if 0 // TODO: No longer needed
    static bool    cgcInitialized = (bool)false;
 #endif // 0
@@ -11577,6 +11678,11 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          listFreqs = (bool)true;
          --argc;
       }
+      if ( ( *argv[1] == 'v' ) || ( *argv[1] == 'V' ) )
+      {
+         DBG_printf("lowestCap=%d.%02dV", (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U );
+         return ( 0 );
+      }
    }
 #endif
    // No parameters
@@ -11589,13 +11695,17 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          DBG_printf( "   min    med    max     avg stddev    P90    P95    P99   P995   P999");
 #else
          if ( listFreqs ) {
-           DBG_printf( "\r\nFrequency   min    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' 'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c'", \
+            DBG_printf( "\r\nFrequency   min    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' "
+                        "'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c' 'lowestCap=%d.%02dV' ", \
                         radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, \
-                        ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter );
+                        ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter,
+                        (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U );
          } else {
-            DBG_printf( "\r\nmin    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' 'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c'", \
+            DBG_printf( "\r\nmin    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' "
+                        "'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c' 'lowestCap=%d.%02dV' ", \
                         radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, \
-                        ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter );
+                        ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter,
+                        (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U );
          }
 #endif
          //List seperately so existing test programs are not affected
@@ -11721,6 +11831,22 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 #endif
       {
          boost = ( uint8_t )atoi( argv[8] );
+#if ( MCU_SELECTED == RA6E1 )
+         if ( ( boost == 1 ) && ( ADC_Get_SC_Voltage() < 2.3f ) )
+         {
+            DBG_printf( "You have requested boost mode but super-cap voltage < 2300 mV\r\n"
+                        "  If you want to go ahead anyway, re-run and enter '2' for boost instead of 1\r\n"
+                        "  If you want to wait until the voltage reaches 2300mV, enter '3' for boost" );
+            return ( 0 );
+         }
+         float lv = ADC_Get_SC_Voltage();
+         while ( ( boost == 3 ) && ( lv < 2.3f ) )
+         {
+            DBG_printf(" You have requested boost mode but super-cap is only up to %u mV, waiting to reach 2300 mV", (uint32_t)(lv * 1000.0) );
+            OS_TASK_Sleep ( 2000 );
+            lv = ADC_Get_SC_Voltage();
+         }
+#endif
       }
 
 #if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
@@ -11840,9 +11966,9 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    }
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )
-   #define MIMINUM_TIME 320 // TODO: RA6E1 Bob: verify whether this changed due to RA6E1 or was it always wrong even on K24
+   #define MINIMUM_TIME 320 // TODO: RA6E1 Bob: verify whether this changed due to RA6E1 or was it always wrong even on K24
 #else
-   #define MINIMUM_TIME 130
+   #define MINIMUM_TIME 320
 #endif
    // This minimum sampling rate is around 320usec per read.
    // RSSI read will take a minimum time which is bounded by the SPI rate and radio turn around time.
@@ -11853,8 +11979,25 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    #define PAUSE_MSEC 5
    // TODO: RA6E1 Bob: restore original time calculation for K24/MQX
 #else
-   #define PAUSE_MSEC 11 // TODO: RA6E1 Bob: reflect this in the calculation of time
-   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) * (float)1.05 ); // fudge factor
+   #define PAUSE_MSEC          0 // TODO: RA6E1 Bob: reflect this in the calculation of time
+   #define DELAY_SEC          10 // How long to delay between batches of DELAY_CHANS channels
+   #define ENERGY_IN_CAP 3600000 // Magic number to keep super-cap voltage above 2.1V
+
+   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) );
+   time += ( (uint32_t) ( nbChannels * PAUSE_MSEC + 999 ) ) / 1000 + 1 + waittime; /* account for PAUSE_MSEC and 1 second delay at start */
+   time += ( (uint32_t) ( nbChannels * 1 + 500 ) ) / 1000; /* RADIO_Get_RSSI delays for 1 msec per channel to discard noise after changing frequency */
+   if ( boost != 0 )
+   {
+      time += (uint32_t)nbChannels * (PWR_3P6LDO_EN_ON_DLY_MS + PWR_3V6BOOST_EN_ON_DLY_MS ) / 1000; // Boost/LDO time delays
+   }
+   bool delayDuringTest = (bool)false;
+   if ( (boost != 0) && ( (uint32_t)nSamples * (uint32_t)samplingRate * (uint32_t)nbChannels > ENERGY_IN_CAP ) )
+   {  /* At risk of depleting super-cap during this run.  Insert delays between every channelsBeforeDelay channels */
+      delayDuringTest = (bool)true;
+      channelsBeforeDelay = ENERGY_IN_CAP / ( (uint32_t)nSamples * (uint32_t)samplingRate );
+      time += (uint32_t)( ( ( nbChannels - 2 ) / channelsBeforeDelay ) * DELAY_SEC );
+      DBG_printf( "A delay of %u msec will be inserted every %u channel steps for super-cap recharging", (uint32_t)(DELAY_SEC*1000), channelsBeforeDelay );
+   }
 #endif
    // Remove the time it takes to read RSSI from the sampling rate so that we read RSSI at the specified rate
    if (samplingRate > MINIMUM_TIME) {
@@ -12052,27 +12195,34 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 #endif // 0
 
 #endif
-#if 0 // TODO: RA6E1 Bob: Temporary code so that we don't need to initialize the PHY
-   vRadio_Init(eRADIO_MODE_NORMAL);
-#endif
-
-   DBG_printf( "test should take %02u:%02u", time / 60, time % 60 );
-
-   OS_TASK_Sleep( waittime * ONE_SEC );
-
-   DBG_logPrintf( 'R', "noiseband start" );
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )  // just so we produce the same .hex file
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+   DBG_printf( "test should take %02u:%02u, %u seconds", time / 60, time % 60, time );
    OS_TICK_Get_CurrentElapsedTicks(&time1);
+#else
+   DBG_printf( "test should take %02u:%02u", time / 60, time % 60 );
+#endif
+   OS_TASK_Sleep( waittime * ONE_SEC );
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )  // just so we produce the same .hex file
+   DBG_logPrintf( 'R', "noiseband start; delay between samples = %u, starting super-cap voltage=%u mV", samplingRate, (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 
    PWR_3P6LDO_EN_ON();    // TODO: RA6E1 Bob: This should already be in this condition, just being sure
    PWR_3V6BOOST_EN_OFF(); // TODO: RA6E1 Bob: This should already be in this condition, just being sure
 
    OS_TASK_Sleep( ONE_SEC ); /* Make sure debug printout of the above message has completed before we start */
+   lowestCapVoltage = 9.99;
+#else
+   DBG_logPrintf( 'R', "noiseband start" );
 #endif
 
    for ( j=0, i = start; i <= end; i += step, j++ )
    {
       PHY_Lock();      // Function will not return if it fails
+#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+      RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
+#else
+      float lv = RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
+      if ( lv < lowestCapVoltage ) lowestCapVoltage = lv;
+#endif
       RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
       PHY_Unlock();    // Function will not return if it fails
       qsort( workBuf, nSamples, sizeof(uint8_t), cmpfunc); // Sort RSSI array
@@ -12094,7 +12244,23 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       noiseResults[j].P995 = workBuf[(uint32_t)((nSamples-1)*0.995)];
       noiseResults[j].P999 = workBuf[(uint32_t)((nSamples-1)*0.999)];
 
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )  // just so we produce the same .hex file
+      if ( delayDuringTest )
+      {
+         if ( ( i != start ) && ( i != end ) && ( j % channelsBeforeDelay == 0) ) /* Have we just finished DELAY_CHANS channels? */
+         {
+            uint16_t vBefore = (uint16_t)( ADC_Get_SC_Voltage() * 1000);
+            OS_TASK_Sleep( (uint32_t)( DELAY_SEC * 1000.0 ) ); /* Every DELAY_CHANS channels, give the super-cap time to charge up (boost disabled) */
+            uint16_t vAfter  = (uint16_t)( ADC_Get_SC_Voltage() * 1000);
+            DBG_printf(" Capacitor charged up from %u mV to %u mV (%u mV)", vBefore, vAfter, vAfter-vBefore);
+         }
+      }
+#endif
+#if ( RTOS_SELECTION == MQX_RTOS )
       OS_TASK_Sleep( PAUSE_MSEC ); // Be nice to other tasks
+#elif ( RTOS_SELECTION == FREE_RTOS )
+      OS_TASK_Yield();
+#endif
    }
 #if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
    R_BSP_PinCfg (BSP_IO_PORT_03_PIN_00, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
@@ -12104,7 +12270,8 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    R_BSP_PinCfg (BSP_IO_PORT_02_PIN_01, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    OS_TICK_Get_CurrentElapsedTicks(&time2);
    TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
-   DBG_logPrintf( 'R', "Noiseband end, took %d seconds", TimeDiff/1000000);
+   DBG_logPrintf( 'R', "Noiseband end, took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV",
+                       TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 #endif
 
 #if 0 // TODO: RA6E1 Bob: temporarily remove until Radio and PHY are integrated
@@ -12580,210 +12747,210 @@ uint32_t DBG_CommandLine_NetworkId ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RxTimeout
-//
-//   Purpose: This function sets/gets the Reassembly timeout
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RxTimeout ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t reassemblyTimeout;
-//
-//
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else if ( argc == 2 )
-//   {
-//      MAC_SetConf_t SetConf;
-//      reassemblyTimeout = ( uint8_t )atoi( argv[1] );
-//      SetConf = MAC_SetRequest( eMacAttr_ReassemblyTimeout, &reassemblyTimeout);
-//      if (SetConf.eStatus != eMAC_SET_SUCCESS) {
-//         DBG_printf( "MAC set API returned an error" );
-//      }
-//   }
-//
-//   else if ( argc == 1 )
-//   {
-//      MAC_GetConf_t GetConf;
-//      GetConf = MAC_GetRequest( eMacAttr_ReassemblyTimeout );
-//      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//         DBG_printf( "Reassembly timeout is %d", GetConf.val.ReassemblyTimeout );
-//      }
-//   }
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RelHighCnt
-//
-//   Purpose: This function sets/gets the ReliabilityHighCount MAC attribute
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RelHighCnt ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t reliabilityHighCount;
-//   uint32_t tempInputCleaning;
-//
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else if ( argc == 2 )
-//   {
-//      tempInputCleaning = ( uint32_t )atoi( argv[1] );
-//      if (tempInputCleaning > 255)
-//      {
-//         DBG_printf( "Value too large\n" );
-//      }
-//      else
-//      {
-//         MAC_SetConf_t SetConf;
-//         reliabilityHighCount = ( uint8_t )tempInputCleaning;
-//         SetConf = MAC_SetRequest( eMacAttr_ReliabilityHighCount, &reliabilityHighCount);
-//         if (SetConf.eStatus != eMAC_SET_SUCCESS) {
-//            DBG_printf( "MAC set API returned an error" );
-//         }
-//      }
-//   }
-//
-//   else if ( argc == 1 )
-//   {
-//      MAC_GetConf_t GetConf;
-//      GetConf = MAC_GetRequest( eMacAttr_ReliabilityHighCount );
-//      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//         DBG_printf( "High Reliability retry count is %d", GetConf.val.ReliabilityHighCount );
-//      }
-//   }
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RelMedCnt
-//
-//   Purpose: This function sets/gets the ReliabilityMedCount MAC attribute
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RelMedCnt ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t reliabilityMediumCount;
-//   uint32_t tempInputCleaning;
-//
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else if ( argc == 2 )
-//   {
-//      tempInputCleaning = ( uint32_t )atoi( argv[1] );
-//      if (tempInputCleaning > 255)
-//      {
-//         DBG_printf( "Value too large\n" );
-//      }
-//      else
-//      {
-//         MAC_SetConf_t SetConf;
-//         reliabilityMediumCount = ( uint8_t )tempInputCleaning;
-//         SetConf = MAC_SetRequest( eMacAttr_ReliabilityMediumCount, &reliabilityMediumCount);
-//         if (SetConf.eStatus != eMAC_SET_SUCCESS) {
-//            DBG_printf( "MAC set API returned an error" );
-//         }
-//      }
-//   }
-//
-//   else if ( argc == 1 )
-//   {
-//      MAC_GetConf_t GetConf;
-//      GetConf = MAC_GetRequest( eMacAttr_ReliabilityMediumCount );
-//      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//         DBG_printf( "Medium Reliability retry count is %d", GetConf.val.ReliabilityMediumCount );
-//      }
-//   }
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_RelLowCnt
-//
-//   Purpose: This function sets/gets the ReliabilityLowCount MAC attribute
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_RelLowCnt ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t reliabilityLowCount;
-//   uint32_t tempInputCleaning;
-//
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else if ( argc == 2 )
-//   {
-//      tempInputCleaning = ( uint32_t )atoi( argv[1] );
-//      if (tempInputCleaning > 255)
-//      {
-//         DBG_printf( "Value too large\n" );
-//      }
-//      else
-//      {
-//         MAC_SetConf_t SetConf;
-//         reliabilityLowCount = ( uint8_t )tempInputCleaning;
-//         SetConf = MAC_SetRequest( eMacAttr_ReliabilityLowCount, &reliabilityLowCount);
-//         if (SetConf.eStatus != eMAC_SET_SUCCESS) {
-//            DBG_printf( "MAC set API returned an error" );
-//         }
-//      }
-//   }
-//
-//   else if ( argc == 1 )
-//   {
-//      MAC_GetConf_t GetConf;
-//      GetConf = MAC_GetRequest( eMacAttr_ReliabilityLowCount );
-//      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//         DBG_printf( "Low Reliability retry count is %d", GetConf.val.ReliabilityLowCount );
-//      }
-//   }
-//   return ( 0 );
-//}
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RxTimeout
+
+   Purpose: This function sets/gets the Reassembly timeout
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RxTimeout ( uint32_t argc, char *argv[] )
+{
+   uint8_t reassemblyTimeout;
+
+
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else if ( argc == 2 )
+   {
+      MAC_SetConf_t SetConf;
+      reassemblyTimeout = ( uint8_t )atoi( argv[1] );
+      SetConf = MAC_SetRequest( eMacAttr_ReassemblyTimeout, &reassemblyTimeout);
+      if (SetConf.eStatus != eMAC_SET_SUCCESS) {
+         DBG_printf( "MAC set API returned an error" );
+      }
+   }
+
+   else if ( argc == 1 )
+   {
+      MAC_GetConf_t GetConf;
+      GetConf = MAC_GetRequest( eMacAttr_ReassemblyTimeout );
+      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+         DBG_printf( "Reassembly timeout is %d", GetConf.val.ReassemblyTimeout );
+      }
+   }
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RelHighCnt
+
+   Purpose: This function sets/gets the ReliabilityHighCount MAC attribute
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RelHighCnt ( uint32_t argc, char *argv[] )
+{
+   uint8_t reliabilityHighCount;
+   uint32_t tempInputCleaning;
+
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else if ( argc == 2 )
+   {
+      tempInputCleaning = ( uint32_t )atoi( argv[1] );
+      if (tempInputCleaning > 255)
+      {
+         DBG_printf( "Value too large\n" );
+      }
+      else
+      {
+         MAC_SetConf_t SetConf;
+         reliabilityHighCount = ( uint8_t )tempInputCleaning;
+         SetConf = MAC_SetRequest( eMacAttr_ReliabilityHighCount, &reliabilityHighCount);
+         if (SetConf.eStatus != eMAC_SET_SUCCESS) {
+            DBG_printf( "MAC set API returned an error" );
+         }
+      }
+   }
+
+   else if ( argc == 1 )
+   {
+      MAC_GetConf_t GetConf;
+      GetConf = MAC_GetRequest( eMacAttr_ReliabilityHighCount );
+      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+         DBG_printf( "High Reliability retry count is %d", GetConf.val.ReliabilityHighCount );
+      }
+   }
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RelMedCnt
+
+   Purpose: This function sets/gets the ReliabilityMedCount MAC attribute
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RelMedCnt ( uint32_t argc, char *argv[] )
+{
+   uint8_t reliabilityMediumCount;
+   uint32_t tempInputCleaning;
+
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else if ( argc == 2 )
+   {
+      tempInputCleaning = ( uint32_t )atoi( argv[1] );
+      if (tempInputCleaning > 255)
+      {
+         DBG_printf( "Value too large\n" );
+      }
+      else
+      {
+         MAC_SetConf_t SetConf;
+         reliabilityMediumCount = ( uint8_t )tempInputCleaning;
+         SetConf = MAC_SetRequest( eMacAttr_ReliabilityMediumCount, &reliabilityMediumCount);
+         if (SetConf.eStatus != eMAC_SET_SUCCESS) {
+            DBG_printf( "MAC set API returned an error" );
+         }
+      }
+   }
+
+   else if ( argc == 1 )
+   {
+      MAC_GetConf_t GetConf;
+      GetConf = MAC_GetRequest( eMacAttr_ReliabilityMediumCount );
+      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+         DBG_printf( "Medium Reliability retry count is %d", GetConf.val.ReliabilityMediumCount );
+      }
+   }
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RelLowCnt
+
+   Purpose: This function sets/gets the ReliabilityLowCount MAC attribute
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_RelLowCnt ( uint32_t argc, char *argv[] )
+{
+   uint8_t reliabilityLowCount;
+   uint32_t tempInputCleaning;
+
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else if ( argc == 2 )
+   {
+      tempInputCleaning = ( uint32_t )atoi( argv[1] );
+      if (tempInputCleaning > 255)
+      {
+         DBG_printf( "Value too large\n" );
+      }
+      else
+      {
+         MAC_SetConf_t SetConf;
+         reliabilityLowCount = ( uint8_t )tempInputCleaning;
+         SetConf = MAC_SetRequest( eMacAttr_ReliabilityLowCount, &reliabilityLowCount);
+         if (SetConf.eStatus != eMAC_SET_SUCCESS) {
+            DBG_printf( "MAC set API returned an error" );
+         }
+      }
+   }
+
+   else if ( argc == 1 )
+   {
+      MAC_GetConf_t GetConf;
+      GetConf = MAC_GetRequest( eMacAttr_ReliabilityLowCount );
+      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+         DBG_printf( "Low Reliability retry count is %d", GetConf.val.ReliabilityLowCount );
+      }
+   }
+   return ( 0 );
+}
+
 //#if ( DCU == 1 )
 ///******************************************************************************
 //
@@ -12886,423 +13053,423 @@ uint32_t DBG_CommandLine_NetworkId ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_EVLADD
-//
-//   Purpose: This function will add an event log
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv[1] - priority
-//               argv[2] - Event Id
-//               argv[3] - Pairs Count
-//               argv[4] - Value size
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_EVLADD( uint32_t argc, char *argv[] )
-//{
-//   EventData_s event;
-//   EventKeyValuePair_s ePairs[15];
-//   EventAction_e rVal;
-//   int16_t i, j;
-//   uint8_t e_priority;
-//
-//   ( void )memset( ePairs, 0, sizeof( ePairs ) );
-//   ( void )memset( ( void * )&event, 0, sizeof( event ) );
-//
-//   if ( argc == 5 )
-//   {
-//      e_priority = ( uint8_t )strtoul( argv[1], NULL, 0 );
-//      event.markSent = (bool)false;
-//      event.eventId = ( uint16_t )strtoul( argv[2], NULL, 0 );
-//      event.eventKeyValuePairsCount = ( uint8_t )strtoul( argv[3], NULL, 0 );
-//      event.eventKeyValueSize = ( uint8_t )strtoul( argv[4], NULL, 0 );
-//      if ( event.eventKeyValuePairsCount > 15 )
-//      {
-//         event.eventKeyValuePairsCount = 15;
-//      }
-//      if ( event.eventKeyValueSize > 15 )
-//      {
-//         event.eventKeyValueSize = 15;
-//      }
-//      for ( i = 0; i < event.eventKeyValuePairsCount; i++ )
-//      {
-//         ePairs[i].Key[0] = ( uint8_t )( i + 1 );
-//         ePairs[i].Key[1] = ( uint8_t )( i + 1 );
-//         for ( j = 0; j < event.eventKeyValueSize; j++ )
-//         {
-//            ePairs[i].Value[j] = ( uint8_t )( i + 'A' );
-//         }
-//      }
-//      rVal = EVL_LogEvent( e_priority, &event, ePairs, TIMESTAMP_NOT_PROVIDED, NULL );
-//      INFO_printf( "EVL_LogEvent returned: " );
-//      switch ( rVal )
-//      {
-//         case ( QUEUED_e ) :
-//            INFO_printf( "QUEUED" );
-//            break;
-//         case ( DROPPED_e ) :
-//            INFO_printf( "DROPPED" );
-//            break;
-//         case ( SENT_e ) :
-//            INFO_printf( "SENT" );
-//            break;
-//         case ( ERROR_e ) :
-//            INFO_printf( "ERROR" );
-//            break;
-//         default:
-//            INFO_printf( "ILLEGAL VALUE" );
-//            break;
-//      }
-//   }
-//   else
-//   {
-//      INFO_printf( "USAGE: evladd <priority> <event id><num of key pairs> <key value size>" );
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_EVLADD () */
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_EVLCMD
-//
-//   Purpose: This function is called to execute a command as follows:
-//   (1) - Dump Both Buffers
-//   (2) - Add events to the buffers <num events>
-//   (3) - Erase the flash <buffer>
-//   (4) - Delete all events; maintain current thresholds.
-//   (5) - Set thresholds realTime Opportunistic
-//   (6) - Get thresholds
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_EVLCMD( uint32_t argc, char *argv[] )
-//{
-//   uint16_t command;
-//   command = ( uint16_t )atoi( argv[1] );
-//   EventData_s event;
-//   EventKeyValuePair_s ePairs[15];
-//   uint16_t i, j, k;
-//   uint16_t loop;
-//   uint16_t rVal = 0;
-//   uint16_t whichBuffer;
-//   uint8_t rt;
-//   uint8_t o;
-//
-//   ( void )memset( ( void * )&event, 0, sizeof( event ) );
-//   ( void )memset( ( void * )ePairs, 0, sizeof( ePairs ) );
-//
-//   if ( argc > 1 )
-//   {
-//      switch ( command )
-//      {
-//         case ( 1 ) :
-//         {
-//            EventLogDumpBuffers();
-//            break;
-//         }
-//         case ( 2 ) :
-//         {
-//            loop = ( uint16_t )atoi( argv[2] );
-//            event.markSent = (bool)false;
-//            for ( k = 0; k < loop; k++ )
-//            {
-//               event.eventId++;
-//               event.eventKeyValuePairsCount = k % 5;
-//               event.eventKeyValueSize = ( k + 1 ) % 5;
-//               for ( i = 0; i < event.eventKeyValuePairsCount; i++ )
-//               {
-//                  ePairs[i].Key[0] = ( uint8_t )( i + 1 );
-//                  ePairs[i].Key[1] = ( uint8_t )( i + 1 );
-//                  for ( j = 0; j < event.eventKeyValueSize; j++ )
-//                  {
-//                     ePairs[i].Value[j] = ( uint8_t )( i + 0x41 );
-//                  }
-//               }
-//               rVal = ( uint16_t )EVL_LogEvent( ( uint8_t )atoi( argv[3] ), &event, ePairs, TIMESTAMP_NOT_PROVIDED, NULL );
-//               if ( rVal == ( uint16_t )ERROR_e )
-//               {
-//                  INFO_printf( "Log Event Failure 0x%x", event.eventId );
-//               }
-//               else if ( rVal == ( uint16_t )DROPPED_e )
-//               {
-//                  INFO_printf( "Dropped the packet" );
-//               }
-//            }
-//            if ( rVal == 0 )
-//            {
-//               INFO_printf( "%d events added to the queue", loop );
-//            }
-//            break;
-//         }
-//         case ( 3 ) :
-//         {
-//            whichBuffer = ( uint16_t )atoi( argv[2] );
-//            EventLogEraseFlash( ( uint8_t )whichBuffer );
-//            INFO_printf( "NVRAM ring buffer erased" );
-//            break;
-//         }
-//         case ( 4 ) :
-//         {
-//            EventLogDeleteMetaData();
-//            break;
-//         }
-//         case ( 5 ):
-//         {
-//            ( void )EVL_SetThresholds( ( uint8_t )atoi( argv[2] ), ( uint8_t )atoi( argv[3] ) );
-//            break;
-//         }
-//         case ( 6 ):
-//         {
-//            EVL_GetThresholds( &rt, &o );
-//            INFO_printf( "Real Time Threshold: %d Opportunistic Threshold: %d", rt, o );
-//            break;
-//         }
-//         default:
-//         {
-//            INFO_printf( "Command %d not implemented", command );
-//         }
-//      }
-//   }
-//   else
-//   {
-//      INFO_printf( "USAGE: evlcmd cmd" );
-//      INFO_printf( "cmd: 1 - dump all, 2 - Add events (num events), 3 - Erase flash (buf num)" );
-//      INFO_printf( "cmd: 4 - Delete meta data, 5 - set thresholds, 6 - get thresholds" );
-//   }
-//
-//   return ( 0 );
-//
-//} /* end DBG_CommandLine_EVLDUMP () */
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_EVLQ
-//
-//   Purpose: This function will query the logs by date or event id.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv[1] - query type 0|ALL 1|BY DATE 2|BY EVENT
-//               argv[2] - start range
-//               argv[3] - end range
-//               argv[4] - buffer size
-//               argv[5] - alarm severity  2|Opportunistic 3|RT (only w/ alarmID query)
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:Alarm Severity must be speficied when querying based on Alarm_id
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_EVLQ( uint32_t argc, char *argv[] )
-//{
-//   buffer_t       *pBuffer;
-//   uint8_t        *results = NULL;
-//   uint32_t       total    = 0;
-//   uint32_t       size     = 0;
-//   uint32_t       retVal   = 0;
-//   EventQuery_s   query;
-//   uint8_t        alarmId;
-//   bool           validQry = true;
-//
-//   if ( argc == 5 || argc == 6 )
-//   {
-//      query.qType = ( EventQueryRequest_e )atoi( argv[1] );
-//      if ( (query.qType == QUERY_BY_DATE_e) && (5 == argc))
-//      {
-//         query.start_u.timestamp = strtoul( argv[2], NULL, 0 );
-//         query.end_u.timestamp = strtoul( argv[3], NULL, 0 );
-//         size = strtoul( argv[4], NULL, 0 );
-//      }
-//      else if ( (query.qType == QUERY_BY_INDEX_e) && (6 == argc))
-//      {
-//         query.start_u.eventId = ( uint16_t )strtoul( argv[2], NULL, 0 );
-//         query.end_u.eventId = ( uint16_t )strtoul( argv[3], NULL, 0 );
-//         size = strtoul( argv[4], NULL, 0 );
-//         pBuffer = BM_alloc( ( uint16_t )size );
-//         query.alarmSeverity = (uint8_t) strtoul(argv[5], NULL, 0);
-//         if( (MEDIUM_PRIORITY_SEVERITY != query.alarmSeverity) &&
-//                HIGH_PRIORITY_SEVERITY != query.alarmSeverity )
-//         {
-//            INFO_printf( "ERR: invalid alarm priority" );
-//            validQry = false;
-//         }
-//      }
-//
-//      if( true == validQry )
-//      {
-//         pBuffer = BM_alloc( ( uint16_t )size );
-//         if ( NULL == pBuffer )
-//         {
-//           INFO_printf( "ERR: cannot allocate buffer" );
-//           retVal = ( uint32_t ) - 1;
-//         }
-//         else
-//         {
-//            results = ( uint8_t* ) pBuffer->data;
-//            DBG_printf( "\nQUERY BY EVENT" );
-//            ( void )EVL_QueryBy( query, results, size, &total, &alarmId );
-//            DBG_printf( "ALARM ID: 0x%x", alarmId );
-//
-//            INFO_printf( "Total bytes returned: %d", total );
-//            if ( total > 0 )
-//            {
-//               DumpHeadEndData( results, total );
-//            }
-//            BM_free( pBuffer );
-//         }
-//      }
-//   }
-//   else
-//   {
-//      INFO_printf( "USAGE: evlq <query type> <start range> <end range> <results buffer size> if(event id): <alrm severity>" );
-//      INFO_printf( "       query types: 0 - NONE, 1 - date, 2 - event id" );
-//      INFO_printf( "       severity types (required with event ID) : 2 - opportunistic, 3 - real time" );
-//   }
-//   return( retVal );
-//} /* end DBG_CommandLine_EVLQ () */
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_EVLSEND
-//
-//   Purpose: This function simulates events were successfully sent to the
-//   head-end.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv[1] - number of event ids
-//               argv[n] - event id list (hex)
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_EVLSEND( uint32_t argc, char *argv[] )
-//{
-//   uint16_t i;
-//   uint16_t index;
-//   EventMarkSent_s markSent;
-//
-//   if ( argc > 3 )
-//   {
-//      markSent.nEvents = ( uint16_t )atoi( argv[1] );
-//      if ( markSent.nEvents == 0 )
-//      {
-//         INFO_printf( "number of events needs to be > 0" );
-//         return 0;
-//      }
-//
-//      index = 2;
-//      markSent.nEvents = ( uint16_t )min( markSent.nEvents, EVL_MAX_NUMBER_EVENTS_SENT );
-//      for ( i = 0; i < markSent.nEvents; i++ )
-//      {
-//         markSent.eventIds[i].priority = (uint8_t) strtoul( argv[index++], NULL, 0 );
-//         markSent.eventIds[i].eventId =  (uint16_t)strtoul( argv[index++], NULL, 0 );
-//         markSent.eventIds[i].offset =             strtoul( argv[index++], NULL, 0 );
-//         markSent.eventIds[i].size =               strtoul( argv[index++], NULL, 0 );
-//      }
-//      EVL_MarkSent( &markSent );
-//      EventLogDumpBuffers();
-//   }
-//   else
-//   {
-//      INFO_printf(   "USAGE: evlsend <num events> <pri> <event ids> <event offset> <size> ... "
-//                     "<pri[n]> <event ids[n]> <event offset[n]. <size[n]>" );
-//   }
-//   return ( 0 );
-//} /* end DBG_CommandLine_EVLSEND () */
-//
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_EVLGETLOG
-//
-//   Purpose: This function will fill a buffer with as many events that fit.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv[1] - priority 0|NORMAL 1|PRIORITY
-//               argv[2] - Size of buffer and size of data to get
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_EVLGETLOG( uint32_t argc, char *argv[] )
-//{
-//   EventMarkSent_s markSent;
-//   buffer_t* pBuffer;
-//   uint32_t uRetVal = 0;
-//   uint16_t size;
-//   uint8_t *buffer;
-//   int32_t  filled;
-//   uint16_t i = 0;
-//   uint8_t alarmId;
-//
-//   markSent.nEvents = 0;
-//
-//   if ( argc == 2 )
-//   {
-//      size = ( uint16_t )strtoul( argv[1], NULL, 0 );
-//
-//      if ( size == 0 )
-//      {
-//         INFO_printf( "Size must be greater than 0" );
-//         return 0;
-//      }
-//
-//      pBuffer = BM_alloc( size );
-//      if ( pBuffer == NULL )
-//      {
-//         ERR_printf( "Failed to allocate memory" );
-//         uRetVal = ( uint32_t ) - 1;
-//      }
-//
-//      else
-//      {
-//         buffer = ( uint8_t* ) pBuffer->data;
-//         filled = EVL_GetLog( size, buffer, &alarmId, &markSent );
-//         if ( filled >= 0 ) {
-//            INFO_printf( "ALARM ID: 0x%x", alarmId );
-//            INFO_printf( "FILLED: %d", filled );
-//            DumpHeadEndData( buffer, (uint32_t)filled );
-//            BM_free( pBuffer );
-//
-//            if ( markSent.nEvents )
-//            {
-//               markSent.nEvents = min( markSent.nEvents, ARRAY_IDX_CNT( markSent.eventIds ) );
-//               INFO_printf( "PASSBACK DATA: " );
-//               for ( i = 0; i < markSent.nEvents; i++ )
-//               {
-//                  INFO_printf( "Priority: %d ev: 0x%x off: %d",
-//                               markSent.eventIds[i].priority,
-//                               markSent.eventIds[i].eventId,
-//                               markSent.eventIds[i].offset );
-//               }
-//            }
-//         } else {
-//            ERR_printf("EVL_GetLog returned an error");
-//         }
-//      }
-//   }
-//   else
-//   {
-//      INFO_printf( "USAGE: evlgetlog <size>" );
-//   }
-//
-//   return( uRetVal );
-//} /* end DBG_CommandLine_EVLGETLOG () */
-//
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_EVLADD
+
+   Purpose: This function will add an event log
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv[1] - priority
+               argv[2] - Event Id
+               argv[3] - Pairs Count
+               argv[4] - Value size
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_EVLADD( uint32_t argc, char *argv[] )
+{
+   EventData_s event;
+   EventKeyValuePair_s ePairs[15];
+   EventAction_e rVal;
+   int16_t i, j;
+   uint8_t e_priority;
+
+   ( void )memset( ePairs, 0, sizeof( ePairs ) );
+   ( void )memset( ( void * )&event, 0, sizeof( event ) );
+
+   if ( argc == 5 )
+   {
+      e_priority = ( uint8_t )strtoul( argv[1], NULL, 0 );
+      event.markSent = (bool)false;
+      event.eventId = ( uint16_t )strtoul( argv[2], NULL, 0 );
+      event.eventKeyValuePairsCount = ( uint8_t )strtoul( argv[3], NULL, 0 );
+      event.eventKeyValueSize = ( uint8_t )strtoul( argv[4], NULL, 0 );
+      if ( event.eventKeyValuePairsCount > 15 )
+      {
+         event.eventKeyValuePairsCount = 15;
+      }
+      if ( event.eventKeyValueSize > 15 )
+      {
+         event.eventKeyValueSize = 15;
+      }
+      for ( i = 0; i < event.eventKeyValuePairsCount; i++ )
+      {
+         ePairs[i].Key[0] = ( uint8_t )( i + 1 );
+         ePairs[i].Key[1] = ( uint8_t )( i + 1 );
+         for ( j = 0; j < event.eventKeyValueSize; j++ )
+         {
+            ePairs[i].Value[j] = ( uint8_t )( i + 'A' );
+         }
+      }
+      rVal = EVL_LogEvent( e_priority, &event, ePairs, TIMESTAMP_NOT_PROVIDED, NULL );
+      INFO_printf( "EVL_LogEvent returned: " );
+      switch ( rVal )
+      {
+         case ( QUEUED_e ) :
+            INFO_printf( "QUEUED" );
+            break;
+         case ( DROPPED_e ) :
+            INFO_printf( "DROPPED" );
+            break;
+         case ( SENT_e ) :
+            INFO_printf( "SENT" );
+            break;
+         case ( ERROR_e ) :
+            INFO_printf( "ERROR" );
+            break;
+         default:
+            INFO_printf( "ILLEGAL VALUE" );
+            break;
+      }
+   }
+   else
+   {
+      INFO_printf( "USAGE: evladd <priority> <event id><num of key pairs> <key value size>" );
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_EVLADD () */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_EVLCMD
+
+   Purpose: This function is called to execute a command as follows:
+   (1) - Dump Both Buffers
+   (2) - Add events to the buffers <num events>
+   (3) - Erase the flash <buffer>
+   (4) - Delete all events; maintain current thresholds.
+   (5) - Set thresholds realTime Opportunistic
+   (6) - Get thresholds
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_EVLCMD( uint32_t argc, char *argv[] )
+{
+   uint16_t command;
+   command = ( uint16_t )atoi( argv[1] );
+   EventData_s event;
+   EventKeyValuePair_s ePairs[15];
+   uint16_t i, j, k;
+   uint16_t loop;
+   uint16_t rVal = 0;
+   uint16_t whichBuffer;
+   uint8_t rt;
+   uint8_t o;
+
+   ( void )memset( ( void * )&event, 0, sizeof( event ) );
+   ( void )memset( ( void * )ePairs, 0, sizeof( ePairs ) );
+
+   if ( argc > 1 )
+   {
+      switch ( command )
+      {
+         case ( 1 ) :
+         {
+            EventLogDumpBuffers();
+            break;
+         }
+         case ( 2 ) :
+         {
+            loop = ( uint16_t )atoi( argv[2] );
+            event.markSent = (bool)false;
+            for ( k = 0; k < loop; k++ )
+            {
+               event.eventId++;
+               event.eventKeyValuePairsCount = k % 5;
+               event.eventKeyValueSize = ( k + 1 ) % 5;
+               for ( i = 0; i < event.eventKeyValuePairsCount; i++ )
+               {
+                  ePairs[i].Key[0] = ( uint8_t )( i + 1 );
+                  ePairs[i].Key[1] = ( uint8_t )( i + 1 );
+                  for ( j = 0; j < event.eventKeyValueSize; j++ )
+                  {
+                     ePairs[i].Value[j] = ( uint8_t )( i + 0x41 );
+                  }
+               }
+               rVal = ( uint16_t )EVL_LogEvent( ( uint8_t )atoi( argv[3] ), &event, ePairs, TIMESTAMP_NOT_PROVIDED, NULL );
+               if ( rVal == ( uint16_t )ERROR_e )
+               {
+                  INFO_printf( "Log Event Failure 0x%x", event.eventId );
+               }
+               else if ( rVal == ( uint16_t )DROPPED_e )
+               {
+                  INFO_printf( "Dropped the packet" );
+               }
+            }
+            if ( rVal == 0 )
+            {
+               INFO_printf( "%d events added to the queue", loop );
+            }
+            break;
+         }
+         case ( 3 ) :
+         {
+            whichBuffer = ( uint16_t )atoi( argv[2] );
+            EventLogEraseFlash( ( uint8_t )whichBuffer );
+            INFO_printf( "NVRAM ring buffer erased" );
+            break;
+         }
+         case ( 4 ) :
+         {
+            EventLogDeleteMetaData();
+            break;
+         }
+         case ( 5 ):
+         {
+            ( void )EVL_SetThresholds( ( uint8_t )atoi( argv[2] ), ( uint8_t )atoi( argv[3] ) );
+            break;
+         }
+         case ( 6 ):
+         {
+            EVL_GetThresholds( &rt, &o );
+            INFO_printf( "Real Time Threshold: %d Opportunistic Threshold: %d", rt, o );
+            break;
+         }
+         default:
+         {
+            INFO_printf( "Command %d not implemented", command );
+         }
+      }
+   }
+   else
+   {
+      INFO_printf( "USAGE: evlcmd cmd" );
+      INFO_printf( "cmd: 1 - dump all, 2 - Add events (num events), 3 - Erase flash (buf num)" );
+      INFO_printf( "cmd: 4 - Delete meta data, 5 - set thresholds, 6 - get thresholds" );
+   }
+
+   return ( 0 );
+
+} /* end DBG_CommandLine_EVLDUMP () */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_EVLQ
+
+   Purpose: This function will query the logs by date or event id.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv[1] - query type 0|ALL 1|BY DATE 2|BY EVENT
+               argv[2] - start range
+               argv[3] - end range
+               argv[4] - buffer size
+               argv[5] - alarm severity  2|Opportunistic 3|RT (only w/ alarmID query)
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:Alarm Severity must be speficied when querying based on Alarm_id
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_EVLQ( uint32_t argc, char *argv[] )
+{
+   buffer_t       *pBuffer;
+   uint8_t        *results = NULL;
+   uint32_t       total    = 0;
+   uint32_t       size     = 0;
+   uint32_t       retVal   = 0;
+   EventQuery_s   query;
+   uint8_t        alarmId;
+   bool           validQry = true;
+
+   if ( argc == 5 || argc == 6 )
+   {
+      query.qType = ( EventQueryRequest_e )atoi( argv[1] );
+      if ( (query.qType == QUERY_BY_DATE_e) && (5 == argc))
+      {
+         query.start_u.timestamp = strtoul( argv[2], NULL, 0 );
+         query.end_u.timestamp = strtoul( argv[3], NULL, 0 );
+         size = strtoul( argv[4], NULL, 0 );
+      }
+      else if ( (query.qType == QUERY_BY_INDEX_e) && (6 == argc))
+      {
+         query.start_u.eventId = ( uint16_t )strtoul( argv[2], NULL, 0 );
+         query.end_u.eventId = ( uint16_t )strtoul( argv[3], NULL, 0 );
+         size = strtoul( argv[4], NULL, 0 );
+         pBuffer = BM_alloc( ( uint16_t )size );
+         query.alarmSeverity = (uint8_t) strtoul(argv[5], NULL, 0);
+         if( (MEDIUM_PRIORITY_SEVERITY != query.alarmSeverity) &&
+                HIGH_PRIORITY_SEVERITY != query.alarmSeverity )
+         {
+            INFO_printf( "ERR: invalid alarm priority" );
+            validQry = false;
+         }
+      }
+
+      if( true == validQry )
+      {
+         pBuffer = BM_alloc( ( uint16_t )size );
+         if ( NULL == pBuffer )
+         {
+           INFO_printf( "ERR: cannot allocate buffer" );
+           retVal = ( uint32_t ) - 1;
+         }
+         else
+         {
+            results = ( uint8_t* ) pBuffer->data;
+            DBG_printf( "\nQUERY BY EVENT" );
+            ( void )EVL_QueryBy( query, results, size, &total, &alarmId );
+            DBG_printf( "ALARM ID: 0x%x", alarmId );
+
+            INFO_printf( "Total bytes returned: %d", total );
+            if ( total > 0 )
+            {
+               DumpHeadEndData( results, total );
+            }
+            BM_free( pBuffer );
+         }
+      }
+   }
+   else
+   {
+      INFO_printf( "USAGE: evlq <query type> <start range> <end range> <results buffer size> if(event id): <alrm severity>" );
+      INFO_printf( "       query types: 0 - NONE, 1 - date, 2 - event id" );
+      INFO_printf( "       severity types (required with event ID) : 2 - opportunistic, 3 - real time" );
+   }
+   return( retVal );
+} /* end DBG_CommandLine_EVLQ () */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_EVLSEND
+
+   Purpose: This function simulates events were successfully sent to the
+   head-end.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv[1] - number of event ids
+               argv[n] - event id list (hex)
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_EVLSEND( uint32_t argc, char *argv[] )
+{
+   uint16_t i;
+   uint16_t index;
+   EventMarkSent_s markSent;
+
+   if ( argc > 3 )
+   {
+      markSent.nEvents = ( uint16_t )atoi( argv[1] );
+      if ( markSent.nEvents == 0 )
+      {
+         INFO_printf( "number of events needs to be > 0" );
+         return 0;
+      }
+
+      index = 2;
+      markSent.nEvents = ( uint16_t )min( markSent.nEvents, EVL_MAX_NUMBER_EVENTS_SENT );
+      for ( i = 0; i < markSent.nEvents; i++ )
+      {
+         markSent.eventIds[i].priority = (uint8_t) strtoul( argv[index++], NULL, 0 );
+         markSent.eventIds[i].eventId =  (uint16_t)strtoul( argv[index++], NULL, 0 );
+         markSent.eventIds[i].offset =             strtoul( argv[index++], NULL, 0 );
+         markSent.eventIds[i].size =               strtoul( argv[index++], NULL, 0 );
+      }
+      EVL_MarkSent( &markSent );
+      EventLogDumpBuffers();
+   }
+   else
+   {
+      INFO_printf(   "USAGE: evlsend <num events> <pri> <event ids> <event offset> <size> ... "
+                     "<pri[n]> <event ids[n]> <event offset[n]. <size[n]>" );
+   }
+   return ( 0 );
+} /* end DBG_CommandLine_EVLSEND () */
+
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_EVLGETLOG
+
+   Purpose: This function will fill a buffer with as many events that fit.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv[1] - priority 0|NORMAL 1|PRIORITY
+               argv[2] - Size of buffer and size of data to get
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_EVLGETLOG( uint32_t argc, char *argv[] )
+{
+   EventMarkSent_s markSent;
+   buffer_t* pBuffer;
+   uint32_t uRetVal = 0;
+   uint16_t size;
+   uint8_t *buffer;
+   int32_t  filled;
+   uint16_t i = 0;
+   uint8_t alarmId;
+
+   markSent.nEvents = 0;
+
+   if ( argc == 2 )
+   {
+      size = ( uint16_t )strtoul( argv[1], NULL, 0 );
+
+      if ( size == 0 )
+      {
+         INFO_printf( "Size must be greater than 0" );
+         return 0;
+      }
+
+      pBuffer = BM_alloc( size );
+      if ( pBuffer == NULL )
+      {
+         ERR_printf( "Failed to allocate memory" );
+         uRetVal = ( uint32_t ) - 1;
+      }
+
+      else
+      {
+         buffer = ( uint8_t* ) pBuffer->data;
+         filled = EVL_GetLog( size, buffer, &alarmId, &markSent );
+         if ( filled >= 0 ) {
+            INFO_printf( "ALARM ID: 0x%x", alarmId );
+            INFO_printf( "FILLED: %d", filled );
+            DumpHeadEndData( buffer, (uint32_t)filled );
+            BM_free( pBuffer );
+
+            if ( markSent.nEvents )
+            {
+               markSent.nEvents = min( markSent.nEvents, ARRAY_IDX_CNT( markSent.eventIds ) );
+               INFO_printf( "PASSBACK DATA: " );
+               for ( i = 0; i < markSent.nEvents; i++ )
+               {
+                  INFO_printf( "Priority: %d ev: 0x%x off: %d",
+                               markSent.eventIds[i].priority,
+                               markSent.eventIds[i].eventId,
+                               markSent.eventIds[i].offset );
+               }
+            }
+         } else {
+            ERR_printf("EVL_GetLog returned an error");
+         }
+      }
+   }
+   else
+   {
+      INFO_printf( "USAGE: evlgetlog <size>" );
+   }
+
+   return( uRetVal );
+} /* end DBG_CommandLine_EVLGETLOG () */
+
 //#if ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
 ///******************************************************************************
 //
@@ -13408,43 +13575,43 @@ uint32_t DBG_CommandLine_NetworkId ( uint32_t argc, char *argv[] )
 //}
 //#endif // end of ( MAC_LINK_PARAMETERS == 1 ) section
 //
-//#if (USE_DTLS == 1)
-//
-//uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
-//{
-//   bool printUsage = true;
-//   if ( argc == 2 )
-//   {
-//      if ( 0 == strcmp( argv[1], "get" ) )
-//      {
-//         DTLS_PrintSessionStateInformation();
-//
-//         printUsage = false;
-//      }
-//      else if ( 0 == strcmp( argv[1], "reset" ) )
-//      {
-//         DTLS_ReconnectRf();
-//         printUsage = false;
-//      }
-//      else if ( 0 == strcmp( argv[1], "pubkey" ) )
-//      {
-//         uint16_t keyLen;
-//         uint8_t  key[  VERIFY_256_KEY_SIZE ];  /* 64 byte key used to verify signatures.  */
-//
-//         keyLen = DTLS_GetPublicKey( key );
-//         DBG_logPrintHex ( 'D', "public key ", key, keyLen );
-//         printUsage = false;
-//      }
-//   }
-//
-//   if ( printUsage == true )
-//   {
-//      INFO_printf( "USAGE: dtls get OR dtls reset" );
-//   }
-//
-//   return 0;
-//}
-//#endif
+#if (USE_DTLS == 1)
+
+uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
+{
+   bool printUsage = true;
+   if ( argc == 2 )
+   {
+      if ( 0 == strcmp( argv[1], "get" ) )
+      {
+         DTLS_PrintSessionStateInformation();
+
+         printUsage = false;
+      }
+      else if ( 0 == strcmp( argv[1], "reset" ) )
+      {
+         DTLS_ReconnectRf();
+         printUsage = false;
+      }
+      else if ( 0 == strcmp( argv[1], "pubkey" ) )
+      {
+         uint16_t keyLen;
+         uint8_t  key[  VERIFY_256_KEY_SIZE ];  /* 64 byte key used to verify signatures.  */
+
+         keyLen = DTLS_GetPublicKey( key );
+         DBG_logPrintHex ( 'D', "public key ", key, keyLen );
+         printUsage = false;
+      }
+   }
+
+   if ( printUsage == true )
+   {
+      INFO_printf( "USAGE: dtls get OR dtls reset" );
+   }
+
+   return 0;
+}
+#endif
 //#if 0
 //static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
 //{

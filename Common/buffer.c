@@ -764,8 +764,8 @@ void BM_showAlloc( bool safePrint )
    char     str[100];
 
    OS_MUTEX_Lock( &bufMutex_ );
-
-   ( void )snprintf( str, (int32_t)sizeof( str ), "\nAllocated buffers:\nPool reqSize poolSize        ptr  ptr->addr                 file  line\n" );
+   // TODO: RA6E1 Bob: must remove the \r to produce the same .hex file for K24
+   ( void )snprintf( str, (int32_t)sizeof( str ), "\r\nAllocated buffers:\r\nPool reqSize poolSize        ptr  ptr->addr                 file  line\r\n" );
    if ( safePrint )
    {
       DBG_printfNoCr( str );
@@ -796,7 +796,7 @@ void BM_showAlloc( bool safePrint )
             // Is the buffer in use?
             if ( !pBuf->x.flag.isStatic && !pBuf->x.flag.isFree && pBuf->x.dataLen )
             {
-               ( void )snprintf( str, (int32_t)sizeof( str ), "  %2u %7u     %4u 0x%08X 0x%08X %20s %5u\n",
+               ( void )snprintf( str, (int32_t)sizeof( str ), "  %2u %7u     %4u 0x%08X 0x%08X %20s %5u\r\n",
                                  pBuf->x.bufPool, pBuf->x.dataLen, BM_bufferPoolParams[pBuf->x.bufPool].size,
                                  pBuf, pBuf->data, pBuf->pfile, pBuf->line );
                if ( safePrint )

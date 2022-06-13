@@ -177,7 +177,7 @@ void DBG_printfDirect( const char *fmt, ... )
 returnStatus_t DBG_init( void )
 {
    returnStatus_t retVal = eFAILURE;
-//   FileStatus_t   fileStatus;
+   FileStatus_t   fileStatus;
 
    if (  OS_MSGQ_Create( &mQueueHandle_, SERIAL_DBG_NUM_MSGQ_ITEMS, "DBG" ) && /* "DBG" only used with FreeRTOS */
          OS_MUTEX_Create( &mutex_ ) &&
@@ -189,7 +189,7 @@ returnStatus_t DBG_init( void )
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
    {
-#if 0 // TODO: RA6: DG: Enable this code when the FIO issue is resolved.
+#if 1 // TODO: RA6: DG: Enable this code when the FIO issue is resolved.
       if ( eSUCCESS == FIO_fopen(&dbgFileHndl_,                 /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,        /* Search for the best partition according to the timing. */
                                  (uint16_t) eFN_DBG_CONFIG,     /* File ID (filename) */
@@ -625,8 +625,7 @@ void DBG_PortTimer_Set ( uint8_t val )
    ConfigAttr.PortTimeout_hh = val;
 
    (void)FIO_fwrite( &dbgFileHndl_, 0, (uint8_t const *)&ConfigAttr, (lCnt)sizeof(DBG_ConfigAttr_t));
-
-//   DBG_PortTimer_Manage ( ); // TODO: RA6: Enable later
+   DBG_PortTimer_Manage ( );
 }
 /*******************************************************************************
 

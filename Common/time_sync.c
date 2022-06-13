@@ -300,7 +300,12 @@ void TIME_SYNC_AddTimeSyncPayload(uint8_t *payload)
       val = (uint8_t)round(log2((double)TIME_SYNC_TimeSetPeriod_Get()));
    }
    payload[8] = ((timeSyncVars_.timeLeapIndication << 6) & 0xC0) | (val & 0x3F);
+#if 1 // TODO: RA6E1 Bob: Remove this later
    payload[9] = (uint8_t)TIME_SYNC_TimePrecision_Get();
+#else
+   payload[9] = (uint8_t)TIME_PRECISION_MIN;
+#warning "This code always sends TIME_PRECISION_MIN in a Time Sync message.  Do not release it this way!!!"
+#endif
 }
 
 /***********************************************************************************************************************

@@ -58,9 +58,17 @@ const external_irq_instance_t hmc_trouble_busy =
 };
 sci_uart_instance_ctrl_t     g_uart_lpm_dbg_ctrl;
 
-            baud_setting_t               g_uart_lpm_dbg_baud_setting =
+#define DEBUG_BAUD_RATE 115200 /* This allows static (boot-up) configuration of the debug serial port baud rate */
+
+baud_setting_t               g_uart_lpm_dbg_baud_setting =
             {
-                /* Baud rate calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false
+#if ( DEBUG_BAUD_RATE == 115200 )
+                /* Baud rate 115200 calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false
+#elif ( DEBUG_BAUD_RATE == 38400 )
+                /* Baud rate  38400 calculated with 0.677% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 96, .mddr = (uint8_t) 256, .brme = false
+#else
+                #error "Unsupported baud rate configured for the debug port!"
+#endif
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */
@@ -916,7 +924,13 @@ sci_uart_instance_ctrl_t     g_uart_DBG_ctrl;
 
             baud_setting_t               g_uart_DBG_baud_setting =
             {
-                /* Baud rate calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false
+#if ( DEBUG_BAUD_RATE == 115200 )
+                /* Baud rate 115200 calculated with 1.725% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 31, .mddr = (uint8_t) 256, .brme = false
+#elif ( DEBUG_BAUD_RATE == 38400 )
+                /* Baud rate  38400 calculated with 0.677% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 96, .mddr = (uint8_t) 256, .brme = false
+#else
+                #error "Unsupported baud rate configured for the debug port!"
+#endif
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */

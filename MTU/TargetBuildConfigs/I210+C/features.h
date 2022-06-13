@@ -42,7 +42,7 @@
 #define ED_PROGRAMMER_NAME_LENTGH         10 /* Aclara Meters Manufacturing table field */
 
 #define COMMERCIAL_METER                  2  /* Not a commercial meter, but can have more than one phase voltage */
-#define CLOCK_IN_METER                    0
+#define CLOCK_IN_METER                    0  // TODO: RA6E1 Bob: this should probably be changed to 1 but we need to verify what happens with an I-210+c demand-only meter (e.g., no TOU)
 #define LP_IN_METER                       1
 #define DEMAND_IN_METER                   1
 #define COINCIDENT_SUPPORT                0
@@ -74,6 +74,7 @@
 #define MAC_CMD_RESP_TIME_DIVERSITY       0  /* Not an EP feature */
 #define TX_THROTTLE_CONTROL               0  /* 0=No Tx Throttling, 1=Tx Throttling */
 #define BM_USE_KERNEL_AWARE_DEBUGGING     1  // TODO: RA6E1 Bob: remove this before release
+#define NOISEBAND_LOWEST_CAP_VOLTAGE      1  // TODO: RA6E1 Bob: remove this before release
 
 /* TODO: RA6: Move the following to Appropriate module */
 #define BARE_METAL                        0

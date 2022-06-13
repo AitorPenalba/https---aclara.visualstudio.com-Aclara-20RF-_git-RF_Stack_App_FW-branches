@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)69)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)70)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -122,6 +122,9 @@ static char const HWVersionDefault[] =
   "A.1.99852"      /* Y99852-1   (ILC) default hardware revision */
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84030_1_REV_A )
   "B.301-XA.84024"      /* Y84030-1   (K24 KV2c)  default hardware revision */
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
+   #define DASH_NUMBER_OFFSET 2 /* This must correspond to the position of the 'x' in the string below */
+  "A.x.84580"           /* Y84580-x where 1 = Maxim boost, 2 = TI boost */
 #else
   ""               /* NULL default hardware revision */
 #endif
@@ -262,6 +265,21 @@ returnStatus_t VER_Init ( void )
             OS_TASK_Sleep(200);
             hWVer.String[0] = ADC_GetHWRevLetter();   //Replace default Rev Letter with the HW detected value
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+            /* If the "dash number" of the Aclara part number has the default of '.x.', fill in the correct value based on HW Functional Rev */
+            if ( ( hWVer.String[DASH_NUMBER_OFFSET-1] == '.' ) && ( hWVer.String[DASH_NUMBER_OFFSET] == 'x' ) && ( hWVer.String[DASH_NUMBER_OFFSET+1] == '.' ) )
+            {
+               char hwFunctionalRev = (char)ADC_GetHWRevLetter();
+               if ( hwFunctionalRev == 'B' )
+               { /* Maxim boost chip = Y84580-1 */
+                  hWVer.String[DASH_NUMBER_OFFSET] = '1';
+               }
+               else if ( hwFunctionalRev == 'C' )
+               { /* TI boost chip = Y84580-2 */
+                  hWVer.String[DASH_NUMBER_OFFSET] = '2';
+               }
+            }
+#endif
             retVal = FIO_fwrite(&verFileHndl_, 0, &hWVer.String[0], (lCnt)sizeof(hWVer.String));
          }
       }
@@ -345,7 +363,6 @@ const firmwareVersionDT_s * VER_getFirmwareVersionDT ( void )
 returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 {
    returnStatus_t   retVal = eFAILURE;
-#if 0
    HWVerString_t    hWVer;                      /* HW Version string */
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
@@ -356,9 +373,6 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
       retVal = eSUCCESS;
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
-#else
-   retVal = eSUCCESS;
-#endif
    return (retVal);
 }
 
@@ -381,7 +395,6 @@ returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
 {
    returnStatus_t   retVal = eFAILURE;
-#if 0
    uint8_t          len;
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
@@ -397,9 +410,6 @@ returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
       retVal = eSUCCESS;
    }
    OS_MUTEX_Unlock(&verMutex_); // Function will not return if it fails
-#else
-   retVal = eSUCCESS;
-#endif
    return (retVal);
 }
 
