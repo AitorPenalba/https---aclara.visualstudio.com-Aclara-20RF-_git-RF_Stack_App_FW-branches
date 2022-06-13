@@ -724,15 +724,15 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" }, //TODO: RA6E1 [name_Siva]:Has to be moved to the correct place in the next commit
 
 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
-//   // { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
-//   {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
-//   {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
-//   {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
-//   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
-//   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
-//   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
+//   { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" }, 
+   {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
+   {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
+   {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
+   {  "capableOfMeterBasecodeDFW",  MFGP_capableOfMeterBasecodeDFW,  "Indicates if the device supports the Download Firmware feature for its meter base code"},
+   {  "capableOfMeterPatchDFW",     MFGP_capableOfMeterPatchDFW,     "Indicates if the device supports the Download Firmware feature for its meter patch code"},
+   {  "capableOfMeterReprogrammingOTA", MFGP_capableOfMeterReprogrammingOTA, "Indicates if the device supports the Download Firmware feature for meter configuration change" },
    {  "comdevicefirmwareversion",   MFGP_firmwareVersion,            "Get firmware version" },
-//   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
+   {  "comDeviceBootloaderVersion", MFGP_firmwareVersion,            "Get firmware version" },
    {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
    {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
    {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
@@ -743,20 +743,19 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
 //   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
 //#endif
-//   {  "dataConfigurationDocumentVersion", MFGP_dataConfigurationDocumentVersion, "(MIMT)Get/Set the data Configuration document version" },
-//   {  "DateTime",                   MFG_DateTime,                    "Get/Set system date/time" },
-//   {  "dtlsDeviceCertificate",      MFGP_dtlsDeviceCertificate,      "Read Device cert" },                               // 1363
-//   {  "dtlsMfgSubject1",            MFGP_dtlsMfgSubject1,            "Read Mfg1 Subject partial cert" },                 // 1359
-//   {  "dtlsMfgSubject2",            MFGP_dtlsMfgSubject2,            "Read/Write Mfg2 Subject partial cert" },           // 1360
-//   {  "dtlsNetworkHESubject",       MFGP_dtlsNetworkHESubject,       "Read/Write Head End Subject partial cert" },       // 1332
-//   {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
+   {  "dataConfigurationDocumentVersion", MFGP_dataConfigurationDocumentVersion, "(MIMT)Get/Set the data Configuration document version" },
+   {  "DateTime",                   MFG_DateTime,                    "Get/Set system date/time" },
+   {  "dtlsDeviceCertificate",      MFGP_dtlsDeviceCertificate,      "Read Device cert" },                               // 1363
+   {  "dtlsMfgSubject1",            MFGP_dtlsMfgSubject1,            "Read Mfg1 Subject partial cert" },                 // 1359
+   {  "dtlsMfgSubject2",            MFGP_dtlsMfgSubject2,            "Read/Write Mfg2 Subject partial cert" },           // 1360
+   {  "dtlsNetworkHESubject",       MFGP_dtlsNetworkHESubject,       "Read/Write Head End Subject partial cert" },       // 1332
+   {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
 //#if 0
 //// These are defined in the HEEP, but not sure if they are valid or not!
 //// {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
 //#endif
-//   {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
-//
-//   {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
+   {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
+   {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
    {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
    {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
    {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
@@ -767,12 +766,12 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "epTempHysteresis",           MFGP_EpTempHysteresis,           "Get/Set EP Temperature Hysteresis" },
 //   {  "epTempMinThreshold",         MFGP_EpTempMinThreshold,         "Get/Set EP Min Temperature Threshold" },
 //#endif
-//   {  "fctEnclosureDatabaseVersion",MFGP_fctEnclosureDatabaseVersion,"(MIMT)Get/Set the fct enclosure database version" },
-//   {  "fctEnclosureProgramVersion", MFGP_fctEnclosureProgramVersion, "(MIMT)Get/Set the fct enclosure program version" },
-//   {  "fctEnclosureTestDate",       MFGP_fctEnclosureTestDate,       "(MIMT)Get/Set the fct enclosure test date" },
-//   {  "fctModuleDatabaseVersion",   MFGP_fctModuleDatabaseVersion,   "(MIMT)Get/Set the fct module database version" },
-//   {  "fctModuleProgramVersion",    MFGP_fctModuleProgramVersion,    "(MIMT)Get/Set the fct module program version" },
-//   {  "fctModuleTestDate",          MFGP_fctModuleTestDate,          "(MIMT)Get/Set the fct module test date" },
+   {  "fctEnclosureDatabaseVersion",MFGP_fctEnclosureDatabaseVersion,"(MIMT)Get/Set the fct enclosure database version" },
+   {  "fctEnclosureProgramVersion", MFGP_fctEnclosureProgramVersion, "(MIMT)Get/Set the fct enclosure program version" },
+   {  "fctEnclosureTestDate",       MFGP_fctEnclosureTestDate,       "(MIMT)Get/Set the fct enclosure test date" },
+   {  "fctModuleDatabaseVersion",   MFGP_fctModuleDatabaseVersion,   "(MIMT)Get/Set the fct module database version" },
+   {  "fctModuleProgramVersion",    MFGP_fctModuleProgramVersion,    "(MIMT)Get/Set the fct module program version" },
+   {  "fctModuleTestDate",          MFGP_fctModuleTestDate,          "(MIMT)Get/Set the fct module test date" },
 //#if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
 //   {  "fngFemMfg",                  MFGP_fngFemMfg,                  "Get/Set FEM manufacturer (0 = Mini Circuits/1 = MicroAnt)" },
 //   {  "fngForwardPower",            MFGP_fngForwardPower,            "Get Forward Power" },
@@ -789,42 +788,42 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //#if (USE_DTLS == 1)
 //   {  "initialAuthenticationTimeout", MFGP_initialAuthenticationTimeout, "Get/Set the maximum authentication timout value" },
 //#endif
-//   {  "inboundFrameCount",          MFGP_inboundFrameCount,          "Display MAC Layer inbound frame counter" },
-//   {  "installationDateTime",       MFGP_installationDateTime,       "Get the installation dateTime of the device." },
-//   {  "integrationDatabaseVersion", MFGP_integrationDatabaseVersion, "(MIMT)Get/Set the integration database version" },
-//   {  "integrationProgramVersion",  MFGP_integrationProgramVersion,  "(MIMT)Get/Set the integration program version" },
-//   {  "integrationSetupDate",       MFGP_integrationSetupDate,       "(MIMT)Get/Set the integration setup date" },
-//   {  "ipHEContext",                MFGP_ipHEContext,                "Get/Set IP Head End Context" },
-//
-//   {  "macState",                   MFGP_macState,                   "Get MAC State" },
-//   {  "macTxFrames",                MFGP_macTxFrames,                "Get MAC TxFrames" },
-//   {  "macAckWaitDuration",         MFGP_macAckWaitDuration,         "Get/Set AckWaitDuration" },
-//   {  "macAckDelayDuration",        MFGP_macAckDelayDuration,        "Get/Set AckDelayDuration" },
-//   {  "macChannelSetsCount",        MFGP_macChannelSetsCount,        "Get MAC ChannelSetsCount" },
-//   {  "macPacketId",                MFGP_macPacketId,                "Get MAC PacketId" },
-//   {  "macTxFrames",                    MFGP_macTxFrames,                    "Get TxFrames"},
-//   {  "macIsChannelAccessConstrained",  MFGP_macIsChannelAccessConstrained,  "Get/Set macIsChannelAccessConstrained"},
-//   {  "macIsFNG",                       MFGP_macIsFNG,                       "Get/Set macIsFNG"},
-//   {  "macIsIAG",                       MFGP_macIsIAG,                       "Get/Set macIsIAG"},
-//   {  "macIsRouter",                    MFGP_macIsRouter,                    "Get/Set macIsRouter"},
-//
+   {  "inboundFrameCount",          MFGP_inboundFrameCount,          "Display MAC Layer inbound frame counter" },
+   {  "installationDateTime",       MFGP_installationDateTime,       "Get the installation dateTime of the device." },
+   {  "integrationDatabaseVersion", MFGP_integrationDatabaseVersion, "(MIMT)Get/Set the integration database version" },
+   {  "integrationProgramVersion",  MFGP_integrationProgramVersion,  "(MIMT)Get/Set the integration program version" },
+   {  "integrationSetupDate",       MFGP_integrationSetupDate,       "(MIMT)Get/Set the integration setup date" },
+   {  "ipHEContext",                MFGP_ipHEContext,                "Get/Set IP Head End Context" },
+
+   {  "macState",                   MFGP_macState,                   "Get MAC State" },
+   {  "macTxFrames",                MFGP_macTxFrames,                "Get MAC TxFrames" },
+   {  "macAckWaitDuration",         MFGP_macAckWaitDuration,         "Get/Set AckWaitDuration" },
+   {  "macAckDelayDuration",        MFGP_macAckDelayDuration,        "Get/Set AckDelayDuration" },
+   {  "macChannelSetsCount",        MFGP_macChannelSetsCount,        "Get MAC ChannelSetsCount" },
+   {  "macPacketId",                MFGP_macPacketId,                "Get MAC PacketId" },
+   {  "macTxFrames",                    MFGP_macTxFrames,                    "Get TxFrames"},
+   {  "macIsChannelAccessConstrained",  MFGP_macIsChannelAccessConstrained,  "Get/Set macIsChannelAccessConstrained"},
+   {  "macIsFNG",                       MFGP_macIsFNG,                       "Get/Set macIsFNG"},
+   {  "macIsIAG",                       MFGP_macIsIAG,                       "Get/Set macIsIAG"},
+   {  "macIsRouter",                    MFGP_macIsRouter,                    "Get/Set macIsRouter"},
+
    {  "macChannelSets",             MFGP_MacChannelSetsSRFN,         "Get/Set SRFN MAC channel sets" },
 //#if ( DCU == 1 )
 //   {  "macChannelSetsSTAR",         MFGP_MacChannelSetsSTAR,         "Get/Set STAR MAC channel sets" },
 //#endif
-//   {  "macCsmaMaxAttempts",         MFGP_macCsmaMaxAttempts,         "Get/Set MAC CSMA max attempts" },
-//   {  "macCsmaMinBackOffTime",      MFGP_macCsmaMinBackOffTime,      "Get/Set MAC CSMA minimum backoff time" },
-//   {  "macCsmaMaxBackOffTime",      MFGP_macCsmaMaxBackOffTime,      "Get/Set MAC CSMA maximum backoff time" },
-//   {  "macCsmaPValue",              MFGP_macCsmaPValue,              "Get/Set MAC CSMA PV value (float between 0-1)" },
-//   {  "macCsmaQuickAbort",          MFGP_macCsmaQuickAbort,          "Get/Set MAC CSMA QuickAbort" },
-//   {  "macNetworkId",               MFGP_macNetworkId,               "Get/Set MAC Netork ID" },
-//   {  "macPacketTimeout",           MFGP_macPacketTimeout,           "Get/Set MAC PacketTimeout" },
-//   {  "macPingCount",               MFGP_macPingCount,               "Display MAC Layer ping counter" },
-//   {  "macReassemblyTimeout",       MFGP_macReassemblyTimeout,       "Get/Set MAC reassembly timeout" },
-//   {  "macReliabilityHighCount",    MFGP_macReliabilityHighCount,    "Get/Set the number of retries to satisfy the QOS reliability level of high" },
-//   {  "macReliabilityMedCount",     MFGP_macReliabilityMedCount,     "Get/Set the number of retries to satisfy the QOS reliability level of medium" },
-//   {  "macReliabilityLowCount",     MFGP_macReliabilityLowCount,     "Get/Set the number of retries to satisfy the QOS reliability level of low" },
-//   {  "macRSSI",                    MFGP_macRSSI,                    "Display the RSSI of a specified radio" },
+   {  "macCsmaMaxAttempts",         MFGP_macCsmaMaxAttempts,         "Get/Set MAC CSMA max attempts" },
+   {  "macCsmaMinBackOffTime",      MFGP_macCsmaMinBackOffTime,      "Get/Set MAC CSMA minimum backoff time" },
+   {  "macCsmaMaxBackOffTime",      MFGP_macCsmaMaxBackOffTime,      "Get/Set MAC CSMA maximum backoff time" },
+   {  "macCsmaPValue",              MFGP_macCsmaPValue,              "Get/Set MAC CSMA PV value (float between 0-1)" },
+   {  "macCsmaQuickAbort",          MFGP_macCsmaQuickAbort,          "Get/Set MAC CSMA QuickAbort" },
+   {  "macNetworkId",               MFGP_macNetworkId,               "Get/Set MAC Netork ID" },
+   {  "macPacketTimeout",           MFGP_macPacketTimeout,           "Get/Set MAC PacketTimeout" },
+   {  "macPingCount",               MFGP_macPingCount,               "Display MAC Layer ping counter" },
+   {  "macReassemblyTimeout",       MFGP_macReassemblyTimeout,       "Get/Set MAC reassembly timeout" },
+   {  "macReliabilityHighCount",    MFGP_macReliabilityHighCount,    "Get/Set the number of retries to satisfy the QOS reliability level of high" },
+   {  "macReliabilityMedCount",     MFGP_macReliabilityMedCount,     "Get/Set the number of retries to satisfy the QOS reliability level of medium" },
+   {  "macReliabilityLowCount",     MFGP_macReliabilityLowCount,     "Get/Set the number of retries to satisfy the QOS reliability level of low" },
+   {  "macRSSI",                    MFGP_macRSSI,                    "Display the RSSI of a specified radio" },
 #if ( EP == 1 )
    {  "macTimeSetMaxOffset",        MFG_TimeSetMaxOffset,            "Get/Set the TimeSet MaxOffset"},
    {  "macTimeSetPeriod",           MFG_TimeSetPeriod,               "Get/Set the TimeSet Period" },
@@ -840,11 +839,11 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 #if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
    {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
 #endif
-//   {  "macTransactionTimeout",      MFG_TransactionTimeout,          "Get/Set MAC transaction timeout" },
-//   {  "macTransactionTimeoutCount", MFG_TransactionTimeoutCount,     "Get the number of times there was a MAC transaction timeout"},
-//   {  "macTxLinkDelayCount",        MFG_macTxLinkDelayCount,         "Amount of MAC delays incurred"},
-//   {  "macTxLinkDelayTime",         MFG_macTxLinkDelayTime,          "Total time (ms) in delay"},
-//   {  "manufacturerNumber",         MFGP_manufacturerNumber,         "(MIMT)Get/Set the manufacturerNumber of the endpoint" },
+   {  "macTransactionTimeout",      MFG_TransactionTimeout,          "Get/Set MAC transaction timeout" },
+   {  "macTransactionTimeoutCount", MFG_TransactionTimeoutCount,     "Get the number of times there was a MAC transaction timeout"},
+   {  "macTxLinkDelayCount",        MFG_macTxLinkDelayCount,         "Amount of MAC delays incurred"},
+   {  "macTxLinkDelayTime",         MFG_macTxLinkDelayTime,          "Total time (ms) in delay"},
+   {  "manufacturerNumber",         MFGP_manufacturerNumber,         "(MIMT)Get/Set the manufacturerNumber of the endpoint" },
 //#if (USE_DTLS == 1)
 //   {  "maxAuthenticationTimeout",   MFGP_maxAuthenticationTimeout,   "Get/Set the maximum authentication timeout value" },
 //   {  "minAuthenticationTimeout",   MFGP_minAuthenticationTimeout,   "Get/Set the maximum authentication timeout value" },
@@ -853,9 +852,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "mtlsAuthenticationWindow",   MFGP_mtlsAuthenticationWindow,   "Get/Set the mtls Authentication Window value" },
 //   {  "mtlsNetworkTimeVariation",   MFGP_mtlsNetworkTimeVariation,   "Get/Set the mtls Network Time Variationvalue" },
 //#endif
-//   {  "opportunisticAlarmIndexId",  MFGP_opportunisticAlarmIndexId,  "Get current index into the opportunistic alarm log" },
-//   {  "opportunisticThreshold",     MFGP_eventThreshold,             "xxx" },
-//
+   {  "opportunisticAlarmIndexId",  MFGP_opportunisticAlarmIndexId,  "Get current index into the opportunistic alarm log" },
+   {  "opportunisticThreshold",     MFGP_eventThreshold,             "xxx" },
+
 //#if ( PHASE_DETECTION == 1 )
 //   {  "capableOfPhaseSelfAssessment",  PD_SurveySelfAssessment,        "Is device capable of Phase Detect Self Assessment" },
 //   {  "capableOfPhaseDetectSurvey",    PD_SurveyCapable,               "Is device capable of Phase Detect" },
@@ -870,11 +869,11 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "pdSurveyPeriodQty",             PD_SurveyPeriodQty,             "Get/Set Survey Period Quantity" },
 //#endif
 //
-//   {  "phyAvailableChannels",          MFG_PhyAvailableChannels,        "Get/Set the available radio channels" },
-//   {  "PhyAvailableFrequencies",       MFG_PhyAvailableFrequencies,     "Get/Set available radio frequencies" },
-//   {  "phyCcaThreshold",               MFG_PhyCcaThreshold,             "Get the CCA threshold" },
-//   {  "phyCcaAdaptiveThresholdEnable", MFG_PhyCcaAdaptiveThresholdEnable,"Enable/Disable the adaptive CCA threshold" },
-//   {  "phyCcaOffset",                  MFG_PhyCcaOffset,                "The offset in dB from phyNoiseEstimate used to obtain phyCcaAdaptiveThreshold. Range: 0-30."},
+   {  "phyAvailableChannels",          MFG_PhyAvailableChannels,        "Get/Set the available radio channels" },
+   {  "PhyAvailableFrequencies",       MFG_PhyAvailableFrequencies,     "Get/Set available radio frequencies" },
+   {  "phyCcaThreshold",               MFG_PhyCcaThreshold,             "Get the CCA threshold" },
+   {  "phyCcaAdaptiveThresholdEnable", MFG_PhyCcaAdaptiveThresholdEnable,"Enable/Disable the adaptive CCA threshold" },
+   {  "phyCcaOffset",                  MFG_PhyCcaOffset,                "The offset in dB from phyNoiseEstimate used to obtain phyCcaAdaptiveThreshold. Range: 0-30."},
 //#if ( EP == 1 )
 //   {  "phyDemodulator",             MFG_PhyDemodulator,              "Get/Set the demodulator used by the each receiver" },
 //#endif
@@ -907,19 +906,19 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //#if (VSWR_MEASUREMENT == 1)
 //   {  "vswr",                       MFGP_Vswr,                       "Get last VSWR reading." },
 //#endif
-//   {  "realTimeAlarm",              MFGP_getRealTimeAlarm,           "Get whether the endpoint supports real time alarms" },
-//   {  "realTimeAlarmIndexId",       MFGP_realTimeAlarmIndexId,       "Get current index into the real time alarm log" },
-//   {  "realtimeThreshold",          MFGP_eventThreshold,             "Get the realtime event threshold" },
+   {  "realTimeAlarm",              MFGP_getRealTimeAlarm,           "Get whether the endpoint supports real time alarms" },
+   {  "realTimeAlarmIndexId",       MFGP_realTimeAlarmIndexId,       "Get current index into the real time alarm log" },
+   {  "realtimeThreshold",          MFGP_eventThreshold,             "Get the realtime event threshold" },
    {  "reboot",                     MFG_reboot,                      "Reboot device"   },
-//   {  "repairInformation",          MFGP_repairInformation,          "(MIMT)Get/Set the repair information of the endpoint of the endpoint" },
-//   {  "rtcDateTime",                MFGP_rtcDateTime,                "Get/Set the RTC value"   },
+   {  "repairInformation",          MFGP_repairInformation,          "(MIMT)Get/Set the repair information of the endpoint of the endpoint" },
+   {  "rtcDateTime",                MFGP_rtcDateTime,                "Get/Set the RTC value"   },
    {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
    {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
-//   {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
-//   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
-//   {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
-//   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },
-//   {  "strx4gfsk",                  MFG_StRx4GFSK,                   "Start a Receiver BER test using normal radio processing" },
+   {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
+   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
+   {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
+   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },
+   {  "strx4gfsk",                  MFG_StRx4GFSK,                   "Start a Receiver BER test using normal radio processing" },
 //#if ( DCU == 1 )
 //   {  "stRamRWFailCount",           MFG_ToolEP_SDRAMCount,           "Get/Set SDRAM test failure count" },
 //   {  "stRamRWFailTest",            MFG_ToolEP_SDRAMTest,            "Run the SDRAM test" },
