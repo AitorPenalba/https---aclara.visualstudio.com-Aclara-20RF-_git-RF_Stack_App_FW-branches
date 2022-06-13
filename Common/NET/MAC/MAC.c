@@ -2399,17 +2399,21 @@ void MAC_PauseTx( bool pause )
 #if ( EP == 1 )
    if( pause )
    {
+#if 0 // TODO: RA6E1 Bob: Is this needed anymore?
       LED_setRedLedStatus(RADIO_DISABLED);
+#endif // TODO: RA6E1 Bob: Is this needed anymore?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
       HMC_DISP_UpdateDisplayBuffer(HMC_DISP_MSG_HOT, HMC_DISP_POS_NIC_MODE);
 #endif
    }
    else
    {
+#if 0 // TODO: RA6E1 Bob: Is this needed anymore?
       LED_setRedLedStatus(RADIO_ENABLED);
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
       LED_checkModeStatus();           /* Radio got enabled replace the msg Hot with Mode */
 #endif
+#endif // TODO: RA6E1 Bob: Is this needed anymore?
    }
 #endif
 }
