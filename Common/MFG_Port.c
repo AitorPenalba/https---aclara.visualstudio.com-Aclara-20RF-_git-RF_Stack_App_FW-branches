@@ -739,10 +739,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //#if ( DCU == 1 )
 //   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
 //#endif
-//#if ( ENABLE_FIO_TASKS == 1 )
-//   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
-//   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
-//#endif
+#if ( ENABLE_FIO_TASKS == 1 )
+   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
+   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
+#endif
    {  "dataConfigurationDocumentVersion", MFGP_dataConfigurationDocumentVersion, "(MIMT)Get/Set the data Configuration document version" },
    {  "DateTime",                   MFG_DateTime,                    "Get/Set system date/time" },
    {  "dtlsDeviceCertificate",      MFGP_dtlsDeviceCertificate,      "Read Device cert" },                               // 1363
@@ -752,20 +752,20 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
 //#if 0
 //// These are defined in the HEEP, but not sure if they are valid or not!
-//// {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
+//   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
 //#endif
    {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
    {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
    {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
    {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
    {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
-//#if ( EP == 1 )
+#if ( EP == 1 )
    {  "engData2",                   MFGP_engData2,                   "Get the engData2 stats" },
-//   {  "epMaxTemperature",           MFGP_epMaxTemperature,           "Get/Set EP Max Temperature" },
-//   {  "epMinTemperature",           MFGP_epMinTemperature,           "Get/Set EP Min Temperature" },
-//   {  "epTempHysteresis",           MFGP_EpTempHysteresis,           "Get/Set EP Temperature Hysteresis" },
-//   {  "epTempMinThreshold",         MFGP_EpTempMinThreshold,         "Get/Set EP Min Temperature Threshold" },
-//#endif
+   {  "epMaxTemperature",           MFGP_epMaxTemperature,           "Get/Set EP Max Temperature" },
+   {  "epMinTemperature",           MFGP_epMinTemperature,           "Get/Set EP Min Temperature" },
+   {  "epTempHysteresis",           MFGP_EpTempHysteresis,           "Get/Set EP Temperature Hysteresis" },
+   {  "epTempMinThreshold",         MFGP_EpTempMinThreshold,         "Get/Set EP Min Temperature Threshold" },
+#endif
    {  "fctEnclosureDatabaseVersion",MFGP_fctEnclosureDatabaseVersion,"(MIMT)Get/Set the fct enclosure database version" },
    {  "fctEnclosureProgramVersion", MFGP_fctEnclosureProgramVersion, "(MIMT)Get/Set the fct enclosure program version" },
    {  "fctEnclosureTestDate",       MFGP_fctEnclosureTestDate,       "(MIMT)Get/Set the fct enclosure test date" },
@@ -782,9 +782,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //   {  "fngVswrNotificationSet",     MFGP_fngVswrNotificationSet,     "Get/Set VSWR Notification Set Point" },
 //   {  "fngVswrShutdownSet",         MFGP_fngVswrShutdownSet,         "Get/Set VSWR Shutdown Set Point" },
 //#endif
-//#if ( EP == 1 )
-//   {  "HighTempThreshold",          MFGP_HighTempThreshold,          "Get/Set EP High Temperature Threshold" },
-//#endif
+#if ( EP == 1 )
+   {  "HighTempThreshold",          MFGP_HighTempThreshold,          "Get/Set EP High Temperature Threshold" },
+#endif
 //#if (USE_DTLS == 1)
 //   {  "initialAuthenticationTimeout", MFGP_initialAuthenticationTimeout, "Get/Set the maximum authentication timout value" },
 //#endif
@@ -915,9 +915,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
    {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
    {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
-   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
+//   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
    {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
-   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },
+//   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },
    {  "strx4gfsk",                  MFG_StRx4GFSK,                   "Start a Receiver BER test using normal radio processing" },
 //#if ( DCU == 1 )
 //   {  "stRamRWFailCount",           MFG_ToolEP_SDRAMCount,           "Get/Set SDRAM test failure count" },
