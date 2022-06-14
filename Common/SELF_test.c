@@ -693,14 +693,12 @@ returnStatus_t SELF_testRTC( void )
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )
 // TODO: RA6 [name_Balaji]: Remove unit test if not required
-#if 0
    bool isRTCUnitTestFailed;
    isRTCUnitTestFailed = RTC_UnitTest();
    if (isRTCUnitTestFailed == 1)
    {
      DBG_printf( "ERROR - RTC failed to Set Error Adjustment\n" );
    }
-#endif // if 0
 #endif // TM_RTC_UNIT_TEST
    if ( retVal == eFAILURE )
    {
