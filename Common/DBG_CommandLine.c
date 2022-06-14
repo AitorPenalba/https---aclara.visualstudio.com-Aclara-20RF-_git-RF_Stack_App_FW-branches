@@ -114,8 +114,8 @@ uint32_t DBG_CommandLine_PhaseDetectCmd( uint32_t argc, char *argv[] );
 //uint32_t DBG_CommandLine_SM_Stop(   uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
 uint32_t DBG_CommandLine_SM_Stats(  uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
-//uint32_t DBG_CommandLine_SM_Set(    uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
-//uint32_t DBG_CommandLine_SM_Get(    uint32_t argc, char *argv[] ); // TODO: RA6E1 Bob: This command was removed from original K24 code
+//uint32_t DBG_CommandLine_SM_Set(    uint32_t argc, char *argv[] );
+//uint32_t DBG_CommandLine_SM_Get(    uint32_t argc, char *argv[] );
 
 #if (EP == 1)
 #include "smtd_config.h"
@@ -1187,9 +1187,7 @@ uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] )
       }
       else
       {
-         DBG_logPrintf( 'R', "watchDogTest 1 (for refreshing the watchdog timer)" );
-         DBG_logPrintf( 'R', "watchDogTest 2 (for validating the watchdog timer)" );
-         
+         DBG_logPrintf( 'R', "watchDogTest 1 for refreshing the watchdog timer , watchDogTest 2 (for validating the watchdog timer)" );
       }
    }
    return 0;

@@ -32,7 +32,6 @@
 #define WATCHDOG_CLOCK_DIVIDE_PRESCALER 4 /* This value is 1 less than the actual prescaler/divider used */
 #define WATCHDOG_HW_TIMEOUT 30 /* Time in seconds for the Watchdog hardware to reset the board if not refreshed */
 
-
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */

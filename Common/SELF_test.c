@@ -944,7 +944,7 @@ void SELF_testIWDT( void )
   
    while ( TRUE )
    {
-      /* Read the current IWDT counter value. */
+      /* Read the current IWDT counter value for debugging purpose. Can be watched in the live watch. */
       R_IWDT_CounterGet( &g_wdt0_ctrl, &iwdt_counter );
     
    }
