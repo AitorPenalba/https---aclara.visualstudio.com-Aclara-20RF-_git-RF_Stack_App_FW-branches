@@ -926,3 +926,26 @@ returnStatus_t SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType i
    return ( retVal );
 }
 #endif // SUPPORT_HEEP
+
+
+/***********************************************************************************************************************
+   Function Name: SELF_testIWDT
+
+   Purpose: Test the IWDT 
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+
+void SELF_testIWDT( void )
+{
+   static uint32_t iwdt_counter;
+  
+   while ( TRUE )
+   {
+      /* Read the current IWDT counter value for debugging purpose. Can be watched in the live watch. */
+      R_IWDT_CounterGet( &g_wdt0_ctrl, &iwdt_counter );
+    
+   }
+}

@@ -25,9 +25,9 @@ FSP Configuration
     Security: BUS Accessibility: Bus Security Attribution Register A: Both Secure and Non-Secure State
     Security: BUS Accessibility: Bus Security Attribution Register B: Both Secure and Non-Secure State
     Startup C-Cache Line Size: 32 Bytes
-    OFS0 register settings: Independent WDT: Start Mode: IWDT is Disabled
+    OFS0 register settings: Independent WDT: Start Mode: IWDT is automatically activated after a reset (Autostart mode)
     OFS0 register settings: Independent WDT: Timeout Period: 2048 cycles
-    OFS0 register settings: Independent WDT: Dedicated Clock Frequency Divisor: 128
+    OFS0 register settings: Independent WDT: Dedicated Clock Frequency Divisor: 256
     OFS0 register settings: Independent WDT: Window End Position:  0% (no window end position)
     OFS0 register settings: Independent WDT: Window Start Position: 100% (no window start position)
     OFS0 register settings: Independent WDT: Reset Interrupt Request Select: Reset is enabled
@@ -366,6 +366,9 @@ FSP Configuration
     Parameter Checking: Default (BSP)
     
   Module "DAC (r_dac)"
+    Parameter Checking: Default (BSP)
+    
+  Module "Independent Watchdog (r_iwdt)"
     Parameter Checking: Default (BSP)
     
   FreeRTOS
@@ -908,4 +911,8 @@ FSP Configuration
       Charge Pump (Requires MOCO active): Disabled
       Internal Output: Enabled by default
       ELC Trigger Source: Disabled
+      
+    Instance "g_wdt0 Independent Watchdog (r_iwdt)"
+      Name: g_wdt0
+      NMI callback: NULL
       

@@ -38,6 +38,7 @@
 
 void DBG_CommandLineTask ( taskParameter );
 uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] );
 #if ( TM_CRC_UNIT_TEST == 1 )
 uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] );
 #endif

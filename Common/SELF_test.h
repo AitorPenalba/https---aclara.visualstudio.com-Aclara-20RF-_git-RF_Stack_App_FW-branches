@@ -125,6 +125,7 @@ extern returnStatus_t   SELF_testSecurity( void );
 extern returnStatus_t   SELF_testNV( void );
 extern returnStatus_t   SELF_testInternalFlash( void );
 extern returnStatus_t   SELF_testTimeCompound( void );
+extern void             SELF_testIWDT( void );
 #if (SUPPORT_HEEP != 0)
 extern returnStatus_t   SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
 #endif
