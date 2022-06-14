@@ -27,10 +27,13 @@
 /* INCLUDE FILES */
 #include "project.h"
 #ifndef __BOOTLOADER
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#else
 #include <MK24F12.h>
+#else
+
+#endif // ( RTOS_SELECTION )
 #endif   /* BOOTLOADER  */
 #include "project.h"
 #include "sys_clock.h"
@@ -257,11 +260,19 @@ void sleepDeep( void )
  **********************************************************************************************************************/
 uint32_t getBusClock( void )
 {
+#if ( MCU_SELECTED == NXP_K24 )
 #ifndef __BOOTLOADER
    return(_bsp_get_clock( _bsp_get_clock_configuration(), CM_CLOCK_SOURCE_BUS) );
 #else
    return BSP_BUS_CLOCK;
 #endif
+#elif ( MCU_SELECTED == RA6E1 )
+#ifndef __BOOTLOADER
+   return ( R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB) ); // TODO: RA6E1 Bob: Verify that PCLKB is the correct bus clock
+#else
+
+#endif // __BOOTLOADER
+#endif // ( MCU SELECTED )
 }
 // </editor-fold>
 #ifndef __BOOTLOADER
@@ -283,7 +294,11 @@ uint32_t getBusClock( void )
  **********************************************************************************************************************/
 uint32_t getCoreClock( void )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    return(_bsp_get_clock( _bsp_get_clock_configuration(), CM_CLOCK_SOURCE_CORE) );
+#elif ( MCU_SELECTED == RA6E1 )
+   return ( R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_PLL) );
+#endif
 }
 /* ****************************************************************************************************************** */
 // </editor-fold>

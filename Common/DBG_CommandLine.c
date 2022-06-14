@@ -51,7 +51,7 @@
 #include "MFG_Port.h"
 //#include "MAC_Protocol.h"
 //#include "STACK_Protocol.h"
-//#include "COMM.h"
+#include "COMM.h"
 //#include "time_util.h"
 #include "dvr_DAC0.h"
 #include "radio.h"
@@ -98,7 +98,7 @@
 //#include "SELF_test.h"
 #include "mode_config.h"
 #include "EVL_event_log.h"
-//#include "ascii.h"
+#include "ascii.h"
 #if (USE_DTLS==1)
 #include "dtls.h"
 #include "wolfssl/wolfcrypt/aes.h"
@@ -307,9 +307,9 @@ uint32_t DBG_CommandLine_EVL_UNIT_TESTING( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_dfwMonMode( uint32_t argc, char *argv[] );
 #endif
 
-#if 0
+#if 0  // TODO: RA6E1 Bob: This command was removed from original K24 code
 static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] );
-#endif
+#endif // TODO: RA6E1 Bob: This command was removed from original K24 code
 
 #if ( USE_IPTUNNEL == 1 )
 static uint32_t DBG_CommandLine_SendIpTunMsg(uint32_t argc, char *argv[]);
@@ -321,6 +321,9 @@ static uint32_t DBG_CommandLine_usbaddr( uint32_t argc, char *argv[] );
 
 #if ( TEST_SYNC_ERROR == 1 )
 static uint32_t DBG_CommandLine_SyncError( uint32_t argc, char *argv[] );
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+static uint32_t DBG_CommandLine_CoreClocks( uint32_t argc, char *argv[] );
 #endif
 
 static const struct_CmdLineEntry DBG_CmdTable[] =
@@ -367,6 +370,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
 //   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" }, // TODO: RA6E1 Bob: this commmand needs to have GPIOs redefined
    { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
+#if ( MCU_SELECTED == RA6E1 )
+   { "coreClocks",   DBG_CommandLine_CoreClocks,      "Display the CPU core clocks in Hz" },
+#endif
 #if ( EP == 1 )
    { "counters",     DBG_CommandLine_Counters,        "Display the current counters like reset counts etc" },
 #endif
@@ -441,17 +447,17 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #else
    { "DfwKeyGen",    DBG_CommandLine_GenDFWkey,       "ComDeviceType FromVer ToVer" },
 #endif
-//#if ( EP == 1 )
-////   { "getdstenable", DBG_CommandLine_getDstEnable,    "Prints the DST enable" },             // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "getdsthash",   DBG_CommandLine_getDstHash,      "Prints the DST hash" },               // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "getdstoffset", DBG_CommandLine_getDstOffset,    "Prints the DST offset" },             // TODO: RA6E1 Bob: This command was removed from original K24 code
-//#endif
+#if ( EP == 1 )
+//   { "getdstenable", DBG_CommandLine_getDstEnable,    "Prints the DST enable" },             // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "getdsthash",   DBG_CommandLine_getDstHash,      "Prints the DST hash" },               // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "getdstoffset", DBG_CommandLine_getDstOffset,    "Prints the DST offset" },             // TODO: RA6E1 Bob: This command was removed from original K24 code
+#endif
    { "getfreq",      DBG_CommandLine_GetFreq,         "print list of available frequencies" },
-//#if ( EP == 1 )
-////   { "getstartrule", DBG_CommandLine_getDstStartRule, "Prints the DST start rule" },         // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "getstoprule",  DBG_CommandLine_getDstStopRule,  "Prints the DST stop rule" },          // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "gettimezoneoffset", DBG_CommandLine_getTimezoneOffset, "Prints the timezone offset" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
-//#endif
+#if ( EP == 1 )
+//   { "getstartrule", DBG_CommandLine_getDstStartRule, "Prints the DST start rule" },         // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "getstoprule",  DBG_CommandLine_getDstStopRule,  "Prints the DST stop rule" },          // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "gettimezoneoffset", DBG_CommandLine_getTimezoneOffset, "Prints the timezone offset" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+#endif
 #if ENABLE_HMC_TASKS
 #if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
    { "hmc",          DBG_CommandLine_HmcCmd,          "Host Meter Table Read, format is: hmc [m] id offset len" },
@@ -471,24 +477,28 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
 #endif
    { "hwinfo",       DBG_CommandLine_GetHWInfo,       "Display the HW Info" },
-//#ifdef TM_ID_TEST_CODE
-////   { "idbufr",       DBG_CommandLine_IdBufRd,         "Reads from the interval data test buffer: bufIndex "},          // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "idbufw",       DBG_CommandLine_IdBufWr,         "Reads from the interval data test buffer: bufIndex floatVal"},  // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "idcfg",        DBG_CommandLine_IdCfg,           "Configure Interval Data: ch smpl_mS store mult div mode rti" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "idcfgr",       DBG_CommandLine_IdCfgR,          "Read Interval Data Configuration" },                            // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "idparams",     DBG_CommandLine_IdParams,        "Read/Write Parameters\n"                                        // TODO: RA6E1 Bob: This command was removed from original K24 code
-////                   "                                   Read: No Params, Set: SamplePeriod BuSchedule" },               // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "idrd",         DBG_CommandLine_IdRd,            "Read Interval: ch yy mm dd hh mm" },                            // TODO: RA6E1 Bob: This command was removed from original K24 code
-////   { "idtimedv",     DBG_CommandLine_IdTimeDv,        "Get (no args) or set (one arg) Interval Data Time Diversity" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
-//#endif
-//#ifdef TM_ID_UNIT_TEST
-////   { "idut",         DBG_CommandLine_IdUt,            "Run interval data self test: idut ch"},                         // TODO: RA6E1 Bob: This command was removed from original K24 code
-//#endif
-//
+#ifdef TM_ID_TEST_CODE
+//   { "idbufr",       DBG_CommandLine_IdBufRd,         "Reads from the interval data test buffer: bufIndex "},          // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "idbufw",       DBG_CommandLine_IdBufWr,         "Reads from the interval data test buffer: bufIndex floatVal"},  // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "idcfg",        DBG_CommandLine_IdCfg,           "Configure Interval Data: ch smpl_mS store mult div mode rti" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "idcfgr",       DBG_CommandLine_IdCfgR,          "Read Interval Data Configuration" },                            // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "idparams",     DBG_CommandLine_IdParams,        "Read/Write Parameters\n"                                        // TODO: RA6E1 Bob: This command was removed from original K24 code
+//                   "                                   Read: No Params, Set: SamplePeriod BuSchedule" },               // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "idrd",         DBG_CommandLine_IdRd,            "Read Interval: ch yy mm dd hh mm" },                            // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "idtimedv",     DBG_CommandLine_IdTimeDv,        "Get (no args) or set (one arg) Interval Data Time Diversity" }, // TODO: RA6E1 Bob: This command was removed from original K24 code
+#endif
+#ifdef TM_ID_UNIT_TEST
+//   { "idut",         DBG_CommandLine_IdUt,            "Run interval data self test: idut ch"},                         // TODO: RA6E1 Bob: This command was removed from original K24 code
+#endif
+
    { "insertappmsg", DBG_CommandLine_InsertAppMsg,    "send NWK payload (arg1) into the bottom of the APP layer" },
-   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+#if ( RTOS_SELECTION == MQX_RTOS )
+   { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\n"
+                   "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
+#elif ( RTOS_SELECTION == FREE_RTOS)
    { "insertmacmsg", DBG_CommandLine_InsertMacMsg,    "send phy payload (arg1) into the bottom of the MAC layer using\r\n"
                    "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
+#endif // ( RTOS_SELECTION )
 #if ( EP == 1 )
 //   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" }, // TODO: RA6E1 Bob: Do we want to replace this with our temporary test LED?
 #if ( LP_IN_METER != 0 )
@@ -581,99 +591,130 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 //   { "phystop",      DBG_CommandLine_PhyStop,         "phy stop"  },                                            // TODO: RA6E1 Bob: This command was removed from original K24 code
    { "ping",         DBG_CommandLine_MacPingCmd,      "Send a 'ping' request to EP"},
    { "power",        DBG_CommandLine_Power,           "Get power level when no arguments. Set power level (0-5)" },
-//#if ( EP == 1 )
-//   { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
-//#endif
+#if ( EP == 1 )
+   { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
+#endif
    { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
    { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
 #if ( EP == 1 )
    { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
    { "regtimeouts",  DBG_CommandLine_RegTimeouts,     "Get or Set the Registration Timeouts" },
 #endif
-//#if BOB_IS_LAZY == 1
-//   { "reset",        DBG_ResetAllStats,               "Reset PHY, MAC and NWK stats" },
-//#endif
-//#if ( CLOCK_IN_METER == 1 )
-//   { "revmtrtime",   DBG_CommandLine_mtrTime,         "Convert system time to meter time mm dd yy hh mm" },
-//#endif
-//#if ( FAKE_TRAFFIC == 1 )
-//   { "rfdutycycle",  DBG_CommandLine_ipRfDutyCycle,   "get (no args) or set (arg1) RF dutycycle" },
-//#endif
+#if BOB_IS_LAZY == 1
+   { "reset",        DBG_ResetAllStats,               "Reset PHY, MAC and NWK stats" },
+#endif
+#if ( CLOCK_IN_METER == 1 )
+   { "revmtrtime",   DBG_CommandLine_mtrTime,         "Convert system time to meter time mm dd yy hh mm" },
+#endif
+#if ( FAKE_TRAFFIC == 1 )
+   { "rfdutycycle",  DBG_CommandLine_ipRfDutyCycle,   "get (no args) or set (arg1) RF dutycycle" },
+#endif
    { "rssi",         DBG_CommandLine_RSSI,            "Display the RSSI of a specified radio" },
-////   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },
-//   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" },
+//   { "rssijumpthreshold", DBG_CommandLine_RSSIJumpThreshold, "Get or Set the RSSI Jump Threshold" },            // TODO: RA6E1 Bob: This command was removed from original K24 code
+#if ( MCU_SELECTED == NXP_K24 )
+   { "rtcCap",       DBG_CommandLine_rtcCap,          "Get/Set Cap Load in RTC_CR" }, /* There is no analogous feature on the RA6E1 MCU */
+#endif
 #if ( MCU_SELECTED == NXP_K24 )
    { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\n"
                    "                                   Set: Params - yy mm dd hh mm ss" },
    { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\n"
                    "                                   Type ""rxchannels"" with no arguments for more help" },
 #elif ( MCU_SELECTED == RA6E1 )
-   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "rtctime",      DBG_CommandLine_rtcTime,         "Operates on RTC only. Read: No Params,\r\n"
                    "                                   Set: Params - yy mm dd hh mm ss" },
-   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\r\n"
                    "                                   Type ""rxchannels"" with no arguments for more help" },
-#endif
+#endif // ( RTOS_SELECTION )
    { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
    { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
    { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },
-//#if ( DCU == 1 )
-//   { "sdtest",       DBG_CommandLine_sdtest,          "[count (default=1)] Exercise SDRAM" },
-//#endif
-//   { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\n"
-//                   "                                   Plus unpublished functions - see source code for details" },
-//   { "sectest",      DBG_CommandLine_sectest,         "[count (default=1)] Exercise Security Device" },
-//   { "sendappmsg",   DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
-//#if (USE_IPTUNNEL == 1)
-//   { "sendtunmsg",   DBG_CommandLine_SendIpTunMsg,    "send data (arg1) to address (arg2) with qos (arg3)" },
-//#endif
-//   { "sendheadendmsg", DBG_CommandLine_SendHeadEndMsg,  "send data (arg1) to head end with qos (arg2)" },
+#if ( DCU == 1 )
+   { "sdtest",       DBG_CommandLine_sdtest,          "[count (default=1)] Exercise SDRAM" },
+#endif
+#if ( INCLUDE_ECC == 1 )
+#if ( RTOS_SELECTION == MQX_RTOS )
+   { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\n"
+                   "                                   Plus unpublished functions - see source code for details" },
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\r\n"
+                   "                                   Plus unpublished functions - see source code for details" },
+#endif // ( RTOS_SELECTION )
+   { "sectest",      DBG_CommandLine_sectest,         "[count (default=1)] Exercise Security Device" },
+#endif // ( INCLUDE_ECC == 1)
+   { "sendappmsg",   DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
+#if (USE_IPTUNNEL == 1)
+   { "sendtunmsg",   DBG_CommandLine_SendIpTunMsg,    "send data (arg1) to address (arg2) with qos (arg3)" },
+#endif
+   { "sendheadendmsg", DBG_CommandLine_SendHeadEndMsg,  "send data (arg1) to head end with qos (arg2)" },
    { "sendheepmsg",  DBG_CommandLine_SendHeepMsg,     "send dummy alarm header HEEP_MSG_TxHeepHdrOnly" },
-//   { "sendmtlsmsg",  DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
-////   { "sendmeta",     DBG_CommandLine_SendMetadata,    "Trigger transmission of a Metadata message" },
-//#if ( EP == 1 )
-//   { "setdstenable", DBG_CommandLine_setDstEnable,   "Updates the DST enable:\n"
-//                   "                                   Params - enable flag (0 - disable or 1 - enable)" },
-//   { "setdstoffset", DBG_CommandLine_setDstOffset,    "Updates the DST offset: Params - offset in seconds" },
-//#endif
-   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "sendmtlsmsg",  DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
+//   { "sendmeta",     DBG_CommandLine_SendMetadata,    "Trigger transmission of a Metadata message" },           // TODO: RA6E1 Bob: This command was removed from original K24 code
+#if ( EP == 1 )
+#if ( RTOS_SELECTION == MQX_RTOS )
+   { "setdstenable", DBG_CommandLine_setDstEnable,   "Updates the DST enable:\n"
+                   "                                   Params - enable flag (0 - disable or 1 - enable)" },
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   { "setdstenable", DBG_CommandLine_setDstEnable,   "Updates the DST enable:\r\n"
+                   "                                   Params - enable flag (0 - disable or 1 - enable)" },
+#endif // ( RTOS_SELECTION )
+   { "setdstoffset", DBG_CommandLine_setDstOffset,    "Updates the DST offset: Params - offset in seconds" },
+#endif // ( EP == 1 )
+#if ( RTOS_SELECTION == MQX_RTOS )
+   { "setfreq",      DBG_CommandLine_SetFreq,         "set list of available frequencies.\n"
+                   "                                   Type ""setfreq"" with no arguments for more help" },
+#elif ( RTOS_SELECTION == FREE_RTOS )
    { "setfreq",      DBG_CommandLine_SetFreq,         "set list of available frequencies.\r\n"
                    "                                   Type ""setfreq"" with no arguments for more help" },
-//#if ( EP == 1 )
-//   { "setstartrule", DBG_CommandLine_setDstStartRule, "Updates the DST start rule: Params - mm dow ood hh mm" },
-//   { "setstoprule",  DBG_CommandLine_setDstStopRule,  "Updates the DST stop rule: Params - mm dow ood hh mm" },
-//   { "settimezoneoffset", DBG_CommandLine_setTimezoneOffset, "Updates the timezone offset: Params - offset in seconds" },
-//#endif
-//   // SM - Stack Manager
-////   { "smstart",      DBG_CommandLine_SM_Start,         "SM start" },
-////   { "smstop",       DBG_CommandLine_SM_Stop,          "SM stop"  },
-////   { "smget",        DBG_CommandLine_SM_Get,           "SM get"   },
-////   { "smset",        DBG_CommandLine_SM_Set,           "SM set"   },
+#endif // ( RTOS_SELECTION )
+#if ( EP == 1 )
+   { "setstartrule", DBG_CommandLine_setDstStartRule, "Updates the DST start rule: Params - mm dow ood hh mm" },
+   { "setstoprule",  DBG_CommandLine_setDstStopRule,  "Updates the DST stop rule: Params - mm dow ood hh mm" },
+   { "settimezoneoffset", DBG_CommandLine_setTimezoneOffset, "Updates the timezone offset: Params - offset in seconds" },
+#endif
+   // SM - Stack Manager
+//   { "smstart",      DBG_CommandLine_SM_Start,         "SM start" },                                            // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "smstop",       DBG_CommandLine_SM_Stop,          "SM stop"  },                                            // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "smget",        DBG_CommandLine_SM_Get,           "SM get"   },                                            // TODO: RA6E1 Bob: This command was removed from original K24 code
+//   { "smset",        DBG_CommandLine_SM_Set,           "SM set"   },                                            // TODO: RA6E1 Bob: This command was removed from original K24 code
    { "nwPassActTimeout",   DBG_CommandLine_SM_NwPassiveActTimeout, "Get or set passive network activity timeout" },
    { "nwActiveActTimeout", DBG_CommandLine_SM_NwActiveActTimeout,  "Get or set active network activity timeout" },
    { "smstats",      DBG_CommandLine_SM_Stats,        "Print the SM stats" },
    { "smconfig",     DBG_CommandLine_SM_Config,       "Print the SM Configuration" },
 //
 //   { "stackusage",   DBG_CommandLine_StackUsage,      "print the stack of active tasks" },
-//#if ( TEST_SYNC_ERROR == 1 )
-//   { "syncerror",    DBG_CommandLine_SyncError,       "Set SYNC bit error " },
-//#endif
+#if ( TEST_SYNC_ERROR == 1 )
+   { "syncerror",    DBG_CommandLine_SyncError,       "Set SYNC bit error " },
+#endif
 //   { "tasksummary",  DBG_CommandLine_TaskSummary,     "print tasks summary" },
-   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+#if ( RTOS_SELECTION == MQX_RTOS )
+   { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
+                   "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
+#elif ( RTOS_SELECTION == FREE_RTOS )
    { "time",         DBG_CommandLine_time,            "RTC and SYS time.\r\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
+#endif // ( RTOS_SELECTION )
 #if ( DCU == 1 )
-//   { "read_res",     CommandLine_ReadResource,       "Read a resource and value."},
+//   { "read_res",     CommandLine_ReadResource,       "Read a resource and value."},                             // TODO: RA6E1 Bob: This command was removed from original K24 code
    { "slot",         DBG_CommandLine_getTBslot,        "Get the slot of this TB." },
 
-//   { "tr",           DBG_TraceRoute,                 "Trace Route"},
+//   { "tr",           DBG_TraceRoute,                 "Trace Route"},                                            // TODO: RA6E1 Bob: This command was removed from original K24 code
 #endif
-//   { "tunnel",       DBG_CommandLine_tunnel,          "Convert TWACS command to tunnel format" },
-   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
+   { "tunnel",       DBG_CommandLine_tunnel,          "Convert TWACS command to tunnel format" },
+#if ( RTOS_SELECTION == MQX_RTOS )
+   { "txchannels",   DBG_CommandLine_TxChannels,      "set/print the TX channel list.\n"
+                   "                                   Type ""txchannels"" with no arguments for more help" },
+   { "txmode",       DBG_CommandLine_TXMode,          "Choose TX mode: 0 = Normal (default), 1 = PN9,\n"
+                   "                                   2 = Unmodulated Carrier Wave,\n"
+                   "                                   3 = Deprecated,\n"
+#if ( PORTABLE_DCU == 1)
+                   "                                   4 = 4GFSK BER with manufacturing print out,\n"
+                   "                                   5 = Old PHY (freq dev 600Hz, RS(63,59)" },
+#else
+                   "                                   4 = 4GFSK BER with manufacturing print out," },
+#endif
+#elif ( RTOS_SELECTION == FREE_RTOS )
    { "txchannels",   DBG_CommandLine_TxChannels,      "set/print the TX channel list.\r\n"
                    "                                   Type ""txchannels"" with no arguments for more help" },
-   // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "txmode",       DBG_CommandLine_TXMode,          "Choose TX mode: 0 = Normal (default), 1 = PN9,\r\n"
                    "                                   2 = Unmodulated Carrier Wave,\r\n"
                    "                                   3 = Deprecated,\r\n"
@@ -683,36 +724,36 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #else
                    "                                   4 = 4GFSK BER with manufacturing print out," },
 #endif
-
-//#if ( EP == 1 ) && ( TEST_TDMA == 1 )
-//   { "txslot",       DBG_CommandLine_TxSlot,           "Specify which time slot to use for TDMA test\n" },
-//#endif
-//#if ( PORTABLE_DCU == 1)
-//   { "dfwmonitormode",  DBG_CommandLine_dfwMonMode,    "enable (1) or disable (0) mode to only print DFW responses\n" },
-//#endif
+#endif // ( RTOS_SELECTION )
+#if ( EP == 1 ) && ( TEST_TDMA == 1 )
+   { "txslot",       DBG_CommandLine_TxSlot,           "Specify which time slot to use for TDMA test\n" },
+#endif
+#if ( PORTABLE_DCU == 1)
+   { "dfwmonitormode",  DBG_CommandLine_dfwMonMode,    "enable (1) or disable (0) mode to only print DFW responses\n" },
+#endif
    { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
    { "virgin",       DBG_CommandLine_virgin,          "Erases flash chip and resets the micro" },
    { "virgindelay",  DBG_CommandLine_virginDelay,     "Erases signature; continues. Allows new code load and then virgin" },
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    { "vswr",         DBG_CommandLine_VSWR,            "Displays VSWR measurement" },
 #endif
-//#if ( READ_KEY_ALLOWED != 0 )
-//   { "dumpKeys",     DBG_CommandLine_dumpKeys ,       "Dump 3 keys automatically replace on flash security change" },
-//   { "rkey",         DBG_CommandLine_readKey ,        "Read specifed key" },
-//   { "rkeyenc",      DBG_CommandLine_readKey ,        "Read specifed encrypted key" },
-//#endif
-//#if USE_USB_MFG
-//   { "usb",          DBG_CommandLine_usbaddr ,        "Display USB address" },
-//#endif
-//#if ( WRITE_KEY_ALLOWED != 0 )
-//   { "wkey",         DBG_CommandLine_writeKey ,       "Write specifed key with specified data" },
-//#endif
-//#if 0
-//   { "x",            DBG_CommandLine_hardfault,       "Force a write to flash; test fault handler" },
-//#endif
-//#if ( SIMULATE_POWER_DOWN == 1 )
-//   { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
-//#endif
+#if ( READ_KEY_ALLOWED != 0 )
+   { "dumpKeys",     DBG_CommandLine_dumpKeys ,       "Dump 3 keys automatically replace on flash security change" },
+   { "rkey",         DBG_CommandLine_readKey ,        "Read specifed key" },
+   { "rkeyenc",      DBG_CommandLine_readKey ,        "Read specifed encrypted key" },
+#endif
+#if USE_USB_MFG
+   { "usb",          DBG_CommandLine_usbaddr ,        "Display USB address" },
+#endif
+#if ( WRITE_KEY_ALLOWED != 0 )
+   { "wkey",         DBG_CommandLine_writeKey ,       "Write specifed key with specified data" },
+#endif
+#if 0  // TODO: RA6E1 Bob: This command was removed from original K24 code
+   { "x",            DBG_CommandLine_hardfault,       "Force a write to flash; test fault handler" },
+#endif // TODO: RA6E1 Bob: This command was removed from original K24 code
+#if ( SIMULATE_POWER_DOWN == 1 )
+   { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
+#endif
 #if ( TM_CRC_UNIT_TEST == 1)
    { "crcunittest",  DBG_CommandLine_CrcCalculate,     "Displays CRC results" },
 #endif
@@ -1141,9 +1182,9 @@ static void DBG_CommandLine_Process ( void )
 uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
 {
    struct_CmdLineEntry  const *CmdLineEntry;
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( RTOS_SELECTION == MXQ_RTOS )
    DBG_printf( "\n[M]Command List:" );
-#elif ( MCU_SELECTED == RA6E1 )
+#elif ( RTOS_SELECTION == FREE_RTOS )
 /* Added carriage return to follow printing standard */
    DBG_printf( "\r\n[M]Command List:" );
 #endif
@@ -2400,438 +2441,440 @@ uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
 /* end DBG_CommandLine_NvTest() */
 #endif
 
-//#if ( SIMULATE_POWER_DOWN == 1 )
-//
-///*******************************************************************************
-//*******************************************************************************/
-//OS_TICK_Struct DBG_CommandLine_GetStartTick ()
-//{
-//   return (DBG_startTick_);
-//}
-///*******************************************************************************
-//*******************************************************************************/
-//bool DBG_CommandLine_isPowerDownSimulationFeatureEnabled()
-//{
-//   return pwrDnSimulation_Enable_;
-//}
-///*******************************************************************************
-//*******************************************************************************/
-//#if 0
-//void DBG_CommandLine_isPowerDownSimulationFeatureDisable()
-//{
-//   pwrDnSimulation_Enable_ = false;
-//}
-//#endif
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_SimulatePowerDown
-//
-//   Purpose: Power Down Simulation Test. This function accepts the parameters as follows:
-//            (1) delay in miliseconds.
-//            (2) number of sectors to test on
-//            (3) ( 0 )External NV or Internal NV ( 1 )
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes: * NOT intended to be released to the production.
-//          * If you would like to cancel the test before powering down, use MFG port to reboot the device
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_SimulatePowerDown ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t  delaymSec       = 0;                    /* Max Wait time is 4.5 minutes*/
-//   uint8_t  numOfSectors   = DEFAULT_NUM_SECTORS;   /* Max 255 */
-//   bool     location       = EXTERNAL_NV;           /* false: External (default), true: Internal */
-//   bool     execute        = false;
-//
-//#if 0 // DBG Test
-//   bool     eraseTestOnly = true;
-//
-//   if( eraseTestOnly )
-//   {
-//      ( void )DBG_CommandLine_NvEraseTest ( 4, EXTERNAL_NV );
-//   }
-//   else
-//   {
-//#endif
-//
-//   switch ( argc )
-//   {
-//
-//      case ( 2 ):
-//      {
-//         delaymSec      = ( uint8_t )atoi( argv[1] );
-//         execute        = true;
-//         break;
-//      }
-//      case ( 3 ) :
-//      {
-//         delaymSec      = ( uint8_t )atoi( argv[1] );
-//         numOfSectors   = ( uint8_t )atoi( argv[2] );
-//         execute        = true;
-//         break;
-//      }
-//      case ( 4 ):
-//      {
-//         delaymSec      = ( uint8_t )atoi( argv[1] );
-//         numOfSectors   = ( uint8_t )atoi( argv[2] );
-//         location       = ( uint8_t )atoi( argv[3] );
-//         execute        = true;
-//         break;
-//      }
-//      default:
-//      {
-//         execute        = false;
-//         DBG_printf( "USAGE: PowerDownTest delay(ms) [no_of_sectors] [ 0: External NV; 1: Internal ]" );
-//         break;
-//      }
-//   }
-//
-//   if( execute )
-//   {
-//      pwrDnSimulation_Enable_ = true; // Enable the feature
-//
-//      if ( ( EXTERNAL_NV == location ) && ( 0 == numOfSectors ) )
-//      {
-//         numOfSectors = DEFAULT_NUM_SECTORS; // Update with default
-//         INFO_printf( " Using the defaults: Number of Sectors %d, Test Location: External NV !!!!" );
-//      }
-//      if ( ( INTERNAL_NV == location ) && ( numOfSectors > 4 ) )
-//      {
-//         numOfSectors = DEFAULT_NUM_SECTORS; // Update: Max value for internal NV
-//         INFO_printf( " Note: Max possible number of sectors for internal NV is 4 " );
-//      }
-//      DBG_logPrintf( 'R', " !!!! Power Down Simulation Test !!!!" );
-//      if( delaymSec != 0 )
-//      {
-//         INFO_printf( " !!!! Wait for %d msecs !!!!", delaymSec );
-//         ( void )DFWA_WaitForSysIdle(delaymSec );
-//      }
-//
-//      INFO_printf( " !!!! Arming for Power Down !!!!" );
-//
-//      /* Increase the priority of the DBG task and Print task */
-//      ( void )OS_TASK_Set_Priority( pTskName_Print, 11 ); // Increasing priority
-//      ( void )OS_TASK_Set_Priority( pTskName_Dbg, 11 );
-//      // Note: Increase the MFG port priority to have MFG port access to use "reboot" command
-//      ( void )OS_TASK_Set_Priority( pTskName_Mfg, 11 );
-//      ( void )OS_TASK_Set_Priority( pTskName_MfgUartRecv, 11 );
-//      ( void )OS_TASK_Set_Priority( pTskName_MfgUartCmd, 11 );
-//      ( void )OS_TASK_Set_Priority( pTskName_Idle, 13 );
-//
-//      DBG_printf( " !!!! Now waiting for Power Down, Please TURN OFF the Power !!!!" );
-//      DBG_printf( " Note: If you would like to end this test NOW, use MFG port to send '''reboot''' command " );
-//      ( void )OS_SEM_Pend( &PWR_SimulatePowerDn_Sem, OS_WAIT_FOREVER ); // Wait for power down semaphore!
-//      OS_TICK_Get_CurrentElapsedTicks(&DBG_startTick_);
-//      // lock the PWR mutex
-//      PWR_lockMutex( PWR_MUTEX_ONLY ); // Function will not return if it fails
-//      ( void )DBG_CommandLine_NvEraseTest ( numOfSectors, location );
-//      PWR_unlockMutex( PWR_MUTEX_ONLY ); // Function will not return if it fails
-//
-//      /* Never Returns */
-//   }
-//   return (0);
-//}
-///* end DBG_CommandLine_SimulatePowerDown() */
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_NvEraseTest
-//
-//   Purpose: To perform R-E-W ( Read Erase Write ) test on Internal or External NV
-//
-//   Arguments:  uint8_t - number of sectors
-//               bool - NV location to test ( 0: External 1: Internal )
-//
-//   Returns: FuncStatus - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_NvEraseTest ( uint8_t sectors, bool nvLocation )
-//{
-//   uint32_t          sectorSize        = EXT_FLASH_SECTOR_SIZE;
-//   ePartitionName    partition         = ePART_DFW_PGM_IMAGE;
-//   uint32_t          bootLoaderOffset  = PART_BL_BACKUP_OFFSET;
-//   OS_TICK_Struct    startTick         = {0};
-//   OS_TICK_Struct    endTick           = {0};
-//   uint32_t          *pSomeBuffer;
-//
-//   DBG_printf( " !!!! Welcome to NV Read Erase Write ( R-E-W ) Test !!!!" );
-//   INFO_printf( " !!!! Let's perform R-E-W on #%d Sectors ", sectors );
-//
-//   if ( INTERNAL_NV == nvLocation )  // Internal
-//   {
-//      sectorSize        = INT_FLASH_ERASE_SIZE;  // same as sector erase size for Ext flash
-//      partition         = ePART_BL_BACKUP;
-//      bootLoaderOffset  = 0;
-//      INFO_printf(" Performing Test on Internal NV ");
-//   }
-//   else
-//   {
-//      INFO_printf(" Performing Test on External NV ");
-//   }
-//   // Read-Erase-Write for given no. of sectors. "One sector at a time"
-//   pSomeBuffer = malloc( sectorSize );
-//
-//   if ( NULL != pSomeBuffer )
-//   {
-//#if 0
-//      //DG: DBG Prints
-//      INFO_printf( "Got  pSomeBuffer = 0x%08x", ( uint32_t )pSomeBuffer );
-//      INFO_printf( " Partition address :0x%08x", pTestPartition_->PhyStartingAddress );
-//#endif
-//      (void)memset( pSomeBuffer, 0 , sectorSize );
-//      // Fill the buffer with Random Number
-//      for ( uint16_t i = 0; i < ( uint16_t )( sectorSize/4) ; i++ )
-//      {
-//         pSomeBuffer[i] = ( uint32_t )aclara_rand();
-//      }
-//      /* Get the OS tick */
-//      OS_TICK_Get_CurrentElapsedTicks(&startTick);
-//      // TODO: Select the Partition based on the size?
-//      if ( eSUCCESS == PAR_partitionFptr.parOpen(&pTestPartition_, partition, 0L) )
-//      {
-//         for ( ; sectors > 0 ; sectors-- )
-//         {
-//            // Write the pattern to the sector
-//            if ( eSUCCESS == PAR_partitionFptr.parWrite( bootLoaderOffset, (uint8_t *) pSomeBuffer, sectorSize, pTestPartition_ ) )
-//            {
-//               INFO_printf(" !!!!!!!! Successfully performed R-E-W on a sector !!!!!!!");
-//            }
-//            else
-//            {
-//               ERR_printf( "ERROR: Write FAILED!!!!!!!!!" );
-//            }
-//            bootLoaderOffset += sectorSize; // perform R-E-W on next sector
-//         } // End of for loop
-//         OS_TICK_Get_CurrentElapsedTicks(&endTick);
-//         INFO_printf(" Time to complete the NV Read-Write-Erase Test : %li usec", OS_TICK_Get_Diff_InMicroseconds ( &startTick, &endTick  ));
-//      }
-//      else
-//      {
-//         ERR_printf(" !!!!!!!! Failed to Open the partition !!!!!!! ");
-//      }
-//      free(pSomeBuffer);
-//   }
-//   else
-//   {
-//      ERR_printf( "ERROR: Falied to allocate memory ");
-//   }
-//
-//   return ( 0 );
-//}
-///* end DBG_CommandLine_NvTest() */
-//#endif /* End of #if ( SIMULATE_POWER_DOWN == 1 ) */
-//#if ( DCU == 1 )
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_sdtest
-//
-//   Purpose: Tests the external SDRAM memory
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-///* Kill tasks that are likely to try to use (malloc) RAM under test. */
-//static char const  *const tasks[] =
-//{
-//   "STRT",
-//   "APPMSG",
-//   "BPI",
-//   "SM",
-//   "PHY",
-//   "MAC",
-//   "NWK",
-//   "STAR",
-//   "DTLS",
-//   "BUAM",
-//   "DFW",
-//   "MFGC",
-//   "MFGU",
-//   "PAR",
-//   "TEST",
-//   NULL
-//};
-//extern unsigned char __EXTERNAL_MRAM_RAM_BASE[];  /* Defined in linker script   */
-//extern unsigned char __EXTERNAL_MRAM_RAM_SIZE[];  /* Defined in linker script   */
-//#define SDRAM_START __EXTERNAL_MRAM_RAM_BASE
-//#define SDRAM_SIZE  __EXTERNAL_MRAM_RAM_SIZE
-//static uint32_t DBG_CommandLine_sdtest ( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t    status; /*lint !e123 */
-//   char              **pTask;
-//   _task_id          id;
-//   uint32_t          LoopCount = 1;
-//   uint32_t          pattern;
-//   uint32_t          antipattern;
-//   uint32_t          readback;
-//   uint32_t          addressMask;
-//   uint32_t          offset;
-//   uint32_t          testOffset;
-//   char              *endptr;             /* Used with strtoul */
-//   volatile uint32_t *sdptr;              /* Pointer to SDRAM  */
-//   uint32_t          i;
-//
-//   if ( argc == 2 )
-//   {
-//      LoopCount = strtoul( argv[1], &endptr, 0 );
-//   }
-//   pTask = (char **)tasks;
-//   do
-//   {
-//      id = _task_get_id_from_name( *pTask );
-//      if ( id != 0 )
-//      {
-//         (void)_task_destroy( id );
-//      }
-//      pTask++;
-//   } while ( *pTask != NULL );
-//
-//   (void)printf( "Testing SDRAM %d times...\n", LoopCount );
-//
-//   /*lint -e{443} status in first clause; not in third OK   */
-//   for ( status = eSUCCESS; LoopCount && ( status == eSUCCESS ); LoopCount-- )
-//   {
-//      (void)printf( "Loop: %lu\n", LoopCount );
-//
-//      (void)printf( "Walking 1s test\n" );
-//      /* Perform walking ones test  */
-//      sdptr = (uint32_t *)(void*)SDRAM_START;
-//      for( i = 0; i < (uint32_t)SDRAM_SIZE / sizeof( uint32_t ) ; i++, sdptr++ )
-//      {
-//         for( pattern = 1U; pattern != 0; pattern <<= 1 )
-//         {
-//            *sdptr = pattern;       /* Write pattern  */
-//
-//            readback = *sdptr;      /* Read back to variable, in case read/write not reliable.  */
-//            if ( readback != pattern )
-//            {
-//               (void)printf( "Walking 1 failed at location 0x%08p, s/b 0x%08lx, is 0x%08lx\n", sdptr, pattern, readback );
-//            }
-//         }
-//      }
-//
-//      /* Perform address bus test   */
-//      (void)printf( "Address stuck high test\n" );
-//      sdptr = (uint32_t *)(void*)SDRAM_START;
-//      addressMask = ( (uint32_t)SDRAM_SIZE/sizeof( uint32_t ) - 1 );
-//      pattern     = (uint32_t) 0xAAAAAAAA;
-//      antipattern = (uint32_t) 0x55555555;
-//
-//      /* Write the default pattern at each of the power-of-two offsets.  */
-//      for (offset = 1; (offset & addressMask) != 0; offset <<= 1)
-//      {
-//         sdptr[offset] = pattern;
-//      }
-//
-//      /* Check for address bits stuck high.  */
-//      testOffset = 0;
-//      sdptr[testOffset] = antipattern;
-//
-//      for (offset = 1; (offset & addressMask) != 0; offset <<= 1)
-//      {
-//         readback = sdptr[offset];
-//         if (readback != pattern)
-//         {
-//            (void)printf( "Address stuck high at location 0x%08p, s/b 0x%08lx, is 0x%08lx\n", sdptr+offset, pattern, readback );
-//            status = eFAILURE;
-//         }
-//      }
-//
-//      sdptr[testOffset] = pattern;
-//
-//      /* Check for address bits stuck low or shorted.  */
-//      (void)printf( "Address stuck low or shorted test\n" );
-//      for (testOffset = 1; (testOffset & addressMask) != 0; testOffset <<= 1)
-//      {
-//         sdptr[testOffset] = antipattern;
-//
-//         readback = sdptr[0];
-//         if ( readback != pattern )
-//         {
-//            (void)printf( "Address stuck low at location 0x%08p, s/b 0x%08lx, is 0x%08lx\n", sdptr+offset, pattern, readback );
-//            status = eFAILURE;
-//         }
-//
-//         for (offset = 1; (offset & addressMask) != 0; offset <<= 1)
-//         {
-//            if ((sdptr[offset] != pattern) && (offset != testOffset))
-//            {
-//               (void)printf( "Address stuck low at location 0x%08p, s/b 0x%08lx, is 0x%08lx\n", sdptr+offset, pattern, readback );
-//               status = eFAILURE;
-//            }
-//         }
-//         sdptr[testOffset] = pattern;
-//      }
-//
-//
-//      /* Fill sector with pattern (data = address low byte) */
-//      sdptr = (uint32_t *)(void*)SDRAM_START;
-//      for( i = 0; i < (uint32_t)SDRAM_SIZE / sizeof( uint32_t ) ; i++, sdptr++ )
-//      {
-//         *sdptr = ~( uint32_t )sdptr;
-//      }
-//      /* Check sector for pattern (data = address low byte) */
-//      sdptr = (uint32_t *)(void*)SDRAM_START;
-//      for( i = 0; i < (uint32_t)SDRAM_SIZE / sizeof( uint32_t ) ; i++, sdptr++ )
-//      {
-//         if ( *sdptr != ~( uint32_t )sdptr )
-//         {
-//            (void)printf( "Failed at location 0x%08p, s/b 0x%08x, is 0x%08x\n",
-//                           sdptr, ( uint32_t )sdptr, *sdptr );
-//            status = eFAILURE;
-//         }
-//      }
-//      WDOG_Kick();
-//   }
-//
-//   if( eSUCCESS == status )
-//   {
-//      (void)printf( "SDRAM Test Success!\n" );
-//   }
-//   else
-//   {
-//      (void)printf( "SDRAM Test Failed!!!!\n" );
-//      OS_TASK_Sleep( ONE_SEC * 5 );
-//   }
-//
-//   (void)printf( "Rebooting\n" );
-//   OS_TASK_Sleep( ONE_SEC );
-//   PWR_SafeReset();  /* Execute Software Reset, with cache flush */
-//   return ( 0 );
-//}
-///* end DBG_CommandLine_sdtest() */
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_getTBslot
-//
-//   Purpose: Reports backplane slot sensed.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_getTBslot( uint32_t argc, char *argv[] )
-//{
-//   uint8_t slotID;
-//
-//   SLOT_ADDR( slotID );                            /* read slot ID      */
-//   slotID += '1';                                  /* Convert to ASCII and bias for base 1 reporting  */
-//   DBG_logPrintf( 'I', "Slot: %c (1 based)", (char)slotID ); /* Print result      */
-//   return 0;
-//}
-//#endif //#if ( DCU == 1 )
+#if ( SIMULATE_POWER_DOWN == 1 )
+
+/*******************************************************************************
+*******************************************************************************/
+OS_TICK_Struct DBG_CommandLine_GetStartTick ()
+{
+   return (DBG_startTick_);
+}
+/*******************************************************************************
+*******************************************************************************/
+bool DBG_CommandLine_isPowerDownSimulationFeatureEnabled()
+{
+   return pwrDnSimulation_Enable_;
+}
+/*******************************************************************************
+*******************************************************************************/
+#if 0
+void DBG_CommandLine_isPowerDownSimulationFeatureDisable()
+{
+   pwrDnSimulation_Enable_ = false;
+}
+#endif
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_SimulatePowerDown
+
+   Purpose: Power Down Simulation Test. This function accepts the parameters as follows:
+            (1) delay in miliseconds.
+            (2) number of sectors to test on
+            (3) ( 0 )External NV or Internal NV ( 1 )
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: * NOT intended to be released to the production.
+          * If you would like to cancel the test before powering down, use MFG port to reboot the device
+*******************************************************************************/
+uint32_t DBG_CommandLine_SimulatePowerDown ( uint32_t argc, char *argv[] )
+{
+   uint8_t  delaymSec       = 0;                    /* Max Wait time is 4.5 minutes*/
+   uint8_t  numOfSectors   = DEFAULT_NUM_SECTORS;   /* Max 255 */
+   bool     location       = EXTERNAL_NV;           /* false: External (default), true: Internal */
+   bool     execute        = false;
+
+#if 0 // DBG Test
+   bool     eraseTestOnly = true;
+
+   if( eraseTestOnly )
+   {
+      ( void )DBG_CommandLine_NvEraseTest ( 4, EXTERNAL_NV );
+   }
+   else
+   {
+#endif
+
+   switch ( argc )
+   {
+
+      case ( 2 ):
+      {
+         delaymSec      = ( uint8_t )atoi( argv[1] );
+         execute        = true;
+         break;
+      }
+      case ( 3 ) :
+      {
+         delaymSec      = ( uint8_t )atoi( argv[1] );
+         numOfSectors   = ( uint8_t )atoi( argv[2] );
+         execute        = true;
+         break;
+      }
+      case ( 4 ):
+      {
+         delaymSec      = ( uint8_t )atoi( argv[1] );
+         numOfSectors   = ( uint8_t )atoi( argv[2] );
+         location       = ( uint8_t )atoi( argv[3] );
+         execute        = true;
+         break;
+      }
+      default:
+      {
+         execute        = false;
+         DBG_printf( "USAGE: PowerDownTest delay(ms) [no_of_sectors] [ 0: External NV; 1: Internal ]" );
+         break;
+      }
+   }
+
+   if( execute )
+   {
+      pwrDnSimulation_Enable_ = true; // Enable the feature
+
+      if ( ( EXTERNAL_NV == location ) && ( 0 == numOfSectors ) )
+      {
+         numOfSectors = DEFAULT_NUM_SECTORS; // Update with default
+         INFO_printf( " Using the defaults: Number of Sectors %d, Test Location: External NV !!!!" );
+      }
+      if ( ( INTERNAL_NV == location ) && ( numOfSectors > 4 ) )
+      {
+         numOfSectors = DEFAULT_NUM_SECTORS; // Update: Max value for internal NV
+         INFO_printf( " Note: Max possible number of sectors for internal NV is 4 " );
+      }
+      DBG_logPrintf( 'R', " !!!! Power Down Simulation Test !!!!" );
+      if( delaymSec != 0 )
+      {
+         INFO_printf( " !!!! Wait for %d msecs !!!!", delaymSec );
+         ( void )DFWA_WaitForSysIdle(delaymSec );
+      }
+
+      INFO_printf( " !!!! Arming for Power Down !!!!" );
+
+      /* Increase the priority of the DBG task and Print task */
+      ( void )OS_TASK_Set_Priority( pTskName_Print, 11 ); // Increasing priority
+      ( void )OS_TASK_Set_Priority( pTskName_Dbg, 11 );
+      // Note: Increase the MFG port priority to have MFG port access to use "reboot" command
+#if 0  // TODO: RA6E1 Bob: Unable to figure out why these two extern symbols cannot be resolved
+      ( void )OS_TASK_Set_Priority( pTskName_Mfg, 11 );
+      ( void )OS_TASK_Set_Priority( pTskName_MfgUartRecv, 11 );
+#endif  // TODO: RA6E1 Bob: Unable to figure out why these two extern symbols cannot be resolved
+      ( void )OS_TASK_Set_Priority( pTskName_MfgUartCmd, 11 );
+      ( void )OS_TASK_Set_Priority( pTskName_Idle, 13 );
+
+      DBG_printf( " !!!! Now waiting for Power Down, Please TURN OFF the Power !!!!" );
+      DBG_printf( " Note: If you would like to end this test NOW, use MFG port to send '''reboot''' command " );
+      ( void )OS_SEM_Pend( &PWR_SimulatePowerDn_Sem, OS_WAIT_FOREVER ); // Wait for power down semaphore!
+      OS_TICK_Get_CurrentElapsedTicks(&DBG_startTick_);
+      // lock the PWR mutex
+      PWR_lockMutex( PWR_MUTEX_ONLY ); // Function will not return if it fails
+      ( void )DBG_CommandLine_NvEraseTest ( numOfSectors, location );
+      PWR_unlockMutex( PWR_MUTEX_ONLY ); // Function will not return if it fails
+
+      /* Never Returns */
+   }
+   return (0);
+}
+/* end DBG_CommandLine_SimulatePowerDown() */
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_NvEraseTest
+
+   Purpose: To perform R-E-W ( Read Erase Write ) test on Internal or External NV
+
+   Arguments:  uint8_t - number of sectors
+               bool - NV location to test ( 0: External 1: Internal )
+
+   Returns: FuncStatus - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_NvEraseTest ( uint8_t sectors, bool nvLocation )
+{
+   uint32_t          sectorSize        = EXT_FLASH_SECTOR_SIZE;
+   ePartitionName    partition         = ePART_DFW_PGM_IMAGE;
+   uint32_t          bootLoaderOffset  = PART_BL_BACKUP_OFFSET;
+   OS_TICK_Struct    startTick         = {0};
+   OS_TICK_Struct    endTick           = {0};
+   uint32_t          *pSomeBuffer;
+
+   DBG_printf( " !!!! Welcome to NV Read Erase Write ( R-E-W ) Test !!!!" );
+   INFO_printf( " !!!! Let's perform R-E-W on #%d Sectors ", sectors );
+
+   if ( INTERNAL_NV == nvLocation )  // Internal
+   {
+      sectorSize        = INT_FLASH_ERASE_SIZE;  // same as sector erase size for Ext flash
+      partition         = ePART_BL_BACKUP;
+      bootLoaderOffset  = 0;
+      INFO_printf(" Performing Test on Internal NV ");
+   }
+   else
+   {
+      INFO_printf(" Performing Test on External NV ");
+   }
+   // Read-Erase-Write for given no. of sectors. "One sector at a time"
+   pSomeBuffer = malloc( sectorSize );
+
+   if ( NULL != pSomeBuffer )
+   {
+#if 0
+      //DG: DBG Prints
+      INFO_printf( "Got  pSomeBuffer = 0x%08x", ( uint32_t )pSomeBuffer );
+      INFO_printf( " Partition address :0x%08x", pTestPartition_->PhyStartingAddress );
+#endif
+      (void)memset( pSomeBuffer, 0 , sectorSize );
+      // Fill the buffer with Random Number
+      for ( uint16_t i = 0; i < ( uint16_t )( sectorSize/4) ; i++ )
+      {
+         pSomeBuffer[i] = ( uint32_t )aclara_rand();
+      }
+      /* Get the OS tick */
+      OS_TICK_Get_CurrentElapsedTicks(&startTick);
+      // TODO: Select the Partition based on the size?
+      if ( eSUCCESS == PAR_partitionFptr.parOpen(&pTestPartition_, partition, 0L) )
+      {
+         for ( ; sectors > 0 ; sectors-- )
+         {
+            // Write the pattern to the sector
+            if ( eSUCCESS == PAR_partitionFptr.parWrite( bootLoaderOffset, (uint8_t *) pSomeBuffer, sectorSize, pTestPartition_ ) )
+            {
+               INFO_printf(" !!!!!!!! Successfully performed R-E-W on a sector !!!!!!!");
+            }
+            else
+            {
+               ERR_printf( "ERROR: Write FAILED!!!!!!!!!" );
+            }
+            bootLoaderOffset += sectorSize; // perform R-E-W on next sector
+         } // End of for loop
+         OS_TICK_Get_CurrentElapsedTicks(&endTick);
+         INFO_printf(" Time to complete the NV Read-Write-Erase Test : %li usec", OS_TICK_Get_Diff_InMicroseconds ( &startTick, &endTick  ));
+      }
+      else
+      {
+         ERR_printf(" !!!!!!!! Failed to Open the partition !!!!!!! ");
+      }
+      free(pSomeBuffer);
+   }
+   else
+   {
+      ERR_printf( "ERROR: Falied to allocate memory ");
+   }
+
+   return ( 0 );
+}
+/* end DBG_CommandLine_NvTest() */
+#endif /* End of #if ( SIMULATE_POWER_DOWN == 1 ) */
+#if ( DCU == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_sdtest
+
+   Purpose: Tests the external SDRAM memory
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+/* Kill tasks that are likely to try to use (malloc) RAM under test. */
+static char const  *const tasks[] =
+{
+   "STRT",
+   "APPMSG",
+   "BPI",
+   "SM",
+   "PHY",
+   "MAC",
+   "NWK",
+   "STAR",
+   "DTLS",
+   "BUAM",
+   "DFW",
+   "MFGC",
+   "MFGU",
+   "PAR",
+   "TEST",
+   NULL
+};
+extern unsigned char __EXTERNAL_MRAM_RAM_BASE[];  /* Defined in linker script   */
+extern unsigned char __EXTERNAL_MRAM_RAM_SIZE[];  /* Defined in linker script   */
+#define SDRAM_START __EXTERNAL_MRAM_RAM_BASE
+#define SDRAM_SIZE  __EXTERNAL_MRAM_RAM_SIZE
+static uint32_t DBG_CommandLine_sdtest ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t    status; /*lint !e123 */
+   char              **pTask;
+   _task_id          id;
+   uint32_t          LoopCount = 1;
+   uint32_t          pattern;
+   uint32_t          antipattern;
+   uint32_t          readback;
+   uint32_t          addressMask;
+   uint32_t          offset;
+   uint32_t          testOffset;
+   char              *endptr;             /* Used with strtoul */
+   volatile uint32_t *sdptr;              /* Pointer to SDRAM  */
+   uint32_t          i;
+
+   if ( argc == 2 )
+   {
+      LoopCount = strtoul( argv[1], &endptr, 0 );
+   }
+   pTask = (char **)tasks;
+   do
+   {
+      id = _task_get_id_from_name( *pTask );
+      if ( id != 0 )
+      {
+         (void)_task_destroy( id );
+      }
+      pTask++;
+   } while ( *pTask != NULL );
+
+   (void)printf( "Testing SDRAM %d times...\n", LoopCount );
+
+   /*lint -e{443} status in first clause; not in third OK   */
+   for ( status = eSUCCESS; LoopCount && ( status == eSUCCESS ); LoopCount-- )
+   {
+      (void)printf( "Loop: %lu\n", LoopCount );
+
+      (void)printf( "Walking 1s test\n" );
+      /* Perform walking ones test  */
+      sdptr = (uint32_t *)(void*)SDRAM_START;
+      for( i = 0; i < (uint32_t)SDRAM_SIZE / sizeof( uint32_t ) ; i++, sdptr++ )
+      {
+         for( pattern = 1U; pattern != 0; pattern <<= 1 )
+         {
+            *sdptr = pattern;       /* Write pattern  */
+
+            readback = *sdptr;      /* Read back to variable, in case read/write not reliable.  */
+            if ( readback != pattern )
+            {
+               (void)printf( "Walking 1 failed at location 0x%08p, s/b 0x%08lx, is 0x%08lx\n", sdptr, pattern, readback );
+            }
+         }
+      }
+
+      /* Perform address bus test   */
+      (void)printf( "Address stuck high test\n" );
+      sdptr = (uint32_t *)(void*)SDRAM_START;
+      addressMask = ( (uint32_t)SDRAM_SIZE/sizeof( uint32_t ) - 1 );
+      pattern     = (uint32_t) 0xAAAAAAAA;
+      antipattern = (uint32_t) 0x55555555;
+
+      /* Write the default pattern at each of the power-of-two offsets.  */
+      for (offset = 1; (offset & addressMask) != 0; offset <<= 1)
+      {
+         sdptr[offset] = pattern;
+      }
+
+      /* Check for address bits stuck high.  */
+      testOffset = 0;
+      sdptr[testOffset] = antipattern;
+
+      for (offset = 1; (offset & addressMask) != 0; offset <<= 1)
+      {
+         readback = sdptr[offset];
+         if (readback != pattern)
+         {
+            (void)printf( "Address stuck high at location 0x%08p, s/b 0x%08lx, is 0x%08lx\n", sdptr+offset, pattern, readback );
+            status = eFAILURE;
+         }
+      }
+
+      sdptr[testOffset] = pattern;
+
+      /* Check for address bits stuck low or shorted.  */
+      (void)printf( "Address stuck low or shorted test\n" );
+      for (testOffset = 1; (testOffset & addressMask) != 0; testOffset <<= 1)
+      {
+         sdptr[testOffset] = antipattern;
+
+         readback = sdptr[0];
+         if ( readback != pattern )
+         {
+            (void)printf( "Address stuck low at location 0x%08p, s/b 0x%08lx, is 0x%08lx\n", sdptr+offset, pattern, readback );
+            status = eFAILURE;
+         }
+
+         for (offset = 1; (offset & addressMask) != 0; offset <<= 1)
+         {
+            if ((sdptr[offset] != pattern) && (offset != testOffset))
+            {
+               (void)printf( "Address stuck low at location 0x%08p, s/b 0x%08lx, is 0x%08lx\n", sdptr+offset, pattern, readback );
+               status = eFAILURE;
+            }
+         }
+         sdptr[testOffset] = pattern;
+      }
+
+
+      /* Fill sector with pattern (data = address low byte) */
+      sdptr = (uint32_t *)(void*)SDRAM_START;
+      for( i = 0; i < (uint32_t)SDRAM_SIZE / sizeof( uint32_t ) ; i++, sdptr++ )
+      {
+         *sdptr = ~( uint32_t )sdptr;
+      }
+      /* Check sector for pattern (data = address low byte) */
+      sdptr = (uint32_t *)(void*)SDRAM_START;
+      for( i = 0; i < (uint32_t)SDRAM_SIZE / sizeof( uint32_t ) ; i++, sdptr++ )
+      {
+         if ( *sdptr != ~( uint32_t )sdptr )
+         {
+            (void)printf( "Failed at location 0x%08p, s/b 0x%08x, is 0x%08x\n",
+                           sdptr, ( uint32_t )sdptr, *sdptr );
+            status = eFAILURE;
+         }
+      }
+      WDOG_Kick();
+   }
+
+   if( eSUCCESS == status )
+   {
+      (void)printf( "SDRAM Test Success!\n" );
+   }
+   else
+   {
+      (void)printf( "SDRAM Test Failed!!!!\n" );
+      OS_TASK_Sleep( ONE_SEC * 5 );
+   }
+
+   (void)printf( "Rebooting\n" );
+   OS_TASK_Sleep( ONE_SEC );
+   PWR_SafeReset();  /* Execute Software Reset, with cache flush */
+   return ( 0 );
+}
+/* end DBG_CommandLine_sdtest() */
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_getTBslot
+
+   Purpose: Reports backplane slot sensed.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_getTBslot( uint32_t argc, char *argv[] )
+{
+   uint8_t slotID;
+
+   SLOT_ADDR( slotID );                            /* read slot ID      */
+   slotID += '1';                                  /* Convert to ASCII and bias for base 1 reporting  */
+   DBG_logPrintf( 'I', "Slot: %c (1 based)", (char)slotID ); /* Print result      */
+   return 0;
+}
+#endif //#if ( DCU == 1 )
 //#if ( INCLUDE_ECC == 1 )
 //#include "ecc108_lib_return_codes.h"
 //static const char checkmac_failed[] = "ECC108_CHECKMAC_FAILED";
@@ -3028,326 +3071,326 @@ static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] )
    }
    return 0;
 }
-//#endif // #if 0
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_sectest
-//
-//   Purpose: Exercise the security chip (I2C)
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//#if 0
-//static const uint8_t verifyMsg[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
-//static const uint8_t slot12sig[ 64 ] =
-//{
-//   0x5F, 0xA0, 0xFF, 0x1E, 0x82, 0xB4, 0x99, 0xC1, 0xA1, 0x55, 0xC1, 0x78, 0xEB, 0x66, 0x19, 0x67,
-//   0x37, 0x2F, 0x30, 0x15, 0x0A, 0x69, 0x46, 0x61, 0xCC, 0xA9, 0xE2, 0x12, 0xBF, 0x8D, 0x48, 0x87,
-//   0x9D, 0xEA, 0xA3, 0xAE, 0xF5, 0x31, 0xFA, 0x96, 0x59, 0xEF, 0x6C, 0x70, 0x3E, 0x68, 0x89, 0x0D,
-//   0xC5, 0x3C, 0xB1, 0x57, 0x32, 0x71, 0x75, 0x24, 0xEE, 0xDC, 0xA6, 0x50, 0x14, 0xF4, 0xDB, 0x62
-//};
-//static const uint8_t slot14sig[ 64 ] =
-//{
-//   0x26, 0x3E, 0xDD, 0x98, 0x14, 0xFC, 0x7F, 0xA9, 0xCE, 0x00, 0x41, 0x5F, 0xCB, 0x14, 0xF7, 0xB3,
-//   0xC7, 0x3B, 0xF7, 0x3B, 0x90, 0x0A, 0x64, 0x94, 0x67, 0x7A, 0xA4, 0xE1, 0x22, 0x19, 0x60, 0xF8,
-//   0x78, 0x8C, 0x37, 0x64, 0xBF, 0x98, 0xD1, 0xCC, 0xA6, 0x51, 0x0E, 0xC3, 0x44, 0x88, 0x6F, 0xE2,
-//   0xF9, 0x5E, 0x4B, 0xE7, 0x1F, 0x4F, 0x73, 0x31, 0xB4, 0x2C, 0x3F, 0x03, 0xE5, 0xD6, 0x2F, 0xB2
-//};
-//#endif
-//#if 0
-//static const uint8_t fwen[ 32 ] = { 0 };
-//#endif
-//#if (INCLUDE_ECC == 1)
-//uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
-//{
-//#if 0
-//   uint8_t        response[ VERIFY_256_SIGNATURE_SIZE ];
-//#endif
-//   char           *endptr;             /* Used with strtoul */
-//   uint32_t       LoopCount = 1;
-//   uint8_t        ECCstatus;
-//#if 0
-//   Sha256         sha;                 /* sha256 working area  */
-//   uint8_t        response[ 512 ];     /* Value returned by some ecc108e routines   */
-//   PartitionData_t const *pPart;       /* Used to access the security info partition  */
-//#endif
-//
-//   if ( argc == 2 )
-//   {
-//      LoopCount = strtoul( argv[1], &endptr, 0 );
-//   }
-//   DBG_logPrintf( 'R', "Exercising security device %d times...", LoopCount );
-//#if 0
-//   if ( ECC108_SUCCESS == ecc108_open() )
-//#endif
-//   {
-//      ECCstatus = ECC108_SUCCESS;
-//      do
-//      {
-//         ECCstatus = ecc108e_SelfTest();
-//#if 0
-//         ECCstatus = ecc108e_Verify( 14, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot14sig );
-//         /* sha256 the message */
-//         ( void )wc_InitSha256( &sha );
-//         ( void )wc_Sha256Update( &sha, verifyMsg, sizeof( verifyMsg ) ); /* sha256 on message */
-//         ( void )wc_Sha256Final( &sha, response );      /* Retrieve the sha256 results   */
-//         ECCstatus = ecc108e_Sign( SHA256_DIGEST_SIZE, response, response );
-//         for ( Cert_type i = AclaraPublicRootCert_e; i <= dtlsMSSubject_e; i++ )
-//         {
-//            ecc108e_GetDeviceCert( i, response, &LoopCount );
-//         }
-//         endptr = ( char * )ecc108e_SecureRandom();
-//         ECCstatus = ecc108e_Verify( 12, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot12sig );
-//         ECCstatus = ecc108e_EncryptedKeyWrite( PUB_KEY_SECRET, HOST_AUTH_KEY, ( bool )false, ( bool )false );
-//         ECCstatus = ecc108e_Verify( 12, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot12sig );
-//         ECCstatus = ecc108e_DeriveFWDecryptionKey( response, response );
-//         ECCstatus = ecc108e_EncryptedKeyWrite( NETWORK_PUB_KEY_SECRET, HOST_AUTH_KEY, ( bool )false, ( bool )false );
-//         ECCstatus = ecc108e_EncryptedKeyWrite( HOST_AUTH_KEY, KEY_UPDATE_WRITE_KEY, ( bool )true, ( bool )true );
-//         ECCstatus = ecc108e_Sign( sizeof( verifyMsg ), ( uint8_t * )verifyMsg, response );
-//         ECCstatus = ecc108e_DeriveFWDecryptionKey( ( uint8_t * )fwen, response );
-//         ECCstatus = ecc108e_EncryptedKeyRead( KEY_UPDATE_WRITE_KEY, HOST_AUTH_KEY, response );
-//         ecc108e_sleep();
-//         ECCstatus = ecc108e_Verify( 12, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot12sig );
-//         ECCstatus = ecc108e_Verify( 14, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot14sig );
-//         ECCstatus = ecc108e_read_mac( response );
-//         ECCstatus = ecc108e_Verify( 12, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot12sig );
-//         ECCstatus = ecc108e_Verify( 14, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot14sig );
-//         ECCstatus = ecc108e_EncryptedKeyWrite();
-//         ECCstatus = ecc108e_SelfTest();
-//         uint8_t        slotData[ 32 ];
-//         ECCstatus = ecc108e_EncryptedKeyRead( slotData );
-//         ecc108e_sleep();
-//         endptr = ( char * )ecc108e_SecureRandom();
-//         ecc108e_sleep();
-//         if( ECCstatus == ECC108_SUCCESS )
-//         {
-//            ECCstatus = ecc108e_readAllPublic();
-//         }
-//         ECCstatus = ecc108e_readAllPublic();
-//         ECCstatus = ecc108e_gen_public_key();
-//         PrintECC_error( ECCstatus );
-//         PrintECC_error( ECCstatus );
-//         ECCstatus = ecc108e_random( NULL );
-//         PrintECC_error( ECCstatus );
-//         ecc108e_write_config();
-//         break;
-//         ECCstatus = ecc108e_random( NULL );
-//         ECCstatus = ecc108e_checkmac_device();
-//         ECCstatus = ecc108e_checkmac_firmware();
-//         ECCstatus = ecc108e_verify_external();
-//         ECCstatus = ecc108e_verify_host();
-//#endif
-//         if( LoopCount )
-//         {
-//            LoopCount--;
-//         }
-//      }
-//      while( ( ECC108_SUCCESS == ECCstatus ) && ( LoopCount != 0 ) );
-//      PrintECC_error( ECCstatus );
-//      DBG_printf( "Security Device Test %s", ( ECC108_SUCCESS == ECCstatus ) ? "Success!" : "Failed!!!!" );
-//#if 0
-//      ecc108_close();
-//#endif
-//   }
-//#if 0
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Failed to open device %s", i2cName );
-//   }
-//#endif
-//   return ( 0 );  /*lint !e438 endptr value not used; OK */
-//}
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_secConfig
-//
-//   Purpose: Configure the security chip (I2C)
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Note: This function can take an optional (unadvertised) parameter -
-//         if the string (case insensitive) "lockdata" is specified, the data zone will be locked.
-//            OR
-//         if the string (case insensitive) "lockconfig" is specified on the command line, the configuration zone will be
-//            locked.
-//            OR
-//         the word "customize", the Aclara customization (public key and signer cert) will be stored in the
-//            eccx08 device. The customization data must already be present in ecc108e_apps.c file.
-//            OR
-//         the word "genkey" - will generate a new private device key in slot 0, with the public key going to slot 9
-//            OR
-//         the word "verifykeys" - will attempt to verify all the public keys in the device.
-//            OR
-//         the word "crcconfig" will compute the CRC of the config zone. The user may also specify a SN as an
-//               additional parameter (up to 10 hex digits)
-//
-//   Returns: FuncStatus - Successful status of this function.
-//
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
-//{
-//#if 0
-//   uint8_t        customize = 0;    /* Request to customize the data zone flag            */
-//   uint8_t        genkey = 0;       /* Request to generate a new private/public key pair  */
-//   uint8_t        verifykey = 0;    /* Request to verify all the public keys              */
-//   uint16_t       crc;              /* Computed CRC of config zone                        */
-//   uint64_t       *psn = NULL;
-//   uint64_t       sn = 0;
-//#endif
-//   uint8_t        crcconfig = 0;    /* Request to compute config zone CRC, with optional S/N   */
-//   uint8_t        ECCstatus;        /* Function return value                              */
-//   uint8_t        lockdata = 0;     /* Request to lock the data zone flag                 */
-//#if 0
-//   uint8_t        lockconfig = 0;   /* Request to lock the config zone flag               */
-//#endif
-//
-//   if ( argc >= 2 )     /* Extra parameter on command line - not advertised   */
-//   {
-//      if ( strcasecmp( "lockdata", argv[1] ) == 0 )
-//      {
-//         lockdata = 1;
-//      }
-//#if 0
-//      else if ( strcasecmp( "lockconfig", argv[1] ) == 0 )
-//      {
-//         lockconfig = 1;
-//      }
-//      else if ( strcasecmp( "customize", argv[1] ) == 0 )
-//      {
-//         customize = 1;
-//      }
-//      else if ( strcasecmp( "genkey", argv[1] ) == 0 )
-//      {
-//         genkey = 1;
-//      }
-//      else if ( strcasecmp( "verifykeys", argv[1] ) == 0 )
-//      {
-//         verifykey = 1;
-//      }
-//#endif
-//      else if ( strcasecmp( "crcconfig", argv[1] ) == 0 )
-//      {
-//#if 0
-//         crcconfig = 1;
-//         if( argc == 3 )      /* S/N provided?  */
-//         {
-//            char *endptr;
-//            /* Use should input as SN[0:3]SN[4-7]
-//               SN[8] is always 0xEE
-//               e.g. SN[0-3] = 01236B37
-//                     SN[4-7] = 69A1FF4F
-//               type
-//               secconfig crcconfig 0x01236B3769A1FF4F
-//            */
-//            sn = strtoull( argv[2], &endptr, 0 );
-//            psn = &sn;
-//         }
-//#endif
-//      }
-//   }
-//   if ( ECC108_SUCCESS == ecc108_open() )
-//   {
-//      if( lockdata != 0 )
-//      {
-//#if 0
-//         DBG_logPrintf( 'R', "Attempting to lock ECCx08 data." );
-//         ecc108e_sleep();
-//         ECCstatus = ecc108e_lock_data_zone();
-//         PrintECC_error( ECCstatus );
-//         DBG_logPrintf( 'R', "ECCx08 lock data %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-//#endif
-//      }
-//#if 0
-//      else if ( customize != 0 )
-//      {
-//         DBG_logPrintf( 'R', "Attempting to customize ECCx08." );
-//         ECCstatus = ecc108e_customize();
-//         PrintECC_error( ECCstatus );
-//         DBG_logPrintf( 'R', "ECCx08 customize %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-//      }
-//      else if ( verifykey != 0 )
-//      {
-//         DBG_logPrintf( 'R', "Attempting to verify ECCx08 keys." );
-//         ECCstatus = ecc108e_verify_public_keys();
-//         PrintECC_error( ECCstatus );
-//         DBG_logPrintf( 'R', "ECCx08 gen key %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-//      }
-//      else if ( genkey != 0 )
-//      {
-//         DBG_logPrintf( 'R', "Attempting to generate ECCx08 key." );
-//         ECCstatus = ecc108e_gen_public_key();
-//         PrintECC_error( ECCstatus );
-//         DBG_logPrintf( 'R', "ECCx08 gen key %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-//      }
-//#endif
-//      else if ( crcconfig != 0 ) /*lint !e774 crcconfig always 0; OK temporary code */
-//      {
-//#if 0
-//         DBG_logPrintf( 'R', "Computing ECCx08 config zone CRC." );
-//         PrintECC_error( ECCstatus );
-//         DBG_logPrintf( 'R', "Computing config CRC%s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-//#endif
-//      }
-//      else
-//      {
-////       ECCstatus = ecc108e_check_lock_status();  /* Returns failure on "UNlocked" */
-//#if 0
-//         if ( ECCstatus != ECC108_FUNC_FAIL )      /* Make sure not locked already  */
-//         {
-//            PrintECC_error( ECCstatus );
-//            DBG_logPrintf( 'R', "ECCx08 config already locked." );
-//         }
-//         else
-//#endif
-//         {
-//#if 0
-//            DBG_logPrintf( 'R', "Writing default values to the ECCx08 configuration zone." );
-////          ECCstatus = ecc108e_write_config(); /* Attempt to write default config data   */
-//            PrintECC_error( ECCstatus );
-//            DBG_logPrintf( 'R', "ECCx08 config update %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" : "failed" );
-//            if ( ECCstatus == ECC108_SUCCESS )
-//#endif
-//            {
-//               ECCstatus = ecc108e_verify_config();
-//               PrintECC_error( ECCstatus );
-//               DBG_logPrintf( 'R', "ECCx08 config verification %s.",
-//                              ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-//#if 0 // DG: DeadCode
-//               if ( ECCstatus == ECC108_SUCCESS )
-//               {
-//                  if( lockconfig != 0 ) /*lint !e774 lockconfig always 0; OK temporary code */
-//                  {
-//                     ecc108e_sleep();
-////                   ECCstatus = ecc108e_lock_config_zone();
-//                     PrintECC_error( ECCstatus );
-//                     DBG_logPrintf( 'R', "ECCx08 lock config %s.",
-//                                    ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-//                  }
-//               }
-//#endif
-//               ecc108e_sleep();
-//            }
-//         }
-//      }
-//      ecc108_close();
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Failed to open device %s", i2cName );
-//   }
-//   return ( 0 );
-//}
-///* end DBG_CommandLine_secConfig() */
-//#endif // #if (INCLUDE_ECC == 1)
-//
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_sectest
+
+   Purpose: Exercise the security chip (I2C)
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+#if 0
+static const uint8_t verifyMsg[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
+static const uint8_t slot12sig[ 64 ] =
+{
+   0x5F, 0xA0, 0xFF, 0x1E, 0x82, 0xB4, 0x99, 0xC1, 0xA1, 0x55, 0xC1, 0x78, 0xEB, 0x66, 0x19, 0x67,
+   0x37, 0x2F, 0x30, 0x15, 0x0A, 0x69, 0x46, 0x61, 0xCC, 0xA9, 0xE2, 0x12, 0xBF, 0x8D, 0x48, 0x87,
+   0x9D, 0xEA, 0xA3, 0xAE, 0xF5, 0x31, 0xFA, 0x96, 0x59, 0xEF, 0x6C, 0x70, 0x3E, 0x68, 0x89, 0x0D,
+   0xC5, 0x3C, 0xB1, 0x57, 0x32, 0x71, 0x75, 0x24, 0xEE, 0xDC, 0xA6, 0x50, 0x14, 0xF4, 0xDB, 0x62
+};
+static const uint8_t slot14sig[ 64 ] =
+{
+   0x26, 0x3E, 0xDD, 0x98, 0x14, 0xFC, 0x7F, 0xA9, 0xCE, 0x00, 0x41, 0x5F, 0xCB, 0x14, 0xF7, 0xB3,
+   0xC7, 0x3B, 0xF7, 0x3B, 0x90, 0x0A, 0x64, 0x94, 0x67, 0x7A, 0xA4, 0xE1, 0x22, 0x19, 0x60, 0xF8,
+   0x78, 0x8C, 0x37, 0x64, 0xBF, 0x98, 0xD1, 0xCC, 0xA6, 0x51, 0x0E, 0xC3, 0x44, 0x88, 0x6F, 0xE2,
+   0xF9, 0x5E, 0x4B, 0xE7, 0x1F, 0x4F, 0x73, 0x31, 0xB4, 0x2C, 0x3F, 0x03, 0xE5, 0xD6, 0x2F, 0xB2
+};
+#endif
+#if 0
+static const uint8_t fwen[ 32 ] = { 0 };
+#endif
+#if (INCLUDE_ECC == 1)
+uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
+{
+#if 0
+   uint8_t        response[ VERIFY_256_SIGNATURE_SIZE ];
+#endif
+   char           *endptr;             /* Used with strtoul */
+   uint32_t       LoopCount = 1;
+   uint8_t        ECCstatus;
+#if 0
+   Sha256         sha;                 /* sha256 working area  */
+   uint8_t        response[ 512 ];     /* Value returned by some ecc108e routines   */
+   PartitionData_t const *pPart;       /* Used to access the security info partition  */
+#endif
+
+   if ( argc == 2 )
+   {
+      LoopCount = strtoul( argv[1], &endptr, 0 );
+   }
+   DBG_logPrintf( 'R', "Exercising security device %d times...", LoopCount );
+#if 0
+   if ( ECC108_SUCCESS == ecc108_open() )
+#endif
+   {
+      ECCstatus = ECC108_SUCCESS;
+      do
+      {
+         ECCstatus = ecc108e_SelfTest();
+#if 0
+         ECCstatus = ecc108e_Verify( 14, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot14sig );
+         /* sha256 the message */
+         ( void )wc_InitSha256( &sha );
+         ( void )wc_Sha256Update( &sha, verifyMsg, sizeof( verifyMsg ) ); /* sha256 on message */
+         ( void )wc_Sha256Final( &sha, response );      /* Retrieve the sha256 results   */
+         ECCstatus = ecc108e_Sign( SHA256_DIGEST_SIZE, response, response );
+         for ( Cert_type i = AclaraPublicRootCert_e; i <= dtlsMSSubject_e; i++ )
+         {
+            ecc108e_GetDeviceCert( i, response, &LoopCount );
+         }
+         endptr = ( char * )ecc108e_SecureRandom();
+         ECCstatus = ecc108e_Verify( 12, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot12sig );
+         ECCstatus = ecc108e_EncryptedKeyWrite( PUB_KEY_SECRET, HOST_AUTH_KEY, ( bool )false, ( bool )false );
+         ECCstatus = ecc108e_Verify( 12, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot12sig );
+         ECCstatus = ecc108e_DeriveFWDecryptionKey( response, response );
+         ECCstatus = ecc108e_EncryptedKeyWrite( NETWORK_PUB_KEY_SECRET, HOST_AUTH_KEY, ( bool )false, ( bool )false );
+         ECCstatus = ecc108e_EncryptedKeyWrite( HOST_AUTH_KEY, KEY_UPDATE_WRITE_KEY, ( bool )true, ( bool )true );
+         ECCstatus = ecc108e_Sign( sizeof( verifyMsg ), ( uint8_t * )verifyMsg, response );
+         ECCstatus = ecc108e_DeriveFWDecryptionKey( ( uint8_t * )fwen, response );
+         ECCstatus = ecc108e_EncryptedKeyRead( KEY_UPDATE_WRITE_KEY, HOST_AUTH_KEY, response );
+         ecc108e_sleep();
+         ECCstatus = ecc108e_Verify( 12, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot12sig );
+         ECCstatus = ecc108e_Verify( 14, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot14sig );
+         ECCstatus = ecc108e_read_mac( response );
+         ECCstatus = ecc108e_Verify( 12, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot12sig );
+         ECCstatus = ecc108e_Verify( 14, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot14sig );
+         ECCstatus = ecc108e_EncryptedKeyWrite();
+         ECCstatus = ecc108e_SelfTest();
+         uint8_t        slotData[ 32 ];
+         ECCstatus = ecc108e_EncryptedKeyRead( slotData );
+         ecc108e_sleep();
+         endptr = ( char * )ecc108e_SecureRandom();
+         ecc108e_sleep();
+         if( ECCstatus == ECC108_SUCCESS )
+         {
+            ECCstatus = ecc108e_readAllPublic();
+         }
+         ECCstatus = ecc108e_readAllPublic();
+         ECCstatus = ecc108e_gen_public_key();
+         PrintECC_error( ECCstatus );
+         PrintECC_error( ECCstatus );
+         ECCstatus = ecc108e_random( NULL );
+         PrintECC_error( ECCstatus );
+         ecc108e_write_config();
+         break;
+         ECCstatus = ecc108e_random( NULL );
+         ECCstatus = ecc108e_checkmac_device();
+         ECCstatus = ecc108e_checkmac_firmware();
+         ECCstatus = ecc108e_verify_external();
+         ECCstatus = ecc108e_verify_host();
+#endif
+         if( LoopCount )
+         {
+            LoopCount--;
+         }
+      }
+      while( ( ECC108_SUCCESS == ECCstatus ) && ( LoopCount != 0 ) );
+      PrintECC_error( ECCstatus );
+      DBG_printf( "Security Device Test %s", ( ECC108_SUCCESS == ECCstatus ) ? "Success!" : "Failed!!!!" );
+#if 0
+      ecc108_close();
+#endif
+   }
+#if 0
+   else
+   {
+      DBG_logPrintf( 'R', "Failed to open device %s", i2cName );
+   }
+#endif
+   return ( 0 );  /*lint !e438 endptr value not used; OK */
+}
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_secConfig
+
+   Purpose: Configure the security chip (I2C)
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Note: This function can take an optional (unadvertised) parameter -
+         if the string (case insensitive) "lockdata" is specified, the data zone will be locked.
+            OR
+         if the string (case insensitive) "lockconfig" is specified on the command line, the configuration zone will be
+            locked.
+            OR
+         the word "customize", the Aclara customization (public key and signer cert) will be stored in the
+            eccx08 device. The customization data must already be present in ecc108e_apps.c file.
+            OR
+         the word "genkey" - will generate a new private device key in slot 0, with the public key going to slot 9
+            OR
+         the word "verifykeys" - will attempt to verify all the public keys in the device.
+            OR
+         the word "crcconfig" will compute the CRC of the config zone. The user may also specify a SN as an
+               additional parameter (up to 10 hex digits)
+
+   Returns: FuncStatus - Successful status of this function.
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
+{
+#if 0
+   uint8_t        customize = 0;    /* Request to customize the data zone flag            */
+   uint8_t        genkey = 0;       /* Request to generate a new private/public key pair  */
+   uint8_t        verifykey = 0;    /* Request to verify all the public keys              */
+   uint16_t       crc;              /* Computed CRC of config zone                        */
+   uint64_t       *psn = NULL;
+   uint64_t       sn = 0;
+#endif
+   uint8_t        crcconfig = 0;    /* Request to compute config zone CRC, with optional S/N   */
+   uint8_t        ECCstatus;        /* Function return value                              */
+   uint8_t        lockdata = 0;     /* Request to lock the data zone flag                 */
+#if 0
+   uint8_t        lockconfig = 0;   /* Request to lock the config zone flag               */
+#endif
+
+   if ( argc >= 2 )     /* Extra parameter on command line - not advertised   */
+   {
+      if ( strcasecmp( "lockdata", argv[1] ) == 0 )
+      {
+         lockdata = 1;
+      }
+#if 0
+      else if ( strcasecmp( "lockconfig", argv[1] ) == 0 )
+      {
+         lockconfig = 1;
+      }
+      else if ( strcasecmp( "customize", argv[1] ) == 0 )
+      {
+         customize = 1;
+      }
+      else if ( strcasecmp( "genkey", argv[1] ) == 0 )
+      {
+         genkey = 1;
+      }
+      else if ( strcasecmp( "verifykeys", argv[1] ) == 0 )
+      {
+         verifykey = 1;
+      }
+#endif
+      else if ( strcasecmp( "crcconfig", argv[1] ) == 0 )
+      {
+#if 0
+         crcconfig = 1;
+         if( argc == 3 )      /* S/N provided?  */
+         {
+            char *endptr;
+            /* Use should input as SN[0:3]SN[4-7]
+               SN[8] is always 0xEE
+               e.g. SN[0-3] = 01236B37
+                     SN[4-7] = 69A1FF4F
+               type
+               secconfig crcconfig 0x01236B3769A1FF4F
+            */
+            sn = strtoull( argv[2], &endptr, 0 );
+            psn = &sn;
+         }
+#endif
+      }
+   }
+   if ( ECC108_SUCCESS == ecc108_open() )
+   {
+      if( lockdata != 0 )
+      {
+#if 0
+         DBG_logPrintf( 'R', "Attempting to lock ECCx08 data." );
+         ecc108e_sleep();
+         ECCstatus = ecc108e_lock_data_zone();
+         PrintECC_error( ECCstatus );
+         DBG_logPrintf( 'R', "ECCx08 lock data %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
+#endif
+      }
+#if 0
+      else if ( customize != 0 )
+      {
+         DBG_logPrintf( 'R', "Attempting to customize ECCx08." );
+         ECCstatus = ecc108e_customize();
+         PrintECC_error( ECCstatus );
+         DBG_logPrintf( 'R', "ECCx08 customize %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
+      }
+      else if ( verifykey != 0 )
+      {
+         DBG_logPrintf( 'R', "Attempting to verify ECCx08 keys." );
+         ECCstatus = ecc108e_verify_public_keys();
+         PrintECC_error( ECCstatus );
+         DBG_logPrintf( 'R', "ECCx08 gen key %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
+      }
+      else if ( genkey != 0 )
+      {
+         DBG_logPrintf( 'R', "Attempting to generate ECCx08 key." );
+         ECCstatus = ecc108e_gen_public_key();
+         PrintECC_error( ECCstatus );
+         DBG_logPrintf( 'R', "ECCx08 gen key %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
+      }
+#endif
+      else if ( crcconfig != 0 ) /*lint !e774 crcconfig always 0; OK temporary code */
+      {
+#if 0
+         DBG_logPrintf( 'R', "Computing ECCx08 config zone CRC." );
+         PrintECC_error( ECCstatus );
+         DBG_logPrintf( 'R', "Computing config CRC%s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
+#endif
+      }
+      else
+      {
+//       ECCstatus = ecc108e_check_lock_status();  /* Returns failure on "UNlocked" */
+#if 0
+         if ( ECCstatus != ECC108_FUNC_FAIL )      /* Make sure not locked already  */
+         {
+            PrintECC_error( ECCstatus );
+            DBG_logPrintf( 'R', "ECCx08 config already locked." );
+         }
+         else
+#endif
+         {
+#if 0
+            DBG_logPrintf( 'R', "Writing default values to the ECCx08 configuration zone." );
+//          ECCstatus = ecc108e_write_config(); /* Attempt to write default config data   */
+            PrintECC_error( ECCstatus );
+            DBG_logPrintf( 'R', "ECCx08 config update %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" : "failed" );
+            if ( ECCstatus == ECC108_SUCCESS )
+#endif
+            {
+               ECCstatus = ecc108e_verify_config();
+               PrintECC_error( ECCstatus );
+               DBG_logPrintf( 'R', "ECCx08 config verification %s.",
+                              ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
+#if 0 // DG: DeadCode
+               if ( ECCstatus == ECC108_SUCCESS )
+               {
+                  if( lockconfig != 0 ) /*lint !e774 lockconfig always 0; OK temporary code */
+                  {
+                     ecc108e_sleep();
+//                   ECCstatus = ecc108e_lock_config_zone();
+                     PrintECC_error( ECCstatus );
+                     DBG_logPrintf( 'R', "ECCx08 lock config %s.",
+                                    ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
+                  }
+               }
+#endif
+               ecc108e_sleep();
+            }
+         }
+      }
+      ecc108_close();
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Failed to open device %s", i2cName );
+   }
+   return ( 0 );
+}
+/* end DBG_CommandLine_secConfig() */
+#endif // #if (INCLUDE_ECC == 1)
+
 //#if 0 //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 ///*******************************************************************************
 //
@@ -3512,77 +3555,77 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
    return 0;
 }
 
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_mtrTime
-//
-//   Purpose: This function converts the input time in meter time format to system time, and converts it to UTC.
-//            meter time format is yy mm dd hh mm ss
-//            Enter arguments mm dd yy hh mm (more natural input format )
-//
-//   Arguments:  if argv[0] is mtrtime then converts meter format time to TIMESTAMP_t seconds
-//                  Converts meter time to system time and applies local to UTC conversion.
-//               if argv[0] is revmtrtime the converts TIMESTAMP_t seconds to meter format date
-//                  Converts entered time (seconds since epoch) to system time, and displays that
-//                  applies UTC to local conversion and displays that.
-//
-//               argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//#if ( CLOCK_IN_METER == 1 )
-//static uint32_t DBG_CommandLine_mtrTime( uint32_t argc, char *argv[] )
-//{
-//   sysTime_t                     sTime;      /* Meter time converted to system time */
-//   sysTime_dateFormat_t          sDateTime;  /* Seconds converted to date/time format  */
-//   uint32_t                      seconds;    /* System time converted to seconds since epoch */
-//   uint32_t                      fracSecs;   /* Unused, but required fractional seconds  */
-//   MtrTimeFormatHighPrecision_t  mTime;      /* Structure built with input values   */
-//
-//   if ( strcasecmp( argv[ 0 ], "mtrtime" ) == 0 )
-//   {
-//      if ( 6 == argc )  /* Must be exactly 6 parameters  */
-//      {
-//         /* Get individual date/time quantities */
-//         mTime.month   = (uint8_t)strtoul( argv[1], NULL, 0 );  /* Get two digits of month  */
-//         mTime.day     = (uint8_t)strtoul( argv[2], NULL, 0 );  /* Get two digits of day  */
-//         mTime.year    = (uint8_t)strtoul( argv[3], NULL, 0 );  /* Get two digits of year  */
-//         mTime.hours   = (uint8_t)strtoul( argv[4], NULL, 0 );  /* Get two digits of hours  */
-//         mTime.minutes = (uint8_t)strtoul( argv[5], NULL, 0 );  /* Get two digits of minutes  */
-//         mTime.seconds = 0;
-//
-//         (void)TIME_UTIL_ConvertMtrHighFormatToSysFormat( &mTime, &sTime);    /*  Convert meter local time to system time and convert to UTC  */
-//         TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &seconds, &fracSecs);
-//         DBG_logPrintf( 'R', "UTC: %hhu/%hhu/%hhu %hhu:%02hhu:%02hhu 0x%08lX", mTime.month, mTime.day, mTime.year, mTime.hours, mTime.minutes,
-//                        mTime.seconds, seconds ); /*  Display system time */
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'E', "Enter date: mm dd yy hh mm" );
-//      }
-//   }
-//   else if ( ( argc == 2 ) && ( strcasecmp( argv[ 0 ], "revmtrtime" ) == 0 ) )
-//   {
-//      seconds = strtoul( argv[ 1 ], NULL, 0 );
-//      fracSecs = 0;
-//
-//      TIME_UTIL_ConvertSecondsToSysFormat( seconds, fracSecs, &sTime );    /* Convert input seconds to sysTime_t format */
-//      (void)TIME_UTIL_ConvertSysFormatToMtrHighFormat( &sTime, &mTime );   /* Convert to meter format, local   */
-//
-//      DBG_logPrintf( 'R', "mtr time (local):  %02hhu/%02hhu/%04hu %02hhu:%02hhu:%02hhu", mTime.month, mTime.day, mTime.year + 2000U,
-//                     mTime.hours, mTime.minutes, mTime.seconds );
-//
-//      (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sDateTime );  /* Convert to date and time format */
-//      DBG_logPrintf( 'R', "mtr time (UTC)  :  %02hhu/%02hhu/%04hu %02hhu:%02hhu:%02hhu", sDateTime.month, sDateTime.day, sDateTime.year,
-//                     sDateTime.hour, sDateTime.min, sDateTime.sec );
-//   }
-//   return 0;
-//}
-//#endif
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_mtrTime
+
+   Purpose: This function converts the input time in meter time format to system time, and converts it to UTC.
+            meter time format is yy mm dd hh mm ss
+            Enter arguments mm dd yy hh mm (more natural input format )
+
+   Arguments:  if argv[0] is mtrtime then converts meter format time to TIMESTAMP_t seconds
+                  Converts meter time to system time and applies local to UTC conversion.
+               if argv[0] is revmtrtime the converts TIMESTAMP_t seconds to meter format date
+                  Converts entered time (seconds since epoch) to system time, and displays that
+                  applies UTC to local conversion and displays that.
+
+               argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+#if ( CLOCK_IN_METER == 1 )
+static uint32_t DBG_CommandLine_mtrTime( uint32_t argc, char *argv[] )
+{
+   sysTime_t                     sTime;      /* Meter time converted to system time */
+   sysTime_dateFormat_t          sDateTime;  /* Seconds converted to date/time format  */
+   uint32_t                      seconds;    /* System time converted to seconds since epoch */
+   uint32_t                      fracSecs;   /* Unused, but required fractional seconds  */
+   MtrTimeFormatHighPrecision_t  mTime;      /* Structure built with input values   */
+
+   if ( strcasecmp( argv[ 0 ], "mtrtime" ) == 0 )
+   {
+      if ( 6 == argc )  /* Must be exactly 6 parameters  */
+      {
+         /* Get individual date/time quantities */
+         mTime.month   = (uint8_t)strtoul( argv[1], NULL, 0 );  /* Get two digits of month  */
+         mTime.day     = (uint8_t)strtoul( argv[2], NULL, 0 );  /* Get two digits of day  */
+         mTime.year    = (uint8_t)strtoul( argv[3], NULL, 0 );  /* Get two digits of year  */
+         mTime.hours   = (uint8_t)strtoul( argv[4], NULL, 0 );  /* Get two digits of hours  */
+         mTime.minutes = (uint8_t)strtoul( argv[5], NULL, 0 );  /* Get two digits of minutes  */
+         mTime.seconds = 0;
+
+         (void)TIME_UTIL_ConvertMtrHighFormatToSysFormat( &mTime, &sTime);    /*  Convert meter local time to system time and convert to UTC  */
+         TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &seconds, &fracSecs);
+         DBG_logPrintf( 'R', "UTC: %hhu/%hhu/%hhu %hhu:%02hhu:%02hhu 0x%08lX", mTime.month, mTime.day, mTime.year, mTime.hours, mTime.minutes,
+                        mTime.seconds, seconds ); /*  Display system time */
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Enter date: mm dd yy hh mm" );
+      }
+   }
+   else if ( ( argc == 2 ) && ( strcasecmp( argv[ 0 ], "revmtrtime" ) == 0 ) )
+   {
+      seconds = strtoul( argv[ 1 ], NULL, 0 );
+      fracSecs = 0;
+
+      TIME_UTIL_ConvertSecondsToSysFormat( seconds, fracSecs, &sTime );    /* Convert input seconds to sysTime_t format */
+      (void)TIME_UTIL_ConvertSysFormatToMtrHighFormat( &sTime, &mTime );   /* Convert to meter format, local   */
+
+      DBG_logPrintf( 'R', "mtr time (local):  %02hhu/%02hhu/%04hu %02hhu:%02hhu:%02hhu", mTime.month, mTime.day, mTime.year + 2000U,
+                     mTime.hours, mTime.minutes, mTime.seconds );
+
+      (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sDateTime );  /* Convert to date and time format */
+      DBG_logPrintf( 'R', "mtr time (UTC)  :  %02hhu/%02hhu/%04hu %02hhu:%02hhu:%02hhu", sDateTime.month, sDateTime.day, sDateTime.year,
+                     sDateTime.hour, sDateTime.min, sDateTime.sec );
+   }
+   return 0;
+}
+#endif
 
 /*******************************************************************************
 
@@ -3779,101 +3822,101 @@ uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
 } /* end DBG_CommandLine_rtcTime () */
 
 #if ( MCU_SELECTED == NXP_K24 )
-///***********************************************************************************************************************
-//   Function Name: DBG_CommandLine_rtcCap
-//
-//   Purpose: Get/Set RTC Oscillator Cap Load in RTC_SR
-//
-//   Arguments:
-//      argc - Number of Arguments passed to this function
-//      argv - pointer to the list of arguments passed to this function
-//
-//   Returns: void
-//***********************************************************************************************************************/
-//uint32_t DBG_CommandLine_rtcCap( uint32_t argc, char *argv[] )
-//{
-//   uint32_t uValue;
-//   uint8_t uPF = 0;
-//
-//   uValue = ( uint32_t ) RTC_CR;
-//
-//   if ( 1 == argc )
-//   {
-//      DBG_printf( "RTC CAP: 0x%02x",
-//                  (  uValue & ( RTC_CR_SC16P_MASK | RTC_CR_SC8P_MASK | RTC_CR_SC4P_MASK | RTC_CR_SC2P_MASK ) ) >>
-//                  RTC_CR_SC16P_SHIFT );
-//
-//      if ( 0 != ( uValue & RTC_CR_SC16P_MASK ) )
-//      {
-//         uPF += 16;
-//      }
-//      if ( 0 != ( uValue & RTC_CR_SC8P_MASK ) )
-//      {
-//         uPF += 8;
-//      }
-//      if ( 0 != ( uValue & RTC_CR_SC4P_MASK ) )
-//      {
-//         uPF += 4;
-//      }
-//      if ( 0 != ( uValue & RTC_CR_SC2P_MASK ) )
-//      {
-//         uPF += 2;
-//      }
-//
-//      DBG_printf( "RTC CAP: %d pF", uPF );
-//   }
-//   else if ( 2 == argc )
-//   {
-//      uPF = ( uint8_t ) atoi( argv[1] );
-//
-//      if ( ( uPF <= 30 ) && ( 0 == ( uPF & 0x01 ) ) )
-//      {
-//         // Disable RTC Oscillator.
-//         uValue &= ~RTC_CR_OSCE_MASK;
-//         RTC_CR = uValue;
-//
-//         // Mask out all RTC_CR cap load values.
-//         uValue &= ~( RTC_CR_SC16P_MASK | RTC_CR_SC8P_MASK | RTC_CR_SC4P_MASK | RTC_CR_SC2P_MASK );
-//
-//         if ( uPF >= 16 )
-//         {
-//            uValue |= RTC_CR_SC16P_MASK;
-//            uPF -= 16;
-//         }
-//
-//         if ( uPF >= 8 )
-//         {
-//            uValue |= RTC_CR_SC8P_MASK;
-//            uPF -= 8;
-//         }
-//
-//         if ( uPF >= 4 )
-//         {
-//            uValue |= RTC_CR_SC4P_MASK;
-//            uPF -= 4;
-//         }
-//
-//         if ( uPF >= 2 )
-//         {
-//            uValue |= RTC_CR_SC2P_MASK;
-//         }
-//
-//         // Enable RTC Oscillator.
-//         uValue |= RTC_CR_OSCE_MASK;
-//         RTC_CR = uValue;
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Invalid value, must be an even number between 0 and 30 inclusive" );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//
-//   return( 0 );
-//}
+/***********************************************************************************************************************
+   Function Name: DBG_CommandLine_rtcCap
+
+   Purpose: Get/Set RTC Oscillator Cap Load in RTC_SR
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: void
+***********************************************************************************************************************/
+uint32_t DBG_CommandLine_rtcCap( uint32_t argc, char *argv[] )
+{
+   uint32_t uValue;
+   uint8_t uPF = 0;
+
+   uValue = ( uint32_t ) RTC_CR;
+
+   if ( 1 == argc )
+   {
+      DBG_printf( "RTC CAP: 0x%02x",
+                  (  uValue & ( RTC_CR_SC16P_MASK | RTC_CR_SC8P_MASK | RTC_CR_SC4P_MASK | RTC_CR_SC2P_MASK ) ) >>
+                  RTC_CR_SC16P_SHIFT );
+
+      if ( 0 != ( uValue & RTC_CR_SC16P_MASK ) )
+      {
+         uPF += 16;
+      }
+      if ( 0 != ( uValue & RTC_CR_SC8P_MASK ) )
+      {
+         uPF += 8;
+      }
+      if ( 0 != ( uValue & RTC_CR_SC4P_MASK ) )
+      {
+         uPF += 4;
+      }
+      if ( 0 != ( uValue & RTC_CR_SC2P_MASK ) )
+      {
+         uPF += 2;
+      }
+
+      DBG_printf( "RTC CAP: %d pF", uPF );
+   }
+   else if ( 2 == argc )
+   {
+      uPF = ( uint8_t ) atoi( argv[1] );
+
+      if ( ( uPF <= 30 ) && ( 0 == ( uPF & 0x01 ) ) )
+      {
+         // Disable RTC Oscillator.
+         uValue &= ~RTC_CR_OSCE_MASK;
+         RTC_CR = uValue;
+
+         // Mask out all RTC_CR cap load values.
+         uValue &= ~( RTC_CR_SC16P_MASK | RTC_CR_SC8P_MASK | RTC_CR_SC4P_MASK | RTC_CR_SC2P_MASK );
+
+         if ( uPF >= 16 )
+         {
+            uValue |= RTC_CR_SC16P_MASK;
+            uPF -= 16;
+         }
+
+         if ( uPF >= 8 )
+         {
+            uValue |= RTC_CR_SC8P_MASK;
+            uPF -= 8;
+         }
+
+         if ( uPF >= 4 )
+         {
+            uValue |= RTC_CR_SC4P_MASK;
+            uPF -= 4;
+         }
+
+         if ( uPF >= 2 )
+         {
+            uValue |= RTC_CR_SC2P_MASK;
+         }
+
+         // Enable RTC Oscillator.
+         uValue |= RTC_CR_OSCE_MASK;
+         RTC_CR = uValue;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Invalid value, must be an even number between 0 and 30 inclusive" );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+
+   return( 0 );
+}
 #endif // #if ( MCU_SELECTED == NXP_K24 )
 #endif  // #if (RTC == 1)
 
@@ -4163,353 +4206,353 @@ static uint32_t DBG_CommandLine_lpstats ( uint32_t argc, char *argv[] )
 //   return( 0 );
 //}
 #endif
-//#if (EP == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_getDstHash
-//
-//   Purpose: Prints the DST hash
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_getDstHash ( uint32_t argc, char *argv[] )
-//{
-//   uint32_t hash;
-//   DST_getTimeZoneDSTHash( &hash );
-//   DBG_logPrintf( 'R', "DST Hash = %lu", hash );
-//   return( 0 );
-//}
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_setTimezoneOffset
-//
-//   Purpose: Updates the timezone offset
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_setTimezoneOffset ( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t retVal = eFAILURE;
-//
-//   if ( 2 == argc )
-//   {
-//      int32_t offset =  ( int32_t )atol( argv[1] );
-//      retVal = DST_setTimeZoneOffset( offset );
-//      if ( eSUCCESS == retVal )
-//      {
-//         DBG_logPrintf( 'R', "Wrote timezone offset = %lu", offset );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Error writing timezone offset. Error code %u", ( uint32_t )retVal );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//   return ( uint32_t )retVal;
-//}
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_getTimezoneOffset
-//
-//   Purpose: Prints the timezone offset
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_getTimezoneOffset ( uint32_t argc, char *argv[] )
-//{
-//   int32_t offset;
-//   DST_getTimeZoneOffset( &offset );
-//   DBG_logPrintf( 'R', "Timezone offset = %l", offset );
-//   return ( 0 );
-//}
-//
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_setDstEnable
-//
-//   Purpose: Updates the DST enable
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_setDstEnable ( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t retVal = eFAILURE;
-//
-//   if ( 2 == argc )
-//   {
-//      int8_t dstEnable =  ( int8_t )atoi( argv[1] );
-//      retVal = DST_setDstEnable( dstEnable );
-//      if ( eSUCCESS == retVal )
-//      {
-//         DBG_logPrintf( 'R', "Wrote DST enable = %i", dstEnable );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Error DST enable. Error code %u", ( uint32_t )retVal );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//   return ( uint32_t )retVal;
-//}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_getDstEnable
-//
-//   Purpose: Prints the DST Enable
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_getDstEnable ( uint32_t argc, char *argv[] )
-//{
-//   int8_t dstEnable;
-//   DST_getDstEnable( &dstEnable );
-//   DBG_logPrintf( 'R', "DST enable = %i", dstEnable );
-//   return ( 0 );
-//}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_setDstOffset
-//
-//   Purpose: Updates the DST offset
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_setDstOffset ( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t retVal = eFAILURE;
-//
-//   if ( 2 == argc )
-//   {
-//      int16_t offset =  ( int16_t )atoi( argv[1] );
-//      retVal = DST_setDstOffset( offset );
-//      if ( eSUCCESS == retVal )
-//      {
-//         DBG_logPrintf( 'R', "Wrote DST offset = %i", offset );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Error writing DST offset. Error code %u", ( uint32_t )retVal );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//   return ( uint32_t )retVal;
-//}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_getDstOffset
-//
-//   Purpose: Prints the DST offset
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_getDstOffset ( uint32_t argc, char *argv[] )
-//{
-//   int16_t offset;
-//   DST_getDstOffset( &offset );
-//   DBG_logPrintf( 'R', "DST offset = %i", offset );
-//   return ( 0 );
-//}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_setDstStartRule
-//
-//   Purpose: Updates the DST start rule
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_setDstStartRule ( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t retVal = eFAILURE;
-//
-//   if ( 6 == argc )
-//   {
-//      uint8_t month     = ( uint8_t )atoi( argv[1] );
-//      uint8_t dayOfWeek = ( uint8_t )atoi( argv[2] );
-//      uint8_t occOfDay  = ( uint8_t )atoi( argv[3] );
-//      uint8_t hour      = ( uint8_t )atoi( argv[4] );
-//      uint8_t minute    = ( uint8_t )atoi( argv[5] );
-//
-//      retVal = DST_setDstStartRule( month, dayOfWeek, occOfDay, hour, minute );
-//      if ( eSUCCESS == retVal )
-//      {
-//         DBG_logPrintf( 'R', "Wrote DST start rule: month=%u, dayOfWeek=%u, occOfDay=%u, hour=%u, minute=%u",
-//                        month, dayOfWeek, occOfDay, hour, minute );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Error writing DST start rule. Error code %u", ( uint32_t )retVal );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//   return ( uint32_t )retVal;
-//}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_getDstStartRule
-//
-//   Purpose: Prints the DST start rule
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_getDstStartRule ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t month;
-//   uint8_t dayOfWeek;
-//   uint8_t occOfDay;
-//   uint8_t hour;
-//   uint8_t minute;
-//
-//   DST_getDstStartRule( &month, &dayOfWeek, &occOfDay, &hour, &minute );
-//   DBG_logPrintf( 'R', "DST start rule: month=%u, dayOfWeek=%u, occOfDay=%u, hour=%u, minute=%u",
-//                  month, dayOfWeek, occOfDay, hour, minute );
-//   return ( 0 );
-//}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_setDstStopRule
-//
-//   Purpose: Updates the DST stop rule
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_setDstStopRule ( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t retVal = eFAILURE;
-//
-//   if ( 6 == argc )
-//   {
-//      uint8_t month     = ( uint8_t )atoi( argv[1] );
-//      uint8_t dayOfWeek = ( uint8_t )atoi( argv[2] );
-//      uint8_t occOfDay  = ( uint8_t )atoi( argv[3] );
-//      uint8_t hour      = ( uint8_t )atoi( argv[4] );
-//      uint8_t minute    = ( uint8_t )atoi( argv[5] );
-//
-//      retVal = DST_setDstStopRule( month, dayOfWeek, occOfDay, hour, minute );
-//      if ( eSUCCESS == retVal )
-//      {
-//         DBG_logPrintf( 'R', "Wrote DST stop rule: month=%u, dayOfWeek=%u, occOfDay=%u, hour=%u, minute=%u",
-//                        month, dayOfWeek, occOfDay, hour, minute );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Error writing DST stop rule. Error code %u", ( uint32_t )retVal );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//   return ( uint32_t )retVal;
-//}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_getDstStopRule
-//
-//   Purpose: Prints the DST stop rule
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_getDstStopRule ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t month;
-//   uint8_t dayOfWeek;
-//   uint8_t occOfDay;
-//   uint8_t hour;
-//   uint8_t minute;
-//
-//   DST_getDstStopRule( &month, &dayOfWeek, &occOfDay, &hour, &minute );
-//   DBG_logPrintf( 'R', "DST stop rule: month=%u, dayOfWeek=%u, occOfDay=%u, hour=%u, minute=%u",
-//                  month, dayOfWeek, occOfDay, hour, minute );
-//   return ( 0 );
-//}
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_getDstParams
-//
-//   Purpose: Prints the DST params
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_getDstParams ( uint32_t argc, char *argv[] )
-//{
-//   DST_PrintDSTParams();
-//   return ( 0 );
-//}
-//#endif // (EP == 1)
+#if (EP == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_getDstHash
+
+   Purpose: Prints the DST hash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_getDstHash ( uint32_t argc, char *argv[] )
+{
+   uint32_t hash;
+   DST_getTimeZoneDSTHash( &hash );
+   DBG_logPrintf( 'R', "DST Hash = %lu", hash );
+   return( 0 );
+}
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_setTimezoneOffset
+
+   Purpose: Updates the timezone offset
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_setTimezoneOffset ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+
+   if ( 2 == argc )
+   {
+      int32_t offset =  ( int32_t )atol( argv[1] );
+      retVal = DST_setTimeZoneOffset( offset );
+      if ( eSUCCESS == retVal )
+      {
+         DBG_logPrintf( 'R', "Wrote timezone offset = %lu", offset );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Error writing timezone offset. Error code %u", ( uint32_t )retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+   return ( uint32_t )retVal;
+}
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_getTimezoneOffset
+
+   Purpose: Prints the timezone offset
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_getTimezoneOffset ( uint32_t argc, char *argv[] )
+{
+   int32_t offset;
+   DST_getTimeZoneOffset( &offset );
+   DBG_logPrintf( 'R', "Timezone offset = %l", offset );
+   return ( 0 );
+}
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_setDstEnable
+
+   Purpose: Updates the DST enable
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_setDstEnable ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+
+   if ( 2 == argc )
+   {
+      int8_t dstEnable =  ( int8_t )atoi( argv[1] );
+      retVal = DST_setDstEnable( dstEnable );
+      if ( eSUCCESS == retVal )
+      {
+         DBG_logPrintf( 'R', "Wrote DST enable = %i", dstEnable );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Error DST enable. Error code %u", ( uint32_t )retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+   return ( uint32_t )retVal;
+}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_getDstEnable
+
+   Purpose: Prints the DST Enable
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_getDstEnable ( uint32_t argc, char *argv[] )
+{
+   int8_t dstEnable;
+   DST_getDstEnable( &dstEnable );
+   DBG_logPrintf( 'R', "DST enable = %i", dstEnable );
+   return ( 0 );
+}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_setDstOffset
+
+   Purpose: Updates the DST offset
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_setDstOffset ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+
+   if ( 2 == argc )
+   {
+      int16_t offset =  ( int16_t )atoi( argv[1] );
+      retVal = DST_setDstOffset( offset );
+      if ( eSUCCESS == retVal )
+      {
+         DBG_logPrintf( 'R', "Wrote DST offset = %i", offset );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Error writing DST offset. Error code %u", ( uint32_t )retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+   return ( uint32_t )retVal;
+}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_getDstOffset
+
+   Purpose: Prints the DST offset
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_getDstOffset ( uint32_t argc, char *argv[] )
+{
+   int16_t offset;
+   DST_getDstOffset( &offset );
+   DBG_logPrintf( 'R', "DST offset = %i", offset );
+   return ( 0 );
+}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_setDstStartRule
+
+   Purpose: Updates the DST start rule
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_setDstStartRule ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+
+   if ( 6 == argc )
+   {
+      uint8_t month     = ( uint8_t )atoi( argv[1] );
+      uint8_t dayOfWeek = ( uint8_t )atoi( argv[2] );
+      uint8_t occOfDay  = ( uint8_t )atoi( argv[3] );
+      uint8_t hour      = ( uint8_t )atoi( argv[4] );
+      uint8_t minute    = ( uint8_t )atoi( argv[5] );
+
+      retVal = DST_setDstStartRule( month, dayOfWeek, occOfDay, hour, minute );
+      if ( eSUCCESS == retVal )
+      {
+         DBG_logPrintf( 'R', "Wrote DST start rule: month=%u, dayOfWeek=%u, occOfDay=%u, hour=%u, minute=%u",
+                        month, dayOfWeek, occOfDay, hour, minute );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Error writing DST start rule. Error code %u", ( uint32_t )retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+   return ( uint32_t )retVal;
+}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_getDstStartRule
+
+   Purpose: Prints the DST start rule
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_getDstStartRule ( uint32_t argc, char *argv[] )
+{
+   uint8_t month;
+   uint8_t dayOfWeek;
+   uint8_t occOfDay;
+   uint8_t hour;
+   uint8_t minute;
+
+   DST_getDstStartRule( &month, &dayOfWeek, &occOfDay, &hour, &minute );
+   DBG_logPrintf( 'R', "DST start rule: month=%u, dayOfWeek=%u, occOfDay=%u, hour=%u, minute=%u",
+                  month, dayOfWeek, occOfDay, hour, minute );
+   return ( 0 );
+}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_setDstStopRule
+
+   Purpose: Updates the DST stop rule
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_setDstStopRule ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+
+   if ( 6 == argc )
+   {
+      uint8_t month     = ( uint8_t )atoi( argv[1] );
+      uint8_t dayOfWeek = ( uint8_t )atoi( argv[2] );
+      uint8_t occOfDay  = ( uint8_t )atoi( argv[3] );
+      uint8_t hour      = ( uint8_t )atoi( argv[4] );
+      uint8_t minute    = ( uint8_t )atoi( argv[5] );
+
+      retVal = DST_setDstStopRule( month, dayOfWeek, occOfDay, hour, minute );
+      if ( eSUCCESS == retVal )
+      {
+         DBG_logPrintf( 'R', "Wrote DST stop rule: month=%u, dayOfWeek=%u, occOfDay=%u, hour=%u, minute=%u",
+                        month, dayOfWeek, occOfDay, hour, minute );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Error writing DST stop rule. Error code %u", ( uint32_t )retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+   return ( uint32_t )retVal;
+}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_getDstStopRule
+
+   Purpose: Prints the DST stop rule
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_getDstStopRule ( uint32_t argc, char *argv[] )
+{
+   uint8_t month;
+   uint8_t dayOfWeek;
+   uint8_t occOfDay;
+   uint8_t hour;
+   uint8_t minute;
+
+   DST_getDstStopRule( &month, &dayOfWeek, &occOfDay, &hour, &minute );
+   DBG_logPrintf( 'R', "DST stop rule: month=%u, dayOfWeek=%u, occOfDay=%u, hour=%u, minute=%u",
+                  month, dayOfWeek, occOfDay, hour, minute );
+   return ( 0 );
+}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_getDstParams
+
+   Purpose: Prints the DST params
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_getDstParams ( uint32_t argc, char *argv[] )
+{
+   DST_PrintDSTParams();
+   return ( 0 );
+}
+#endif // (EP == 1)
 //#if 0
 /*******************************************************************************
 
@@ -4569,138 +4612,139 @@ static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
 #endif
    return 0;
 }
-//#endif // #if 0
-//#if WRITE_KEY_ALLOWED
-//#warning "Don't release with WRITE_KEY_ALLOWED"
-//static uint32_t DBG_CommandLine_writeKey ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t  keyData[ 64 ]; /* Longest possible key */
-//   uint16_t keyID;
-//   uint8_t  ECCstatus;
-//
-//   if ( argc < 3 )
-//   {
-//      DBG_logPrintf( 'D', "usage: wkey id data" );
-//   }
-//   else
-//   {
-//      keyID = ( uint16_t )strtoul( argv[1], NULL, 0 );
-//      if ( ( keyID < 4 ) || ( keyID > 15 ) )
-//      {
-//         DBG_logPrintf( 'D', "keyID must be > 3 and < 16" );
-//      }
-//      else
-//      {
-//         if ( strlen( argv[ 2 ] ) > 128 )
-//         {
-//            DBG_logPrintf( 'D', "keylength must be <= 128" );
-//         }
-//         else
-//         {
-//            char     *msg = argv[ 2 ];
-//            uint8_t  *data = keyData;
-//            uint8_t  keyLen = 0;
-//
-//            while ( *msg != 0 )                          /* Loop thru input string, converting ASCII to hex.   */
-//            {
-//               ( void )sscanf( msg, "%02hhx", data );
-//               msg += 2;                                 /* Each sscanf consumes 2 input bytes.       */
-//               keyLen++;
-//               data++;
-//            }
-//            ECCstatus = ecc108e_WriteKey( keyID, keyLen, keyData );
-//            PrintECC_error( ECCstatus );
-//         }
-//      }
-//   }
-//
-//   return 0;
-//}
-//#endif
-//#if READ_KEY_ALLOWED
-//#warning "Don't release with READ_KEY_ALLOWED"
-//static uint32_t DBG_CommandLine_readKey ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t  keyData[ 64 ]; /* Longest possible key */
-//   uint16_t keyID;
-//   uint16_t readKeyID;
-//   uint8_t  keyLen;
-//   uint8_t  ECCstatus = 1;
-//
-//   if ( ( argc > 1 ) && ( argc <= 3 ) )
-//   {
-//      ( void )memset( keyData, 0, sizeof( keyData ) );
-//      keyID = ( uint16_t )strtoul( argv[1], NULL, 0 );
-//
-//      readKeyID = ( uint16_t )strtoul( argv[ 1 ], NULL, 0 );
-//      if ( ( readKeyID < 4 ) || ( readKeyID > 15 ) )
-//      {
-//         DBG_logPrintf( 'D', "readKeyID must be > 3 and < 16" );
-//      }
-//      else
-//      {
-//         if ( strcasecmp( argv[ 0 ], "rkeyenc" ) == 0 )
-//         {
-//            ECCstatus = ecc108e_EncryptedKeyRead( keyID, keyData );
-//            if ( keyID < FIRST_SIGNATURE_KEY )
-//            {
-//               keyLen = ECC108_KEY_SIZE;
-//            }
-//            else
-//            {
-//               keyLen = VERIFY_256_KEY_SIZE;
-//            }
-//         }
-//         else
-//         {
-//            keyLen = ( uint8_t )strtoul( argv[ 2 ], NULL, 0 );
-//            ECCstatus = ecc108e_ReadKey( keyID, keyLen, keyData );
-//         }
-//         if ( ECCstatus == ECC108_SUCCESS )
-//         {
-//            DBG_logPrintHex ( 'D', "key: ", keyData, keyLen );
-//         }
-//         else
-//         {
-//            PrintECC_error( ECCstatus );
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'D', "usage: rkey keyID keyLen" );
-//      DBG_logPrintf( 'D', "usage: rkeyenc keyID readkey" );
-//   }
-//
-//   return 0;
-//}
-//static uint32_t DBG_CommandLine_dumpKeys ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t *key;
-//#define secROM ((intFlashNvMap_t *)0x7e000)
-//
-//   key = secROM->pKeys[ 0 ].key;
-//   DBG_logPrintHex ( 'D', "pKey         4: ", key, 32 );
-//
-//   key = secROM->replPrivKeys[ 0 ].key;
-//   DBG_logPrintHex ( 'D', "replPrivKey  4: ", key, 32 );
-//
-//   key = secROM->sigKeys[ 4 ].key;
-//   DBG_logPrintHex ( 'D', "pKey        13: ", key, 32 );
-//
-//   key = secROM->replSigKeys[ 4 ].key;
-//   DBG_logPrintHex ( 'D', "replPrivKey 13: ", key, 32 );
-//
-//   key = secROM->sigKeys[ 6 ].key;
-//   DBG_logPrintHex ( 'D', "pKey        15: ", key, 32 );
-//
-//   key = secROM->replSigKeys[ 6 ].key;
-//   DBG_logPrintHex ( 'D', "replPrivKey 15: ", key, 32 );
-//
-//   return 0;
-//}
-//#endif
-//
+
+#if ( WRITE_KEY_ALLOWED == 1)
+#warning "Don't release with WRITE_KEY_ALLOWED"
+static uint32_t DBG_CommandLine_writeKey ( uint32_t argc, char *argv[] )
+{
+   uint8_t  keyData[ 64 ]; /* Longest possible key */
+   uint16_t keyID;
+   uint8_t  ECCstatus;
+
+   if ( argc < 3 )
+   {
+      DBG_logPrintf( 'D', "usage: wkey id data" );
+   }
+   else
+   {
+      keyID = ( uint16_t )strtoul( argv[1], NULL, 0 );
+      if ( ( keyID < 4 ) || ( keyID > 15 ) )
+      {
+         DBG_logPrintf( 'D', "keyID must be > 3 and < 16" );
+      }
+      else
+      {
+         if ( strlen( argv[ 2 ] ) > 128 )
+         {
+            DBG_logPrintf( 'D', "keylength must be <= 128" );
+         }
+         else
+         {
+            char     *msg = argv[ 2 ];
+            uint8_t  *data = keyData;
+            uint8_t  keyLen = 0;
+
+            while ( *msg != 0 )                          /* Loop thru input string, converting ASCII to hex.   */
+            {
+               ( void )sscanf( msg, "%02hhx", data );
+               msg += 2;                                 /* Each sscanf consumes 2 input bytes.       */
+               keyLen++;
+               data++;
+            }
+            ECCstatus = ecc108e_WriteKey( keyID, keyLen, keyData );
+            PrintECC_error( ECCstatus );
+         }
+      }
+   }
+
+   return 0;
+}
+#endif // ( WRITE_KEY_ALLOWED == 1)
+
+#if ( READ_KEY_ALLOWED == 1 )
+#warning "Don't release with READ_KEY_ALLOWED"
+static uint32_t DBG_CommandLine_readKey ( uint32_t argc, char *argv[] )
+{
+   uint8_t  keyData[ 64 ]; /* Longest possible key */
+   uint16_t keyID;
+   uint16_t readKeyID;
+   uint8_t  keyLen;
+   uint8_t  ECCstatus = 1;
+
+   if ( ( argc > 1 ) && ( argc <= 3 ) )
+   {
+      ( void )memset( keyData, 0, sizeof( keyData ) );
+      keyID = ( uint16_t )strtoul( argv[1], NULL, 0 );
+
+      readKeyID = ( uint16_t )strtoul( argv[ 1 ], NULL, 0 );
+      if ( ( readKeyID < 4 ) || ( readKeyID > 15 ) )
+      {
+         DBG_logPrintf( 'D', "readKeyID must be > 3 and < 16" );
+      }
+      else
+      {
+         if ( strcasecmp( argv[ 0 ], "rkeyenc" ) == 0 )
+         {
+            ECCstatus = ecc108e_EncryptedKeyRead( keyID, keyData );
+            if ( keyID < FIRST_SIGNATURE_KEY )
+            {
+               keyLen = ECC108_KEY_SIZE;
+            }
+            else
+            {
+               keyLen = VERIFY_256_KEY_SIZE;
+            }
+         }
+         else
+         {
+            keyLen = ( uint8_t )strtoul( argv[ 2 ], NULL, 0 );
+            ECCstatus = ecc108e_ReadKey( keyID, keyLen, keyData );
+         }
+         if ( ECCstatus == ECC108_SUCCESS )
+         {
+            DBG_logPrintHex ( 'D', "key: ", keyData, keyLen );
+         }
+         else
+         {
+            PrintECC_error( ECCstatus );
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'D', "usage: rkey keyID keyLen" );
+      DBG_logPrintf( 'D', "usage: rkeyenc keyID readkey" );
+   }
+
+   return 0;
+}
+static uint32_t DBG_CommandLine_dumpKeys ( uint32_t argc, char *argv[] )
+{
+   uint8_t *key;
+#define secROM ((intFlashNvMap_t *)0x7e000)
+
+   key = secROM->pKeys[ 0 ].key;
+   DBG_logPrintHex ( 'D', "pKey         4: ", key, 32 );
+
+   key = secROM->replPrivKeys[ 0 ].key;
+   DBG_logPrintHex ( 'D', "replPrivKey  4: ", key, 32 );
+
+   key = secROM->sigKeys[ 4 ].key;
+   DBG_logPrintHex ( 'D', "pKey        13: ", key, 32 );
+
+   key = secROM->replSigKeys[ 4 ].key;
+   DBG_logPrintHex ( 'D', "replPrivKey 13: ", key, 32 );
+
+   key = secROM->sigKeys[ 6 ].key;
+   DBG_logPrintHex ( 'D', "pKey        15: ", key, 32 );
+
+   key = secROM->replSigKeys[ 6 ].key;
+   DBG_logPrintHex ( 'D', "replPrivKey 15: ", key, 32 );
+
+   return 0;
+}
+#endif
+
 //#if ( PHASE_DETECTION == 1 )
 ///*******************************************************************************
 //
@@ -5039,38 +5083,38 @@ uint32_t DBG_CommandLine_PaCoeff( uint32_t argc, char *argv[] )
 }
 #endif //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) && ( ENGINEERING_BUILD == 1 )
 
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_VSWR
-//
-//   Purpose: This function will print out the measure Voltage Standing Wave Ratio
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//uint32_t DBG_CommandLine_VSWR( uint32_t argc, char *argv[] )
-//{
-//   char floatStr[PRINT_FLOAT_SIZE];
-//
-//   if ( argc == 1) // No Parameters
-//   {
-//      DBG_printf( "%s %-6s", argv[0], DBG_printFloat( floatStr, ADC_Get_VSWR(), 3 ) );
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   return ( 0 );
-//}
-//#endif //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-//
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_VSWR
+
+   Purpose: This function will print out the measure Voltage Standing Wave Ratio
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+uint32_t DBG_CommandLine_VSWR( uint32_t argc, char *argv[] )
+{
+   char floatStr[PRINT_FLOAT_SIZE];
+
+   if ( argc == 1) // No Parameters
+   {
+      DBG_printf( "%s %-6s", argv[0], DBG_printFloat( floatStr, ADC_Get_VSWR(), 3 ) );
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   return ( 0 );
+}
+#endif //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+
 #if (EP == 1)
 /*******************************************************************************
 
@@ -6081,61 +6125,61 @@ uint32_t DBG_CommandLine_DsTimeDv( uint32_t argc, char *argv[] )
 //} /* end DBG_CommandLine_IdRd () */
 #endif   /* end of EP == 1   */
 #endif   /* end of if ( ACLARA_LC == 0 )  */
-//
-//#if ( PORTABLE_DCU == 1)
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_dfwMonMode
-//
-//   Purpose: This function will enable or disable DFW reply monitor mode.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_dfwMonMode ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t mode;
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else
-//   {
-//      if ( argc == 2 )
-//      {
-//         mode = ( uint8_t )atoi( argv[1] );
-//         if (mode == 1)
-//         {
-//            // enable DFW monitor mode
-//            DBG_DfwMonitorMode((bool)true);
-//         }
-//         else if (mode == 0)
-//         {
-//            // disable DFW monitor mode
-//            DBG_DfwMonitorMode((bool)false);
-//         }
-//      }
-//
-//      /* always print current value */
-//      if (DBG_GetDfwMonitorMode() == (bool)true)
-//      {
-//         DBG_printf( "dfwmonitormode 1" );
-//      }
-//      else
-//      {
-//         DBG_printf( "dfwmonitormode 0" );
-//      }
-//   }
-//
-//   return ( 0 );
-//} /* end DBG_CommandLine_dfwMonMode () */
-//#endif
+
+#if ( PORTABLE_DCU == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_dfwMonMode
+
+   Purpose: This function will enable or disable DFW reply monitor mode.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_dfwMonMode ( uint32_t argc, char *argv[] )
+{
+   uint8_t mode;
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else
+   {
+      if ( argc == 2 )
+      {
+         mode = ( uint8_t )atoi( argv[1] );
+         if (mode == 1)
+         {
+            // enable DFW monitor mode
+            DBG_DfwMonitorMode((bool)true);
+         }
+         else if (mode == 0)
+         {
+            // disable DFW monitor mode
+            DBG_DfwMonitorMode((bool)false);
+         }
+      }
+
+      /* always print current value */
+      if (DBG_GetDfwMonitorMode() == (bool)true)
+      {
+         DBG_printf( "dfwmonitormode 1" );
+      }
+      else
+      {
+         DBG_printf( "dfwmonitormode 0" );
+      }
+   }
+
+   return ( 0 );
+} /* end DBG_CommandLine_dfwMonMode () */
+#endif // ( PORTABLE_DCU == 1)
 
 /*******************************************************************************
 
@@ -6307,363 +6351,363 @@ static returnStatus_t atoh( uint8_t *pHex, char const *pAscii )
    return( eSUCCESS );
 }
 
-///*******************************************************************************
-//   Function name: DBG_CommandLine_SendAppMsg
-//
-//   Purpose: This command will trigger call to an application layer tx function
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - status of this function - currently always 0 (success)
-//   Note:    If invoked as sendMTLSmsg, will send a message through the appropriate port
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_SendAppMsg ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t        data[MAX_ATOH_CHARS];
-//   uint8_t        address[MULTICAST_ADDRESS_SIZE * 2];
-//   uint16_t       dataLen;
-//   uint16_t       bufIndex;
-//   uint16_t       srcIndex;
-//   uint32_t i;
-//
-//   COMM_Tx_t tx_data;
-//
-//   DBG_logPrintf( 'R', "Received DBG_CommandLine_SendAppMsg command" );
-//   if ((argc >= 4) && (argc <=6))  /* The number of arguments must be 3-5 */
-//   {
-//      dataLen = ( uint16_t )strlen( argv[1] );
-//      if ( ( dataLen % 2 ) != 0 )
-//      {
-//         DBG_logPrintf( 'R',
-//                        "data field must be divisible by 2 (2 chars per hex byte) 'sendappmsg 1354 1122334455 3F'" );
-//      }
-//      else if ( dataLen > ( MAX_ATOH_CHARS * 2 ) )
-//      {
-//         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
-//
-//      }
-//      else if ( (strlen(argv[2]) != 10) && (strlen(argv[2]) != 12) )
-//      {
-//         DBG_logPrintf('R', "Address must be 10 or 12 chars (5 or 6) hex bytes. 'sendappmsg 1354 1122334455(66) 3F'");
-//      }
-//
-//      else if ( ( strlen( argv[3] ) != 1 ) && ( strlen( argv[3] ) != 2 ) )
-//      {
-//         DBG_logPrintf( 'R',
-//                        "QoS field must be 2 chars representing a hex byte. 'sendappmsg 1354 1122334455 3F'" );
-//      }
-//      else
-//      {
-//         /* convert ascii data to hex data */
-//         for ( bufIndex = 0, srcIndex = 0;
-//               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
-//               srcIndex += 2, bufIndex++ )
-//         {
-//            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
-//         }
-//         /* convert ascii address to hex */
-//         for ( bufIndex = 0, srcIndex = 0;
-//               ( bufIndex < sizeof( address ) ) && ( 0 != argv[2][srcIndex] );
-//               srcIndex += 2, bufIndex++ )
-//         {
-//            ( void )atoh( &address[bufIndex], &argv[2][srcIndex] );
-//         }
-//
-//         if ( strlen(argv[2]) == ( MAC_ADDRESS_SIZE * 2 ) )
-//         {
-//#if ( EP == 1 )
-//            tx_data.dst_address.addr_type = eCONTEXT; // On an EP, we send a message to the HE so we use context.
-//#else
-//            tx_data.dst_address.addr_type = eEXTENSION_ID; // On a DCU, we send a message to an EP so we use the MAC address.
-//#endif
-//            //lint -e{772} address initialized by atoh above
-//            ( void )memcpy( tx_data.dst_address.ExtensionAddr, address, MAC_ADDRESS_SIZE );
-//         }
-//         else if ( strlen( argv[2] ) == ( MULTICAST_ADDRESS_SIZE * 2 ) )
-//         {
-//            tx_data.dst_address.addr_type = eMULTICAST;
-//            //lint -e{772} address initialized by atoh above
-//            (void)memcpy(tx_data.dst_address.multicastAddr, address, MULTICAST_ADDRESS_SIZE);
-//         }
-//
-//         tx_data.length = dataLen / 2;
-//         tx_data.data = data;
-//         tx_data.callback = NULL;
-//         tx_data.override.linkOverride = eNWK_LINK_OVERRIDE_NULL;
-//
-//         dataLen = ( uint16_t )strlen( argv[3] );
-//         if ( dataLen  == 1 )
-//         {
-//            /* user entered a single digit, assume it represents a decimal number */
-//            tx_data.qos = ( uint8_t )atoi( argv[3] );
-//         }
-//         else if ( dataLen  == 2 )
-//         {
-//            /* user entered 2 ascii chars, assume it represents a hex byte (3F, 1A, etc)*/
-//            /* convert ascii data to hex data */
-//            for ( bufIndex = 0, srcIndex = 0;
-//                  ( bufIndex < sizeof( data ) ) && ( 0 != argv[3][srcIndex] );
-//                  srcIndex += 2, bufIndex++ )
-//            {
-//               ( void )atoh( &tx_data.qos, &argv[3][srcIndex] );
-//            }
-//            if ( !NWK_IsQosValueValid( tx_data.qos ) )
-//            {
-//               DBG_logPrintf( 'R', "QoS must be valid. 'sendappmsg 1354 1122334455 3F'" );
-//            }
-//            else
-//            {
-//               if ( strcasecmp( argv[0], "sendappmsg" ) == 0 )
-//               {
-//                  if(argc>=5)
-//                  {
-//                     for ( i = 0; i < (uint32_t)atoi(argv[4]); i++ )
-//                     {
-//                        COMM_transmit( &tx_data );
-//                        if ( argc == 6 )
-//                        {
-//                           OS_TASK_Sleep( (uint32_t)atoi(argv[5]) );
-//                        }
-//                     }
-//                  }
-//                  else
-//                  {
-//                     COMM_transmit( &tx_data );
-//                  }
-//               }
-//#if ( USE_MTLS == 1 )
-//               else
-//               {
-//                  MTLS_transmit( &tx_data );
-//               }
-//#endif
-//            }
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R',
-//                     "Invalid, expected format:  'sendappmsg <data> <address> [repeats] [delay(ms)]' : eg. 'sendappmsg 1354 1122334455'" );
-//   }
-//
-//   return ( 0 );
-//}
-//
-//#if (USE_IPTUNNEL == 1)
-///**
-//This command will trigger call to the IP Tunneling layer tx function
-//
-//@param argc Number of Arguments passed to this function
-//@param argv pointer to the list of arguments passed to this function
-//
-//@return status of this function - currently always 0 (success)
-//*/
-//static uint32_t DBG_CommandLine_SendIpTunMsg(uint32_t argc, char *argv[])
-//{
-//   uint8_t        data[MAX_ATOH_CHARS];
-//   uint8_t        address[MULTICAST_ADDRESS_SIZE * 2];
-//   uint16_t       dataLen;
-//   uint16_t       bufIndex;
-//   uint16_t       srcIndex;
-//   COMM_Tx_t tx_data;
-//
-//   DBG_logPrintf('R', "Received DBG_CommandLine_SendIpTunMsg command");
-//   if (argc == 4)  /* The number of arguments must be 3 */
-//   {
-//      dataLen = (uint16_t)strlen(argv[1]);
-//      if ((dataLen % 2) != 0)
-//      {
-//         DBG_logPrintf('R',
-//                       "data field must be divisible by 2 (2 chars per hex byte) 'sendtunmsg 1354 1122334455 3F'");
-//      }
-//      else if (dataLen > (MAX_ATOH_CHARS * 2))
-//      {
-//         DBG_logPrintf('R', "data field must be less than or equal to %u", MAX_ATOH_CHARS);
-//      }
-//      else if ((strlen(argv[2]) != 10) && (strlen(argv[2]) != 12))
-//      {
-//         DBG_logPrintf('R', "Address must be 10 or 12 chars (5 or 6) hex bytes. 'sendtunmsg 1354 1122334455(66) 3F'");
-//      }
-//
-//      else if ((strlen(argv[3]) != 1) && (strlen(argv[3]) != 2))
-//      {
-//         DBG_logPrintf('R',
-//                       "QoS field must be 2 chars representing a hex byte. 'sendtunmsg 1354 1122334455 3F'");
-//      }
-//      else
-//      {
-//         /* convert ascii data to hex data */
-//         for (bufIndex = 0, srcIndex = 0;
-//              (bufIndex < sizeof(data)) && (0 != argv[1][srcIndex]);
-//              srcIndex += 2, bufIndex++)
-//         {
-//            (void)atoh(&data[bufIndex], &argv[1][srcIndex]);
-//         }
-//
-//         /* convert ascii address to hex */
-//         for (bufIndex = 0, srcIndex = 0;
-//              (bufIndex < sizeof(address)) && (0 != argv[2][srcIndex]);
-//              srcIndex += 2, bufIndex++)
-//         {
-//            (void)atoh(&address[bufIndex], &argv[2][srcIndex]);
-//         }
-//
-//         if (strlen(argv[2]) == (MAC_ADDRESS_SIZE * 2))
-//         {
-//            tx_data.dst_address.addr_type = eEXTENSION_ID;
-//            //lint -e{772} address initialized by atoh above
-//            (void)memcpy(tx_data.dst_address.ExtensionAddr, address, MAC_ADDRESS_SIZE);
-//         }
-//         else if (strlen(argv[2]) == (MULTICAST_ADDRESS_SIZE * 2))
-//         {
-//            tx_data.dst_address.addr_type = eMULTICAST;
-//            //lint -e{772} address initialized by atoh above
-//            (void)memcpy(tx_data.dst_address.multicastAddr, address, MULTICAST_ADDRESS_SIZE);
-//         }
-//
-//         tx_data.length = dataLen / 2;
-//         tx_data.data = data;
-//         tx_data.callback = NULL;
-//         tx_data.override.linkOverride = eNWK_LINK_OVERRIDE_NULL;
-//
-//         dataLen = (uint16_t)strlen(argv[3]);
-//         if (dataLen == 1)
-//         {
-//            /* user entered a single digit, assume it represents a decimal number */
-//            tx_data.qos = (uint8_t)atoi(argv[3]);
-//         }
-//         else if (dataLen == 2)
-//         {
-//            /* user entered 2 ascii chars, assume it represents a hex byte (3F, 1A, etc)*/
-//            /* convert ascii data to hex data */
-//            for (bufIndex = 0, srcIndex = 0;
-//                 (bufIndex < sizeof(data)) && (0 != argv[3][srcIndex]);
-//                 srcIndex += 2, bufIndex++)
-//            {
-//               (void)atoh(&tx_data.qos, &argv[3][srcIndex]);
-//            }
-//
-//            if (!NWK_IsQosValueValid(tx_data.qos))
-//            {
-//               DBG_logPrintf('R', "QoS must be valid. 'sendtunmsg 1354 1122334455 3F'");
-//            }
-//            else
-//            {
-//               IP_transmit(&tx_data);
-//            }
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf('R',
-//                    "Invalid, expected format:  'sendtunmsg <data> <address> <qos>' : eg. 'sendtunmsg 1354 1122334455 3F'");
-//   }
-//
-//   return 0;
-//}
-//#endif
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_SendHeadEndMsg
-//
-//   Purpose: This command will trigger call to an application layer tx function
-//   using context ID as destination address
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - status of this function - currently always 0 (success)
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_SendHeadEndMsg ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t        data[MAX_ATOH_CHARS];
-//   uint16_t       dataLen;
-//   uint16_t       bufIndex;
-//   uint16_t       srcIndex;
-//   COMM_Tx_t tx_data;
-//
-//   DBG_logPrintf( 'R', "Received DBG_CommandLine_SendHeadEndMsg command" );
-//   if ( argc == 3 )  /* The number of arguments must be 3 */
-//   {
-//      dataLen = ( uint16_t )strlen( argv[1] );
-//      if ( ( dataLen % 2 ) != 0 )
-//      {
-//         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'sendheadendmsg 1354 3F'" );
-//      }
-//      else if ( dataLen > ( MAX_ATOH_CHARS * 2 ) )
-//      {
-//         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
-//      }
-//      else if ( ( strlen( argv[2] ) != 1 ) && ( strlen( argv[2] ) != 2 ) )
-//      {
-//         DBG_logPrintf( 'R',
-//                        "QoS field must be 2 chars representing a hex byte. 'sendheadendmsg 1354 3F'" );
-//      }
-//
-//      else
-//      {
-//         /* convert ascii data to hex data */
-//         for ( bufIndex = 0, srcIndex = 0;
-//               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
-//               srcIndex += 2, bufIndex++ )
-//         {
-//            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
-//         }
-//
-//         NWK_GetConf_t GetConf;
-//
-//         // Retrieve Head End context ID
-//         GetConf = NWK_GetRequest( eNwkAttr_ipHEContext );
-//
-//         if (GetConf.eStatus != eNWK_GET_SUCCESS) {
-//            GetConf.val.ipHEContext = DEFAULT_HEAD_END_CONTEXT; // Use default in case of error
-//         }
-//
-//         tx_data.dst_address.addr_type = eCONTEXT;
-//         //lint -e{772} address initialized by atoh above
-//         tx_data.dst_address.context = GetConf.val.ipHEContext;
-//         tx_data.length = dataLen / 2;
-//         tx_data.data = data;
-//         tx_data.callback = NULL;
-//         tx_data.override.linkOverride = eNWK_LINK_OVERRIDE_NULL;
-//
-//         dataLen = ( uint16_t )strlen( argv[2] );
-//         if ( dataLen  == 1 )
-//         {
-//            /* user entered a single digit, assume it represents a decimal number */
-//            tx_data.qos = ( uint8_t )atoi( argv[2] );
-//         }
-//         else if ( dataLen  == 2 )
-//         {
-//            /* user entered 2 ascii chars, assume it represents a hex byte (3F, 1A, etc)*/
-//            /* convert ascii data to hex data */
-//            for ( bufIndex = 0, srcIndex = 0;
-//                  ( bufIndex < sizeof( data ) ) && ( 0 != argv[2][srcIndex] );
-//                  srcIndex += 2, bufIndex++ )
-//            {
-//               ( void )atoh( &tx_data.qos, &argv[2][srcIndex] );
-//            }
-//         }
-//         if ( !NWK_IsQosValueValid( tx_data.qos ) )
-//         {
-//            DBG_logPrintf( 'R', "QoS must be valid. 'sendheadendmsg 1354 3F'" );
-//         }
-//         else
-//         {
-//            COMM_transmit( &tx_data );
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid, expected format:  'sendheadendmsg <data> <QoS>' : eg. 'sendappmsg 1354 00'" );
-//   }
-//
-//   return ( 0 );
-//}
+/*******************************************************************************
+   Function name: DBG_CommandLine_SendAppMsg
+
+   Purpose: This command will trigger call to an application layer tx function
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - status of this function - currently always 0 (success)
+   Note:    If invoked as sendMTLSmsg, will send a message through the appropriate port
+*******************************************************************************/
+uint32_t DBG_CommandLine_SendAppMsg ( uint32_t argc, char *argv[] )
+{
+   uint8_t        data[MAX_ATOH_CHARS];
+   uint8_t        address[MULTICAST_ADDRESS_SIZE * 2];
+   uint16_t       dataLen;
+   uint16_t       bufIndex;
+   uint16_t       srcIndex;
+   uint32_t i;
+
+   COMM_Tx_t tx_data;
+
+   DBG_logPrintf( 'R', "Received DBG_CommandLine_SendAppMsg command" );
+   if ((argc >= 4) && (argc <=6))  /* The number of arguments must be 3-5 */
+   {
+      dataLen = ( uint16_t )strlen( argv[1] );
+      if ( ( dataLen % 2 ) != 0 )
+      {
+         DBG_logPrintf( 'R',
+                        "data field must be divisible by 2 (2 chars per hex byte) 'sendappmsg 1354 1122334455 3F'" );
+      }
+      else if ( dataLen > ( MAX_ATOH_CHARS * 2 ) )
+      {
+         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
+
+      }
+      else if ( (strlen(argv[2]) != 10) && (strlen(argv[2]) != 12) )
+      {
+         DBG_logPrintf('R', "Address must be 10 or 12 chars (5 or 6) hex bytes. 'sendappmsg 1354 1122334455(66) 3F'");
+      }
+
+      else if ( ( strlen( argv[3] ) != 1 ) && ( strlen( argv[3] ) != 2 ) )
+      {
+         DBG_logPrintf( 'R',
+                        "QoS field must be 2 chars representing a hex byte. 'sendappmsg 1354 1122334455 3F'" );
+      }
+      else
+      {
+         /* convert ascii data to hex data */
+         for ( bufIndex = 0, srcIndex = 0;
+               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
+               srcIndex += 2, bufIndex++ )
+         {
+            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
+         }
+         /* convert ascii address to hex */
+         for ( bufIndex = 0, srcIndex = 0;
+               ( bufIndex < sizeof( address ) ) && ( 0 != argv[2][srcIndex] );
+               srcIndex += 2, bufIndex++ )
+         {
+            ( void )atoh( &address[bufIndex], &argv[2][srcIndex] );
+         }
+
+         if ( strlen(argv[2]) == ( MAC_ADDRESS_SIZE * 2 ) )
+         {
+#if ( EP == 1 )
+            tx_data.dst_address.addr_type = eCONTEXT; // On an EP, we send a message to the HE so we use context.
+#else
+            tx_data.dst_address.addr_type = eEXTENSION_ID; // On a DCU, we send a message to an EP so we use the MAC address.
+#endif
+            //lint -e{772} address initialized by atoh above
+            ( void )memcpy( tx_data.dst_address.ExtensionAddr, address, MAC_ADDRESS_SIZE );
+         }
+         else if ( strlen( argv[2] ) == ( MULTICAST_ADDRESS_SIZE * 2 ) )
+         {
+            tx_data.dst_address.addr_type = eMULTICAST;
+            //lint -e{772} address initialized by atoh above
+            (void)memcpy(tx_data.dst_address.multicastAddr, address, MULTICAST_ADDRESS_SIZE);
+         }
+
+         tx_data.length = dataLen / 2;
+         tx_data.data = data;
+         tx_data.callback = NULL;
+         tx_data.override.linkOverride = eNWK_LINK_OVERRIDE_NULL;
+
+         dataLen = ( uint16_t )strlen( argv[3] );
+         if ( dataLen  == 1 )
+         {
+            /* user entered a single digit, assume it represents a decimal number */
+            tx_data.qos = ( uint8_t )atoi( argv[3] );
+         }
+         else if ( dataLen  == 2 )
+         {
+            /* user entered 2 ascii chars, assume it represents a hex byte (3F, 1A, etc)*/
+            /* convert ascii data to hex data */
+            for ( bufIndex = 0, srcIndex = 0;
+                  ( bufIndex < sizeof( data ) ) && ( 0 != argv[3][srcIndex] );
+                  srcIndex += 2, bufIndex++ )
+            {
+               ( void )atoh( &tx_data.qos, &argv[3][srcIndex] );
+            }
+            if ( !NWK_IsQosValueValid( tx_data.qos ) )
+            {
+               DBG_logPrintf( 'R', "QoS must be valid. 'sendappmsg 1354 1122334455 3F'" );
+            }
+            else
+            {
+               if ( strcasecmp( argv[0], "sendappmsg" ) == 0 )
+               {
+                  if(argc>=5)
+                  {
+                     for ( i = 0; i < (uint32_t)atoi(argv[4]); i++ )
+                     {
+                        COMM_transmit( &tx_data );
+                        if ( argc == 6 )
+                        {
+                           OS_TASK_Sleep( (uint32_t)atoi(argv[5]) );
+                        }
+                     }
+                  }
+                  else
+                  {
+                     COMM_transmit( &tx_data );
+                  }
+               }
+#if ( USE_MTLS == 1 )
+               else
+               {
+                  MTLS_transmit( &tx_data );
+               }
+#endif
+            }
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R',
+                     "Invalid, expected format:  'sendappmsg <data> <address> [repeats] [delay(ms)]' : eg. 'sendappmsg 1354 1122334455'" );
+   }
+
+   return ( 0 );
+}
+
+#if (USE_IPTUNNEL == 1)
+/**
+This command will trigger call to the IP Tunneling layer tx function
+
+@param argc Number of Arguments passed to this function
+@param argv pointer to the list of arguments passed to this function
+
+@return status of this function - currently always 0 (success)
+*/
+static uint32_t DBG_CommandLine_SendIpTunMsg(uint32_t argc, char *argv[])
+{
+   uint8_t        data[MAX_ATOH_CHARS];
+   uint8_t        address[MULTICAST_ADDRESS_SIZE * 2];
+   uint16_t       dataLen;
+   uint16_t       bufIndex;
+   uint16_t       srcIndex;
+   COMM_Tx_t tx_data;
+
+   DBG_logPrintf('R', "Received DBG_CommandLine_SendIpTunMsg command");
+   if (argc == 4)  /* The number of arguments must be 3 */
+   {
+      dataLen = (uint16_t)strlen(argv[1]);
+      if ((dataLen % 2) != 0)
+      {
+         DBG_logPrintf('R',
+                       "data field must be divisible by 2 (2 chars per hex byte) 'sendtunmsg 1354 1122334455 3F'");
+      }
+      else if (dataLen > (MAX_ATOH_CHARS * 2))
+      {
+         DBG_logPrintf('R', "data field must be less than or equal to %u", MAX_ATOH_CHARS);
+      }
+      else if ((strlen(argv[2]) != 10) && (strlen(argv[2]) != 12))
+      {
+         DBG_logPrintf('R', "Address must be 10 or 12 chars (5 or 6) hex bytes. 'sendtunmsg 1354 1122334455(66) 3F'");
+      }
+
+      else if ((strlen(argv[3]) != 1) && (strlen(argv[3]) != 2))
+      {
+         DBG_logPrintf('R',
+                       "QoS field must be 2 chars representing a hex byte. 'sendtunmsg 1354 1122334455 3F'");
+      }
+      else
+      {
+         /* convert ascii data to hex data */
+         for (bufIndex = 0, srcIndex = 0;
+              (bufIndex < sizeof(data)) && (0 != argv[1][srcIndex]);
+              srcIndex += 2, bufIndex++)
+         {
+            (void)atoh(&data[bufIndex], &argv[1][srcIndex]);
+         }
+
+         /* convert ascii address to hex */
+         for (bufIndex = 0, srcIndex = 0;
+              (bufIndex < sizeof(address)) && (0 != argv[2][srcIndex]);
+              srcIndex += 2, bufIndex++)
+         {
+            (void)atoh(&address[bufIndex], &argv[2][srcIndex]);
+         }
+
+         if (strlen(argv[2]) == (MAC_ADDRESS_SIZE * 2))
+         {
+            tx_data.dst_address.addr_type = eEXTENSION_ID;
+            //lint -e{772} address initialized by atoh above
+            (void)memcpy(tx_data.dst_address.ExtensionAddr, address, MAC_ADDRESS_SIZE);
+         }
+         else if (strlen(argv[2]) == (MULTICAST_ADDRESS_SIZE * 2))
+         {
+            tx_data.dst_address.addr_type = eMULTICAST;
+            //lint -e{772} address initialized by atoh above
+            (void)memcpy(tx_data.dst_address.multicastAddr, address, MULTICAST_ADDRESS_SIZE);
+         }
+
+         tx_data.length = dataLen / 2;
+         tx_data.data = data;
+         tx_data.callback = NULL;
+         tx_data.override.linkOverride = eNWK_LINK_OVERRIDE_NULL;
+
+         dataLen = (uint16_t)strlen(argv[3]);
+         if (dataLen == 1)
+         {
+            /* user entered a single digit, assume it represents a decimal number */
+            tx_data.qos = (uint8_t)atoi(argv[3]);
+         }
+         else if (dataLen == 2)
+         {
+            /* user entered 2 ascii chars, assume it represents a hex byte (3F, 1A, etc)*/
+            /* convert ascii data to hex data */
+            for (bufIndex = 0, srcIndex = 0;
+                 (bufIndex < sizeof(data)) && (0 != argv[3][srcIndex]);
+                 srcIndex += 2, bufIndex++)
+            {
+               (void)atoh(&tx_data.qos, &argv[3][srcIndex]);
+            }
+
+            if (!NWK_IsQosValueValid(tx_data.qos))
+            {
+               DBG_logPrintf('R', "QoS must be valid. 'sendtunmsg 1354 1122334455 3F'");
+            }
+            else
+            {
+               IP_transmit(&tx_data);
+            }
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf('R',
+                    "Invalid, expected format:  'sendtunmsg <data> <address> <qos>' : eg. 'sendtunmsg 1354 1122334455 3F'");
+   }
+
+   return 0;
+}
+#endif
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_SendHeadEndMsg
+
+   Purpose: This command will trigger call to an application layer tx function
+   using context ID as destination address
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - status of this function - currently always 0 (success)
+*******************************************************************************/
+uint32_t DBG_CommandLine_SendHeadEndMsg ( uint32_t argc, char *argv[] )
+{
+   uint8_t        data[MAX_ATOH_CHARS];
+   uint16_t       dataLen;
+   uint16_t       bufIndex;
+   uint16_t       srcIndex;
+   COMM_Tx_t tx_data;
+
+   DBG_logPrintf( 'R', "Received DBG_CommandLine_SendHeadEndMsg command" );
+   if ( argc == 3 )  /* The number of arguments must be 3 */
+   {
+      dataLen = ( uint16_t )strlen( argv[1] );
+      if ( ( dataLen % 2 ) != 0 )
+      {
+         DBG_logPrintf( 'R', "data field must be divisible by 2 (2 chars per hex byte) 'sendheadendmsg 1354 3F'" );
+      }
+      else if ( dataLen > ( MAX_ATOH_CHARS * 2 ) )
+      {
+         DBG_logPrintf( 'R', "data field must be less than or equal to %u", MAX_ATOH_CHARS );
+      }
+      else if ( ( strlen( argv[2] ) != 1 ) && ( strlen( argv[2] ) != 2 ) )
+      {
+         DBG_logPrintf( 'R',
+                        "QoS field must be 2 chars representing a hex byte. 'sendheadendmsg 1354 3F'" );
+      }
+
+      else
+      {
+         /* convert ascii data to hex data */
+         for ( bufIndex = 0, srcIndex = 0;
+               ( bufIndex < sizeof( data ) ) && ( 0 != argv[1][srcIndex] );
+               srcIndex += 2, bufIndex++ )
+         {
+            ( void )atoh( &data[bufIndex], &argv[1][srcIndex] );
+         }
+
+         NWK_GetConf_t GetConf;
+
+         // Retrieve Head End context ID
+         GetConf = NWK_GetRequest( eNwkAttr_ipHEContext );
+
+         if (GetConf.eStatus != eNWK_GET_SUCCESS) {
+            GetConf.val.ipHEContext = DEFAULT_HEAD_END_CONTEXT; // Use default in case of error
+         }
+
+         tx_data.dst_address.addr_type = eCONTEXT;
+         //lint -e{772} address initialized by atoh above
+         tx_data.dst_address.context = GetConf.val.ipHEContext;
+         tx_data.length = dataLen / 2;
+         tx_data.data = data;
+         tx_data.callback = NULL;
+         tx_data.override.linkOverride = eNWK_LINK_OVERRIDE_NULL;
+
+         dataLen = ( uint16_t )strlen( argv[2] );
+         if ( dataLen  == 1 )
+         {
+            /* user entered a single digit, assume it represents a decimal number */
+            tx_data.qos = ( uint8_t )atoi( argv[2] );
+         }
+         else if ( dataLen  == 2 )
+         {
+            /* user entered 2 ascii chars, assume it represents a hex byte (3F, 1A, etc)*/
+            /* convert ascii data to hex data */
+            for ( bufIndex = 0, srcIndex = 0;
+                  ( bufIndex < sizeof( data ) ) && ( 0 != argv[2][srcIndex] );
+                  srcIndex += 2, bufIndex++ )
+            {
+               ( void )atoh( &tx_data.qos, &argv[2][srcIndex] );
+            }
+         }
+         if ( !NWK_IsQosValueValid( tx_data.qos ) )
+         {
+            DBG_logPrintf( 'R', "QoS must be valid. 'sendheadendmsg 1354 3F'" );
+         }
+         else
+         {
+            COMM_transmit( &tx_data );
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid, expected format:  'sendheadendmsg <data> <QoS>' : eg. 'sendappmsg 1354 00'" );
+   }
+
+   return ( 0 );
+}
 /*******************************************************************************
    Function name: DBG_CommandLine_SendHeepMsg
 
@@ -7027,140 +7071,140 @@ uint32_t DBG_CommandLine_RegState ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_RegState () */
 #endif // (EP == 1)
-//
-///*******************************************************************************
-//   Function name: DBG_CommandLine_chksum
-//
-//   Purpose: This command will calculate a checksum (TWACS serial port protocol) over a passed in hex string
-//
-//   Arguments:  char *msg - pointer to message to convert
-//
-//   Returns: checksum of message passed
-//*******************************************************************************/
-//uint8_t DBG_CommandLine_chksum ( char *msg )
-//{
-//   uint8_t        data;
-//   uint8_t        chksum = 0;
-//
-//   while ( *msg != 0 )                          /* Loop thru input string, converting ASCII to hex.   */
-//   {
-//      ( void )sscanf( msg, "%02hhx", &data );
-//      chksum += data;                           /* Update checksum by simple 8 bit addition. */
-//      msg += 2;                                 /* Each sscanf consumes 2 input bytes.       */
-//   }
-//
-//   return ( chksum );
-//}
-//static const char * const SRFNheader[2] =
-//{
-//   "00A90205",     /* No response expected */
-//   "00290105"      /* Response expected */
-//};
-///*******************************************************************************
-//   Function name: DBG_CommandLine_tunnel
-//
-//   Purpose: This command will convert a string of hex bytes into hex ASCII
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - status of this function - currently always 0 (success)
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_tunnel ( uint32_t argc, char *argv[] )
-//{
-//   eui_addr_t  addr;
-//   uint8_t     data[MAX_ATOH_CHARS];
-//   char        const * hdr = SRFNheader[ 0 ];
-//   uint32_t    maxLen;
-//   uint8_t     chkstring[ 3 ];
-//   uint16_t    dataLen;
-//   uint16_t    bufIndex;
-//   uint16_t    srcIndex;
-//   uint8_t     chksum;
-//   uint8_t     qos;
-//   bool        valid = (bool)true;
-//
-//   if ( argc >= 3 )  /* The number of arguments must be at least 2 */
-//   {
-//      if ( ( 0 == strcasecmp( argv[1], "true" ) ) || ( 0 == strcmp( argv[1], "1" ) ) )
-//      {
-//         hdr = SRFNheader[ 1 ];
-//      }
-//
-//      /* Compute max input string: Size of data - strlen( "sendappmsg " ) - strlen( hdr ) - SOH - chksum - EOT - '\0 */
-//      maxLen = ( sizeof( data ) - strlen("sendappmsg ") ) - strlen( SRFNheader[ 0 ] );
-//      maxLen -= ( sizeof( char ) * 3 ) + sizeof( chksum ) * 4;    /* SOH, EOT, '\0 each take 2 bytes; chksum takes 4 */
-//      maxLen /= 2;                                                /* 2 characters output per input character.  */
-//      dataLen = ( uint16_t )strlen( argv[2] );
-//      if ( dataLen > maxLen ) /* Need room for SOH, checksum and EOT */
-//      {
-//         DBG_logPrintf( 'R', "data field must be less than or equal to %d", maxLen );
-//
-//      }
-//      else
-//      {
-//         chksum = DBG_CommandLine_chksum( argv[ 2 ] );
-//         ( void )sprintf( ( char *)chkstring, "%02X", chksum );
-//         bufIndex = ( uint16_t )sprintf( ( char * )data, "sendappmsg  %s%02X", hdr, SOH );
-//
-//         /* convert ascii data to hex data */
-//         for ( srcIndex = 0; ( bufIndex < sizeof(data) - 5 ) && ( 0 != argv[2][srcIndex] ); srcIndex++, bufIndex += 2 )
-//         {
-//            ASCII_htoa( &data[bufIndex], argv[2][srcIndex] );
-//         }
-//
-//         for ( uint16_t i = 0; i < 2; i++ )                              /* Append the checksum  */
-//         {
-//            ASCII_htoa( &data[bufIndex], chkstring[i] );
-//            bufIndex += 2;
-//         }
-//         ( void )snprintf( ( char * )&data[ bufIndex ], ( int32_t )sizeof( data ) - bufIndex, "%02x", EOT );  /* Append the EOT */
-//
-//         if ( argc >= 4 )  /* mac address supplied? */
-//         {
-//            if ( strlen( argv[ 3 ] ) != 10 )
-//            {
-//               DBG_logPrintf( 'R', "mac address must be 5 bytes in length" );
-//               valid = (bool)false;
-//            }
-//            else
-//            {
-//               for ( uint32_t i = 0; i < 4; i++ )
-//               {
-//                  ( void )sscanf( &argv[ 3 ][ i * 2 ], "%2hhx", &addr[ i + 3 ] );
-//               }
-//            }
-//         }
-//         else
-//         {
-//
-//            /*lint -e{545} & operator needed by compiler in next statement */
-//            MAC_EUI_Address_Get( ( eui_addr_t * )&addr );
-//         }
-//         if ( argc == 5 )  /* qos provided? */
-//         {
-//            ( void )sscanf( argv[ 4 ], "%2hhx", &qos );
-//         }
-//         else
-//         {
-//            qos = 0;
-//         }
-//
-//         if ( valid )
-//         {
-//            /*lint -e{644} addr initialized if valid is true.  */
-//            DBG_logPrintf( 'R', "%s %02X%02X%02X%02X%02X %02X", data, addr[3], addr[4], addr[5], addr[6], addr[7], qos );
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R',
-//                  "Format error: 'tunnel 0|1 <data> [<macaddr>] [<qos>]', e.g. tunnel 1 AA010000000008FC040000C0" );
-//   }
-//
-//   return ( 0 );
-//}
+
+/*******************************************************************************
+   Function name: DBG_CommandLine_chksum
+
+   Purpose: This command will calculate a checksum (TWACS serial port protocol) over a passed in hex string
+
+   Arguments:  char *msg - pointer to message to convert
+
+   Returns: checksum of message passed
+*******************************************************************************/
+uint8_t DBG_CommandLine_chksum ( char *msg )
+{
+   uint8_t        data;
+   uint8_t        chksum = 0;
+
+   while ( *msg != 0 )                          /* Loop thru input string, converting ASCII to hex.   */
+   {
+      ( void )sscanf( msg, "%02hhx", &data );
+      chksum += data;                           /* Update checksum by simple 8 bit addition. */
+      msg += 2;                                 /* Each sscanf consumes 2 input bytes.       */
+   }
+
+   return ( chksum );
+}
+static const char * const SRFNheader[2] =
+{
+   "00A90205",     /* No response expected */
+   "00290105"      /* Response expected */
+};
+/*******************************************************************************
+   Function name: DBG_CommandLine_tunnel
+
+   Purpose: This command will convert a string of hex bytes into hex ASCII
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - status of this function - currently always 0 (success)
+*******************************************************************************/
+uint32_t DBG_CommandLine_tunnel ( uint32_t argc, char *argv[] )
+{
+   eui_addr_t  addr;
+   uint8_t     data[MAX_ATOH_CHARS];
+   char        const * hdr = SRFNheader[ 0 ];
+   uint32_t    maxLen;
+   uint8_t     chkstring[ 3 ];
+   uint16_t    dataLen;
+   uint16_t    bufIndex;
+   uint16_t    srcIndex;
+   uint8_t     chksum;
+   uint8_t     qos;
+   bool        valid = (bool)true;
+
+   if ( argc >= 3 )  /* The number of arguments must be at least 2 */
+   {
+      if ( ( 0 == strcasecmp( argv[1], "true" ) ) || ( 0 == strcmp( argv[1], "1" ) ) )
+      {
+         hdr = SRFNheader[ 1 ];
+      }
+
+      /* Compute max input string: Size of data - strlen( "sendappmsg " ) - strlen( hdr ) - SOH - chksum - EOT - '\0 */
+      maxLen = ( sizeof( data ) - strlen("sendappmsg ") ) - strlen( SRFNheader[ 0 ] );
+      maxLen -= ( sizeof( char ) * 3 ) + sizeof( chksum ) * 4;    /* SOH, EOT, '\0 each take 2 bytes; chksum takes 4 */
+      maxLen /= 2;                                                /* 2 characters output per input character.  */
+      dataLen = ( uint16_t )strlen( argv[2] );
+      if ( dataLen > maxLen ) /* Need room for SOH, checksum and EOT */
+      {
+         DBG_logPrintf( 'R', "data field must be less than or equal to %d", maxLen );
+
+      }
+      else
+      {
+         chksum = DBG_CommandLine_chksum( argv[ 2 ] );
+         ( void )sprintf( ( char *)chkstring, "%02X", chksum );
+         bufIndex = ( uint16_t )sprintf( ( char * )data, "sendappmsg  %s%02X", hdr, SOH );
+
+         /* convert ascii data to hex data */
+         for ( srcIndex = 0; ( bufIndex < sizeof(data) - 5 ) && ( 0 != argv[2][srcIndex] ); srcIndex++, bufIndex += 2 )
+         {
+            ASCII_htoa( &data[bufIndex], argv[2][srcIndex] );
+         }
+
+         for ( uint16_t i = 0; i < 2; i++ )                              /* Append the checksum  */
+         {
+            ASCII_htoa( &data[bufIndex], chkstring[i] );
+            bufIndex += 2;
+         }
+         ( void )snprintf( ( char * )&data[ bufIndex ], ( int32_t )sizeof( data ) - bufIndex, "%02x", EOT );  /* Append the EOT */
+
+         if ( argc >= 4 )  /* mac address supplied? */
+         {
+            if ( strlen( argv[ 3 ] ) != 10 )
+            {
+               DBG_logPrintf( 'R', "mac address must be 5 bytes in length" );
+               valid = (bool)false;
+            }
+            else
+            {
+               for ( uint32_t i = 0; i < 4; i++ )
+               {
+                  ( void )sscanf( &argv[ 3 ][ i * 2 ], "%2hhx", &addr[ i + 3 ] );
+               }
+            }
+         }
+         else
+         {
+
+            /*lint -e{545} & operator needed by compiler in next statement */
+            MAC_EUI_Address_Get( ( eui_addr_t * )&addr );
+         }
+         if ( argc == 5 )  /* qos provided? */
+         {
+            ( void )sscanf( argv[ 4 ], "%2hhx", &qos );
+         }
+         else
+         {
+            qos = 0;
+         }
+
+         if ( valid )
+         {
+            /*lint -e{644} addr initialized if valid is true.  */
+            DBG_logPrintf( 'R', "%s %02X%02X%02X%02X%02X %02X", data, addr[3], addr[4], addr[5], addr[6], addr[7], qos );
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R',
+                  "Format error: 'tunnel 0|1 <data> [<macaddr>] [<qos>]', e.g. tunnel 1 AA010000000008FC040000C0" );
+   }
+
+   return ( 0 );
+}
 
 /*******************************************************************************
    Function name: DBG_CommandLine_crc
@@ -8575,132 +8619,132 @@ uint32_t DBG_CommandLine_mtlsStats ( uint32_t argc, char *argv[] )
 }
 #endif
 
-///******************************************************************************
-//   Function Name: DBG_CommandLine_PWR_BrownOut
-//
-//   Purpose: Signal a Brown Out to the Power Task
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:
-//
-//******************************************************************************/
-//#if 0
-//uint32_t DBG_CommandLine_PWR_BrownOut( uint32_t argc, char *argv[] )
-//{
-//   isr_brownOut();
-//   return( 0 );
-//}
-//#endif
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_usbaddr
-//
-//   Purpose: Display USB address
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:
-//
-//******************************************************************************/
-//#if ( USE_USB_MFG != 0 )
-//static uint32_t DBG_CommandLine_usbaddr( uint32_t argc, char *argv[] )
-//{
-//   DBG_logPrintf( 'I', "usb_addr %hhu", USB0_ADDR );
-//   return 0;
-//}
-//#endif
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_BDT
-//
-//   Purpose: Display USB BDT, or specific buffer.
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:
-//
-//******************************************************************************/
-//#if ( USE_USB_MFG != 0 )
-//static uint32_t DBG_CommandLine_BDT( uint32_t argc, char *argv[] )
-//{
-//   char           bufDesc[ 16 ];
-//   USB_MemMapPtr  usb0 = USB0_BASE_PTR;
-//   uint8_t        *bdt;       /* Pointer to USB BDT   */
-//   uint8_t        *buffer;    /* Pointer to endpoint buffer   */
-//   uint8_t        bdtCount;   /* Steps thru argv values  */
-//   uint8_t        bdtId;      /* argv value converted to hex   */
-//   uint8_t        byteCount;  /* Number of bytes sent/rec'd in each EP buffer */
-//   uint8_t        *rxTx;
-//   uint8_t        bdtPage1 = usb0->BDTPAGE1;    // Quiet compiler warning on usage of volatile usb0. BDT location does not change.
-//   uint8_t        bdtPage2 = usb0->BDTPAGE2;    // Quiet compiler warning on usage of volatile usb0. BDT location does not change.
-//   uint8_t        bdtPage3 = usb0->BDTPAGE3;    // Quiet compiler warning on usage of volatile usb0. BDT location does not change.
-//   bdt = (uint8_t *)( ( bdtPage3 << 24U ) | ( bdtPage2 << 16U ) | ( bdtPage1 << 8U ) );
-//   DBG_logPrintf( 'I', "BDT @ 0x%08X", bdt );
-//
-//   if ( argc == 1 )  /* Dump BDT table */
-//   {
-//      DBG_logPrintf( 'I', "EP   BC OWN DATA0/1 KEEP NINC DTS BDT_STALL buffer" );
-//      for ( uint8_t ep = 0; ep < 16 * 2 * 2; ep++ ) /* 16 bidirectional end points with even/odd bdts for each direction   */
-//      {
-//         /*           EP     BC    OWN   D0/1  KEEP  NINC DTS   STALL buffer  */
-//         DBG_logPrintf( 'I', "%2hhu %4hu %3hhx %7hhx %4hhx %4hhx %3hhx %9hhx 0x%P",
-//               ( ep/4 ),
-//               (*(uint32_t *)(void *)bdt >> 16) & 0x3ff, /*  BC      bits 25:16 */
-//               (*bdt >>  7)                     & 0x001, /*  Own     bit  7 */
-//               (*bdt >>  6)                     & 0x001, /*  data0/1 bit  6 */
-//               (*bdt >>  5)                     & 0x001, /*  keep    bit  5 */
-//               (*bdt >>  4)                     & 0x001, /*  NINC    bit  4 */
-//               (*bdt >>  3)                     & 0x001, /*  DTS     bit  3 */
-//               (*bdt >>  2)                     & 0x001, /*  STALL   bit  2 */
-//               *( uint32_t *)(void *)( bdt + 4 ) );      /*  buffer address */
-//         bdt += 8U;                                      /* Skip to next BDT (2 uint32_t locations */
-//      }
-//   }
-//   else
-//   {
-//      for ( bdtCount = 0; bdtCount < ( argc - 1 ); bdtCount++ )
-//      {
-//         bdtId = (uint8_t)strtoul( argv[ bdtCount + 1 ], NULL, 0 );
-//         buffer = bdt + ( bdtId * 32 );   /* 4 8 byte buffers per EP ( TX, RX, EVEN, ODD )   */
-//
-//         for ( uint8_t bdtBuf = 0; bdtBuf < 4; bdtBuf++ )
-//         {
-//            (void)snprintf( bufDesc, (int32_t)sizeof(bufDesc), "EP%hhu, %s, %-4s ", bdtId, ( bdtBuf < 2 ) ? "RX": "TX" , ( bdtBuf % 2 == 0 ) ? "EVEN": "ODD" );
-//            DBG_logPrintHex ( 'I', bufDesc, buffer, 8 );
-//            byteCount = (uint8_t)max( ( (*(uint32_t *)(void *)bdt >> 16) & 0x3ff ), 8 );
-//            buffer += 4;
-//            rxTx = (uint8_t *)(*(uint32_t *)(void *)buffer); /* Extract pointer to data buffer   */
-//            /* Verify buffer address in range of internal SRAM  */
-//            if (  ( rxTx >= (uint8_t *)__INTERNAL_SRAM_BASE ) &&
-//                  ( rxTx < (uint8_t *)(  (uint32_t)__INTERNAL_SRAM_BASE + (uint32_t)__INTERNAL_SRAM_SIZE ) ) )
-//            {
-//               DBG_logPrintHex( 'I', "buffer data:  ", rxTx, byteCount );
-//            }
-//            else
-//            {
-//               DBG_logPrintf( 'I', "Invalid buffer pointer (%P)", rxTx );
-//            }
-//            buffer += 4;
-//         }
-//         DBG_printf( "" );
-//      }
-//   }
-//   return( 0 );
-//}
-//#endif
-//
+/******************************************************************************
+   Function Name: DBG_CommandLine_PWR_BrownOut
+
+   Purpose: Signal a Brown Out to the Power Task
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+#if 0 // TODO: RA6E1 Bob: This command was removed from original K24 code
+uint32_t DBG_CommandLine_PWR_BrownOut( uint32_t argc, char *argv[] )
+{
+   isr_brownOut();
+   return( 0 );
+}
+#endif
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_usbaddr
+
+   Purpose: Display USB address
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+#if ( USE_USB_MFG != 0 )
+static uint32_t DBG_CommandLine_usbaddr( uint32_t argc, char *argv[] )
+{
+   DBG_logPrintf( 'I', "usb_addr %hhu", USB0_ADDR );
+   return 0;
+}
+#endif //  ( USE_USB_MFG != 0 )
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_BDT
+
+   Purpose: Display USB BDT, or specific buffer.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+#if ( USE_USB_MFG != 0 )
+static uint32_t DBG_CommandLine_BDT( uint32_t argc, char *argv[] )
+{
+   char           bufDesc[ 16 ];
+   USB_MemMapPtr  usb0 = USB0_BASE_PTR;
+   uint8_t        *bdt;       /* Pointer to USB BDT   */
+   uint8_t        *buffer;    /* Pointer to endpoint buffer   */
+   uint8_t        bdtCount;   /* Steps thru argv values  */
+   uint8_t        bdtId;      /* argv value converted to hex   */
+   uint8_t        byteCount;  /* Number of bytes sent/rec'd in each EP buffer */
+   uint8_t        *rxTx;
+   uint8_t        bdtPage1 = usb0->BDTPAGE1;    // Quiet compiler warning on usage of volatile usb0. BDT location does not change.
+   uint8_t        bdtPage2 = usb0->BDTPAGE2;    // Quiet compiler warning on usage of volatile usb0. BDT location does not change.
+   uint8_t        bdtPage3 = usb0->BDTPAGE3;    // Quiet compiler warning on usage of volatile usb0. BDT location does not change.
+   bdt = (uint8_t *)( ( bdtPage3 << 24U ) | ( bdtPage2 << 16U ) | ( bdtPage1 << 8U ) );
+   DBG_logPrintf( 'I', "BDT @ 0x%08X", bdt );
+
+   if ( argc == 1 )  /* Dump BDT table */
+   {
+      DBG_logPrintf( 'I', "EP   BC OWN DATA0/1 KEEP NINC DTS BDT_STALL buffer" );
+      for ( uint8_t ep = 0; ep < 16 * 2 * 2; ep++ ) /* 16 bidirectional end points with even/odd bdts for each direction   */
+      {
+         /*           EP     BC    OWN   D0/1  KEEP  NINC DTS   STALL buffer  */
+         DBG_logPrintf( 'I', "%2hhu %4hu %3hhx %7hhx %4hhx %4hhx %3hhx %9hhx 0x%P",
+               ( ep/4 ),
+               (*(uint32_t *)(void *)bdt >> 16) & 0x3ff, /*  BC      bits 25:16 */
+               (*bdt >>  7)                     & 0x001, /*  Own     bit  7 */
+               (*bdt >>  6)                     & 0x001, /*  data0/1 bit  6 */
+               (*bdt >>  5)                     & 0x001, /*  keep    bit  5 */
+               (*bdt >>  4)                     & 0x001, /*  NINC    bit  4 */
+               (*bdt >>  3)                     & 0x001, /*  DTS     bit  3 */
+               (*bdt >>  2)                     & 0x001, /*  STALL   bit  2 */
+               *( uint32_t *)(void *)( bdt + 4 ) );      /*  buffer address */
+         bdt += 8U;                                      /* Skip to next BDT (2 uint32_t locations */
+      }
+   }
+   else
+   {
+      for ( bdtCount = 0; bdtCount < ( argc - 1 ); bdtCount++ )
+      {
+         bdtId = (uint8_t)strtoul( argv[ bdtCount + 1 ], NULL, 0 );
+         buffer = bdt + ( bdtId * 32 );   /* 4 8 byte buffers per EP ( TX, RX, EVEN, ODD )   */
+
+         for ( uint8_t bdtBuf = 0; bdtBuf < 4; bdtBuf++ )
+         {
+            (void)snprintf( bufDesc, (int32_t)sizeof(bufDesc), "EP%hhu, %s, %-4s ", bdtId, ( bdtBuf < 2 ) ? "RX": "TX" , ( bdtBuf % 2 == 0 ) ? "EVEN": "ODD" );
+            DBG_logPrintHex ( 'I', bufDesc, buffer, 8 );
+            byteCount = (uint8_t)max( ( (*(uint32_t *)(void *)bdt >> 16) & 0x3ff ), 8 );
+            buffer += 4;
+            rxTx = (uint8_t *)(*(uint32_t *)(void *)buffer); /* Extract pointer to data buffer   */
+            /* Verify buffer address in range of internal SRAM  */
+            if (  ( rxTx >= (uint8_t *)__INTERNAL_SRAM_BASE ) &&
+                  ( rxTx < (uint8_t *)(  (uint32_t)__INTERNAL_SRAM_BASE + (uint32_t)__INTERNAL_SRAM_SIZE ) ) )
+            {
+               DBG_logPrintHex( 'I', "buffer data:  ", rxTx, byteCount );
+            }
+            else
+            {
+               DBG_logPrintf( 'I', "Invalid buffer pointer (%P)", rxTx );
+            }
+            buffer += 4;
+         }
+         DBG_printf( "" );
+      }
+   }
+   return( 0 );
+}
+#endif // ( USE_USB_MFG != 0 )
+
 #if (EP == 1)
 /******************************************************************************
 
@@ -11206,93 +11250,93 @@ uint32_t DBG_CommandLine_CCAOffset ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-//#if ( EP == 1 ) && ( TEST_TDMA == 1 )
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_CsmaSkip
-//
-//   Purpose: This function enable/disable skipping CSMA
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_CsmaSkip ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t CsmaSkip;
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         MAC_GetConf_t GetConf;
-//         // Get the CSMA skip
-//         GetConf = MAC_GetRequest( eMacAttr_CsmaSkip );
-//         if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//            DBG_printf( "CSMA skip is %u", GetConf.val.CsmaSkip );
-//         }
-//      } else {
-//         CsmaSkip = ( uint8_t )atoi( argv[1] );
-//         MAC_SetRequest( eMacAttr_CsmaSkip, &CsmaSkip);
-//      }
-//   }
-//   return ( 0 );
-//}
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_TxSlot
-//
-//   Purpose: This function configure the test TDMA slot
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_TxSlot ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t TxSlot;
-//
-//   // More than one parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      // No parameters
-//      if ( argc == 1 )
-//      {
-//         MAC_GetConf_t GetConf;
-//         // Get the TX slot
-//         GetConf = MAC_GetRequest( eMacAttr_TxSlot );
-//         if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//            DBG_printf( "TX slot is %u", GetConf.val.TxSlot+1 );
-//         }
-//      } else {
-//         TxSlot = ( uint8_t )atoi( argv[1] );
-//         if ( TxSlot > 0 && TxSlot < 6) {
-//            TxSlot--;
-//            MAC_SetRequest( eMacAttr_TxSlot, &TxSlot);
-//         } else {
-//            DBG_printf( "Invalid range 1-5" );
-//         }
-//      }
-//   }
-//   return ( 0 );
-//}
-//
-//#endif
+#if ( EP == 1 ) && ( TEST_TDMA == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_CsmaSkip
+
+   Purpose: This function enable/disable skipping CSMA
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_CsmaSkip ( uint32_t argc, char *argv[] )
+{
+   uint8_t CsmaSkip;
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      // No parameters
+      if ( argc == 1 )
+      {
+         MAC_GetConf_t GetConf;
+         // Get the CSMA skip
+         GetConf = MAC_GetRequest( eMacAttr_CsmaSkip );
+         if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+            DBG_printf( "CSMA skip is %u", GetConf.val.CsmaSkip );
+         }
+      } else {
+         CsmaSkip = ( uint8_t )atoi( argv[1] );
+         MAC_SetRequest( eMacAttr_CsmaSkip, &CsmaSkip);
+      }
+   }
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_TxSlot
+
+   Purpose: This function configure the test TDMA slot
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_TxSlot ( uint32_t argc, char *argv[] )
+{
+   uint8_t TxSlot;
+
+   // More than one parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      // No parameters
+      if ( argc == 1 )
+      {
+         MAC_GetConf_t GetConf;
+         // Get the TX slot
+         GetConf = MAC_GetRequest( eMacAttr_TxSlot );
+         if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+            DBG_printf( "TX slot is %u", GetConf.val.TxSlot+1 );
+         }
+      } else {
+         TxSlot = ( uint8_t )atoi( argv[1] );
+         if ( TxSlot > 0 && TxSlot < 6) {
+            TxSlot--;
+            MAC_SetRequest( eMacAttr_TxSlot, &TxSlot);
+         } else {
+            DBG_printf( "Invalid range 1-5" );
+         }
+      }
+   }
+   return ( 0 );
+}
+
+#endif
 
 /******************************************************************************
 
@@ -12291,61 +12335,61 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    return ( 0 );
 }//lint !e429 Custodial pointer has not been freed or returned
 
-//#if ( TEST_SYNC_ERROR == 1 )
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_SyncError
-//
-//   Purpose: This function set the number of allowable SYNC bit error
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_SyncError ( uint32_t argc, char *argv[] )
-//{
-//   uint8_t err;
-//
-//   // One parameter
-//   if ( argc > 2 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   } else {
-//      if ( argc == 1 )
-//      {
-//         PHY_GetConf_t GetConf;
-//         GetConf = PHY_GetRequest( ePhyAttr_SyncError );
-//         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-//            DBG_printf( "SYNC error is %u", ( uint8_t )GetConf.val.SyncError );
-//         }
-//      }
-//      else
-//      {
-//         err = ( uint8_t )atoi( argv[1] );
-//
-//         // Check for valid range
-//         if ( err > 7 )
-//         {
-//            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between 0-7" );
-//            return ( 0 );
-//         }
-//         PHY_SetConf_t SetConf;
-//         SetConf = PHY_SetRequest( ePhyAttr_SyncError, &err);
-//         if (SetConf.eStatus == ePHY_SET_SUCCESS) {
-//            DBG_printf( "SYNC error is set to %u", err );
-//         } else {
-//            DBG_printf( "Failed to set SYNC error" );
-//         }
-//      }
-//   }
-//
-//   return ( 0 );
-//}
-//#endif
+#if ( TEST_SYNC_ERROR == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_SyncError
+
+   Purpose: This function set the number of allowable SYNC bit error
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_SyncError ( uint32_t argc, char *argv[] )
+{
+   uint8_t err;
+
+   // One parameter
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   } else {
+      if ( argc == 1 )
+      {
+         PHY_GetConf_t GetConf;
+         GetConf = PHY_GetRequest( ePhyAttr_SyncError );
+         if (GetConf.eStatus == ePHY_GET_SUCCESS) {
+            DBG_printf( "SYNC error is %u", ( uint8_t )GetConf.val.SyncError );
+         }
+      }
+      else
+      {
+         err = ( uint8_t )atoi( argv[1] );
+
+         // Check for valid range
+         if ( err > 7 )
+         {
+            DBG_logPrintf( 'R', "ERROR - Invalid range. Must be between 0-7" );
+            return ( 0 );
+         }
+         PHY_SetConf_t SetConf;
+         SetConf = PHY_SetRequest( ePhyAttr_SyncError, &err);
+         if (SetConf.eStatus == ePHY_SET_SUCCESS) {
+            DBG_printf( "SYNC error is set to %u", err );
+         } else {
+            DBG_printf( "Failed to set SYNC error" );
+         }
+      }
+   }
+
+   return ( 0 );
+}
+#endif
 //
 //#if ( NOISE_HIST_ENABLED == 1 )
 //static void NoiseHistHelp ( uint8_t command )
@@ -12648,68 +12692,68 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 //   return( 0 );
 //}
 //#endif
-//
-//#if ( FAKE_TRAFFIC == 1 )
-///***********************************************************************************************************************
-//   Function Name: DBG_CommandLine_ipBhaulGenCount
-//
-//   Purpose: Get/Set the backhaul generation count
-//
-//   Arguments:
-//      argc - Number of Arguments passed to this function
-//      argv - pointer to the list of arguments passed to this function
-//
-//   Returns: none
-//***********************************************************************************************************************/
-//uint32_t DBG_CommandLine_ipBhaulGenCount( uint32_t argc, char *argv[] )
-//{
-//   NWK_GetConf_t     GetConf;
-//   char              *endptr;
-//   uint8_t           val;
-//
-//   if ( argc == 2 )           /* User wants to set the RF dutycycle */
-//   {
-//      val = ( uint8_t )strtoul( argv[1], &endptr, 10 );
-//      (void)NWK_SetRequest( eNwkAttr_ipBhaulGenCount, &val);
-//   }
-//
-//   /* Always print the actual value   */
-//   GetConf = NWK_GetRequest( eNwkAttr_ipBhaulGenCount );
-//   DBG_printf("%s %u\n", argv[0], GetConf.val.ipBhaulGenCount );
-//
-//   return( 0 );
-//}
-//
-///***********************************************************************************************************************
-//   Function Name: DBG_CommandLine_ipRfDutyCycle
-//
-//   Purpose: Get/Set the IP RF dutycycle
-//
-//   Arguments:
-//      argc - Number of Arguments passed to this function
-//      argv - pointer to the list of arguments passed to this function
-//
-//   Returns: none
-//***********************************************************************************************************************/
-//uint32_t DBG_CommandLine_ipRfDutyCycle( uint32_t argc, char *argv[] )
-//{
-//   NWK_GetConf_t     GetConf;
-//   char              *endptr;
-//   uint8_t           val;
-//
-//   if ( argc == 2 )           /* User wants to set the RF dutycycle */
-//   {
-//      val = ( uint8_t )strtoul( argv[1], &endptr, 10 );
-//      (void)NWK_SetRequest( eNwkAttr_ipRfDutyCycle, &val);
-//   }
-//
-//   /* Always print the actual value   */
-//   GetConf = NWK_GetRequest( eNwkAttr_ipRfDutyCycle );
-//   DBG_printf("%s %u\n", argv[0], GetConf.val.ipRfDutyCycle );
-//
-//   return( 0 );
-//}
-//#endif
+
+#if ( FAKE_TRAFFIC == 1 )
+/***********************************************************************************************************************
+   Function Name: DBG_CommandLine_ipBhaulGenCount
+
+   Purpose: Get/Set the backhaul generation count
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: none
+***********************************************************************************************************************/
+uint32_t DBG_CommandLine_ipBhaulGenCount( uint32_t argc, char *argv[] )
+{
+   NWK_GetConf_t     GetConf;
+   char              *endptr;
+   uint8_t           val;
+
+   if ( argc == 2 )           /* User wants to set the RF dutycycle */
+   {
+      val = ( uint8_t )strtoul( argv[1], &endptr, 10 );
+      (void)NWK_SetRequest( eNwkAttr_ipBhaulGenCount, &val);
+   }
+
+   /* Always print the actual value   */
+   GetConf = NWK_GetRequest( eNwkAttr_ipBhaulGenCount );
+   DBG_printf("%s %u\n", argv[0], GetConf.val.ipBhaulGenCount );
+
+   return( 0 );
+}
+
+/***********************************************************************************************************************
+   Function Name: DBG_CommandLine_ipRfDutyCycle
+
+   Purpose: Get/Set the IP RF dutycycle
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: none
+***********************************************************************************************************************/
+uint32_t DBG_CommandLine_ipRfDutyCycle( uint32_t argc, char *argv[] )
+{
+   NWK_GetConf_t     GetConf;
+   char              *endptr;
+   uint8_t           val;
+
+   if ( argc == 2 )           /* User wants to set the RF dutycycle */
+   {
+      val = ( uint8_t )strtoul( argv[1], &endptr, 10 );
+      (void)NWK_SetRequest( eNwkAttr_ipRfDutyCycle, &val);
+   }
+
+   /* Always print the actual value   */
+   GetConf = NWK_GetRequest( eNwkAttr_ipRfDutyCycle );
+   DBG_printf("%s %u\n", argv[0], GetConf.val.ipRfDutyCycle );
+
+   return( 0 );
+}
+#endif // ( FAKE_TRAFFIC == 1 )
 
 /******************************************************************************
 
@@ -13612,79 +13656,101 @@ uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
    return 0;
 }
 #endif
-//#if 0
-//static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
-//{
-//   *(uint32_t *)0 = 0;
-//   return 0;
-//}
-//#endif
-///*lint +esym(715,argc, argv, Arg0)  */
-//
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_EVL_UNIT_TESTING ( uint32_t argc, char *argv[] )
-//
-//   Purpose: This function is used to initiate an event log unit test from the debug port
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//#if ( EVL_UNIT_TESTING == 1 )
-//uint32_t DBG_CommandLine_EVL_UNIT_TESTING( uint32_t argc, char *argv[] )
-//{
-//   uint16_t command;
-//   command = ( uint16_t )atoi( argv[1] );
-//
-//   if ( argc > 1 )
-//   {
-//      switch ( command )
-//      {
-//         case ( 1 ) :
-//         {
-//            EVL_generateMakeRoomRealtimeFailure();
-//            break;
-//         }
-//         case ( 2 ) :
-//         {
-//            EVL_generateMakeRoomOpportunisticFailure();
-//            break;
-//         }
-//         case ( 3 ) :
-//         {
-//            if( argc == 4 )
-//            {
-//               uint8_t priorityThreshold;
-//               uint8_t alarmIndex;
-//               priorityThreshold = ( uint8_t )atoi( argv[2] );
-//               alarmIndex = ( uint8_t )atoi( argv[3] );
-//               EVL_loadLogBufferCorruption( priorityThreshold, alarmIndex);
-//            }
-//            else
-//            {
-//               INFO_printf( "COMMAND 3 USAGE: evlUnitTest 3 <buffer priority> <alarm index to search>" );
-//            }
-//            break;
-//         }
-//         default:
-//         {
-//            INFO_printf( "Command %d not implemented", command );
-//         }
-//      }
-//   }
-//   else
-//   {
-//      INFO_printf( "USAGE: evlUnitTesting cmd" );
-//      INFO_printf( "cmd: 1 - Generate a make room failure condition when logging an event in the real time alarm buffer" );
-//      INFO_printf( "cmd: 2 - Generate a make room failure condition when logging an event in the opportunistic alarm buffer" );
-//      INFO_printf( "cmd: 3 - Generate a corruption failure during call to EventLogLoadBuffer - USAGE: evlUnitTest 3 <buffer priority> <alarm index to search>" );
-//   }
-//
-//   return ( 0 );
-//}
-//#endif
+#if 0  // TODO: RA6E1 Bob: This command was removed from original K24 code
+static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
+{
+   *(uint32_t *)0 = 0;
+   return 0;
+}
+#endif // TODO: RA6E1 Bob: This command was removed from original K24 code
+/*lint +esym(715,argc, argv, Arg0)  */
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_EVL_UNIT_TESTING ( uint32_t argc, char *argv[] )
+
+   Purpose: This function is used to initiate an event log unit test from the debug port
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+#if ( EVL_UNIT_TESTING == 1 )
+uint32_t DBG_CommandLine_EVL_UNIT_TESTING( uint32_t argc, char *argv[] )
+{
+   uint16_t command;
+   command = ( uint16_t )atoi( argv[1] );
+
+   if ( argc > 1 )
+   {
+      switch ( command )
+      {
+         case ( 1 ) :
+         {
+            EVL_generateMakeRoomRealtimeFailure();
+            break;
+         }
+         case ( 2 ) :
+         {
+            EVL_generateMakeRoomOpportunisticFailure();
+            break;
+         }
+         case ( 3 ) :
+         {
+            if( argc == 4 )
+            {
+               uint8_t priorityThreshold;
+               uint8_t alarmIndex;
+               priorityThreshold = ( uint8_t )atoi( argv[2] );
+               alarmIndex = ( uint8_t )atoi( argv[3] );
+               EVL_loadLogBufferCorruption( priorityThreshold, alarmIndex);
+            }
+            else
+            {
+               INFO_printf( "COMMAND 3 USAGE: evlUnitTest 3 <buffer priority> <alarm index to search>" );
+            }
+            break;
+         }
+         default:
+         {
+            INFO_printf( "Command %d not implemented", command );
+         }
+      }
+   }
+   else
+   {
+      INFO_printf( "USAGE: evlUnitTesting cmd" );
+      INFO_printf( "cmd: 1 - Generate a make room failure condition when logging an event in the real time alarm buffer" );
+      INFO_printf( "cmd: 2 - Generate a make room failure condition when logging an event in the opportunistic alarm buffer" );
+      INFO_printf( "cmd: 3 - Generate a corruption failure during call to EventLogLoadBuffer - USAGE: evlUnitTest 3 <buffer priority> <alarm index to search>" );
+   }
+
+   return ( 0 );
+}
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+static uint32_t DBG_CommandLine_CoreClocks( uint32_t argc, char *argv[] )
+{
+  INFO_printf( "CPU Clocks (BSP): HOCO = %dMHz, MOCO = %dMHz, LOCO = %dHz, MAIN_OSC = %dMHz, Subclock = %dHz, PLL = %dMHz, PLL2 = %dMHz",
+              R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_HOCO)     / 1000000,
+              R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_MOCO)     / 1000000,
+              R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_LOCO),
+              R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_MAIN_OSC) / 1000000,
+              R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_SUBCLOCK),
+              R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_PLL)      / 1000000,
+              R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_PLL2)     / 10000000 );
+    INFO_printf( "CPU Clocks (FSP): PCLKD = %d, PCLKC = %d, PCLKB = %d, PCLKA = %d, BCLK = %d, ICLK = %d, FCLK = %d (all in MHz)",
+              R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKD)    / 1000000,
+              R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKC)    / 1000000,
+              R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB)    / 1000000,
+              R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKA)    / 1000000,
+              R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_BCLK)     / 1000000,
+              R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_ICLK)     / 1000000,
+              R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_FCLK)     / 1000000 );
+  return 0;
+}
+#endif
 ///*lint +esym(818, argc, argv) argc, argv could be const */

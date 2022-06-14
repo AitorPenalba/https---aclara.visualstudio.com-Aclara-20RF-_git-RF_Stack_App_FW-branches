@@ -251,8 +251,13 @@
 #endif //( TEST_REGULATOR_CONTROL_DISABLE == 0 )
 
 // ZCD_METER
+#if ( MCU_SELECTED == NXP_K24 )
 #define HMC_ZCD_METER()          (((GPIOD_PDIR & (1<<1))>>1)^1) /* ZCD_METER signal from the host meter */
 #define HMC_ZCD_METER_TRIS()     { PORTD_PCR1 = 0x400; }         /* Map ZCD_METER signal to FTM3_CH1 input */
+#elif ( MCU_SELECTED == RA6E1 )
+#define HMC_ZCD_METER()          ( R_BSP_PinRead(BSP_IO_PORT_01_PIN_14 )
+#define HMC_ZCD_METER_TRIS()       R_BSP_PinCfg (BSP_IO_PORT_01_PIN_14, (uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_AGT)
+#endif // ( MCU_SELECTED )
 
 /* HMC trouble pin interrupt definitions   */
 #define HMC_TROUBLE_IRQIsrIndex       ((int)INT_PORTC)   /* Set to the same port that the HMC_TROUBLE signal is on */
