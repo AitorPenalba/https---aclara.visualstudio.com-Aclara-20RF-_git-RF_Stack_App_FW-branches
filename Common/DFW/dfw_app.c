@@ -74,6 +74,10 @@
 #include "dfwtd_config.h"
 #endif
 
+#if DFW_XZCOMPRESS_BSPATCHING
+#include "dfw_xzmini_interface.h"
+#endif
+
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 #define DFW_SHA_CHUNK_SIZE       (32)              /* SHA chunk of data size */
@@ -218,13 +222,26 @@ PACK_END
 typedef enum
 {
    eDFWA_CMD_RESET_PROCESSOR = ( ( uint8_t )0 ), // Command to reset the processor
-   eDFWA_CMD_WRITE_DATA,            // Write data to PGM memory
-   eDFWA_CMD_FILL_REGION,           // Fill PGM region
-   eDFWA_CMD_COPY_DATA,             // Copy PGM data
-   eDFWA_CMD_WRITE_DATA_NV,         // Write data to NV
-   eDFWA_CMD_FILL_REGION_NV,        // Fill NV region
-   eDFWA_CMD_COPY_DATA_NV           // Copy NV data to NV data
-} eMacroCmd_t;                      // Macro commands in the patch
+   eDFWA_CMD_WRITE_DATA,                     // Write data to PGM memory
+   eDFWA_CMD_FILL_REGION,                    // Fill PGM region
+   eDFWA_CMD_COPY_DATA,                      // Copy PGM data
+   eDFWA_CMD_WRITE_DATA_NV,                  // Write data to NV
+   eDFWA_CMD_FILL_REGION_NV,                 // Fill NV region
+   eDFWA_CMD_COPY_DATA_NV,                   // Copy NV data to NV data
+   eDFWA_CMD_PATCH_DECOMPRESS_TECHNOLOGY     // Decompress and patch technology
+}eMacroCmd_t;                                // Macro commands in the patch
+
+typedef enum
+{
+   eDFW_ACLARA_PATCH = ( ( uint8_t )0 ),  // Acalara patch
+   eDFW_MINIBSDIFF_PATCH                  // Minibsdiff patch
+} ePatchTechnology;
+
+typedef enum
+{
+   eDFW_NO_COMPRESSION = ( ( uint8_t )0 ),  // Acalara patch
+   eDFW_XZ_COMPRESSION                      // Minibsdiff patch
+} eCompressionTechnology;
 
 typedef enum
 {
@@ -274,6 +291,16 @@ typedef struct  PACK_MID
    uint8_t       srcAddr[3];  // Source address
    uint8_t       length[2];   // Number of bytes to copy
 } macroCmdCopy_t;
+PACK_END
+
+PACK_BEGIN
+typedef struct  PACK_MID
+{
+   eMacroCmd_t              command: 8;            // Patch & decompression type command
+   ePatchTechnology         patchType: 4;          // Patch type
+   eCompressionTechnology   compressionType: 4;    // Compression technology type
+   uint8_t                  length[3];             // Length of the compressed data
+} macroCmdPatchDecompressionType_t;
 PACK_END
 
 #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( ( DCU == 1 ) &&  ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )) )
@@ -671,8 +698,14 @@ returnStatus_t DFWA_init( void )
                else
 #endif // ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
                {
-                  // If patch state is updating NV, start the NV update process
-                  if( eDFWP_EXEC_NV_COMMANDS == dfwVars.ePatchState || eDFWP_COPY_NV_IMAGE_TO_NV == dfwVars.ePatchState )
+                  // If patch state is updating NV or doing BL swap, start the process if the patch is for application or bootloader
+#if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( DCU == 1 ) )
+                  if( eDFWP_EXEC_NV_COMMANDS == dfwVars.ePatchState || eDFWP_COPY_NV_IMAGE_TO_NV == dfwVars.ePatchState ||
+                      eDFWP_DO_FLASH_SWAP == dfwVars.ePatchState )
+#else
+                  if( eDFWP_EXEC_NV_COMMANDS == dfwVars.ePatchState || eDFWP_COPY_NV_IMAGE_TO_NV == dfwVars.ePatchState ||
+                      eDFWP_BL_SWAP == dfwVars.ePatchState || eDFWP_DO_FLASH_SWAP == dfwVars.ePatchState )
+#endif
                   {
                      ( void )doPatch(); /* Continue patching */
                   }
@@ -818,7 +851,7 @@ void DFWA_task( taskParameter )
    }
    ( void )DFWA_getFileVars( &dfwVars ); // Read the DFW NV variables (status, etc...)
 
-   //If download completed, but still need to decrypt or if decryption has completed, send message to task to (re)start execution
+   // If download completed, but still need to decrypt or if decryption has completed, send message to task to (re)start execution
    if ( ( eDFWP_EXEC_PGM_COMMANDS == dfwVars.ePatchState ) &&
         ( ( eDFWD_READY == dfwVars.decryptState ) || ( eDFWD_DONE == dfwVars.decryptState ) ) )
    {
@@ -1695,13 +1728,34 @@ static returnStatus_t doPatch( void )
          {
             case eDFWP_EXEC_PGM_COMMANDS:
             {
-               DFW_PRNT_INFO( "Copying PGM to Image" );
-               /* TODO The next to last sector contain non-program data and MUST be excluded from Patching.  This
-                  sector contains data that may change between the time of the following pgm copy and the DFW Apply
-                  (swap time).  To ensure the sector is current, it needs to be copied just prior to the swap.  If this
-                  fails, then the swap cannot take place.
-               */
-               if ( eSUCCESS == DFWA_CopyPgmToPgmImagePartition( false, dfwVars.initVars.target ) ) // Copy PGM to image, if no errors, patch it!
+               returnStatus_t retStatus = eSUCCESS;
+               bool copyRequired = true;
+#if DFW_XZCOMPRESS_BSPATCHING
+               macroCmdPatchDecompressionType_t patchDecompressType;
+               dSize   PatchOffset = ( dSize )sizeof( patchHeader_t );
+               ( void ) PAR_partitionFptr.parRead( ( uint8_t * )&patchDecompressType, PatchOffset,
+                                                   ( lCnt )sizeof( patchDecompressType ), pDFWPatchPTbl_ );
+               if( eDFWA_CMD_PATCH_DECOMPRESS_TECHNOLOGY == patchDecompressType.command )
+               {
+                  if( ( eDFW_MINIBSDIFF_PATCH == patchDecompressType.patchType ) &&
+                      ( eDFW_XZ_COMPRESSION == patchDecompressType.compressionType ) )
+                  {
+                     copyRequired = false;
+                  }
+               }
+#endif
+               if( copyRequired )
+               {
+                  DFW_PRNT_INFO("Copying PGM to Image");
+                  /* TODO The next to last sector contain non-program data and MUST be excluded from Patching.  This
+                   * sector contains data that may change between the time of the following pgm copy and the DFW Apply
+                   * (swap time).  To ensure the sector is current, it needs to be copied just prior to the swap.  If this
+                   * fails, then the swap cannot take place.
+                   */
+                  retStatus = DFWA_CopyPgmToPgmImagePartition(false, dfwVars.initVars.target); // Copy PGM to image, if no errors, patch it!
+               }
+
+               if ( eSUCCESS == retStatus )
                {
                   dfwUnitTestToggleOutput_TST1( 500, 3, 5 );
                   DFW_PRNT_INFO( "Exe Macro Cmds" );
@@ -2723,6 +2777,7 @@ static eDfwErrorCodes_t executeMacroCmds( eDfwPatchState_t ePatchState, patchHea
       macroCmdWrite_t  write; // Write Command structure
       macroCmdFill_t   fill;  // Fill Command structure
       macroCmdCopy_t   copy;  // Copy Command structure
+      macroCmdPatchDecompressionType_t patchDecompressType; // Decompress and write command structure
    } patchCmd_;               // Union used for patch command - All structures have the command as the 1st parameter.
 
    patchLen = ( uint32_t )pPatchHeader->patchLength;     // Get the patch length (it is in big endian at this point)
@@ -2788,6 +2843,62 @@ static eDfwErrorCodes_t executeMacroCmds( eDfwPatchState_t ePatchState, patchHea
                }
                break;
             }
+#if DFW_XZCOMPRESS_BSPATCHING
+            case eDFWA_CMD_PATCH_DECOMPRESS_TECHNOLOGY:
+            {
+               int32_t newsz, ctrllen, datalen;
+               PartitionData_t const *pOldImagePartition;
+               Length = getThreeByteAddr( &patchCmd_.patchDecompressType.length[0] );
+               dSize patchSrcOffset = PatchOffset + sizeof( macroCmdPatchDecompressionType_t );
+               PatchOffset = patchSrcOffset + Length;        /* End of the compressed patch, also points to next command */
+               patchLen   -= ( int32_t )sizeof( macroCmdPatchDecompressionType_t ) + ( uint16_t )Length; /* Adjust patch length */
+               if( eDFWP_EXEC_PGM_COMMANDS == ePatchState )
+               {
+                  if( ( eDFW_MINIBSDIFF_PATCH == patchCmd_.patchDecompressType.patchType ) &&
+                      ( eDFW_XZ_COMPRESSION == patchCmd_.patchDecompressType.compressionType ) )
+                  {
+                     if( eSUCCESS == DFW_XZMINI_uncompressPatch_init( pDFWPatchPTbl_, patchSrcOffset, PatchOffset ) )
+                     {
+                        /* Validate the patch header */
+                        if( eSUCCESS == DFW_XZMINI_bspatch_valid_header( &newsz, &ctrllen, &datalen ) )
+                        {
+                           DFW_vars_t dfwVars;
+                           ( void )DFWA_getFileVars( &dfwVars );
+#if ( DCU == 1 )
+                           ( void )PAR_partitionFptr.parOpen( &pOldImagePartition, ePART_APP_CODE, 0L );
+                           /* Check for power down before processing. */
+                           PWR_CheckPowerDown();
+                           /* Set the swap state to INIT */
+                           ( void )DFWA_SetSwapState( eFS_INIT );
+#else
+                           if( eFWT_APP == dfwVars.initVars.target )
+                           {
+                              pOldImagePartition = pAppCodePart_;
+                           }
+                           else if( eFWT_BL == dfwVars.initVars.target )
+                           {
+                              pOldImagePartition = pDFWBLInfoPar_;
+                           }
+#endif
+                           /* Erase the NV image partition before start patching */
+                           ( void )PAR_partitionFptr.parErase( 0, DFW_PGM_IMAGE_SIZE, pDFWImagePTbl_ );
+                           /* Apply patch */
+                           if ( eSUCCESS == DFW_XZMINI_bspatch( pOldImagePartition, dfwVars.initVars.target, pDFWImagePTbl_, newsz ) ) //lint !e644, pOldImagePartition initialized with Appcode/BLinfo partition
+                           {
+                              DFW_PRNT_INFO("XZ Minibs - Patch applied successfully");
+                           }
+                           else
+                           {
+                              DFW_PRNT_INFO("XZ Minibs - Patch failed");
+                           }
+                        }
+                     }
+                  }
+               }
+
+               break;
+            }
+#endif
             case eDFWA_CMD_FILL_REGION:
             case eDFWA_CMD_FILL_REGION_NV:
             {
