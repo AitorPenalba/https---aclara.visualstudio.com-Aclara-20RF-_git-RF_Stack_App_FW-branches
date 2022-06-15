@@ -130,7 +130,6 @@ void PWROR_Task( taskParameter )
    uint32_t             outageTimeSec;       /* Outage time in seconds */
    uint32_t             timeRestorationSec;  /* Restoration time in seconds */
    uint32_t             pwrEventDurationSec;    /* Duration of power event used to determine the kind of event */
-   bool                 bOverflow;           /* Used in elapsed time calculation.   */
    bool                 bRTCValid;           /* Used in elapsed time calculation.   */
 
    DBG_logPrintf( 'I', "Running" );
@@ -257,6 +256,7 @@ void PWROR_Task( taskParameter )
 
             pwrQualEvent.markSent = (bool)true;
 
+#if 0  /* TODO: RA6E1: Enable once the HMC Comm is working */
 #if ( ENABLE_HMC_TASKS == 1 )
             /* If the endpoint is connected to a meter, we need to gather voltage measurements from the meter
                to be stored as NVP data in the power restored event.  Make sure the HMC is ready to go before
@@ -265,6 +265,7 @@ void PWROR_Task( taskParameter )
             {
                OS_TASK_Sleep( 100 );
             }
+#endif
 #endif
             PWROR_printOutageStats( outageTimeSysComb, timeRestorationSysComb );
 

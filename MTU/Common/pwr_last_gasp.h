@@ -110,7 +110,6 @@ typedef struct PWRLG_SysRegisterFile
 #define PWRLG_RFSYS_BASE_PTR        ((PWRLG_SysRegisterFilePtr) (void *)(R_SYSTEM->VBTBKR + VBATREG_FILE_SIZE) )
 #endif
 
-
 #define PWRLG_FLAGS()               (PWRLG_RFSYS_BASE_PTR->flags)
 
 #define PWRLG_LLWU()                (PWRLG_FLAGS().bits.llwu)
@@ -204,6 +203,9 @@ PWRLG_EXTERN uint16_t       PWRLG_CalculateMessages( void );
 PWRLG_EXTERN void           PWRLG_CalculateSleep( uint8_t step );
 PWRLG_EXTERN void           PWRLG_SetupLastGasp( void );
 
+#if 1  // TEST // TODO: RA6E1: Remove later 
+void PWRLG_print_LG_Flags ( void );
+#endif
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 

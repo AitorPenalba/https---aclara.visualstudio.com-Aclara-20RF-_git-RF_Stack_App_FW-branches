@@ -56,7 +56,11 @@
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
-
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define SELF_TEST_EVENT_MASK             0xFFFFFFFF
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define SELF_TEST_EVENT_MASK             0x0000000F   /* TODO: RA6E1: Review */
+#endif
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 #if ( DCU == 1 )  /* DCU will always support external RAM */
@@ -119,7 +123,7 @@ returnStatus_t SELF_init( void )
       if ( fileStatus.bFileCreated )
       {  // The file was just created for the first time.
          (void)memset( &SELF_TestData, 0, sizeof(SELF_TestData) );
-         retVal =FIO_fwrite( &pFile->handle, 0, (uint8_t *)pFile->Data, pFile->Size);
+         retVal = FIO_fwrite( &pFile->handle, 0, (uint8_t *)pFile->Data, pFile->Size);
       }
       else
       {  //Read the SELF_test File Data
@@ -175,17 +179,15 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 ***********************************************************************************************************************/
 void SELF_testTask( taskParameter )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
+   (void)Arg0;    /* Not used - avoids lint warning   */
+#endif
    uint16_t       selfTestResults;
 
-#if 1
-   // TODO: RA6: Use line 192 once complete implementation is available
    DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
-   selfTestResults = RunSelfTest();       /* Run once during the init phase   */
-   vTaskSuspend(NULL); /* TODO: Remove*/
-#else
-   DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
-   (void)Arg0;    /* Not used - avoids lint warning   */
+
 #if ( USE_USB_MFG == 0 )
+#if ( RTOS_SELECTION == MQX_RTOS )
    MQX_FILE_PTR   stdout_ptr;       /* mqx file pointer for UART  */
    if (NULL != (stdout_ptr = fopen(MFG_PORT_IO_CHANNEL, NULL)))
    {
@@ -193,13 +195,20 @@ void SELF_testTask( taskParameter )
       (void)_io_set_handle(IO_STDOUT, stdout_ptr);
 #endif
    }
+#endif // #if ( RTOS_SELECTION == MQX_RTOS )
 #endif
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
 #if ( USE_USB_MFG == 0 )
+#if ( MCU_SELECTED == NXP_K24 )
    (void)fprintf( stdout_ptr, "%s %04X\n", "SelfTest", selfTestResults );
    OS_TASK_Sleep( 20 );
    (void)fflush( stdout_ptr );
    (void)fclose( stdout_ptr );
+#elif ( MCU_SELECTED == RA6E1 )
+   // TODO: RA6E1: Add MFG Print
+//   MFG_printf("%s %04X\n", "SelfTest", selfTestResults );
+   OS_TASK_Sleep( 20 );
+#endif
 #else
    char resBuff[16];
    (void)snprintf( resBuff, sizeof( resBuff ), "%s %04X\n", "SelfTest", selfTestResults );
@@ -216,10 +225,10 @@ void SELF_testTask( taskParameter )
       }
       else
       {
-         OS_TASK_Sleep( 1000U ); /* Wait 1 second before tring again.   */
+         OS_TASK_Sleep( 1000U ); /* Wait 1 second before trying again.   */
       }
    }
-#endif
+#endif  //#if ( USE_USB_MFG == 0 )
 
    /* Now, lower the task priority to just higher than the IDLE task.  */
    (void)OS_TASK_Set_Priority ( pTskName_Test, LOWEST_TASK_PRIORITY_ABOVE_IDLE() );
@@ -227,7 +236,7 @@ void SELF_testTask( taskParameter )
    for (;;)                                                    /* Task Loop */
    {
       /* Wait for an event or 24 hours to elapse   */
-      event_flags = OS_EVNT_Wait ( &SELF_events, 0xffffffff, (bool)false , ONE_MIN * 60 * 24 );
+      event_flags = OS_EVNT_Wait ( &SELF_events, SELF_TEST_EVENT_MASK, (bool)false , ONE_MIN * 60 * 24 );
       if ( event_flags != 0 )
       {
          //NOTE: Selftests initiated by MFg port do not generate Fail/Succeed Events
@@ -272,7 +281,6 @@ void SELF_testTask( taskParameter )
          (void)RunSelfTest();
       }
    }
-#endif // #if 0
 }
 
 /***********************************************************************************************************************
@@ -817,7 +825,6 @@ returnStatus_t SELF_testSDRAM( uint32_t LoopCount )
 }
 #endif // ( DCU == 1 )
 
-#if ( SUPPORT_HEEP != 0 )
 /***********************************************************************************************************************
 
    Function Name: SELF_OR_PM_Handler
@@ -925,13 +932,12 @@ returnStatus_t SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType i
    }
    return ( retVal );
 }
-#endif // SUPPORT_HEEP
 
 
 /***********************************************************************************************************************
    Function Name: SELF_testIWDT
 
-   Purpose: Test the IWDT 
+   Purpose: Test the IWDT
 
    Arguments: none
 
@@ -941,11 +947,11 @@ returnStatus_t SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType i
 void SELF_testIWDT( void )
 {
    static uint32_t iwdt_counter;
-  
+
    while ( TRUE )
    {
       /* Read the current IWDT counter value for debugging purpose. Can be watched in the live watch. */
       R_IWDT_CounterGet( &g_wdt0_ctrl, &iwdt_counter );
-    
+
    }
 }

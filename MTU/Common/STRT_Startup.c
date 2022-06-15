@@ -183,6 +183,8 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( TIME_SYNC_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SYSBUSY_init, STRT_FLAG_NONE ),
+   INIT( PWR_powerUp, STRT_FLAG_NONE),                                              // Read reset reason
+   INIT( SELF_init, STRT_FLAG_NONE ),
 #if ENABLE_DFW_TASKS
    INIT( DFWA_init, STRT_FLAG_NONE ),
    INIT( DFWTDCFG_init, STRT_FLAG_NONE ),
@@ -240,7 +242,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( SEC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
    INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   
+
 #if 0 // TODO: RA6: Add later
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS

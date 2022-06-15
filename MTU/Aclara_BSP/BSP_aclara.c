@@ -7,12 +7,18 @@
  * Contents: This file contains all of the Board Support Package functions that
  *           don't really fit into any of the existing modules under the BSP
  *
- ******************************************************************************
- * Copyright (c) 2012 ACLARA.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *    ACLARA, ST. LOUIS, MISSOURI USA
- *****************************************************************************/
+ **********************************************************************************************************************
+  A product of
+  Aclara Technologies LLC
+  Confidential and Proprietary
+  Copyright 2010 - 2022 Aclara. All Rights Reserved.
+
+  PROPRIETARY NOTICE
+  The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+  (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+  authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may
+  be used or copied only in accordance with the terms of such license.
+ *********************************************************************************************************************/
 
 /* INCLUDE FILES */
 #include "project.h"
@@ -43,7 +49,7 @@ static bool Vref_Initialized = false;
 
 /* FUNCTION DEFINITIONS */
 
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( RTOS_SELECTION == MQX_RTOS )  /* TODO: RA6E1: Add similar functionality for RA6 with FreeRTOS */
 /*******************************************************************************
 
   Function name: BSP_Get_BspRevision
@@ -113,10 +119,11 @@ char const *BSP_Get_PspRevision ( void )
 *******************************************************************************/
 uint16_t BSP_Get_ResetStatus ( void )
 {
-#if ( MCU_SELECTED == NXP_K24 )
-   uint8_t ResetReg, srs0, srs1;
-   uint16_t ResetStatus = 0x0000;
+   uint16_t    ResetStatus = 0x0000;
    static bool firstCall = (bool)true;
+
+#if ( MCU_SELECTED == NXP_K24 )
+   uint8_t     ResetReg, srs0, srs1;
 
    ResetReg = srs0 = RCM_SRS0;
    if ( ResetReg & RCM_SRS0_POR_MASK )
@@ -175,10 +182,45 @@ uint16_t BSP_Get_ResetStatus ( void )
       firstCall = (bool)false;
    }
 
-   return ( ResetStatus );
-#else  // TODO: RA6E1: Add Support
-   return 0;
+#else
+   /* NOTE: Review Figure 5.4 Pg. No 108 of the RA6E1 HRM */
+   if ( ( R_SYSTEM->RSTSR0 == 0 ) && ( R_SYSTEM->RSTSR1 == 0 ) && ( R_SYSTEM->RSTSR2 == 0 ) )
+   {
+      ResetStatus |= RESET_SOURCE_EXTERNAL_RESET_PIN;
+   }
+   else
+   {
+      /* TODO: RA6E1: DO we need to report other Reset Causes ? */
+      if ( R_SYSTEM->RSTSR0_b.PORF )
+      {
+         ResetStatus |= RESET_SOURCE_POWER_ON_RESET;
+      }
+      if ( ( R_SYSTEM->RSTSR1_b.IWDTRF ) || ( R_SYSTEM->RSTSR1_b.WDTRF ) )
+      {
+         ResetStatus |= RESET_SOURCE_WATCHDOG;
+      }
+      if ( R_SYSTEM->RSTSR1_b.SWRF )
+      {
+         ResetStatus |= RESET_SOURCE_SOFTWARE_RESET;
+      }
+      if ( ( R_SYSTEM->RSTSR0_b.LVD0RF ) || ( R_SYSTEM->RSTSR0_b.LVD1RF ) || ( R_SYSTEM->RSTSR0_b.LVD2RF ) )
+      {
+         ResetStatus |= RESET_SOURCE_LOW_VOLTAGE;
+      }
+      if ( R_SYSTEM->RSTSR0_b.DPSRSTF )  // Deep Software Standby Reset
+      {
+         ResetStatus |= RESET_SOURCE_DEEP_SW_STANDBY_CANCEL;
+      }
+   }
+   if ( firstCall )
+   {
+      INFO_printf("Reset register RSTSR0 0x%02X", R_SYSTEM->RSTSR0 );
+      INFO_printf("Reset register RSTSR1 0x%02X", R_SYSTEM->RSTSR1 );
+      INFO_printf("Reset register RSTSR2 0x%02X", R_SYSTEM->RSTSR2 );
+      firstCall = (bool)false;
+   }
 #endif
+   return ( ResetStatus );
 }
 
 #if ( MCU_SELECTED == NXP_K24 )

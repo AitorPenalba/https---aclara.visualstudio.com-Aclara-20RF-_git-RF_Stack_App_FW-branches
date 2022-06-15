@@ -1455,6 +1455,9 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\AGT.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.h</name>
             </file>
             <file>
@@ -2296,6 +2299,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\lpm_app.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\lpm_app.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\OR_MR_Handler.c</name>

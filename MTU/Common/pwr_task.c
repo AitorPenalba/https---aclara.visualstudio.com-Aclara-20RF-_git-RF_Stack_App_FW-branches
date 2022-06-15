@@ -222,6 +222,9 @@ void PWR_task( taskParameter )
 #elif ( MCU_SELECTED == RA6E1 ) /*  RA6 */
    ( void )brownOut_isr_init();
 #endif
+#if 1 /* TEST */ // TODO: RA6E1: DG: Remove later 
+   PWRLG_print_LG_Flags();
+#endif
    // Loop until receiving a valid PF_METER
    while ( eFAILURE == powerFail )
    {
@@ -242,7 +245,6 @@ void PWR_task( taskParameter )
    /* Cancel if any LG Simulation is in progress during Real Last Gasp*/
    EVL_LGSimCancel();
 #endif
-#if 0 /* TODO: RA6: Add this later */
    /* If running from Boost regulator such as during the noise estimate switch back to the LDO to preserve the Super cap energy
       while preparing to shut down */
    if ( PWR_BOOST_IN_USE() )
@@ -250,7 +252,7 @@ void PWR_task( taskParameter )
       //Need this to keep from allowing task switch
       PWR_USE_LDO();
    }
-#endif
+
    //Radio shutdown to ensure transmissions are disabled ASAP
    radio_hal_RadioImmediateSDN();
 
@@ -314,7 +316,7 @@ _Pragma ( "calls = \
    /*****               Next function never returns                *****/
    /********************************************************************/
    /* TODO: RA6: DG: Check for Ship and Shop Mode  */
-//   PWRLG_Begin( pwrFileData.uPowerAnomalyCount ); /* Never returns  */
+   PWRLG_Begin( pwrFileData.uPowerAnomalyCount ); /* Never returns  */
 #else
    VBATREG_SHORT_OUTAGE = 0;  //Ensure we do not see this as a short outage
 
@@ -782,10 +784,8 @@ returnStatus_t PWR_waitForStablePower( void )
  **********************************************************************************************************************/
 returnStatus_t PWR_powerUp( void )
 {
-#if 0 /* TODO: RA6: Add later */
    /* Read the Reset Status Register to find the cause of the previous restart */
    rstReason_ = BSP_Get_ResetStatus();
-#endif
    return( eSUCCESS );
 }
 
@@ -826,7 +826,6 @@ uint16_t PWR_getResetCause( void )
  **********************************************************************************************************************/
 returnStatus_t PWR_printResetCause( void )
 {
-#if ( MCU_SELECTED == NXP_K24 )
    /* Save the reason we went through the reset vector */
    if ( ( rstReason_ & RESET_SOURCE_POWER_ON_RESET ) != 0 )
    {
@@ -848,10 +847,17 @@ returnStatus_t PWR_printResetCause( void )
    {
       DBG_logPrintf( 'I', "Last Reset was Low Voltage" );
    } /* end if() */
+#if ( MCU_SELECTED == NXP_K24 )
    if ( ( rstReason_ & RESET_SOURCE_LOW_LEAKAGE_WAKEUP ) != 0 )
    {
       DBG_logPrintf( 'I', "Last Reset was Low Leakage Wakeup" );
    } /* end if() */
+#elif ( MCU_SELECTED == RA6E1 )
+   if ( ( rstReason_ & RESET_SOURCE_DEEP_SW_STANDBY_CANCEL ) != 0 )
+   {
+      DBG_logPrintf( 'I', "Last Reset was Deep SW Standby Cancel Wakeup" );
+   } /* end if() */
+#endif
    if ( ( rstReason_ & RESET_SOURCE_STOP_MODE_ACK_ERROR ) != 0 )
    {
       DBG_logPrintf( 'I', "Last Reset was Stop Mode Ack Error" );
@@ -876,7 +882,7 @@ returnStatus_t PWR_printResetCause( void )
    {
       DBG_logPrintf( 'I', "Last Reset was JTAG Reset" );
    } /* end if() */
-#endif
+
    return( eSUCCESS );
 }
 
@@ -971,13 +977,13 @@ void PWR_SafeReset( void )
    pwrFileData.uPowerDownSignature  = 0;  /* Clear power down signature */
    pwrFileData.outageTime           = 0;
    VBATREG_PWR_QUAL_COUNT           = 0;  /* Clear the RAM based power quality count.      */
-   VBATREG_DisableRegisterAccess();
 
    ( void )FIO_fwrite( &fileHndlPowerDownCount, 0, ( uint8_t* ) &pwrFileData, ( lCnt )sizeof( pwrFileData ) );
    /* Flush all partitions (only cached actually flushed) and ensures all pending writes are completed */
    ( void )PAR_partitionFptr.parFlush( NULL );
    PWRLG_SOFTWARE_RESET_SET( 1 ); // TODO 2016-02-02 SMG Change to call into PWRLG
    PWRLG_TIME_OUTAGE_SET( 0 );   /* Clear the time of the last outage.  */
+   VBATREG_DisableRegisterAccess();
 
    RESET();
 }

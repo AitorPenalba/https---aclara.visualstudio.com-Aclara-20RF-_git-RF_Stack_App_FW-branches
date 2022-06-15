@@ -37,7 +37,6 @@
    #define ENABLE_MFG_TASKS               1  /* Used to 0=disable, 1=enable the Mfg Port feature */
    #define ENABLE_TMR_TASKS               1  /* Used to 0=disable, 1=enable the Timer feature */
    #define ENABLE_TIME_SYS_TASKS          1  /* Used to 0=disable, 1=enable the System Time feature */
-   // TODO: RA6E1 Enable HMC tasks once HMC module is in place
    #define ENABLE_HMC_TASKS               1  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
    #define ENABLE_PAR_TASKS               1  /* Used to 0=disable, 1=enable the Partition feature */
    #define ENABLE_PWR_TASKS               1  /* Used to 0=disable, 1=enable the Power feature */

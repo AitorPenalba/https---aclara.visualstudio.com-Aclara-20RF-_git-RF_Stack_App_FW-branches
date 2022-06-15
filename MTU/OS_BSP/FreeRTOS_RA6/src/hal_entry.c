@@ -2,7 +2,7 @@
 
 FSP_CPP_HEADER
 void R_BSP_WarmStart(bsp_warm_start_event_t event);
-//extern void PWRLG_BSP_Setup(void); /* Aclara Added */
+extern void PWRLG_BSP_Setup(void); /* Aclara Added */
 FSP_CPP_FOOTER
 
 /*******************************************************************************************************************//**
@@ -50,7 +50,7 @@ void R_BSP_WarmStart (bsp_warm_start_event_t event)
          2. If Last Gasp Then use different pin config??? */
         R_IOPORT_Open(&g_ioport_ctrl, g_ioport.p_cfg);
 
-//        PWRLG_BSP_Setup(); /* Aclara Added */  // TODO: RA6: Enable later
+        //PWRLG_BSP_Setup(); /* Aclara Added */  // TODO: RA6: Enable later
     }
 }
 
