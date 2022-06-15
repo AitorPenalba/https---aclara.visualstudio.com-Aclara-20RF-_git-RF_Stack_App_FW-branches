@@ -81,7 +81,7 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
   Returns: None
 
   Notes: Although MQX can return false for the _lwevent_set function, it should
-         never happen since the ewvent should always be valid.
+         never happen since the event should always be valid.
          If this happens, we consider this a catastrophic failure.
 
          Function will not return if it fails
@@ -90,8 +90,8 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line )
 {
 #if( RTOS_SELECTION == FREE_RTOS )
-      //TODO Error Handling, return value
-      xEventGroupSetBits( *EventHandle , EventMask);
+      //TODO: RA6E1: Error Handling, return value
+      xEventGroupSetBits( *EventHandle , EventMask );
 #elif( RTOS_SELECTION == MQX_RTOS )
    if ( _lwevent_set ( EventHandle, EventMask ) ) {
       EVL_FirmwareError( "OS_EVNT_Set" , file, line );
