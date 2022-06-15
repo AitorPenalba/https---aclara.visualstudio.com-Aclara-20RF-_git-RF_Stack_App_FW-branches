@@ -156,7 +156,11 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
       if ( pdFAIL == RetStatus )
       {
          FuncStatus = false;
-         EVL_FirmwareError( "OS_SEM_Pend" , file, line );
+         /* TODO: Add Print */
+         //         APP_ERR_PRINT("OS_SEM_PEND!");
+         //         if ( RetStatus == MQX_INVALID_LWSEM ) {
+         //         EVL_FirmwareError( "OS_SEM_Pend" , file, line );
+         //      }
       }
    }
    else
