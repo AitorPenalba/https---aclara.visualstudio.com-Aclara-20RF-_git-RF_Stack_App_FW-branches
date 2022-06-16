@@ -739,10 +739,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 //#if ( DCU == 1 )
 //   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
 //#endif
-#if ( ENABLE_FIO_TASKS == 1 )
-   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
-   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
-#endif
+//#if ( ENABLE_FIO_TASKS == 1 )
+//   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
+//   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
+//#endif
    {  "dataConfigurationDocumentVersion", MFGP_dataConfigurationDocumentVersion, "(MIMT)Get/Set the data Configuration document version" },
    {  "DateTime",                   MFG_DateTime,                    "Get/Set system date/time" },
    {  "dtlsDeviceCertificate",      MFGP_dtlsDeviceCertificate,      "Read Device cert" },                               // 1363
@@ -830,15 +830,15 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "macTimeSetStart",            MFG_TimeSetStart,                "Get/Set the TimeSet Start"},
    {  "macTimeSource",              MFG_TimeSource,                  "Get/Set the Time Source"},
 #endif
-#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
-   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
-   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
-   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
-   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
-#endif
-#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
-   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
-#endif
+//#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
+//   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
+//   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
+//   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
+//   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
+//#endif
+//#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
+//   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
+//#endif
    {  "macTransactionTimeout",      MFG_TransactionTimeout,          "Get/Set MAC transaction timeout" },
    {  "macTransactionTimeoutCount", MFG_TransactionTimeoutCount,     "Get the number of times there was a MAC transaction timeout"},
    {  "macTxLinkDelayCount",        MFG_macTxLinkDelayCount,         "Amount of MAC delays incurred"},
@@ -1014,7 +1014,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 #if ( ANSI_STANDARD_TABLES == 1 )
    {  "edModel",                    MFGP_edModel,                    "Get the host's model name" },
 #elif ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-   {  "edModel",                    MFGP_edModel,                    "Get/Set the host's type/model number" },
+//   {  "edModel",                    MFGP_edModel,                    "Get/Set the host's type/model number" },
 #endif
 //#if ACLARA_DA == 1
 //   {  "edBootVersion",              MFGP_hostBootVersion,            "Get the host's boot loader version" },
@@ -1028,11 +1028,11 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "edProgramId",                MFGP_edProgramId,                "Get the meter's program ID number" },
    {  "edProgrammerName",           MFGP_edProgrammerName,           "Get the name of the last programmer of the meter" },
 #endif
-//   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },//[SIVA-DEBUG]
-#if ( SAMPLE_METER_TEMPERATURE == 1 )
-   {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
-   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter's thermometer" },
-#endif
+   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },//[SIVA-DEBUG]
+//#if ( SAMPLE_METER_TEMPERATURE == 1 )
+//   {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
+//   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter's thermometer" },
+//#endif
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
    {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
    {  "historicalRecovery",         MFGP_historicalRecovery,         "Get whether the endpoint supports historical data recovery" },

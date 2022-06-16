@@ -363,6 +363,7 @@ const firmwareVersionDT_s * VER_getFirmwareVersionDT ( void )
 returnStatus_t VER_getHardwareVersion ( uint8_t *string, uint8_t len )
 {
    returnStatus_t   retVal = eFAILURE;
+#if 1
    HWVerString_t    hWVer;                      /* HW Version string */
 
    OS_MUTEX_Lock(&verMutex_); // Function will not return if it fails
