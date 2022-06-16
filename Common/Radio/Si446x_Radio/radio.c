@@ -1845,6 +1845,7 @@ static void Shutdown(void)
 {
    // Put the PA in TX to save power and put radios in standby to gracefully stop them and increment appropriate counters.
    Standby();
+
    // Shutdown power amplifier
    RDO_PA_EN_TRIS();
 
@@ -4746,9 +4747,7 @@ static float32 wait_for_stable_RSSI(uint8_t radioNum)
       if (TimeDiff > 10) {
          break;
       }
-#if 0  //TODO: RA6E1
-      _sched_yield();
-#endif
+      OS_TASK_Yield();
    } while (rawRSSI == 0); // We use the latch value as a way to consume time until RSSI is meaningful.
 
    return ( (float32)rawRSSI );

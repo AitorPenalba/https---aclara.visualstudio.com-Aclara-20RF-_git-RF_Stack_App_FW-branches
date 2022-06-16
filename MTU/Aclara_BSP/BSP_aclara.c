@@ -198,6 +198,8 @@ uint16_t BSP_Get_ResetStatus ( void )
       if ( ( R_SYSTEM->RSTSR1_b.IWDTRF ) || ( R_SYSTEM->RSTSR1_b.WDTRF ) )
       {
          ResetStatus |= RESET_SOURCE_WATCHDOG;
+
+         R_SYSTEM->RSTSR1_b.IWDTRF = 0U;  /* Clear the flag. */
       }
       if ( R_SYSTEM->RSTSR1_b.SWRF )
       {

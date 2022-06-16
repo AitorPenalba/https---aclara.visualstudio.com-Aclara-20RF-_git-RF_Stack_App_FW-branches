@@ -1162,7 +1162,7 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
 /***********************************************************************************************************************
    Function Name: DBG_CommandLine_wdTest
 
-   Purpose: Test the IWDT 
+   Purpose: Test the IWDT
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -6317,6 +6317,7 @@ uint32_t DBG_CommandLine_Counters ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif
+
 /***********************************************************************************************************************
 
    Function name: atoh
