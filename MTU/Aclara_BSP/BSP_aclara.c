@@ -198,8 +198,6 @@ uint16_t BSP_Get_ResetStatus ( void )
       if ( ( R_SYSTEM->RSTSR1_b.IWDTRF ) || ( R_SYSTEM->RSTSR1_b.WDTRF ) )
       {
          ResetStatus |= RESET_SOURCE_WATCHDOG;
-
-         R_SYSTEM->RSTSR1_b.IWDTRF = 0U;  /* Clear the flag. */
       }
       if ( R_SYSTEM->RSTSR1_b.SWRF )
       {
@@ -209,7 +207,7 @@ uint16_t BSP_Get_ResetStatus ( void )
       {
          ResetStatus |= RESET_SOURCE_LOW_VOLTAGE;
       }
-      if ( R_SYSTEM->RSTSR0_b.DPSRSTF )  // Deep Software Standby Reset
+      if ( R_SYSTEM->RSTSR0_b.DPSRSTF )      // Deep Software Standby Reset
       {
          ResetStatus |= RESET_SOURCE_DEEP_SW_STANDBY_CANCEL;
       }
@@ -220,6 +218,11 @@ uint16_t BSP_Get_ResetStatus ( void )
       INFO_printf("Reset register RSTSR1 0x%02X", R_SYSTEM->RSTSR1 );
       INFO_printf("Reset register RSTSR2 0x%02X", R_SYSTEM->RSTSR2 );
       firstCall = (bool)false;
+
+      /* Clear the Reset Status Registers */
+      R_SYSTEM->RSTSR0 = 0x00;
+      R_SYSTEM->RSTSR1 = 0x00;
+      R_SYSTEM->RSTSR2 = 0x00;
    }
 #endif
    return ( ResetStatus );

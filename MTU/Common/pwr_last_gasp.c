@@ -1049,7 +1049,7 @@ void PWRLG_Startup( void )
                      EnterVLLS( ( uint16_t ) 0, LPTMR_MILLISECONDS, 1 );   /* Continue with current time out value.  */
 #elif ( MCU_SELECTED == RA6E1 )
                      EnterVLLS( ( uint16_t )0, LPTMR_SECONDS, 1 );        /* Continue with current time out value.  */
-                     //RESET();   /* Forcing the MCU to go through reset */ // TODO: DG: Review 
+                     //RESET();   /* Forcing the MCU to go through reset */ // TODO: DG: Review
 #endif
                   }
                   else  /* All messages sent, wait for power restored.   */
@@ -1065,13 +1065,13 @@ void PWRLG_Startup( void )
       }
       else
       {
-         LG_PRNT_INFO("OOPs");
+         LG_PRNT_INFO("Not LPM Wake-up");
       }
    }
    else /* In Ship mode or Shop mode. Hence Do not perform Last Gasp feature */
    {
       PWRLG_LLWU_SET( 0 ); /* Don't re-enter last gasp on next reset. */
-      LG_PRNT_INFO( " Last Gasp is not active \n" );
+      LG_PRNT_INFO( "Last Gasp is not active \n" );
       PWRLG_STATE_SET( PWRLG_STATE_SLEEP );  /* Set state to "sleep"  */
    }
 }
@@ -2706,7 +2706,7 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
 
 #endif // #if ( MCU_SELECTED == RA6E1 )
 
-// TEST 
+// TEST
 void PWRLG_print_LG_Flags ( void )
 {
    INFO_printf( "PWRLG-Outage %d",PWRLG_OUTAGE() );
