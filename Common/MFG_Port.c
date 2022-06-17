@@ -882,10 +882,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "phyNoiseEstimateRate",       MFG_PhyNoiseEstimateRate,        "Get/Set the PHY noise estimate rate" },
    {  "phyNumChannels",             MFG_PhyNumchannels,              "Get the number of channels programmed into and usable by the PHY" },
    {  "phyRcvrCount",               MFG_PhyRcvrCount,                "Get the number receivers" },
-   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
+//   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
    {  "phyRxDetection",             MFG_PhyRxDetection,              "Get/Set the detection configuration" },
    {  "phyRxFraming",               MFG_PhyRxFraming,                "Get/Set the framing configuration" },
-   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
+//   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
    {  "phyRxMode",                  MFG_PhyRxMode,                   "Get/Set the PHY mode configuration" },
    {  "phyThermalControlEnable",    MFG_PhyThermalControlEnable,     "Get/Set PHY thermal control feature" },
    {  "phyThermalProtectionEnable", MFG_PhyThermalProtectionEnable,  "Get/Set PHY thermal protection feature" },
@@ -893,10 +893,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "phyThermalProtectionEngaged",MFG_PhyThermalProtectionEngaged, "Get if a PHY peripheral has exceeded an allowed temperature limit"},
    {  "phyTxChannels",              MFG_PhyTxChannels,               "Get/Set radio Transmitter channels" },
    {  "phyTxFrequencies",           MFG_PhyTxFrequencies,            "Get/Set radio Transmitter frequencies" },
-   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
-   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
-   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
-   {  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
+//   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
+//   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
+//   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
+//{  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
    {  "phyFailedHeaderDecodeCount", MFG_PhyFailedHeaderDecodeCount,  "Get the number of received PHY frame headers that failed FEC decoding"},
    {  "phySyncDetectCount",         MFG_PhySyncDetectCount,          "Get the number of times a valid sync word was detected on each reciever"},
 #if ( EP == 1 )
@@ -988,34 +988,34 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "dstEndRule",                 MFGP_dstEndRule,                 "xxx" },
    {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
    {  "dstStartRule",               MFGP_dstStartRule,               "xxx" },
-#if ( ANSI_STANDARD_TABLES == 1 )
-   {  "ansiTableOID",               MFGP_AnsiTblOID,                 "Get the meter's DEVICE_CLASS per ANSI Table 00" },
-#endif
-#if ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-   {  "edFwVersion",                MFGP_edFwVersion,                "Get the host's firmware version.revision.build" },
-#else
-   {  "edFwVersion",                MFGP_edFwVersion,                "Get the meter's firmware version.revision" },
-#endif
-#if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-   {  "edHwVersion",                MFGP_edHwVersion,                "Get the host's hardware version.revision" },
-#endif
-#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS == 1 ) 
-   {  "edInfo",                     MFGP_edInfo,                     "xxx" },
-#else // for SRNFI-210+C  [SIVA- DEBUG]
-   {  "edInfo",                     MFGP_edInfo,                     "Get the end device info" },
-#endif
+//#if ( ANSI_STANDARD_TABLES == 1 )
+//   {  "ansiTableOID",               MFGP_AnsiTblOID,                 "Get the meter's DEVICE_CLASS per ANSI Table 00" },
+//#endif
+//#if ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
+//   {  "edFwVersion",                MFGP_edFwVersion,                "Get the host's firmware version.revision.build" },
+//#else
+//   {  "edFwVersion",                MFGP_edFwVersion,                "Get the meter's firmware version.revision" },
+//#endif
+//#if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
+//   {  "edHwVersion",                MFGP_edHwVersion,                "Get the host's hardware version.revision" },
+//#endif
+//if ( HMC_KV == 1 ) || ( HMC_I210_PLUS == 1 ) 
+//   {  "edInfo",                     MFGP_edInfo,                     "xxx" },
+//#else // for SRNFI-210+C  [SIVA- DEBUG]
+//   {  "edInfo",                     MFGP_edInfo,                     "Get the end device info" },
+//#endif
 
-#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
-   {  "edManufacturer",             MFGP_edManufacturer,             "Get the meter manufacturer" },
-#elif ( ACLARA_DA == 1 )
-   {  "edManufacturer",             MFGP_edManufacturer,             "Get the host manufacturer" },
-#endif
-   {  "edMfgSerialNumber",          MFGP_edMfgSerialNumber,          "Get the host's serial number" },
-#if ( ANSI_STANDARD_TABLES == 1 )
-   {  "edModel",                    MFGP_edModel,                    "Get the host's model name" },
-#elif ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
+//#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
+//   {  "edManufacturer",             MFGP_edManufacturer,             "Get the meter manufacturer" },
+//#elif ( ACLARA_DA == 1 )
+//   {  "edManufacturer",             MFGP_edManufacturer,             "Get the host manufacturer" },
+//#endif
+//   {  "edMfgSerialNumber",          MFGP_edMfgSerialNumber,          "Get the host's serial number" },
+//#if ( ANSI_STANDARD_TABLES == 1 )
+//   {  "edModel",                    MFGP_edModel,                    "Get the host's model name" },
+//#elif ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
 //   {  "edModel",                    MFGP_edModel,                    "Get/Set the host's type/model number" },
-#endif
+//#endif
 //#if ACLARA_DA == 1
 //   {  "edBootVersion",              MFGP_hostBootVersion,            "Get the host's boot loader version" },
 //   {  "edBspVersion",               MFGP_hostBspVersion,             "Get the host's BSP version" },
@@ -1023,18 +1023,18 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "edCarrierHwVersion",         MFGP_carrierHwVersion,           "Get the carrier board's hardware version" },
 //   {  "hostEchoTest",               MFGP_hostEchoTest,               "Test the host communication port" },
 //#endif
-#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
+//#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
    {  "edProgrammedDateTime",       MFGP_edProgrammedDateTime,       "Get the meters's last program datetime in seconds" },
    {  "edProgramId",                MFGP_edProgramId,                "Get the meter's program ID number" },
-   {  "edProgrammerName",           MFGP_edProgrammerName,           "Get the name of the last programmer of the meter" },
-#endif
-   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },//[SIVA-DEBUG]
+//   {  "edProgrammerName",           MFGP_edProgrammerName,           "Get the name of the last programmer of the meter" },
+//#endif
+//   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },//[SIVA-DEBUG]
 //#if ( SAMPLE_METER_TEMPERATURE == 1 )
 //   {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
 //   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter's thermometer" },
 //#endif
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-   {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
+//   {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
    {  "historicalRecovery",         MFGP_historicalRecovery,         "Get whether the endpoint supports historical data recovery" },
 #endif
    {  "initialRegistrationTimeout", MFGP_initialRegistrationTimemout,"Get/Set the initial registration timeout" },
@@ -1104,7 +1104,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //#endif
    {  "smLogTimeDiversity",         MFGP_smLogTimeDiversity,         "Get/Set Stack Manager Log Time Diversity" },
    {  "stP0LoopbackFailCount",      MFGP_stP0LoopbackFailCount,      "Get/Set P0 Loopback Fail Count" },
-   {  "stp0loopbackfailtest",       MFGP_stP0LoopbackFailTest,       "Test P0 (HMC port) - requires loopback cable" },//[SIVA-DEBUG]
+//   {  "stp0loopbackfailtest",       MFGP_stP0LoopbackFailTest,       "Test P0 (HMC port) - requires loopback cable" },//[SIVA-DEBUG]
 //#if ( REMOTE_DISCONNECT == 1 )
 //   {  "switchPosition",             MFGP_switchPosition,             "Possible Values returned: 0 = disconnected / 1 = connected" },
 //#endif
@@ -6638,7 +6638,9 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
    ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_INIT, NULL );
    ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_DISABLE, NULL );
    while ( HMC_APP_main( ( uint8_t )HMC_APP_CMD_STATUS, NULL )  != ( uint8_t )HMC_APP_STATUS_LOGGED_OFF )
-   {}
+   {
+     MFG_logPrintf("loop count \r\n");
+   }
 #endif   /* end of ACLARA_LC == 0   */
    if ( argc == 2 )
    {
@@ -11194,6 +11196,7 @@ static void MFGP_dtlsServerCertificateSN(uint32_t argc, char *argv[] ){
     if(1 == argc)
     {
         size = DTLS_GetServerCertificateSerialNumber(certBuffer);
+        
     }
     else
     {
