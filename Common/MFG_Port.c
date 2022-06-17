@@ -752,7 +752,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
 //#if 0
 //// These are defined in the HEEP, but not sure if they are valid or not!
-//   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
+//	   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
 //#endif
    {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
    {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
@@ -830,15 +830,15 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "macTimeSetStart",            MFG_TimeSetStart,                "Get/Set the TimeSet Start"},
    {  "macTimeSource",              MFG_TimeSource,                  "Get/Set the Time Source"},
 #endif
-//#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
-//   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
-//   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
-//   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
-//   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
-//#endif
-//#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
-//   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
-//#endif
+#if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
+   {  "macLinkParametersPeriod",    MFG_LinkParametersPeriod,       "Get/Set the Link Parameter Period"},
+   {  "macLinkParametersStart",     MFG_LinkParametersStart,        "Get/Set the Link Parameter Start"},
+   {  "macLinkParametersMaxOffset", MFG_LinkParametersMaxOffset,    "Get/Set the Link Parameter MaxOffset"},
+   {  "receivePowerMargin",         MFG_ReceivePowerMargin,         "Get/Set the Link Parameter receivePowerMargin"},
+#endif
+#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
+   {  "macCommandResponseMaxTimeDiversity", MFG_MacCommandResponseMaxTimeDiversity,    "Get/Set the Link Parameter MaxOffset"},
+#endif
    {  "macTransactionTimeout",      MFG_TransactionTimeout,          "Get/Set MAC transaction timeout" },
    {  "macTransactionTimeoutCount", MFG_TransactionTimeoutCount,     "Get the number of times there was a MAC transaction timeout"},
    {  "macTxLinkDelayCount",        MFG_macTxLinkDelayCount,         "Amount of MAC delays incurred"},
@@ -882,10 +882,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "phyNoiseEstimateRate",       MFG_PhyNoiseEstimateRate,        "Get/Set the PHY noise estimate rate" },
    {  "phyNumChannels",             MFG_PhyNumchannels,              "Get the number of channels programmed into and usable by the PHY" },
    {  "phyRcvrCount",               MFG_PhyRcvrCount,                "Get the number receivers" },
-//   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
+   {  "phyRxChannels",              MFG_PhyRxChannels,               "Get/Set radio Receiver channels" },
    {  "phyRxDetection",             MFG_PhyRxDetection,              "Get/Set the detection configuration" },
    {  "phyRxFraming",               MFG_PhyRxFraming,                "Get/Set the framing configuration" },
-//   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
+   {  "phyRxFrequencies",           MFG_PhyRxFrequencies,            "Get/Set radio Receiver frequencies" },
    {  "phyRxMode",                  MFG_PhyRxMode,                   "Get/Set the PHY mode configuration" },
    {  "phyThermalControlEnable",    MFG_PhyThermalControlEnable,     "Get/Set PHY thermal control feature" },
    {  "phyThermalProtectionEnable", MFG_PhyThermalProtectionEnable,  "Get/Set PHY thermal protection feature" },
@@ -893,10 +893,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "phyThermalProtectionEngaged",MFG_PhyThermalProtectionEngaged, "Get if a PHY peripheral has exceeded an allowed temperature limit"},
    {  "phyTxChannels",              MFG_PhyTxChannels,               "Get/Set radio Transmitter channels" },
    {  "phyTxFrequencies",           MFG_PhyTxFrequencies,            "Get/Set radio Transmitter frequencies" },
-//   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
-//   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
-//   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
-//{  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
+   {  "phyFailedFrameDecodeCount",  MFG_PhyFailedFrameDecodeCount,   "Get the number of received PHY frames that failed FEC decoding"},
+   {  "phyFailedHcsCount",          MFG_PhyFailedHcsCount,           "Get the number of RX PHY frame headers that failed the header check for each  reciever"},
+   {  "phyFramesReceivedCount",     MFG_PhyFramesReceivedCount,      "Get the number of data frames received for each  reciever"},
+   {  "phyFramesTransmittedCount",  MFG_PhyFramesTransmittedCount,   "Get the number of frames transmitted"},
    {  "phyFailedHeaderDecodeCount", MFG_PhyFailedHeaderDecodeCount,  "Get the number of received PHY frame headers that failed FEC decoding"},
    {  "phySyncDetectCount",         MFG_PhySyncDetectCount,          "Get the number of times a valid sync word was detected on each reciever"},
 #if ( EP == 1 )
@@ -960,11 +960,11 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "demandPresentConfiguration", MFGP_demandPresentConfiguration, "xxx" },
    {  "demandResetLockoutPeriod",   MFGP_demandResetLockoutPeriod,   "Get/Set the demand reset lockout period" },
 #endif // ( ENABLE_DEMAND_TASKS == 1 )
-#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
+//#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
    {  "dfwAuditTestStatus",         MFGP_dfwAuditTestStatus,         "Get the dfwAuditTestStatus parameter value"},
    {  "dfwCompatibilityTestStatus", MFGP_dfwCompatibilityTestStatus, "Get the dfwCompatibilityTestStatus parameter value"},
    {  "dfwProgramScriptStatus",     MFGP_dfwProgramScriptStatus,     "Get the dfwProgramScriptStatus parameter value"},
-#endif  // endif ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
+//#endif  // endif ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
    {  "dfwApplyConfirmTimeDiversity", MFGP_dfwApplyConfirmTimeDiversity, "xxx" },
    {  "dfwDownloadConfirmTimeDiversity", MFGP_dfwDownloadConfirmTimeDiversity, "xxx" },
    {  "dfwDupDiscardPacketQty",     MFGP_dfwDupDiscardPacketQty,     "Get the number of discarded during dfw packet download process." },
@@ -991,11 +991,11 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //#if ( ANSI_STANDARD_TABLES == 1 )
 //   {  "ansiTableOID",               MFGP_AnsiTblOID,                 "Get the meter's DEVICE_CLASS per ANSI Table 00" },
 //#endif
-//#if ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-//   {  "edFwVersion",                MFGP_edFwVersion,                "Get the host's firmware version.revision.build" },
-//#else
-//   {  "edFwVersion",                MFGP_edFwVersion,                "Get the meter's firmware version.revision" },
-//#endif
+#if ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
+   {  "edFwVersion",                MFGP_edFwVersion,                "Get the host's firmware version.revision.build" },
+#else
+   {  "edFwVersion",                MFGP_edFwVersion,                "Get the meter's firmware version.revision" },
+#endif
 //#if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
 //   {  "edHwVersion",                MFGP_edHwVersion,                "Get the host's hardware version.revision" },
 //#endif
@@ -1024,8 +1024,8 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 //   {  "hostEchoTest",               MFGP_hostEchoTest,               "Test the host communication port" },
 //#endif
 //#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
-   {  "edProgrammedDateTime",       MFGP_edProgrammedDateTime,       "Get the meters's last program datetime in seconds" },
-   {  "edProgramId",                MFGP_edProgramId,                "Get the meter's program ID number" },
+//   {  "edProgrammedDateTime",       MFGP_edProgrammedDateTime,       "Get the meters's last program datetime in seconds" },
+//   {  "edProgramId",                MFGP_edProgramId,                "Get the meter's program ID number" },
 //   {  "edProgrammerName",           MFGP_edProgrammerName,           "Get the name of the last programmer of the meter" },
 //#endif
 //   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },//[SIVA-DEBUG]
@@ -1152,14 +1152,14 @@ static const struct_CmdLineEntry MFGP_HiddenCmdTable[] =
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    {  "logoff",                     MFG_logoff,                      "Reset port for mfg commands" },
 #endif
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//   {  "passwordPort0",              MFG_meterPassword,               "Set password for AMR port" },
-//   {  "masterpasswordPort0",        MFGP_passwordPort0Master,        "Set Master password for AMR port" },
-//#endif // endif of (ACLARA_LC == 0)
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+   {  "passwordPort0",              MFG_meterPassword,               "Set password for AMR port" },
+   {  "masterpasswordPort0",        MFGP_passwordPort0Master,        "Set Master password for AMR port" },
+#endif // endif of (ACLARA_LC == 0)
 #endif
-//#if (TX_THROTTLE_CONTROL == 1 )
-//   {  "txThrottleDisable",          MFG_TxThrottleDisable,           "Disable transmitter throttling for 255 hours" },
-//#endif
+#if (TX_THROTTLE_CONTROL == 1 )
+   {  "txThrottleDisable",          MFG_TxThrottleDisable,           "Disable transmitter throttling for 255 hours" },
+#endif
    { 0, 0, 0 }
 };
 
