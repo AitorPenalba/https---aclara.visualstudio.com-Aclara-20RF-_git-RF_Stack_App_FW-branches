@@ -1534,9 +1534,7 @@ static void HardwareShutdown( void )
 
    /* Set all the pins except PF_METER, LDO Enable,  to Input Mode before going to Deep Software Standby Mode */
    ( void )R_IOPORT_PinsCfg(&g_ioport_ctrl, &g_bsp_pin_cfg_lpm);
-#if ( PWRLG_PRINT_ENABLE == 0 )
-   /* TODO: RA6: DG: Configure the Boost Pin */
-#else
+#if ( PWRLG_PRINT_ENABLE == 1 )
    /* Enable the DBG UART pins for Printing */
    ( void )R_IOPORT_PinCfg(&g_ioport_ctrl, UART4_TX_DBG, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_SCI0_2_4_6_8));
    ( void )R_IOPORT_PinCfg(&g_ioport_ctrl, UART4_RX_DBG, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_SCI0_2_4_6_8));

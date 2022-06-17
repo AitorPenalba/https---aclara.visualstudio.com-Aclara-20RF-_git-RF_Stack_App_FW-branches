@@ -111,14 +111,14 @@
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 14) /* POEG0 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 15) /* ADC1 */ | \
             (((1 > 0) ? 0U : 1U) << 16) /* ADC0 */ | \
-            (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 20) /* DAC */ | \
+            (((1 > 0) ? 0U : 1U) << 20) /* DAC */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 22) /* TSN */ | \
             0xffae07f0) /* Unused */
 #endif
 #ifndef BSP_TZ_CFG_PSARE
 #define BSP_TZ_CFG_PSARE (\
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 0) /* WDT */ | \
-            (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 1) /* IWDT */ | \
+            (((1 > 0) ? 0U : 1U) << 1) /* IWDT */ | \
             (((1 > 0) ? 0U : 1U) << 2) /* RTC */ | \
             (((1 > 0) ? 0U : 1U) << 14) /* AGT5 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 15) /* AGT4 */ | \
