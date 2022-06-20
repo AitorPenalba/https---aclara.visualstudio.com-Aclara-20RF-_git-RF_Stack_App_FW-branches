@@ -773,7 +773,9 @@ returnStatus_t SELF_testNV( void )
       }
    }
 
+#if ( MCU_SELECTED == RA6E1 )
    DBG_logPrintf( 'I', "SELF_testNV: Done - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
+#endif
    return ( ( 0 == errCount ) ? eSUCCESS : eFAILURE );
 }
 
