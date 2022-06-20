@@ -182,6 +182,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( TIME_SYNC_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+   INIT( SELF_init, STRT_FLAG_NONE ),
    INIT( SYSBUSY_init, STRT_FLAG_NONE ),
    INIT( PWR_powerUp, STRT_FLAG_NONE),                                              // Read reset reason
    INIT( SELF_init, STRT_FLAG_NONE ),
@@ -202,6 +203,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( MFGP_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
 #endif
+   INIT( MIMTINFO_init, STRT_FLAG_NONE ),
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
@@ -209,7 +211,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DVR_DAC0_init, STRT_FLAG_NONE ),  /* TODO: RA6E1: Review the order */
 #endif
 #if ENABLE_HMC_TASKS
-#if END_DEVICE_PROGRAMMING_CONFIG == 1
+#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
    INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
 #endif
    INIT( HMC_STRT_init, STRT_FLAG_NONE ),

@@ -86,6 +86,10 @@ static SELF_file_t      SELF_testFile =
 uint8_t flashBuffer[512];
 uint8_t checkFlashBuffer[512];
 
+#if ( MCU_SELECTED == RA6E1 )
+static const enum_UART_ID mfgPortUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
+#endif
+
 /* TYPE DEFINITIONS */
 
 /* ****************************************************************************************************************** */
@@ -186,29 +190,24 @@ void SELF_testTask( taskParameter )
 
    DBG_logPrintf( 'I', "SELF_testTask: Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
 
-#if ( USE_USB_MFG == 0 )
 #if ( RTOS_SELECTION == MQX_RTOS )
+#if ( USE_USB_MFG == 0 )
    MQX_FILE_PTR   stdout_ptr;       /* mqx file pointer for UART  */
    if (NULL != (stdout_ptr = fopen(MFG_PORT_IO_CHANNEL, NULL)))
    {
 #if 0
       (void)_io_set_handle(IO_STDOUT, stdout_ptr);
-#endif
+#endif // if 0
    }
-#endif // #if ( RTOS_SELECTION == MQX_RTOS )
 #endif
+#endif // if MQX_RTOS
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 #if ( USE_USB_MFG == 0 )
-#if ( MCU_SELECTED == NXP_K24 )
    (void)fprintf( stdout_ptr, "%s %04X\n", "SelfTest", selfTestResults );
    OS_TASK_Sleep( 20 );
    (void)fflush( stdout_ptr );
    (void)fclose( stdout_ptr );
-#elif ( MCU_SELECTED == RA6E1 )
-   // TODO: RA6E1: Add MFG Print
-//   MFG_printf("%s %04X\n", "SelfTest", selfTestResults );
-   OS_TASK_Sleep( 20 );
-#endif
 #else
    char resBuff[16];
    (void)snprintf( resBuff, sizeof( resBuff ), "%s %04X\n", "SelfTest", selfTestResults );
@@ -228,8 +227,16 @@ void SELF_testTask( taskParameter )
          OS_TASK_Sleep( 1000U ); /* Wait 1 second before trying again.   */
       }
    }
-#endif  //#if ( USE_USB_MFG == 0 )
-
+#endif //USE_USB_MFG
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   char resBuff[18];
+   ( void )snprintf( resBuff, sizeof( resBuff ), "\r\n%s %04X\r\n", "SelfTest", selfTestResults );
+   ( void )UART_write( mfgPortUart, (uint8_t*)resBuff, sizeof( resBuff ) );
+   if ( SELF_notify != NULL )
+   {
+      OS_EVNT_Set ( SELF_notify, 1U );
+   }
+#endif //RTOS_SELECTION
    /* Now, lower the task priority to just higher than the IDLE task.  */
    (void)OS_TASK_Set_Priority ( pTskName_Test, LOWEST_TASK_PRIORITY_ABOVE_IDLE() );
 
@@ -407,7 +414,7 @@ static uint16_t RunSelfTest()
    }
 #endif
 
-#if ( TM_RTC_UNIT_TEST == 1 )
+
    /* Execute the RTC Test last (to allow sufficient time for VBAT to come up and the OSC to start?)
       otherwise if the RTC SuperCap is completely discharged on the T-board the RTC test may fail on
       first time from power up.  The EP's are OK when in a meter or if powered up standalone and
@@ -418,11 +425,9 @@ static uint16_t RunSelfTest()
       if ( SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had failed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 0;
-#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event Log module is ready
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOSucceeded;
          (void)EVL_LogEvent( 45, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
-#endif
       }
    }
    else
@@ -430,7 +435,6 @@ static uint16_t RunSelfTest()
       if ( !SELF_TestData.lastResults.uAllResults.Bits.RTCFail )  //If this had passed...
       {
          SELF_TestData.lastResults.uAllResults.Bits.RTCFail = 1;
-#if 0 // TODO: RA6 [name_Balaji]: Integrate once Event Log module is ready
          eventData.markSent                     = (bool)false;
          eventData.eventId                      = (uint16_t)comDeviceClockIOFailed;
          eventData.eventKeyValuePairsCount      = 1;
@@ -438,10 +442,9 @@ static uint16_t RunSelfTest()
          *( uint16_t * )keyVal.Key              = stRTCFailCount;
          *( uint16_t * )keyVal.Value            = SELF_TestData.RTCFail;
          (void)EVL_LogEvent( 86, &eventData, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
-#endif
       }
    }
-#endif
+
    /* Update the number of times self test has run */
    SELF_TestData.selfTestCount++;
 #if 0
@@ -692,13 +695,14 @@ returnStatus_t SELF_testRTC( void )
    R_RTC_Close (&g_rtc0_ctrl);// TODO: RA6 [name_Balaji]: Closing RTC, for now as there is no other known method to check the RTC valid or not
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )
+// TODO: RA6 [name_Balaji]: Remove unit test if not required
    bool isRTCUnitTestFailed;
    isRTCUnitTestFailed = RTC_UnitTest();
    if (isRTCUnitTestFailed == 1)
    {
      DBG_printf( "ERROR - RTC failed to Set Error Adjustment\n" );
    }
-#endif
+#endif // TM_RTC_UNIT_TEST
    if ( retVal == eFAILURE )
    {
       if( SELF_TestData.RTCFail < ( ( 1 << ( 8 * sizeof( SELF_TestData.RTCFail ) ) ) - 1 ) ) /* Do not let counter rollover.  */
@@ -707,7 +711,7 @@ returnStatus_t SELF_testRTC( void )
       }
    }
 
-//   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );// TODO: RA6 [name_Balaji]: Uncomment once the function is implemented
+   DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );
    return retVal;
 }
 
@@ -771,6 +775,10 @@ returnStatus_t SELF_testNV( void )
          SELF_TestData.nvFail += (uint16_t)errCount;
       }
    }
+
+#if ( MCU_SELECTED == RA6E1 )
+   DBG_logPrintf( 'I', "SELF_testNV: Done - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
+#endif
    return ( ( 0 == errCount ) ? eSUCCESS : eFAILURE );
 }
 
@@ -952,6 +960,5 @@ void SELF_testIWDT( void )
    {
       /* Read the current IWDT counter value for debugging purpose. Can be watched in the live watch. */
       R_IWDT_CounterGet( &g_wdt0_ctrl, &iwdt_counter );
-
    }
 }
