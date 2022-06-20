@@ -1145,7 +1145,7 @@ static const struct_CmdLineEntry MFGP_HiddenCmdTable[] =
    {  "appSecurityAuthMode",        MFG_appSecAuthMode,              "Set system security mode" },
    {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" },
    {  "enableOTATest",              MFGP_enableOTATest,              "Temporarily allows over the air testing of certain tests" },
-   {  "flashSecurityEnabled",       MFGP_FlashSecurity,              "Lock/Unlock Flash and JTAG Security" },
+ //  {  "flashSecurityEnabled",       MFGP_FlashSecurity,              "Lock/Unlock Flash and JTAG Security" }, TODO: RA6E1: Support this feature later
 #if ( EP == 1 )
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    {  "logoff",                     MFG_logoff,                      "Reset port for mfg commands" },
