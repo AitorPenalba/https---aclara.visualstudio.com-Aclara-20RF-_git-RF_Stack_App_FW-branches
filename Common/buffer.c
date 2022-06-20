@@ -527,7 +527,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
 #if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Verify the change
          if ( ( AllocWatchDog[type].TICKS[0] == 0 ) && ( AllocWatchDog[type].TICKS[1] == 0 ) )
 #elif( RTOS_SELECTION == FREE_RTOS )
-         if ( ( AllocWatchDog[type].tickCount == 0 ) || ( AllocWatchDog[type].xNumOfOverflows == 0 ) )
+         if ( ( AllocWatchDog[type].tickCount == 0 ) && ( AllocWatchDog[type].xNumOfOverflows == 0 ) )
 #endif
          {
             // Save timestamp
@@ -539,9 +539,8 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
             // Have we been out of buffers for a long time?
             if ( ( _time_diff_minutes( &CurrentTime, &AllocWatchDog[type], &overflow ) > ALLOC_WATCHDOG_TIMEOUT ) || overflow )
 #elif( RTOS_SELECTION == FREE_RTOS )
-            if( ( OS_TICK_Get_Diff_InMinutes( &CurrentTime, &AllocWatchDog[type] ) > ALLOC_WATCHDOG_TIMEOUT ) ||
-                ( OS_TICK_Get_Diff_InMinutes( &CurrentTime, &AllocWatchDog[type] ) == 0 ) ) //  Overflow condition
-
+               /* TODO: RA6E1: Should we use the Timers instead ? */
+            if ( OS_TICK_Get_Diff_InMinutes( &CurrentTime, &AllocWatchDog[type] ) > ALLOC_WATCHDOG_TIMEOUT )  //  TODO: RA6E1: Handle Overflow condition
 #endif
             {
                // Need to reboot

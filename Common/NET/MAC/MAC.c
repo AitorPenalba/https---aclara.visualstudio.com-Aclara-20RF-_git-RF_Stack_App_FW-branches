@@ -60,7 +60,7 @@
 #include "time_util.h"
 #include "timer_util.h"
 #include "time_sync.h"
-//#include "time_sys.h"  // TODO: RA6E1: Do we need this include?
+#include "time_sys.h"  // TODO: RA6E1: Do we need this include?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
 #endif
