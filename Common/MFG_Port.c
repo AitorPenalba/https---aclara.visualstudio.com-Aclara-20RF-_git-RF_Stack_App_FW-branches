@@ -1954,6 +1954,7 @@ static void mfgpReadCommandProcess( void )
 #if ( RTOS_SELECTION == MQX_RTOS )
             event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
 #elif ( RTOS_SELECTION == FREE_RTOS )
+            // TODO: RA6 [name_Balaji]: Support 0xffffffff in future
             event_flags = OS_EVNT_Wait ( &CMD_events, 0x00ffffff, (bool)false, ONE_SEC );
 #endif
             if ( event_flags == 0 )    /* Check for time-out.  */
