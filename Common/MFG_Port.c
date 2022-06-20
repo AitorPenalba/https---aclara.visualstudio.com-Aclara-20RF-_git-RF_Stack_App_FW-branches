@@ -721,7 +721,6 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
-   {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" }, //TODO: RA6E1 [name_Siva]:Has to be moved to the correct place in the next commit
 
 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
 //   { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" }, 
@@ -736,13 +735,13 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
    {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
    {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
-//#if ( DCU == 1 )
-//   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
-//#endif
-//#if ( ENABLE_FIO_TASKS == 1 )
-//   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
-//   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
-//#endif
+#if ( DCU == 1 )
+   {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
+#endif
+#if ( ENABLE_FIO_TASKS == 1 )
+   {  "config_test",                MFGP_ConfigTest,                 "Test the configuration"},
+   {  "config_update",              MFGP_ConfigUpdate,               "Update the Configuration Check Information"},
+#endif
    {  "dataConfigurationDocumentVersion", MFGP_dataConfigurationDocumentVersion, "(MIMT)Get/Set the data Configuration document version" },
    {  "DateTime",                   MFG_DateTime,                    "Get/Set system date/time" },
    {  "dtlsDeviceCertificate",      MFGP_dtlsDeviceCertificate,      "Read Device cert" },                               // 1363
@@ -750,10 +749,10 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "dtlsMfgSubject2",            MFGP_dtlsMfgSubject2,            "Read/Write Mfg2 Subject partial cert" },           // 1360
    {  "dtlsNetworkHESubject",       MFGP_dtlsNetworkHESubject,       "Read/Write Head End Subject partial cert" },       // 1332
    {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
-//#if 0
-//// These are defined in the HEEP, but not sure if they are valid or not!
-//	   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
-//#endif
+#if 0
+   //These are defined in the HEEP, but not sure if they are valid or not!
+   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
+#endif
    {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
    {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
    {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
@@ -772,16 +771,16 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "fctModuleDatabaseVersion",   MFGP_fctModuleDatabaseVersion,   "(MIMT)Get/Set the fct module database version" },
    {  "fctModuleProgramVersion",    MFGP_fctModuleProgramVersion,    "(MIMT)Get/Set the fct module program version" },
    {  "fctModuleTestDate",          MFGP_fctModuleTestDate,          "(MIMT)Get/Set the fct module test date" },
-//#if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
-//   {  "fngFemMfg",                  MFGP_fngFemMfg,                  "Get/Set FEM manufacturer (0 = Mini Circuits/1 = MicroAnt)" },
-//   {  "fngForwardPower",            MFGP_fngForwardPower,            "Get Forward Power" },
-//   {  "fngForwardPowerSet",         MFGP_fngForwardPowerSet,         "Get/Set Forward Power Set Point" },
-//   {  "fngFowardPowerLowSet",       MFGP_fngFowardPowerLowSet,       "Get/Set Foward Power Low Set Point" },
-//   {  "fngReflectedPower",          MFGP_fngReflectedPower,          "Get Reflected Power" },
-//   {  "fngVSWR",                    MFGP_fngVSWR,                    "Get VSWR" },
-//   {  "fngVswrNotificationSet",     MFGP_fngVswrNotificationSet,     "Get/Set VSWR Notification Set Point" },
-//   {  "fngVswrShutdownSet",         MFGP_fngVswrShutdownSet,         "Get/Set VSWR Shutdown Set Point" },
-//#endif
+#if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
+   {  "fngFemMfg",                  MFGP_fngFemMfg,                  "Get/Set FEM manufacturer (0 = Mini Circuits/1 = MicroAnt)" },
+   {  "fngForwardPower",            MFGP_fngForwardPower,            "Get Forward Power" },
+   {  "fngForwardPowerSet",         MFGP_fngForwardPowerSet,         "Get/Set Forward Power Set Point" },
+   {  "fngFowardPowerLowSet",       MFGP_fngFowardPowerLowSet,       "Get/Set Foward Power Low Set Point" },
+   {  "fngReflectedPower",          MFGP_fngReflectedPower,          "Get Reflected Power" },
+   {  "fngVSWR",                    MFGP_fngVSWR,                    "Get VSWR" },
+   {  "fngVswrNotificationSet",     MFGP_fngVswrNotificationSet,     "Get/Set VSWR Notification Set Point" },
+   {  "fngVswrShutdownSet",         MFGP_fngVswrShutdownSet,         "Get/Set VSWR Shutdown Set Point" },
+#endif
 #if ( EP == 1 )
    {  "HighTempThreshold",          MFGP_HighTempThreshold,          "Get/Set EP High Temperature Threshold" },
 #endif
@@ -808,9 +807,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "macIsRouter",                    MFGP_macIsRouter,                    "Get/Set macIsRouter"},
 
    {  "macChannelSets",             MFGP_MacChannelSetsSRFN,         "Get/Set SRFN MAC channel sets" },
-//#if ( DCU == 1 )
-//   {  "macChannelSetsSTAR",         MFGP_MacChannelSetsSTAR,         "Get/Set STAR MAC channel sets" },
-//#endif
+#if ( DCU == 1 )
+   {  "macChannelSetsSTAR",         MFGP_MacChannelSetsSTAR,         "Get/Set STAR MAC channel sets" },
+#endif
    {  "macCsmaMaxAttempts",         MFGP_macCsmaMaxAttempts,         "Get/Set MAC CSMA max attempts" },
    {  "macCsmaMinBackOffTime",      MFGP_macCsmaMinBackOffTime,      "Get/Set MAC CSMA minimum backoff time" },
    {  "macCsmaMaxBackOffTime",      MFGP_macCsmaMaxBackOffTime,      "Get/Set MAC CSMA maximum backoff time" },
@@ -855,19 +854,19 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "opportunisticAlarmIndexId",  MFGP_opportunisticAlarmIndexId,  "Get current index into the opportunistic alarm log" },
    {  "opportunisticThreshold",     MFGP_eventThreshold,             "xxx" },
 
-//#if ( PHASE_DETECTION == 1 )
-//   {  "capableOfPhaseSelfAssessment",  PD_SurveySelfAssessment,        "Is device capable of Phase Detect Self Assessment" },
-//   {  "capableOfPhaseDetectSurvey",    PD_SurveyCapable,               "Is device capable of Phase Detect" },
-//   {  "pdSurveyStartTime",             PD_SurveyStartTime,             "Get/Set Survey StartTime" },
-//   {  "pdSurveyPeriod",                PD_SurveyPeriod,                "Get/Set Survey Period" },
-//   {  "pdSurveyQuantity",              PD_SurveyQuantity,              "Get/Set Survey Quantity" },
-//   {  "pdSurveyMode",                  PD_SurveyReportMode,            "Get/Set Survey Mode" },
-//   {  "pdZCProductNullingOffset",      PD_ZCProductNullingOffset,      "Get/Set ZC Product Nulling Offset" },
-//   {  "pdLcdMsg",                      PD_LcdMsg,                      "Get/Set Lcd Msg" },
-//   {  "pdBuMaxTimeDiversity",          PD_BuMaxTimeDiversity,          "Get/Set Time Diversity" },
-//   {  "pdBuDataRedundancy",            PD_BuDataRedundancy,            "Get/Set DataRedundancy" },
-//   {  "pdSurveyPeriodQty",             PD_SurveyPeriodQty,             "Get/Set Survey Period Quantity" },
-//#endif
+#if ( PHASE_DETECTION == 1 )
+   {  "capableOfPhaseSelfAssessment",  PD_SurveySelfAssessment,        "Is device capable of Phase Detect Self Assessment" },
+   {  "capableOfPhaseDetectSurvey",    PD_SurveyCapable,               "Is device capable of Phase Detect" },
+   {  "pdSurveyStartTime",             PD_SurveyStartTime,             "Get/Set Survey StartTime" },
+   {  "pdSurveyPeriod",                PD_SurveyPeriod,                "Get/Set Survey Period" },
+   {  "pdSurveyQuantity",              PD_SurveyQuantity,              "Get/Set Survey Quantity" },
+   {  "pdSurveyMode",                  PD_SurveyReportMode,            "Get/Set Survey Mode" },
+   {  "pdZCProductNullingOffset",      PD_ZCProductNullingOffset,      "Get/Set ZC Product Nulling Offset" },
+   {  "pdLcdMsg",                      PD_LcdMsg,                      "Get/Set Lcd Msg" },
+   {  "pdBuMaxTimeDiversity",          PD_BuMaxTimeDiversity,          "Get/Set Time Diversity" },
+   {  "pdBuDataRedundancy",            PD_BuDataRedundancy,            "Get/Set DataRedundancy" },
+   {  "pdSurveyPeriodQty",             PD_SurveyPeriodQty,             "Get/Set Survey Period Quantity" },
+#endif
    {  "phyAvailableChannels",          MFG_PhyAvailableChannels,        "Get/Set the available radio channels" },
    {  "PhyAvailableFrequencies",       MFG_PhyAvailableFrequencies,     "Get/Set available radio frequencies" },
    {  "phyCcaThreshold",               MFG_PhyCcaThreshold,             "Get the CCA threshold" },
@@ -902,9 +901,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 #if ( EP == 1 )
    {  "powerQuality",               MFGP_powerQuality,               "Get power quality counter reading"},
 #endif
-//#if (VSWR_MEASUREMENT == 1)
-//   {  "vswr",                       MFGP_Vswr,                       "Get last VSWR reading." },
-//#endif
+#if (VSWR_MEASUREMENT == 1)
+   {  "vswr",                       MFGP_Vswr,                       "Get last VSWR reading." },
+#endif
    {  "realTimeAlarm",              MFGP_getRealTimeAlarm,           "Get whether the endpoint supports real time alarms" },
    {  "realTimeAlarmIndexId",       MFGP_realTimeAlarmIndexId,       "Get current index into the real time alarm log" },
    {  "realtimeThreshold",          MFGP_eventThreshold,             "Get the realtime event threshold" },
@@ -918,21 +917,21 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
 //   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },//[fixed by balaji PR]
    {  "strx4gfsk",                  MFG_StRx4GFSK,                   "Start a Receiver BER test using normal radio processing" },
-//#if ( DCU == 1 )
-//   {  "stRamRWFailCount",           MFG_ToolEP_SDRAMCount,           "Get/Set SDRAM test failure count" },
-//   {  "stRamRWFailTest",            MFG_ToolEP_SDRAMTest,            "Run the SDRAM test" },
-//#endif
+#if ( DCU == 1 )
+   {  "stRamRWFailCount",           MFG_ToolEP_SDRAMCount,           "Get/Set SDRAM test failure count" },
+   {  "stRamRWFailTest",            MFG_ToolEP_SDRAMTest,            "Run the SDRAM test" },
+#endif
    {  "stSecurityFailCount",        MFGP_stSecurityFailCount,        "Get/Set security device test failure count" },
-//   {  "stSecurityFailTest",         MFGP_stSecurityFailTest,         "Test security device" },
-//#if ( DCU == 1 )
+   {  "stSecurityFailTest",         MFGP_stSecurityFailTest,         "Test security device" },
+#if ( DCU == 1 )
 //   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX. Specify SRFN or STAR" },
-//#else
+#else
 //   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX" },
-//#endif
-//   {  "sttxcwtest",                 MFG_StTxCwTest,                  "Start a CW transmitter test" },
-//#if ( DCU == 1 )
-//   {  "TBImageTarget",              MFGP_DCUVersion,                 "Get/Set DCU operating mode {DCU2|DCU2+}" },
-//#endif
+#endif
+   {  "sttxcwtest",                 MFG_StTxCwTest,                  "Start a CW transmitter test" },
+#if ( DCU == 1 )
+   {  "TBImageTarget",              MFGP_DCUVersion,                 "Get/Set DCU operating mode {DCU2|DCU2+}" },
+#endif
    {  "temperature",                MFGP_temperature,                "Get device temperature" },
    {  "timeDefaultAccuracy",        MFG_TimeDefaultAccuracy,         "Get/Set the Default Time Accuracy"},
    {  "timeLastUpdated",            MFGP_timeLastUpdated,            "The time that date/time was last updated" },
@@ -960,20 +959,20 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "demandPresentConfiguration", MFGP_demandPresentConfiguration, "xxx" },
    {  "demandResetLockoutPeriod",   MFGP_demandResetLockoutPeriod,   "Get/Set the demand reset lockout period" },
 #endif // ( ENABLE_DEMAND_TASKS == 1 )
-//#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
+#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
    {  "dfwAuditTestStatus",         MFGP_dfwAuditTestStatus,         "Get the dfwAuditTestStatus parameter value"},
    {  "dfwCompatibilityTestStatus", MFGP_dfwCompatibilityTestStatus, "Get the dfwCompatibilityTestStatus parameter value"},
    {  "dfwProgramScriptStatus",     MFGP_dfwProgramScriptStatus,     "Get the dfwProgramScriptStatus parameter value"},
-//#endif  // endif ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
+#endif  // endif ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
    {  "dfwApplyConfirmTimeDiversity", MFGP_dfwApplyConfirmTimeDiversity, "xxx" },
    {  "dfwDownloadConfirmTimeDiversity", MFGP_dfwDownloadConfirmTimeDiversity, "xxx" },
    {  "dfwDupDiscardPacketQty",     MFGP_dfwDupDiscardPacketQty,     "Get the number of discarded during dfw packet download process." },
    {  "dfwFileType",                MFGP_dfwFileType,                "Get the file type set by the DFW_INIT"},
    {  "dfwStatus",                  MFGP_dfwStatus,                  "Get the DFW status" },
    {  "dfwStreamID",                MFGP_dfwStreamId,                "Get/Set DFW Stream Id" },
-//#if ( REMOTE_DISCONNECT == 1 )
-//   {  "disconnectCapable",          MFGP_disconnectCapable,          "Display whether the meter is capable of remote disconnect ability" },
-//#endif
+#if ( REMOTE_DISCONNECT == 1 )
+   {  "disconnectCapable",          MFGP_disconnectCapable,          "Display whether the meter is capable of remote disconnect ability" },
+#endif
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 #if ( ENABLE_DEMAND_TASKS == 1 )
    {  "drReadList",                 MFGP_drReadList,                 "Get/Set Demand read list" },
@@ -988,51 +987,51 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "dstEndRule",                 MFGP_dstEndRule,                 "xxx" },
    {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
    {  "dstStartRule",               MFGP_dstStartRule,               "xxx" },
-//#if ( ANSI_STANDARD_TABLES == 1 )
+#if ( ANSI_STANDARD_TABLES == 1 )
 //   {  "ansiTableOID",               MFGP_AnsiTblOID,                 "Get the meter's DEVICE_CLASS per ANSI Table 00" },
-//#endif
-#if ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-   {  "edFwVersion",                MFGP_edFwVersion,                "Get the host's firmware version.revision.build" },
-#else
-   {  "edFwVersion",                MFGP_edFwVersion,                "Get the meter's firmware version.revision" },
 #endif
-//#if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
+#if ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
+//   {  "edFwVersion",                MFGP_edFwVersion,                "Get the host's firmware version.revision.build" },
+#else
+//   {  "edFwVersion",                MFGP_edFwVersion,                "Get the meter's firmware version.revision" },
+#endif
+#if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
 //   {  "edHwVersion",                MFGP_edHwVersion,                "Get the host's hardware version.revision" },
-//#endif
-//if ( HMC_KV == 1 ) || ( HMC_I210_PLUS == 1 ) 
+#endif
+#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS == 1 ) 
 //   {  "edInfo",                     MFGP_edInfo,                     "xxx" },
-//#else // for SRNFI-210+C  [SIVA- DEBUG]
+#else // for SRNFI-210+C
 //   {  "edInfo",                     MFGP_edInfo,                     "Get the end device info" },
-//#endif
+#endif
 
-//#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
+#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
 //   {  "edManufacturer",             MFGP_edManufacturer,             "Get the meter manufacturer" },
-//#elif ( ACLARA_DA == 1 )
+#elif ( ACLARA_DA == 1 )
 //   {  "edManufacturer",             MFGP_edManufacturer,             "Get the host manufacturer" },
-//#endif
-//   {  "edMfgSerialNumber",          MFGP_edMfgSerialNumber,          "Get the host's serial number" },
-//#if ( ANSI_STANDARD_TABLES == 1 )
-//   {  "edModel",                    MFGP_edModel,                    "Get the host's model name" },
-//#elif ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-//   {  "edModel",                    MFGP_edModel,                    "Get/Set the host's type/model number" },
-//#endif
-//#if ACLARA_DA == 1
-//   {  "edBootVersion",              MFGP_hostBootVersion,            "Get the host's boot loader version" },
-//   {  "edBspVersion",               MFGP_hostBspVersion,             "Get the host's BSP version" },
-//   {  "edKernelVersion",            MFGP_hostKernelVersion,          "Get the host's kernel version" },
-//   {  "edCarrierHwVersion",         MFGP_carrierHwVersion,           "Get the carrier board's hardware version" },
-//   {  "hostEchoTest",               MFGP_hostEchoTest,               "Test the host communication port" },
-//#endif
-//#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
-//   {  "edProgrammedDateTime",       MFGP_edProgrammedDateTime,       "Get the meters's last program datetime in seconds" },
-//   {  "edProgramId",                MFGP_edProgramId,                "Get the meter's program ID number" },
+#endif
+   {  "edMfgSerialNumber",          MFGP_edMfgSerialNumber,          "Get the host's serial number" },
+#if ( ANSI_STANDARD_TABLES == 1 )
+   {  "edModel",                    MFGP_edModel,                    "Get the host's model name" },
+#elif ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
+   {  "edModel",                    MFGP_edModel,                    "Get/Set the host's type/model number" },
+#endif
+#if ACLARA_DA == 1
+   {  "edBootVersion",              MFGP_hostBootVersion,            "Get the host's boot loader version" },
+   {  "edBspVersion",               MFGP_hostBspVersion,             "Get the host's BSP version" },
+   {  "edKernelVersion",            MFGP_hostKernelVersion,          "Get the host's kernel version" },
+   {  "edCarrierHwVersion",         MFGP_carrierHwVersion,           "Get the carrier board's hardware version" },
+   {  "hostEchoTest",               MFGP_hostEchoTest,               "Test the host communication port" },
+#endif
+#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
+   {  "edProgrammedDateTime",       MFGP_edProgrammedDateTime,       "Get the meters's last program datetime in seconds" },
+   {  "edProgramId",                MFGP_edProgramId,                "Get the meter's program ID number" },
 //   {  "edProgrammerName",           MFGP_edProgrammerName,           "Get the name of the last programmer of the meter" },
-//#endif
-//   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },//[SIVA-DEBUG]
-//#if ( SAMPLE_METER_TEMPERATURE == 1 )
-//   {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
-//   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter's thermometer" },
-//#endif
+#endif
+//   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },
+#if ( SAMPLE_METER_TEMPERATURE == 1 )
+   {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
+   {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter's thermometer" },
+#endif
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 //   {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
    {  "historicalRecovery",         MFGP_historicalRecovery,         "Get whether the endpoint supports historical data recovery" },
@@ -1040,7 +1039,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "initialRegistrationTimeout", MFGP_initialRegistrationTimemout,"Get/Set the initial registration timeout" },
    {  "invalidAddressModeCount",    MFGP_invalidAddressModeCount,    "Get the invalid address mode count." },
    {  "lastGaspMaxNumAttempts",     MFGP_lastGaspMaxNumAttempts,     "Get/Set maximum number of last gasps" },
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 #if ( LP_IN_METER == 0 )
    {  "lpBuChannel1",               MFGP_lpBuChannel,                "xxx" },
    {  "lpBuChannel2",               MFGP_lpBuChannel,                "xxx" },
@@ -1058,73 +1057,72 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "lpBuMaxTimeDiversity",       MFGP_lpBuMaxTimeDiversity,       "xxx" },
    {  "lpBuSchedule",               MFGP_lpBuSchedule,               "xxx" },
    {  "lpBuTrafficClass",           MFGP_lpBuTrafficClass,           "xxx" },
-//#endif
+#endif
    {  "maxRegistrationTimeout",     MFGP_maxRegistrationTimemout,    "Get/Set the maximum registration timeout" },
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//   {  "meterCommunicationLockoutCount", MFGP_meterCommunicationLockoutCount,
-//      "Get Total number of times the transponder is locked out from communicating with the meter." },
-//#endif
-//   {  "minRegistrationTimeout",     MFGP_minRegistrationTimemout,    "Get/Set the minimum registration timeout" },
-//#if ( CLOCK_IN_METER == 1 )
-//   {  "meterDateTime",              MFGP_meterDateTime,              "Get meter's local date/time - seconds since midnight 1/1/70" },
-//#endif
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//   {  "meterSessionFailureCount",   MFGP_meterSessionFailureCount,   "Get/Set the meterSessionFailureCount parameter" },
-//#endif
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+   {  "meterCommunicationLockoutCount", MFGP_meterCommunicationLockoutCount,
+      "Get Total number of times the transponder is locked out from communicating with the meter." },
+#endif
+   {  "minRegistrationTimeout",     MFGP_minRegistrationTimemout,    "Get/Set the minimum registration timeout" },
+#if ( CLOCK_IN_METER == 1 )
+   {  "meterDateTime",              MFGP_meterDateTime,              "Get meter's local date/time - seconds since midnight 1/1/70" },
+#endif
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+   {  "meterSessionFailureCount",   MFGP_meterSessionFailureCount,   "Get/Set the meterSessionFailureCount parameter" },
+#endif
 //   {  "meterShopMode",              MFGP_meterShopMode,              "Alias for decommissionMode" },
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//   {  "netkWh",                     MFG_bulkQuantity,                "Read net kWh from meter" },
-//#endif
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+   {  "netkWh",                     MFG_bulkQuantity,                "Read net kWh from meter" },
+#endif
    {  "newRegistrationRequired",    MFGP_newRegistrationRequired,    "Get/Set registration state" },
    {  "nwActiveActTimeout",         MFGP_NwActiveActTimeout,         "Get or set active network activity timeout" },
    {  "nwPassActTimeout",           MFGP_NwPassActTimeout,           "Get or set passive network activity timeout" },
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//   {  "orReadList",                 MFGP_orReadList,                 "Get/Set on demand read list" },
-//#endif
-   {  "PhyAfcEnable",               MFGP_PhyAfcEnable,               "Enable/disable AFC" }, //[SIVA-DEBUG]
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+   {  "orReadList",                 MFGP_orReadList,                 "Get/Set on demand read list" },
+#endif
+   {  "PhyAfcEnable",               MFGP_PhyAfcEnable,               "Enable/disable AFC" },
    {  "PhyAfcRssiThreshold",        MFGP_PhyAfcRSSIThreshold,        "Get/Set AFC RSSI threshold" },
    {  "PhyAfcTemperaturerange",     MFGP_PhyAfcTemperatureRange,     "Get/Set AFC temperature range" },
    {  "outageDeclarationDelay",     MFGP_outageDeclarationDelay,     "Get/Set outage declaration delay in seconds" },
    {  "restorationDeclarationDelay",MFGP_restorationDelay,           "Get/Set restoration delay in seconds" },
    {  "powerQualityEventDuration",  MFGP_powerQualityEventDuration,  "Get/Set power quality event duration in seconds" },
-//#if ( ENABLE_DEMAND_TASKS == 1 )
-//#if ( DEMAND_IN_METER == 0 )
-
-//   {  "scheduledDemandResetDay",    MFGP_scheduledDemandResetDay,    "xxx" },//[SIVA-DEBUG]
-//#endif
-//#endif
-//#if ( LAST_GASP_SIMULATION == 1 ) && ( EP == 1 )
-//   {  "simulateLastGaspStart",      MFGP_simulateLastGaspStart,      "Get/Set simulateLastGaspStart parameter" },
-//   {  "simulateLastGaspDuration",   MFGP_simulateLastGaspDuration,   "Get/Set simulateLastGaspDuration parameter" },
-//   {  "SimulateLastGaspTraffic",    MFGP_SimulateLastGaspTraffic,    "Get/Set simulateLastGaspDuration parameter" },
-//   {  "simulateLastGaspMaxNumAttempts",       MFGP_simulateLastGaspMaxNumAttempts,        "Get/Set simulateLastGaspMaxNumAttempts parameter" },
-//   {  "simulateLastGaspStatCcaAttempts",      MFGP_simulateLastGaspStatCcaAttempts,       "Get simulateLastGaspStatCcaAttempts stats" },
-//   {  "simulateLastGaspStatPPersistAttempts", MFGP_simulateLastGaspStatPPersistAttempts,  "Get simulateLastGaspStatPPersistAttempts stats" },
-//   {  "simulateLastGaspStatMsgsSent",         MFGP_simulateLastGaspStatMsgsSent,          "Get simulateLastGaspStatMsgsSent stats" },
-//#endif
+#if ( ENABLE_DEMAND_TASKS == 1 )
+#if ( DEMAND_IN_METER == 0 )
+   {  "scheduledDemandResetDay",    MFGP_scheduledDemandResetDay,    "xxx" },
+#endif
+#endif
+#if ( LAST_GASP_SIMULATION == 1 ) && ( EP == 1 )
+   {  "simulateLastGaspStart",      MFGP_simulateLastGaspStart,      "Get/Set simulateLastGaspStart parameter" },
+   {  "simulateLastGaspDuration",   MFGP_simulateLastGaspDuration,   "Get/Set simulateLastGaspDuration parameter" },
+   {  "SimulateLastGaspTraffic",    MFGP_SimulateLastGaspTraffic,    "Get/Set simulateLastGaspDuration parameter" },
+   {  "simulateLastGaspMaxNumAttempts",       MFGP_simulateLastGaspMaxNumAttempts,        "Get/Set simulateLastGaspMaxNumAttempts parameter" },
+   {  "simulateLastGaspStatCcaAttempts",      MFGP_simulateLastGaspStatCcaAttempts,       "Get simulateLastGaspStatCcaAttempts stats" },
+   {  "simulateLastGaspStatPPersistAttempts", MFGP_simulateLastGaspStatPPersistAttempts,  "Get simulateLastGaspStatPPersistAttempts stats" },
+   {  "simulateLastGaspStatMsgsSent",         MFGP_simulateLastGaspStatMsgsSent,          "Get simulateLastGaspStatMsgsSent stats" },
+#endif
    {  "smLogTimeDiversity",         MFGP_smLogTimeDiversity,         "Get/Set Stack Manager Log Time Diversity" },
    {  "stP0LoopbackFailCount",      MFGP_stP0LoopbackFailCount,      "Get/Set P0 Loopback Fail Count" },
-//   {  "stp0loopbackfailtest",       MFGP_stP0LoopbackFailTest,       "Test P0 (HMC port) - requires loopback cable" },//[SIVA-DEBUG]
-//#if ( REMOTE_DISCONNECT == 1 )
-//   {  "switchPosition",             MFGP_switchPosition,             "Possible Values returned: 0 = disconnected / 1 = connected" },
-//#endif
+//   {  "stp0loopbackfailtest",       MFGP_stP0LoopbackFailTest,       "Test P0 (HMC port) - requires loopback cable" },
+#if ( REMOTE_DISCONNECT == 1 )
+   {  "switchPosition",             MFGP_switchPosition,             "Possible Values returned: 0 = disconnected / 1 = connected" },
+#endif
    {  "timeSigOffset",              MFGP_timeSigOffset,              "Get/Set timeSigOffset"},
    {  "timeAcceptanceDelay",        MFGP_timeAcceptanceDelay,        "Time Acceptance Delay for MAC Time Set" },
    {  "timeRequestMaxTimeout",      MFGP_timeRequestMaxTimeout,      "Get/Set the maximum amount of random delay following a request for network time before the time request is retried" },
    {  "timeZoneDSTHash",            MFGP_timeZoneDSTHash,            "SHA-256 hash of local time settings" },
    {  "timeZoneOffset",             MFGP_timeZoneOffset,             "time zone offset (signed, in hours)" },
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//   {  "totkWh",                     MFG_bulkQuantity,                "Read total kWh from meter" },
-//#endif
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+   {  "totkWh",                     MFG_bulkQuantity,                "Read total kWh from meter" },
+#endif
    {  "watchdogResetCount",         MFGP_watchDogResetCount,         "Get/Set watchdoge reset counter" },
-//#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//   {  "0.0.0.1.1.1.12.0.0.0.0.0.0.0.0.3.72.0",  MFG_bulkQuantity,    "Read forward kWh from meter" },
-//   {  "0.0.0.1.20.1.12.0.0.0.0.0.0.0.0.3.72.0", MFG_bulkQuantity,    "Read total kWh from meter" },
-//   {  "0.0.0.1.4.1.12.0.0.0.0.0.0.0.0.3.72.0",  MFG_bulkQuantity,    "Read net kWh from meter" },
-//#endif
-//#if ( CLOCK_IN_METER == 1 )
-//   {  "0.0.0.6.0.41.7.0.0.0.0.0.0.0.0.0.108.0", MFGP_meterDateTime,  "Get meter's local date/time - seconds since midnight 1/1/70" },
-//#endif
+#if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
+   {  "0.0.0.1.1.1.12.0.0.0.0.0.0.0.0.3.72.0",  MFG_bulkQuantity,    "Read forward kWh from meter" },
+   {  "0.0.0.1.20.1.12.0.0.0.0.0.0.0.0.3.72.0", MFG_bulkQuantity,    "Read total kWh from meter" },
+   {  "0.0.0.1.4.1.12.0.0.0.0.0.0.0.0.3.72.0",  MFG_bulkQuantity,    "Read net kWh from meter" },
+#endif
+#if ( CLOCK_IN_METER == 1 )
+   {  "0.0.0.6.0.41.7.0.0.0.0.0.0.0.0.0.108.0", MFGP_meterDateTime,  "Get meter's local date/time - seconds since midnight 1/1/70" },
+#endif
    { 0, 0, 0 }
 };
 #endif   //end of #if ( EP == 1 )
@@ -6639,7 +6637,6 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
    ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_DISABLE, NULL );
    while ( HMC_APP_main( ( uint8_t )HMC_APP_CMD_STATUS, NULL )  != ( uint8_t )HMC_APP_STATUS_LOGGED_OFF )
    {
-     MFG_logPrintf("loop count \r\n");
    }
 #endif   /* end of ACLARA_LC == 0   */
    if ( argc == 2 )
@@ -11196,7 +11193,6 @@ static void MFGP_dtlsServerCertificateSN(uint32_t argc, char *argv[] ){
     if(1 == argc)
     {
         size = DTLS_GetServerCertificateSerialNumber(certBuffer);
-        
     }
     else
     {
