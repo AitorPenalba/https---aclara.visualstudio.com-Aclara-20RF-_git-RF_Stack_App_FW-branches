@@ -11198,6 +11198,7 @@ static void MFGP_dtlsServerCertificateSN(uint32_t argc, char *argv[] ){
    {
       DBG_logPrintf( 'R', "Invalid number of parameters" );
    }
+   
    MFG_printHex(argv[0], certBuffer, size);
 }
 
