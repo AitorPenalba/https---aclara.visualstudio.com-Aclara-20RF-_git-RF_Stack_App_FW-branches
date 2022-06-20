@@ -11190,16 +11190,15 @@ static void MFGP_dtlsServerCertificateSN(uint32_t argc, char *argv[] ){
    uint16_t size = 0;
    uint8_t certBuffer[DTLS_SERVER_CERTIFICATE_SERIAL_MAX_SIZE] = {0};
 
-    if(1 == argc)
-    {
-        size = DTLS_GetServerCertificateSerialNumber(certBuffer);
-    }
-    else
-    {
-       DBG_logPrintf( 'R', "Invalid number of parameters" );
-    }
-
-    MFG_printHex(argv[0], certBuffer, size);
+   if(1 == argc)
+   {
+      size = DTLS_GetServerCertificateSerialNumber(certBuffer);
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+   MFG_printHex(argv[0], certBuffer, size);
 }
 
 #endif // USE_DTLS endif
