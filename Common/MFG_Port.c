@@ -6636,8 +6636,7 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
    ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_INIT, NULL );
    ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_DISABLE, NULL );
    while ( HMC_APP_main( ( uint8_t )HMC_APP_CMD_STATUS, NULL )  != ( uint8_t )HMC_APP_STATUS_LOGGED_OFF )
-   {
-   }
+   {}
 #endif   /* end of ACLARA_LC == 0   */
    if ( argc == 2 )
    {
