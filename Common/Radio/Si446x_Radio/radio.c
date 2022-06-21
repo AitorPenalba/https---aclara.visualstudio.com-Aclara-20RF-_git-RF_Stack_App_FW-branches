@@ -714,7 +714,6 @@ void compare(void);
 #if RADIO_TASK
 bool bRadio_ready = FALSE; 
 #endif
-   
 
 #if 0  // TODO: RA6E1 Bob: This was removed from original project
 void RF_SetHardwareMode(RFHardwareMode_e newMode)
@@ -2552,10 +2551,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Be nice to other tasks.
    OS_TASK_Sleep( FIFTY_MSEC );
 #endif
-
-
    RADIO_Update_Freq();
-
 #if RADIO_TASK 
    bRadio_ready = TRUE; 
 #endif
@@ -6423,7 +6419,7 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
 
    Purpose: To get Radio Temperature and compute average of an array of floats;
 
-   Arguments:  float    bSoft_demod - to verify if this function was called from softdemod
+   Arguments:  bool    bSoft_demod - to verify if this function was called from softdemod
               .  
 */
 
@@ -6448,8 +6444,8 @@ float RADIO_Get_Current_Temperature( bool bSoft_demod )
       // TODO: averaging mechanism 
     }    
   }
-  
-  else {
+  else 
+  {
     if ( TRUE == bSoft_demod )
     {
       if ( si446x_get_adc_reading ( RADIO_0, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd ) == SI446X_SUCCESS )
@@ -6473,7 +6469,6 @@ float RADIO_Get_Current_Temperature( bool bSoft_demod )
         {
           RADIO_Temperature = temp/avg_index;  // avg value for first five cycles
         }
-        
         else 
         {
           RADIO_Temperature = temp/RADIO_TEMP_SAMPLE; // avg value
@@ -6497,7 +6492,7 @@ float RADIO_Get_Current_Temperature( bool bSoft_demod )
 } 
 
 /*
-Used to check Radio initialized
+Used to check whether radio is initialized
 */
  
 bool Is_Radio_ready ()

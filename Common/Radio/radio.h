@@ -47,7 +47,7 @@
 #define VSWR_AVERAGE_COUNT      8 /* Number of samples that go into VSWR average */
 #endif
 
-#define RADIO_TASK 1 // 
+#define RADIO_TASK 1 
 #define RADIO_TEMP_SAMPLE 5
 
 
@@ -63,7 +63,8 @@ extern bool MFG_Port_Print;                        /*!< Used to print some PHY r
 /*****************************************************************************
  *  Global Function Declarations
  *****************************************************************************/
-
+extern float RADIO_Get_Current_Temperature(bool bSoft_demod);
+extern bool Is_Radio_ready(void);
 
 /**
  * \addtogroup dev
