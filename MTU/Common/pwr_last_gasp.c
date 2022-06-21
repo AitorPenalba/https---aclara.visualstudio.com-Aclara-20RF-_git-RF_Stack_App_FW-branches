@@ -2674,7 +2674,6 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
    }
    else //if ( LPTMR_SLEEP_FOREVER != eUnits )
    {
-
       if ( uCounter != 0 ) /* Not "resuming", set actual delay.   */
       {
          LptmrStart( uCounter, eUnits, LPTMR_MODE_PROGRAM_ONLY );
@@ -2739,6 +2738,7 @@ static void ClearVBATT ( void )
 #endif // #if ( MCU_SELECTED == RA6E1 )
 
 // TEST
+#if ( MCU_SELECTED == RA6E1 )
 void PWRLG_print_LG_Flags ( void )
 {
    INFO_printf( "PWRLG-Outage %d",PWRLG_OUTAGE() );
@@ -2749,3 +2749,4 @@ void PWRLG_print_LG_Flags ( void )
    INFO_printf( "PWRLG-uMilliseconds %ld", PWRLG_MILLISECONDS() );
    INFO_printf( "PWRLG-SFT RESET %d", PWRLG_SOFTWARE_RESET());
 }
+#endif

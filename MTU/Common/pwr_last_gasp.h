@@ -202,9 +202,10 @@ PWRLG_EXTERN void           PWRLG_SetCsmaParameters( void );
 PWRLG_EXTERN uint16_t       PWRLG_CalculateMessages( void );
 PWRLG_EXTERN void           PWRLG_CalculateSleep( uint8_t step );
 PWRLG_EXTERN void           PWRLG_SetupLastGasp( void );
-
-#if 1  // TEST // TODO: RA6E1: Remove later 
+#if ( MCU_SELECTED == RA6E1 )
+#if 1  // TEST // TODO: RA6E1: Remove later
 void PWRLG_print_LG_Flags ( void );
+#endif
 #endif
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
