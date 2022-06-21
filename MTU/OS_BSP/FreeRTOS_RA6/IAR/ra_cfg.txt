@@ -167,7 +167,7 @@ FSP Configuration
       P601 66 SCI9_RXD9 - L - "Peripheral mode" - - "AGT3: AGTEE3; GPT6: GTIOC6A; SCI9: RXD9" UART9_RX_OPT I - "Reserved for KV2C: UART4_TX" 
       P602 65 SCI9_TXD9 - L - "Peripheral mode" - - "AGT3: AGTO3; GPT7: GTIOC7B; SCI9: TXD9" UART9_TX_OPT O - "Reserved for KV2C: UART4_RX" 
       P608 59 GPIO - L - "Output mode (Initial Low)" - - "GPT4: GTIOC4B" Open IO - "Resereved : Dimming_PWM" 
-      P609 60 GPIO - L - "Output mode (Initial Low)" - - "AGT5: AGTO5; GPT5: GTIOC5A" 3V6BOOST_EN IO - 3V6BOOST_EN 
+      P609 60 GPIO - L - "Output mode (Initial High)" - - "AGT5: AGTO5; GPT5: GTIOC5A" 3V6BOOST_EN IO - 3V6BOOST_EN 
       P610 61 GPIO - L - "Output mode (Initial Low)" - - "AGT4: AGTO4; GPT5: GTIOC5B" Open IO - /EZ_CS 
       P708 16 GPIO - L None "Output mode (Initial Low)" - - "IRQ: IRQ11; SCI1: RXD1; SPI1: SSLB3" Open IO - PWR_SEL 
       RES 38 SYSTEM_RES - - - - - - - - IO "Read only" RES 
@@ -246,7 +246,7 @@ FSP Configuration
       P401 2 GPIO - L None "Input mode" - - "CAN0: CTX0; ETHER_RMII: ET0_MDC; GPT6: GTIOC6B; GPT_POEG: GTETRGA; IIC0: SDA0; IRQ: IRQ5-DS; SCI4: CTS_RTS4" I2C0_SDA IO - I2C0_SDA 
       P402 3 GPIO - L None "Input mode" - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; CAC: CACREF; CAN0: CRX0; ETHER_RMII: ET0_MDIO; IRQ: IRQ4-DS; RTC: RTCIC0; SCI4: CTS4; SSIE0: AUDIO_CLK" Open IO - - 
       P403 4 GPIO - - - "Input mode" - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_LINKSTA; IRQ: IRQ14-DS; RTC: RTCIC1; SSIE0: SSISCK0" Open None - - 
-      P404 5 GPIO LDO_EN L None "Output mode (Initial High)" - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_EXOUT; IRQ: IRQ15-DS; RTC: RTCIC2; SSIE0: SSIWS0" 3V6LDO_EN IO - 3V6LDO_EN 
+      P404 5 GPIO LDO_EN L None "Output mode (Initial Low)" - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_EXOUT; IRQ: IRQ15-DS; RTC: RTCIC2; SSIE0: SSIWS0" 3V6LDO_EN IO - 3V6LDO_EN 
       P405 6 GPIO - L - "Input mode" - - "ETHER_RMII: RMII0_TXD_EN; GPT1: GTIOC1A; SSIE0: SSITXD0" IRQ_SI4467 IO - - 
       P406 7 GPIO - - - "Input mode" - - "AGT5: AGTO5; ETHER_RMII: RMII0_TXD1; GPT1: GTIOC1B; SSIE0: SSIRXD0" TP121 None - - 
       P407 25 GPIO - - - "Input mode" - - "ADC0: ADTRG0; AGT0: AGTIO0; ETHER_RMII: ET0_EXOUT; GPT6: GTIOC6A; IIC0: SDA0; RTC: RTCOUT; SCI4: CTS_RTS4; SPI0: SSLA3; USB FS: USB_VBUS" Open None - - 
@@ -268,7 +268,7 @@ FSP Configuration
       P601 66 GPIO - L - "Input mode" - - "AGT3: AGTEE3; GPT6: GTIOC6A; SCI9: RXD9" UART9_RX_OPT I - "Reserved for KV2C: UART4_TX" 
       P602 65 GPIO - L - "Input mode" - - "AGT3: AGTO3; GPT7: GTIOC7B; SCI9: TXD9" UART9_TX_OPT O - "Reserved for KV2C: UART4_RX" 
       P608 59 GPIO - L - "Input mode" - - "GPT4: GTIOC4B" Open IO - "Resereved : Dimming_PWM" 
-      P609 60 GPIO - L - "Input mode" - - "AGT5: AGTO5; GPT5: GTIOC5A" 3V6BOOST_EN IO - 3V6BOOST_EN 
+      P609 60 GPIO - L - "Output mode (Initial High)" - - "AGT5: AGTO5; GPT5: GTIOC5A" 3V6BOOST_EN IO - 3V6BOOST_EN 
       P610 61 GPIO - L - "Input mode" - - "AGT4: AGTO4; GPT5: GTIOC5B" Open IO - /EZ_CS 
       P708 16 GPIO - L None "Input mode" - - "IRQ: IRQ11; SCI1: RXD1; SPI1: SSLB3" Open IO - PWR_SEL 
       RES 38 SYSTEM_RES - - - - - - - - IO "Read only" RES 

@@ -203,8 +203,6 @@ typedef struct
 }msgQueueSrc_t;
 #endif  // ( RTOS_SELECTION == MQX_RTOS ) /* MQX */
 
-
-//#define OS_MSGQ_Create(arg)
 typedef struct
 {
    uint32_t   HW_TICKS;    // CYCCNT value
@@ -215,7 +213,7 @@ typedef struct
 } OS_TICK_Struct, * OS_TICK_Struct_Ptr;
 
 
-#define OS_TASK_Summary
+#define OS_TASK_Summary  /* TODO: RA6E1: Add Support for this function */
 
 #if ( RTOS_SELECTION == MQX_RTOS )
 #define taskParameter         uint32_t Arg0

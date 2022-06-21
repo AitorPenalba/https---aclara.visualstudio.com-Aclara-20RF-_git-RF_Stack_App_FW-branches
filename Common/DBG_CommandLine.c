@@ -1162,7 +1162,7 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
 /***********************************************************************************************************************
    Function Name: DBG_CommandLine_wdTest
 
-   Purpose: Test the IWDT 
+   Purpose: Test the IWDT
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -3758,7 +3758,7 @@ uint32_t DBG_CommandLine_time ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //} /* end DBG_CommandLine_time () */
 //#endif
-#if (RTC == 1)
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_rtcTime
@@ -3911,10 +3911,8 @@ uint32_t DBG_CommandLine_rtcTime ( uint32_t argc, char *argv[] )
 //   return( 0 );
 //}
 #endif // #if ( MCU_SELECTED == NXP_K24 )
-#endif  // #if (RTC == 1)
 
 #if (EP == 1)
-
 /***********************************************************************************************************************
    Function Name: DBG_CommandLine_lpstats
 
@@ -4546,7 +4544,7 @@ static uint32_t DBG_CommandLine_lpstats ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif // (EP == 1)
-//#if 0
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_virgin
@@ -4585,7 +4583,6 @@ uint32_t DBG_CommandLine_virgin ( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
 {
-#if ( PARTITION_MANAGER == 1 )
    PartitionData_t const * partitionData;    /* Pointer to partition information   */
    uint8_t                 erasedSignature[ 8 ];
 
@@ -4602,10 +4599,10 @@ static uint32_t DBG_CommandLine_virginDelay ( uint32_t argc, char *argv[] )
          }
       }
    }
-#endif
+
    return 0;
 }
-//#endif // #if 0
+
 //#if WRITE_KEY_ALLOWED
 //#warning "Don't release with WRITE_KEY_ALLOWED"
 //static uint32_t DBG_CommandLine_writeKey ( uint32_t argc, char *argv[] )
@@ -6320,6 +6317,7 @@ uint32_t DBG_CommandLine_Counters ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //#endif
+
 /***********************************************************************************************************************
 
    Function name: atoh

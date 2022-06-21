@@ -75,22 +75,17 @@ returnStatus_t WDOG_Init ( void )
    WDOG_TOVALL = (uint16_t)(((BSP_BUS_CLOCK / (WATCHDOG_CLOCK_DIVIDE_PRESCALER+1)) * WATCHDOG_HW_TIMEOUT) & 0x0000FFFF);
    /* Set Prescaler to (4+1=5) - so Bus Clock / prescaler gives WDOG_CLK */
    WDOG_PRESC = WDOG_PRESC_PRESCVAL(WATCHDOG_CLOCK_DIVIDE_PRESCALER);
-   
+
 #elif ( MCU_SELECTED == RA6E1 )
-   /* Check RESET source */
-   if ( R_SYSTEM->RSTSR1_b.IWDTRF )
-   {
-      /* Clear the flag. */
-      R_SYSTEM->RSTSR1 = 0U;
-   }
+
    /* (Optional) Enable the IWDT to count and generate NMI or reset when the
     * debugger is connected. */
    R_DEBUG->DBGSTOPCR_b.DBGSTOP_IWDT = 0;
    /* Initializes the module. */
    R_IWDT_Open ( &g_wdt0_ctrl, &g_wdt0_cfg );
    /* Refresh before the counter underflows to prevent reset or NMI based on the setting. */
-   R_IWDT_Refresh ( &g_wdt0_ctrl ); 
-    
+   R_IWDT_Refresh ( &g_wdt0_ctrl );
+
 #endif
    return(eSUCCESS);
 } /* end WDOG_Init () */
@@ -114,11 +109,11 @@ void WDOG_Kick ( void )
 #ifndef __BOOTLOADER
    OS_INT_disable( ); //The second sequence 0xB480 should be written within 20 cycles of first
 #endif   /* BOOTLOADER  */
-   
+
   /* Kick (refresh) the Watchdog */
    WDOG_REFRESH = 0xA602;
    WDOG_REFRESH = 0xB480;
-  
+
 #ifndef __BOOTLOADER
    OS_INT_enable( );
 #endif   /* BOOTLOADER  */

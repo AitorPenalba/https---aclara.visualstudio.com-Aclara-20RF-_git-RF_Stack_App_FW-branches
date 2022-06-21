@@ -723,7 +723,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
 
 // TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
-//   { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" }, 
+//   { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
    {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
    {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
    {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
@@ -998,7 +998,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 #if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
 //   {  "edHwVersion",                MFGP_edHwVersion,                "Get the host's hardware version.revision" },
 #endif
-#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS == 1 ) 
+#if ( HMC_KV == 1 ) || ( HMC_I210_PLUS == 1 )
 //   {  "edInfo",                     MFGP_edInfo,                     "xxx" },
 #else // for SRNFI-210+C
 //   {  "edInfo",                     MFGP_edInfo,                     "Get the end device info" },
@@ -1145,7 +1145,7 @@ static const struct_CmdLineEntry MFGP_HiddenCmdTable[] =
    {  "appSecurityAuthMode",        MFG_appSecAuthMode,              "Set system security mode" },
    {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" },
    {  "enableOTATest",              MFGP_enableOTATest,              "Temporarily allows over the air testing of certain tests" },
- //  {  "flashSecurityEnabled",       MFGP_FlashSecurity,              "Lock/Unlock Flash and JTAG Security" }, TODO: RA6E1: Support this feature later
+//   {  "flashSecurityEnabled",       MFGP_FlashSecurity,              "Lock/Unlock Flash and JTAG Security" }, TODO: RA6E1: Support this feature later
 #if ( EP == 1 )
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    {  "logoff",                     MFG_logoff,                      "Reset port for mfg commands" },
@@ -1825,7 +1825,7 @@ static void mfgpReadCommandProcess( void )
       MFGP_CommandBuffer[ MFGP_numBytes++ ] = rxByte;
       MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
       rxByte = 0x0;
-      for ( MFGP_numBytes ; MFGP_numBytes < MFGP_MAX_MFG_COMMAND_CHARS ; MFGP_numBytes++ )
+      for ( ; MFGP_numBytes < MFGP_MAX_MFG_COMMAND_CHARS ; MFGP_numBytes++ )
        {
           /* UART_read used to read characters while doing Copy/Paste */
           ( void )UART_read ( mfgUart, &rxByte, sizeof(rxByte) );
@@ -11198,7 +11198,7 @@ static void MFGP_dtlsServerCertificateSN(uint32_t argc, char *argv[] ){
    {
       DBG_logPrintf( 'R', "Invalid number of parameters" );
    }
-   
+
    MFG_printHex(argv[0], certBuffer, size);
 }
 

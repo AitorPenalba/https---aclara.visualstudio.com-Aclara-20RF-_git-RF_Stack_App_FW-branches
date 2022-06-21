@@ -69,11 +69,7 @@
 /* MACRO DEFINITIONS */
 
 #define PERSISTENT                  __no_init
-#if ( MCU_SELECTED == NXP_K24 )
 #define CLRWDT()                    WDOG_Kick()
-#elif ( MCU_SELECTED == RA6E1 )
-#define CLRWDT()                    1   //TODO: RA6: Melvin: add RA6E1 equivalent for the same
-#endif
 #define NOP()                       asm("nop")
 #if ( MCU_SELECTED == NXP_K24 )
 #define RESET()                     { SCB_AIRCR = SCB_AIRCR_VECTKEY(0x5FA)| SCB_AIRCR_SYSRESETREQ_MASK; while(1){} }

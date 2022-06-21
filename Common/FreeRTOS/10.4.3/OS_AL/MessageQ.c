@@ -15,7 +15,7 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include "OS_aclara.h"
+//#include "OS_aclara.h"
 #include "DBG_SerialDebug.h"
 #include "buffer.h"
 
@@ -211,7 +211,7 @@ void OS_MSGQ_TestCreate ( void )
 bool OS_MSGQ_TestPend( void )
 {
    bool retVal = false;
-   
+
    if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, OS_WAIT_FOREVER ) )
    {
       counter--;

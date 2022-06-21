@@ -81,7 +81,7 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
   Returns: None
 
   Notes: Although MQX can return false for the _lwevent_set function, it should
-         never happen since the ewvent should always be valid.
+         never happen since the event should always be valid.
          If this happens, we consider this a catastrophic failure.
 
          Function will not return if it fails
@@ -90,8 +90,8 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line )
 {
 #if( RTOS_SELECTION == FREE_RTOS )
-      //TODO Error Handling, return value
-      xEventGroupSetBits( *EventHandle , EventMask);
+      //TODO: RA6E1: Error Handling, return value
+      xEventGroupSetBits( *EventHandle , EventMask );
 #elif( RTOS_SELECTION == MQX_RTOS )
    if ( _lwevent_set ( EventHandle, EventMask ) ) {
       EVL_FirmwareError( "OS_EVNT_Set" , file, line );
@@ -198,8 +198,8 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
             timeout_ticks = timeout_ticks + 1;
          } /* end if() */
 #else
-         timeout_ticks = pdMS_TO_TICKS(Timeout_msec);
-         if( ( ( TickType_t ) ( ( ( TickType_t ) ( Timeout_msec ) * ( TickType_t ) configTICK_RATE_HZ ) % ( TickType_t ) 1000U ) ) )
+         timeout_ticks = pdMS_TO_TICKS( Timeout_msec );
+         if( (uint32_t) ( (uint64_t) ((uint64_t) Timeout_msec * (uint64_t) configTICK_RATE_HZ ) % ( TickType_t )1000U ) > 0 )
          {   /* Round the value up to ensure the time is >= the time requested */
             timeout_ticks = timeout_ticks + 1;
          }

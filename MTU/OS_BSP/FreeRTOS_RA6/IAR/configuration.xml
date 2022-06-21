@@ -1138,8 +1138,8 @@
       <configSetting altId="p602.gpio_mode.gpio_mode_peripheral" configurationId="p602.gpio_mode"/>
       <configSetting altId="p608.output.low" configurationId="p608"/>
       <configSetting altId="p608.gpio_mode.gpio_mode_out.low" configurationId="p608.gpio_mode"/>
-      <configSetting altId="p609.output.low" configurationId="p609"/>
-      <configSetting altId="p609.gpio_mode.gpio_mode_out.low" configurationId="p609.gpio_mode"/>
+      <configSetting altId="p609.output.high" configurationId="p609"/>
+      <configSetting altId="p609.gpio_mode.gpio_mode_out.high" configurationId="p609.gpio_mode"/>
       <configSetting altId="p610.output.low" configurationId="p610"/>
       <configSetting altId="p610.gpio_mode.gpio_mode_out.low" configurationId="p610.gpio_mode"/>
       <configSetting altId="p708.output.low" configurationId="p708"/>
@@ -1335,8 +1335,8 @@
       <configSetting altId="p402.gpio_mode.gpio_mode_in" configurationId="p402.gpio_mode"/>
       <configSetting altId="p403.input" configurationId="p403"/>
       <configSetting altId="p403.gpio_mode.gpio_mode_in" configurationId="p403.gpio_mode"/>
-      <configSetting altId="p404.output.high" configurationId="p404"/>
-      <configSetting altId="p404.gpio_mode.gpio_mode_out.high" configurationId="p404.gpio_mode"/>
+      <configSetting altId="p404.output.low" configurationId="p404"/>
+      <configSetting altId="p404.gpio_mode.gpio_mode_out.low" configurationId="p404.gpio_mode"/>
       <configSetting altId="p405.input" configurationId="p405"/>
       <configSetting altId="p405.gpio_mode.gpio_mode_in" configurationId="p405.gpio_mode"/>
       <configSetting altId="p406.input" configurationId="p406"/>
@@ -1379,8 +1379,8 @@
       <configSetting altId="p602.gpio_mode.gpio_mode_in" configurationId="p602.gpio_mode"/>
       <configSetting altId="p608.input" configurationId="p608"/>
       <configSetting altId="p608.gpio_mode.gpio_mode_in" configurationId="p608.gpio_mode"/>
-      <configSetting altId="p609.input" configurationId="p609"/>
-      <configSetting altId="p609.gpio_mode.gpio_mode_in" configurationId="p609.gpio_mode"/>
+      <configSetting altId="p609.output.high" configurationId="p609"/>
+      <configSetting altId="p609.gpio_mode.gpio_mode_out.high" configurationId="p609.gpio_mode"/>
       <configSetting altId="p610.input" configurationId="p610"/>
       <configSetting altId="p610.gpio_mode.gpio_mode_in" configurationId="p610.gpio_mode"/>
       <configSetting altId="p708.input" configurationId="p708"/>

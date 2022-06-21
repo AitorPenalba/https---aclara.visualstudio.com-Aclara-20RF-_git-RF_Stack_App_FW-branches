@@ -10,7 +10,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2015-2020 Aclara.  All Rights Reserved.
+   Copyright 2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -134,11 +134,7 @@ returnStatus_t SEC_init( void )
    if ( ECC108_SUCCESS == ecc108e_GetSerialNumber() )   /* Update device serial number   */
    {
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 Enable lastgasp
       if( PWRLG_LastGasp() == 0 )
-#else
-      if ( 1 )
-#endif
 #endif
       {
          ecc108e_InitKeys();
@@ -223,7 +219,7 @@ uint8_t ecc108_open( void )
    if ( (bool)false == _i2cTransmitRecieveSemCreated )
    {
       //TODO RA6: NRJ: determine if semaphores need to be counting
-      if ( OS_SEM_Create( &_i2cTransmitRecieveSem , 0) )
+      if ( OS_SEM_Create( &_i2cTransmitRecieveSem , 0 ) )
       {
          _i2cTransmitRecieveSemCreated = true;
       }
@@ -234,8 +230,6 @@ uint8_t ecc108_open( void )
    {
        (void)ecc108c_wakeup( wakeup_response );   // This wakeup call here results in not communicating with the security chip as there will be another wakeup at every APIs
    }
-
-
 
    return ( uint8_t ) err;
 }

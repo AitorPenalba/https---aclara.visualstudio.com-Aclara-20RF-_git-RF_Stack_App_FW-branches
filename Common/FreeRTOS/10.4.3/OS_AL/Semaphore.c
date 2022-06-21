@@ -22,7 +22,7 @@
 /* INCLUDE FILES */
 #include "project.h"
 //#include <mqx.h>
-//#include "EVL_event_log.h"
+#include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -86,7 +86,7 @@ bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
   Returns: None
 
   Notes: Although MQX can return false for the _lwsem_post function, it should
-         never happen since the semepaphore should always be valid.
+         never happen since the semaphore should always be valid.
          If this happens, we consider this a catastrophic failure.
 
          Function will not return if it fails
@@ -96,9 +96,7 @@ void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 {
    if( pdFAIL == xSemaphoreGive(*SemHandle) )
    {
-      /* TODO: */
-      //      APP_ERR_PRINT("OS_SEM_POST!");
-      //      EVL_FirmwareError( "OS_SEM_Post" , file, line );
+      EVL_FirmwareError( "OS_SEM_Post" , file, line );
    }
 } /* end OS_SEM_Post () */
 
@@ -126,7 +124,6 @@ void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 *******************************************************************************/
 bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, int line )
 {
-   //uint32_t RetStatus;
    BaseType_t RetStatus;
    bool FuncStatus = true;
 
@@ -150,7 +147,7 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
          }
 
          timeout_ticks = pdMS_TO_TICKS(Timeout_msec);
-         if( ( ( TickType_t ) ( ( ( TickType_t ) ( Timeout_msec ) * ( TickType_t ) configTICK_RATE_HZ ) % ( TickType_t ) 1000U ) ) )
+         if( (uint32_t) ( (uint64_t) ((uint64_t) (Timeout_msec) * (uint64_t) configTICK_RATE_HZ ) % 1000 ) )
          {   /* Round the value up to ensure the time is >= the time requested */
             timeout_ticks = timeout_ticks + 1;
          }

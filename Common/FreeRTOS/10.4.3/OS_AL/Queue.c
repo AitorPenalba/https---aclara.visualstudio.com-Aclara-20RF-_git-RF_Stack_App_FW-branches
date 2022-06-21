@@ -15,11 +15,10 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
+//#include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
 #include "buffer.h"
 #include "DBG_SerialDebug.h"
-#include "DBG_CommandLine.h"
-//#include "EVL_event_log.h"
+#include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -117,6 +116,7 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
    if (pdPASS != xQueueSend ( *QueueHandle, (void *)&ptr, 0 ) )
    {
       DBG_printf("Could not add item to queue at %s line %d", file, line);
+      EVL_FirmwareError( "OS_QUEUE_Enqueue" , file, line );
    }
 
 #elif( RTOS_SELECTION == MQX_RTOS )
