@@ -112,6 +112,7 @@ static MQX_FILE_PTR UartHandle[MAX_UART_ID];
 #if ( MCU_SELECTED == RA6E1 )
 static const char       CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
 extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+extern OS_SEM_Obj       mfgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
 static char             DbgPrintBuffer[MAX_DBG_COMMAND_CHARS + 1];
 // TODO: RA6 [name_Balaji]: Make the transferSem work without extern
 extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
@@ -345,7 +346,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
       ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
    }
    else
-#endif
+#endif // if 1
    {
       ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
       ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
@@ -366,7 +367,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
   Arguments: UartId - Identifier of the particular UART to receive data in
              DataBuffer - pointer to the Data that is received (populated by this function)
              DataLength - number of bytes that are to be received before this function returns
-
+             Timeout - Timeout for Counting Semaphore pends
   Returns: DataReceived - Number of valid bytes that are being returned in the buffer
 
   Notes: This function will block processing until all the requested bytes have
@@ -377,7 +378,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
          in an ioctl call IO_IOCTL_SERIAL_SET_FLAGS
 
 *******************************************************************************/
-uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength )
+uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength ,uint32_t TimeoutMs)
 {
 #if ( MCU_SELECTED == NXP_K24 )
    uint32_t DataReceived;
@@ -386,9 +387,32 @@ uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 
    return ( DataReceived );
 #elif ( MCU_SELECTED == RA6E1 )
-   ( void )R_SCI_UART_Read( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+//   ( void )R_SCI_UART_Read( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+   ( void )OS_SEM_Pend( &mfgReceiveSem_, TimeoutMs );
+   UART_getc( UartId, DataBuffer, DataLength);
    return DataLength;/* R_SCI_UART_Read does not return the no. of valid read bytes, returning DataLength */
 #endif
+}
+
+/*******************************************************************************
+
+  Function name: UART_getc
+
+  Purpose: This function behaves like fgets
+
+  Arguments: UartId - Identifier of the particular UART to receive data in
+             DataBuffer - pointer to the Data that is received (populated by this function)
+             DataLength - number of bytes that are to be received before this function returns
+             
+  Returns: none
+
+*******************************************************************************/
+extern uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength )
+{
+   /* Get the data Buffer */
+   
+   /*echo the data except HMC*/
+   
 }
 
 /*******************************************************************************
@@ -428,7 +452,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
    /* Loops Until Newline is detected */
    for ( ;; )
    {
-      ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
+//      ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
       ( void )OS_SEM_Pend( &dbgReceiveSem_, OS_WAIT_FOREVER );
       if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
          ( rxByte == CTRL_C_CHAR ) ||    /* User pressed CRTL-C key */
@@ -453,7 +477,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
          for ( ;DBGP_numBytes<DataLength;DBGP_numBytes++)
          {
             /* UART_read used to read characters while doing Copy/Paste */
-            ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
+//            ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
             /* 10millisecond is the delay timing where a successful UART_read happens */
             ( void )OS_SEM_Pend( &dbgReceiveSem_, ( portTICK_RATE_MS * 2) );
 

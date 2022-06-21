@@ -290,92 +290,92 @@ void DBG_TxTask( taskParameter )
    Notes:
 
  **********************************************************************************************************************/
-void DBG_log ( char category, uint8_t options, const char *fmt, ... )
-{
-   sysTime_dateFormat_t RT_Clock;
-   buffer_t *pBuf;
-   uint16_t len;
-
-   /* Print out the Debug port? */
-   if ( EnableDebugPrint_
-#if ( PORTABLE_DCU == 1)
-         && (EnableDfwMonMode == (bool)false)
-#endif
-      )
-   {
-#if (MQX_RTOS == 1)
-      if (( taskPrintFilter_ == 0 )            ||                /* Filter active? */
-            taskPrintFilter_ == _task_get_id() ||                /* Filter match?  */
-            _task_get_id() == _task_get_id_from_name( "DBG" ) )  /* DBG task */
-#endif
-      {
-         OS_MUTEX_Lock( &logPrintf_mutex_ ); // Function will not return if it fails
-
-         // Reset length
-         len = 0;
-         logPrintf_buf[0] = 0;
-
-         // Check if we need to print the category
-         if ( category )
-         {
-            /* DEVELOPER NOTE:  Update DBG_SIZE_OF_LINE_COUNT_AND_CATEGORY #def if you modify the below line */
-            len += (uint16_t)snprintf( logPrintf_buf, (int32_t)sizeof( logPrintf_buf ), "[%05d %c]", ++line_num_, category );
-         }
-         // Build time/data header
-         if ( options & PRINT_DATE_TIME )
-         {
-            (void)TIME_UTIL_GetTimeInDateFormat( &RT_Clock );
-            len += ( uint16_t )snprintf( &logPrintf_buf[len], (int32_t)sizeof( logPrintf_buf ) - len,
-                                         "%04u/%02u/%02u %02u:%02u:%02u.%03u %s_TSK ",
-                                         RT_Clock.year,
-                                         RT_Clock.month,
-                                         RT_Clock.day  ,
-                                         RT_Clock.hour ,
-                                         RT_Clock.min  , //lint !e123
-                                         RT_Clock.sec,
-                                         RT_Clock.msec,
-                                         OS_TASK_GetTaskName() );
-
-         }
-         // Format rest of the string
-         va_list  ap;
-         va_start( ap, fmt );
-         len += ( uint16_t )vsnprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), fmt, ap );
-         va_end( ap );
-
-         // Check for excessive data for logPrintf_buf
-         if ( sizeof( logPrintf_buf ) <= len )
-         {
-            ( void )memcpy( &logPrintf_buf[( sizeof( logPrintf_buf ) - sizeof( PRNT_TRAP_ERR ) ) - 1], PRNT_TRAP_ERR,
-                            sizeof( PRNT_TRAP_ERR ) );
-            len = sizeof( logPrintf_buf ) - 2;  //Account for \n and NULL
-         }
-         // Add \n if needed
-         if ( options & ADD_LF )
-         {
-#if ( MCU_SELECTED == NXP_K24 )
-           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\n" );
-#elif ( MCU_SELECTED == RA6E1 )
-           /* Added carriage return to follow printing standard */
-           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\r\n" );
-#endif
-         }
-
-         if ( len < sizeof( logPrintf_buf ) )
-         {
-            len++;      // Account for the NULL terminator
-         }
-         pBuf = BM_allocDebug( len );
-
-         if ( NULL != pBuf )
-         {
-            ( void )memcpy( pBuf->data, logPrintf_buf, len );
-            OS_MSGQ_Post ( &mQueueHandle_, pBuf );
-         }
-         OS_MUTEX_Unlock( &logPrintf_mutex_ ); // Function will not return if it fails
-      }
-   }
-}  /*lint !e818 fmt could be ptr to const   */
+//void DBG_log ( char category, uint8_t options, const char *fmt, ... )
+//{
+//   sysTime_dateFormat_t RT_Clock;
+//   buffer_t *pBuf;
+//   uint16_t len;
+//
+//   /* Print out the Debug port? */
+//   if ( EnableDebugPrint_
+//#if ( PORTABLE_DCU == 1)
+//         && (EnableDfwMonMode == (bool)false)
+//#endif
+//      )
+//   {
+//#if (MQX_RTOS == 1)
+//      if (( taskPrintFilter_ == 0 )            ||                /* Filter active? */
+//            taskPrintFilter_ == _task_get_id() ||                /* Filter match?  */
+//            _task_get_id() == _task_get_id_from_name( "DBG" ) )  /* DBG task */
+//#endif
+//      {
+//         OS_MUTEX_Lock( &logPrintf_mutex_ ); // Function will not return if it fails
+//
+//         // Reset length
+//         len = 0;
+//         logPrintf_buf[0] = 0;
+//
+//         // Check if we need to print the category
+//         if ( category )
+//         {
+//            /* DEVELOPER NOTE:  Update DBG_SIZE_OF_LINE_COUNT_AND_CATEGORY #def if you modify the below line */
+//            len += (uint16_t)snprintf( logPrintf_buf, (int32_t)sizeof( logPrintf_buf ), "[%05d %c]", ++line_num_, category );
+//         }
+//         // Build time/data header
+//         if ( options & PRINT_DATE_TIME )
+//         {
+//            (void)TIME_UTIL_GetTimeInDateFormat( &RT_Clock );
+//            len += ( uint16_t )snprintf( &logPrintf_buf[len], (int32_t)sizeof( logPrintf_buf ) - len,
+//                                         "%04u/%02u/%02u %02u:%02u:%02u.%03u %s_TSK ",
+//                                         RT_Clock.year,
+//                                         RT_Clock.month,
+//                                         RT_Clock.day  ,
+//                                         RT_Clock.hour ,
+//                                         RT_Clock.min  , //lint !e123
+//                                         RT_Clock.sec,
+//                                         RT_Clock.msec,
+//                                         OS_TASK_GetTaskName() );
+//
+//         }
+//         // Format rest of the string
+//         va_list  ap;
+//         va_start( ap, fmt );
+//         len += ( uint16_t )vsnprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), fmt, ap );
+//         va_end( ap );
+//
+//         // Check for excessive data for logPrintf_buf
+//         if ( sizeof( logPrintf_buf ) <= len )
+//         {
+//            ( void )memcpy( &logPrintf_buf[( sizeof( logPrintf_buf ) - sizeof( PRNT_TRAP_ERR ) ) - 1], PRNT_TRAP_ERR,
+//                            sizeof( PRNT_TRAP_ERR ) );
+//            len = sizeof( logPrintf_buf ) - 2;  //Account for \n and NULL
+//         }
+//         // Add \n if needed
+//         if ( options & ADD_LF )
+//         {
+//#if ( MCU_SELECTED == NXP_K24 )
+//           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\n" );
+//#elif ( MCU_SELECTED == RA6E1 )
+//           /* Added carriage return to follow printing standard */
+//           len += ( uint16_t )snprintf( &logPrintf_buf[ len ], ( int32_t )( sizeof( logPrintf_buf ) - len ), "\r\n" );
+//#endif
+//         }
+//
+//         if ( len < sizeof( logPrintf_buf ) )
+//         {
+//            len++;      // Account for the NULL terminator
+//         }
+//         pBuf = BM_allocDebug( len );
+//
+//         if ( NULL != pBuf )
+//         {
+//            ( void )memcpy( pBuf->data, logPrintf_buf, len );
+//            OS_MSGQ_Post ( &mQueueHandle_, pBuf );
+//         }
+//         OS_MUTEX_Unlock( &logPrintf_mutex_ ); // Function will not return if it fails
+//      }
+//   }
+//}  /*lint !e818 fmt could be ptr to const   */
 /***********************************************************************************************************************
 
    Function name: DBG_printHex

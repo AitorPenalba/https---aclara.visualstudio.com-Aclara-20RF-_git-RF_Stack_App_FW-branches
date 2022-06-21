@@ -79,6 +79,9 @@
 
 #if ( MCU_SELECTED == RA6E1 )
 #define printf( fmt, ... )         DBG_printfDirect( fmt, ##__VA_ARGS__ )
+// TODO: RA6 [name_Balaji]: Figure out the right ring buffer size
+#define MAX_RING_BUFFER_CHAR       128
+#define RING_BUFFER_MASK           127
 #endif
 
 /* TYPE DEFINITIONS */
@@ -174,6 +177,18 @@ uint32_t MILLISECONDS;
 
 } TIME_STRUCT, * TIME_STRUCT_PTR;
 #endif
+
+/* Structure for Ring buffer implementation. */
+#if ( MCU_SELECTED == RA6E1 )
+typedef struct
+{
+uint8_t buffer[MAX_RING_BUFFER_CHAR];
+uint8_t head; 
+uint8_t tail;
+//uint8_t *head;
+//uint8_t *tail;
+}ringBuff_T;
+#endif
 /* CONSTANTS */
 
 /* KTL - 16 byte key: "ultrapassword123" - This is temporary and will change to an external key later */
@@ -244,7 +259,13 @@ extern bool           RTC_isRunning ( void );
 #endif
 
 extern uint32_t    UART_write                ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
+#if ( MCU_SELECTED == NXP_K24 )
 extern uint32_t    UART_read                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength );
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+extern uint32_t    UART_read                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength, uint32_t TimeoutMs );
+extern uint32_t    UART_getc                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength ); 
+#endif
 extern void        UART_fgets                ( enum_UART_ID UartId,       char    *DataBuffer, uint32_t DataLength );
 extern uint8_t     UART_flush                ( enum_UART_ID UartId );
 extern void        UART_RX_flush             ( enum_UART_ID UartId );

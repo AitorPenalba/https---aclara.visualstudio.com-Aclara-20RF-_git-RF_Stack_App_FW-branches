@@ -305,10 +305,11 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                else
                {
                   sStatus_.Bits.bTxWait = true;
-                  numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
+//                  numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
                   timerCfg.usiTimerId = resExpiredTimerId_;
                   (void)TMR_ReadTimer(&timerCfg);
-                  if ( (timerCfg.bExpired) && (0 == numRxBytes) ) /* Did a Time-out occur &no data received? */
+//                  if ( (timerCfg.bExpired) && (0 == numRxBytes) ) /* Did a Time-out occur &no data received? */
+                  if ( timerCfg.bExpired) /* Did a Time-out occur &no data received? */
                   {
                      sStatus_.Bits.bTxWait = false; /* Clear the TX Wait Flag */
                      if ( retries_ != 0 ) /* Any retries left? */
@@ -567,7 +568,7 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                               break;  /* get out of the while so that the main can process data */
                            }
                         } // receiving a response packet
-                        numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
+//                        numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
                         /* If no bytes were received, and we're still in RX mode, pause the task for 1mS.  Note: If the
                          * RTOS tick time is greater than 1mS, the delay here may take longer which may slow down comm.
                          * a little! */
@@ -649,7 +650,7 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                {
                   /* The receive is called only to clear the glitch on the KV2 meter when starting a session! */
                   uint8_t rxGarbage;
-                  while(0 != UART_read(UART_HOST_COMM_PORT, &rxGarbage, sizeof(rxGarbage)))
+//                  while(0 != UART_read(UART_HOST_COMM_PORT, &rxGarbage, sizeof(rxGarbage)))
                   {}
                   OS_TASK_Sleep( 1 );   /* Wait a while for the TX buffer to empty before starting times. */
                }

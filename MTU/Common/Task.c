@@ -382,14 +382,14 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 
 #if ( TEST_QUIET_MODE == 0 )
-   { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+//   { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #else
-   { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+//   { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 
    // TODO: RA6 [name_Balaji]: Check for Priority and change if required
    /* Increased the Priority of DBG_CommandLineTask to handle large amount of Uart_read */
-   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  13, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+//   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  13, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_PAR_TASKS
    { ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },
