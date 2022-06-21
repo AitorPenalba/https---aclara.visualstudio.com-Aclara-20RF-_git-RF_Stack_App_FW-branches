@@ -1736,7 +1736,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -2037,7 +2037,7 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
@@ -2255,6 +2255,21 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\user_settings.h</name>
                 </file>
             </group>
+            <group>
+                <name>LastGasp</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\lpm_app.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\lpm_app.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\pwr_last_gasp.h</name>
+                </file>
+            </group>
             <file>
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
@@ -2301,12 +2316,6 @@
                 <name>$PROJ_DIR$\..\Common\IDL_IdleProcess.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\lpm_app.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Common\lpm_app.h</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\Common\OR_MR_Handler.c</name>
             </file>
             <file>
@@ -2317,12 +2326,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_config.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Common\pwr_last_gasp.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_restore.c</name>

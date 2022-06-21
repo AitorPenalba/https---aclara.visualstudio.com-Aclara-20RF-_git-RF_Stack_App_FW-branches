@@ -191,17 +191,13 @@ static bool             powerStable( bool curState );
 #define LG_PRNT_INFO( fmt, ... )
 #endif // #if ( PWRLG_PRINT_ENABLE != 0 )
 
-#if 1
 #if ( MCU_SELECTED == RA6E1 )
 static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint8_t uMode );
+static void ClearVBATT ( void );
 
-#define EnterVLLS(counter, eUnits, uMode)    EnterLowPowerMode(counter, eUnits, uMode)  // TODO: RA6: DG: Convert the old code or the new?
-#define EnterLLS(counter, eUnits)            EnterLowPowerMode(counter, eUnits, 0)  // TODO: RA6: DG: Convert the old code or the new?
+#define EnterVLLS(counter, eUnits, uMode)    EnterLowPowerMode(counter, eUnits, uMode)
+#define EnterLLS(counter, eUnits)            EnterLowPowerMode(counter, eUnits, 0)
 #endif
-#else
-#define EnterVLLS(counter, eUnits, uMode)  /* TODO: RA6: DG: Remove later */
-#define EnterLLS(counter, eUnits )         /* TODO: RA6: DG: Remove later */
-#endif // if 0
 
 #if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
@@ -458,7 +454,7 @@ void PWRLG_Task( taskParameter )
 
    // We should never reach this point.
    DBG_logPrintf( 'I', "Completed" );
-#if 1  // Dead code
+#if 0  // Dead code
    for( ;; )
    {
       OS_TASK_Sleep( ONE_SEC );
@@ -685,7 +681,7 @@ void PWRLG_TxFailure( void )
 
 #if ( LG_WORST_CASE_TEST == 0 )
    uMilliseconds = aclara_randu( MAC_CSMA_MIN_BACKOFF_TIME_DEFAULT, MAC_CSMA_MAX_BACKOFF_TIME_DEFAULT );
-   LG_PRNT_INFO("Milliseconds:%ld\n", uMilliseconds);
+//   LG_PRNT_INFO("Milliseconds:%ld\n", uMilliseconds);
 #else
    GetConf = MAC_GetRequest( eMacAttr_CsmaMaxBackOffTime );
    if ( GetConf.eStatus == eMAC_GET_SUCCESS )
@@ -716,7 +712,7 @@ void PWRLG_TxFailure( void )
       if ( eSimLGDisabled == EVL_GetLGSimState() )
       {
 #endif
-         LG_PRNT_INFO("\nTx-Fail:LLS\n");
+//         LG_PRNT_INFO("\nTx-Fail:LLS\n");
          /* The CSMA back-off is long, switch to LLS mode.  */
 #if ( MCU_SELECTED == NXP_K24 )
 #if ( PWRLG_PRINT_ENABLE == 0 )
@@ -795,7 +791,12 @@ void PWRLG_Startup( void )
 #endif
    VBATREG_EnableRegisterAccess();
    /* Last Gasp or Restoration not active in Ship mode or Shop mode(a.k.a decommission mode) */
+#if ( MCU_SELECTED == NXP_K24 )
+   if ( ( 0 == VBATREG_SHIP_MODE ) && ( 0 == VBATREG_METER_SHOP_MODE ) )
+#elif ( MCU_SELECTED == RA6E1 )
+   ClearVBATT();
    if ( ( 0 == VBATREG_SHIP_MODE ) && ( 0 == VBATREG_METER_SHOP_MODE )  && ( 0 == PWRLG_SOFTWARE_RESET() ) )
+#endif
    {
 #if ( DEBUG_PWRLG == 0 )
 #if ( MCU_SELECTED == NXP_K24 )
@@ -884,6 +885,7 @@ void PWRLG_Startup( void )
                   uLLWU_FILT1 = 0;
 #endif
 #if ( MCU_SELECTED == RA6E1 )
+#if 0        /* NOTE: Followed the instruction to clear reset flags mentioned in the manual, however the LPM cancel source was the RTC */
                   /* Note: 1: After the setting of DPSIER2 is modified, an edge may be internally generated depending on the state of the pin, resulting in
                         DPSIFR2 being set to 1. Therefore, DPSIFR2 should be cleared to 0 before entering Deep Software Standby mode. */
                   /* Note: 2: To clear DPSIFR2 to 0x00 after modifying DPSIER2, wait for at least 6 PCLKB cycles, read DPSIFR2, and then write 0 to
@@ -897,9 +899,10 @@ void PWRLG_Startup( void )
                   LG_PRNT_INFO("DPSIFR2:%ld", R_SYSTEM->DPSIFR2);
                   R_SYSTEM->DPSIFR2 = 0U;
                   LG_PRNT_INFO("DPSIFR2:%ld", R_SYSTEM->DPSIFR2);
+#endif
                   PWRLG_SOFTWARE_RESET_SET( 1 );   /* Done with LG */
-#endif  /* TODO: DG: Review why its looping here  */
                   LG_PRNT_INFO("Complete");
+#endif
                   RESET(); /* Power restored, reset to restart MTU.  PWR_SafeReset() not necessary */
                }
                else        /* Outage declared, restoration not met. Set state to "wait for restoration" and sleep.   */
@@ -1063,15 +1066,17 @@ void PWRLG_Startup( void )
             }
          }
       }
+#if ( MCU_SELECTED == RA6E1 )
       else
       {
          LG_PRNT_INFO("Not LPM Wake-up");
       }
+#endif
    }
    else /* In Ship mode or Shop mode. Hence Do not perform Last Gasp feature */
    {
       PWRLG_LLWU_SET( 0 ); /* Don't re-enter last gasp on next reset. */
-      LG_PRNT_INFO( "Last Gasp is not active \n" );
+      LG_PRNT_INFO( " Last Gasp is not active \n" );
       PWRLG_STATE_SET( PWRLG_STATE_SLEEP );  /* Set state to "sleep"  */
    }
 }
@@ -1374,72 +1379,76 @@ void PWRLG_Begin( uint16_t anomalyCount )
    DBG_LW_printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
                   uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
 #elif ( MCU_SELECTED == RA6E1 )
+   /* TODO: RA6E1: Remove later */
 //   printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
 //                  uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
 //   printf( "seconds: %d, milliseconds: %d\n", PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
 #endif
    OS_TASK_Sleep( 10 );    // let print out finish
 
-#if ( ( MCU_SELECTED == RA6E1 ) && ( PWRLG_PRINT_ENABLE == 0 ) && ( LAST_GASP_RECONFIGURE_CLK == 1 ) )
-   CGC_Switch_SystemClock_to_MOCO();  /* TODO: RA6E1: DG: Revisit the ()call order */
-#endif
    PWRLG_FLAGS().byte = 0;
+   HardwareShutdown();
 
    TOTAL_BACK_OFF_TIME_SET( 0 );
    CUR_BACK_OFF_TIME_SET( 0 );
    TX_FAILURES_SET( 0 );
    RESTORATION_TIME_SET( 0 );
 
-   if ( ( 0 == MODECFG_get_ship_mode() ) && ( 0 == MODECFG_get_decommission_mode() ) )
-   {
-      VBATREG_SHORT_OUTAGE = 1;
-      HardwareShutdown();
+#if ( ( MCU_SELECTED == RA6E1 ) && ( PWRLG_PRINT_ENABLE == 0 ) && ( LAST_GASP_RECONFIGURE_CLK == 1 ) )
+   CGC_Switch_SystemClock_to_MOCO();
+//#if 0  /* NOTE: DG: This check was an improvement and the decision was made to add later */
+//   if ( ( 0 == MODECFG_get_ship_mode() ) && ( 0 == MODECFG_get_decommission_mode() ) )
+//   {
+//#endif
+#endif
+   //TODO: DG: Don't execute PWRLG_Begin function if in Ship Mode or Meter Shop mode.
+   VBATREG_SHORT_OUTAGE = 1;
 
 #if ( DEBUG_PWRLG == 0 )
-      PWR_USE_BOOST();  /* Use the Super Cap to run the system.   */
+   PWR_USE_BOOST();  /* Use the Super Cap to run the system.   */
 #endif
-      if ( PWRLG_MESSAGE_COUNT() != 0 )  /* If there's enough energy to send any message... */
-      {
-         PWRLG_LLWU_SET( 1 );       /* Re-enter last gasp on next reset.   */
-         //    PWRLG_CAP_BEFORE() = ADC_Get_SC_Voltage();
+   if ( PWRLG_MESSAGE_COUNT() != 0 )  /* If there's enough energy to send any message... */
+   {
+      PWRLG_LLWU_SET( 1 );       /* Re-enter last gasp on next reset.   */
+      //    PWRLG_CAP_BEFORE() = ADC_Get_SC_Voltage();
 #if ( MCU_SELECTED == NXP_K24 )
-         PWRLG_SOFTWARE_RESET_SET( 1 );   /* This bit is set so it can be determined if last gasp was terminated before or
-         after all last gasp messages were sent. This bit will remain set if last gasp
-         was terminated by power being restore before all last gasp messages were sent.
-         */
+      PWRLG_SOFTWARE_RESET_SET( 1 );   /* This bit is set so it can be determined if last gasp was terminated before or
+      after all last gasp messages were sent. This bit will remain set if last gasp
+      was terminated by power being restore before all last gasp messages were sent.
+      */
 #elif ( MCU_SELECTED == RA6E1 )
-         PWRLG_SOFTWARE_RESET_SET(0);   /* This flag is used differently in RA6 */
+      PWRLG_SOFTWARE_RESET_SET(0);   /* This flag is used differently in RA6. This flag now indicates if the LastGasp is compelete */
 #endif
 
-         /* LP time cannot exceed 65535 */
-         if ( uFirstSleepMilliseconds <= 60000 )
-         {
-            EnterVLLS( ( uint16_t )uFirstSleepMilliseconds, LPTMR_MILLISECONDS, 1 );   /* Goes into low power mode, never returns */
-         }
-         else
-         {
-            EnterVLLS( ( uint16_t )( uFirstSleepMilliseconds / 1000 ), LPTMR_SECONDS, 1 );   /* Goes into low power mode, never returns */
-         }
-      }
-      else  /* There's not enough power to send even 1 last gasp message or last gasp messages are disabled. */
+      /* LP time cannot exceed 65535 */
+      if ( uFirstSleepMilliseconds <= 60000 )
       {
-         /* Last gasp messages are disabled if lastGaspMaxNumAttempts is set to zero */
-         if ( 0 == PWRCFG_get_LastGaspMaxNumAttempts() )
-         {
-            LG_PRNT_INFO("\nLast Gasp messages are disabled \n\r");
-         }
-         else
-         {
-            LG_PRNT_INFO("\nNot enough Power \n\r");
-         }
-         PWRLG_OUTAGE_SET(1);                      /* Assume long outage, if we have a PQE without cap voltage, timestamps will be used to label it as such */
-         VBATREG_SHORT_OUTAGE = 0;
-         PWRLG_LLWU_SET( 1 );                      /* Re-enter last gasp on next reset.   */
-         EnterVLLS( 0, LPTMR_SLEEP_FOREVER, 1 );   /* Goes into low power mode, never returns */
-         RESET();                                  /* In case EnterVLLS() exits due to Power fail signal released. PWR_SafeReset() not necessary */
+         EnterVLLS( ( uint16_t )uFirstSleepMilliseconds, LPTMR_MILLISECONDS, 1 );   /* Goes into low power mode, never returns */
+      }
+      else
+      {
+         EnterVLLS( ( uint16_t )( uFirstSleepMilliseconds / 1000 ), LPTMR_SECONDS, 1 );   /* Goes into low power mode, never returns */
       }
    }
-#if 0 // TODO: RA6E1: Do we need the following code?
+   else  /* There's not enough power to send even 1 last gasp message or last gasp messages are disabled. */
+   {
+      /* Last gasp messages are disabled if lastGaspMaxNumAttempts is set to zero */
+      if ( 0 == PWRCFG_get_LastGaspMaxNumAttempts() )
+      {
+         LG_PRNT_INFO("\nLast Gasp messages are disabled \n\r");
+      }
+      else
+      {
+         LG_PRNT_INFO("\nNot enough Power \n\r");
+      }
+      PWRLG_OUTAGE_SET(1);                      /* Assume long outage, if we have a PQE without cap voltage, timestamps will be used to label it as such */
+      VBATREG_SHORT_OUTAGE = 0;
+      PWRLG_LLWU_SET( 1 );                      /* Re-enter last gasp on next reset.   */
+      EnterVLLS( 0, LPTMR_SLEEP_FOREVER, 1 );   /* Goes into low power mode, never returns */
+      RESET();                                  /* In case EnterVLLS() exits due to Power fail signal released. PWR_SafeReset() not necessary */
+   }
+#if ( MCU_SELECTED == RA6E1 )
+#if 0 // TODO: RA6E1: This was an improvement and the decision was made to add later */
    else
    {
       LG_PRNT_INFO("Don't execute LG");
@@ -1450,6 +1459,7 @@ void PWRLG_Begin( uint16_t anomalyCount )
       {}
       RESET(); /* PWR_SafeReset() not necessary */
    }
+#endif
 #endif
 }
 #endif  //#if ( MCU_SELECTED == NXP_K24 )
@@ -2698,8 +2708,27 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
       LG_PRNT_INFO("LPM - DEEP SW STDBY; Secs:%d",uCounter);
       LptmrStart( uCounter, eUnits, LPTMR_MODE_PROGRAM_ONLY );
       (void)LPM_APP_mode_enter( (app_lpm_states_t)uMode );
-
    }
+}
+
+/***********************************************************************************************************************
+
+   Function name: ClearVBATT
+
+   Purpose: Clear the VBAT when the MCU goes through Power On Reset.
+
+   Arguments: None
+
+   Returns: void
+
+ **********************************************************************************************************************/
+static void ClearVBATT ( void )
+{
+   if ( R_SYSTEM->RSTSR0_b.PORF ) // TODO: RA6E1: Add LVD check also
+   {
+      memset( (void *)&R_SYSTEM->VBTBKR[0], 0, 128 * sizeof( char ) );
+   }
+   PWRLG_SOFTWARE_RESET_SET(1); // TODO: RA6E1: Fail safe.
 }
 
 #endif // #if ( MCU_SELECTED == RA6E1 )
