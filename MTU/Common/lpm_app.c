@@ -88,9 +88,6 @@ fsp_err_t LPM_APP_mode_enter( app_lpm_states_t lpm_mode )
 #if ( LAST_GASP_RECONFIGURE_CLK == 1 )
             bsp_clock_init();
 #endif
-#if 0
-            ( void )R_IOPORT_PinsCfg(&g_ioport_ctrl, &g_bsp_pin_cfg);  /* Re-configure the pins */
-#endif
             break;
          }
          case APP_LPM_DEEP_SW_STANDBY_STATE:
@@ -163,7 +160,7 @@ static void StopModules ( void )
    /* Module Stop Control Register D */
    R_BSP_MODULE_STOP( FSP_IP_AGT, 3 );
    R_BSP_MODULE_STOP( FSP_IP_AGT, 2 );
-   R_BSP_MODULE_STOP( FSP_IP_AGT, 1 );  // Need for SW Standby Mode 
+   R_BSP_MODULE_STOP( FSP_IP_AGT, 1 );  // Need for SW Standby Mode
    R_BSP_MODULE_STOP( FSP_IP_POEG, 0 );  // FSP_IP_POEGD
    R_BSP_MODULE_STOP( FSP_IP_POEG, 0 );  // C
    R_BSP_MODULE_STOP( FSP_IP_POEG, 0 );  // B

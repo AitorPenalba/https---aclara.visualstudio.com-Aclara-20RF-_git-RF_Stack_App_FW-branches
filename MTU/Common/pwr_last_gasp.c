@@ -789,6 +789,11 @@ void PWRLG_Startup( void )
       SMC_PMPROT = (SMC_PMPROT_AVLP_MASK | SMC_PMPROT_ALLS_MASK | SMC_PMPROT_AVLLS_MASK);
    }
 #endif
+#if ( MCU_SELECTED == RA6E1 ) /* TEST Code */
+   LG_PRNT_INFO("RSTSR0 0x%02X", R_SYSTEM->RSTSR0 );
+   LG_PRNT_INFO("RSTSR1 0x%02X", R_SYSTEM->RSTSR1 );
+   LG_PRNT_INFO("RSTSR2 0x%02X", R_SYSTEM->RSTSR2 );
+#endif
    VBATREG_EnableRegisterAccess();
    /* Last Gasp or Restoration not active in Ship mode or Shop mode(a.k.a decommission mode) */
 #if ( MCU_SELECTED == NXP_K24 )
@@ -845,7 +850,6 @@ void PWRLG_Startup( void )
       /* This block handles timer event.   */
       if ( ( uLLWU_F3 & LLWU_F3_MWUF0_MASK ) != 0  )
 #elif ( MCU_SELECTED == RA6E1 )
-         /* TODO: RA6: DG: Do we need to check DPSRSTF before entering here?? ?*/
       if ( R_SYSTEM->DPSIFR2_b.DRTCAIF != 0 )  /* RTC Alarm Interrupt */
 #endif
       {
