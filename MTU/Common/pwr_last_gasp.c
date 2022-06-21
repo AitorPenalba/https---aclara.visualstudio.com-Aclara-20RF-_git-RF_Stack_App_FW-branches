@@ -794,7 +794,7 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
    if ( ( 0 == VBATREG_SHIP_MODE ) && ( 0 == VBATREG_METER_SHOP_MODE ) )
 #elif ( MCU_SELECTED == RA6E1 )
-   ClearVBATT();
+//   ClearVBATT();
    if ( ( 0 == VBATREG_SHIP_MODE ) && ( 0 == VBATREG_METER_SHOP_MODE )  && ( 0 == PWRLG_SOFTWARE_RESET() ) )
 #endif
    {
@@ -2711,6 +2711,7 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
    }
 }
 
+#if 0 /* NOTE: This logic did NOT work with LG. */
 /***********************************************************************************************************************
 
    Function name: ClearVBATT
@@ -2730,7 +2731,7 @@ static void ClearVBATT ( void )
    }
    PWRLG_SOFTWARE_RESET_SET(1); // TODO: RA6E1: Fail safe.
 }
-
+#endif
 #endif // #if ( MCU_SELECTED == RA6E1 )
 
 // TEST
