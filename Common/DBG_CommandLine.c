@@ -2286,8 +2286,6 @@ uint32_t DBG_CommandLine_OS_EventCreateWait( uint32_t argc, char *argv[] )
 #endif
                {
                   DBG_logPrintf( 'R', "ERROR - Test Event Task Creation Failed" );
-                  while(true) 
-                  {}
                }
                osEventTaskCreated = TRUE;
                retVal = eSUCCESS;
