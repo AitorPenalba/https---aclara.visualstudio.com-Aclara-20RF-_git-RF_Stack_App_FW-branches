@@ -42,6 +42,7 @@ uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] );
 #if ( TM_CRC_UNIT_TEST == 1 )
 uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] );
 #endif
+
 #if ( TM_TIME_COMPOUND_TEST == 1 )
 uint32_t DBG_CommandLine_TimeElapsed( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_TimeNanoSec( uint32_t argc, char *argv[] );
@@ -53,6 +54,13 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] );
 #endif
+
+#if ( TM_OS_EVENT_TEST == 1)
+uint32_t DBG_CommandLine_OS_EventSet( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_EventCreateWait( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] );
+#endif
+
 #if ( DAC_CODE_CONFIG == 1 )
 uint32_t DBG_CommandLine_DAC_SetDacStep ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_setPwrSel ( uint32_t argc, char *argv[] );

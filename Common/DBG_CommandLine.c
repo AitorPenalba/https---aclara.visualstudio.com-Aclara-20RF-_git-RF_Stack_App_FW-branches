@@ -150,6 +150,9 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 #include "MK66F18.h"
 #endif
+#if( ( RTOS_SELECTION == FREE_RTOS ) && ( TM_OS_EVENT_TEST == 1) )
+#include "event_groups.h"
+#endif
 
 /* #DEFINE DEFINITIONS */
 #if ( ( EP == 1 ) || ( PORTABLE_DCU == 0 ) )
@@ -321,6 +324,16 @@ static uint32_t DBG_CommandLine_usbaddr( uint32_t argc, char *argv[] );
 
 #if ( TEST_SYNC_ERROR == 1 )
 static uint32_t DBG_CommandLine_SyncError( uint32_t argc, char *argv[] );
+#endif
+
+#if ( TM_OS_EVENT_TEST == 1)
+const char pTskName_OSEVNTTest[]      = "TMEVT";
+static OS_EVNT_Obj eventTestObj;
+static OS_EVNT_Handle eventTestHandle = &eventTestObj;
+bool osEventTaskCreated = FALSE;
+bool osEventCreated = FALSE;
+uint32_t waitBit;
+bool waitForAll;
 #endif
 
 static const struct_CmdLineEntry DBG_CmdTable[] =
@@ -728,6 +741,12 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "ticktestmsectoticks",  DBG_CommandLine_TimeTicks,      "Displays Time compound's add millisecond to tickcount results" },
    { "ticktestfuture",       DBG_CommandLine_TimeFuture,     "Displays Time compound's difference between two tick struct results" },
 #endif
+#if ( TM_OS_EVENT_TEST == 1)
+   { "eventtestset",         DBG_CommandLine_OS_EventSet,     "Sets the Event Bits argument is SetBit (hex) " },
+   { "createtesteventandwait",  DBG_CommandLine_OS_EventCreateWait,     "Create and Wait for Event Set Bits argument\r\n"
+                                     "                                   are WaitBit (hex) and WaitForAll (bool)" },
+   { "deleteeventtesttask",  DBG_CommandLine_OS_EventTaskDelete,     "Deletes the Event Test Task" },
+#endif
    { 0, 0, 0 }
 };
 
@@ -735,6 +754,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 
 static void DBG_CommandLine_Process ( void );
 static returnStatus_t atoh( uint8_t *pHex, char const *pAscii );
+#if ( TM_OS_EVENT_TEST == 1)
+void OS_EVNTTestTask ( taskParameter );         /* A Task to test Event wait */
+#endif
 
 /* FUNCTION DEFINITIONS */
 /*******************************************************************************
@@ -744,7 +766,7 @@ static returnStatus_t atoh( uint8_t *pHex, char const *pAscii );
    Purpose: This function is a Task and will parse the Serial Received data and
             take action on the commands that are received.
 
-   Arguments: Arg0 - Not used, but required here because this is a task
+   Arguments: taskParameter - Not used, but required here because this is a task
 
    Returns:void
 
@@ -2126,6 +2148,207 @@ uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] )
 
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_TimeFuture() */
+#endif
+
+#if ( TM_OS_EVENT_TEST == 1)
+/*******************************************************************************
+
+   Function name: OS_EVNTTestTask
+
+   Purpose: Creates the test event and waits forever
+
+   Arguments:  taskParameter - Not used, but required here because this is a task
+
+   Returns: void
+
+*******************************************************************************/
+void OS_EVNTTestTask ( taskParameter )
+{
+   bool isEvtCreateSuccess = false;
+   isEvtCreateSuccess = OS_EVNT_Create( eventTestHandle );
+   if( isEvtCreateSuccess == true )
+   {
+      DBG_logPrintf( 'I', "EventTest Create Success!" );
+      uint32_t setEvents;
+      osEventCreated = TRUE;
+      for(;;)
+      {
+         setEvents = OS_EVNT_Wait( eventTestHandle, waitBit, waitForAll, OS_WAIT_FOREVER );
+         DBG_logPrintf( 'R', "Test SetEvents %X",setEvents );
+         if ( setEvents == waitBit )
+         {
+            DBG_logPrintf( 'R', "SetBits and WaitBits are equal" );
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "SetBits and WaitBits are not equal" );
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "EventTest Create Failure!" );
+      OS_TASK_Exit();
+   }
+}
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_EventSet
+
+   Purpose: This function will set and test the OS_EVNT_Set
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_EventSet( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint32_t setBit;
+   if ( argc == 2 )
+   {
+      /* The number of arguments must be 2 */
+      setBit = ( uint32_t )strtol( argv[1], NULL, 16 );
+      if( setBit > 0xFFFFFF || setBit < 1 )
+      {
+         DBG_logPrintf( 'R', "Enter values less than 3Bytes ( 1 to FFFFFF )" );
+      }
+      else
+      {
+         if ( osEventCreated == TRUE )
+         {
+            OS_EVNT_Set( eventTestHandle,setBit );
+            DBG_logPrintf( 'R', "OS Test Event Set Successful" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "OS Test Event not created" );
+         }
+      }
+   }
+   else if (argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Too few arguments" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_EventSet() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_EventCreateWait
+
+   Purpose: This function will create OS_EVNTTestTask
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_EventCreateWait( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t argvWaitForAll;
+   if ( argc == 3 )
+   {
+      /* The number of arguments must be 2 */
+      waitBit = ( uint32_t ) strtol ( argv[1], NULL, 16 );
+      if( waitBit > 0xFFFFFF || waitBit < 1 )
+      {
+         DBG_logPrintf( 'R', "Enter values less than 3Bytes ( 1 to FFFFFF )" );
+      }
+      else
+      {
+         argvWaitForAll = ( uint32_t )atoi( argv[2] );
+         if( ( argvWaitForAll == 0 ) || ( argvWaitForAll == 1 ) )
+         {
+            waitForAll = argvWaitForAll;
+            if( osEventTaskCreated == FALSE )
+            {
+               const OS_TASK_Template_t  osEventTaskTemplate[1] =
+               {
+                  /* Task Index, Function,   Stack, Pri, Name,           tributes, Param, Time Slice */
+                  { 1,      OS_EVNTTestTask, 500, 38, (char *)pTskName_OSEVNTTest, 0, 0, 0 },
+               };
+               OS_TASK_Template_t const *osEventTestTask;
+               osEventTestTask = &osEventTaskTemplate[0];
+#if( RTOS_SELECTION == MQX_RTOS )
+               if ( MQX_NULL_TASK_ID == (taskID = OS_TASK_Create(osEventTestTask) ) )
+#elif (RTOS_SELECTION == FREE_RTOS)
+               if ( pdPASS != OS_TASK_Create(osEventTestTask) )
+#endif
+               {
+                  DBG_logPrintf( 'R', "ERROR - Test Event Task Creation Failed" );
+               }
+               osEventTaskCreated = TRUE;
+               retVal = eSUCCESS;
+            }
+            else
+            {
+               DBG_logPrintf( 'R', "ERROR - Test Event Task Already Created" );
+            }
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "WaitForAll must be 0 or 1" );
+         }
+      }
+   }
+   else if (argc < 3 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Too few arguments" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_EventCreateWait() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_EventTaskDelete
+
+   Purpose: This function will exit the OS_EVNTTest task and deletes the Event
+            test group
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   if ( argc == 1 )
+   {
+      if( osEventTaskCreated == TRUE )
+      {
+         OS_TASK_ExitId( pTskName_OSEVNTTest );
+         osEventTaskCreated = FALSE;
+         vEventGroupDelete( eventTestObj );
+         DBG_logPrintf( 'R', "Test Event Task Delete Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "ERROR - Test Event Task Not Created" );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_EventTaskDelete() */
 #endif
 
 // TODO: RA6 [name_Balaji]: Add support to the following function in RA6E1
