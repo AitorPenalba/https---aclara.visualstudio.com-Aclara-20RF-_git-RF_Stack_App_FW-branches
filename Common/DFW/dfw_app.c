@@ -2883,7 +2883,7 @@ static eDfwErrorCodes_t executeMacroCmds( eDfwPatchState_t ePatchState, patchHea
                            /* Erase the NV image partition before start patching */
                            ( void )PAR_partitionFptr.parErase( 0, DFW_PGM_IMAGE_SIZE, pDFWImagePTbl_ );
                            /* Apply patch */
-                           if ( eSUCCESS == DFW_XZMINI_bspatch( pOldImagePartition, dfwVars.initVars.target, pDFWImagePTbl_, newsz ) ) //lint !e644, pOldImagePartition initialized with Appcode/BLinfo partition
+                           if ( eSUCCESS == DFW_XZMINI_bspatch( pOldImagePartition, dfwVars.initVars.target, pDFWImagePTbl_, ( off_t ) newsz ) ) //lint !e644, pOldImagePartition initialized with Appcode/BLinfo partition
                            {
                               DFW_PRNT_INFO("XZ Minibs - Patch applied successfully");
                            }

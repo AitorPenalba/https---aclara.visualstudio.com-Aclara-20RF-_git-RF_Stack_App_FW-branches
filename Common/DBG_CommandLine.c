@@ -646,18 +646,18 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "sendheepmsg",  DBG_CommandLine_SendHeepMsg,     "send dummy alarm header HEEP_MSG_TxHeepHdrOnly" },
 //   { "sendmtlsmsg",  DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
 ////   { "sendmeta",     DBG_CommandLine_SendMetadata,    "Trigger transmission of a Metadata message" },
-//#if ( EP == 1 )
-//   { "setdstenable", DBG_CommandLine_setDstEnable,   "Updates the DST enable:\n"
-//                   "                                   Params - enable flag (0 - disable or 1 - enable)" },
+#if ( EP == 1 )
+   { "setdstenable", DBG_CommandLine_setDstEnable,   "Updates the DST enable:\n"
+                   "                                   Params - enable flag (0 - disable or 1 - enable)" },
 //   { "setdstoffset", DBG_CommandLine_setDstOffset,    "Updates the DST offset: Params - offset in seconds" },
-//#endif
+#endif
    // TODO: RA6E1 Bob: need to remove \r to make .hex match K24
    { "setfreq",      DBG_CommandLine_SetFreq,         "set list of available frequencies.\r\n"
                    "                                   Type ""setfreq"" with no arguments for more help" },
 //#if ( EP == 1 )
 //   { "setstartrule", DBG_CommandLine_setDstStartRule, "Updates the DST start rule: Params - mm dow ood hh mm" },
 //   { "setstoprule",  DBG_CommandLine_setDstStopRule,  "Updates the DST stop rule: Params - mm dow ood hh mm" },
-//   { "settimezoneoffset", DBG_CommandLine_setTimezoneOffset, "Updates the timezone offset: Params - offset in seconds" },
+   { "settimezoneoffset", DBG_CommandLine_setTimezoneOffset, "Updates the timezone offset: Params - offset in seconds" },
 //#endif
 //   // SM - Stack Manager
 ////   { "smstart",      DBG_CommandLine_SM_Start,         "SM start" },
@@ -4442,43 +4442,43 @@ static uint32_t DBG_CommandLine_lpstats ( uint32_t argc, char *argv[] )
 //   return( 0 );
 //}
 //
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_setTimezoneOffset
-//
-//   Purpose: Updates the timezone offset
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_setTimezoneOffset ( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t retVal = eFAILURE;
-//
-//   if ( 2 == argc )
-//   {
-//      int32_t offset =  ( int32_t )atol( argv[1] );
-//      retVal = DST_setTimeZoneOffset( offset );
-//      if ( eSUCCESS == retVal )
-//      {
-//         DBG_logPrintf( 'R', "Wrote timezone offset = %lu", offset );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Error writing timezone offset. Error code %u", ( uint32_t )retVal );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//   return ( uint32_t )retVal;
-//}
-//
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_setTimezoneOffset
+
+   Purpose: Updates the timezone offset
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_setTimezoneOffset ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+
+   if ( 2 == argc )
+   {
+      int32_t offset =  ( int32_t )atol( argv[1] );
+      retVal = DST_setTimeZoneOffset( offset );
+      if ( eSUCCESS == retVal )
+      {
+         DBG_logPrintf( 'R', "Wrote timezone offset = %lu", offset );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Error writing timezone offset. Error code %u", ( uint32_t )retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+   return ( uint32_t )retVal;
+}
+
 ///*******************************************************************************
 //
 //   Function name: DBG_CommandLine_getTimezoneOffset
@@ -4500,43 +4500,43 @@ static uint32_t DBG_CommandLine_lpstats ( uint32_t argc, char *argv[] )
 //   return ( 0 );
 //}
 //
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_setDstEnable
-//
-//   Purpose: Updates the DST enable
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
-//
-//   Notes:
-//*******************************************************************************/
-//uint32_t DBG_CommandLine_setDstEnable ( uint32_t argc, char *argv[] )
-//{
-//   returnStatus_t retVal = eFAILURE;
-//
-//   if ( 2 == argc )
-//   {
-//      int8_t dstEnable =  ( int8_t )atoi( argv[1] );
-//      retVal = DST_setDstEnable( dstEnable );
-//      if ( eSUCCESS == retVal )
-//      {
-//         DBG_logPrintf( 'R', "Wrote DST enable = %i", dstEnable );
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'R', "Error DST enable. Error code %u", ( uint32_t )retVal );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//   return ( uint32_t )retVal;
-//}
-//
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_setDstEnable
+
+   Purpose: Updates the DST enable
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: returnStatus_t retVal - eSUCCESS - Successful, eFAILURE otherwise.
+
+   Notes:
+*******************************************************************************/
+uint32_t DBG_CommandLine_setDstEnable ( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+
+   if ( 2 == argc )
+   {
+      int8_t dstEnable =  ( int8_t )atoi( argv[1] );
+      retVal = DST_setDstEnable( dstEnable );
+      if ( eSUCCESS == retVal )
+      {
+         DBG_logPrintf( 'R', "Wrote DST enable = %i", dstEnable );
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Error DST enable. Error code %u", ( uint32_t )retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+   return ( uint32_t )retVal;
+}
+
 ///*******************************************************************************
 //   Function name: DBG_CommandLine_getDstEnable
 //

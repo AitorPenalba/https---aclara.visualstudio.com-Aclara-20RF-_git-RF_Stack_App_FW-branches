@@ -254,6 +254,7 @@ returnStatus_t MINIBS_patch( PartitionData_t const *pOldImagePTbl, eFwTarget_t p
       i = 0;
       while (i < ctrl)
       {
+         WDOG_Kick();   // Added for bypassing wdog reset TODO: investigate why external RAM write takes longer time
          off_t bufSizeToRead = LOCAL_READ_WRITE_BUFFER_SIZE;
          if( ( ctrl - i ) < bufSizeToRead )
          {
@@ -294,6 +295,7 @@ returnStatus_t MINIBS_patch( PartitionData_t const *pOldImagePTbl, eFwTarget_t p
       i = 0;
       while (i < ctrl)
       {
+         WDOG_Kick();   // Added for bypassing wdog reset TODO: investigate why external RAM write takes longer time
          off_t bufSizeToRead = LOCAL_READ_WRITE_BUFFER_SIZE;
          if( ( ctrl - i ) < bufSizeToRead )
          {
