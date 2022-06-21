@@ -147,7 +147,7 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
          }
 
          timeout_ticks = pdMS_TO_TICKS(Timeout_msec);
-         if( ( ( TickType_t ) ( ( ( TickType_t ) ( Timeout_msec ) * ( TickType_t ) configTICK_RATE_HZ ) % ( TickType_t ) 1000U ) ) )
+         if( (uint32_t) ( (uint64_t) ((uint64_t) (Timeout_msec) * (uint64_t) configTICK_RATE_HZ ) % 1000 ) )
          {   /* Round the value up to ensure the time is >= the time requested */
             timeout_ticks = timeout_ticks + 1;
          }
