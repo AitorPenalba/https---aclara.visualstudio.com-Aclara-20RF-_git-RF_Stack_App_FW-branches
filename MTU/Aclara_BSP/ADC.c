@@ -16,6 +16,8 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include "DBG_SerialDebug.h"
+#include "radio.h"
+#include "SoftDemodulator.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
@@ -136,6 +138,7 @@ bool ADC_UnitTest(void);
 #endif
 
 /* FUNCTION DEFINITIONS */
+
 
 /*******************************************************************************
 
@@ -722,22 +725,10 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
       Temperature = ( ( ( Temperature * 9.0f ) / 5.0f ) + 32.0f );
    }
    return ( Temperature );
-#elif ( MCU_SELECTED == RA6E1 )                     //TODO: RA6E1 for renesas MCU
-   float Temperature = 0.0;
-   bool bDemodcall = 0;
-   if ( Is_Radio_ready() ) // make sure radio is initialized
-   {
-   bDemodcall = FALSE; // make sure RADIO_Get_Current_Temperature () called from ADC_Get_uP_Temperature ()
-   Temperature = RADIO_Get_Current_Temperature ( bDemodcall ); 
-   }
-   if ( bFahrenheit )
-   {
-      /* Convert from Celcius to Farenheit */
-      Temperature = ( ( ( Temperature * 9.0f ) / 5.0f ) + 32.0f );
-   }
-    return ( Temperature );
 #endif
 }
+
+
 
 //K22 is the only one that supports the Board temp. sensor
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A )

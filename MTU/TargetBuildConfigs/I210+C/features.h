@@ -71,6 +71,7 @@
 #define TX_THROTTLE_CONTROL               0  /* 0=No Tx Throttling, 1=Tx Throttling */
 #define BM_USE_KERNEL_AWARE_DEBUGGING     1  // TODO: RA6E1 Bob: remove this before release
 #define NOISEBAND_LOWEST_CAP_VOLTAGE      1  // TODO: RA6E1 Bob: remove this before release
+#define GET_TEMPERATURE_FROM_RADIO        1  
 
 /* TODO: RA6: Move the following to Appropriate module */
 #define BARE_METAL                        0
