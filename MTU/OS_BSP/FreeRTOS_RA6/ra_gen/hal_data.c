@@ -47,7 +47,7 @@ icu_instance_ctrl_t miso_busy_ctrl;
 const external_irq_cfg_t miso_busy_cfg =
 {
     .channel             = 4,
-    .trigger             = EXTERNAL_IRQ_TRIG_BOTH_EDGE,
+    .trigger             = EXTERNAL_IRQ_TRIG_RISING,
     .filter_enable       = false,
     .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
     .p_callback          = isr_busy,

@@ -752,9 +752,9 @@
       <property id="module.driver.watchdog.nmi_callback" value="NULL"/>
     </module>
     <module id="module.driver.external_irq_on_icu.2093440699">
-      <property id="module.driver.external_irq.name" value="MISO_Busy"/>
+      <property id="module.driver.external_irq.name" value="miso_busy"/>
       <property id="module.driver.external_irq.channel" value="4"/>
-      <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_both_edge"/>
+      <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_rising"/>
       <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.false"/>
       <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
       <property id="module.driver.external_irq.p_callback" value="isr_busy"/>
