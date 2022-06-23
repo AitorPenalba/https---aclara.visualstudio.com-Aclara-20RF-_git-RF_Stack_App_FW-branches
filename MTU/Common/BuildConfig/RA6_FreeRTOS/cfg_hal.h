@@ -410,8 +410,8 @@
 #define NV_CS_TRIS_LG()
 #define NV_CS_ACTIVE()                 R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_LOW)
 #define NV_CS_INACTIVE()               R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_HIGH)
-#define NV_BUSY()           1 // return always true
-#define NV_MISO_CFG(port, cfg)         eSUCCESS
+#define NV_BUSY()                      R_BSP_PinRead(BSP_IO_PORT_05_PIN_01)
+#define NV_MISO_CFG(port, cfg)         R_BSP_PinCfg (port, cfg)
 #endif
 
 /* Set PCR for GPIO, Make Output */
@@ -431,14 +431,18 @@
                                                                                                           edge */
 #else
 #if ( MCU_SELECTED == NXP_K24 ) // IRQ not available for QSPI on RA6E1
-#define DVR_EFL_BUSY_IRQ_EI()          { PORTA_ISFR = (1 << 17); PORTA_PCR17 |= PORT_PCR_IRQC(0xc); } /* IRQ on high
-                                                                                                         level  */
+#define DVR_EFL_BUSY_IRQ_EI()          { PORTA_ISFR = (1 << 17); PORTA_PCR17 |= PORT_PCR_IRQC(0xc); } /* IRQ on high level  */
 #else
-#define DVR_EFL_BUSY_IRQ_EI()
+#define DVR_EFL_BUSY_IRQ_EI()          R_ICU_ExternalIrqEnable( &miso_busy_ctrl );
 #endif
+
 #endif
 /* Disable flash busy IRQ and reset IRQ flag */
+#if ( MCU_SELECTED == NXP_K24 )
 #define DVR_EFL_BUSY_IRQ_DI()          { PORTA_PCR17 &= ~PORT_PCR_IRQC(0xf); PORTA_ISFR = ( 1 << 17 ); }
+#else
+#define DVR_EFL_BUSY_IRQ_DI()          R_ICU_ExternalIrqDisable( &miso_busy_ctrl )
+#endif
 #define DVR_EFL_BUSY_TRIG              (PORTA_ISFR & (1 << 17)   /* ISF Triggered? */
 
 /* The following definition is only used when the SPI driver in the device is used to control the CS pin.

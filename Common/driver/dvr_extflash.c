@@ -263,7 +263,12 @@ static returnStatus_t localErase( const eEraseCmd eCmd,
 static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt, const SpiFlashDevice_t *pDevice );
 static void           setBusyTimer( uint32_t busyTimer_uS );
 static void           enableWrites( uint8_t port );
+#if ( MCU_SELECTED == NXP_K24 )
 static void           isr_busy( void );
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+static fsp_err_t MisoBusy_isr_init( void );
+#endif
 static void           isr_tmr( void );
 #endif
 
@@ -445,6 +450,7 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
       R_AGT_Open(&g_timer0_ctrl, &g_timer0_cfg);
       NV_SPI_PORT_INIT( &g_qspi0_ctrl, &g_qspi0_cfg );
       R_QSPI_SpiProtocolSet(&g_qspi0_ctrl, SPI_FLASH_PROTOCOL_EXTENDED_SPI);
+      (void)MisoBusy_isr_init();
 
       /* TODO: RA6: Access needs to be enabled so we can operate the chip select of external flash during startup.
                Need to investigate if this should be moved to a more appropriate/generic location, otherwise having
@@ -1112,7 +1118,11 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #ifndef __BOOTLOADER
    if ( bUseHardwareBsy_ && pChipId_->bBusyOnSiPin )
    {
+#if ( MCU_SELECTED == NXP_K24 )
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_GPIO_e ); /* Change pin to digital input from SPI MISO */
+#else
+      (void)NV_MISO_CFG( BSP_IO_PORT_05_PIN_03, (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT );
+#endif
 #if !RTOS
       bBusyIsr_ = false;
 #endif
@@ -1217,7 +1227,11 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #else
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
+#if ( MCU_SELECTED == NXP_K24 )
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_SPI_e );   /* Make pin SPI again MISO */
+#else
+      (void)NV_MISO_CFG( BSP_IO_PORT_05_PIN_03, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_QSPI) );
+#endif
    }
    else
 #endif   /* BOOTLOADER  */
@@ -1962,20 +1976,54 @@ static bool timeSlice( PartitionData_t const *pParData, DeviceDriverMem_t const 
 
  **********************************************************************************************************************/
 #ifndef __BOOTLOADER
-#if 0 // TODO: RA6 Melvin
+#if ( MCU_SELECTED == NXP_K24 )
 static void isr_busy( void )
+#elif ( MCU_SELECTED == RA6E1 )
+void isr_busy( external_irq_callback_args_t * p_args )
+#endif
 {
    DVR_EFL_BUSY_IRQ_DI();              /* Disable the ISR */
    if ( eRtosCmdsEn == rtosCmds_ )
    {
+#if ( MCU_SELECTED == NXP_K24 )
       OS_SEM_Post( &extFlashSem_ );  /* Post the semaphore */
+#elif ( MCU_SELECTED == RA6E1 )
+      OS_SEM_Post_fromISR( &extFlashSem_ );  /* Post the semaphore */
+#endif
    }
 #if !RTOS
    bBusyIsr_ = true;
 #endif
 }
-#endif
 #endif   /* BOOTLOADER  */
+
+#ifndef __BOOTLOADER
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: MisoBusy_isr_init
+
+   Purpose: Initializes the MISO busy IRQ setup
+
+   Arguments: None
+
+   Returns: fsp_err_t
+
+   Reentrant Code: No
+
+ **********************************************************************************************************************/
+static fsp_err_t MisoBusy_isr_init( void )
+{
+   fsp_err_t err = FSP_SUCCESS;
+
+   /* Open external IRQ/ICU module */
+   err = R_ICU_ExternalIrqOpen( &miso_busy_ctrl, &miso_busy_cfg );
+
+   return err;
+}
+#endif   /* MCU_SELECTED == RA6E1 */
+#endif   /* BOOTLOADER  */
+
 #if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
 

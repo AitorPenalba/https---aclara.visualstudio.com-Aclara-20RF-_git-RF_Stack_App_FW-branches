@@ -97,4 +97,6 @@
         #define AGT1_INT_IRQn          ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
         #define VECTOR_NUMBER_ICU_IRQ14 ((IRQn_Type) 34) /* ICU IRQ14 (External pin interrupt 14) */
         #define ICU_IRQ14_IRQn          ((IRQn_Type) 34) /* ICU IRQ14 (External pin interrupt 14) */
+        #define VECTOR_NUMBER_ICU_IRQ4 ((IRQn_Type) 35) /* ICU IRQ14 (External pin interrupt 14) */
+        #define ICU_IRQ4_IRQn          ((IRQn_Type) 35) /* ICU IRQ14 (External pin interrupt 14) */
         #endif /* VECTOR_DATA_H */

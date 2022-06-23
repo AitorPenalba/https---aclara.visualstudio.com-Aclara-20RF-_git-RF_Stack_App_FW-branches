@@ -52,6 +52,17 @@ extern const wdt_cfg_t g_wdt0_cfg;
 void NULL(wdt_callback_args_t * p_args);
 #endif
 /** External IRQ on ICU Instance. */
+extern const external_irq_instance_t miso_busy;
+
+/** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
+extern icu_instance_ctrl_t miso_busy_ctrl;
+extern const external_irq_cfg_t miso_busy_cfg;
+
+#ifndef isr_busy
+void isr_busy(external_irq_callback_args_t * p_args);
+#endif
+
+/** External IRQ on ICU Instance. */
 extern const external_irq_instance_t hmc_trouble_busy;
 
 /** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
