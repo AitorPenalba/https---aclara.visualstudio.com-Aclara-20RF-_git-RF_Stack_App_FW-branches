@@ -614,19 +614,19 @@ void STRT_StartupTask ( taskParameter )
       R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_01, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_HIGH | IOPORT_CFG_DRIVE_HIGH ) );
    }
 #endif
-// TODO: RA6: Enable this code later
-//   if (!initSuccess_)
-//   {
-//      //LED_setRedLedStatus(MANUAL_RED);
-//#if ( TEST_TDMA == 0 )
-//      LED_enableManualControl();
-//      LED_on(RED_LED);
-//#endif
-//   }
+
+   if (!initSuccess_)
+   {
+      //LED_setRedLedStatus(MANUAL_RED);
+#if ( TEST_TDMA == 0 )
+      LED_enableManualControl();
+      LED_on(RED_LED);
+#endif
+   }
 
    // Reset all CPU stats
    // This MUST be done after the tasks are started
-//   (void)OS_TASK_UpdateCpuLoad();
+//   (void)OS_TASK_UpdateCpuLoad();  /* TODO: RA6E1: Add Support later */
 
    if ( quiet == 0 )
    {
@@ -648,9 +648,9 @@ void STRT_StartupTask ( taskParameter )
       we don't surpass the TickTime delay specified below
       Note:  We do have the CPU Load function below this, and that is acceptable
              to ensure we get an accurate CPU load value */
-   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );   // TODO: RA6: Enable this code later
-   CurrentIdleCount = IDL_Get_IdleCounter();        // TODO: RA6: Enable this code later
-   PrevIdleCount = CurrentIdleCount;                // TODO: RA6: Enable this code later
+   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
+   CurrentIdleCount = IDL_Get_IdleCounter();
+   PrevIdleCount = CurrentIdleCount;
 
    for ( ;; )
    {

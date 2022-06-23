@@ -2528,9 +2528,8 @@ void vApplicationTickHook()
    }
 
    TMR_vApplicationTickHook();
-#if 0 // TODO: RA6E1 Enable once LED application tick hook is in place
    LED_vApplicationTickHook();
-#endif
+
    //LED2_PIN_OFF();
 }
 #endif
