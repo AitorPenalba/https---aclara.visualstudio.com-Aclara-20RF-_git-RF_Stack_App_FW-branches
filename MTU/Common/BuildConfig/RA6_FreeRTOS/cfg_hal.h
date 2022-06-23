@@ -102,7 +102,7 @@
 #define  TRIS_OUTPUT             0           /* Set data I/O Pin as an Output */
 
 #define  ANALOG                  1           /* Set data I/O Pin as an Analog Input */
-#define  DIGITAL                 0           /* Set data I/O Pin as a Digial I/O */
+#define  DIGITAL                 0           /* Set data I/O Pin as a Digital I/O */
 
 #define  OPEN_DRAIN_ON           1           /* Set data output pin as open drain output */
 #define  OPEN_DRAIN_OFF          0           /* Set data output pin to drive output high/low */
@@ -292,7 +292,7 @@
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* LED definitions */
-
+#if ( MCU_SELECTED == NXP_K24 )
 #define LED0_PIN                 (1<<0)
 #define LED1_PIN                 (1<<1)
 #define LED2_PIN                 (1<<2)
@@ -334,6 +334,52 @@
 #define LED_HMC_OFF()            LED0_PIN_OFF()
 #define LED_HMC_ON()             LED0_PIN_ON()
 #define LED_HMC_INIT()           LED0_PIN_TRIS()
+#elif ( MCU_SELECTED == RA6E1 )
+/* NO LEDs in RA6E1 */
+
+#define LED0_PIN                 (1<<0)
+#define LED1_PIN                 (1<<1)
+#define LED2_PIN                 (1<<2)
+
+//LED0
+#define GRN_LED_OFF()
+#define GRN_LED_ON()
+#define GRN_LED_TOGGLE()
+#define GRN_LED_PIN_DRV_HIGH()
+#define GRN_LED_PIN_DRV_LOW()
+/* Set PCR for GPIO, Make Output */
+#define GRN_LED_PIN_TRIS()
+/* Configuring the unused LED0's pin mode to analog which will result in lowest power consumption */
+#define GRN_LED_PIN_DISABLE()
+
+//LED1
+#define RED_LED_OFF()
+#define RED_LED_ON()
+#define RED_LED_TOGGLE()
+#define RED_LED_PIN_DRV_HIGH()
+#define RED_LED_PIN_DRV_LOW()
+/* Set PCR for GPIO, Make Output */
+#define RED_LED_PIN_TRIS()
+/* Configuring the unused LED1's pin mode to analog which will result in lowest power consumption */
+#define RED_LED_PIN_DISABLE()
+
+//LED2
+#define BLU_LED_OFF()
+#define BLU_LED_ON()
+#define BLU_LED_TOGGLE()
+#define BLU_LED_PIN_DRV_HIGH()
+#define BLU_LED_PIN_DRV_LOW()
+/* Set PCR for GPIO, Make Output */
+#define BLU_LED_PIN_TRIS()
+/* Configuring the unused LED2's pin mode to analog which will result in lowest power consumption */
+#define BLU_LED_PIN_DISABLE()
+
+/* LED configuration. */
+#define LED_HMC_OFF()            LED0_PIN_OFF()
+#define LED_HMC_ON()             LED0_PIN_ON()
+#define LED_HMC_INIT()           LED0_PIN_TRIS()
+
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 
 #if ( ENABLE_TRACE_PINS_LAST_GASP == 1 )
 /* Trace D0 Config */

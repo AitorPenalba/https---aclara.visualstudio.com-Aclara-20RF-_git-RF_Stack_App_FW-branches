@@ -158,8 +158,11 @@
 /* FILE VARIABLE DEFINITIONS */
 static bool initSuccess_ = true; //Default, system init successful
 
-//static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
-
+#if 0 // TODO: RA6E1: Revert when we have OS_Task_Summary
+static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
+#else
+static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_OFF;
+#endif
 
 /* Power Up Table - Define all modules that require initialization below. */
 const STRT_FunctionList_t startUpTbl[] =
@@ -378,7 +381,6 @@ static OS_MSGQ_Obj TestMsgq_MSGQ;
 
 /* FUNCTION DEFINITIONS */
 
-#if 0 // TODO: RA6E1: Add support
 /*******************************************************************************
 
   Function name: STRT_EnableCpuLoadPrint
@@ -401,7 +403,7 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
       CpuLoadPrint = mode;
    }
 }
-#endif
+
 /*******************************************************************************
 
    Function name: STRT_StartupTask
@@ -425,21 +427,19 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
 /*lint -e{715} Arg0 not used; required by API */
 void STRT_StartupTask ( taskParameter )
 {
-   //FSP_PARAMETER_NOT_USED(taskParameter);
-//   OS_TICK_Struct       TickTime;
-//   TickType_t           TickTime;
+   OS_TICK_Struct       TickTime;
    STRT_FunctionList_t  *pFunct;
-//   uint32_t             CurrentIdleCount;
-//   uint32_t             PrevIdleCount;
-//   uint32_t             TempIdleCount;
-//   uint32_t             printStackAndTask = 0;
-//   uint32_t             CpuLoad[PRINT_CPU_STATS_IN_SEC];
-//   uint8_t              CpuIdx = 0;
+   uint32_t             CurrentIdleCount;
+   uint32_t             PrevIdleCount;
+   uint32_t             TempIdleCount;
+   uint32_t             printStackAndTask = 0;
+   uint32_t             CpuLoad[PRINT_CPU_STATS_IN_SEC];
+   uint8_t              CpuIdx = 0;
    uint8_t              startUpIdx;
    uint8_t              quiet = 0;
    uint8_t              rfTest = 0;
 
-#if 0
+#if ( MCU_SELECTED == NXP_K24 )  // TODO: RA6E1: Do we need to support this?
    // Enable to use DWT module.
    // This is needed for DWT_CYCCNT to work properly when the debugger (I-jet) is not plugged in.
    // When the debugger is plugged in, the following registers are programmed by the IAR environment.
@@ -468,7 +468,7 @@ void STRT_StartupTask ( taskParameter )
             ( ( rfTest == 0 ) || ( ( pFunct->uFlags & STRT_FLAG_RFTEST ) != 0 ) ) )
       {
          returnStatus_t response;
-#if 0
+
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 #pragma calls=\
           WDOG_Init, \
@@ -575,7 +575,7 @@ void STRT_StartupTask ( taskParameter )
           FIO_init, \
           PWR_printResetCause
 #endif
-#endif // #if 0
+
          response = pFunct->pFxnStrt();
          if ( pFunct->pFxnStrt == MODECFG_init )
          {
@@ -648,22 +648,19 @@ void STRT_StartupTask ( taskParameter )
       we don't surpass the TickTime delay specified below
       Note:  We do have the CPU Load function below this, and that is acceptable
              to ensure we get an accurate CPU load value */
-//   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );   // TODO: RA6: Enable this code later
-//
-//   CurrentIdleCount = IDL_Get_IdleCounter();        // TODO: RA6: Enable this code later
-//   PrevIdleCount = CurrentIdleCount;                // TODO: RA6: Enable this code later
+   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );   // TODO: RA6: Enable this code later
+   CurrentIdleCount = IDL_Get_IdleCounter();        // TODO: RA6: Enable this code later
+   PrevIdleCount = CurrentIdleCount;                // TODO: RA6: Enable this code later
 
    for ( ;; )
    {
-      vTaskSuspend(NULL); // TODO: RA6: DG: Remove
-#if 0  // TODO: RA6: Enable the Code
       OS_TICK_Sleep ( &TickTime, ONE_SEC );
 
       CurrentIdleCount = IDL_Get_IdleCounter();
       TempIdleCount = CurrentIdleCount - PrevIdleCount;
       PrevIdleCount = CurrentIdleCount;
 
-      CpuLoad[CpuIdx] = OS_TASK_UpdateCpuLoad();
+//      CpuLoad[CpuIdx] = OS_TASK_UpdateCpuLoad();  /* TODO: RA6E1: Add Support later */
 
       if ( TempIdleCount > 0 )
       {
@@ -674,6 +671,7 @@ void STRT_StartupTask ( taskParameter )
       else if ( ++printStackAndTask >= PRINT_STACK_USAGE_AND_TASK_SUMMARY )
       {
          // If we are close to a watchdog reset, print some useful stats.
+#if ( RTOS_SELECTION == MQX_RTOS)
 #if ( MQX_USE_LOGS == 1 )
          /* Read data from kernel log */
 #if ( PRINT_LOGS == 1 )
@@ -685,6 +683,9 @@ void STRT_StartupTask ( taskParameter )
 #endif
 #else
          OS_TASK_Summary((bool)false);
+#endif
+#elif ( MCU_SELECTED == FREE_RTOS )
+//         OS_TASK_Summary((bool)false); /* TODO: RA6E1: Add Support later */
 #endif
          printStackAndTask = 0;
       }
@@ -718,6 +719,5 @@ void STRT_StartupTask ( taskParameter )
          }
          CpuIdx = 0;
       } /* end if() */
-#endif // #if 0
    } /* end for() */
 } /* end STRT_StartupTask () */

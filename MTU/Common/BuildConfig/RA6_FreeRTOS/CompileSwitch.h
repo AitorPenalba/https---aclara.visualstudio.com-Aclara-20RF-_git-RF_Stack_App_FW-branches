@@ -181,7 +181,7 @@
 #define ENABLE_PRNT_HMC_FINISH_ERROR   1
 
 /* HMC - Info */
-#define ENABLE_PRNT_HMC_INFO_INFO      1   //TODO: RA6: Turn off after unit testing complete
+#define ENABLE_PRNT_HMC_INFO_INFO      0
 #define ENABLE_PRNT_HMC_INFO_WARN      1
 #define ENABLE_PRNT_HMC_INFO_ERROR     1
 
