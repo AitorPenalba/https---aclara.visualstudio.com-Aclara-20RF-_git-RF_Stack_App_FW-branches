@@ -116,7 +116,7 @@ FSP Configuration
       P108 51 JTAG/SWD_TMS - L - "Peripheral mode" - - "AGT3: AGTOA3; JTAG/SWD: SWDIO; JTAG/SWD: TMS; SCI9: CTS_RTS9; SPI0: SSLA0" JTAG_TMS IO - - 
       P109 52 JTAG/SWD_TDO - L - "Peripheral mode" - - "AGT3: AGTOB3; CGC: CLKOUT; GPT1: GTIOC1A; JTAG/SWD: TDO; JTAG/SWD: TRACESWO; SCI9: TXD9; SPI0: MOSI0" JTAG_TDO IO - - 
       P110 53 JTAG/SWD_TDI - L None "Peripheral mode" - - "AGT3: AGTEE3; GPT1: GTIOC1B; IRQ: IRQ3; JTAG/SWD: TDI; SCI2: CTS_RTS2; SCI9: RXD9; SPI0: MISO0" JTAG_TDI IO - - 
-      P111 54 GPIO - L None "Output mode (Initial Low)" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" TP118 IO - ZCD_METER 
+      P111 54 IRQ_IRQ4 - - IRQ4 "IRQ mode" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" Miso_Busy IO - ZCD_METER 
       P112 55 SCI2_TXD2 - L - "Peripheral mode" - - "AGT5: AGTOB5; QSPI: QSSL; SCI1: SCK1; SCI2: TXD2; SPI0: SSLA0; SSIE0: SSISCK0" UART2_TX_AMR O - UART3_TX_AMR 
       P113 56 SCI2_RXD2 - L - "Peripheral mode" - - "AGT5: AGTEE5; GPT2: GTIOC2A; SCI2: RXD2; SSIE0: SSIWS0" UART2_RX_AMR I - UART3_RX_AMR 
       P114 57 AGT5_AGTIO5 - L - "Peripheral mode" - - "AGT5: AGTIO5; GPT2: GTIOC2B; SCI9: CTS9; SSIE0: SSIRXD0" ZCD_METER IO - "Reserved for : RLY_DRIVE" 
@@ -217,7 +217,7 @@ FSP Configuration
       P108 51 GPIO - L - "Input mode" - - "AGT3: AGTOA3; JTAG/SWD: SWDIO; JTAG/SWD: TMS; SCI9: CTS_RTS9; SPI0: SSLA0" JTAG_TMS IO - - 
       P109 52 GPIO - L - "Input mode" - - "AGT3: AGTOB3; CGC: CLKOUT; GPT1: GTIOC1A; JTAG/SWD: TDO; JTAG/SWD: TRACESWO; SCI9: TXD9; SPI0: MOSI0" JTAG_TDO IO - - 
       P110 53 GPIO - L None "Input mode" - - "AGT3: AGTEE3; GPT1: GTIOC1B; IRQ: IRQ3; JTAG/SWD: TDI; SCI2: CTS_RTS2; SCI9: RXD9; SPI0: MISO0" JTAG_TDI IO - - 
-      P111 54 GPIO - L None "Input mode" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" TP118 IO - ZCD_METER 
+      P111 54 GPIO - - None "Input mode" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" Miso_Busy IO - ZCD_METER 
       P112 55 GPIO - L - "Input mode" - - "AGT5: AGTOB5; QSPI: QSSL; SCI1: SCK1; SCI2: TXD2; SPI0: SSLA0; SSIE0: SSISCK0" UART2_TX_AMR O - UART3_TX_AMR 
       P113 56 GPIO - L - "Input mode" - - "AGT5: AGTEE5; GPT2: GTIOC2A; SCI2: RXD2; SSIE0: SSIWS0" UART2_RX_AMR I - UART3_RX_AMR 
       P114 57 GPIO - L - "Input mode" - - "AGT5: AGTIO5; GPT2: GTIOC2B; SCI9: CTS9; SSIE0: SSIRXD0" ZCD_METER IO - "Reserved for : RLY_DRIVE" 
@@ -915,4 +915,13 @@ FSP Configuration
     Instance "g_wdt0 Independent Watchdog (r_iwdt)"
       Name: g_wdt0
       NMI callback: NULL
+      
+    Instance "miso_busy External IRQ (r_icu)"
+      Name: miso_busy
+      Channel: 4
+      Trigger: Rising
+      Digital Filtering: Disabled
+      Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
+      Callback: isr_busy
+      Pin Interrupt Priority: Priority 12
       

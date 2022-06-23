@@ -1379,15 +1379,22 @@ void PWRLG_Begin( uint16_t anomalyCount )
 #warning "Update the Revision"
 #endif
    PWRLG_SetupLastGasp();
+   if( Vcap > fMinimumStartVoltage )
+   {
 #if ( MCU_SELECTED == NXP_K24 )
-   DBG_LW_printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
-                  uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
+      DBG_LW_printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
+                     uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
 #elif ( MCU_SELECTED == RA6E1 )
    /* TODO: RA6E1: Remove later */
 //   printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
 //                  uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
 //   printf( "seconds: %d, milliseconds: %d\n", PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
 #endif
+   }
+   else
+   {
+      DBG_LW_printf("Shutting down, Vcap too low\n");
+   }
    OS_TASK_Sleep( 10 );    // let print out finish
 
    PWRLG_FLAGS().byte = 0;
@@ -1409,7 +1416,14 @@ void PWRLG_Begin( uint16_t anomalyCount )
    VBATREG_SHORT_OUTAGE = 1;
 
 #if ( DEBUG_PWRLG == 0 )
-   PWR_USE_BOOST();  /* Use the Super Cap to run the system.   */
+   if( Vcap > fMinimumStartVoltage )
+   {
+      PWR_USE_BOOST();  /* Use the Super Cap to run the system.   */
+   }
+   else
+   {
+      PWRLG_MESSAGE_COUNT_SET(0);  // Note: Just to ensure we won't try to transmit
+   }
 #endif
    if ( PWRLG_MESSAGE_COUNT() != 0 )  /* If there's enough energy to send any message... */
    {

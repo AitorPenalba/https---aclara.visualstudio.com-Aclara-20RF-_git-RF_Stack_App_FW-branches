@@ -5608,8 +5608,7 @@ bool RADIO_Update_Noise_Floor(void)
                // On second pass, build noise estimate with capacitor boost on
                if ( (radioMask & mask) == 0) {
                   float fSuperCapV;
-                  // Turn on boost
-                  PWR_USE_BOOST();
+
                   // Get voltage
                   fSuperCapV = ADC_Get_SC_Voltage();
 
@@ -5619,6 +5618,10 @@ bool RADIO_Update_Noise_Floor(void)
                      INFO_printf("SuperCap voltage too low to compute noise estimate for channel %u", Channels[i] );
                      radioMaskBoost &= ~mask;  // Remove from the Channel mask to not process this channel anymore
                      break; // Abort noise estimate
+                  }
+                  else {
+                     // capacitor voltage is good, turn on boost
+                     PWR_USE_BOOST();
                   }
                }
 #endif
@@ -5832,8 +5835,7 @@ bool RADIO_Build_Noise_Floor(uint16_t const *Channels_list, uint8_t radioNum, bo
                float fSuperCapV;
                // Point to noise estimate to update
                pNoiseEstimate = noiseEstimateBoostOn;
-               // Turn on boost
-               PWR_USE_BOOST();
+
                // Get voltage
                fSuperCapV = ADC_Get_SC_Voltage();
 
@@ -5843,6 +5845,10 @@ bool RADIO_Build_Noise_Floor(uint16_t const *Channels_list, uint8_t radioNum, bo
                   noiseEstimateBoostOn = NULL; // Abort noise estimate with super cap on for all channels since super cap won't charge back up quickly enough for other channels.
                   INFO_printf("SuperCap voltage too low to compute noise estimate for channel %u", Channels[i] );
                   break; // Abort noise estimate
+               }
+               else {
+                  // capacitor voltage is good, turn on boost
+                  PWR_USE_BOOST();
                }
             }
 #endif

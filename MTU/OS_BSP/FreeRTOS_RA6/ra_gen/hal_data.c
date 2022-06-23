@@ -41,6 +41,39 @@ const wdt_instance_t g_wdt0 =
     .p_cfg         = &g_wdt0_cfg,
     .p_api         = &g_wdt_on_iwdt
 };
+
+
+icu_instance_ctrl_t miso_busy_ctrl;
+const external_irq_cfg_t miso_busy_cfg =
+{
+    .channel             = 4,
+    .trigger             = EXTERNAL_IRQ_TRIG_RISING,
+    .filter_enable       = false,
+    .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
+    .p_callback          = isr_busy,
+    /** If NULL then do not add & */
+#if defined(NULL)
+    .p_context           = NULL,
+#else
+    .p_context           = &NULL,
+#endif
+    .p_extend            = NULL,
+    .ipl                 = (12),
+#if defined(VECTOR_NUMBER_ICU_IRQ4)
+    .irq                 = VECTOR_NUMBER_ICU_IRQ4,
+#else
+    .irq                 = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const external_irq_instance_t miso_busy =
+{
+    .p_ctrl        = &miso_busy_ctrl,
+    .p_cfg         = &miso_busy_cfg,
+    .p_api         = &g_external_irq_on_icu
+};
+
+
 icu_instance_ctrl_t hmc_trouble_busy_ctrl;
 const external_irq_cfg_t hmc_trouble_busy_cfg =
 {
