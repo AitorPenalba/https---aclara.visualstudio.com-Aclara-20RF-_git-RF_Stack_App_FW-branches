@@ -410,7 +410,7 @@
 #define NV_CS_TRIS_LG()
 #define NV_CS_ACTIVE()                 R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_LOW)
 #define NV_CS_INACTIVE()               R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_HIGH)
-#define NV_BUSY()                      R_BSP_PinRead(BSP_IO_PORT_05_PIN_01)
+#define NV_BUSY()                      R_BSP_PinRead(BSP_IO_PORT_05_PIN_03)
 #define NV_MISO_CFG(port, cfg)         R_BSP_PinCfg (port, cfg)
 #endif
 

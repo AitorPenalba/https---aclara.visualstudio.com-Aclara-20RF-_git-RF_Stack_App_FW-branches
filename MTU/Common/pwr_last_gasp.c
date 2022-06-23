@@ -1422,7 +1422,7 @@ void PWRLG_Begin( uint16_t anomalyCount )
    }
    else
    {
-      PWRLG_MESSAGE_COUNT_SET(0);
+      PWRLG_MESSAGE_COUNT_SET(0);  // Note: Just to ensure we won't try to transmit
    }
 #endif
    if ( PWRLG_MESSAGE_COUNT() != 0 )  /* If there's enough energy to send any message... */

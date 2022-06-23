@@ -1120,7 +1120,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
    {
 #if ( MCU_SELECTED == NXP_K24 )
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_GPIO_e ); /* Change pin to digital input from SPI MISO */
-#else
+#elif ( MCU_SELECTED == RA6E1 )
       (void)NV_MISO_CFG( BSP_IO_PORT_05_PIN_03, (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT );
 #endif
 #if !RTOS
@@ -1229,7 +1229,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #endif
 #if ( MCU_SELECTED == NXP_K24 )
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_SPI_e );   /* Make pin SPI again MISO */
-#else
+#elif ( MCU_SELECTED == RA6E1 )
       (void)NV_MISO_CFG( BSP_IO_PORT_05_PIN_03, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_QSPI) );
 #endif
    }
