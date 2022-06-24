@@ -223,9 +223,7 @@ returnStatus_t MODECFG_set_ship_mode( uint8_t uShipMode )
    {
 #if ( EP == 1 )
       VBATREG_SHIP_MODE = modeConfigFileData.uShipMode;
-#if 0 // TODO: RA6E1 Enable once LED ported
       LED_checkModeStatus();
-#endif
 #endif
       DBG_logPrintf( 'I', "eFN_MODECFG Write Successful" );
    }
@@ -296,9 +294,7 @@ returnStatus_t MODECFG_set_quiet_mode( uint8_t uQuietMode )
       if ( eSUCCESS == retVal )
       {
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 Enable once LED ported
          LED_checkModeStatus();
-#endif
 #endif
          DBG_logPrintf( 'I', "eFN_MODECFG Write Successful" );
       }
@@ -375,9 +371,7 @@ returnStatus_t MODECFG_set_rfTest_mode( uint8_t urfTestMode )
       if ( eSUCCESS == retVal )
       {
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 Enable once LED ported
-        LED_checkModeStatus();
-#endif
+         LED_checkModeStatus();
 #endif
          DBG_logPrintf( 'I', "eFN_MODECFG Write Successful" );
       }
@@ -413,7 +407,6 @@ returnStatus_t MODECFG_set_rfTest_mode( uint8_t urfTestMode )
  **********************************************************************************************************************/
 
 uint8_t MODECFG_get_decommission_mode( void )
-
 {
    uint8_t uDecommissionMode = 0;
 
@@ -457,9 +450,7 @@ returnStatus_t MODECFG_set_decommission_mode( uint8_t uDecommissionMode )
    {
 #if ( EP == 1 )
       VBATREG_METER_SHOP_MODE = modeConfigFileData.uDecommissionMode;
-#if 0 // TODO: RA6E1 Enable once LED ported
       LED_checkModeStatus();
-#endif
 #if (ACLARA_DA == 1)
       (void)B2BSendDecommission();
 #endif

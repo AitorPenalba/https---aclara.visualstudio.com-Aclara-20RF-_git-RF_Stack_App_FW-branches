@@ -617,7 +617,7 @@ bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Stru
 
   Returns: Nothing
 
-  Notes: The TickValue that is passed in should be a Tick Time from the past,
+  Notes: 1. The TickValue that is passed in should be a Tick Time from the past,
          This function will add the TimeDelay to the passed in TickValue and then
          only wake up when this computed Tick time has passed
          This function is useful (with OS_TICK_Get_ElapsedTicks) to wake
@@ -626,6 +626,7 @@ bool OS_TICK_Is_FutureTime_Greater ( OS_TICK_Struct *CurrTickValue, OS_TICK_Stru
          is going to be a Tick Time in the future.  (Code has been added to try
          to protect against sleeping when the time has already passed, but there
          are situation (interrupts,task switch,etc) that could cause errors
+         2. In FreeRTOS, the TickValue will be updated by the xTaskDelayUntil().
 
 *******************************************************************************/
 void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay )
@@ -649,11 +650,11 @@ void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay )
 #elif ( RTOS_SELECTION == FREE_RTOS )
    /* NOTE: This works in portTICK_RATE_MS accuracy. For better accuracy, need to modify the algorithm */
    uint32_t ticksToDelay = pdMS_TO_TICKS( TimeDelay );
-   uint32_t previousTick = TickValue->tickCount;
    // Convert to ticks from the structure
    if ( ticksToDelay > 0 )
    {
-      xTaskDelayUntil ( &previousTick, ticksToDelay ); // TODO: RA6E1 Bob: may need to round this up to a minimum of 5msec of delay. Scot is checking MQX to confirm
+      // Note: xTaskDelayUntil() will update the TickValue->tickCount
+      xTaskDelayUntil ( &TickValue->tickCount, ticksToDelay ); // TODO: RA6E1 Bob: may need to round this up to a minimum of 5msec of delay. Scot is checking MQX to confirm
    }
 #endif
 

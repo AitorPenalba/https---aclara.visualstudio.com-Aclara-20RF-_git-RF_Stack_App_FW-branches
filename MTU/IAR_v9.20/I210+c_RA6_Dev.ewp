@@ -1125,6 +1125,9 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\ADC.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\AES.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\AGT.c</name>
             </file>
             <file>
@@ -1143,10 +1146,19 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\CRC.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\CRC.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\LED.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\RA6_OptionsMemory.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\radio_hal.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\radio_hal.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\RTC.c</name>
@@ -1418,7 +1430,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1959,7 +1971,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>

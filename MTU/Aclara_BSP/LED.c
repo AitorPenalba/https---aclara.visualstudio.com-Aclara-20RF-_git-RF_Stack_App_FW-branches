@@ -1,28 +1,32 @@
-/******************************************************************************
+/**********************************************************************************************************************
  *
  * Filename: LED.c
  *
- * Global Designator:
+ * Global Designator: LED_
  *
  * Contents:
  *
- ******************************************************************************
- * Copyright (c) 2020 ACLARA.  All rights reserved.
- * This program may not be reproduced, in whole or in part, in any form or by
- * any means whatsoever without the written permission of:
- *    ACLARA, ST. LOUIS, MISSOURI USA
- *****************************************************************************/
+ **********************************************************************************************************************
+ * A product of
+ * Aclara Technologies LLC
+ * Confidential and Proprietary
+ * Copyright 2017-2022 Aclara.  All Rights Reserved.
+ *
+ * PROPRIETARY NOTICE
+ * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+ * (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+ * authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may
+ * be used or copied only in accordance with the terms of such license.
+ *********************************************************************************************************************/
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
 #include "project.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
 #endif
 #include "buffer.h"
-#include "mac.h"
+#include "MAC.h"
 #include "DBG_SerialDebug.h"
 #include "mode_config.h"
 #if ( EP == 1 )
@@ -42,12 +46,14 @@
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
+#if ( RTOS_SELECTION == MQX_RTOS )  /* TODO: RA6E1: Add Support */
 typedef struct led_isr_struct_led
 {
    void *         OLD_ISR_DATA;
    void           (_CODE_PTR_ OLD_ISR)(void *);
    unsigned long  TICK_COUNT;
 } MY_ISR_STRUCT_LED, *MY_ISR_STRUCT_LED_PTR;
+#endif
 
 typedef enum
 {
@@ -93,9 +99,10 @@ static uint16_t LedTimerId;
 static enum_LedControl_t redLedControl = BLINK_SLOW; // Assign initial state of red LED
 static enum_LedControl_t blueLedControl = BLINK_SLOW; // Assign initial state of blue LED
 static enum_LedControl_t greenLedControl = STEADY_OFF; // Assign initial state of green LED
-static bool diagnosticLedTimeout = (bool)false; // Identifies when 30 seconds LED timout has occured
+static bool diagnosticLedTimeout = (bool)false; // Identifies when 30 seconds LED timeout has occurred
 static DiagnosticsType_t diagnosticStatus;
 
+#if ( MCU_SELECTED == NXP_K24 )
 static const uint32_t led_pins[] =
 {
    LED0_PIN ,
@@ -103,12 +110,14 @@ static const uint32_t led_pins[] =
    LED2_PIN ,
 };
 #endif
+#endif
 
 /* FUNCTION PROTOTYPES */
 static returnStatus_t createLedTimer(void);
 static void ledVisual_CB(uint8_t, void *);
+#if ( RTOS_SELECTION == MQX_RTOS )
 static void LED_vApplicationTickHook( void *user_isr_ptr );
-
+#endif
 
 /* FUNCTION DEFINITIONS */
 
@@ -129,6 +138,7 @@ static void LED_vApplicationTickHook( void *user_isr_ptr );
 returnStatus_t LED_init ( void )
 {
   returnStatus_t retVal = eSUCCESS;
+#if ( MCU_SELECTED == NXP_K24 )
 #if ( TRACE_MODE == 0 )
    uint8_t  hwVerString[VER_HW_STR_LEN];
    ( void )VER_getHardwareVersion ( &hwVerString[0], sizeof(hwVerString) );
@@ -136,7 +146,7 @@ returnStatus_t LED_init ( void )
    if ( 'C' == hwVerString[0] )
    {
       /* If the hardware revision is C, disable the three LED pins and it's
-       * application fucntionality will be replaced by the LCD module */
+       * application functionality will be replaced by the LCD module */
       GRN_LED_PIN_DISABLE();
       RED_LED_PIN_DISABLE();
       BLU_LED_PIN_DISABLE();
@@ -161,19 +171,24 @@ returnStatus_t LED_init ( void )
    PORTE_PCR2   = 0x540;   // Enable trace d2 with DSE
    PORTE_PCR3   = 0x540;   // Enable trace d1 with DSE
    PORTE_PCR4   = 0x540;   // Enable trace d0 with DSE
-#endif
+#endif // #if ( TRACE_MODE == 0 )
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 
    if ( 0 == MODECFG_get_quiet_mode() )
    {  // Let LED timer execute only if not in quiet mode (timer cannot be disabled in quiet mode see ledVisual_CB())
       /* The following code was taken from MQX example code for adding our timer code to the RTOS tick interrupt.  So, the */
       /* following code will replace the RTOS tick interrupt with our own and then our ISR will call the RTOS tick. */
+
+#if ( RTOS_SELECTION == MQX_RTOS )
       MY_ISR_STRUCT_LED_PTR isr_ptr;
       isr_ptr = (MY_ISR_STRUCT_LED_PTR)_mem_alloc_zero(sizeof(MY_ISR_STRUCT_LED));
       isr_ptr->TICK_COUNT   = 0;
       isr_ptr->OLD_ISR_DATA = _int_get_isr_data(INT_SysTick);             /*lint !e641 */
       isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                  /*lint !e641 */
       _int_install_isr(INT_SysTick, LED_vApplicationTickHook, isr_ptr);   /*lint !e641 !e64 !e534 */
-
+#elif( RTOS_SELECTION == FREE_RTOS )
+      /* No need to install ISR */
+#endif
       diagnosticStatus.flags = 0; // clear the diagnostic flags
 #if ( TEST_TDMA == 0 )
       retVal = createLedTimer();
@@ -199,8 +214,10 @@ returnStatus_t LED_init ( void )
 *******************************************************************************/
 void LED_on     ( enum_LED_ID LedId )
 {
+#if ( MCU_SELECTED == NXP_K24 )
 #if ( TRACE_MODE == 0 )
    GPIOE_PSOR = led_pins[LedId];   /* LED On   */
+#endif
 #endif
 }
 
@@ -219,8 +236,10 @@ void LED_on     ( enum_LED_ID LedId )
 *******************************************************************************/
 void LED_off    ( enum_LED_ID LedId )
 {
+#if ( MCU_SELECTED == NXP_K24 )
 #if ( TRACE_MODE == 0 )
    GPIOE_PCOR = led_pins[LedId];   /* LED Off   */
+#endif
 #endif
 }
 
@@ -239,8 +258,10 @@ void LED_off    ( enum_LED_ID LedId )
 *******************************************************************************/
 void LED_toggle ( enum_LED_ID LedId )
 {
+#if ( MCU_SELECTED == NXP_K24 )
 #if ( TRACE_MODE == 0 )
   GPIOE_PTOR = led_pins[LedId];   /* toggle   */
+#endif
 #endif
 }
 
@@ -251,7 +272,7 @@ void LED_toggle ( enum_LED_ID LedId )
  *
  *  \fn           LED_lcdModeDisplay
  *
- *  \brief        Update the mode or hot statuss to LCD display.
+ *  \brief        Update the mode or hot status to LCD display.
  *
  *  \param        enum_LcdMode_t
  *
@@ -322,7 +343,7 @@ static void LED_lcdModeDisplay( enum_LcdMode_t cmd )
  *  \return       None
  *
  *  \details      This function will update the status of the Mode LED of the endpoint.  It first will check
- *                for quietmode, then shipmode, and then finally metershopmode.  If none of the mode's are
+ *                for quietmode, then shipmode, and then finally meter shopmode.  If none of the mode's are
  *                set, it sets the endpoint to normal operation mode.  This function can be used whenever a
  *                check of the current mode is required.
  *
@@ -399,7 +420,7 @@ void LED_checkModeStatus()
  *  \return       returnStatus_t
  *
  *  \details      This function creates a timer and assigns a call back function to be called every
- *                1000ms.  If unabled to create timer, a message will be sent to the debug port.
+ *                1000ms.  If unable to create timer, a message will be sent to the debug port.
  *
  *  \sideeffect   None
  *
@@ -447,7 +468,7 @@ void LED_setBlueLedStatus(enum_BlueLedStatus_t status)
    {
       switch (status )
       {
-         case TIME_IDLE : // Five minute timeout has occured, turn LED off
+         case TIME_IDLE : // Five minute timeout has occurred, turn LED off
          {
             blueLedControl = STEADY_OFF;
             LED_off(BLU_LED);
@@ -585,7 +606,7 @@ void LED_setRedLedStatus(enum_RedLedStatus_t status)
          }
          case SELFTEST_PASS :
          {
-            diagnosticStatus.bits.selftestFail = (bool)false; // clear the selftest fail bit
+            diagnosticStatus.bits.selftestFail = (bool)false; // clear the self-test fail bit
             if ( diagnosticStatus.flags == 0 ) // if no other diagnostics are flagged update LED
             {
               if( diagnosticLedTimeout ) // if after 30 seconds since power up, turn OFF red LED
@@ -600,17 +621,17 @@ void LED_setRedLedStatus(enum_RedLedStatus_t status)
             }
             break;
          }
-         case RADIO_DISABLED : // radio temperature outside operating range (upper extremee)
+         case RADIO_DISABLED : // radio temperature outside operating range (upper extreme)
          {
             diagnosticStatus.bits.radioDisabled = (bool)true;
             redLedControl = STEADY_ON;
             LED_on(RED_LED);
             break;
          }
-         case RADIO_ENABLED : // radio temperature in operating range (upper extremee)
+         case RADIO_ENABLED : // radio temperature in operating range (upper extreme)
          {
             diagnosticStatus.bits.radioDisabled = (bool)false;
-            if ( diagnosticLedTimeout && ( diagnosticStatus.flags == 0) ) // if after 30 secondes since power up and no diagnostic flags
+            if ( diagnosticLedTimeout && ( diagnosticStatus.flags == 0) ) // if after 30 seconds since power up and no diagnostic flags
             {
                redLedControl = STEADY_OFF;
                LED_off(RED_LED);
@@ -648,16 +669,16 @@ void LED_setRedLedStatus(enum_RedLedStatus_t status)
  *
  *  \fn           ledVisual_CB
  *
- *  \brief        Updates current status of LED's based upon events occuring within a period
- *                of time as required in prodcut specific PDS.
+ *  \brief        Updates current status of LED's based upon events occurring within a period
+ *                of time as required in product specific PDS.
  *
  *  \param        uint8_t, void *
  *
  *  \return       None
  *
  *  \details      This function will update the status of the EUT's LEDs by updating status
- *                enumurations that are part of the LED module.  Valid time in the EUT will be
- *                polled as well as monitoring timout values of specific LED's.  After five minutes,
+ *                enumerations that are part of the LED module.  Valid time in the EUT will be
+ *                polled as well as monitoring timeout values of specific LED's.  After five minutes,
  *                the function will create a task to delete the timer since the timer is no longer
  *                needed for LED functionality.
  *
@@ -676,11 +697,11 @@ static void ledVisual_CB(uint8_t cmd, void *pData)
    ++time; /* increment time when we enter function */
 
 
-   /* If the diagnostic LED timout has not occured, check on time passed so far  */
+   /* If the diagnostic LED timeout has not occurred, check on time passed so far  */
    if ( !diagnosticLedTimeout )
    {
-      /* check to see if we crossed timeout threshold and no diagnostic errors have occured */
-      if ( time >= RED_LED_TIMEOUT ) // If we crossed threshold, set timout to true
+      /* check to see if we crossed timeout threshold and no diagnostic errors have occurred */
+      if ( time >= RED_LED_TIMEOUT ) // If we crossed threshold, set timeout to true
       {
         diagnosticLedTimeout = true;
         if( diagnosticStatus.flags == 0 ) // if we are presently not in a diagnostic condition, set red LED to idle condition
@@ -708,7 +729,7 @@ static void ledVisual_CB(uint8_t cmd, void *pData)
       BM_AllocStatic(&buf, eSYSFMT_VISUAL_INDICATION);
       MAC_Request(&buf);
    }
-   /* If we have not crossed timout theshold, update LED's based upon valid time */
+   /* If we have not crossed timeout threshold, update LED's based upon valid time */
    else
    {
       /* Check if the EUT has a valid time */
@@ -732,6 +753,7 @@ static void ledVisual_CB(uint8_t cmd, void *pData)
 /*lint +esym(818,pData)*/
 /*lint +esym(715,cmd,pData)*/
 
+#if ( RTOS_SELECTION == MQX_RTOS ) && ( MCU_SELECTED == NXP_K24 )
 /*!
  *************************************************************************************************************
 **********************************************
@@ -751,7 +773,6 @@ static void ledVisual_CB(uint8_t cmd, void *pData)
  *  \reentrant    No
 ***************************************************************************************************************
 *********************************************/
-#if ( RTOS_SELECTION == MQX_RTOS )
 STATIC void LED_vApplicationTickHook( void *user_isr_ptr )
 {
 
@@ -789,38 +810,8 @@ STATIC void LED_vApplicationTickHook( void *user_isr_ptr )
 #endif
    (*isr_ptr->OLD_ISR)(isr_ptr->OLD_ISR_DATA);
 }
-#elif ( RTOS_SELECTION == FREE_RTOS )
-void LED_vApplicationTickHook( void )
-{
-#if ( TEST_TDMA == 0 )
-   /* Update the blue LED if needed */
-   if (blueLedControl == BLINK_SLOW && isr_ptr->TICK_COUNT % 100 == 0 ) // each second
-   {
-      LED_toggle(BLU_LED);
-   }
-
-   /*  Update the red LED if needed */
-   if ( redLedControl == BLINK_SLOW && isr_ptr->TICK_COUNT % 100 == 0 ) // each second
-   {
-      LED_toggle(RED_LED);
-   }
-   else if ( redLedControl == BLINK_FAST && isr_ptr->TICK_COUNT % 25 == 0 ) //at quarter second
-   {
-      LED_toggle(RED_LED);
-   }
-
-   /* Update the green LED if needed */
-   if (greenLedControl == BLINK_SLOW && isr_ptr->TICK_COUNT % 100 == 0) // each second
-   {
-      LED_toggle(GRN_LED);
-   }
-   else if (greenLedControl == BLINK_FAST && isr_ptr->TICK_COUNT % 25 == 0 ) //at quarter second
-   {
-      LED_toggle(GRN_LED);
-   }
 #endif
-}
-#endif
+
 
 /*!
  *************************************************************************************************************
@@ -828,14 +819,14 @@ void LED_vApplicationTickHook( void )
  *
  *  \fn           LED_getLedTimerId
  *
- *  \brief        Returns the ID number of the timer associated with the timout threshold of the LED's.
+ *  \brief        Returns the ID number of the timer associated with the timeout threshold of the LED's.
  *
  *  \param        None
  *
  *  \return       uint16_t
  *
- *  \details      Returns the ID number of the timer associated with the timout threshold of the LED's.
- *                This function can be used elswhere in the program to acquire the timer ID to perform
+ *  \details      Returns the ID number of the timer associated with the timeout threshold of the LED's.
+ *                This function can be used elsewhere in the program to acquire the timer ID to perform
  *                needed actions with this ID such as timer deletion when it is no longer needed.
  *
  *  \sideeffect   None
@@ -847,7 +838,6 @@ uint16_t LED_getLedTimerId()
 {
    return LedTimerId;
 }
-
 
 /*!
  *************************************************************************************************************

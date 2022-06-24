@@ -50,7 +50,7 @@
   Returns: FuncStatus - True if Semaphore created successfully, False if error
 
   Notes: maxCount is only used in FreeRTOS.
-         If the maxcount is 0 then a binary sempahore is created,
+         If the maxcount is 0 then a binary semaphore is created,
 
 *******************************************************************************/
 bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
@@ -59,7 +59,6 @@ bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
 
    if( 0 == maxCount )
    {
-
       *SemHandle = xSemaphoreCreateBinary();
    }
    else
@@ -155,12 +154,8 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
       RetStatus = xSemaphoreTake( *SemHandle, timeout_ticks );
       if ( pdFAIL == RetStatus )
       {
+         // NOTE: In FreeRTOS, function returns pdFAIL if timeout_ticks expired without the semaphore becoming available.
          FuncStatus = false;
-         /* TODO: Add Print */
-         //         APP_ERR_PRINT("OS_SEM_PEND!");
-         //         if ( RetStatus == MQX_INVALID_LWSEM ) {
-         //         EVL_FirmwareError( "OS_SEM_Pend" , file, line );
-         //      }
       }
    }
    else
@@ -239,7 +234,7 @@ void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
 
   Returns:
 
-  Notes: This basically performs a Pend opperation until all of them have been
+  Notes: This basically performs a Pend operation until all of them have been
          consumed
 
 *******************************************************************************/

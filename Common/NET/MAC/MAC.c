@@ -2402,10 +2402,10 @@ void MAC_PauseTx( bool pause )
    {
 #if ( MCU_SELECTION == NXP_K24 ) // TODO: RA6E1 Bob: Is this needed anymore?
       LED_setRedLedStatus(RADIO_ENABLED);
+#endif // TODO: RA6E1 Bob: Is this needed anymore?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
       LED_checkModeStatus();           /* Radio got enabled replace the msg Hot with Mode */
 #endif
-#endif // TODO: RA6E1 Bob: Is this needed anymore?
    }
 #endif
 }

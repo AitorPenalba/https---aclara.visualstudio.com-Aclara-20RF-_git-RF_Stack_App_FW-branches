@@ -6,12 +6,18 @@
 
    Contents: Driver for the External Flash Memory.
 
- ***********************************************************************************************************************
-   Copyright (c) 2011-2020 Aclara Power-Line Systems Inc.  All rights reserved.  This program may not be reproduced, in
-   whole or in part, in any form or by any means whatsoever without the written permission of:
-                  ACLARA POWER-LINE SYSTEMS INC.
-                  ST. LOUIS, MISSOURI USA
- ***********************************************************************************************************************
+ **********************************************************************************************************************
+   A product of
+   Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2011-2022 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may
+   be used or copied only in accordance with the terms of such license.
+ **********************************************************************************************************************
 
    $Log$ kdavlin Created Feb 18, 2011
 
@@ -510,7 +516,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
       /* Initialize the SPI Driver */
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexLock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -518,7 +524,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
 
@@ -558,7 +564,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
 #if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexLock(pDevice->port);
                NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
                OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
                NV_CS_ACTIVE();   /* Need to send instruction to Write the Flash with address byte */
@@ -571,7 +577,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
                NV_CS_INACTIVE();
 #if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
                OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
             }
@@ -587,7 +593,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
 #if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexLock(pDevice->port);
                NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
                OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
                NV_CS_ACTIVE();
@@ -599,7 +605,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
                NV_CS_INACTIVE();
 #if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
                OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
             }
@@ -1043,7 +1049,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
 #if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
          OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
          NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1062,7 +1068,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
 #if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
          OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
          NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1075,7 +1081,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
       NV_CS_INACTIVE(); /* Release the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
       //WRITE_PROTECT_PIN_ON();
@@ -1136,7 +1142,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexLock(pDevice->port);
             NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
             OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
             NV_CS_ACTIVE();                                 /* Activate the chip select  */
@@ -1144,7 +1150,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexLock(pDevice->port);
             NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
             OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
             NV_CS_ACTIVE();                                 /* Activate the chip select  */
@@ -1197,7 +1203,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
          OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
          NV_CS_ACTIVE();                                    /* Activate the chip select  */
@@ -1205,7 +1211,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
          OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
          NV_CS_ACTIVE();                                    /* Activate the chip select  */
@@ -1224,7 +1230,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       NV_CS_INACTIVE();                                     /* Deactivate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
 #if ( MCU_SELECTED == NXP_K24 )
@@ -1242,7 +1248,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexLock(pDevice->port);
       NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
       NV_CS_ACTIVE();                           /* Activate the chip select  */
@@ -1297,7 +1303,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       NV_CS_INACTIVE(); /* Activate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
    }
@@ -1473,7 +1479,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 #if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexLock(pDevice->port);
             NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
             OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
             NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1487,7 +1493,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
             NV_CS_INACTIVE(); /* Deactivate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
             OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
             setBusyTimer( pChipId_->u32PgmTimeByte_uS * actualBytesToWrite );
@@ -1514,7 +1520,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 #if ( RTOS_SELECTION == MQX_RTOS )
                   NV_SPI_MutexLock(pDevice->port);
                   NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
                   OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
                   NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1526,7 +1532,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
                   NV_CS_INACTIVE(); /* Deactivate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
                   NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
                   OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
                   bUseHardwareBsy_ = 1;
@@ -1543,7 +1549,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 #if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexLock(pDevice->port);
                NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
                OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
                NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1562,7 +1568,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 #if ( RTOS_SELECTION == MQX_RTOS )
                NV_SPI_MutexLock(pDevice->port);
                NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
                OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
                NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1579,7 +1585,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
             NV_CS_INACTIVE(); /* Deactivate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
             OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
             setBusyTimer( pChipId_->u32PgmTimeByte_uS );
@@ -1678,8 +1684,8 @@ static void enableWrites( uint8_t port )
 #if ( RTOS_SELECTION == MQX_RTOS )
    NV_SPI_MutexLock(port);
    NV_SPI_ChkSharedPortCfg(port);
-#else
-               OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
    NV_CS_ACTIVE(); /* Activate the chip select  */
 #if ( MCU_SELECTED == NXP_K24 )
@@ -1690,7 +1696,7 @@ static void enableWrites( uint8_t port )
    NV_CS_INACTIVE(); /* Activate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
    NV_SPI_MutexUnlock(port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
    OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
    bWrEnabled_ = 1;
@@ -1706,7 +1712,7 @@ static void enableWrites( uint8_t port )
 
    Returns: None
 
-   Side Effects: Diables the device writes
+   Side Effects: Disables the device writes
 
    Reentrant Code: No
 
@@ -1719,7 +1725,7 @@ static void disableWrites( uint8_t port )
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexLock(port);
       NV_SPI_ChkSharedPortCfg(port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
       NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1731,7 +1737,7 @@ static void disableWrites( uint8_t port )
       NV_CS_INACTIVE(); /* Activate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
 #ifndef __BOOTLOADER
@@ -1741,7 +1747,7 @@ static void disableWrites( uint8_t port )
 #if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(port);
          NV_SPI_ChkSharedPortCfg(port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
          OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
          NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1753,7 +1759,7 @@ static void disableWrites( uint8_t port )
          NV_CS_INACTIVE(); /* Activate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexUnlock(port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
          bUseHardwareBsy_ = 0;
@@ -1795,7 +1801,7 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexLock(pDevice->port);
       NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
       NV_CS_ACTIVE(); /* Assert the chip select  */
@@ -1821,7 +1827,7 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
       NV_CS_INACTIVE(); /* Release the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
       NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
    }
@@ -1861,7 +1867,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 #if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexLock(pDevice->port);
          NV_SPI_ChkSharedPortCfg(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
          OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
          NV_CS_ACTIVE(); /* Activate the chip select  */
@@ -1901,7 +1907,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
          NV_CS_INACTIVE(); /* Activate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
          NV_SPI_MutexUnlock(pDevice->port);
-#else
+#elif ( RTOS_SELECTION == FREE_RTOS )
          OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
       }
