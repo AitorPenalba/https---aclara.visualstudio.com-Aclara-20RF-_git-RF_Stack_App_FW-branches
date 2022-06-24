@@ -2528,8 +2528,6 @@ void vApplicationTickHook()
    }
 
    TMR_vApplicationTickHook();
-   LED_vApplicationTickHook();
-
    //LED2_PIN_OFF();
 }
 #endif
