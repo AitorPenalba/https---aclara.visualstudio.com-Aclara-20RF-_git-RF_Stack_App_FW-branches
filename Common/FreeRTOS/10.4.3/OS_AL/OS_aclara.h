@@ -508,7 +508,7 @@ void OS_EVENT_TestCreate(void);
 bool OS_EVENT_TestWait(void);;
 void OS_EVENT_TestSet(void);
 #endif
-#if( TM_LINKED_LIST == 1)
+#if( TM_LINKED_LIST == 2)
 void OS_LINKEDLIST_Test(void);
 #endif
 #endif /* this must be the last line of the file */
