@@ -39,8 +39,6 @@
 #endif
 #endif
 
-#if 1 // TODO: RA6E1: Support This Module
-
 /* #DEFINE DEFINITIONS */
 #define BLUE_LED_TIMEOUT 300           /* seconds until LED power up routine ends */
 #define RED_LED_TIMEOUT 30             /* seconds until LED power up routine ends */
@@ -919,4 +917,3 @@ void LED_disableManualControl()
 
 #endif // end of if (EP == 1)
 /* end LED_Set () */
-#endif // if 0
