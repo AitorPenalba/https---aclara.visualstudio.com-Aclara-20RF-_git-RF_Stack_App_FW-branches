@@ -1,4 +1,3 @@
-// <editor-fold defaultstate="collapsed" desc="File Header">
 /* ****************************************************************************************************************** */
 /***********************************************************************************************************************
  *
@@ -41,8 +40,7 @@
  * 100710  MS    - Initial Release
  *
  **********************************************************************************************************************/
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Included Files">
+
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 
@@ -57,18 +55,13 @@
 #include "timer_util.h"
 #undef  TMR_GLOBAL
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Constant Definitions">
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Macro Definitions">
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Type Definitions">
+
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 #if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
@@ -78,8 +71,7 @@ typedef struct my_isr_struct
    void           (_CODE_PTR_ OLD_ISR)(void *);
 } MY_ISR_STRUCT, *MY_ISR_STRUCT_PTR;
 #endif
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="File Static Variables">
+
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
@@ -95,8 +87,6 @@ nInt MaxTimersUsed = 0;
 nInt TimersUsed = 0;
 #endif
 
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Static Function Prototypes">
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
 
@@ -106,11 +96,11 @@ STATIC returnStatus_t isTimerActive( uint16_t usiTimerId );    /* Checks if the 
 #if ( RTOS_SELECTION == MQX_RTOS )
 STATIC void TMR_vApplicationTickHook( void *user_isr_ptr );
 #endif
-// </editor-fold>
+
 /* ****************************************************************************************************************** */
 /* Local Function Definitions */
 
-// <editor-fold defaultstate="collapsed" desc="void insertTimerNode(timer_t *pTimer)">
+
 /***********************************************************************************************************************
  *
  * Function name: insertTimerNode
@@ -171,8 +161,7 @@ STATIC void insertTimerNode( timer_t *pTimer )
       } /* end while */
    } /* end else */
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t deleteTimerNode(uint16_t usiTimerId)">
+
 /***********************************************************************************************************************
  *
  * Function name: deleteTimerNode
@@ -182,7 +171,7 @@ STATIC void insertTimerNode( timer_t *pTimer )
  * Arguments: uint16_t usiTimerId: Timer ID of the node to be removed from the list
  *
  * Returns: returnStatus_t eRetVal - eSUCCESS - node deleted eSUCCESSfully
- *                                  eFAILURE - Node not found i.e. timer not vaild or not active
+ *                                  eFAILURE - Node not found i.e. timer not valid or not active
  *
  * Side effects: Removes a timer node from the timer link list
  *
@@ -233,13 +222,13 @@ STATIC returnStatus_t deleteTimerNode( uint16_t usiTimerId )
    }
    return (eRetVal);
 }
-// </editor-fold>
+
 /* ****************************************************************************************************************** */
 /* Global Function Definitions */
 
 /*lint -e454 -e456 The mutex is handled properly. */
 
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t TMR_HandlerInit( void )">
+
 /*****************************************************************************************************************
  *
  * Function name: TMR_HandlerInit
@@ -274,8 +263,7 @@ returnStatus_t TMR_HandlerInit( void )
    }
    return (retVal);
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="void TMR_HandlerTask( void *pvParameters )">
+
 /*****************************************************************************************************************
  *
  * Function name: TMR_HandlerTask
@@ -370,8 +358,7 @@ void TMR_HandlerTask( taskParameter )
       }
    }
 } /*lint !e715   Arg0 is not used */
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t isTimerActive(uint16_t timerId)">
+
 /***********************************************************************************************************************
  *
  * Function name: isTimerActive
@@ -404,8 +391,7 @@ STATIC returnStatus_t isTimerActive( uint16_t usiTimerId )
    }
    return(eRetVal);
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t TMR_AddTimer(timer_t *pData)">
+
 /***********************************************************************************************************************
  *
  * Function name: TMR_AddTimer
@@ -475,8 +461,7 @@ returnStatus_t TMR_AddTimer( timer_t *pData )
    }
    return(eRetVal);
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t TMR_DeleteTimer(uint16_t usiTimerId)">
+
 /***********************************************************************************************************************
  *
  * Function name: TMR_DeleteTimer
@@ -522,8 +507,7 @@ returnStatus_t TMR_DeleteTimer( uint16_t usiTimerId )
    }
    return(eRetVal);
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t TMR_StartTimer(uint16_t usiTimerId)">
+
 /***********************************************************************************************************************
  *
  * Function name: TMR_StartTimer
@@ -570,8 +554,7 @@ returnStatus_t TMR_StartTimer( uint16_t usiTimerId )
    }
    return(eRetVal);
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t TMR_StopTimer(uint16_t usiTimerId)">
+
 /***********************************************************************************************************************
  *
  * Function name: TMR_StopTimer
@@ -613,8 +596,7 @@ returnStatus_t TMR_StopTimer( uint16_t usiTimerId )
    }
    return(eRetVal);
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t TMR_ResetTimer( uint16_t usiTimerId, uint32_t ulTimerValue)">
+
 /***********************************************************************************************************************
  *
  * Function name: TMR_ResetTimer
@@ -674,8 +656,7 @@ returnStatus_t TMR_ResetTimer( uint16_t usiTimerId, uint32_t ulTimerValue )
    }
    return(eRetVal);
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t TMR_ReadTimer(timer_t *pData)">
+
 /***********************************************************************************************************************
  *
  * Function name: TMR_ReadTimer
@@ -707,8 +688,7 @@ returnStatus_t TMR_ReadTimer( timer_t *pData )
    }
    return(eRetVal);
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="returnStatus_t TMR_GetMillisecondCntr(uint64_t *ulMSCntr)">
+
 /***********************************************************************************************************************
  *
  * Function name: TMR_GetMillisecondCntr
@@ -730,8 +710,7 @@ void TMR_GetMillisecondCntr( uint64_t *ulMSCntr )
    *ulMSCntr = (_TMR_Tick_Cntr * portTICK_RATE_MS);
    OS_MUTEX_Unlock(&_tmrUtilMutex);  /* End critical section */ // Function will not return if it fails
 }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="void TMR_vApplicationTickHook(void)">
+
 /*****************************************************************************************************************
  *
  * Function name: TMR_vApplicationTickHook
