@@ -103,10 +103,6 @@ static OS_MUTEX_Obj     mutex_;
 static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
 static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
-#if ( MCU_SELECTED == RA6E1 )
-OS_SEM_Obj              dbgReceiveSem_;                    /* Used as Semaphore for interrupt method of UART_read in DBG_CommandLine.c */
-extern OS_SEM_Obj       transferSem[MAX_UART_ID];          /* For RA6E1, UART_write process is used in Semaphore method */
-#endif
 //static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
 static uint16_t         line_num_ = 0;                      /* Line number used by DBG_log */
 #if ENABLE_TMR_TASKS
@@ -183,8 +179,8 @@ returnStatus_t DBG_init( void )
          OS_MUTEX_Create( &mutex_ ) &&
 #if ( RTOS_SELECTION == FREE_RTOS )
          //TODO RA6: NRJ: determine if semaphores need to be counting
-         OS_SEM_Create( &dbgReceiveSem_ , 0) &&
-         OS_SEM_Create( &transferSem[UART_DEBUG_PORT], 0 ) &&
+//         OS_SEM_Create( &dbgReceiveSem_ , 0) &&
+//         OS_SEM_Create( &transferSem[UART_DEBUG_PORT], 0 ) &&
 #endif
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )

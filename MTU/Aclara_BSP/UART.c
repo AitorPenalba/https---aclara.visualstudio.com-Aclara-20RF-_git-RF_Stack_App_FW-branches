@@ -34,6 +34,7 @@
 #include "psp_cpudef.h"
 #endif
 
+#include "MFG_Port.h"
 /* #DEFINE DEFINITIONS */
 #if ( MCU_SELECTED == RA6E1 )  //To process the input byte in RA6E1
 #define MAX_DBG_COMMAND_CHARS     1602
@@ -96,6 +97,27 @@ const uart_cfg_t *UartCfg[MAX_UART_ID] =
    &g_uart_DBG_cfg,
    &g_uart2_cfg
 };
+
+
+#if (RTOS_SELECTION == FREE_RTOS)
+#define MAX_RING_BUFFER_SIZE   128
+#define RING_BUFFER_MASK       127
+
+typedef struct
+{
+   uint8_t   buffer[MAX_RING_BUFFER_SIZE];
+   uint16_t  head;
+   uint16_t  tail;
+} UART_ringBuffer_t;
+
+typedef struct
+{ // TODO: check whether sem needed for echo separately
+   OS_SEM_Obj receiveUART_sem;
+   OS_SEM_Obj transmitUART_sem;
+   OS_SEM_Obj echoUART_sem;
+} UART_Sem;
+#endif
+
 #if ( DEBUG_PORT_BAUD_RATE == 1 )
 static const char *uart_name[MAX_UART_ID] = {"MFG", /* Order must match UartCtrl and UartCfg above */
 #if 0 //TODO: RA6 Bob: Add Optical port support
@@ -110,18 +132,81 @@ static MQX_FILE_PTR UartHandle[MAX_UART_ID];
 #endif
 
 #if ( MCU_SELECTED == RA6E1 )
+static UART_ringBuffer_t uartRingBuf[MAX_UART_ID];
+static UART_Sem          UART_semHandle[MAX_UART_ID];
+static bool              ringBufoverflow[MAX_UART_ID];
+static bool              transmitUARTEnable[MAX_UART_ID];
+
 static const char       CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
-extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
-extern OS_SEM_Obj       mfgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+//extern OS_SEM_Obj       dbgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
+//extern OS_SEM_Obj       mfgReceiveSem_;           /* For RA6E1, UART_read process is Transfered from polling to interrupt method */
 static char             DbgPrintBuffer[MAX_DBG_COMMAND_CHARS + 1];
 // TODO: RA6 [name_Balaji]: Make the transferSem work without extern
-extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
+//extern OS_SEM_Obj       transferSem[MAX_UART_ID];     /* For RA6E1, UART_write process is used in Semaphore method */
 #endif
 /* FUNCTION PROTOTYPES */
 static void             polled_putc( char c );
 static void             polled_init_uart( void );
 
 /* FUNCTION DEFINITIONS */
+
+#if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
+
+  Function name: mfg_uart_callback
+
+  Purpose: Interrupt Handler for MFG UART Module,Postpones the semaphore wait
+            once one byte of data is read in SCI Channel 3 (MFG port)
+
+  Returns: None
+
+*******************************************************************************/
+void mfg_uart_callback( uart_callback_args_t *p_args )
+{
+   /* Handle the UART event */
+   switch ( p_args->event )
+   {
+      /* Receive complete */
+      case UART_EVENT_RX_COMPLETE:
+      {
+         break;
+      }
+      /* Transmit complete */
+      case UART_EVENT_TX_COMPLETE:
+      {
+         OS_SEM_Post_fromISR( &UART_semHandle[UART_MANUF_TEST].echoUART_sem );
+         if ( transmitUARTEnable[UART_MANUF_TEST] )
+         {
+            OS_SEM_Post_fromISR( &UART_semHandle[UART_MANUF_TEST].transmitUART_sem );
+            transmitUARTEnable[UART_MANUF_TEST] = false;
+         }
+         break;
+      }
+      /* Received single byte */
+      case UART_EVENT_RX_CHAR:
+      {
+         uartRingBuf[UART_MANUF_TEST].head &= RING_BUFFER_MASK;
+         if ( ( ( uartRingBuf[UART_MANUF_TEST].head + 1 ) & RING_BUFFER_MASK ) ==
+                ( uartRingBuf[UART_MANUF_TEST].tail ) )
+         {
+            ringBufoverflow[UART_MANUF_TEST] = true;
+         }
+         else
+         {
+            uartRingBuf[UART_MANUF_TEST].buffer[uartRingBuf[UART_MANUF_TEST].head++] = ( uint8_t )p_args->data;
+            uartRingBuf[UART_MANUF_TEST].head &= RING_BUFFER_MASK;
+            OS_SEM_Post_fromISR( &UART_semHandle[UART_MANUF_TEST].receiveUART_sem );
+         }
+
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }/* end switch () */
+}/* end mfg_uart_callback () */
+#endif
 
 /*******************************************************************************
 
@@ -192,6 +277,30 @@ returnStatus_t UART_init ( void )
       }
    }
 #elif (RTOS_SELECTION == FREE_RTOS)
+   for( i = 0; i < ( uint8_t ) MAX_UART_ID; i++ )
+   {
+      uint16_t semReceiveCount = 0;
+
+      // Setting bool values to false at init
+      ringBufoverflow[i] = false;
+      transmitUARTEnable[i] = false;
+
+      uartRingBuf[i].head = 0;
+      uartRingBuf[i].tail = 0;
+
+      if ( ( i == UART_MANUF_TEST ) || ( i == UART_DEBUG_PORT ) ) // TODO: check optical port needed counting semaphore
+      {
+         semReceiveCount = MAX_RING_BUFFER_SIZE;
+      }
+
+      if( 0 == ( ( OS_SEM_Create( &UART_semHandle[i].receiveUART_sem, semReceiveCount ) ) &&
+                 ( OS_SEM_Create( &UART_semHandle[i].transmitUART_sem, 0 ) ) &&
+                 ( OS_SEM_Create( &UART_semHandle[i].echoUART_sem, semReceiveCount ) ) ) )
+      {
+         retVal = eFAILURE;
+      }
+   }
+
    for( i = 0; i < (uint8_t)MAX_UART_ID; i++ )
    {
       if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)i ) )  // Only open DEBUG port in last gasp mode */
@@ -339,23 +448,28 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
    {
       if ( DataLength > 1 )
       {
+         transmitUARTEnable[UartId] = true;
          ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength-1 );
-         ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+         ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
       }
+
+      transmitUARTEnable[UartId] = true;
       ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], (uint8_t *)&CRLF, sizeof(CRLF) );
-      ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+      ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
    }
    else
 #endif // if 1
    {
+      transmitUARTEnable[UartId] = true;
       ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-      ( void )OS_SEM_Pend( &transferSem[ UartId ], OS_WAIT_FOREVER );
+      ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
    }
 
    return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 #endif
 }
 
+#if ( RTOS_SELECTION == MQX_RTOS )
 /*******************************************************************************
 
   Function name: UART_read
@@ -367,7 +481,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
   Arguments: UartId - Identifier of the particular UART to receive data in
              DataBuffer - pointer to the Data that is received (populated by this function)
              DataLength - number of bytes that are to be received before this function returns
-             Timeout - Timeout for Counting Semaphore pends
+
   Returns: DataReceived - Number of valid bytes that are being returned in the buffer
 
   Notes: This function will block processing until all the requested bytes have
@@ -378,43 +492,93 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
          in an ioctl call IO_IOCTL_SERIAL_SET_FLAGS
 
 *******************************************************************************/
-uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength ,uint32_t TimeoutMs)
+uint32_t UART_read ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength )
 {
-#if ( MCU_SELECTED == NXP_K24 )
    uint32_t DataReceived;
 
    DataReceived = (uint32_t)read ( UartHandle[UartId], DataBuffer, (int32_t)DataLength ); /*lint !e64 */
 
    return ( DataReceived );
-#elif ( MCU_SELECTED == RA6E1 )
-//   ( void )R_SCI_UART_Read( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-   ( void )OS_SEM_Pend( &mfgReceiveSem_, TimeoutMs );
-   UART_getc( UartId, DataBuffer, DataLength);
-   return DataLength;/* R_SCI_UART_Read does not return the no. of valid read bytes, returning DataLength */
-#endif
+}
+
+#elif ( RTOS_SELECTION == FREE_RTOS )
+/*******************************************************************************
+  Function name: UART_getc
+
+  Purpose: This function will return the number of bytes requested only when that
+           number of bytes have been received into the UART
+  Arguments: UartId - Identifier of the particular UART to receive data in
+             DataBuffer - pointer to the Data that is received (populated by this function)
+             DataLength - number of bytes that are to be received before this function returns
+             Timeout - Timeout for Counting Semaphore pends
+
+  Returns: DataReceived - Number of valid bytes that are being returned in the buffer (1 or 0)
+
+  Notes: This function will block processing for timeout until 1 byte has been received.
+         This function always gets only one character and hence if it succeed, it will return datalength 0f 1
+
+*******************************************************************************/
+uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength, uint32_t TimeoutMs )
+{
+   ( void )OS_SEM_Pend( &UART_semHandle[UartId].receiveUART_sem, TimeoutMs );
+   // TODO: Counting semaphore matching
+   if ( ringBufoverflow[UartId] )
+   {
+      DataLength = 0;
+//      MFG_logPrintf( "Ring buffer overflow\n" );
+      // TODO: Indicate user with prints
+   }
+   else
+   {
+      uartRingBuf[UartId].tail &= RING_BUFFER_MASK;
+      OS_INT_disable(); // Enter critical section
+
+      if( ( uartRingBuf[UartId].head ) !=
+          ( uartRingBuf[UartId].tail & RING_BUFFER_MASK ) )
+      {
+         *DataBuffer = uartRingBuf[UartId].buffer[uartRingBuf[UartId].tail++];
+         uartRingBuf[UartId].tail &= RING_BUFFER_MASK;
+         DataLength = 1;
+      }
+      else
+      {
+         DataLength = 0;
+      }
+
+      OS_INT_enable(); // Exit critical section
+   }
+
+   return DataLength; /* Returning DataLength */
 }
 
 /*******************************************************************************
 
-  Function name: UART_getc
+  Function name: UART_echo
 
-  Purpose: This function behaves like fgets
+  Purpose: This function will Transmit the passed data buffer out on the appropriate
+           UART connection
 
-  Arguments: UartId - Identifier of the particular UART to receive data in
-             DataBuffer - pointer to the Data that is received (populated by this function)
-             DataLength - number of bytes that are to be received before this function returns
-             
-  Returns: none
+  Arguments: UartId - Identifier of the particular UART to send data on
+             DataBuffer - pointer to the Data that is to be sent
+             DataLength - number of bytes that are to be sent (size of data in DataBuffer)
+
+  Returns: DataSent - number of bytes that were correctly sent out the UART
+
+  Notes: if the UART_Option is set to IO_SERIAL_NON_BLOCKING, then this function
+         may not block and may return immediately (not sure what the return value will be??
+         if the UART_Option is 0, then this function will block until all the bytes are sent
+         to the lower MQX UART driver
 
 *******************************************************************************/
-extern uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLength )
+extern uint32_t UART_echo ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength )
 {
-   /* Get the data Buffer */
-   
-   /*echo the data except HMC*/
-   
+   ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+   ( void )OS_SEM_Pend( &UART_semHandle[UartId].echoUART_sem, OS_WAIT_FOREVER );
+
+   return DataLength;/* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 }
 
+#endif
 /*******************************************************************************
 
   Function name: UART_fgets
@@ -453,7 +617,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
    for ( ;; )
    {
 //      ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
-      ( void )OS_SEM_Pend( &dbgReceiveSem_, OS_WAIT_FOREVER );
+      ( void )OS_SEM_Pend( &UART_semHandle[UartId].receiveUART_sem, OS_WAIT_FOREVER );
       if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
          ( rxByte == CTRL_C_CHAR ) ||    /* User pressed CRTL-C key */
          ( rxByte == 0xC0 ))             /* Left over SLIP protocol characters in buffer */
@@ -479,7 +643,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
             /* UART_read used to read characters while doing Copy/Paste */
 //            ( void )UART_read ( UART_DEBUG_PORT, &rxByte, sizeof(rxByte) );
             /* 10millisecond is the delay timing where a successful UART_read happens */
-            ( void )OS_SEM_Pend( &dbgReceiveSem_, ( portTICK_RATE_MS * 2) );
+            ( void )OS_SEM_Pend( &UART_semHandle[UartId].receiveUART_sem, ( portTICK_RATE_MS * 2) );
 
             if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
                ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
@@ -867,13 +1031,13 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
       /* Receive complete */
       case UART_EVENT_RX_COMPLETE:
       {
-         OS_SEM_Post_fromISR( &dbgReceiveSem_ );
+         OS_SEM_Post_fromISR( &UART_semHandle[UART_DEBUG_PORT].receiveUART_sem );
          break;
       }
       /* Transmit complete */
       case UART_EVENT_TX_COMPLETE:
       {
-         OS_SEM_Post_fromISR( &transferSem[ UART_DEBUG_PORT ] );
+         OS_SEM_Post_fromISR( &UART_semHandle[UART_DEBUG_PORT].transmitUART_sem );
          break;
       }
       default:

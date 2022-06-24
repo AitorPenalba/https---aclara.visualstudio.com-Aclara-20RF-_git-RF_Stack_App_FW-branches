@@ -305,10 +305,14 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                else
                {
                   sStatus_.Bits.bTxWait = true;
-//                  numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
+#if ( MCU_SELECTED == NXP_K24 )
+                  numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
+#elif ( MCU_SELECTED == RA6E1 )
+                  numRxBytes = UART_getc( UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult), 50 ); // Setting 50 ms for now. Will be checked later
+#endif
                   timerCfg.usiTimerId = resExpiredTimerId_;
                   (void)TMR_ReadTimer(&timerCfg);
-//                  if ( (timerCfg.bExpired) && (0 == numRxBytes) ) /* Did a Time-out occur &no data received? */
+                  if ( (timerCfg.bExpired) && (0 == numRxBytes) ) /* Did a Time-out occur &no data received? */
                   if ( timerCfg.bExpired) /* Did a Time-out occur &no data received? */
                   {
                      sStatus_.Bits.bTxWait = false; /* Clear the TX Wait Flag */
@@ -568,7 +572,11 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                               break;  /* get out of the while so that the main can process data */
                            }
                         } // receiving a response packet
-//                        numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
+#if ( MCU_SELECTED == NXP_K24 )
+                        numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
+#elif ( MCU_SELECTED == RA6E1 )
+                        numRxBytes = UART_getc( UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult), 50 ); // Setting 50 ms for now. Will be checked later
+#endif
                         /* If no bytes were received, and we're still in RX mode, pause the task for 1mS.  Note: If the
                          * RTOS tick time is greater than 1mS, the delay here may take longer which may slow down comm.
                          * a little! */
@@ -650,7 +658,11 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                {
                   /* The receive is called only to clear the glitch on the KV2 meter when starting a session! */
                   uint8_t rxGarbage;
-//                  while(0 != UART_read(UART_HOST_COMM_PORT, &rxGarbage, sizeof(rxGarbage)))
+#if ( MCU_SELECTED == NXP_K24 )
+                  while( 0 != UART_read( UART_HOST_COMM_PORT, &rxGarbage, sizeof( rxGarbage ) ) )
+#elif ( MCU_SELECTED == RA6E1 )
+                  while( 0 != UART_getc( UART_HOST_COMM_PORT, &rxGarbage, sizeof( rxGarbage ), 50 ) ) // Setting timeout of 50ms
+#endif
                   {}
                   OS_TASK_Sleep( 1 );   /* Wait a while for the TX buffer to empty before starting times. */
                }
