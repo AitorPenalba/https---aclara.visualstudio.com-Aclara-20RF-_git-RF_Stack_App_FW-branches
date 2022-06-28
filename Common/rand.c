@@ -234,11 +234,16 @@ int32_t aclara_rand(void)
       ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84020_1_REV_A ) || \
       ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84114_1_REV_A ) || \
       ( HAL_TARGET_HARDWARE == HAL_TARGET_Y99852_1_REV_A ) || \
-      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84030_1_REV_A )  )
+      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84030_1_REV_A ) || \
+      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) )
       float temp1, temp2;
       uint32_t utemp1, utemp2;
 
-      temp1 = ADC_Get_uP_Temperature(TEMP_IN_DEG_F);
+#if ( MCU_SELECTED == NXP_K24 )
+   temp1 = ADC_Get_uP_Temperature(TEMP_IN_DEG_F);
+#elif ( MCU_SELECTED == RA6E1 )
+   temp1 = ADC_Get_4V0_Voltage();
+#endif
       temp2 = ADC_Get_SC_Voltage();
 
       utemp1 = *(uint32_t*)&temp1;  /*lint !e740 just want bit pattern from temp1   */

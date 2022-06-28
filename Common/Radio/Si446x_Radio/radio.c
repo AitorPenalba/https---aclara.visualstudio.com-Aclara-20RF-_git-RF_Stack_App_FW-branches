@@ -166,6 +166,12 @@ extern uint32_t DMA_Complete_IRQ_ISR_Timestamp; // Used for a watchdog to make s
  *  Local Variables
  *****************************************************************************/
 static RadioEvent_Fxn pEventHandler_Fxn;
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
+static bool bRadio_ready = FALSE; 
+static float RADIO_Temperature;
+static bool bAvg_done = FALSE;
+#endif
+
 
 
 #if ( MCU_SELECTED == NXP_K24 )
@@ -2547,10 +2553,9 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Be nice to other tasks.
    OS_TASK_Sleep( FIFTY_MSEC );
 #endif
-
-   // Start triming CPU or TCXO frequency
-#if 0  //TODO Melvin: add the below code once PHY  module is added
    RADIO_Update_Freq();
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
+   bRadio_ready = TRUE; 
 #endif
 }
 
@@ -3262,7 +3267,11 @@ static void validatePhyPayload(uint8_t radioNum)
       // Check that AFC is enabled
       if (AfcEnable) {
          // Get the temperature
+#if ( MCU_SELECTED == NXP_K24 )
          if ( RADIO_Temperature_Get(radioNum, &Temperature) ) {
+#elif ( MCU_SELECTED == RA6E1 )
+         if ( RADIO_Get_Chip_Temperature(radioNum, &Temperature) ) {
+#endif
 
             // Get temperature variable
             GetReq.eAttribute = ePhyAttr_AfcTemperatureRange;
@@ -4044,14 +4053,18 @@ void RADIO_SetPower( uint32_t frequency, float powerOutput)
    int16_t radioTemp;     // Radio temperature
    int16_t clippedRadioTemp; // Radio temperature
    int32_t PaTemp;        // PA temperature
-
+   
    (void)RADIO_Temperature_Get( (uint8_t)RADIO_0, &radioTemp );
+
    clippedRadioTemp = radioTemp;
 
    // Clip temperature if needed.
-   if ( radioTemp < RADIO_TEMPERATURE_MIN ) {
+   if ( radioTemp < RADIO_TEMPERATURE_MIN ) 
+   {
       clippedRadioTemp = RADIO_TEMPERATURE_MIN;
-   } else if ( radioTemp > RADIO_TEMPERATURE_MAX ) {
+   } 
+   else if ( radioTemp > RADIO_TEMPERATURE_MAX ) 
+   {
       clippedRadioTemp = RADIO_TEMPERATURE_MAX;
    }
    PaTemp = (int32_t)ADC_Get_PA_Temperature( TEMP_IN_DEG_C );
@@ -4059,7 +4072,8 @@ void RADIO_SetPower( uint32_t frequency, float powerOutput)
    val = 1.21574-(0.0352986512723369*powerOutput);
 
    // Sanitize input
-   if ( val < 0.01 ) {
+   if ( val < 0.01 ) 
+   {
       val = 0.01;
    }
 
@@ -6376,6 +6390,122 @@ uint8_t RADIO_Power_Level_Get(void)
 
    return (Si446xCmd.GET_PROPERTY.DATA[0]);
 }
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
+/*******************************************************************************
+
+  Function name: RADIO_Temperature_Update 
+
+  Purpose: This function called from SoftDemodulator.c just to update 
+           RADIO_Temperature using the average calculation.
+
+  Arguments: None
+
+  Returns: None
+
+  Notes:
+
+*******************************************************************************/
+void RADIO_Temperature_Update(void)
+{
+   union si446x_cmd_reply_union Si446xCmd;
+   static uint8_t avg_index = 0;
+   static float temperature[RADIO_TEMP_SAMPLE];
+   float temp = 0;
+
+      if ( si446x_get_adc_reading ( RADIO_0, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd ) == SI446X_SUCCESS )
+      {
+        temperature[avg_index] = ( int16_t ) ( ( ( 899.0/4096.0 ) * Si446xCmd.GET_ADC_READING.TEMP_ADC ) - 293 );
+        avg_index++ ;
+        
+        //five samples to determine temperature
+        if ( avg_index >= RADIO_TEMP_SAMPLE )
+        {
+           avg_index = 0;
+           bAvg_done = TRUE;     
+        }
+        
+        for ( uint8_t i = 0; i < RADIO_TEMP_SAMPLE; i++ )
+        {
+           temp += temperature[i];        
+        }
+        
+        if ( FALSE == bAvg_done )
+        {
+           RADIO_Temperature = temp/avg_index;  // avg value for first five cycles
+        }
+        else 
+        {
+           RADIO_Temperature = temp/RADIO_TEMP_SAMPLE; // avg value
+        } 
+        
+      }
+
+  // Sanitize output 
+   if ( RADIO_Temperature < TEMPERATURE_MIN ) 
+   {
+      RADIO_Temperature = TEMPERATURE_MIN;
+   } 
+   else if ( RADIO_Temperature > TEMPERATURE_MAX )
+   {
+      RADIO_Temperature = TEMPERATURE_MAX;
+   } 
+}
+
+
+/*******************************************************************************
+
+  Function name: RADIO_Get_Chip_Temperature 
+
+  Purpose: This function is used to get the current temperature of the Radio chip.
+           
+
+  Arguments: radioNum - Index for the radio selection
+             temp - Pointer the temperature value
+
+  Returns: radioTemp_done status of the temperature read function.
+
+  Notes:
+
+*******************************************************************************/
+bool RADIO_Get_Chip_Temperature( uint8_t radioNum ,int16_t *temp )
+{
+   union si446x_cmd_reply_union Si446xCmd;
+   bool radioTemp_done = FALSE;
+
+   if ( radio[radioNum].demodulator == 0 ) 
+   {
+      if ( si446x_get_adc_reading(radioNum, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd) == SI446X_SUCCESS ) 
+      {
+         RADIO_Temperature = (int16_t) (((899.0/4096.0)*Si446xCmd.GET_ADC_READING.TEMP_ADC)-293);
+         radioTemp_done = TRUE;
+      } 
+      else 
+      {
+         radioTemp_done = FALSE;
+      }
+   }
+   else
+   {
+      radioTemp_done = bAvg_done;
+   }
+   
+   // Sanitize output
+   if ( RADIO_Temperature < TEMPERATURE_MIN ) 
+   {
+      RADIO_Temperature = TEMPERATURE_MIN;
+   } 
+   else if ( RADIO_Temperature > TEMPERATURE_MAX )
+   {
+      RADIO_Temperature = TEMPERATURE_MAX;
+   }
+   
+   *temp = (int16_t) RADIO_Temperature;
+
+   return radioTemp_done;
+ }
+#endif
+
+#if GET_TEMPERATURE_FROM_RADIO == 0
 
 /*!
  *  Used to get the radio temperature
@@ -6394,12 +6524,7 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
    } else {
       // Reading the radio temperature takes about 1,s which is way too long when using the soft-demodulator.
       // Use the CPU temperature as a proxy instead.
-#if ( MCU_SELECTED == NXP_K24 )
       *temp = (int16_t)ADC_Get_uP_Temperature((bool)false);
-#elif ( MCU_SELECTED == RA6E1 )
-      *temp = 0; // TODO: RA6E1 Bob: this needs to use the new method of getting the Si446x temperature even if SD is running
-      return (bool)false;
-#endif
    }
 
    // Sanitize output
@@ -6410,6 +6535,99 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
    }
    return (bool)true;
 }
+
+#endif
+
+#if 0
+
+/*
+   Function name: RADIO_Get_Current_Temperature
+
+   Purpose: To get Radio Temperature and compute average of an array of floats;
+
+   Arguments:  bool    bSoft_demod - to verify if this function was called from softdemod
+              .  
+*/
+
+float RADIO_Get_Current_Temperature( bool bSoft_demod )
+{
+  union si446x_cmd_reply_union Si446xCmd;
+  static uint8_t avg_index = 0;
+  static float temperature[RADIO_TEMP_SAMPLE];
+  float temp = 0;
+
+  if ( ( radio [ ( uint8_t ) RADIO_0 ].demodulator == 0 ) ) // if soft-demod disabled 
+  {
+    if ( si446x_get_adc_reading ( RADIO_0, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd ) == SI446X_SUCCESS ) 
+    {
+      RADIO_Temperature = ( int16_t ) ( ( ( 899.0/4096.0 ) * Si446xCmd.GET_ADC_READING.TEMP_ADC ) - 293 );
+      
+      // TODO: averaging mechanism 
+    }    
+  }
+  else 
+  {
+    if ( TRUE == bSoft_demod )
+    {
+      if ( si446x_get_adc_reading ( RADIO_0, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd ) == SI446X_SUCCESS )
+      {
+        temperature[avg_index] = ( int16_t ) ( ( ( 899.0/4096.0 ) * Si446xCmd.GET_ADC_READING.TEMP_ADC ) - 293 );
+        avg_index++ ;
+        
+        //five samples to determine temperature
+        if ( avg_index >= RADIO_TEMP_SAMPLE )
+        {
+          avg_index = 0;
+          bAvg_done = TRUE;     
+        }
+        
+        for ( uint8_t i = 0; i < RADIO_TEMP_SAMPLE; i++ )
+        {
+          temp += temperature[i];        
+        }
+        
+        if ( FALSE == bAvg_done )
+        {
+          RADIO_Temperature = temp/avg_index;  // avg value for first five cycles
+        }
+        else 
+        {
+          RADIO_Temperature = temp/RADIO_TEMP_SAMPLE; // avg value
+        } 
+        
+      }
+    }   
+  }
+  
+  // Sanitize output 
+   if ( RADIO_Temperature < TEMPERATURE_MIN ) 
+   {
+      RADIO_Temperature = TEMPERATURE_MIN;
+   } 
+   else if ( RADIO_Temperature > TEMPERATURE_MAX )
+   {
+      RADIO_Temperature = TEMPERATURE_MAX;
+   } 
+  
+  return RADIO_Temperature;
+} 
+
+/*
+   Function name: RADIO_Is_Radio_Ready
+
+   Purpose: Used to check whether radio is initialized
+
+   Arguments: None
+
+   Return: bRadio_ready status of the radio
+
+*/
+ 
+bool RADIO_Is_Radio_Ready (void)
+{
+  return bRadio_ready;
+}
+#endif
 
 /*!
  *  Used to get the transmit buffer

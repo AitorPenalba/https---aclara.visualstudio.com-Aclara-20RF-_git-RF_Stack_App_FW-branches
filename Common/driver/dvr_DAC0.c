@@ -904,8 +904,13 @@ returnStatus_t DVR_DAC0_setDacCode ( uint16_t channelNumber, float32_t dBM )
    /* WARNING: RADIO_Temperature_Get() should not be called directly by any other task other than PHY_TSK, use PHY_GetRequest instead.
                 Using PHY_GetRequest() in PHY_TSK will result in failure as it waits in it's own queue causing a lock-up condition
       NOTE: RADIO_Temperature_Get() will take 1msec delay to acquire the temperature */
+#if ( MCU_SELECTED == NXP_K24 )
    if ( RADIO_Temperature_Get( (uint8_t)RADIO_0, &radioTemperature ) )
    {
+#elif ( MCU_SELECTED == RA6E1 )
+   if ( RADIO_Get_Chip_Temperature( (uint8_t)RADIO_0, &radioTemperature ) )
+   {
+#endif
       INFO_printf( "RF Algorithm: Radio(phy) Temperature %d\n",  radioTemperature );
    }
    else

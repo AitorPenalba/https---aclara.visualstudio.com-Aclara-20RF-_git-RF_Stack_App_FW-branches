@@ -1748,7 +1748,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1880,6 +1880,9 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_config_normal.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</name>
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\xradio.h</name>

@@ -27,6 +27,8 @@
 #include "project.h"
 #include "Temperature.h"
 #include "ALRM_Handler.h"
+#include "radio.h"
+#include "radio_hal.h"
 #if ( EP == 1 )
 #include "file_io.h"
 #endif
@@ -147,53 +149,60 @@ TemperatureStatus_t TEMPERATURE_getEpTemperatureStatus( void )
    int8_t              temperatureLocal;       /* Temporary variable to store Temperature */
 
    // Use CPU temperature which is common to EPs and TBs.
+#if ( MCU_SELECTED == NXP_K24 )
    // Avoid using radio temperature because it takes 1ms and this is disruptive to the soft-modem (when used).
    temperatureLocal = (int8_t)ADC_Get_uP_Temperature( TEMP_IN_DEG_C );
-
-   (void)FIO_fread( &temperatureFileHandle_, (uint8_t *)&temperatureConfig_, 0, (lCnt)sizeof(temperatureConfig_)); /* Read the file */
-
-   if( temperatureLocal > temperatureConfig_.EpMaxTemp )
+#elif ( MCU_SELECTED == RA6E1 )
+   int16_t        Temperature;
+   bool tempOK = RADIO_Get_Chip_Temperature( (uint8_t) RADIO_0, &Temperature );
+   temperatureLocal = (int8_t)Temperature;
+   if( tempOK )
+#endif
    {
-      temperatureConfig_.EpMaxTemp = ( uint8_t )temperatureLocal;   /* Update */
-      (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,EpMaxTemp),
+      (void)FIO_fread( &temperatureFileHandle_, (uint8_t *)&temperatureConfig_, 0, (lCnt)sizeof(temperatureConfig_)); /* Read the file */
+
+      if( temperatureLocal > temperatureConfig_.EpMaxTemp )
+      {
+         temperatureConfig_.EpMaxTemp = ( uint8_t )temperatureLocal;   /* Update */
+         (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,EpMaxTemp),
                        (uint8_t*) &temperatureConfig_.EpMaxTemp, (lCnt)sizeof(temperatureConfig_.EpMaxTemp)); /* Update the file*/
-   }
-   else if( temperatureLocal < temperatureConfig_.EpMinTemp )
-   {
-      temperatureConfig_.EpMinTemp = temperatureLocal;   /* Update */
-      (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,EpMinTemp),
+      }
+      else if( temperatureLocal < temperatureConfig_.EpMinTemp )
+      {
+         temperatureConfig_.EpMinTemp = temperatureLocal;   /* Update */
+         (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,EpMinTemp),
                        (uint8_t*) &temperatureConfig_.EpMinTemp, (lCnt)sizeof(temperatureConfig_.EpMinTemp)); /* Update the file*/
-   }
+      }
    /* Determine the Status */
-   if ( temperatureLocal >= temperatureConfig_.HighTempThreshold )
-   {
-      status = eHIGH_TEMP_THRESHOLD;
-      temperatureConfig_.oldStatus = status;
-      (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,oldStatus),
+      if ( temperatureLocal >= temperatureConfig_.HighTempThreshold )
+      {
+         status = eHIGH_TEMP_THRESHOLD;
+         temperatureConfig_.oldStatus = status;
+         (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,oldStatus),
                        (uint8_t*) &temperatureConfig_.oldStatus, (lCnt)sizeof(temperatureConfig_.oldStatus)); /* Update the file*/
-   }
-   else if( temperatureLocal <= temperatureConfig_.EpTempMinThreshold )
-   {
-      status = eLOW_TEMP_THRESHOLD;
-      temperatureConfig_.oldStatus = status;
-      (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,oldStatus),
+      }
+      else if( temperatureLocal <= temperatureConfig_.EpTempMinThreshold )
+      {
+         status = eLOW_TEMP_THRESHOLD;
+         temperatureConfig_.oldStatus = status;
+         (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,oldStatus),
                        (uint8_t*) &temperatureConfig_.oldStatus, (lCnt)sizeof(temperatureConfig_.oldStatus)); /* Update the file*/
-   }
-   else if( ( temperatureConfig_.oldStatus == eHIGH_TEMP_THRESHOLD ) && ( temperatureLocal <= ( temperatureConfig_.HighTempThreshold - temperatureConfig_.EpTempHysteresis ) ) )
-   {
-      status = eNORMAL_TEMP;
-      temperatureConfig_.oldStatus = status;
-      (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,oldStatus),
+      }
+      else if( ( temperatureConfig_.oldStatus == eHIGH_TEMP_THRESHOLD ) && ( temperatureLocal <= ( temperatureConfig_.HighTempThreshold - temperatureConfig_.EpTempHysteresis ) ) )
+      {
+         status = eNORMAL_TEMP;
+         temperatureConfig_.oldStatus = status;
+         (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,oldStatus),
                        (uint8_t*) &temperatureConfig_.oldStatus, (lCnt)sizeof(temperatureConfig_.oldStatus)); /* Update the file*/
-   }
-   else if( ( temperatureConfig_.oldStatus == eLOW_TEMP_THRESHOLD ) && ( temperatureLocal >= ( temperatureConfig_.HighTempThreshold + temperatureConfig_.EpTempHysteresis ) ) )
-   {
-      status = eNORMAL_TEMP;
-      temperatureConfig_.oldStatus = status;
-      (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,oldStatus),
+      }
+      else if( ( temperatureConfig_.oldStatus == eLOW_TEMP_THRESHOLD ) && ( temperatureLocal >= ( temperatureConfig_.HighTempThreshold + temperatureConfig_.EpTempHysteresis ) ) )
+      {
+         status = eNORMAL_TEMP;
+         temperatureConfig_.oldStatus = status;
+         (void)FIO_fwrite(&temperatureFileHandle_, (fileOffset)offsetof(TemperatureConfig_t,oldStatus),
                        (uint8_t*) &temperatureConfig_.oldStatus, (lCnt)sizeof(temperatureConfig_.oldStatus)); /* Update the file*/
+      }
    }
-
    return status;
 }
 

@@ -82,4 +82,5 @@ void SD_SyncPayloadDemodTask(taskParameter);
 
 bool ProcessSRFNHeaderPBytes(unsigned const char headerBytes[], unsigned int* lengthOfPayload);
 bool ProcessSRFNPayloadPBytes(unsigned const char payloadBytes[], unsigned short numberOfPayloadBytes);
+
 #endif

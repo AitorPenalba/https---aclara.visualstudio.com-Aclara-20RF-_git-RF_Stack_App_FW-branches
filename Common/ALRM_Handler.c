@@ -37,6 +37,8 @@
 #include "file_io.h"
 #include "Temperature.h"
 #include "DFW_App.h"
+#include "radio.h"
+#include "radio_hal.h"
 #if ( EP == 1 ) && ( LOG_IN_METER == 1 )
 #include "PWR_Task.h"
 #endif
@@ -1045,23 +1047,40 @@ void ALRM_RealTimeTask ( taskParameter )
       // The TB already handles this beahvior in the PHY and EPs need to do the same but it's not trivial because the algorithm would have to change in some fundamental ways.
       int32_t procTemp;
 
-      // Avoid using radio temperature because it takes 1ms and this is disruptive to the soft-modem (when used).
-      procTemp = (int32_t)ADC_Get_uP_Temperature( TEMP_IN_DEG_C );
+#if ( MCU_SELECTED == NXP_K24 )
+   // Avoid using radio temperature because it takes 1ms and this is disruptive to the soft-modem (when used).
+   procTemp = (int32_t)ADC_Get_uP_Temperature( TEMP_IN_DEG_C );
+#elif ( MCU_SELECTED == RA6E1 )
+   int16_t Temperature;
+   bool tempOK = RADIO_Get_Chip_Temperature( (uint8_t) RADIO_0, &Temperature );
+   procTemp = (int32_t)Temperature;
+#endif
 
       // Check if stack is enabled/disabled
-      if ( stackDisabled ) {
-         // Stack is disabled, check if we can re-enable it.
-         if ( (procTemp <= (MAX_TEMP_LIMIT - STACK_HYSTERISIS)) && (procTemp >= (MIN_TEMP_LIMIT + STACK_HYSTERISIS)) ) {
-            (void)SM_StartRequest(eSM_START_STANDARD, NULL);
-            stackDisabled = ( bool )false;
-         }
-      } else {
+   if ( stackDisabled ) 
+   {
+      // Stack is disabled, check if we can re-enable it.
+      if ( (procTemp <= (MAX_TEMP_LIMIT - STACK_HYSTERISIS)) && (procTemp >= (MIN_TEMP_LIMIT + STACK_HYSTERISIS)) ) 
+      {
+         (void)SM_StartRequest(eSM_START_STANDARD, NULL);
+         stackDisabled = ( bool )false;
+         
+      }
+      } 
+      else 
+      {
          // Stack is enabled, check if we need to disable it.
-         if ( (procTemp > MAX_TEMP_LIMIT) || (procTemp < MIN_TEMP_LIMIT) ) {
+         if ( (procTemp > MAX_TEMP_LIMIT) || (procTemp < MIN_TEMP_LIMIT) ) 
+         {
             (void)SM_StartRequest(eSM_START_MUTE, NULL);
             stackDisabled = ( bool )true;
          }
       }
+   if( !tempOK )
+   {
+      (void)SM_StartRequest(eSM_START_MUTE, NULL);
+      stackDisabled = ( bool )true;        
+   }
 #endif
 #if ( LOG_IN_METER == 1 )
       // A condition was discovered above requiring the processor to be reset

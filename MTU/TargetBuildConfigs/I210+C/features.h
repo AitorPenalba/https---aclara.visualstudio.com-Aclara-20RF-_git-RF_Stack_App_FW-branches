@@ -71,6 +71,20 @@
 #define TX_THROTTLE_CONTROL               0  /* 0=No Tx Throttling, 1=Tx Throttling */
 #define BM_USE_KERNEL_AWARE_DEBUGGING     1  // TODO: RA6E1 Bob: remove this before release
 #define NOISEBAND_LOWEST_CAP_VOLTAGE      1  // TODO: RA6E1 Bob: remove this before release
+#define GET_TEMPERATURE_FROM_RADIO        1  /* When GET_TEMPERATURE_FROM_RADIO set as 1 the radio temperature calculated using the RA6E1.
+
+                                               While using the RA6E1 there are two methods for calculate the radio temperature.
+                                               1 - RADIO_Temperature_Update :   Only called from SoftDemodulator.c to update 
+                                                                                RADIO_Temperature using the average calculation. 
+                                               2 - RADIO_Get_Chip_Temperature : Either get a radio temperature if Soft Demod is not active 
+                                                                                or to return the current average temperature in static variable RADIO_Temperature 
+                                                                                if Soft Demod is active.
+
+                                               When GET_TEMPERATURE_FROM_RADIO set as 0 the radio temperature calculated using the K24.
+                                               While using the K24 one method for calculate the radio temperature. 
+                                               1 - RADIO_Temperature_Get : This function will only be used in the K24 implementation.  
+                                                                           It will therefore call ADC_Get_uP_Temperature if the soft demodulator is active*/ 
+
 
 /* TODO: RA6: Move the following to Appropriate module */
 #define BARE_METAL                        0
