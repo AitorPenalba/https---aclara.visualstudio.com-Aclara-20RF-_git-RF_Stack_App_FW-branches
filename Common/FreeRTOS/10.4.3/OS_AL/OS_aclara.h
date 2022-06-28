@@ -394,6 +394,7 @@ bool     OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void     OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 #if ( RTOS_SELECTION == FREE_RTOS ) // TODO: RA6E1 Bob: the conditional is not needed because this file is unique to a FreeRTOS folder
 void OS_EVNT_SET_from_ISR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
+void OS_EVNT_DELETE ( OS_EVNT_Obj EventObject );
 #endif
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
 

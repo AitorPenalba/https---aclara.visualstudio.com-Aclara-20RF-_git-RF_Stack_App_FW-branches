@@ -372,10 +372,10 @@ static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] );
 const char pTskName_OSEVNTTest[]      = "TMEVT";
 static OS_EVNT_Obj eventTestObj;
 static OS_EVNT_Handle eventTestHandle = &eventTestObj;
-bool osEventTaskCreated = FALSE;
-bool osEventCreated = FALSE;
-uint32_t waitBit;
-bool waitForAll;
+static bool osEventTaskCreated = FALSE;
+static bool osEventCreated = FALSE;
+static uint32_t waitBit;
+static bool waitForAll;
 #endif
 
 #if ( TM_LINKED_LIST == 1)
@@ -2438,7 +2438,7 @@ uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] )
       {
          OS_TASK_ExitId( pTskName_OSEVNTTest );
          osEventTaskCreated = FALSE;
-         vEventGroupDelete( eventTestObj );
+         OS_EVNT_DELETE( eventTestObj );
          DBG_logPrintf( 'R', "Test Event Task Delete Success" );
          retVal = eSUCCESS;
       }
