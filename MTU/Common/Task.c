@@ -347,10 +347,9 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eSM_TSK_IDX,               SM_Task,                      1000,  20, (char *)pTskName_Sm,     DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #if 1 // TODO: RA6E1 Enable once PHY_Init gets succeeded
    { ePHY_TSK_IDX,              PHY_Task,                     2100,  21, (char *)pTskName_Phy,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-#endif
    { eMAC_TSK_IDX,              MAC_Task,                     1500,  22, (char *)pTskName_Mac,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
-
+#endif
 #if ENABLE_HMC_TASKS
 //   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
 #endif
@@ -653,7 +652,16 @@ void OS_TASK_Create_All ( bool initSuccess )
                 * that there is an issue creating a task.  Look at pTaskList->TASK_TEMPLATE_INDEX to figure out which task
                 * was not created properly.  */
                while(true) /*lint !e716  */
+#if ( RTOS_SELECTION == FREE_RTOS )
+               {
+                  OS_TASK_Sleep(500); /* If some task failed to start, blink tack-on LED at 1Hz forever or until IWDT gets us */
+                  TEST_LED_TACKON_ON;
+                  OS_TASK_Sleep(500);
+                  TEST_LED_TACKON_OFF;
+               }
+#else
                {}  /* Todo:  We may wish to discuss the definition of LEDs.  Maybe we could add code here. */
+#endif
             }
             // TODO: RA6: DG: Move these lines to OS_Task_Create
 

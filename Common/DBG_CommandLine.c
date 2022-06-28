@@ -92,8 +92,9 @@
 #endif
 #include "ecc108_physical.h" // TODO: RA6E1 Bob: This is needed by DBG_CommandLine_MacAddr
 //#include "compiler_types.h"
-//#include "si446x_cmd.h"
-//#include "si446x_api_lib.h"
+#include "si446x_api_lib.h"
+#include "si446x_cmd.h"
+#include "si446x_prop.h"
 #include "time_sync.h"
 //#include "SELF_test.h"
 #include "mode_config.h"
@@ -149,6 +150,9 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #endif
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 #include "MK66F18.h"
+#endif
+#if ( TM_BSP_SW_DELAY == 1 )
+#include "sys_clock.h"
 #endif
 
 /* #DEFINE DEFINITIONS */
@@ -322,8 +326,13 @@ static uint32_t DBG_CommandLine_usbaddr( uint32_t argc, char *argv[] );
 #if ( TEST_SYNC_ERROR == 1 )
 static uint32_t DBG_CommandLine_SyncError( uint32_t argc, char *argv[] );
 #endif
+#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_NoiseBandClkOff( uint32_t argc, char *argv[] );
+#endif
 #if ( MCU_SELECTED == RA6E1 )
 static uint32_t DBG_CommandLine_CoreClocks( uint32_t argc, char *argv[] );
+static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] );
 #endif
 
 static const struct_CmdLineEntry DBG_CmdTable[] =
@@ -500,7 +509,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
                    "                                   rxFraming (arg2) and RxMode (arg3). No arg2/3 assumes SRFN" },
 #endif // ( RTOS_SELECTION )
 #if ( EP == 1 )
-//   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" }, // TODO: RA6E1 Bob: Do we want to replace this with our temporary test LED?
+   { "led",          DBG_CommandLine_LED,             "Turn LEDs on/off" },
 #if ( LP_IN_METER != 0 )
    { "lpstats",      DBG_CommandLine_lpstats,         "Dump Load Profile info. Usage: lptstats [first_block [last_block]]" },
 #endif
@@ -540,6 +549,10 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
    { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
    { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
+#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+   { "noisebandClkOn",  DBG_CommandLine_NoiseBandClkOn,     "Display/compute the noise for a range of frequencies with 1MHz clock out" },
+   { "noisebandClkOff", DBG_CommandLine_NoiseBandClkOff,    "Display/compute the noise for a range of frequencies without 1MHz clock out" },
+#endif
    { "noiseestimate", DBG_CommandLine_NoiseEstimate,  "Display the noise estimate" },
    { "noiseestimatecount", DBG_CommandLine_NoiseEstimateCount, "Display/Set the noise estimate count" },
    { "noiseestimaterate", DBG_CommandLine_NoiseEstimateRate, "Display/Set the noise estimate rate" },
@@ -690,6 +703,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #elif ( RTOS_SELECTION == FREE_RTOS )
+   { "testBSPSWDelay", DBG_CommandLine_TestSWDelay,   "Test Renesas BSP R_BSP_SoftwareDelay function" },
    { "time",         DBG_CommandLine_time,            "RTC and SYS time.\r\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #endif // ( RTOS_SELECTION )
@@ -4040,172 +4054,195 @@ static uint32_t DBG_CommandLine_lpstats ( uint32_t argc, char *argv[] )
 }
 #endif //( LP_IN_METER != 0 )
 
-///***********************************************************************************************************************
-//   Function Name: DBG_CommandLine_LED
-//
-//   Purpose: Turn LEDs Off or On and set drive state to High or Low.
-//
-//   Arguments:
-//      argc - Number of Arguments passed to this function
-//      argv - pointer to the list of arguments passed to this function
-//
-//   Returns: void
-//***********************************************************************************************************************/
-//uint32_t DBG_CommandLine_LED( uint32_t argc, char *argv[] )
-//{
-//   uint8_t bHi    = false;
-//   uint8_t bOn    = false;
-//   uint8_t bValid = true;
-//   uint8_t uLed;
-//   uint8_t string[VER_HW_STR_LEN];   /* Version string including the two '.' and a NULL */
-//
-//   ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
-//
-//   /* Rev C HW does not support LED functionality */
-//   if ( 'C' == string[0] )
-//   {
-//      DBG_printf( "This is Rev C HW, LED operations are not available" );
-//
-//      return( 0 );
-//   }
-//
-//   if ( ( 3 == argc ) || ( argc == 4 ) )
-//   {
-//
-//
-//      /* set LED's to manual control */
-//      LED_enableManualControl();
-//
-//
-//      if ( ( 0 == strcmp( argv[1], "0" ) ) || ( 0 == strcmp( argv[1], "1" ) ) || ( 0 == strcmp( argv[1], "2" ) ) )
-//      {
-//         uLed = ( uint8_t )( argv[1][0] - '0' );
-//      }
-//      else
-//      {
-//         bValid = false;
-//      }
-//
-//      if ( ( 0 == strcasecmp( argv[2], "on" ) ) || ( 0 == strcmp( argv[2], "1" ) ) )
-//      {
-//         bOn = true;
-//      }
-//      else if ( ( 0 == strcasecmp( argv[2], "off" ) ) || ( 0 == strcmp( argv[2], "0" ) ) )
-//      {
-//         bOn = false;
-//      }
-//      else
-//      {
-//         bValid = false;
-//      }
-//
-//      if ( argc == 4 )
-//      {
-//         if ( ( 0 == strcasecmp( argv[3], "hi" ) ) || ( 0 == strcmp( argv[3], "1" ) ) )
-//         {
-//            bHi = true;
-//         }
-//         else if ( ( 0 == strcasecmp( argv[3], "lo" ) ) || ( 0 == strcmp( argv[3], "0" ) ) )
-//         {
-//            bHi = false;
-//         }
-//         else
-//         {
-//            bValid = false;
-//         }
-//      }
-//
-//      if ( bValid )
-//      {
-//         if ( argc == 4 )
-//         {
-//            DBG_printf( "%s %s %s %s", argv[0], argv[1], argv[2], argv[3] );
-//         }
-//         else
-//         {
-//            DBG_printf( "%s %s %s", argv[0], argv[1], argv[2] );
-//         }
-//
-//         switch( uLed ) /*lint !e644 if bValid, uLed is initialized  */
-//         {
-//            case 0:
-//            {
-//               if ( true == bOn )
-//               {
-//                  if ( true == bHi )
-//                  {
-//                     GRN_LED_PIN_DRV_HIGH();
-//                  }
-//                  else
-//                  {
-//                     GRN_LED_PIN_DRV_LOW();
-//                  }
-//                  GRN_LED_ON();
-//               }
-//               else
-//               {
-//                  GRN_LED_PIN_TRIS();
-//               }
-//               break;
-//            }
-//            case 1:
-//            {
-//               if ( true == bOn )
-//               {
-//                  if ( true == bHi )
-//                  {
-//                     RED_LED_PIN_DRV_HIGH();
-//                  }
-//                  else
-//                  {
-//                     RED_LED_PIN_DRV_LOW();
-//                  }
-//                  RED_LED_ON();
-//               }
-//               else
-//               {
-//                  RED_LED_PIN_TRIS();
-//               }
-//               break;
-//            }
-//            case 2:
-//            {
-//               if ( true == bOn )
-//               {
-//                  if ( true == bHi )
-//                  {
-//                     BLU_LED_PIN_DRV_HIGH();
-//                  }
-//                  else
-//                  {
-//                     BLU_LED_PIN_DRV_LOW();
-//                  }
-//                  BLU_LED_ON();
-//               }
-//               else
-//               {
-//                  BLU_LED_PIN_TRIS();
-//               }
-//               break;
-//            }
-//            default:
-//            {
-//               GRN_LED_OFF();
-//               RED_LED_OFF();
-//               BLU_LED_OFF();
-//               break;
-//            }
-//         }
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "Invalid number of parameters" );
-//   }
-//
-//   return( 0 );
-//}
-#endif
+/***********************************************************************************************************************
+   Function Name: DBG_CommandLine_LED
+
+   Purpose: Turn LEDs Off or On and set drive state to High or Low.
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: void
+***********************************************************************************************************************/
+uint32_t DBG_CommandLine_LED( uint32_t argc, char *argv[] )
+{
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) /* Are we running on the RA6E1 NIC for the I-210+c? */
+   char *pHelp = "Usage: LED {on | off | 0 | 1 }";
+   if ( 2 != argc )
+   {
+      DBG_printf( "%s", pHelp );
+   }
+   else if ( ( 0 == strcasecmp( argv[1], "on"  ) ) || ( 0 == strcmp( argv[1], "1" ) ) )
+   {
+      TEST_LED_TACKON_ON;
+   }
+   else if ( ( 0 == strcasecmp( argv[1], "off" ) ) || ( 0 == strcmp( argv[1], "0" ) ) )
+   {
+      TEST_LED_TACKON_OFF;
+   }
+   else
+   {
+      DBG_printf( "%s", pHelp );
+   }
+   return ( 0 );
+}
+#else
+   uint8_t bHi    = false;
+   uint8_t bOn    = false;
+   uint8_t bValid = true;
+   uint8_t uLed;
+   uint8_t string[VER_HW_STR_LEN];   /* Version string including the two '.' and a NULL */
+
+   ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+
+   /* Rev C HW does not support LED functionality */
+   if ( 'C' == string[0] )
+   {
+      DBG_printf( "This is Rev C HW, LED operations are not available" );
+
+      return( 0 );
+   }
+
+   if ( ( 3 == argc ) || ( argc == 4 ) )
+   {
+
+
+      /* set LED's to manual control */
+      LED_enableManualControl();
+
+
+      if ( ( 0 == strcmp( argv[1], "0" ) ) || ( 0 == strcmp( argv[1], "1" ) ) || ( 0 == strcmp( argv[1], "2" ) ) )
+      {
+         uLed = ( uint8_t )( argv[1][0] - '0' );
+      }
+      else
+      {
+         bValid = false;
+      }
+
+      if ( ( 0 == strcasecmp( argv[2], "on" ) ) || ( 0 == strcmp( argv[2], "1" ) ) )
+      {
+         bOn = true;
+      }
+      else if ( ( 0 == strcasecmp( argv[2], "off" ) ) || ( 0 == strcmp( argv[2], "0" ) ) )
+      {
+         bOn = false;
+      }
+      else
+      {
+         bValid = false;
+      }
+
+      if ( argc == 4 )
+      {
+         if ( ( 0 == strcasecmp( argv[3], "hi" ) ) || ( 0 == strcmp( argv[3], "1" ) ) )
+         {
+            bHi = true;
+         }
+         else if ( ( 0 == strcasecmp( argv[3], "lo" ) ) || ( 0 == strcmp( argv[3], "0" ) ) )
+         {
+            bHi = false;
+         }
+         else
+         {
+            bValid = false;
+         }
+      }
+
+      if ( bValid )
+      {
+         if ( argc == 4 )
+         {
+            DBG_printf( "%s %s %s %s", argv[0], argv[1], argv[2], argv[3] );
+         }
+         else
+         {
+            DBG_printf( "%s %s %s", argv[0], argv[1], argv[2] );
+         }
+
+         switch( uLed ) /*lint !e644 if bValid, uLed is initialized  */
+         {
+            case 0:
+            {
+               if ( true == bOn )
+               {
+                  if ( true == bHi )
+                  {
+                     GRN_LED_PIN_DRV_HIGH();
+                  }
+                  else
+                  {
+                     GRN_LED_PIN_DRV_LOW();
+                  }
+                  GRN_LED_ON();
+               }
+               else
+               {
+                  GRN_LED_PIN_TRIS();
+               }
+               break;
+            }
+            case 1:
+            {
+               if ( true == bOn )
+               {
+                  if ( true == bHi )
+                  {
+                     RED_LED_PIN_DRV_HIGH();
+                  }
+                  else
+                  {
+                     RED_LED_PIN_DRV_LOW();
+                  }
+                  RED_LED_ON();
+               }
+               else
+               {
+                  RED_LED_PIN_TRIS();
+               }
+               break;
+            }
+            case 2:
+            {
+               if ( true == bOn )
+               {
+                  if ( true == bHi )
+                  {
+                     BLU_LED_PIN_DRV_HIGH();
+                  }
+                  else
+                  {
+                     BLU_LED_PIN_DRV_LOW();
+                  }
+                  BLU_LED_ON();
+               }
+               else
+               {
+                  BLU_LED_PIN_TRIS();
+               }
+               break;
+            }
+            default:
+            {
+               GRN_LED_OFF();
+               RED_LED_OFF();
+               BLU_LED_OFF();
+               break;
+            }
+         }
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Invalid number of parameters" );
+   }
+
+   return( 0 );
+}
+#endif // ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
+#endif // (EP == 1)
+
 #if (EP == 1)
 /*******************************************************************************
 
@@ -12335,6 +12372,71 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    return ( 0 );
 }//lint !e429 Custodial pointer has not been freed or returned
 
+#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NoiseBandClkOn
+
+   Purpose: This function displays/compute the noise for a range of channels with 1MHz clock on
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
+{
+   PHY_Lock();      // Function will not return if it fails
+
+   (void)si446x_set_property( 0,
+                              SI446X_PROP_GRP_ID_GLOBAL,
+                              1,
+                              SI446X_PROP_GRP_INDEX_GLOBAL_CLK_CFG,
+                              SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_EN_TRUE_BIT |          // Enable divided system clock output
+                              SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_SEL_ENUM_DIV_30 << 3); // Divide clock by 30
+
+   PHY_Unlock();    // Function will not return if it fails
+
+   DBG_CommandLine_NoiseBand ( argc, argv );
+
+   return ( 0 );
+}
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_NoiseBandClkOff
+
+   Purpose: This function displays/compute the noise for a range of channels with 1MHz clock off
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_NoiseBandClkOff ( uint32_t argc, char *argv[] )
+{
+   PHY_Lock();      // Function will not return if it fails
+
+   (void)si446x_set_property( 0,
+                              SI446X_PROP_GRP_ID_GLOBAL,
+                              1,
+                              SI446X_PROP_GRP_INDEX_GLOBAL_CLK_CFG,
+                              0); // Clock off
+
+   PHY_Unlock();    // Function will not return if it fails
+
+   DBG_CommandLine_NoiseBand ( argc, argv );
+
+   return ( 0 );
+}
+#endif // ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+
 #if ( TEST_SYNC_ERROR == 1 )
 /******************************************************************************
 
@@ -13751,6 +13853,73 @@ static uint32_t DBG_CommandLine_CoreClocks( uint32_t argc, char *argv[] )
               R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_ICLK)     / 1000000,
               R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_FCLK)     / 1000000 );
   return 0;
+}
+#endif
+#if ( TM_BSP_SW_DELAY == 1 )
+static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] )
+{
+   bsp_delay_units_t units;
+   uint32_t startCycle, endCycle, diff, oldPriority;
+   float mult;
+   char *unitStr, *delayError = "Delay is too long for IWDT";
+   if ( argc == 3 )
+   {
+      uint32_t delayPeriod = ( uint32_t )atol( argv[1] );
+      if ( 0 == strcasecmp( "S", argv[2] ) )
+      {
+         units = BSP_DELAY_UNITS_SECONDS;
+         if ( delayPeriod > 34 )
+         {
+            INFO_printf("%s", delayError);
+            return ( 0 );
+         }
+      } else if ( 0 == strcasecmp( "M", argv[2] ) )
+      {
+         units = BSP_DELAY_UNITS_MILLISECONDS;
+         if ( delayPeriod > 34000 )
+         {
+            INFO_printf("%s", delayError);
+            return ( 0 );
+         }
+      } else if ( 0 == strcasecmp( "U", argv[2] ) )
+      {
+         units = BSP_DELAY_UNITS_MICROSECONDS;
+         if ( delayPeriod > 34000000 )
+         {
+            INFO_printf("%s", delayError);
+            return ( 0 );
+         }
+      }
+      else
+      {
+         INFO_printf( "bad units parameter: %s, use s|m|u", argv[2] );
+         return ( 0 );
+      }
+      INFO_printf( "Will shortly begin delay of %d %s", delayPeriod, argv[2] );
+      OS_TASK_Sleep( 1000 ); //Wait for debug to print
+      oldPriority = OS_TASK_Get_Priority( pTskName_Dbg );
+      OS_TASK_Set_Priority( pTskName_Dbg, OS_MAX_TASK_PRIORITY );
+      INFO_printf( "Delay is starting" );
+
+      startCycle = DWT->CYCCNT;
+      R_BSP_SoftwareDelay( delayPeriod, units);
+      endCycle   = DWT->CYCCNT;
+
+      OS_TASK_Set_Priority( pTskName_Dbg, oldPriority );
+      diff = endCycle - startCycle;
+      double dDiff = (double)diff / (double)getCoreClock();
+      if ( dDiff >= 1.0 ) { unitStr = "sec"; mult = 1.0; }
+      else if ( dDiff > 0.001 ) { unitStr = "msec"; mult = 1000.0; }
+      else { unitStr = "usec"; mult = 1000000.0; }
+      dDiff *= mult;
+      INFO_printf( "Delay is complete: startCycle = %u, endCycle = %u, diff = %u, %u.%06u %s", startCycle, endCycle, diff,
+                   (uint32_t)dDiff, (uint32_t)( ( dDiff - (uint32_t)dDiff ) * 1000000 ), unitStr );
+   }
+   else
+   {
+      INFO_printf("%s requires two parameters: delay time and units; units = { s | m | u }", argv[0] );
+   }
+   return ( 0 );
 }
 #endif
 ///*lint +esym(818, argc, argv) argc, argv could be const */

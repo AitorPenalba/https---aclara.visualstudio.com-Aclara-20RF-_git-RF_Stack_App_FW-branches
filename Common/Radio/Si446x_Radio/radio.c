@@ -4696,8 +4696,8 @@ static void wait_us(uint32_t time)
    }
    while (TimeDiff < time);
    #else
-   #warning "Using the Renesas R_BSP_SoftwareDelay instead of OS_TICK_Get_Diff_InMicroseconds and dividing by 2!"
-   R_BSP_SoftwareDelay ((time+1)/2, BSP_DELAY_UNITS_MICROSECONDS);
+   #warning "Using the Renesas R_BSP_SoftwareDelay instead of OS_TICK_Get_Diff_InMicroseconds!"
+   R_BSP_SoftwareDelay ((time+1), BSP_DELAY_UNITS_MICROSECONDS);
    #endif
 #endif
 

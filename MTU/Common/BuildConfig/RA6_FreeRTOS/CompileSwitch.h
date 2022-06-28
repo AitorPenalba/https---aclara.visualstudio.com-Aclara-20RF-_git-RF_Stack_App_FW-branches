@@ -309,7 +309,9 @@
 #define TM_EVENTS                         0
 #define TM_LINKED_LIST                    0
 #define TM_CRC_UNIT_TEST                  0
-#define TM_TIME_COMPOUND_TEST             0
+#define TM_TIME_COMPOUND_TEST             1
+#define TM_BSP_SW_DELAY                   1 /* Tests the Renesas R_BSP_SoftwareDelay function */
+#define TM_1MHZ_OFF_ON_NOISEBAND          1 /* Adds two debug commands that run noiseband with the 1MHz clock from the SI4467 off or on */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */
