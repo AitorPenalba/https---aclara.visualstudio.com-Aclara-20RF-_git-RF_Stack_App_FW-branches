@@ -37,7 +37,12 @@ typedef void (* TaskFunction_t)( void * );
  * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
  * definition here is not suitable for your application. */
 #ifndef pdMS_TO_TICKS
+#if 0 /* Aclara Added - Start */
     #define pdMS_TO_TICKS( xTimeInMs )    ( ( TickType_t ) ( ( ( TickType_t ) ( xTimeInMs ) * ( TickType_t ) configTICK_RATE_HZ ) / ( TickType_t ) 1000U ) )
+#else
+   #define pdMS_TO_TICKS( xTimeInMs )    ( ( TickType_t ) (  ( uint64_t ) ( ( uint64_t ) ( xTimeInMs ) * ( uint64_t ) configTICK_RATE_HZ ) / ( TickType_t ) 1000U ) )
+#endif /* Aclara Added - End */
+
 #endif
 
 #define pdFALSE                                  ( ( BaseType_t ) 0 )

@@ -69,11 +69,7 @@
 /* MACRO DEFINITIONS */
 
 #define PERSISTENT                  __no_init
-#if ( MCU_SELECTED == NXP_K24 )
 #define CLRWDT()                    WDOG_Kick()
-#elif ( MCU_SELECTED == RA6E1 )
-#define CLRWDT()                    1   //TODO: RA6: Melvin: add RA6E1 equivalent for the same
-#endif
 #define NOP()                       asm("nop")
 #if ( MCU_SELECTED == NXP_K24 )
 #define RESET()                     { SCB_AIRCR = SCB_AIRCR_VECTKEY(0x5FA)| SCB_AIRCR_SYSRESETREQ_MASK; while(1){} }
@@ -106,7 +102,7 @@
 #define  TRIS_OUTPUT             0           /* Set data I/O Pin as an Output */
 
 #define  ANALOG                  1           /* Set data I/O Pin as an Analog Input */
-#define  DIGITAL                 0           /* Set data I/O Pin as a Digial I/O */
+#define  DIGITAL                 0           /* Set data I/O Pin as a Digital I/O */
 
 #define  OPEN_DRAIN_ON           1           /* Set data output pin as open drain output */
 #define  OPEN_DRAIN_OFF          0           /* Set data output pin to drive output high/low */
@@ -305,7 +301,7 @@
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* LED definitions */
-
+#if ( MCU_SELECTED == NXP_K24 )
 #define LED0_PIN                 (1<<0)
 #define LED1_PIN                 (1<<1)
 #define LED2_PIN                 (1<<2)
@@ -347,6 +343,52 @@
 #define LED_HMC_OFF()            LED0_PIN_OFF()
 #define LED_HMC_ON()             LED0_PIN_ON()
 #define LED_HMC_INIT()           LED0_PIN_TRIS()
+#elif ( MCU_SELECTED == RA6E1 )
+/* NO LEDs in RA6E1 */
+
+#define LED0_PIN                 (1<<0)
+#define LED1_PIN                 (1<<1)
+#define LED2_PIN                 (1<<2)
+
+//LED0
+#define GRN_LED_OFF()
+#define GRN_LED_ON()
+#define GRN_LED_TOGGLE()
+#define GRN_LED_PIN_DRV_HIGH()
+#define GRN_LED_PIN_DRV_LOW()
+/* Set PCR for GPIO, Make Output */
+#define GRN_LED_PIN_TRIS()
+/* Configuring the unused LED0's pin mode to analog which will result in lowest power consumption */
+#define GRN_LED_PIN_DISABLE()
+
+//LED1
+#define RED_LED_OFF()
+#define RED_LED_ON()
+#define RED_LED_TOGGLE()
+#define RED_LED_PIN_DRV_HIGH()
+#define RED_LED_PIN_DRV_LOW()
+/* Set PCR for GPIO, Make Output */
+#define RED_LED_PIN_TRIS()
+/* Configuring the unused LED1's pin mode to analog which will result in lowest power consumption */
+#define RED_LED_PIN_DISABLE()
+
+//LED2
+#define BLU_LED_OFF()
+#define BLU_LED_ON()
+#define BLU_LED_TOGGLE()
+#define BLU_LED_PIN_DRV_HIGH()
+#define BLU_LED_PIN_DRV_LOW()
+/* Set PCR for GPIO, Make Output */
+#define BLU_LED_PIN_TRIS()
+/* Configuring the unused LED2's pin mode to analog which will result in lowest power consumption */
+#define BLU_LED_PIN_DISABLE()
+
+/* LED configuration. */
+#define LED_HMC_OFF()            LED0_PIN_OFF()
+#define LED_HMC_ON()             LED0_PIN_ON()
+#define LED_HMC_INIT()           LED0_PIN_TRIS()
+
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 
 #if ( MCU_SELECTED == RA6E1 )
 #define TEST_LED_TACKON          BSP_IO_PORT_03_PIN_01       /* Tack on LED is located on P301, TP119, pin 49 */
@@ -429,8 +471,8 @@
 #define NV_CS_TRIS_LG()
 #define NV_CS_ACTIVE()                 R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_LOW)
 #define NV_CS_INACTIVE()               R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_HIGH)
-#define NV_BUSY()           1 // return always true
-#define NV_MISO_CFG(port, cfg)         eSUCCESS
+#define NV_BUSY()                      R_BSP_PinRead(BSP_IO_PORT_05_PIN_03)
+#define NV_MISO_CFG(port, cfg)         R_BSP_PinCfg (port, cfg)
 #endif
 
 /* Set PCR for GPIO, Make Output */
@@ -450,14 +492,18 @@
                                                                                                           edge */
 #else
 #if ( MCU_SELECTED == NXP_K24 ) // IRQ not available for QSPI on RA6E1
-#define DVR_EFL_BUSY_IRQ_EI()          { PORTA_ISFR = (1 << 17); PORTA_PCR17 |= PORT_PCR_IRQC(0xc); } /* IRQ on high
-                                                                                                         level  */
+#define DVR_EFL_BUSY_IRQ_EI()          { PORTA_ISFR = (1 << 17); PORTA_PCR17 |= PORT_PCR_IRQC(0xc); } /* IRQ on high level  */
 #else
-#define DVR_EFL_BUSY_IRQ_EI()
+#define DVR_EFL_BUSY_IRQ_EI()          R_ICU_ExternalIrqEnable( &miso_busy_ctrl );
 #endif
+
 #endif
 /* Disable flash busy IRQ and reset IRQ flag */
+#if ( MCU_SELECTED == NXP_K24 )
 #define DVR_EFL_BUSY_IRQ_DI()          { PORTA_PCR17 &= ~PORT_PCR_IRQC(0xf); PORTA_ISFR = ( 1 << 17 ); }
+#else
+#define DVR_EFL_BUSY_IRQ_DI()          R_ICU_ExternalIrqDisable( &miso_busy_ctrl )
+#endif
 #define DVR_EFL_BUSY_TRIG              (PORTA_ISFR & (1 << 17)   /* ISF Triggered? */
 
 /* The following definition is only used when the SPI driver in the device is used to control the CS pin.

@@ -678,7 +678,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>Y84500-1-V3.00.xx.hex</state>
+                    <state>Y84580-1-V3.00.xx.hex</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -725,7 +725,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>I210+c_RA6_Dev.out</state>
+                    <state>Y84580-1-V3.00.xx.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -1125,10 +1125,16 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\ADC.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\AES.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\AGT.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\AGT.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.h</name>
@@ -1140,7 +1146,19 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\CRC.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\CRC.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\LED.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\RA6_OptionsMemory.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\radio_hal.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\radio_hal.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\RTC.c</name>
@@ -1153,6 +1171,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\UART.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\WDOG.c</name>
             </file>
         </group>
         <group>
@@ -1725,7 +1746,7 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
@@ -1946,6 +1967,21 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\user_settings.h</name>
                 </file>
             </group>
+            <group>
+                <name>LastGasp</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\lpm_app.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\lpm_app.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\pwr_last_gasp.h</name>
+                </file>
+            </group>
             <file>
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
@@ -2008,12 +2044,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_config.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Common\pwr_last_gasp.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Common\pwr_last_gasp.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_restore.c</name>

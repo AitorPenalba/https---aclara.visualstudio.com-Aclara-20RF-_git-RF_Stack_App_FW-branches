@@ -60,7 +60,7 @@
 #include "time_util.h"
 #include "timer_util.h"
 #include "time_sync.h"
-#include "time_sys.h"
+#include "time_sys.h"  // TODO: RA6E1: Do we need this include?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
 #endif
@@ -1230,11 +1230,7 @@ void MAC_Task ( taskParameter )
    INFO_printf("MAC_Task starting...");
 
 #if ( EP == 1 )
-#if 0 // TODO: RA6E1 - lastgasp
    if( PWRLG_LastGasp() == true )
-#else
-   if( 0 )
-#endif
    {  // Booting in Low Power mode, so set the tx frequency to the value that was saved
       // When booting in normal mode the phy will recover from NV.
       uMessagePend = 100;
@@ -2087,11 +2083,7 @@ static void Process_DataIndication( const PHY_DataInd_t *phy_indication )
    {
 
 #if EP == 1
-#if 0 // TODO: RA6E1 - lastgasp
       if(PWRLG_LastGasp() == false)
-#else
-      if(1)
-#endif
 #endif
       {  // Normal Mode
          mac_frame_t rx_frame;
@@ -2410,10 +2402,10 @@ void MAC_PauseTx( bool pause )
    {
 #if ( MCU_SELECTION == NXP_K24 ) // TODO: RA6E1 Bob: Is this needed anymore?
       LED_setRedLedStatus(RADIO_ENABLED);
+#endif // TODO: RA6E1 Bob: Is this needed anymore?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
       LED_checkModeStatus();           /* Radio got enabled replace the msg Hot with Mode */
 #endif
-#endif // TODO: RA6E1 Bob: Is this needed anymore?
    }
 #endif
 }
@@ -3363,16 +3355,14 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
 {
    MAC_SET_STATUS_e eStatus;
 
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 task id implementation in freeRTOS
    // This function should only be called inside the MAC task
-   if ( _task_get_id() != _task_get_id_from_name( "MAC" ) ) {
-     ERR_printf("WARNING: MAC_Attribute_Set should only be called inside the MAC task. Please use MAC_SetRequest instead.");
+   if ( 0 != strcmp("MAC", OS_TASK_GetTaskName()) ) {
+     ERR_printf("WARNING: MAC_Attribute_Set should only be called inside the MAC task. Please use MAC_Attribute_Set instead.");
    }
-#endif
 
    switch (pSetReq->eAttribute)  /*lint !e788 not all enums used within switch */
    {
-      // Writeable Attributes
+      // Writable Attributes
       case eMacAttr_AcceptedFrameCount:            eStatus = eMAC_SET_READONLY; break;
       case eMacAttr_AckDelayDuration:              eStatus = eMAC_SET_READONLY; break;
       case eMacAttr_AckWaitDuration:               eStatus = eMAC_SET_READONLY; break;

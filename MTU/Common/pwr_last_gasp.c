@@ -49,7 +49,7 @@
 #include "SM_Protocol.h"
 #include "SM.h"
 #if ( MCU_SELECTED == RA6E1 )
-//#include "lpm_app.h" // TODO: RA6E1: DG: Add later
+#include "lpm_app.h"
 #include "AGT.h"
 #include "bsp_pin_cfg.h"
 #endif
@@ -79,7 +79,7 @@ extern const uint8_t uStartUpTblCnt;
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
-#define PWRLG_PRINT_ENABLE       0  /* Enable to use LG_PRNT_INFO() */
+#define PWRLG_PRINT_ENABLE       1  /* Enable to use LG_PRNT_INFO() */
 
 #define ENABLE_LED               0  /* Set to non-zero to used LEDs for debugging purposes   */
 
@@ -113,7 +113,7 @@ extern const uint8_t uStartUpTblCnt;
 //These MAY become configurable
 static const float fCapacitanceRevB          = ( float )10.0;     /* Rev B HW's Super cap capacitance value in Farads */
 static const float fCapacitanceRevC          = ( float )5.0;      /* Rev C HW's Super cap capacitance value in Farads */
-static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */
+static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */  // TODO: RA6E1: This value needs to be updated
 static const float fEnergyCollisionDetection = ( float )0.0;      /* Energy used to detect a collision */
 static const float fEnergyTransmit           = ( float )0.65;     /* Energy used to transmit the message */
 static const float fMinimumRunVoltageRevB    = ( float )1.7;      /* Minimum supercap voltage needed to run micro */
@@ -191,17 +191,13 @@ static bool             powerStable( bool curState );
 #define LG_PRNT_INFO( fmt, ... )
 #endif // #if ( PWRLG_PRINT_ENABLE != 0 )
 
-#if 0
 #if ( MCU_SELECTED == RA6E1 )
 static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint8_t uMode );
+static void ClearVBATT ( void );
 
-#define EnterVLLS(counter, eUnits, uMode)    EnterLowPowerMode(counter, eUnits, uMode)  // TODO: RA6: DG: Convert the old code or the new?
-#define EnterLLS(counter, eUnits )           EnterLowPowerMode(counter, eUnits, 0)  // TODO: RA6: DG: Convert the old code or the new?
+#define EnterVLLS(counter, eUnits, uMode)    EnterLowPowerMode(counter, eUnits, uMode)
+#define EnterLLS(counter, eUnits)            EnterLowPowerMode(counter, eUnits, 0)
 #endif
-#else
-#define EnterVLLS(counter, eUnits, uMode)  /* TODO: RA6: DG: Remove later */
-#define EnterLLS(counter, eUnits )         /* TODO: RA6: DG: Remove later */
-#endif // if 0
 
 #if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
@@ -420,6 +416,7 @@ void PWRLG_Task( taskParameter )
 #if ( PWRLG_PRINT_ENABLE != 0 )
             OS_TASK_Sleep( OS_SLEEP_PRINT_DELAY_MS ); // Adding for Print
 #endif
+            OS_TASK_Sleep( OS_SLEEP_PRINT_DELAY_MS ); // Adding for Print /* TODO: Remove */
             if ( !TxSuccessful )
             {
                RDO_PA_EN_OFF();  /* Disable the Radio PA  */
@@ -684,6 +681,7 @@ void PWRLG_TxFailure( void )
 
 #if ( LG_WORST_CASE_TEST == 0 )
    uMilliseconds = aclara_randu( MAC_CSMA_MIN_BACKOFF_TIME_DEFAULT, MAC_CSMA_MAX_BACKOFF_TIME_DEFAULT );
+//   LG_PRNT_INFO("Milliseconds:%ld\n", uMilliseconds);
 #else
    GetConf = MAC_GetRequest( eMacAttr_CsmaMaxBackOffTime );
    if ( GetConf.eStatus == eMAC_GET_SUCCESS )
@@ -714,12 +712,19 @@ void PWRLG_TxFailure( void )
       if ( eSimLGDisabled == EVL_GetLGSimState() )
       {
 #endif
+//         LG_PRNT_INFO("\nTx-Fail:LLS\n");
          /* The CSMA back-off is long, switch to LLS mode.  */
+#if ( MCU_SELECTED == NXP_K24 )
 #if ( PWRLG_PRINT_ENABLE == 0 )
          EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
 #else
          /* Subtracting the sleep delay added for print*/
-         EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS );
+//         EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS );
+         EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
+#endif
+#elif( MCU_SELECTED == RA6E1 )
+         // TODO: RA6E1: Support SW Standby instead
+         OS_TASK_Sleep( uMilliseconds );
 #endif
 #if ( LAST_GASP_SIMULATION == 1 )
       }
@@ -784,9 +789,19 @@ void PWRLG_Startup( void )
       SMC_PMPROT = (SMC_PMPROT_AVLP_MASK | SMC_PMPROT_ALLS_MASK | SMC_PMPROT_AVLLS_MASK);
    }
 #endif
+#if ( MCU_SELECTED == RA6E1 ) /* TEST Code */
+   LG_PRNT_INFO("RSTSR0 0x%02X", R_SYSTEM->RSTSR0 );
+   LG_PRNT_INFO("RSTSR1 0x%02X", R_SYSTEM->RSTSR1 );
+   LG_PRNT_INFO("RSTSR2 0x%02X", R_SYSTEM->RSTSR2 );
+#endif
    VBATREG_EnableRegisterAccess();
    /* Last Gasp or Restoration not active in Ship mode or Shop mode(a.k.a decommission mode) */
+#if ( MCU_SELECTED == NXP_K24 )
    if ( ( 0 == VBATREG_SHIP_MODE ) && ( 0 == VBATREG_METER_SHOP_MODE ) )
+#elif ( MCU_SELECTED == RA6E1 )
+//   ClearVBATT();
+   if ( ( 0 == VBATREG_SHIP_MODE ) && ( 0 == VBATREG_METER_SHOP_MODE )  && ( 0 == PWRLG_SOFTWARE_RESET() ) )
+#endif
    {
 #if ( DEBUG_PWRLG == 0 )
 #if ( MCU_SELECTED == NXP_K24 )
@@ -835,7 +850,6 @@ void PWRLG_Startup( void )
       /* This block handles timer event.   */
       if ( ( uLLWU_F3 & LLWU_F3_MWUF0_MASK ) != 0  )
 #elif ( MCU_SELECTED == RA6E1 )
-         /* TODO: RA6: DG: Do we need to check DPSRSTF before entering here?? ?*/
       if ( R_SYSTEM->DPSIFR2_b.DRTCAIF != 0 )  /* RTC Alarm Interrupt */
 #endif
       {
@@ -874,6 +888,25 @@ void PWRLG_Startup( void )
                   uLLWU_F3 = 0;        /* Clear the cause(s) of the wakeup.   */
                   uLLWU_FILT1 = 0;
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+#if 0        /* NOTE: Followed the instruction to clear reset flags mentioned in the manual, however the LPM cancel source was the RTC */
+                  /* Note: 1: After the setting of DPSIER2 is modified, an edge may be internally generated depending on the state of the pin, resulting in
+                        DPSIFR2 being set to 1. Therefore, DPSIFR2 should be cleared to 0 before entering Deep Software Standby mode. */
+                  /* Note: 2: To clear DPSIFR2 to 0x00 after modifying DPSIER2, wait for at least 6 PCLKB cycles, read DPSIFR2, and then write 0 to
+                           DPSIFR2. Six or more PCLKB cycles can be secured, for example, by reading DPSIER2. */
+                  R_SYSTEM->DPSIER2;
+                  LG_PRNT_INFO("DPSIER2:%ld", R_SYSTEM->DPSIER2);
+                  R_SYSTEM->DPSIER2 = 0U;
+                  LG_PRNT_INFO("DPSIER2:%ld", R_SYSTEM->DPSIER2);
+
+                  R_SYSTEM->DPSIFR2;
+                  LG_PRNT_INFO("DPSIFR2:%ld", R_SYSTEM->DPSIFR2);
+                  R_SYSTEM->DPSIFR2 = 0U;
+                  LG_PRNT_INFO("DPSIFR2:%ld", R_SYSTEM->DPSIFR2);
+#endif
+                  PWRLG_SOFTWARE_RESET_SET( 1 );   /* Done with LG */
+                  LG_PRNT_INFO("Complete");
+#endif
                   RESET(); /* Power restored, reset to restart MTU.  PWR_SafeReset() not necessary */
                }
                else        /* Outage declared, restoration not met. Set state to "wait for restoration" and sleep.   */
@@ -903,16 +936,18 @@ void PWRLG_Startup( void )
                   uLLWU_F3 = 0;        /* Clear the cause(s) of the wakeup.   */
                   uLLWU_FILT1 = 0;
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+                  PWRLG_SOFTWARE_RESET_SET( 1 );   /* Done with LG */
+#endif
                   RESET();             /* Power restored, reset to restart MTU.   */
                }
                else
                {
                   LG_PRNT_INFO( "Wait for LP EXIT\n\r" );
                   PWRLG_STATE_SET( PWRLG_STATE_WAIT_LP_EXIT );
-#if ( MCU_SELECTED == NXP_K24 )
                   EnterVLLS( VBATREG_POWER_RESTORATION_TIMER, LPTMR_MILLISECONDS, 1 );  //DG: Why???
-#elif ( MCU_SELECTED == RA6E1 )
-                  EnterVLLS( VBATREG_POWER_RESTORATION_TIMER, LPTMR_SECONDS, 1 );   /* Forcing the MCU to go through reset after timer expires */
+#if ( MCU_SELECTED == RA6E1 )
+                  RESET();  /* Forcing MCU to go through a reset */
 #endif
                }
             }
@@ -977,6 +1012,9 @@ void PWRLG_Startup( void )
                   uLLWU_F3 = 0;        /* Clear the cause(s) of the wakeup.   */
                   uLLWU_FILT1 = 0;
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+                  PWRLG_SOFTWARE_RESET_SET( 1 );   /* Done with LG */
+#endif
                   RESET(); /* PWR_SafeReset() not necessary */
                }
             }
@@ -990,14 +1028,18 @@ void PWRLG_Startup( void )
                   PWRLG_MESSAGE_NUM_SET( 0 );            /* Init number of messages sent. */
                   VBATREG_CURR_TX_ATTEMPT = 0;           /* Init number of transmission attempts   */
                   PWRLG_STATE_SET( PWRLG_STATE_SLEEP );  /* Set state to "sleep"  */
-
-                  PWRLG_SOFTWARE_RESET_SET( 1 );   /* This bit is set so it can be detmerined if last gasp was terminated
+#if ( MCU_SELECTED == NXP_K24 )
+                  PWRLG_SOFTWARE_RESET_SET( 1 );   /* This bit is set so it can be determined if last gasp was terminated
                                                    before or after all last gasp messages were sent. This bit will
                                                    remain set if last gasp was terminated by power being restore before
                                                    all capacity has been used. */
+#endif
                   if ( VBATREG_OUTAGE_DECLARATION_DELAY <= 60000 )
                   {
                      EnterVLLS( ( uint16_t )VBATREG_OUTAGE_DECLARATION_DELAY, LPTMR_MILLISECONDS, 1 );
+#if ( MCU_SELECTED == RA6E1 )
+                     RESET();  /* Forcing MCU to go through a reset */
+#endif
                   }
                   else
                   {
@@ -1013,7 +1055,8 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
                      EnterVLLS( ( uint16_t ) 0, LPTMR_MILLISECONDS, 1 );   /* Continue with current time out value.  */
 #elif ( MCU_SELECTED == RA6E1 )
-                     EnterVLLS( ( uint16_t ) 0, LPTMR_SECONDS, 1 );        /* Continue with current time out value.  */
+                     EnterVLLS( ( uint16_t )0, LPTMR_SECONDS, 1 );        /* Continue with current time out value.  */
+                     //RESET();   /* Forcing the MCU to go through reset */ // TODO: DG: Review
 #endif
                   }
                   else  /* All messages sent, wait for power restored.   */
@@ -1027,6 +1070,12 @@ void PWRLG_Startup( void )
             }
          }
       }
+#if ( MCU_SELECTED == RA6E1 )
+      else
+      {
+         LG_PRNT_INFO("Not LPM Wake-up");
+      }
+#endif
    }
    else /* In Ship mode or Shop mode. Hence Do not perform Last Gasp feature */
    {
@@ -1068,8 +1117,12 @@ void PWRLG_Restoration( uint16_t powerAnomalyCount )
       resetCause = PWR_getResetCause();
       LG_PRNT_INFO("\n Reset Cause: %d \n ",resetCause);
       if( ( resetCause & RESET_SOURCE_POWER_ON_RESET ) ||
-              ( resetCause & RESET_SOURCE_LOW_LEAKAGE_WAKEUP ) ||
-                 ( resetCause & RESET_SOURCE_LOW_VOLTAGE ) )
+#if ( MCU_SELECTED == NXP_K24 )
+          ( resetCause & RESET_SOURCE_LOW_LEAKAGE_WAKEUP ) ||
+#elif ( MCU_SELECTED == RA6E1 )
+          ( resetCause & RESET_SOURCE_DEEP_SW_STANDBY_CANCEL ) ||
+#endif
+          ( resetCause & RESET_SOURCE_LOW_VOLTAGE ) )
       {
          if ( 0 == RESTORATION_TIME() )/* If never updated, bump the power quality count. */
          {
@@ -1198,10 +1251,10 @@ static void NextSleep( void )
 
       if ( !brnOut && powerStable( brnOut ) )
       {
-#if ( MCU_SELECTED == NXP_K24 )
          EnterVLLS( 1, LPTMR_MILLISECONDS, 1 );
-#elif ( MCU_SELECTED == RA6E1 )
+#if ( MCU_SELECTED == RA6E1 )
          EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */ // TODO: RA6E1: Verify
+         // RESET();  /* Forcing MCU to go through a reset */ // TODO: DG: Verify
 #endif
       }
    }
@@ -1230,9 +1283,10 @@ static void NextSleep( void )
          PWRLG_STATE_SET( PWRLG_STATE_TRANSMIT );  /* Next wakeup should transmit. */
          VBATREG_CURR_TX_ATTEMPT = 0;              /* Reset the Tx attempts for this message */
          EnterVLLS( uCounter, LPTMR_MILLISECONDS, 1 );
-#if ( MCU_SELECTED == RA6E1 ) /* TODO: DG: Review */
-         /* In K24, above line make the MCU go through a reset, where as for RA6, we need to force that by using Deep SW Standby Mode */
+#if ( MCU_SELECTED == RA6E1 )
+         /* In K24, above line make the MCU go through a reset, where as for RA6, we need to force it to go through reset to keep the same functionality */
          EnterVLLS( 0, LPTMR_SECONDS, 1 );  // TODO: RA6E1: Verify
+         //RESET(); // TODO: RA6E1: Verify
 #endif
       }
    }
@@ -1298,7 +1352,11 @@ void PWRLG_Begin( uint16_t anomalyCount )
    // Display current recorded outage time on debug port
    TIME_UTIL_ConvertSysCombinedToSysFormat( &currentTime, &now );
    ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &now, &dt );
+#if ( MCU_SELECTED == NXP_K24 )
    DBG_LW_printf( "Outage time: %04u/%02u/%02u %02u:%02u:%02u\n", dt.year, dt.month, dt.day, dt.hour, dt.min,   dt.sec );
+#elif ( MCU_SELECTED == RA6E1 )
+   printf( "Outage time: %04u/%02u/%02u %02u:%02u:%02u\n", dt.year, dt.month, dt.day, dt.hour, dt.min, dt.sec );
+#endif
 
    // Save the MAC Configuration for later recovery
    MAC_SaveConfig_To_BkupRAM();
@@ -1308,20 +1366,37 @@ void PWRLG_Begin( uint16_t anomalyCount )
    // Get HW Revision letter
    ( void )VER_getHardwareVersion ( &hwVerString[0], sizeof(hwVerString) );
    hwRevLetter_ = hwVerString[0];
+#if ( MCU_SELECTED == NXP_K24 )
    DBG_LW_printf( "Vcap: %-6s\n", DBG_printFloat( floatStr, Vcap, 3 ) );
    DBG_logPrintf( 'I', "HW Rev Letter: %c ", hwRevLetter_);
+#elif ( MCU_SELECTED == RA6E1 )
+   printf( "Vcap: %-6s\n", DBG_printFloat( floatStr, Vcap, 3 ) );
+//   printf( "HW Rev Letter: %c ", hwRevLetter_ );
+#endif
+   R_BSP_SoftwareDelay( 1, BSP_DELAY_UNITS_SECONDS );
 #if ( LG_WORST_CASE_TEST == 1 )
    DBG_LW_printf(" \n !!!! This is Last Gasp Worst Case Test Code( Revision: 12) !!!! \n");
 #warning "Update the Revision"
 #endif
    PWRLG_SetupLastGasp();
-   DBG_LW_printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
-                  uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
+   if( Vcap > fMinimumStartVoltage )
+   {
+#if ( MCU_SELECTED == NXP_K24 )
+      DBG_LW_printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
+                     uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
+#elif ( MCU_SELECTED == RA6E1 )
+   /* TODO: RA6E1: Remove later */
+//   printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
+//                  uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
+//   printf( "seconds: %d, milliseconds: %d\n", PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
+#endif
+   }
+   else
+   {
+      DBG_LW_printf("Shutting down, Vcap too low\n");
+   }
    OS_TASK_Sleep( 10 );    // let print out finish
 
-#if ( ( MCU_SELECTED == RA6E1 ) && ( PWRLG_PRINT_ENABLE == 0 ) && ( LAST_GASP_RECONFIGURE_CLK == 1 ) )
-   CGC_Switch_SystemClock_to_MOCO();  /* TODO: RA6E1: DG: Revisit the ()call order */
-#endif
    PWRLG_FLAGS().byte = 0;
    HardwareShutdown();
 
@@ -1329,20 +1404,39 @@ void PWRLG_Begin( uint16_t anomalyCount )
    CUR_BACK_OFF_TIME_SET( 0 );
    TX_FAILURES_SET( 0 );
    RESTORATION_TIME_SET( 0 );
+
+#if ( ( MCU_SELECTED == RA6E1 ) && ( PWRLG_PRINT_ENABLE == 0 ) && ( LAST_GASP_RECONFIGURE_CLK == 1 ) )
+   CGC_Switch_SystemClock_to_MOCO();
+//#if 0  /* NOTE: DG: This check was an improvement and the decision was made to add later */
+//   if ( ( 0 == MODECFG_get_ship_mode() ) && ( 0 == MODECFG_get_decommission_mode() ) )
+//   {
+//#endif
+#endif
    //TODO: DG: Don't execute PWRLG_Begin function if in Ship Mode or Meter Shop mode.
    VBATREG_SHORT_OUTAGE = 1;
 
 #if ( DEBUG_PWRLG == 0 )
-   PWR_USE_BOOST();  /* Use the Super Cap to run the system.   */
+   if( Vcap > fMinimumStartVoltage )
+   {
+      PWR_USE_BOOST();  /* Use the Super Cap to run the system.   */
+   }
+   else
+   {
+      PWRLG_MESSAGE_COUNT_SET(0);  // Note: Just to ensure we won't try to transmit
+   }
 #endif
    if ( PWRLG_MESSAGE_COUNT() != 0 )  /* If there's enough energy to send any message... */
    {
       PWRLG_LLWU_SET( 1 );       /* Re-enter last gasp on next reset.   */
-//    PWRLG_CAP_BEFORE() = ADC_Get_SC_Voltage();
+      //    PWRLG_CAP_BEFORE() = ADC_Get_SC_Voltage();
+#if ( MCU_SELECTED == NXP_K24 )
       PWRLG_SOFTWARE_RESET_SET( 1 );   /* This bit is set so it can be determined if last gasp was terminated before or
-                                          after all last gasp messages were sent. This bit will remain set if last gasp
-                                          was terminated by power being restore before all last gasp messages were sent.
-                                          */
+      after all last gasp messages were sent. This bit will remain set if last gasp
+      was terminated by power being restore before all last gasp messages were sent.
+      */
+#elif ( MCU_SELECTED == RA6E1 )
+      PWRLG_SOFTWARE_RESET_SET(0);   /* This flag is used differently in RA6. This flag now indicates if the LastGasp is compelete */
+#endif
 
       /* LP time cannot exceed 65535 */
       if ( uFirstSleepMilliseconds <= 60000 )
@@ -1371,6 +1465,20 @@ void PWRLG_Begin( uint16_t anomalyCount )
       EnterVLLS( 0, LPTMR_SLEEP_FOREVER, 1 );   /* Goes into low power mode, never returns */
       RESET();                                  /* In case EnterVLLS() exits due to Power fail signal released. PWR_SafeReset() not necessary */
    }
+#if ( MCU_SELECTED == RA6E1 )
+#if 0 // TODO: RA6E1: This was an improvement and the decision was made to add later */
+   else
+   {
+      LG_PRNT_INFO("Don't execute LG");
+      /* Wait for either power to go away, or the power down signal to return to an "okay" state. If the power signal
+      should return to a "okay" state, then reset the processor.  */
+
+      while ( BRN_OUT() )
+      {}
+      RESET(); /* PWR_SafeReset() not necessary */
+   }
+#endif
+#endif
 }
 #endif  //#if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
@@ -1454,9 +1562,7 @@ static void HardwareShutdown( void )
 
    /* Set all the pins except PF_METER, LDO Enable,  to Input Mode before going to Deep Software Standby Mode */
    ( void )R_IOPORT_PinsCfg(&g_ioport_ctrl, &g_bsp_pin_cfg_lpm);
-#if ( PWRLG_PRINT_ENABLE == 0 )
-   /* TODO: RA6: DG: Configure the Boost Pin */
-#else
+#if ( PWRLG_PRINT_ENABLE == 1 )
    /* Enable the DBG UART pins for Printing */
    ( void )R_IOPORT_PinCfg(&g_ioport_ctrl, UART4_TX_DBG, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_SCI0_2_4_6_8));
    ( void )R_IOPORT_PinCfg(&g_ioport_ctrl, UART4_RX_DBG, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_SCI0_2_4_6_8));
@@ -1503,7 +1609,8 @@ uint8_t PWRLG_LastGasp( void )
 #endif
 #elif ( MCU_SELECTED == RA6E1)
       /* TODO: RA6: DG: Do we need to further check the wake-up source? */
-      if  ( R_SYSTEM->RSTSR0_b.DPSRSTF ) /* Deep Software Standby Reset Flag */
+      if ( ( R_SYSTEM->RSTSR0_b.DPSRSTF )  &&   /* Deep Software Standby Reset Flag */
+           ( 0 != PWRLG_LLWU() ) )              /* LLWU cause set in LP RAM   */
 #endif
       {
          retVal = true;
@@ -2437,52 +2544,13 @@ void PWRLG_RestLastGaspFlags( void )
    VBATREG_PWR_QUAL_COUNT = 0;   // Clear the RAM based power quality count.
    PWRLG_TIME_OUTAGE_SET( 0 );   // Clear the time of the last outage.
    RESTORATION_TIME_SET( 0 );    // Clear the Restoration time.
+#if ( MCU_SELECTED == RA6E1 )
+   PWRLG_SOFTWARE_RESET_SET( 1 ); // Done with LG
+#endif
    VBATREG_DisableRegisterAccess();
 }
 
 #if ( MCU_SELECTED == RA6E1 )
-/***********************************************************************************************************************
-
-   Function name: PWRLG_GetSleepCancelSource
-
-   Purpose: Identify and return the Deep Software Standby Cancel Source
-
-   Arguments: none
-
-   Returns: cancel Source
-
-   Re-entrant Code: No
-
-   Notes:
-
- **********************************************************************************************************************/
-uint8_t PWRLG_GetSleepCancelSource( void )
-{
-   uint8_t cancelSoruce = 0;
-
-   /* TODO: RA6: Create an Enum for the Cancel Sources */
-   /* TODO : RA6: DG: Review Figure 5.4 Pg. No 109 of the RA6E1 HRM */
-   if( R_SYSTEM->DPSIFR2_b.DLVD1IF )
-   {
-      cancelSoruce = 1;
-      DBG_printf("LVD1 Deep Standby Cancel Flag");
-   }
-   else if( R_SYSTEM->DPSIFR2_b.DRTCAIF )
-   {
-      cancelSoruce = 2;
-      DBG_printf("RTC Alarm Interrupt");
-   }
-   /* TODO: RA6 Select & add appropriate reg for Power Fail signal */
-   else if( R_SYSTEM->DPSIFR1_b.DIRQ11F ) /* IRQ11-DS - Change in PF_METER */
-   {
-      cancelSoruce = 3;
-      DBG_printf("IRQ5-DS Pin Edge Select");
-   }
-
-   return (cancelSoruce);
-
-}
-
 /***********************************************************************************************************************
 
    Function name: LptmrStart
@@ -2552,4 +2620,147 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
 
    }
 }
+
+/***********************************************************************************************************************
+
+   Function name: EnterLowPowerMode
+
+   Purpose: Setup the Low power timer and enters the Low Power Mode
+
+   Arguments:  uint16_t uCounter - Counter value for LPTMR.
+               PWRLG_LPTMR_Units eUnits - LPTMR_SECONDS, LPTMR_MILLISECONDS, LPTMR_SLEEP_FOREVER
+               uint8_t uMode - Low Power Mode
+
+   Returns: void
+
+   Notes:   If LPTMR_SLEEP_FOREVER specified, PF change still causes wakeup.
+            If counter = 0, resume with existing LPTMR count.
+
+ **********************************************************************************************************************/
+static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint8_t uMode )
+{
+   static uint16_t secs, mSecs;
+
+   if ( ( LPTMR_MILLISECONDS == eUnits ) && ( uCounter > 1000 ) )
+   {
+      /* In RA6E1, if we would like to achieve milliseconds precision, we need to use SW Standby Mode,
+         for anything greater than a second we will use Deep SW Standby mode */
+      secs = uCounter / 1000;  /* Convert to secs */
+      mSecs = uCounter % 1000;  /* Remaining msecs */
+
+      LG_PRNT_INFO("LPM - Secs: %d, mSecs: %d", secs, mSecs);
+
+      if( mSecs == 0 )
+      {
+         eUnits   = LPTMR_SECONDS;
+         uMode    = APP_LPM_DEEP_SW_STANDBY_STATE;
+         uCounter = secs;
+      }
+      else
+      {
+         eUnits   = LPTMR_MILLISECONDS;
+         uMode    = APP_LPM_SW_STANDBY_STATE;
+         uCounter = mSecs;
+      }
+   }
+
+   LG_PRNT_INFO( "\nEnter LPM, count: %d, units: %d, mode: %d\n", uCounter, ( uint8_t )eUnits, uMode );
+//   LG_PRNT_INFO("\n HW Rev Letter: %c \n\r", hwRevLetter_);
+
+#if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
+   TRACE_D0_LOW();
+#endif
+
+   if( uMode == APP_LPM_DEEP_SW_STANDBY_STATE )  /* TODO: RA6: DG: This is test to see the pwr consumption*/
+   {
+      HardwareShutdown();
+   }
+
+#if ( ( MCU_SELECTED == RA6E1 ) && ( PWRLG_PRINT_ENABLE == 0 ) && ( LAST_GASP_RECONFIGURE_CLK == 1 ) )
+   CGC_Switch_SystemClock_to_MOCO();  /* TODO: RA6E1: DG: Revisit the ()call order */
+#endif
+
+   HardwareShutdown(); /* TODO: Remove */
+   if ( LPTMR_SLEEP_FOREVER == eUnits )
+   {
+      /* NOTE: For RA6E1 regardless of HW Letter, we need to keep the RTC running */
+      LG_PRNT_INFO("EnterLPM: Boost kept ON to keep the RTC running\n\r");
+   }
+   else //if ( LPTMR_SLEEP_FOREVER != eUnits )
+   {
+      if ( uCounter != 0 ) /* Not "resuming", set actual delay.   */
+      {
+         LptmrStart( uCounter, eUnits, LPTMR_MODE_PROGRAM_ONLY );
+      }
+      else  /* Restart delay. */
+      {
+         if ( PWRLG_SLEEP_SECONDS() != 0 )   /* Using seconds? */
+         {
+            LptmrStart( PWRLG_SLEEP_SECONDS(), LPTMR_SECONDS, LPTMR_MODE_PROGRAM_ONLY );
+            eUnits = LPTMR_SECONDS;
+            uMode  = APP_LPM_DEEP_SW_STANDBY_STATE;
+         }
+         else  /* Using milliseconds   */
+         {
+            LptmrStart( max( PWRLG_SLEEP_MILLISECONDS(), 1 ), LPTMR_MILLISECONDS, LPTMR_MODE_PROGRAM_ONLY );
+            eUnits = LPTMR_MILLISECONDS;
+            uMode  = APP_LPM_SW_STANDBY_STATE;
+         }
+      }
+   }
+   if( ( LPTMR_MILLISECONDS == eUnits ) || ( APP_LPM_SW_STANDBY_STATE == uMode ) )
+   {
+      /* Start the AGT only when we use the AGT */
+      LptmrEnable( ( bool )true );
+   }
+
+   (void)LPM_APP_mode_enter( (app_lpm_states_t)uMode );
+
+   if( secs != 0 )
+   {
+      eUnits   = LPTMR_SECONDS;
+      uMode    = APP_LPM_DEEP_SW_STANDBY_STATE;
+      uCounter = secs;
+
+      LG_PRNT_INFO("LPM - DEEP SW STDBY; Secs:%d",uCounter);
+      LptmrStart( uCounter, eUnits, LPTMR_MODE_PROGRAM_ONLY );
+      (void)LPM_APP_mode_enter( (app_lpm_states_t)uMode );
+   }
+}
+
+#if 0 /* NOTE: This logic did NOT work with LG. */
+/***********************************************************************************************************************
+
+   Function name: ClearVBATT
+
+   Purpose: Clear the VBAT when the MCU goes through Power On Reset.
+
+   Arguments: None
+
+   Returns: void
+
+ **********************************************************************************************************************/
+static void ClearVBATT ( void )
+{
+   if ( R_SYSTEM->RSTSR0_b.PORF ) // TODO: RA6E1: Add LVD check also
+   {
+      memset( (void *)&R_SYSTEM->VBTBKR[0], 0, 128 * sizeof( char ) );
+   }
+   PWRLG_SOFTWARE_RESET_SET(1); // TODO: RA6E1: Fail safe.
+}
+#endif
 #endif // #if ( MCU_SELECTED == RA6E1 )
+
+// TEST
+#if ( MCU_SELECTED == RA6E1 )
+void PWRLG_print_LG_Flags ( void )
+{
+   INFO_printf( "PWRLG-Outage %d",PWRLG_OUTAGE() );
+   INFO_printf( "PWRLG-PWRLG_STATE: %d", PWRLG_STATE() );
+   INFO_printf( "VBATREG-SHORT_OUTAGE: %d",VBATREG_SHORT_OUTAGE);
+   INFO_printf( "VBATREG-Restoration Met:%d",VBATREG_POWER_RESTORATION_MET);
+   INFO_printf( "PWRLG-timeOutage %ld", PWRLG_TIME_OUTAGE() );
+   INFO_printf( "PWRLG-uMilliseconds %ld", PWRLG_MILLISECONDS() );
+   INFO_printf( "PWRLG-SFT RESET %d", PWRLG_SOFTWARE_RESET());
+}
+#endif

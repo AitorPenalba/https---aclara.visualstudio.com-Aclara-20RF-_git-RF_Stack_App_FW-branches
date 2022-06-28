@@ -25,9 +25,9 @@ FSP Configuration
     Security: BUS Accessibility: Bus Security Attribution Register A: Both Secure and Non-Secure State
     Security: BUS Accessibility: Bus Security Attribution Register B: Both Secure and Non-Secure State
     Startup C-Cache Line Size: 32 Bytes
-    OFS0 register settings: Independent WDT: Start Mode: IWDT is Disabled
+    OFS0 register settings: Independent WDT: Start Mode: IWDT is automatically activated after a reset (Autostart mode)
     OFS0 register settings: Independent WDT: Timeout Period: 2048 cycles
-    OFS0 register settings: Independent WDT: Dedicated Clock Frequency Divisor: 128
+    OFS0 register settings: Independent WDT: Dedicated Clock Frequency Divisor: 256
     OFS0 register settings: Independent WDT: Window End Position:  0% (no window end position)
     OFS0 register settings: Independent WDT: Window Start Position: 100% (no window start position)
     OFS0 register settings: Independent WDT: Reset Interrupt Request Select: Reset is enabled
@@ -116,7 +116,7 @@ FSP Configuration
       P108 51 JTAG/SWD_TMS - L - "Peripheral mode" - - "AGT3: AGTOA3; JTAG/SWD: SWDIO; JTAG/SWD: TMS; SCI9: CTS_RTS9; SPI0: SSLA0" JTAG_TMS IO - - 
       P109 52 JTAG/SWD_TDO - L - "Peripheral mode" - - "AGT3: AGTOB3; CGC: CLKOUT; GPT1: GTIOC1A; JTAG/SWD: TDO; JTAG/SWD: TRACESWO; SCI9: TXD9; SPI0: MOSI0" JTAG_TDO IO - - 
       P110 53 JTAG/SWD_TDI - L None "Peripheral mode" - - "AGT3: AGTEE3; GPT1: GTIOC1B; IRQ: IRQ3; JTAG/SWD: TDI; SCI2: CTS_RTS2; SCI9: RXD9; SPI0: MISO0" JTAG_TDI IO - - 
-      P111 54 GPIO - L None "Output mode (Initial Low)" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" TP118 IO - ZCD_METER 
+      P111 54 IRQ_IRQ4 - - IRQ4 "IRQ mode" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" Miso_Busy IO - ZCD_METER 
       P112 55 SCI2_TXD2 - L - "Peripheral mode" - - "AGT5: AGTOB5; QSPI: QSSL; SCI1: SCK1; SCI2: TXD2; SPI0: SSLA0; SSIE0: SSISCK0" UART2_TX_AMR O - UART3_TX_AMR 
       P113 56 SCI2_RXD2 - L - "Peripheral mode" - - "AGT5: AGTEE5; GPT2: GTIOC2A; SCI2: RXD2; SSIE0: SSIWS0" UART2_RX_AMR I - UART3_RX_AMR 
       P114 57 AGT5_AGTIO5 - L - "Peripheral mode" - - "AGT5: AGTIO5; GPT2: GTIOC2B; SCI9: CTS9; SSIE0: SSIRXD0" ZCD_METER IO - "Reserved for : RLY_DRIVE" 
@@ -167,7 +167,7 @@ FSP Configuration
       P601 66 SCI9_RXD9 - L - "Peripheral mode" - - "AGT3: AGTEE3; GPT6: GTIOC6A; SCI9: RXD9" UART9_RX_OPT I - "Reserved for KV2C: UART4_TX" 
       P602 65 SCI9_TXD9 - L - "Peripheral mode" - - "AGT3: AGTO3; GPT7: GTIOC7B; SCI9: TXD9" UART9_TX_OPT O - "Reserved for KV2C: UART4_RX" 
       P608 59 GPIO - L - "Output mode (Initial Low)" - - "GPT4: GTIOC4B" Open IO - "Resereved : Dimming_PWM" 
-      P609 60 GPIO - L - "Output mode (Initial Low)" - - "AGT5: AGTO5; GPT5: GTIOC5A" 3V6BOOST_EN IO - 3V6BOOST_EN 
+      P609 60 GPIO - L - "Output mode (Initial High)" - - "AGT5: AGTO5; GPT5: GTIOC5A" 3V6BOOST_EN IO - 3V6BOOST_EN 
       P610 61 GPIO - L - "Output mode (Initial Low)" - - "AGT4: AGTO4; GPT5: GTIOC5B" Open IO - /EZ_CS 
       P708 16 GPIO - L None "Output mode (Initial Low)" - - "IRQ: IRQ11; SCI1: RXD1; SPI1: SSLB3" Open IO - PWR_SEL 
       RES 38 SYSTEM_RES - - - - - - - - IO "Read only" RES 
@@ -217,7 +217,7 @@ FSP Configuration
       P108 51 GPIO - L - "Input mode" - - "AGT3: AGTOA3; JTAG/SWD: SWDIO; JTAG/SWD: TMS; SCI9: CTS_RTS9; SPI0: SSLA0" JTAG_TMS IO - - 
       P109 52 GPIO - L - "Input mode" - - "AGT3: AGTOB3; CGC: CLKOUT; GPT1: GTIOC1A; JTAG/SWD: TDO; JTAG/SWD: TRACESWO; SCI9: TXD9; SPI0: MOSI0" JTAG_TDO IO - - 
       P110 53 GPIO - L None "Input mode" - - "AGT3: AGTEE3; GPT1: GTIOC1B; IRQ: IRQ3; JTAG/SWD: TDI; SCI2: CTS_RTS2; SCI9: RXD9; SPI0: MISO0" JTAG_TDI IO - - 
-      P111 54 GPIO - L None "Input mode" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" TP118 IO - ZCD_METER 
+      P111 54 GPIO - - None "Input mode" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" Miso_Busy IO - ZCD_METER 
       P112 55 GPIO - L - "Input mode" - - "AGT5: AGTOB5; QSPI: QSSL; SCI1: SCK1; SCI2: TXD2; SPI0: SSLA0; SSIE0: SSISCK0" UART2_TX_AMR O - UART3_TX_AMR 
       P113 56 GPIO - L - "Input mode" - - "AGT5: AGTEE5; GPT2: GTIOC2A; SCI2: RXD2; SSIE0: SSIWS0" UART2_RX_AMR I - UART3_RX_AMR 
       P114 57 GPIO - L - "Input mode" - - "AGT5: AGTIO5; GPT2: GTIOC2B; SCI9: CTS9; SSIE0: SSIRXD0" ZCD_METER IO - "Reserved for : RLY_DRIVE" 
@@ -246,7 +246,7 @@ FSP Configuration
       P401 2 GPIO - L None "Input mode" - - "CAN0: CTX0; ETHER_RMII: ET0_MDC; GPT6: GTIOC6B; GPT_POEG: GTETRGA; IIC0: SDA0; IRQ: IRQ5-DS; SCI4: CTS_RTS4" I2C0_SDA IO - I2C0_SDA 
       P402 3 GPIO - L None "Input mode" - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; CAC: CACREF; CAN0: CRX0; ETHER_RMII: ET0_MDIO; IRQ: IRQ4-DS; RTC: RTCIC0; SCI4: CTS4; SSIE0: AUDIO_CLK" Open IO - - 
       P403 4 GPIO - - - "Input mode" - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_LINKSTA; IRQ: IRQ14-DS; RTC: RTCIC1; SSIE0: SSISCK0" Open None - - 
-      P404 5 GPIO LDO_EN L None "Output mode (Initial High)" - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_EXOUT; IRQ: IRQ15-DS; RTC: RTCIC2; SSIE0: SSIWS0" 3V6LDO_EN IO - 3V6LDO_EN 
+      P404 5 GPIO LDO_EN L None "Output mode (Initial Low)" - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_EXOUT; IRQ: IRQ15-DS; RTC: RTCIC2; SSIE0: SSIWS0" 3V6LDO_EN IO - 3V6LDO_EN 
       P405 6 GPIO - L - "Input mode" - - "ETHER_RMII: RMII0_TXD_EN; GPT1: GTIOC1A; SSIE0: SSITXD0" IRQ_SI4467 IO - - 
       P406 7 GPIO - - - "Input mode" - - "AGT5: AGTO5; ETHER_RMII: RMII0_TXD1; GPT1: GTIOC1B; SSIE0: SSIRXD0" TP121 None - - 
       P407 25 GPIO - - - "Input mode" - - "ADC0: ADTRG0; AGT0: AGTIO0; ETHER_RMII: ET0_EXOUT; GPT6: GTIOC6A; IIC0: SDA0; RTC: RTCOUT; SCI4: CTS_RTS4; SPI0: SSLA3; USB FS: USB_VBUS" Open None - - 
@@ -268,7 +268,7 @@ FSP Configuration
       P601 66 GPIO - L - "Input mode" - - "AGT3: AGTEE3; GPT6: GTIOC6A; SCI9: RXD9" UART9_RX_OPT I - "Reserved for KV2C: UART4_TX" 
       P602 65 GPIO - L - "Input mode" - - "AGT3: AGTO3; GPT7: GTIOC7B; SCI9: TXD9" UART9_TX_OPT O - "Reserved for KV2C: UART4_RX" 
       P608 59 GPIO - L - "Input mode" - - "GPT4: GTIOC4B" Open IO - "Resereved : Dimming_PWM" 
-      P609 60 GPIO - L - "Input mode" - - "AGT5: AGTO5; GPT5: GTIOC5A" 3V6BOOST_EN IO - 3V6BOOST_EN 
+      P609 60 GPIO - L - "Output mode (Initial High)" - - "AGT5: AGTO5; GPT5: GTIOC5A" 3V6BOOST_EN IO - 3V6BOOST_EN 
       P610 61 GPIO - L - "Input mode" - - "AGT4: AGTO4; GPT5: GTIOC5B" Open IO - /EZ_CS 
       P708 16 GPIO - L None "Input mode" - - "IRQ: IRQ11; SCI1: RXD1; SPI1: SSLB3" Open IO - PWR_SEL 
       RES 38 SYSTEM_RES - - - - - - - - IO "Read only" RES 
@@ -366,6 +366,9 @@ FSP Configuration
     Parameter Checking: Default (BSP)
     
   Module "DAC (r_dac)"
+    Parameter Checking: Default (BSP)
+    
+  Module "Independent Watchdog (r_iwdt)"
     Parameter Checking: Default (BSP)
     
   FreeRTOS
@@ -908,4 +911,17 @@ FSP Configuration
       Charge Pump (Requires MOCO active): Disabled
       Internal Output: Enabled by default
       ELC Trigger Source: Disabled
+      
+    Instance "g_wdt0 Independent Watchdog (r_iwdt)"
+      Name: g_wdt0
+      NMI callback: NULL
+      
+    Instance "miso_busy External IRQ (r_icu)"
+      Name: miso_busy
+      Channel: 4
+      Trigger: Rising
+      Digital Filtering: Disabled
+      Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
+      Callback: isr_busy
+      Pin Interrupt Priority: Priority 12
       

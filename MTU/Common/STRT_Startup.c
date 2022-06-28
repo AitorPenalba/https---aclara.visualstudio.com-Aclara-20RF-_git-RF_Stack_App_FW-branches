@@ -158,12 +158,16 @@
 /* FILE VARIABLE DEFINITIONS */
 static bool initSuccess_ = true; //Default, system init successful
 
-//static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
-
+#if 0 // TODO: RA6E1: Revert when we have OS_Task_Summary
+static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
+#else
+static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_OFF;
+#endif
 
 /* Power Up Table - Define all modules that require initialization below. */
 const STRT_FunctionList_t startUpTbl[] =
 {
+   INIT( WDOG_Init, STRT_FLAG_NONE ),                                               // Initialize the IWDT
    INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
@@ -182,6 +186,8 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( TIME_SYNC_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SYSBUSY_init, STRT_FLAG_NONE ),
+   INIT( PWR_powerUp, STRT_FLAG_NONE),                                              // Read reset reason
+   INIT( SELF_init, STRT_FLAG_NONE ),
 #if ENABLE_DFW_TASKS
    INIT( DFWA_init, STRT_FLAG_NONE ),
    INIT( DFWTDCFG_init, STRT_FLAG_NONE ),
@@ -199,6 +205,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( MFGP_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
 #endif
+   INIT( MIMTINFO_init, STRT_FLAG_NONE ),
    INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
@@ -206,7 +213,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( DVR_DAC0_init, STRT_FLAG_NONE ),  /* TODO: RA6E1: Review the order */
 #endif
 #if ENABLE_HMC_TASKS
-#if END_DEVICE_PROGRAMMING_CONFIG == 1
+#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
    INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
 #endif
    INIT( HMC_STRT_init, STRT_FLAG_NONE ),
@@ -374,7 +381,6 @@ static OS_MSGQ_Obj TestMsgq_MSGQ;
 
 /* FUNCTION DEFINITIONS */
 
-#if 0 // TODO: RA6E1: Add support
 /*******************************************************************************
 
   Function name: STRT_EnableCpuLoadPrint
@@ -397,7 +403,7 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
       CpuLoadPrint = mode;
    }
 }
-#endif
+
 /*******************************************************************************
 
    Function name: STRT_StartupTask
@@ -421,21 +427,19 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
 /*lint -e{715} Arg0 not used; required by API */
 void STRT_StartupTask ( taskParameter )
 {
-   //FSP_PARAMETER_NOT_USED(taskParameter);
-//   OS_TICK_Struct       TickTime;
-//   TickType_t           TickTime;
+   OS_TICK_Struct       TickTime;
    STRT_FunctionList_t  *pFunct;
-//   uint32_t             CurrentIdleCount;
-//   uint32_t             PrevIdleCount;
-//   uint32_t             TempIdleCount;
-//   uint32_t             printStackAndTask = 0;
-//   uint32_t             CpuLoad[PRINT_CPU_STATS_IN_SEC];
-//   uint8_t              CpuIdx = 0;
+   uint32_t             CurrentIdleCount;
+   uint32_t             PrevIdleCount;
+   uint32_t             TempIdleCount;
+   uint32_t             printStackAndTask = 0;
+   uint32_t             CpuLoad[PRINT_CPU_STATS_IN_SEC];
+   uint8_t              CpuIdx = 0;
    uint8_t              startUpIdx;
    uint8_t              quiet = 0;
    uint8_t              rfTest = 0;
 
-#if 0
+#if ( MCU_SELECTED == NXP_K24 )  // TODO: RA6E1: Do we need to support this?
    // Enable to use DWT module.
    // This is needed for DWT_CYCCNT to work properly when the debugger (I-jet) is not plugged in.
    // When the debugger is plugged in, the following registers are programmed by the IAR environment.
@@ -464,7 +468,7 @@ void STRT_StartupTask ( taskParameter )
             ( ( rfTest == 0 ) || ( ( pFunct->uFlags & STRT_FLAG_RFTEST ) != 0 ) ) )
       {
          returnStatus_t response;
-#if 0
+
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 #pragma calls=\
           WDOG_Init, \
@@ -571,7 +575,7 @@ void STRT_StartupTask ( taskParameter )
           FIO_init, \
           PWR_printResetCause
 #endif
-#endif // #if 0
+
          response = pFunct->pFxnStrt();
          if ( pFunct->pFxnStrt == MODECFG_init )
          {
@@ -625,19 +629,19 @@ void STRT_StartupTask ( taskParameter )
       TEST_LED_TACKON_ON; /* Drive the pin for a tacked-on LED high with high drive strength */
    }
 #endif
-// TODO: RA6: Enable this code later
-//   if (!initSuccess_)
-//   {
-//      //LED_setRedLedStatus(MANUAL_RED);
-//#if ( TEST_TDMA == 0 )
-//      LED_enableManualControl();
-//      LED_on(RED_LED);
-//#endif
-//   }
+
+   if (!initSuccess_)
+   {
+      //LED_setRedLedStatus(MANUAL_RED);
+#if ( TEST_TDMA == 0 )
+      LED_enableManualControl();
+      LED_on(RED_LED);
+#endif
+   }
 
    // Reset all CPU stats
    // This MUST be done after the tasks are started
-//   (void)OS_TASK_UpdateCpuLoad();
+//   (void)OS_TASK_UpdateCpuLoad();  /* TODO: RA6E1: Add Support later */
 
    if ( quiet == 0 )
    {
@@ -659,22 +663,19 @@ void STRT_StartupTask ( taskParameter )
       we don't surpass the TickTime delay specified below
       Note:  We do have the CPU Load function below this, and that is acceptable
              to ensure we get an accurate CPU load value */
-//   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );   // TODO: RA6: Enable this code later
-//
-//   CurrentIdleCount = IDL_Get_IdleCounter();        // TODO: RA6: Enable this code later
-//   PrevIdleCount = CurrentIdleCount;                // TODO: RA6: Enable this code later
+   OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
+   CurrentIdleCount = IDL_Get_IdleCounter();
+   PrevIdleCount = CurrentIdleCount;
 
    for ( ;; )
    {
-      vTaskSuspend(NULL); // TODO: RA6: DG: Remove
-#if 0  // TODO: RA6: Enable the Code
       OS_TICK_Sleep ( &TickTime, ONE_SEC );
 
       CurrentIdleCount = IDL_Get_IdleCounter();
       TempIdleCount = CurrentIdleCount - PrevIdleCount;
       PrevIdleCount = CurrentIdleCount;
 
-      CpuLoad[CpuIdx] = OS_TASK_UpdateCpuLoad();
+//      CpuLoad[CpuIdx] = OS_TASK_UpdateCpuLoad();  /* TODO: RA6E1: Add Support later */
 
       if ( TempIdleCount > 0 )
       {
@@ -685,6 +686,7 @@ void STRT_StartupTask ( taskParameter )
       else if ( ++printStackAndTask >= PRINT_STACK_USAGE_AND_TASK_SUMMARY )
       {
          // If we are close to a watchdog reset, print some useful stats.
+#if ( RTOS_SELECTION == MQX_RTOS)
 #if ( MQX_USE_LOGS == 1 )
          /* Read data from kernel log */
 #if ( PRINT_LOGS == 1 )
@@ -696,6 +698,9 @@ void STRT_StartupTask ( taskParameter )
 #endif
 #else
          OS_TASK_Summary((bool)false);
+#endif
+#elif ( MCU_SELECTED == FREE_RTOS )
+//         OS_TASK_Summary((bool)false); /* TODO: RA6E1: Add Support later */
 #endif
          printStackAndTask = 0;
       }
@@ -729,6 +734,5 @@ void STRT_StartupTask ( taskParameter )
          }
          CpuIdx = 0;
       } /* end if() */
-#endif // #if 0
    } /* end for() */
 } /* end STRT_StartupTask () */

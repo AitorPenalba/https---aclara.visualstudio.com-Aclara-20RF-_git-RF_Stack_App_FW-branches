@@ -1488,6 +1488,9 @@
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_ioport_cfg.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_iwdt_cfg.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_lpm_cfg.h</name>
             </file>
             <file>
@@ -1725,6 +1728,12 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_ioport_api.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\src\r_iwdt\r_iwdt.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_iwdt.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\ra\fsp\src\r_lpm\r_lpm.c</name>

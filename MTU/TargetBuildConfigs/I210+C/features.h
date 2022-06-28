@@ -2,7 +2,7 @@
  *
  * Filename: features.h
  *
- * Contents: Defines the options/features for the XCVR
+ * Contents: Defines the options/features for the I-210+C
  *
  ******************************************************************************
  * A product of
@@ -15,11 +15,7 @@
  * (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
  * authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may be
  * used or copied only in accordance with the terms of such license.
- ******************************************************************************
- *
- * $Log$ kad Created 20160324
- *
- *****************************************************************************/
+ *****************************************************************************************************************/
 
 #ifndef features_H
 #define features_H
@@ -82,13 +78,7 @@
    #define MQX_RTOS                       1
 #endif
 #define FREE_RTOS                         2
-/* */
-#define ACLARA_DVR_ABSTRACTION            1
-#if ( ACLARA_DVR_ABSTRACTION != 0 )
-   #define PARTITION_MANAGER              1 /* 0 = No PARTITION_MANAGER, 1 = Partition Manager */
-   #define RTC                            1
-#endif
-#define SUPPORT_HEEP                      0 /* TODO: RA6E1: Temporary conditional*/
+
 #define INCLUDE_ECC                       0 /* TODO: RA6E1: Temporary conditional*/
 #define RTOS_SELECTION                    FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
 #define DBG_TESTS                         1

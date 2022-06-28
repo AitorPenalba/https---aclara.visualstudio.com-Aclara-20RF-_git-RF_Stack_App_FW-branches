@@ -3467,6 +3467,7 @@ PHY_SET_STATUS_e  PHY_Attribute_Set( PHY_SetReq_t const *pSetReq)
      ERR_printf("WARNING: PHY_Attribute_Set should only be called from the PHY task. Please use PHY_SetRequest instead.");
    }
 #endif
+
    switch(pSetReq->eAttribute) /*lint !e788 not all enums used within switch */
    {
    // Writeable Attributes

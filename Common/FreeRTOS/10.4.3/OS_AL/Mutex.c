@@ -17,9 +17,8 @@
 #include "project.h"
 //#include <mqx.h>      /* TODO: RA6: DG: We might not need this as its already included in project.h */
 //#include <mutex.h>    /* TODO: RA6: DG: We might not need this as its already included in project.h */
-#include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
-//#include "DBG_SerialDebug.h"
-//#include "EVL_event_log.h"
+//#include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
+#include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -119,7 +118,7 @@ void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
 //         default:
 //              break;
 //      }
-//      EVL_FirmwareError( "OS_MUTEX_Lock" , file, line );
+      EVL_FirmwareError( "OS_MUTEX_Lock" , file, line );
    } /* end if() */
 } /* end OS_MUTEX_Lock () */
 
@@ -142,10 +141,9 @@ void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
 *******************************************************************************/
 void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
 {
-   if ( pdFAIL == xSemaphoreGive ( *MutexHandle ) ) {
-//      APP_ERR_PRINT("OS_MUTEX_Unlock!");
-      /* TODO: Add the below code */
-//      EVL_FirmwareError( "OS_MUTEX_Unlock" , file, line );
+   if ( pdFAIL == xSemaphoreGive ( *MutexHandle ) )
+   {
+      EVL_FirmwareError( "OS_MUTEX_Unlock" , file, line );
    }
 } /* end OS_MUTEX_Unlock () */
 

@@ -31,7 +31,7 @@
 /* INCLUDE FILES */
 
 #include "file_io.h"
-//#include "HEEP_util.h"
+#include "HEEP_util.h"
 
 /* ****************************************************************************************************************** */
    /* GLOBAL DEFINTION */
@@ -87,7 +87,6 @@ typedef enum
 #endif
 } SELFT_enum;
 
-#if ( ACLARA_DVR_ABSTRACTION != 0)
 typedef struct
 {
    FileHandle_t            handle;
@@ -99,7 +98,6 @@ typedef struct
    FileAttr_t        const Attr;          /*!< File Attributes     */
    uint32_t          const UpdateFreq;    /*!< Update Frequency    */
 } SELF_file_t;
-#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -125,9 +123,8 @@ extern returnStatus_t   SELF_testSecurity( void );
 extern returnStatus_t   SELF_testNV( void );
 extern returnStatus_t   SELF_testInternalFlash( void );
 extern returnStatus_t   SELF_testTimeCompound( void );
-#if (SUPPORT_HEEP != 0)
+extern void             SELF_testIWDT( void );
 extern returnStatus_t   SELF_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
-#endif
 #if ( DCU == 1 )  /* DCU will always support external RAM */
 extern returnStatus_t   SELF_testSDRAM( uint32_t LoopCount );
 #endif

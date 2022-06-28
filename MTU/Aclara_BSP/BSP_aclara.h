@@ -51,7 +51,11 @@
 #define RESET_SOURCE_WATCHDOG            0x0004
 #define RESET_SOURCE_LOSS_OF_EXT_CLOCK   0x0008
 #define RESET_SOURCE_LOW_VOLTAGE         0x0010
+#if ( MCU_SELECTED == NXP_K24 )
 #define RESET_SOURCE_LOW_LEAKAGE_WAKEUP  0x0020
+#elif ( MCU_SELECTED == RA6E1 )
+#define RESET_SOURCE_DEEP_SW_STANDBY_CANCEL 0x0020
+#endif
 #define RESET_SOURCE_STOP_MODE_ACK_ERROR 0x0040
 #define RESET_SOURCE_EZPORT_RESET        0x0080
 #define RESET_SOURCE_MDM_AP              0x0100
@@ -220,9 +224,6 @@ extern void        LED_setBlueLedStatus      ( enum_BlueLedStatus_t status);
 extern void        LED_setRedLedStatus       ( enum_RedLedStatus_t status);
 extern void        LED_enableManualControl   ( void );
 extern void        LED_checkModeStatus       ( void );
-#if ( RTOS_SELECTION == FREE_RTOS )
-extern void        LED_vApplicationTickHook  ( void );
-#endif
 extern uint32_t    RNG_GetRandom_32bit       ( void );
 extern void        RNG_GetRandom_Array       ( uint8_t *DataPtr, uint16_t DataLen );
 

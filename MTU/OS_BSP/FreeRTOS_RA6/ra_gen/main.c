@@ -104,8 +104,7 @@
                     }
 
                     /* Aclara Added -- Start */
-#if 0  // TODO: RA6: DG: Add later
-                    PWRLG_Startup();  // TODO: RA6: DG: Add
+                    PWRLG_Startup();
                     if ( PWRLG_LastGasp() )
                     {
                        /* Clear DPSRSTF flag */
@@ -113,19 +112,11 @@
                        /* Init LastGasp tasks. */
                        OS_TASK_Create_PWRLG();
                     }
-                    OS_TASK_Create_PWRLG();  // TODO: Remove
                     else
-#else
                     {
-                       if ( PWRLG_LastGasp() )
-                       {
-                          /* Clear DPSRSTF flag */
-                          R_SYSTEM->RSTSR0_b.DPSRSTF = 0;  //TODO: RA6: DG: Remove later
-                       }
                        /* Init Normal Mode tasks. */
                        OS_TASK_Create_STRT();
                     }
-#endif
                     /* Aclara Added -- End */
                     /* Start the scheduler. */
                     vTaskStartScheduler();

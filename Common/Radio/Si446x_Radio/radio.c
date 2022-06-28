@@ -1845,13 +1845,13 @@ static void Shutdown(void)
 {
    // Put the PA in TX to save power and put radios in standby to gracefully stop them and increment appropriate counters.
    Standby();
-#if 0 //TODO: RA6E1
+
    // Shutdown power amplifier
    RDO_PA_EN_TRIS();
 
    // Turn off radio oscillator
    RDO_OSC_EN_TRIS(); // Samwise only
-#endif
+
    // Shutdown radios (pull SDN pin high)
    RDO_SDN_TRIS();      // First radio on Frodo and Samwise
    RX_RADIO_SDN_TRIS(); // All other radios on Frodo
@@ -2091,9 +2091,8 @@ static uint16_t checkRadioPart( uint8_t radioNum, uint32_t checkNum )
    if ( error || ((Si446xCmd.PART_INFO.PART != 0x4460) && (Si446xCmd.PART_INFO.PART != 0x4467) && (Si446xCmd.PART_INFO.PART != 0x4468)) ) {
       ERR_printf("Unsupported radio %u is Si%04X or radio error. Check #%u. Rebooting...", radioNum, Si446xCmd.PART_INFO.PART, checkNum);
       OS_TASK_Sleep(ONE_SEC); // Give time to print message
-#if 0 //TODO Melvin: add this section once PWR_ module is added
+
       PWR_SafeReset();        // Execute Software Reset, with cache flush
-#endif
    }
    return Si446xCmd.PART_INFO.PART;
 }
@@ -4748,9 +4747,7 @@ static float32 wait_for_stable_RSSI(uint8_t radioNum)
       if (TimeDiff > 10) {
          break;
       }
-#if 0  //TODO: RA6E1
-      _sched_yield();
-#endif
+      OS_TASK_Yield();
    } while (rawRSSI == 0); // We use the latch value as a way to consume time until RSSI is meaningful.
 
    return ( (float32)rawRSSI );
@@ -5611,8 +5608,7 @@ bool RADIO_Update_Noise_Floor(void)
                // On second pass, build noise estimate with capacitor boost on
                if ( (radioMask & mask) == 0) {
                   float fSuperCapV;
-                  // Turn on boost
-                  PWR_USE_BOOST();
+
                   // Get voltage
                   fSuperCapV = ADC_Get_SC_Voltage();
 
@@ -5622,6 +5618,10 @@ bool RADIO_Update_Noise_Floor(void)
                      INFO_printf("SuperCap voltage too low to compute noise estimate for channel %u", Channels[i] );
                      radioMaskBoost &= ~mask;  // Remove from the Channel mask to not process this channel anymore
                      break; // Abort noise estimate
+                  }
+                  else {
+                     // capacitor voltage is good, turn on boost
+                     PWR_USE_BOOST();
                   }
                }
 #endif
@@ -5835,8 +5835,7 @@ bool RADIO_Build_Noise_Floor(uint16_t const *Channels_list, uint8_t radioNum, bo
                float fSuperCapV;
                // Point to noise estimate to update
                pNoiseEstimate = noiseEstimateBoostOn;
-               // Turn on boost
-               PWR_USE_BOOST();
+
                // Get voltage
                fSuperCapV = ADC_Get_SC_Voltage();
 
@@ -5846,6 +5845,10 @@ bool RADIO_Build_Noise_Floor(uint16_t const *Channels_list, uint8_t radioNum, bo
                   noiseEstimateBoostOn = NULL; // Abort noise estimate with super cap on for all channels since super cap won't charge back up quickly enough for other channels.
                   INFO_printf("SuperCap voltage too low to compute noise estimate for channel %u", Channels[i] );
                   break; // Abort noise estimate
+               }
+               else {
+                  // capacitor voltage is good, turn on boost
+                  PWR_USE_BOOST();
                }
             }
 #endif

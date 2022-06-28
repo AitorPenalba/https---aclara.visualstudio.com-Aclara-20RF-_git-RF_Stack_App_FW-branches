@@ -529,7 +529,7 @@ char * DBG_printFloat( char *str, float f, uint32_t precision )
    return str;
 }
 
-#if (MQX_RTOS == 1)
+#if (MQX_RTOS == 1)  /* TODO: RA6E1: Add Support*/
 /***********************************************************************************************************************
 
    Function name: DBG_SetTaskFilter()
@@ -712,6 +712,8 @@ bool DBG_IsPortEnabled ( void )
 {
    return EnableDebugPrint_ ;
 }
+
+#if 0  // TODO: RA6E1: Support this printf for RA6
 /*******************************************************************************
 
    Function name: DBG_LW_printf
@@ -732,7 +734,7 @@ bool DBG_IsPortEnabled ( void )
 *******************************************************************************/
 void DBG_LW_printf( char const *fmt, ... )
 {
-#if 0  // TODO: RA6E1: Support this printf for RA6
+
    static char    LW_printf_str[DEBUG_MSG_SIZE];
    static int32_t len;
    static int32_t i;
@@ -763,8 +765,9 @@ void DBG_LW_printf( char const *fmt, ... )
    }
 
    OS_INT_enable( );
-#endif
+
 }
+#endif // #if 0
 
 #if ( PORTABLE_DCU == 1)
 /*******************************************************************************
