@@ -4055,11 +4055,8 @@ void RADIO_SetPower( uint32_t frequency, float powerOutput)
    int16_t clippedRadioTemp; // Radio temperature
    int32_t PaTemp;        // PA temperature
    
-#if ( MCU_SELECTED == NXP_K24 )
    (void)RADIO_Temperature_Get( (uint8_t)RADIO_0, &radioTemp );
-#elif ( MCU_SELECTED == RA6E1 )
-   (void)RADIO_Get_Chip_Temperature( (uint8_t)RADIO_0, &radioTemp );
-#endif
+
    clippedRadioTemp = radioTemp;
 
    // Clip temperature if needed.

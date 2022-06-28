@@ -746,11 +746,9 @@ static void PHY_TestMode(void)
          {
             DBG_logPrintf( 'I', "Test Mode # Cycle %u of %u (outer loop %u)", ++cycle1, test_mode.RepeatCnt, cycle2+1 );
 #if ( DCU == 1 )
-#if ( MCU_SELECTED == NXP_K24 )
+            
    (void)RADIO_Temperature_Get( (uint8_t)RADIO_0, &radioTemp );
-#elif ( MCU_SELECTED == RA6E1 )
-#error "RA6E1 not supported for DCU"
-#endif
+   
             clippedRadioTemp = radioTemp;
 
             // Clip temperature if needed.
