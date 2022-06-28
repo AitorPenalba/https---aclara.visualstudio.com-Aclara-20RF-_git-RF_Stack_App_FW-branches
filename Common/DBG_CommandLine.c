@@ -5098,7 +5098,7 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
    }
    else
    {
-      DBG_logPrintf( 'R', "Radio TempOk=%d",tempOK);
+      DBG_logPrintf( 'E', "Problem in RADIO_Get_Chip_Temperature: Radio TempOk=%d",tempOK);
    }
 #endif
 

@@ -67,7 +67,7 @@ extern bool MFG_Port_Print;                        /*!< Used to print some PHY r
 extern float RADIO_Get_Current_Temperature( bool bSoft_demod );
 extern bool RADIO_Is_Radio_Ready( void );
 #endif
-extern bool RADIO_Get_Chip_Temperature( uint8_t radioNum,int16_t *temP );
+extern bool RADIO_Get_Chip_Temperature( uint8_t radioNum,int16_t *temp );
 extern void RADIO_Temperature_Update( void );
 /**
  * \addtogroup dev
