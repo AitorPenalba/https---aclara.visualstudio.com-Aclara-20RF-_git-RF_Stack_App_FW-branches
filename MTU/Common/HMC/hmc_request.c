@@ -77,7 +77,7 @@ static HMC_REQ_queue_t     *pQueue_;
 #if( RTOS_SELECTION == FREE_RTOS )
 #define HMC_REQ_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
 #else
-#define HMC_REQ_QUEUE_SIZE 0 
+#define HMC_REQ_QUEUE_SIZE 0
 #endif
 
 
@@ -202,7 +202,6 @@ uint8_t HMC_REQ_applet( uint8_t ucCmd, void *pData )
       }
       case ( uint8_t )HMC_APP_API_CMD_STATUS:        /* Command to check to see if the applet needs communication */
       {
-         HMC_REQ_PRNT_INFO( 'I', "INSIDE HMC_APP_API_CMD_STATUS");
          if ( ( OS_QUEUE_NumElements( &HMC_REQ_queueHandle ) != 0 ) || ( 0 != totalBytesToRead_ ) )
          {
 #if ( ( END_DEVICE_PROGRAMMING_CONFIG == 1 ) || ( END_DEVICE_PROGRAMMING_FLASH >  ED_PROG_FLASH_NOT_SUPPORTED ) )

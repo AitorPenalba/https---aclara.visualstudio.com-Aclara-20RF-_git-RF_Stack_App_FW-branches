@@ -38,7 +38,6 @@
 #define ADD_LF           (1<<0) // Insert \n
 #define PRINT_DATE_TIME  (1<<1) // Print date, time and taskID
 
-
 // Print category, string, adds \n and time stamp
 #define DBG_logPrintf( category, fmt, ... ) DBG_log( category, ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)
 // Print string, adds \n
@@ -79,7 +78,7 @@ void           DBG_lockPrintResource( void );
 void           DBG_releasePrintResource( void );
 void           DBG_TxTask( taskParameter );
 void           DBG_LogTask( taskParameter );
-//void           DBG_log ( char category, uint8_t options, const char *fmt, ... );
+void           DBG_log ( char category, uint8_t options, const char *fmt, ... );
 void           DBG_logPrintHex( char category, char const *str, const uint8_t *Data, uint16_t Length );
 void           DBG_EnableDebug ( void );
 void           DBG_DisableDebug ( void );

@@ -337,7 +337,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 #endif
 
-#if 0 // TODO: RA6E1: Add when the OS Events issue has been resolved 
+#if 0 // TODO: RA6E1: Add when the OS Events issue has been resolved
    { eSD_PS_LISTENER_IDX,       SD_PhaseSamplesListenerTask,   600,  16, (char *)pTskName_SdPsListener,        DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { eSD_PREAM_DET_IDX,         SD_PreambleDetectorTask,      6300,  18, (char *)pTskName_SdPreambleDetector,  DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 }, // |  Parameters here are the ID's
    { eSD_SYNC_PAYL_DEMOD1_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod1, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 1, 0 }, // |  ID's 0-2, run sequentially by the preprocessor
@@ -362,7 +362,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eDA_HOST_RST_TSK_IDX,      HostResetTask,                 600,  28, (char *)pTskName_HostReset,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_MFG_TASKS
-   { eMFGP_CMD_TSK_IDX,         MFGP_uartCmdTask,             3000,  29, (char *)pTskName_MfgUartCmd, DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eMFGP_CMD_TSK_IDX,         MFGP_uartCmdTask,             2000,  29, (char *)pTskName_MfgUartCmd, DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
@@ -372,13 +372,13 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 
 #if ENABLE_ID_TASKS
-   //{ eID_TSK_IDX,               ID_task,                      1900,  31, (char *)pTskName_Id,     DEFAULT_ATTR, 0, 0 },
+   { eID_TSK_IDX,               ID_task,                      1900,  31, (char *)pTskName_Id,     DEFAULT_ATTR, 0, 0 },
 #endif
 
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-   //{ eDMD_TSK_IDX,              DEMAND_task,                  1200,  32, (char *)pTskName_Dmd,    DEFAULT_ATTR, 0, 0 },
+   { eDMD_TSK_IDX,              DEMAND_task,                  1200,  32, (char *)pTskName_Dmd,    DEFAULT_ATTR, 0, 0 },
 
-  // { eHD_DS_TSK_IDX,            HD_DailyShiftTask,            1600,  33, (char *)pTskName_HD_Ds,  DEFAULT_ATTR, 0, 0 },
+   { eHD_DS_TSK_IDX,            HD_DailyShiftTask,            1600,  33, (char *)pTskName_HD_Ds,  DEFAULT_ATTR, 0, 0 },
 #endif
 
 #if ( TEST_QUIET_MODE == 0 )
@@ -389,7 +389,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 
    // TODO: RA6 [name_Balaji]: Check for Priority and change if required
    /* Increased the Priority of DBG_CommandLineTask to handle large amount of Uart_read */
-//   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  13, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  13, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_PAR_TASKS
    { ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },

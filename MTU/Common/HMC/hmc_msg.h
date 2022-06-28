@@ -101,7 +101,7 @@ typedef struct
 }HMC_MSG_Configuration;
 
 /* GLOBAL VARIABLES */
-//static uint8_t   ucResult = 0x00;           /* Used to store the received byte or result of the UART */
+
 /* FUNCTION PROTOTYPES */
 
 GLOBAL uint16_t HMC_MSG_Processor(uint8_t, HMC_COM_INFO *);

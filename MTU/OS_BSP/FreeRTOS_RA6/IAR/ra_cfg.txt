@@ -538,7 +538,7 @@ FSP Configuration
       Extra: Clock Source: Internal Clock
       Extra: Start bit detection: Falling Edge
       Extra: Noise Filter: Disable
-      Extra: Receive FIFO Trigger Level: Max
+      Extra: Receive FIFO Trigger Level: One
       Interrupts: Callback: dbg_uart_callback
       Interrupts: Receive Interrupt Priority: Priority 12
       Interrupts: Transmit Data Empty Interrupt Priority: Priority 12

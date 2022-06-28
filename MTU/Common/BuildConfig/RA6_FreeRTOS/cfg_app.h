@@ -295,7 +295,6 @@ typedef enum
 #elif ( MCU_SELECTED == RA6E1 )
 
 //This is the CBF_BK_KV_METER (Comm Board Force/Busy KV) signal connector pin 27
-//#define HMC_COMM_FORCE()            1  // TODO: RA6E1 Setting to 1 for now
 #define HMC_COMM_FORCE()            R_BSP_PinRead(BSP_IO_PORT_00_PIN_02)
 #define HMC_COMM_FORCE_TRIS()
 
