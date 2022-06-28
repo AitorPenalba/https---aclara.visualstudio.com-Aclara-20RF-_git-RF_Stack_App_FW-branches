@@ -255,11 +255,7 @@ int32_t aclara_rand(void)
       float temp1, temp2, temp3;
       uint32_t utemp1, utemp2, utemp3;
 
-#if ( MCU_SELECTED == NXP_K24 )
       temp1 = ADC_Get_uP_Temperature( TEMP_IN_DEG_F );
-#elif ( MCU_SELECTED == RA6E1 )
-      temp1 = ADC_Get_4V0_Voltage();
-#endif
       temp2 = ADC_Get_PS_Temperature( TEMP_IN_DEG_F );
       temp3 = ADC_Get_PA_Temperature( TEMP_IN_DEG_F );
 

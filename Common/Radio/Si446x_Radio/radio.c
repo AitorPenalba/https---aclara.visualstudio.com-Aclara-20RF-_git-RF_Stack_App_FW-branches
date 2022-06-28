@@ -166,8 +166,11 @@ extern uint32_t DMA_Complete_IRQ_ISR_Timestamp; // Used for a watchdog to make s
  *  Local Variables
  *****************************************************************************/
 static RadioEvent_Fxn pEventHandler_Fxn;
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
+static bool bRadio_ready = FALSE; 
 static float RADIO_Temperature;
 static bool bAvg_done = FALSE;
+#endif
 
 
 
@@ -712,10 +715,6 @@ static OS_MUTEX_Obj radioMutex;
 #if COMPARE == 1
 void compbyte(uint8_t group, uint8_t number);
 void compare(void);
-#endif
-
-#if GET_TEMPERATURE_FROM_RADIO
-static bool bRadio_ready = FALSE; 
 #endif
 
 #if 0  // TODO: RA6E1 Bob: This was removed from original project
@@ -2555,7 +2554,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    OS_TASK_Sleep( FIFTY_MSEC );
 #endif
    RADIO_Update_Freq();
-#if GET_TEMPERATURE_FROM_RADIO
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
    bRadio_ready = TRUE; 
 #endif
 }
@@ -6391,7 +6390,7 @@ uint8_t RADIO_Power_Level_Get(void)
 
    return (Si446xCmd.GET_PROPERTY.DATA[0]);
 }
-
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
 /*******************************************************************************
 
   Function name: RADIO_Temperature_Update 
@@ -6453,7 +6452,6 @@ void RADIO_Temperature_Update(void)
 }
 
 
-#if GET_TEMPERATURE_FROM_RADIO == 1
 /*******************************************************************************
 
   Function name: RADIO_Get_Chip_Temperature 
