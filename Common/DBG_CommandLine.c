@@ -5087,18 +5087,18 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
    temperatureC = (int32_t)( 10 * ADC_Get_uP_Temperature( TEMP_IN_DEG_C ) );
    temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
    DBG_logPrintf( 'R', "CPU Temp    = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
-#elif ( MCU_SELECTED == RA6E1 )
+#elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1: Do we need this section? It is same as the Radio Temp obtained using PHY_GetRequest( ePhyAttr_Temperature );
    int16_t        Temperature;
    bool tempOK = RADIO_Get_Chip_Temperature( (uint8_t) RADIO_0, &Temperature );
    if( tempOK )
    {
       temperatureC = (int32_t)( 10 * Temperature );
       temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
-      DBG_logPrintf( 'R', "Radio Temp  = % 4d.%1dF, % 4d.%1dC Radio TempOk = %d", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 ,tempOK);
+      DBG_logPrintf( 'R', "Radio Temp  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
    }
    else
    {
-      DBG_logPrintf( 'E', "Problem in RADIO_Get_Chip_Temperature: Radio TempOk=%d",tempOK);
+      DBG_logPrintf( 'E', "Problem in RADIO_Get_Chip_Temperature");
    }
 #endif
 

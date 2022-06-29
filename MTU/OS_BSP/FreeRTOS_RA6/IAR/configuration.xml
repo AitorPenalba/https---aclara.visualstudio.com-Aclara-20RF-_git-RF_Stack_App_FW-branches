@@ -1214,7 +1214,7 @@
       <pinNumberSetting comment="RES" pinNumber="38"/>
       <pinNumberSetting comment="RX0TX1" pinNumber="41"/>
       <pinNumberSetting comment="SKY_EN" pinNumber="42"/>
-      <pinNumberSetting comment="ZCD_METER" pinNumber="54"/>
+      <pinNumberSetting comment="Miso_Busy" pinNumber="54"/>
       <pinNumberSetting comment="UART3_TX_AMR" pinNumber="55"/>
       <pinNumberSetting comment="UART3_RX_AMR" pinNumber="56"/>
       <pinNumberSetting comment="Reserved for : RLY_DRIVE" pinNumber="57"/>
