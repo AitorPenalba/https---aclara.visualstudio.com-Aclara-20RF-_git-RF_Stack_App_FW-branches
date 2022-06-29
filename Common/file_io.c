@@ -278,12 +278,12 @@ returnStatus_t FIO_finit( void )
 #if ( RTOS_SELECTION == FREE_RTOS )
       if ( eSUCCESS != retVal )
       {
-         (void)UART_polled_printf ( "ERROR - OS_MUTEX_Create(&fioMutex_) failed" );
+         (void)UART_polled_printf ( "ERROR - Partition Initialization failed" );
       }
    }
    else
    {
-      (void)UART_polled_printf ( "ERROR - Partition Initialization failed" );
+      (void)UART_polled_printf ( "ERROR - OS_MUTEX_Create(&fioMutex_) failed" );
 #endif // RTOS_SELECTION
    }
    return retVal;

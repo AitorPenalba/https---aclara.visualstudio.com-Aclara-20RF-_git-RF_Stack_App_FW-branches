@@ -297,7 +297,7 @@
 #define TEST_TDMA                         0     /* Basic TDMA test */
 #define TEST_DEVIATION                    0     /* Test 600Hz, 700Hz and 800Hz deviation */
 #define OVERRIDE_TEMPERATURE              0     /* 0=Do not include temperature override, 1=Do inlcude temperature override */
-#define TEST_SYNC_ERROR                   0     /* // TODO: RA6E1: Bob - determine what this does and whether we need it */
+#define TEST_SYNC_ERROR                   0     /* Allow configuration of the number of errored bit acceptable in SYNC */
 
 /* All unit/integration defines MUST code inside the #if below! */
 #if (TEST_MODE_ENABLE == 1)
