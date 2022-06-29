@@ -260,9 +260,14 @@ struct xz_dec_lzma2 {
 
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
-
+#if ( DCU == 1 )
+/* Use External RAM on DCU */
+uint8_t                dictionaryBuffer[DICTIONARY_BUFFER_SIZE] @ "EXTERNAL_RAM"; /*lint !e430*/ // Buffer for dictionary
+struct xz_dec_lzma2    lzmaDecompression @ "EXTERNAL_RAM"; /*lint !e430*/
+#else
 uint8_t                dictionaryBuffer[DICTIONARY_BUFFER_SIZE];     // Buffer for dictionary
 struct xz_dec_lzma2    lzmaDecompression;
+#endif
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
@@ -295,7 +300,7 @@ static void dict_reset( struct dictionary *dict, xz_buffer_t *b )
    if ( DEC_IS_SINGLE( dict->mode ) )
    {
       /* Note: This statement will not be executed as we are not using SINGLE method of decompression. This has to be tested while using single mode decompression */
-      memcpy( dict->buf, b->output + b->output_pos, b->output_size - b->output_pos ); /* dict->buf = b->output + b->output_pos; // Code as in open source repo */ 
+      memcpy( dict->buf, b->output + b->output_pos, b->output_size - b->output_pos ); /* dict->buf = b->output + b->output_pos; // Code as in open source repo */
       dict->end = b->output_size - b->output_pos;
    }
 
@@ -764,7 +769,7 @@ static __always_inline int rc_bit( struct rc_dec *rc, uint16_t *prob )
 
    Reentrant Code: Yes
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static __always_inline uint32_t rc_bittree( struct rc_dec *rc, uint16_t *probs, uint32_t limit )
@@ -799,7 +804,7 @@ static __always_inline uint32_t rc_bittree( struct rc_dec *rc, uint16_t *probs, 
 
    Reentrant Code: Yes
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static __always_inline void rc_bittree_reverse( struct rc_dec *rc, uint16_t *probs,
@@ -836,7 +841,7 @@ static __always_inline void rc_bittree_reverse( struct rc_dec *rc, uint16_t *pro
 
    Reentrant Code: Yes
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static inline void rc_direct( struct rc_dec *rc, uint32_t *dest, uint32_t limit )
@@ -867,7 +872,7 @@ static inline void rc_direct( struct rc_dec *rc, uint32_t *dest, uint32_t limit 
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static uint16_t *lzma_literal_probs( struct xz_dec_lzma2 *s )
@@ -892,7 +897,7 @@ static uint16_t *lzma_literal_probs( struct xz_dec_lzma2 *s )
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static void lzma_literal( struct xz_dec_lzma2 *s )
@@ -909,7 +914,7 @@ static void lzma_literal( struct xz_dec_lzma2 *s )
    {
       symbol = rc_bittree( &s->rc, probs, 0x100 );
    }
-   else 
+   else
    {
       symbol = 1;
       match_byte = dict_get( &s->dict, s->lzma.rep0 ) << 1;
@@ -923,8 +928,8 @@ static void lzma_literal( struct xz_dec_lzma2 *s )
          {
             symbol = ( symbol << 1 ) + 1;
             offset &= match_bit;
-         } 
-         else 
+         }
+         else
          {
             symbol <<= 1;
             offset &= ~match_bit;
@@ -950,7 +955,7 @@ static void lzma_literal( struct xz_dec_lzma2 *s )
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static void lzma_len( struct xz_dec_lzma2 *s, struct lzma_len_dec *l, uint32_t pos_state )
@@ -958,21 +963,21 @@ static void lzma_len( struct xz_dec_lzma2 *s, struct lzma_len_dec *l, uint32_t p
    uint16_t *probs;
    uint32_t limit;
 
-   if ( !rc_bit( &s->rc, &l->choice ) ) 
+   if ( !rc_bit( &s->rc, &l->choice ) )
    {
       probs = l->low[pos_state];
       limit = LEN_LOW_SYMBOLS;
       s->lzma.len = MATCH_LEN_MIN;
    }
-   else 
+   else
    {
-      if ( !rc_bit( &s->rc, &l->choice2 ) ) 
+      if ( !rc_bit( &s->rc, &l->choice2 ) )
       {
          probs = l->mid[pos_state];
          limit = LEN_MID_SYMBOLS;
          s->lzma.len = MATCH_LEN_MIN + LEN_LOW_SYMBOLS;
-      } 
-      else 
+      }
+      else
       {
          probs = l->high;
          limit = LEN_HIGH_SYMBOLS;
@@ -997,7 +1002,7 @@ static void lzma_len( struct xz_dec_lzma2 *s, struct lzma_len_dec *l, uint32_t p
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static void lzma_match( struct xz_dec_lzma2 *s, uint32_t pos_state )
@@ -1020,8 +1025,8 @@ static void lzma_match( struct xz_dec_lzma2 *s, uint32_t pos_state )
    if ( dist_slot < DIST_MODEL_START )
    {
       s->lzma.rep0 = dist_slot;
-   } 
-   else 
+   }
+   else
    {
       limit = ( dist_slot >> 1 ) - 1;
       s->lzma.rep0 = 2 + ( dist_slot & 1 );
@@ -1055,7 +1060,7 @@ static void lzma_match( struct xz_dec_lzma2 *s, uint32_t pos_state )
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static void lzma_rep_match( struct xz_dec_lzma2 *s, uint32_t pos_state )
@@ -1113,7 +1118,7 @@ static void lzma_rep_match( struct xz_dec_lzma2 *s, uint32_t pos_state )
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static bool lzma_main( struct xz_dec_lzma2 *s )
@@ -1179,7 +1184,7 @@ static bool lzma_main( struct xz_dec_lzma2 *s )
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static void lzma_reset( struct xz_dec_lzma2 *s )
@@ -1225,7 +1230,7 @@ static void lzma_reset( struct xz_dec_lzma2 *s )
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static bool lzma_props( struct xz_dec_lzma2 *s, uint8_t props )
@@ -1285,7 +1290,7 @@ static bool lzma_props( struct xz_dec_lzma2 *s, uint8_t props )
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 static bool lzma2_lzma( struct xz_dec_lzma2 *s, xz_buffer_t *b )
@@ -1403,7 +1408,7 @@ static bool lzma2_lzma( struct xz_dec_lzma2 *s, xz_buffer_t *b )
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 XZ_EXTERN xz_returnStatus_t XZ_DEC_LZMA2_run( struct xz_dec_lzma2 *s, xz_buffer_t *b )
@@ -1614,7 +1619,7 @@ XZ_EXTERN xz_returnStatus_t XZ_DEC_LZMA2_run( struct xz_dec_lzma2 *s, xz_buffer_
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 XZ_EXTERN struct xz_dec_lzma2 *XZ_DEC_LZMA2_create( xz_mode_t mode, uint32_t dict_max )
@@ -1652,7 +1657,7 @@ XZ_EXTERN struct xz_dec_lzma2 *XZ_DEC_LZMA2_create( xz_mode_t mode, uint32_t dic
    Purpose: Decode the LZMA2 properties (one byte) and reset the decoder. Return
             XZ_OK on success, XZ_MEMLIMIT_ERROR if the preallocated dictionary is not
             big enough, and XZ_OPTIONS_ERROR if props indicates something that this
-            decoder doesn't support. 
+            decoder doesn't support.
 
    Arguments: struct xz_dec_lzma2 *s, xz_buffer_t *b
 
@@ -1662,7 +1667,7 @@ XZ_EXTERN struct xz_dec_lzma2 *XZ_DEC_LZMA2_create( xz_mode_t mode, uint32_t dic
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 XZ_EXTERN xz_returnStatus_t XZ_DEC_LZMA2_reset( struct xz_dec_lzma2 *s, uint8_t props )
@@ -1721,7 +1726,7 @@ XZ_EXTERN xz_returnStatus_t XZ_DEC_LZMA2_reset( struct xz_dec_lzma2 *s, uint8_t 
 
    Reentrant Code: No
 
-   Notes: 
+   Notes:
 
 **********************************************************************************************************************/
 XZ_EXTERN void XZ_DEC_LZMA2_end( struct xz_dec_lzma2 *s )

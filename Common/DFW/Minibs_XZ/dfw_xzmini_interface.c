@@ -36,8 +36,13 @@
 
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
-
+#if ( DCU == 1 )
+/* Use External RAM on DCU */
+/* Structure to store the partition table pointer, moving position value, end offset value */
+static compressedData_position_t patchOffsetDetail_ @ "EXTERNAL_RAM"; /*lint !e430*/
+#else
 static compressedData_position_t patchOffsetDetail_;  /* Structure to store the partition table pointer, moving position value, end offset value */
+#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */

@@ -152,8 +152,12 @@ struct xz_dec {
 
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
-
+#if ( DCU == 1 )
+/* Use External RAM on DCU */
+struct xz_dec xzDecompression @ "EXTERNAL_RAM"; /*lint !e430*/
+#else
 struct xz_dec xzDecompression;
+#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -208,7 +212,7 @@ static uint32_t xz_calcCRC32( const uint8_t *buf, size_t size, uint32_t crc )
    Function Name: fill_temp
 
    Purpose: This fills decompressionInfo->temp by copying data starting from buffer->in[buffer->input_pos]. Caller
-            must have set decompressionInfo->temp.pos to indicate how much data we are supposed to copy 
+            must have set decompressionInfo->temp.pos to indicate how much data we are supposed to copy
             into decompressionInfo->temp.buf. Return true once decompressionInfo->temp.pos has reached decompressionInfo->temp.size.
 
    Arguments: struct xz_dec *decompressionInfo, xz_buffer_t *buffer
@@ -224,7 +228,7 @@ static uint32_t xz_calcCRC32( const uint8_t *buf, size_t size, uint32_t crc )
 **********************************************************************************************************************/
 static bool fill_temp( struct xz_dec *decompressionInfo, xz_buffer_t *buffer )
 {
-   size_t copy_size = min_t( size_t, buffer->input_size - buffer->input_pos, 
+   size_t copy_size = min_t( size_t, buffer->input_size - buffer->input_pos,
                              decompressionInfo->temp.size - decompressionInfo->temp.pos );
 
    memcpy( decompressionInfo->temp.buf + decompressionInfo->temp.pos,
@@ -298,11 +302,11 @@ static xz_returnStatus_t dec_vli( struct xz_dec *decompressionInfo, const uint8_
 
    Function Name: dec_block
 
-   Purpose:  Decode the Compressed Data field from a Block. Update and validate the 
-             observed compressed and uncompressed sizes of the Block so that they don't 
-             exceed the values possibly stored in the Block Header (validation assumes 
-             that no integer overflow occurs, since vli_type is normally uint64_t). 
-             Update the CRC32 or CRC64 value if presence of the CRC32 or 
+   Purpose:  Decode the Compressed Data field from a Block. Update and validate the
+             observed compressed and uncompressed sizes of the Block so that they don't
+             exceed the values possibly stored in the Block Header (validation assumes
+             that no integer overflow occurs, since vli_type is normally uint64_t).
+             Update the CRC32 or CRC64 value if presence of the CRC32 or
              CRC64 field was indicated in Stream Header.
 
              Once the decoding is finished, validate that the observed sizes match
@@ -343,7 +347,7 @@ static xz_returnStatus_t dec_block( struct xz_dec *decompressionInfo, xz_buffer_
 
    /* There is no need to separately check for VLI_UNKNOWN, since
     * the observed sizes are always smaller than VLI_UNKNOWN. */
-   if ( decompressionInfo->block.compressed > decompressionInfo->block_header.compressed || 
+   if ( decompressionInfo->block.compressed > decompressionInfo->block_header.compressed ||
         decompressionInfo->block.uncompressed > decompressionInfo->block_header.uncompressed )
    {
       return XZ_DATA_ERROR;
@@ -366,12 +370,12 @@ static xz_returnStatus_t dec_block( struct xz_dec *decompressionInfo, xz_buffer_
 
    if ( returnValue == XZ_STREAM_END )
    {
-      if ( decompressionInfo->block_header.compressed != VLI_UNKNOWN && 
+      if ( decompressionInfo->block_header.compressed != VLI_UNKNOWN &&
            decompressionInfo->block_header.compressed != decompressionInfo->block.compressed )
       {
          return XZ_DATA_ERROR;
       }
-   
+
       if ( decompressionInfo->block_header.uncompressed != VLI_UNKNOWN &&
            decompressionInfo->block_header.uncompressed != decompressionInfo->block.uncompressed )
       {
@@ -430,7 +434,7 @@ static void index_update( struct xz_dec *decompressionInfo, const xz_buffer_t *b
 
    Function Name: dec_index
 
-   Purpose:  Decode the Number of Records, Unpadded Size, and Uncompressed Size fields 
+   Purpose:  Decode the Number of Records, Unpadded Size, and Uncompressed Size fields
              from the Index field. That is, Index Padding and CRC32 are not decoded by this function.
 
              This can return XZ_OK (more input needed), XZ_STREAM_END (everything successfully
@@ -487,7 +491,7 @@ static xz_returnStatus_t dec_index( struct xz_dec *decompressionInfo, xz_buffer_
          case SEQ_INDEX_UNCOMPRESSED:
          {
             decompressionInfo->index.hash.uncompressed += decompressionInfo->vli;
-            decompressionInfo->index.hash.crc32 = xz_calcCRC32( ( const uint8_t * )&decompressionInfo->index.hash, 
+            decompressionInfo->index.hash.crc32 = xz_calcCRC32( ( const uint8_t * )&decompressionInfo->index.hash,
                                                                 sizeof( decompressionInfo->index.hash ),
                                                                 decompressionInfo->index.hash.crc32 );
             --decompressionInfo->index.count;
@@ -529,7 +533,7 @@ static xz_returnStatus_t crc_validate( struct xz_dec *decompressionInfo,
          return XZ_OK;
       }
 
-      if ( ( ( decompressionInfo->crc >> decompressionInfo->pos ) & 0xFF ) != 
+      if ( ( ( decompressionInfo->crc >> decompressionInfo->pos ) & 0xFF ) !=
            buffer->input[buffer->input_pos++] )
       {
          return XZ_DATA_ERROR;
@@ -607,7 +611,7 @@ static xz_returnStatus_t dec_stream_header( struct xz_dec *decompressionInfo )
       return XZ_FORMAT_ERROR;
    }
 
-   if ( ( xz_calcCRC32( decompressionInfo->temp.buf + HEADER_MAGIC_SIZE, 2, 0 ) != 
+   if ( ( xz_calcCRC32( decompressionInfo->temp.buf + HEADER_MAGIC_SIZE, 2, 0 ) !=
         get_le32( decompressionInfo->temp.buf + HEADER_MAGIC_SIZE + 2 ) ) )
    {
       return XZ_DATA_ERROR;
@@ -618,8 +622,8 @@ static xz_returnStatus_t dec_stream_header( struct xz_dec *decompressionInfo )
       return XZ_OPTIONS_ERROR;
    }
 
-   /* Of integrity checks, we support none ( Check ID = 0 ), CRC32 ( Check ID = 1 ), and 
-    * optionally CRC64 ( Check ID = 4 ). However, if XZ_DEC_ANY_CHECK is defined, 
+   /* Of integrity checks, we support none ( Check ID = 0 ), CRC32 ( Check ID = 1 ), and
+    * optionally CRC64 ( Check ID = 4 ). However, if XZ_DEC_ANY_CHECK is defined,
     * we will accept other check types too, but then the check won't be verified and
     * a warning ( XZ_UNSUPPORTED_CHECK ) will be given. */
    decompressionInfo->check_type = ( enum xz_check ) decompressionInfo->temp.buf[HEADER_MAGIC_SIZE + 1];
@@ -713,14 +717,14 @@ static xz_returnStatus_t dec_block_header( struct xz_dec *decompressionInfo )
 
    /* Validate the CRC32. We know that the temp buffer is at least eight bytes so this is safe. */
    decompressionInfo->temp.size -= 4;
-   if ( xz_calcCRC32( decompressionInfo->temp.buf, decompressionInfo->temp.size, 0 ) != 
+   if ( xz_calcCRC32( decompressionInfo->temp.buf, decompressionInfo->temp.size, 0 ) !=
         get_le32( decompressionInfo->temp.buf + decompressionInfo->temp.size ) )
    {
       return XZ_DATA_ERROR;
    }
 
    decompressionInfo->temp.pos = 2;
-   /* Catch unsupported Block Flags. We support only one or two filters in the chain, 
+   /* Catch unsupported Block Flags. We support only one or two filters in the chain,
       so we catch that with the same test. */
 #ifdef XZ_DEC_BCJ
    if ( decompressionInfo->temp.buf[1] & 0x3E )
@@ -863,7 +867,7 @@ static xz_returnStatus_t dec_main( struct xz_dec *decompressionInfo, xz_buffer_t
          case SEQ_STREAM_HEADER:
          {
             /* Stream Header is copied to decompressionInfo->temp, and then decoded from there.
-             * This way if the caller gives us only little input at a time, we can still keep the 
+             * This way if the caller gives us only little input at a time, we can still keep the
              * Stream Header decoding code simple. Similar approach is used in many places in this file. */
             if ( !fill_temp( decompressionInfo, buffer ) )
             {
@@ -871,7 +875,7 @@ static xz_returnStatus_t dec_main( struct xz_dec *decompressionInfo, xz_buffer_t
             }
 
             /* If dec_stream_header() returns XZ_UNSUPPORTED_CHECK, it is still possible
-             * to continue decoding if working in multi-call mode. Thus, update 
+             * to continue decoding if working in multi-call mode. Thus, update
              * decompressionInfo->sequence before calling dec_stream_header(). */
             decompressionInfo->sequence = SEQ_BLOCK_START;
             ret = dec_stream_header( decompressionInfo );
@@ -888,7 +892,7 @@ static xz_returnStatus_t dec_main( struct xz_dec *decompressionInfo, xz_buffer_t
             {
                return XZ_OK;
             }
-            
+
             /* See if this is the beginning of the Index field. */
             if ( buffer->input[buffer->input_pos] == 0 )
             {
@@ -1011,7 +1015,7 @@ static xz_returnStatus_t dec_main( struct xz_dec *decompressionInfo, xz_buffer_t
             index_update( decompressionInfo, buffer );
 
             /* Compare the hashes to validate the Index field. */
-            if ( !memeq( &decompressionInfo->block.hash, &decompressionInfo->index.hash, 
+            if ( !memeq( &decompressionInfo->block.hash, &decompressionInfo->index.hash,
                          sizeof( decompressionInfo->block.hash ) ) )
             {
                return XZ_DATA_ERROR;

@@ -51,8 +51,11 @@
 
 #define LOCAL_READ_WRITE_BUFFER_SIZE    512     // Size used for reading and writing in the partition
 
+#if ( ( DCU == 1 ) || ( MCU_SELECTED == RA6E1 ) )
+#else
 #define RESERVED_SECTION_1_START_BYTES  ( off_t )( PART_APP_CODE_OFFSET + PART_APP_CODE_SIZE )
 #define RESERVED_SECTION_1_STOP_BYTES   ( off_t )( PART_APP_UPPER_CODE_OFFSET - 1 )
+#endif
 
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
@@ -228,8 +231,10 @@ returnStatus_t MINIBS_patch( PartitionData_t const *pOldImagePTbl, eFwTarget_t p
    }
 
    /* Apply patch */
-#if ( ( DCU == 1 ) || ( MCU_SELECTED == RA6E1 ) )
+#if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( ( DCU == 1 ) &&  ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )) )
    oldpos = 0;
+#elif ( ( ( DCU == 1 ) &&  ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) ) || ( MCU_SELECTED == RA6E1 ) )
+   oldpos = BL_CODE_START;
 #else
    oldpos = BL_CODE_START;
    /* Set the reserved section size only if the patch is for application */
@@ -254,7 +259,9 @@ returnStatus_t MINIBS_patch( PartitionData_t const *pOldImagePTbl, eFwTarget_t p
       i = 0;
       while (i < ctrl)
       {
+#if ( MCU_SELECTED == RA6E1 )
          WDOG_Kick();   // Added for bypassing wdog reset TODO: investigate why external RAM write takes longer time
+#endif
          off_t bufSizeToRead = LOCAL_READ_WRITE_BUFFER_SIZE;
          if( ( ctrl - i ) < bufSizeToRead )
          {
@@ -295,7 +302,9 @@ returnStatus_t MINIBS_patch( PartitionData_t const *pOldImagePTbl, eFwTarget_t p
       i = 0;
       while (i < ctrl)
       {
+#if ( MCU_SELECTED == RA6E1 )
          WDOG_Kick();   // Added for bypassing wdog reset TODO: investigate why external RAM write takes longer time
+#endif
          off_t bufSizeToRead = LOCAL_READ_WRITE_BUFFER_SIZE;
          if( ( ctrl - i ) < bufSizeToRead )
          {

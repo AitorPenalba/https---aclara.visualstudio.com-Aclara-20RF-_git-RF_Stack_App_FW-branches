@@ -1022,7 +1022,7 @@ void DFWI_Init_MsgHandler(HEEP_APPHDR_t *appMsgRxInfo, void *payloadBuf, uint16_
    {
       appMsgTxInfo.Method_Status   = (uint8_t)NotModified;
    }
-   if ( ((uint8_t)OK == appMsgTxInfo.Method_Status ) || ((uint8_t)BadRequest == appMsgTxInfo.Method_Status ) )
+   if ( ((uint8_t)OK == appMsgTxInfo.Method_Status ) || ( ((uint8_t)BadRequest == appMsgTxInfo.Method_Status) && (NULL != pBuf) ) )
    {
       // send the message to message handler. The called function will free the buffer
       /*lint -e(644) If appMsgTxInfo.Method_Status is OK, then pBuf was initialized */

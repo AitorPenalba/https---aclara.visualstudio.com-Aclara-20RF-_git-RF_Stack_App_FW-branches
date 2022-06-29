@@ -35,12 +35,19 @@
 #define XZ_DATA_BUFFER_SIZE    512  // Size of data to be read from patch table and size to be uncompressed from compressed patch
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
-
+#if ( DCU == 1 )
+/* Use External RAM on DCU */
+static uint8_t        compressedInputBuffer[XZ_DATA_BUFFER_SIZE] @ "EXTERNAL_RAM";    /*lint !e430*/
+static uint8_t        uncompressedOutputBuffer[XZ_DATA_BUFFER_SIZE] @ "EXTERNAL_RAM"; /*lint !e430*/
+static xz_buffer_t    xzDataBuffer @ "EXTERNAL_RAM";  /*lint !e430*/
+static struct xz_dec  *xzDecompress @ "EXTERNAL_RAM"; /*lint !e430*/
+#else
 static uint8_t        compressedInputBuffer[XZ_DATA_BUFFER_SIZE];
 static uint8_t        uncompressedOutputBuffer[XZ_DATA_BUFFER_SIZE];
-static uint32_t       getchar_pos = 0;
 static xz_buffer_t    xzDataBuffer;
 static struct xz_dec  *xzDecompress;
+#endif
+static uint32_t       getchar_pos = 0;
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -183,7 +190,7 @@ static xz_returnStatus_t XZMINIDEC_run( compressedData_position_t *patchOffset )
          bytesToRead = patchOffset->patchEndOffset - patchOffset->patchSrcOffset;
       }
 
-      if ( eSUCCESS == PAR_partitionFptr.parRead( compressedInputBuffer, patchOffset->patchSrcOffset, 
+      if ( eSUCCESS == PAR_partitionFptr.parRead( compressedInputBuffer, patchOffset->patchSrcOffset,
                                                   bytesToRead, patchOffset->pPatchPartition ) )
       {
          patchOffset->patchSrcOffset += bytesToRead;
