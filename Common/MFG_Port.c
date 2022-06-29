@@ -720,10 +720,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "help",                       MFGP_CommandLine_Help,           "Display list of commands" },
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
-   {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
-
-// TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
-//   { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
+// { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
    {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
    {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
    {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
@@ -751,7 +748,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
 #if 0 // Turned off in K24
 //These are defined in the HEEP, but not sure if they are valid or not!
-   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
+//   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
 #endif
    {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
    {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
@@ -913,9 +910,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
    {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
    {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
-   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },//[fixed by balaji PR]
+   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
    {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
-   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },//[fixed by balaji PR]
+   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },
    {  "strx4gfsk",                  MFG_StRx4GFSK,                   "Start a Receiver BER test using normal radio processing" },
 #if ( DCU == 1 )
    {  "stRamRWFailCount",           MFG_ToolEP_SDRAMCount,           "Get/Set SDRAM test failure count" },
@@ -926,7 +923,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 #if ( DCU == 1 )
    {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX. Specify SRFN or STAR" },
 #else
-//   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX" },
+   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX" },
 #endif
    {  "sttxcwtest",                 MFG_StTxCwTest,                  "Start a CW transmitter test" },
 #if ( DCU == 1 )
