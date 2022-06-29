@@ -2064,7 +2064,7 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
@@ -2190,6 +2190,12 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_diags.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_eng.c</name>

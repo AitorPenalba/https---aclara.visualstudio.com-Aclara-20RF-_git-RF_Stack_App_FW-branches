@@ -581,7 +581,7 @@ returnStatus_t PHY_init( void )
    {
 #if 0 // TODO: RA6E1 Bob: temporarily without soft demodulator
       retVal = SoftDemodulator_Initialize();
-#endif // 0
+#endif
    }
 #endif
    return(retVal);

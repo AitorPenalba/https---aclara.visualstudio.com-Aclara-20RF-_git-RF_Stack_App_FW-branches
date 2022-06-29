@@ -49,8 +49,8 @@
 #define ID_MAX_CHANNELS                   (8)
 #endif
 
-#define REMOTE_DISCONNECT                 0
-#define HMC_SNAPSHOT                      0
+#define REMOTE_DISCONNECT                 1
+#define HMC_SNAPSHOT                      1
 #define ANSI_STANDARD_TABLES              1
 #define ANSI_LOGON                        1
 #define ANSI_SECURITY                     1
