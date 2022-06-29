@@ -1403,9 +1403,7 @@ void MAC_Task ( taskParameter )
 #if ( EP == 1 )
             case eSYSFMT_VISUAL_INDICATION:
                // Delete timer and turn off LED
-#if 0 // TODO: RA6E1 Enable LED functions
                (void) TMR_DeleteTimer(LED_getLedTimerId());
-#endif
                BM_free(pBuf);
                break;
 #endif
@@ -2391,18 +2389,14 @@ void MAC_PauseTx( bool pause )
 #if ( EP == 1 )
    if( pause )
    {
-#if ( MCU_SELECTION == NXP_K24 ) // TODO: RA6E1 Bob: Is this needed anymore?
       LED_setRedLedStatus(RADIO_DISABLED);
-#endif // TODO: RA6E1 Bob: Is this needed anymore?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
       HMC_DISP_UpdateDisplayBuffer(HMC_DISP_MSG_HOT, HMC_DISP_POS_NIC_MODE);
 #endif
    }
    else
    {
-#if ( MCU_SELECTION == NXP_K24 ) // TODO: RA6E1 Bob: Is this needed anymore?
       LED_setRedLedStatus(RADIO_ENABLED);
-#endif // TODO: RA6E1 Bob: Is this needed anymore?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
       LED_checkModeStatus();           /* Radio got enabled replace the msg Hot with Mode */
 #endif

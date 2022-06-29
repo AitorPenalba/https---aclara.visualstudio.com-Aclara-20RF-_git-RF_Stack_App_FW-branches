@@ -1748,7 +1748,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1802,6 +1802,12 @@
                     </file>
                 </group>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\COMM.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\COMM.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\NET\indication.c</name>
                 </file>
                 <file>
@@ -1812,6 +1818,9 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\NET\SM.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\SM_Protocol.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\NET\smtd_config.c</name>
@@ -2049,7 +2058,7 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
@@ -2222,7 +2231,7 @@
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\HMC\HMC_seq_id.h</name>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_snapshot.c</name>
@@ -2286,7 +2295,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>

@@ -2200,7 +2200,7 @@ void OS_EVNTTestTask ( taskParameter )
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
 
-   Returns: FuncStatus - Successful status of this function 
+   Returns: FuncStatus - Successful status of this function
 
 *******************************************************************************/
 uint32_t DBG_CommandLine_OS_EventSet( uint32_t argc, char *argv[] )
@@ -2249,7 +2249,7 @@ uint32_t DBG_CommandLine_OS_EventSet( uint32_t argc, char *argv[] )
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
 
-   Returns: retVal - Successful status of this function 
+   Returns: retVal - Successful status of this function
 
 *******************************************************************************/
 uint32_t DBG_CommandLine_OS_EventCreateWait( uint32_t argc, char *argv[] )
@@ -2322,7 +2322,7 @@ uint32_t DBG_CommandLine_OS_EventCreateWait( uint32_t argc, char *argv[] )
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
 
-   Returns: retVal - Successful status of this function 
+   Returns: retVal - Successful status of this function
 
 *******************************************************************************/
 uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] )
@@ -5073,7 +5073,7 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
       GetConf.eStatus = ePHY_GET_SUCCESS;
    }
    if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-      DBG_logPrintf( 'R', "Functnl Rev = %8sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(),  3) );
+      DBG_logPrintf( 'R', "Functnl Rev = %8sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(), 3) );
       DBG_logPrintf( 'R', "RevLtr      =   %c", ADC_GetHWRevLetter() );
       if ( argc != 0 )
       {

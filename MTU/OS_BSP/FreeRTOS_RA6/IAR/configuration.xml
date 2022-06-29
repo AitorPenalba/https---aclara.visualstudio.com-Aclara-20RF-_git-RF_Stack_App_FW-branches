@@ -760,6 +760,20 @@
       <property id="module.driver.external_irq.p_callback" value="isr_busy"/>
       <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority12"/>
     </module>
+    <module id="module.driver.lpm.355649270">
+      <property id="module.driver.lpm.name" value="g_lpm_DeepSWStandby_AGT"/>
+      <property id="module.driver.lpm.mode" value="module.driver.lpm.mode.deep"/>
+      <property id="module.driver.lpm.output_port_enable_standby" value="module.driver.lpm.output_port_enable_standby.high_impedance"/>
+      <property id="module.driver.lpm.standby_wake_sources" value="module.driver.lpm.standby_wake_irq11,module.driver.lpm.standby_wake_agt1ud"/>
+      <property id="module.driver.lpm.snooze_request" value="module.driver.lpm.snooze_request_rxd0_falling"/>
+      <property id="module.driver.lpm.snooze_end_sources" value=""/>
+      <property id="module.driver.lpm.snooze_dtc" value="module.driver.lpm.snooze_dtc.lpm_snooze_dtc_disable"/>
+      <property id="module.driver.lpm.snooze_cancel_source" value="enum.mcu.lpm.snooze_cancel_source.none"/>
+      <property id="module.driver.lpm.io_port_deep_standby_exit" value="module.driver.lpm.io_port_deep_standby_exit.no_change"/>
+      <property id="module.driver.lpm.power_supply_deep_standby" value="module.driver.lpm.power_supply_deep_standby.deepcut0"/>
+      <property id="module.driver.lpm.deep_standby_cancel_sources" value="module.driver.lpm.deep_standby_cancel_irq11,module.driver.lpm.deep_standby_cancel_agt1"/>
+      <property id="module.driver.lpm.deep_standby_cancel_edges" value="module.driver.lpm.deep_standby_cancel_irq11.edge"/>
+    </module>
     <context id="_hal.0">
       <stack module="module.driver.ioport_on_ioport.0"/>
       <stack module="module.middleware.rm_freertos_port.0"/>
@@ -794,6 +808,7 @@
       <stack module="module.driver.dac_on_dac.1013954723"/>
       <stack module="module.driver.watchdog_on_iwdt.259655036"/>
       <stack module="module.driver.external_irq_on_icu.2093440699"/>
+      <stack module="module.driver.lpm.355649270"/>
     </context>
     <config id="config.driver.wdt">
       <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>

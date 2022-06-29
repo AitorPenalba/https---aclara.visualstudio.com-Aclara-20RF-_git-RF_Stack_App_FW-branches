@@ -337,7 +337,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 #endif
 
-#if 0 // TODO: RA6E1: Add when the OS Events issue has been resolved 
+#if 0 // TODO: RA6E1: Add when the OS Events issue has been resolved
    { eSD_PS_LISTENER_IDX,       SD_PhaseSamplesListenerTask,   600,  16, (char *)pTskName_SdPsListener,        DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { eSD_PREAM_DET_IDX,         SD_PreambleDetectorTask,      6300,  18, (char *)pTskName_SdPreambleDetector,  DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 }, // |  Parameters here are the ID's
    { eSD_SYNC_PAYL_DEMOD1_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod1, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 1, 0 }, // |  ID's 0-2, run sequentially by the preprocessor
@@ -625,7 +625,7 @@ void OS_TASK_Create_All ( bool initSuccess )
 
 #if ( RTOS_SELECTION == MQX_RTOS )
    /* Install exception handler */
-   (void)_int_install_exception_isr();  TODO:  What is the equivalent opertion in FREE RTOS
+   (void)_int_install_exception_isr();
 #elif ( RTOS_SELECTION == FREE_RTOS )
       // TODO: RA6: What is the equivalent operation for FreeRTOS?
 #endif

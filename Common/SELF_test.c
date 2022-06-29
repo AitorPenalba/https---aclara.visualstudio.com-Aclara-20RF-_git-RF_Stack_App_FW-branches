@@ -59,7 +59,7 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #define SELF_TEST_EVENT_MASK             0xFFFFFFFF
 #elif ( RTOS_SELECTION == FREE_RTOS )
-#define SELF_TEST_EVENT_MASK             0x0000000F   /* TODO: RA6E1: Review */
+#define SELF_TEST_EVENT_MASK             0x0000000F
 #endif
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
@@ -202,7 +202,7 @@ void SELF_testTask( taskParameter )
 #endif
 #endif // if MQX_RTOS
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #if ( USE_USB_MFG == 0 )
    (void)fprintf( stdout_ptr, "%s %04X\n", "SelfTest", selfTestResults );
    OS_TASK_Sleep( 20 );
@@ -309,10 +309,7 @@ static uint16_t RunSelfTest()
 #endif
 
 #if ( EP == 1 )
-#if ( MCU_SELECTED == NXP_K24 )
-   // TODO: RA6 Melvin: LED Module not available
    LED_setRedLedStatus(SELFTEST_RUNNING);
-#endif
 #endif
 
    (void)memset( ( uint8_t * )&eventData, 0, sizeof( eventData ) );
@@ -660,6 +657,9 @@ returnStatus_t SELF_testRTC( void )
       }
    } while ( ( retVal == eFAILURE ) && ( OS_TICK_Get_ElapsedMilliseconds() < 1200 ) );
 #elif ( MCU_SELECTED == RA6E1 )
+
+#if 0 /* TODO: RA6E1: 1. This section is not correct. The System relies on having the RTC keeping the time. We cannot set the time here.
+                          2. R_RTC_Close() Stops the RTC  */
    sysTime_dateFormat_t setTime =
    {
    .sec  = 55,
@@ -693,6 +693,7 @@ returnStatus_t SELF_testRTC( void )
       }
    } while ( retVal == eFAILURE );// TODO: RA6 [name_Balaji]: Need to test after OS_TICK_Get_ElapsedMilliseconds integration
    R_RTC_Close (&g_rtc0_ctrl);// TODO: RA6 [name_Balaji]: Closing RTC, for now as there is no other known method to check the RTC valid or not
+#endif // #if 0
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )
 // TODO: RA6 [name_Balaji]: Remove unit test if not required

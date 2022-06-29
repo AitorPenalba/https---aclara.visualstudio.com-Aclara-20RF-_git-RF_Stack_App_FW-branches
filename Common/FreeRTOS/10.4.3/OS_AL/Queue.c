@@ -74,7 +74,7 @@ bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength )
    }
 #endif // BOB_DEBUG_BUFMGR
 #elif( RTOS_SELECTION == MQX_RTOS )
-    //queuelength is not neceary in MQX
+    //queue length is not necessary in MQX
     _queue_init ( QueueHandle, 0 );
 #endif
 
@@ -277,7 +277,7 @@ void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle )
    result = xQueuePeekFromISR(*QueueHandle, (void*)&QueueElement); //zQueuePeek or zQueuePeekISR?
    if( errQUEUE_EMPTY == result )
    {
-     QueueElement = NULL;
+      QueueElement = NULL;
    }
 #elif( RTOS_SELECTION == MQX_RTOS )
    QueueElement = (OS_QUEUE_Element*)_queue_head ( QueueHandle ); /*lint !e816 area too small   */

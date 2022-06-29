@@ -1971,12 +1971,9 @@ static NWK_SET_STATUS_e NWK_Attribute_Set( NWK_SetReq_t const *pSetReq)
    NWK_SET_STATUS_e eStatus;
 
    // This function should only be called inside the NWK task
-#if 0 // TODO: RA6E1 task get id and from name function
-   if ( _task_get_id() != _task_get_id_from_name( "NWK" ) )
-   {
-     ERR_printf("WARNING: NWK_Attribute_Set should only be called inside the NWK task. Please use NWK_SetRequest instead.");
+   if ( 0 != strcmp("NWK", OS_TASK_GetTaskName()) ) {
+      ERR_printf("WARNING: NWK_Attribute_Set should only be called inside the NWK task. Please use NWK_SetRequest instead.");
    }
-#endif
 
    switch (pSetReq->eAttribute)
    {
@@ -2053,12 +2050,10 @@ static NWK_GET_STATUS_e NWK_Attribute_Get( NWK_GetReq_t const *pGetReq, NWK_ATTR
    NWK_GET_STATUS_e eStatus = eNWK_GET_SUCCESS;
 
    // This function should only be called inside the NWK task
-#if 0 // TODO: RA6E1 task get id and from name function
-   if ( _task_get_id() != _task_get_id_from_name( "NWK" ) )
+   if ( 0 != strcmp("NWK", OS_TASK_GetTaskName()) )
    {
-     ERR_printf("WARNING: NWK_Attribute_Get should only be called inside the NWK task. Please use NWK_GetRequest instead.");
+      ERR_printf("WARNING: NWK_Attribute_Get should only be called inside the NWK task. Please use NWK_GetRequest instead.");
    }
-#endif
 
    switch (pGetReq->eAttribute)
    {
