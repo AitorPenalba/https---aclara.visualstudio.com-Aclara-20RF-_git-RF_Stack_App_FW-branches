@@ -16,6 +16,8 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include "DBG_SerialDebug.h"
+#include "radio.h"
+#include "SoftDemodulator.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
@@ -134,6 +136,7 @@ static bool setup_ADC1 ( void );
 #if ( TM_ADC_UNIT_TEST == 1 )
 bool ADC_UnitTest(void);
 #endif
+
 /* FUNCTION DEFINITIONS */
 
 /*******************************************************************************
@@ -710,7 +713,7 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
     *            voltage versus temperature slope in V/°C.
     * According to both K644 and K66 datasheets, Vtemp25=0.716 and m=0.00162
     */
-   Temperature = 25.0f - ((voltage - 0.716f) / 0.00162f);
+   Temperature = 25.0f - ( ( voltage - 0.716f ) / 0.00162f );
 #if ( OVERRIDE_TEMPERATURE == 1 )
    if ( ManualTemperature_ < 250.0)
    {
@@ -720,13 +723,9 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
    if (bFahrenheit)
    {
       /* Convert from Celsius to Fahrenheit */
-      Temperature = (((Temperature * 9.0f) / 5.0f) + 32.0f);
+      Temperature = ( ( ( Temperature * 9.0f ) / 5.0f ) + 32.0f );
    }
-
    return ( Temperature );
-#elif ( MCU_SELECTED == RA6E1 )                     //TODO: RA6E1 for renesas MCU
-    float Temperature=0.0;
-    return ( Temperature );
 #endif
 }
 

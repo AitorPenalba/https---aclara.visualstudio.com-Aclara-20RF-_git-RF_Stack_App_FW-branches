@@ -392,14 +392,14 @@ class FirmwareBuilder:
             set_file_global(name='RA6_I210+c_Dev Errors', value=error_count)
             # TODO MRh adapt this for RA6
             try:
-                path_to_outfile = os.path.join(path_to_iar_output, "Exe", "I210+c_RA6_Dev.out")
+                path_to_outfile = os.path.join(path_to_iar_output, "Exe", "Y84580-1-V3.00.xx.out")
                 shutil.copyfile(path_to_outfile, "C:\RegressionTestTool\\I210+c_RA6_Dev.out")
             except FileNotFoundError:
                 try:
                     path_to_outfile = os.path.join(path_to_iar_output, "Exe", "Y84074-1-V2.10.xx.out")
                     shutil.copyfile(path_to_outfile, "C:\RegressionTestTool\\I210+c_RA6_Dev.out")
                 except FileNotFoundError:
-                    path_to_outfile = os.path.join(path_to_iar_output, "Exe", "Y84074-1-V1.70.xx.out")
+                    path_to_outfile = os.path.join(path_to_iar_output, "Exe", "Y84580-1-V3.00.xx.out")
                     shutil.copyfile(path_to_outfile, "C:\RegressionTestTool\\I210+c_RA6_Dev.out")
 
         if warning_count > 0:

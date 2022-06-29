@@ -1891,6 +1891,9 @@
                         <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_config_normal.c</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\xradio.h</name>
                     </file>
                 </group>

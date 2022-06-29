@@ -60,6 +60,12 @@
 
 #define OFFSET(index) ((uint32_t)(((float)index*OSR)+0.5f)) // Make an offset based on sampling rate
 
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
+#define NUM_OF_RSSI_SAMPLE 9
+static uint8_t RSSI_Count = 0;
+#endif
+
+
 static bool SD_Unblock_Sync_Payload_Task(void);
 static void SD_ReleaseFilteredSamplesSemaphore(uint8_t id);
 static bool SD_FindSync( int8_t *buf, uint32_t size, uint32_t intFIFOCYCCNTTimeStamp );
@@ -334,6 +340,14 @@ void SD_PhaseSamplesListenerTask(taskParameter)
       if (samplesAvailable)
       {
          RADIO_CaptureRSSI((uint8_t)RADIO_0);
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
+         RSSI_Count++;
+         if ( RSSI_Count >= NUM_OF_RSSI_SAMPLE )
+         {
+            RSSI_Count = 0;
+            RADIO_Temperature_Update();  // get radio adc
+         }
+#endif
          for (uint8_t i=0; i<SOFT_DEMOD_MAX_SYNC_PAYL_TASKS+1; i++)
          {
             if (SD_FilteredPhaseSamplesSemaphores[i].available == false) // i.e. someone taken it
@@ -593,7 +607,7 @@ void SD_SyncPayloadDemodTask(taskParameter)
       SPD_Pers.SyncFound = false;
       SPD_Pers.HeaderValid = false;
       SPD_Pers.ScldFreq = 0.0F;
-	  SPD_Pers.syncTime_msec = 0;
+     SPD_Pers.syncTime_msec = 0;
       SPD_Pers.syncTimeStamp.QSecFrac = 0;
       SPD_Pers.MlseOffset = 0;
       SPD_Pers.IdxSync2 = 0;
