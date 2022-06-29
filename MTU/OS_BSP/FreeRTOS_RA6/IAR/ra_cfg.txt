@@ -450,8 +450,8 @@ FSP Configuration
       Pin Configuration Name: g_bsp_pin_cfg
       
     Instance "FreeRTOS Port (rm_freertos_port)"
-    Instance "g_uart2 UART (r_sci_uart)"
-      General: Name: g_uart2
+    Instance "g_uart_HMC UART (r_sci_uart)"
+      General: Name: g_uart_HMC
       General: Channel: 2
       General: Data Bits: 8bits
       General: Parity: None
@@ -465,7 +465,7 @@ FSP Configuration
       Extra: Clock Source: Internal Clock
       Extra: Start bit detection: Falling Edge
       Extra: Noise Filter: Disable
-      Extra: Receive FIFO Trigger Level: Max
+      Extra: Receive FIFO Trigger Level: One
       Interrupts: Callback: hmc_uart_callback
       Interrupts: Receive Interrupt Priority: Priority 12
       Interrupts: Transmit Data Empty Interrupt Priority: Priority 12
@@ -501,8 +501,8 @@ FSP Configuration
       Callback: isr_brownOut
       Pin Interrupt Priority: Priority 1
       
-    Instance "g_uart3 UART (r_sci_uart)"
-      General: Name: g_uart3
+    Instance "g_uart_MFG UART (r_sci_uart)"
+      General: Name: g_uart_MFG
       General: Channel: 3
       General: Data Bits: 8bits
       General: Parity: None
@@ -545,8 +545,8 @@ FSP Configuration
       Interrupts: Transmit End Interrupt Priority: Priority 12
       Interrupts: Error Interrupt Priority: Priority 12
       
-    Instance "g_uart9 UART (r_sci_uart)"
-      General: Name: g_uart9
+    Instance "g_uart_optical UART (r_sci_uart)"
+      General: Name: g_uart_optical
       General: Channel: 9
       General: Data Bits: 8bits
       General: Parity: None
@@ -560,8 +560,8 @@ FSP Configuration
       Extra: Clock Source: Internal Clock
       Extra: Start bit detection: Falling Edge
       Extra: Noise Filter: Disable
-      Extra: Receive FIFO Trigger Level: Max
-      Interrupts: Callback: opcal_uart_callback
+      Extra: Receive FIFO Trigger Level: One
+      Interrupts: Callback: optical_uart_callback
       Interrupts: Receive Interrupt Priority: Priority 12
       Interrupts: Transmit Data Empty Interrupt Priority: Priority 12
       Interrupts: Transmit End Interrupt Priority: Priority 12

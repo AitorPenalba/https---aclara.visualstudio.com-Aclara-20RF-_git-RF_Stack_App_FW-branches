@@ -1847,7 +1847,7 @@ void MFGP_uartCmdTask( taskParameter )
 /*lint -esym(715,Arg0) not referenced but required by API   */
 void MFGP_uartRecvTask( taskParameter )
 {
-   uint8_t rxByte = 0;
+   uint8_t rxByte;
 #if ( RTOS_SELECTION == MQX_RTOS )
    ( void )Arg0;
 #endif

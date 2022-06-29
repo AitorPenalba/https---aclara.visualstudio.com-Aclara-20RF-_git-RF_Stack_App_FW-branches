@@ -889,21 +889,21 @@ const adc_instance_t g_adc0 =
     .p_channel_cfg = &g_adc0_channel_cfg,
     .p_api     = &g_adc_on_adc
 };
-sci_uart_instance_ctrl_t     g_uart9_ctrl;
+sci_uart_instance_ctrl_t     g_uart_optical_ctrl;
 
-            baud_setting_t               g_uart9_baud_setting =
+            baud_setting_t               g_uart_optical_baud_setting =
             {
                 /* Baud rate calculated with 0.160% error. */ .abcse = 0, .abcs = 0, .bgdm = 0, .cks = 0, .brr = 194, .mddr = (uint8_t) 256, .brme = false
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */
-            const sci_uart_extended_cfg_t g_uart9_cfg_extend =
+            const sci_uart_extended_cfg_t g_uart_optical_cfg_extend =
             {
                 .clock                = SCI_UART_CLOCK_INT,
                 .rx_edge_start          = SCI_UART_START_BIT_FALLING_EDGE,
                 .noise_cancel         = SCI_UART_NOISE_CANCELLATION_DISABLE,
-                .rx_fifo_trigger        = SCI_UART_RX_FIFO_TRIGGER_MAX,
-                .p_baud_setting         = &g_uart9_baud_setting,
+                .rx_fifo_trigger        = SCI_UART_RX_FIFO_TRIGGER_1,
+                .p_baud_setting         = &g_uart_optical_baud_setting,
                 .flow_control           = SCI_UART_FLOW_CONTROL_RTS,
                 #if 0xFF != 0xFF
                 .flow_control_pin       = BSP_IO_PORT_FF_PIN_0xFF,
@@ -913,15 +913,15 @@ sci_uart_instance_ctrl_t     g_uart9_ctrl;
             };
 
             /** UART interface configuration */
-            const uart_cfg_t g_uart9_cfg =
+            const uart_cfg_t g_uart_optical_cfg =
             {
                 .channel             = 9,
                 .data_bits           = UART_DATA_BITS_8,
                 .parity              = UART_PARITY_OFF,
                 .stop_bits           = UART_STOP_BITS_1,
-                .p_callback          = opcal_uart_callback,
+                .p_callback          = optical_uart_callback,
                 .p_context           = NULL,
-                .p_extend            = &g_uart9_cfg_extend,
+                .p_extend            = &g_uart_optical_cfg_extend,
 #define RA_NOT_DEFINED (1)
 #if (RA_NOT_DEFINED == RA_NOT_DEFINED)
                 .p_transfer_tx       = NULL,
@@ -961,10 +961,10 @@ sci_uart_instance_ctrl_t     g_uart9_ctrl;
             };
 
 /* Instance structure to use this module. */
-const uart_instance_t g_uart9 =
+const uart_instance_t g_uart_optical =
 {
-    .p_ctrl        = &g_uart9_ctrl,
-    .p_cfg         = &g_uart9_cfg,
+    .p_ctrl        = &g_uart_optical_ctrl,
+    .p_cfg         = &g_uart_optical_cfg,
     .p_api         = &g_uart_on_sci
 };
 sci_uart_instance_ctrl_t     g_uart_DBG_ctrl;
@@ -1051,21 +1051,21 @@ const uart_instance_t g_uart_DBG =
     .p_cfg         = &g_uart_DBG_cfg,
     .p_api         = &g_uart_on_sci
 };
-sci_uart_instance_ctrl_t     g_uart3_ctrl;
+sci_uart_instance_ctrl_t     g_uart_MFG_ctrl;
 
-            baud_setting_t               g_uart3_baud_setting =
+            baud_setting_t               g_uart_MFG_baud_setting =
             {
                 /* Baud rate calculated with 0.677% error. */ .abcse = 0, .abcs = 0, .bgdm = 1, .cks = 0, .brr = 96, .mddr = (uint8_t) 256, .brme = false
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */
-            const sci_uart_extended_cfg_t g_uart3_cfg_extend =
+            const sci_uart_extended_cfg_t g_uart_MFG_cfg_extend =
             {
                 .clock                = SCI_UART_CLOCK_INT,
                 .rx_edge_start          = SCI_UART_START_BIT_FALLING_EDGE,
                 .noise_cancel         = SCI_UART_NOISE_CANCELLATION_DISABLE,
                 .rx_fifo_trigger        = SCI_UART_RX_FIFO_TRIGGER_1,
-                .p_baud_setting         = &g_uart3_baud_setting,
+                .p_baud_setting         = &g_uart_MFG_baud_setting,
                 .flow_control           = SCI_UART_FLOW_CONTROL_RTS,
                 #if 0xFF != 0xFF
                 .flow_control_pin       = BSP_IO_PORT_FF_PIN_0xFF,
@@ -1075,7 +1075,7 @@ sci_uart_instance_ctrl_t     g_uart3_ctrl;
             };
 
             /** UART interface configuration */
-            const uart_cfg_t g_uart3_cfg =
+            const uart_cfg_t g_uart_MFG_cfg =
             {
                 .channel             = 3,
                 .data_bits           = UART_DATA_BITS_8,
@@ -1083,7 +1083,7 @@ sci_uart_instance_ctrl_t     g_uart3_ctrl;
                 .stop_bits           = UART_STOP_BITS_1,
                 .p_callback          = mfg_uart_callback,
                 .p_context           = NULL,
-                .p_extend            = &g_uart3_cfg_extend,
+                .p_extend            = &g_uart_MFG_cfg_extend,
 #define RA_NOT_DEFINED (1)
 #if (RA_NOT_DEFINED == RA_NOT_DEFINED)
                 .p_transfer_tx       = NULL,
@@ -1123,10 +1123,10 @@ sci_uart_instance_ctrl_t     g_uart3_ctrl;
             };
 
 /* Instance structure to use this module. */
-const uart_instance_t g_uart3 =
+const uart_instance_t g_uart_MFG =
 {
-    .p_ctrl        = &g_uart3_ctrl,
-    .p_cfg         = &g_uart3_cfg,
+    .p_ctrl        = &g_uart_MFG_ctrl,
+    .p_cfg         = &g_uart_MFG_cfg,
     .p_api         = &g_uart_on_sci
 };
 icu_instance_ctrl_t pf_meter_ctrl;
@@ -1231,21 +1231,21 @@ const crc_instance_t g_crc0 =
     .p_cfg         = &g_crc0_cfg,
     .p_api         = &g_crc_on_crc
 };
-sci_uart_instance_ctrl_t     g_uart2_ctrl;
+sci_uart_instance_ctrl_t     g_uart_HMC_ctrl;
 
-            baud_setting_t               g_uart2_baud_setting =
+            baud_setting_t               g_uart_HMC_baud_setting =
             {
                 /* Baud rate calculated with 0.160% error. */ .abcse = 0, .abcs = 0, .bgdm = 0, .cks = 0, .brr = 194, .mddr = (uint8_t) 256, .brme = false
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */
-            const sci_uart_extended_cfg_t g_uart2_cfg_extend =
+            const sci_uart_extended_cfg_t g_uart_HMC_cfg_extend =
             {
                 .clock                = SCI_UART_CLOCK_INT,
                 .rx_edge_start          = SCI_UART_START_BIT_FALLING_EDGE,
                 .noise_cancel         = SCI_UART_NOISE_CANCELLATION_DISABLE,
-                .rx_fifo_trigger        = SCI_UART_RX_FIFO_TRIGGER_MAX,
-                .p_baud_setting         = &g_uart2_baud_setting,
+                .rx_fifo_trigger        = SCI_UART_RX_FIFO_TRIGGER_1,
+                .p_baud_setting         = &g_uart_HMC_baud_setting,
                 .flow_control           = SCI_UART_FLOW_CONTROL_RTS,
                 #if 0xFF != 0xFF
                 .flow_control_pin       = BSP_IO_PORT_FF_PIN_0xFF,
@@ -1255,7 +1255,7 @@ sci_uart_instance_ctrl_t     g_uart2_ctrl;
             };
 
             /** UART interface configuration */
-            const uart_cfg_t g_uart2_cfg =
+            const uart_cfg_t g_uart_HMC_cfg =
             {
                 .channel             = 2,
                 .data_bits           = UART_DATA_BITS_8,
@@ -1263,7 +1263,7 @@ sci_uart_instance_ctrl_t     g_uart2_ctrl;
                 .stop_bits           = UART_STOP_BITS_1,
                 .p_callback          = hmc_uart_callback,
                 .p_context           = NULL,
-                .p_extend            = &g_uart2_cfg_extend,
+                .p_extend            = &g_uart_HMC_cfg_extend,
 #define RA_NOT_DEFINED (1)
 #if (RA_NOT_DEFINED == RA_NOT_DEFINED)
                 .p_transfer_tx       = NULL,
@@ -1303,10 +1303,10 @@ sci_uart_instance_ctrl_t     g_uart2_ctrl;
             };
 
 /* Instance structure to use this module. */
-const uart_instance_t g_uart2 =
+const uart_instance_t g_uart_HMC =
 {
-    .p_ctrl        = &g_uart2_ctrl,
-    .p_cfg         = &g_uart2_cfg,
+    .p_ctrl        = &g_uart_HMC_ctrl,
+    .p_cfg         = &g_uart_HMC_cfg,
     .p_api         = &g_uart_on_sci
 };
 void g_hal_init(void) {

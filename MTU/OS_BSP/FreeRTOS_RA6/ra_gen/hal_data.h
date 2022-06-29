@@ -236,15 +236,15 @@ void NULL(adc_callback_args_t * p_args);
 #define ADC_DMAC_CHANNELS_PER_BLOCK_NULL  3
 #endif
 /** UART on SCI Instance. */
-            extern const uart_instance_t      g_uart9;
+            extern const uart_instance_t      g_uart_optical;
 
             /** Access the UART instance using these structures when calling API functions directly (::p_api is not used). */
-            extern sci_uart_instance_ctrl_t     g_uart9_ctrl;
-            extern const uart_cfg_t g_uart9_cfg;
-            extern const sci_uart_extended_cfg_t g_uart9_cfg_extend;
+            extern sci_uart_instance_ctrl_t     g_uart_optical_ctrl;
+            extern const uart_cfg_t g_uart_optical_cfg;
+            extern const sci_uart_extended_cfg_t g_uart_optical_cfg_extend;
 
-            #ifndef opcal_uart_callback
-            void opcal_uart_callback(uart_callback_args_t * p_args);
+            #ifndef optical_uart_callback
+            void optical_uart_callback(uart_callback_args_t * p_args);
             #endif
 /** UART on SCI Instance. */
             extern const uart_instance_t      g_uart_DBG;
@@ -258,12 +258,12 @@ void NULL(adc_callback_args_t * p_args);
             void dbg_uart_callback(uart_callback_args_t * p_args);
             #endif
 /** UART on SCI Instance. */
-            extern const uart_instance_t      g_uart3;
+            extern const uart_instance_t      g_uart_MFG;
 
             /** Access the UART instance using these structures when calling API functions directly (::p_api is not used). */
-            extern sci_uart_instance_ctrl_t     g_uart3_ctrl;
-            extern const uart_cfg_t g_uart3_cfg;
-            extern const sci_uart_extended_cfg_t g_uart3_cfg_extend;
+            extern sci_uart_instance_ctrl_t     g_uart_MFG_ctrl;
+            extern const uart_cfg_t g_uart_MFG_cfg;
+            extern const sci_uart_extended_cfg_t g_uart_MFG_cfg_extend;
 
             #ifndef mfg_uart_callback
             void mfg_uart_callback(uart_callback_args_t * p_args);
@@ -292,12 +292,12 @@ extern const crc_instance_t g_crc0;
 extern crc_instance_ctrl_t g_crc0_ctrl;
 extern const crc_cfg_t g_crc0_cfg;
 /** UART on SCI Instance. */
-            extern const uart_instance_t      g_uart2;
+            extern const uart_instance_t      g_uart_HMC;
 
             /** Access the UART instance using these structures when calling API functions directly (::p_api is not used). */
-            extern sci_uart_instance_ctrl_t     g_uart2_ctrl;
-            extern const uart_cfg_t g_uart2_cfg;
-            extern const sci_uart_extended_cfg_t g_uart2_cfg_extend;
+            extern sci_uart_instance_ctrl_t     g_uart_HMC_ctrl;
+            extern const uart_cfg_t g_uart_HMC_cfg;
+            extern const sci_uart_extended_cfg_t g_uart_HMC_cfg_extend;
 
             #ifndef hmc_uart_callback
             void hmc_uart_callback(uart_callback_args_t * p_args);

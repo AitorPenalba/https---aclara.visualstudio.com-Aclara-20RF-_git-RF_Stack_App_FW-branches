@@ -286,7 +286,7 @@
     </module>
     <module id="module.middleware.rm_freertos_port.0"/>
     <module id="module.driver.uart_on_sci_uart.795696210">
-      <property id="module.driver.uart.name" value="g_uart2"/>
+      <property id="module.driver.uart.name" value="g_uart_HMC"/>
       <property id="module.driver.uart.channel" value="2"/>
       <property id="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
       <property id="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
@@ -300,7 +300,7 @@
       <property id="module.driver.uart.clk_src" value="module.driver.uart.clk_src.int_clk"/>
       <property id="module.driver.uart.rx_edge_start" value="module.driver.uart.rx_edge_start.falling_edge"/>
       <property id="module.driver.uart.noisecancel_en" value="module.driver.uart.noisecancel_en.disabled"/>
-      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.max"/>
+      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.one"/>
       <property id="module.driver.uart.callback" value="hmc_uart_callback"/>
       <property id="module.driver.uart.rxi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.txi_ipl" value="board.icu.common.irq.priority12"/>
@@ -337,7 +337,7 @@
       <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority1"/>
     </module>
     <module id="module.driver.uart_on_sci_uart.653004113">
-      <property id="module.driver.uart.name" value="g_uart3"/>
+      <property id="module.driver.uart.name" value="g_uart_MFG"/>
       <property id="module.driver.uart.channel" value="3"/>
       <property id="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
       <property id="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
@@ -381,7 +381,7 @@
       <property id="module.driver.uart.eri_ipl" value="board.icu.common.irq.priority12"/>
     </module>
     <module id="module.driver.uart_on_sci_uart.522685831">
-      <property id="module.driver.uart.name" value="g_uart9"/>
+      <property id="module.driver.uart.name" value="g_uart_optical"/>
       <property id="module.driver.uart.channel" value="9"/>
       <property id="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
       <property id="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
@@ -395,8 +395,8 @@
       <property id="module.driver.uart.clk_src" value="module.driver.uart.clk_src.int_clk"/>
       <property id="module.driver.uart.rx_edge_start" value="module.driver.uart.rx_edge_start.falling_edge"/>
       <property id="module.driver.uart.noisecancel_en" value="module.driver.uart.noisecancel_en.disabled"/>
-      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.max"/>
-      <property id="module.driver.uart.callback" value="opcal_uart_callback"/>
+      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.one"/>
+      <property id="module.driver.uart.callback" value="optical_uart_callback"/>
       <property id="module.driver.uart.rxi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.txi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.tei_ipl" value="board.icu.common.irq.priority12"/>

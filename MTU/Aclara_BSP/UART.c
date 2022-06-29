@@ -79,22 +79,22 @@ static const struct_UART_Setup UartSetup[MAX_UART_ID] =
 /* Baud rate and other configurations are done in RASC configurator */
 const sci_uart_instance_ctrl_t *UartCtrl[MAX_UART_ID] =
 {
-   &g_uart3_ctrl, /* MFG Port */
+   &g_uart_MFG_ctrl, /* MFG Port */
 #if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
-   &g_uart9_ctrl, /* Optical Port */
+   &g_uart_optical_ctrl, /* Optical Port */
 #endif
    &g_uart_DBG_ctrl, /* DBG Port */
-   &g_uart2_ctrl  /* Meter Port */
+   &g_uart_HMC_ctrl  /* Meter Port */
 };
 
 const uart_cfg_t *UartCfg[MAX_UART_ID] =
 {
-   &g_uart3_cfg,
+   &g_uart_MFG_cfg,
 #if 0 // TODO: RA6 [name_Balaji]: Add Optical Port support
-   &g_uart9_cfg,
+   &g_uart_optical_cfg,
 #endif
    &g_uart_DBG_cfg,
-   &g_uart2_cfg
+   &g_uart_HMC_cfg
 };
 
 
@@ -205,14 +205,14 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
 /* Configured in RA6 for future use of Optical port integration */
 /*******************************************************************************
 
-  Function name: opcal_uart_callback
+  Function name: optical_uart_callback
 
   Purpose: Interrupt Handler for UART Module
 
   Returns: None
 
 *******************************************************************************/
-void opcal_uart_callback( uart_callback_args_t *p_args )
+void optical_uart_callback( uart_callback_args_t *p_args )
 {
    /* Handle the UART event */
    switch (p_args->event)
@@ -255,7 +255,7 @@ void opcal_uart_callback( uart_callback_args_t *p_args )
       {
       }
    }
-}/* end opcal_uart_callback () */
+}/* end optical_uart_callback () */
 #endif
 
 /*******************************************************************************
@@ -438,6 +438,8 @@ returnStatus_t UART_init ( void )
       }
    }
 #elif (RTOS_SELECTION == FREE_RTOS)
+   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
+
    for( i = 0; i < ( uint8_t ) MAX_UART_ID; i++ )
    {
       uint16_t semReceiveCount = 0;
@@ -466,6 +468,8 @@ returnStatus_t UART_init ( void )
    {
       retVal |= eFAILURE;
    }
+
+   OS_INT_enable();
 
    for( i = 0; i < (uint8_t)MAX_UART_ID; i++ )
    {
@@ -690,7 +694,7 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
    if ( ringBufoverflow[UartId] )
    {
       DataLength = 0;
-      ( void ) printf( "Ring buffer overflow of UART Id - %d\n", UartId );
+      ( void ) UART_polled_printf( "\r\nRing buffer overflow of UART Id - %d", UartId );
    }
    else
    {
@@ -727,11 +731,6 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
              DataLength - number of bytes that are to be sent (size of data in DataBuffer)
 
   Returns: DataSent - number of bytes that were correctly sent out the UART
-
-  Notes: if the UART_Option is set to IO_SERIAL_NON_BLOCKING, then this function
-         may not block and may return immediately (not sure what the return value will be??
-         if the UART_Option is 0, then this function will block until all the bytes are sent
-         to the lower MQX UART driver
 
 *******************************************************************************/
 extern uint32_t UART_echo ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength )
