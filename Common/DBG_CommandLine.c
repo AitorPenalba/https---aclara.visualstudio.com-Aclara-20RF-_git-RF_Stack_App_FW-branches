@@ -348,6 +348,9 @@ static ArgStream_s sArgStream
                 SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,          /* GPIO3 */
                 SI446X_CMD_GPIO_PIN_CFG_ARG_GEN_CONFIG_DRV_STRENGTH_ENUM_LOW << 5}; /* Low Drive Strength */
 #endif
+#if ( TM_MEASURE_SLEEP_TIMES == 1 )
+static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] );
+#endif
 #if ( MCU_SELECTED == RA6E1 )
 static uint32_t DBG_CommandLine_CoreClocks( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] );
@@ -735,6 +738,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #elif ( RTOS_SELECTION == FREE_RTOS )
    { "testBSPSWDelay", DBG_CommandLine_TestSWDelay,   "Test Renesas BSP R_BSP_SoftwareDelay function" },
+   { "testOsTaskSleep", DBG_CommandLine_TestOsTaskSleep, "Test OS_TASK_Sleep function" },
    { "time",         DBG_CommandLine_time,            "RTC and SYS time.\r\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #endif // ( RTOS_SELECTION )
@@ -12369,7 +12373,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    #define PAUSE_MSEC 5
    // TODO: RA6E1 Bob: restore original time calculation for K24/MQX
 #else
-   #define PAUSE_MSEC          0 // TODO: RA6E1 Bob: reflect this in the calculation of time
+   #define PAUSE_MSEC          5 // TODO: RA6E1 Bob: reflect this in the calculation of time
    #define DELAY_SEC          10 // How long to delay between batches of DELAY_CHANS channels
    #define ENERGY_IN_CAP 3600000 // Magic number to keep super-cap voltage above 2.1V
 
@@ -12663,11 +12667,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          }
       }
 #endif
-#if ( RTOS_SELECTION == MQX_RTOS )
       OS_TASK_Sleep( PAUSE_MSEC ); // Be nice to other tasks
-#elif ( RTOS_SELECTION == FREE_RTOS )
-      OS_TASK_Yield();
-#endif
    }
 #if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
    R_BSP_PinCfg (BSP_IO_PORT_03_PIN_00, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
@@ -12677,7 +12677,8 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    R_BSP_PinCfg (BSP_IO_PORT_02_PIN_01, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    OS_TICK_Get_CurrentElapsedTicks(&time2);
    TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
-   DBG_logPrintf( 'R', "Noiseband end, took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV",
+   DBG_logPrintf( 'R', "Noiseband end, took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV\r\n"
+                       "OS_TASK_Sleep(%u): Shortest delay = %u.%06u msec, Longest delay = %u.%06u msec, Average delay = %u.%06u msec",
                        TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 #endif
 
@@ -12689,8 +12690,9 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          (void) Radio.StartRx(radioNum, GetConf.val.RxChannels[radioNum]);
       }
    }
-
+#if ( CONFIG_PORTS_FOR_NOISEBAND == 0 )
    DBG_logPrintf( 'R', "noiseband end" );
+#endif
 
    return ( 0 );
 }//lint !e429 Custodial pointer has not been freed or returned
@@ -12716,9 +12718,8 @@ uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
    if ( argc == 1 )
    {
       DBG_printf( "NoiseBandClkOn GPIO0 GPIO1 GPIO2 GPIO3 drv_strength:\r\n"
-                  "               GPIO0:       7=Divided Clock, 71=Divided Clock with 1M pull-up\r\n"
-                  "               GPIO1-GPIO3: 0=No change, 1=Tri-State, 2=Drive0, 3=Drive1, 4=Input\r\n"
-                  "                            To enable the 1M pull-up resistor, add 64 to the value above\r\n"
+                  "               GPIO0-GPIO3: 0=No change, 1=Tri-State, 2=Drive0, 3=Drive1, 4=Input, 7=Divided Clock\r\n"
+                  "                            To enable the 1M pull-up resistor, add 64 to any value above\r\n"
                   "               drv_strength: 0=HIGH, 1=MED_HIGH, 2=MED_LOW, 3=LOW (applies to all GPIOs)" );
    }
    else
@@ -12740,12 +12741,15 @@ uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
       }
       else
       {
-         if ( ( sTemp.GPIO0 == SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DIV_CLK )          ||
-              ( sTemp.GPIO0 == SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DIV_CLK + 0x40 ) )
+         if ( ( ( sTemp.GPIO0 & 0x3F ) <= SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_INPUT   ) ||
+              ( ( sTemp.GPIO0 & 0x3F ) == SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DIV_CLK )    )
          {
-            if ( ( sTemp.GPIO1 < SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_INPUT ) &&
-                 ( sTemp.GPIO2 < SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_INPUT ) &&
-                 ( sTemp.GPIO3 < SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_INPUT )    )
+            if ( ( ( ( sTemp.GPIO1 & 0x3F ) <= SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_INPUT   ) ||
+                   ( ( sTemp.GPIO1 & 0x3F ) == SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DIV_CLK ) ) &&
+                 ( ( ( sTemp.GPIO2 & 0x3F ) <= SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_INPUT   ) ||
+                   ( ( sTemp.GPIO2 & 0x3F ) == SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DIV_CLK ) ) &&
+                 ( ( ( sTemp.GPIO3 & 0x3F ) <= SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_INPUT   ) ||
+                   ( ( sTemp.GPIO3 & 0x3F ) == SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DIV_CLK ) )    )
             {
                if ( ( sTemp.gen_config >> 5 ) <= SI446X_CMD_GPIO_PIN_CFG_ARG_GEN_CONFIG_DRV_STRENGTH_ENUM_LOW )
                {
@@ -14311,4 +14315,54 @@ static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 #endif
+
+#if ( TM_MEASURE_SLEEP_TIMES == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_TestOsTaskSleep ( uint32_t argc, char *argv[] )
+
+   Purpose: This function tests the OS_TASK_Sleep function to ensure that it waits
+            at least as long as requested and no more than 1 tick longer
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] )
+{
+   if ( argc < 4 )
+   {
+      DBG_printf( "Usage: %s numPasses randomSleepMaxMsed randomDelayMaxUsec", argv[0] );
+   }
+   else
+   {
+      uint16_t numPasses          = atoi( argv[1] );
+      uint16_t randomSleepMaxMsec = atoi( argv[2] );
+      uint16_t randomDelayMaxUsec = atoi( argv[3] );
+      uint16_t pass = 0, fail = 0, maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ;
+      for ( uint16_t i = 0; i < numPasses; i++ )
+      {
+         R_BSP_SoftwareDelay( (uint32_t)aclara_randf( 0.0, (float)randomDelayMaxUsec ), BSP_DELAY_UNITS_MICROSECONDS );
+         uint32_t sleepMSec = (uint32_t)aclara_randf( 0.0, (float)randomSleepMaxMsec );
+         uint32_t startTime = DWT->CYCCNT;
+         OS_TASK_Sleep( sleepMSec ); // Be nice to other tasks
+         uint32_t actualDelayMSec = (uint32_t)( ( 1000LL * (uint64_t)( DWT->CYCCNT - startTime ) ) / (uint32_t)getCoreClock() );
+         if ( ( actualDelayMSec >= sleepMSec ) && ( ( actualDelayMSec - sleepMSec ) <= maxExtraDelay ) )
+         {
+            pass++;
+         }
+         else
+         {
+            fail++;
+            DBG_printf( "Pass # %u, Delay too short: %u < %u", i+1, actualDelayMSec, sleepMSec );
+         }
+      }
+      DBG_printf("%u passes completed: %u good, %u bad", numPasses, pass, fail );
+   }
+   return ( 0 );
+}
+#endif // ( TM_MEASURE_SLEEP_TIMES == 1 )
 ///*lint +esym(818, argc, argv) argc, argv could be const */

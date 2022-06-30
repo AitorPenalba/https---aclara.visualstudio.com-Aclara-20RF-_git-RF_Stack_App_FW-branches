@@ -942,7 +942,14 @@ void OS_TASK_Sleep ( uint32_t MSec )
 #if (RTOS_SELECTION == MQX_RTOS)
    _time_delay ( MSec );
 #elif (RTOS_SELECTION == FREE_RTOS)
+#if 1 // TODO: RA6E1 Bob: temporary test code to guarantee minimum of MSec delay time
+   /* Increase the number of milliseconds by one tick's worth for FreeRTOS. This has the following effect:
+      0-4msec = 3msec, actual, 5-9msec = 8msec, actual, 10-14msec = 13msec, actual, etc. */
+   uint32_t delayInTicks = pdMS_TO_TICKS( ( MSec + ( (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ ) + 1U ) );
+   vTaskDelay( delayInTicks );
+#else
    vTaskDelay( pdMS_TO_TICKS(MSec) );
+#endif // 1
 #endif
 }
 /* ****************************************************************************************************************** */

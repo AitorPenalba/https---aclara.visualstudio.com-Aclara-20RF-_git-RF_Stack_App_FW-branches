@@ -447,6 +447,9 @@ void STRT_StartupTask ( taskParameter )
 
    // Enable cycle counter
    DWT_CTRL = DWT_CTRL | 1 ;
+#else
+   DCB->DEMCR = DCB->DEMCR | 0x01000000;
+   DWT->CTRL  = DWT->CTRL  | 1;
 #endif
 #if ( MQX_USE_LOGS == 1 )
    /* Create kernel log */
