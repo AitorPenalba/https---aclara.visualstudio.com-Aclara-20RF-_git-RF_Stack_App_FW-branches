@@ -38,7 +38,6 @@
 #define ADD_LF           (1<<0) // Insert \n
 #define PRINT_DATE_TIME  (1<<1) // Print date, time and taskID
 
-
 // Print category, string, adds \n and time stamp
 #define DBG_logPrintf( category, fmt, ... ) DBG_log( category, ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)
 // Print string, adds \n

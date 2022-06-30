@@ -77,7 +77,7 @@ static HMC_REQ_queue_t     *pQueue_;
 #if( RTOS_SELECTION == FREE_RTOS )
 #define HMC_REQ_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
 #else
-#define HMC_REQ_QUEUE_SIZE 0 
+#define HMC_REQ_QUEUE_SIZE 0
 #endif
 
 

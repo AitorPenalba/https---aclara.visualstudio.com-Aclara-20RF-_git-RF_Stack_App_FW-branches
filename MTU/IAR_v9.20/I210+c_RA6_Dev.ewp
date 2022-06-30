@@ -1862,6 +1862,12 @@
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_diags.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_eng.c</name>
                 </file>
                 <file>
@@ -1920,6 +1926,18 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_start.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_sync.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_sync.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_time.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_time.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_tsk_lst.c</name>

@@ -172,8 +172,8 @@
 
 /* HMC - Diags */
 #define ENABLE_PRNT_HMC_DIAGS_INFO     0
-#define ENABLE_PRNT_HMC_DIAGS_WARN     0   /* TODO: RA6E1: Enable later */
-#define ENABLE_PRNT_HMC_DIAGS_ERROR    0   /* TODO: RA6E1: Enable later */
+#define ENABLE_PRNT_HMC_DIAGS_WARN     1
+#define ENABLE_PRNT_HMC_DIAGS_ERROR    1
 
 /* HMC - Finish */
 #define ENABLE_PRNT_HMC_FINISH_INFO    0
@@ -197,8 +197,8 @@
 
 /* HMC - Start */
 #define ENABLE_PRNT_HMC_START_INFO     0
-#define ENABLE_PRNT_HMC_START_WARN     0  /* TODO: RA6E1: Enable HMC Print Later */
-#define ENABLE_PRNT_HMC_START_ERROR    0  /* TODO: RA6E1: Enable HMC Print Later */
+#define ENABLE_PRNT_HMC_START_WARN     1
+#define ENABLE_PRNT_HMC_START_ERROR    1
 
 /* HMC - Sync */
 #define ENABLE_PRNT_HMC_SYNC_INFO      0
