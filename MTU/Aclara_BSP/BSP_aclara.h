@@ -174,6 +174,7 @@ uint32_t MILLISECONDS;
 
 } TIME_STRUCT, * TIME_STRUCT_PTR;
 #endif
+
 /* CONSTANTS */
 
 /* KTL - 16 byte key: "ultrapassword123" - This is temporary and will change to an external key later */
@@ -245,7 +246,13 @@ extern void           RTC_DisableCalendarAlarm ( void );
 #endif
 
 extern uint32_t    UART_write                ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
+#if ( MCU_SELECTED == NXP_K24 )
 extern uint32_t    UART_read                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength );
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+extern uint32_t    UART_getc                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength, uint32_t TimeoutMs );
+extern uint32_t    UART_echo                 ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
+#endif
 extern void        UART_fgets                ( enum_UART_ID UartId,       char    *DataBuffer, uint32_t DataLength );
 extern uint8_t     UART_flush                ( enum_UART_ID UartId );
 extern void        UART_RX_flush             ( enum_UART_ID UartId );

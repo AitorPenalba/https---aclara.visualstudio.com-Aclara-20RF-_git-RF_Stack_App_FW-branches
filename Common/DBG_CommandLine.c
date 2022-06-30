@@ -3771,77 +3771,77 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
    return 0;
 }
 
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_mtrTime
-//
-//   Purpose: This function converts the input time in meter time format to system time, and converts it to UTC.
-//            meter time format is yy mm dd hh mm ss
-//            Enter arguments mm dd yy hh mm (more natural input format )
-//
-//   Arguments:  if argv[0] is mtrtime then converts meter format time to TIMESTAMP_t seconds
-//                  Converts meter time to system time and applies local to UTC conversion.
-//               if argv[0] is revmtrtime the converts TIMESTAMP_t seconds to meter format date
-//                  Converts entered time (seconds since epoch) to system time, and displays that
-//                  applies UTC to local conversion and displays that.
-//
-//               argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//#if ( CLOCK_IN_METER == 1 )
-//static uint32_t DBG_CommandLine_mtrTime( uint32_t argc, char *argv[] )
-//{
-//   sysTime_t                     sTime;      /* Meter time converted to system time */
-//   sysTime_dateFormat_t          sDateTime;  /* Seconds converted to date/time format  */
-//   uint32_t                      seconds;    /* System time converted to seconds since epoch */
-//   uint32_t                      fracSecs;   /* Unused, but required fractional seconds  */
-//   MtrTimeFormatHighPrecision_t  mTime;      /* Structure built with input values   */
-//
-//   if ( strcasecmp( argv[ 0 ], "mtrtime" ) == 0 )
-//   {
-//      if ( 6 == argc )  /* Must be exactly 6 parameters  */
-//      {
-//         /* Get individual date/time quantities */
-//         mTime.month   = (uint8_t)strtoul( argv[1], NULL, 0 );  /* Get two digits of month  */
-//         mTime.day     = (uint8_t)strtoul( argv[2], NULL, 0 );  /* Get two digits of day  */
-//         mTime.year    = (uint8_t)strtoul( argv[3], NULL, 0 );  /* Get two digits of year  */
-//         mTime.hours   = (uint8_t)strtoul( argv[4], NULL, 0 );  /* Get two digits of hours  */
-//         mTime.minutes = (uint8_t)strtoul( argv[5], NULL, 0 );  /* Get two digits of minutes  */
-//         mTime.seconds = 0;
-//
-//         (void)TIME_UTIL_ConvertMtrHighFormatToSysFormat( &mTime, &sTime);    /*  Convert meter local time to system time and convert to UTC  */
-//         TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &seconds, &fracSecs);
-//         DBG_logPrintf( 'R', "UTC: %hhu/%hhu/%hhu %hhu:%02hhu:%02hhu 0x%08lX", mTime.month, mTime.day, mTime.year, mTime.hours, mTime.minutes,
-//                        mTime.seconds, seconds ); /*  Display system time */
-//      }
-//      else
-//      {
-//         DBG_logPrintf( 'E', "Enter date: mm dd yy hh mm" );
-//      }
-//   }
-//   else if ( ( argc == 2 ) && ( strcasecmp( argv[ 0 ], "revmtrtime" ) == 0 ) )
-//   {
-//      seconds = strtoul( argv[ 1 ], NULL, 0 );
-//      fracSecs = 0;
-//
-//      TIME_UTIL_ConvertSecondsToSysFormat( seconds, fracSecs, &sTime );    /* Convert input seconds to sysTime_t format */
-//      (void)TIME_UTIL_ConvertSysFormatToMtrHighFormat( &sTime, &mTime );   /* Convert to meter format, local   */
-//
-//      DBG_logPrintf( 'R', "mtr time (local):  %02hhu/%02hhu/%04hu %02hhu:%02hhu:%02hhu", mTime.month, mTime.day, mTime.year + 2000U,
-//                     mTime.hours, mTime.minutes, mTime.seconds );
-//
-//      (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sDateTime );  /* Convert to date and time format */
-//      DBG_logPrintf( 'R', "mtr time (UTC)  :  %02hhu/%02hhu/%04hu %02hhu:%02hhu:%02hhu", sDateTime.month, sDateTime.day, sDateTime.year,
-//                     sDateTime.hour, sDateTime.min, sDateTime.sec );
-//   }
-//   return 0;
-//}
-//#endif
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_mtrTime
+
+   Purpose: This function converts the input time in meter time format to system time, and converts it to UTC.
+            meter time format is yy mm dd hh mm ss
+            Enter arguments mm dd yy hh mm (more natural input format )
+
+   Arguments:  if argv[0] is mtrtime then converts meter format time to TIMESTAMP_t seconds
+                  Converts meter time to system time and applies local to UTC conversion.
+               if argv[0] is revmtrtime the converts TIMESTAMP_t seconds to meter format date
+                  Converts entered time (seconds since epoch) to system time, and displays that
+                  applies UTC to local conversion and displays that.
+
+               argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+#if ( CLOCK_IN_METER == 1 )
+static uint32_t DBG_CommandLine_mtrTime( uint32_t argc, char *argv[] )
+{
+   sysTime_t                     sTime;      /* Meter time converted to system time */
+   sysTime_dateFormat_t          sDateTime;  /* Seconds converted to date/time format  */
+   uint32_t                      seconds;    /* System time converted to seconds since epoch */
+   uint32_t                      fracSecs;   /* Unused, but required fractional seconds  */
+   MtrTimeFormatHighPrecision_t  mTime;      /* Structure built with input values   */
+
+   if ( strcasecmp( argv[ 0 ], "mtrtime" ) == 0 )
+   {
+      if ( 6 == argc )  /* Must be exactly 6 parameters  */
+      {
+         /* Get individual date/time quantities */
+         mTime.month   = (uint8_t)strtoul( argv[1], NULL, 0 );  /* Get two digits of month  */
+         mTime.day     = (uint8_t)strtoul( argv[2], NULL, 0 );  /* Get two digits of day  */
+         mTime.year    = (uint8_t)strtoul( argv[3], NULL, 0 );  /* Get two digits of year  */
+         mTime.hours   = (uint8_t)strtoul( argv[4], NULL, 0 );  /* Get two digits of hours  */
+         mTime.minutes = (uint8_t)strtoul( argv[5], NULL, 0 );  /* Get two digits of minutes  */
+         mTime.seconds = 0;
+
+         (void)TIME_UTIL_ConvertMtrHighFormatToSysFormat( &mTime, &sTime);    /*  Convert meter local time to system time and convert to UTC  */
+         TIME_UTIL_ConvertSysFormatToSeconds( &sTime, &seconds, &fracSecs);
+         DBG_logPrintf( 'R', "UTC: %hhu/%hhu/%hhu %hhu:%02hhu:%02hhu 0x%08lX", mTime.month, mTime.day, mTime.year, mTime.hours, mTime.minutes,
+                        mTime.seconds, seconds ); /*  Display system time */
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Enter date: mm dd yy hh mm" );
+      }
+   }
+   else if ( ( argc == 2 ) && ( strcasecmp( argv[ 0 ], "revmtrtime" ) == 0 ) )
+   {
+      seconds = strtoul( argv[ 1 ], NULL, 0 );
+      fracSecs = 0;
+
+      TIME_UTIL_ConvertSecondsToSysFormat( seconds, fracSecs, &sTime );    /* Convert input seconds to sysTime_t format */
+      (void)TIME_UTIL_ConvertSysFormatToMtrHighFormat( &sTime, &mTime );   /* Convert to meter format, local   */
+
+      DBG_logPrintf( 'R', "mtr time (local):  %02hhu/%02hhu/%04hu %02hhu:%02hhu:%02hhu", mTime.month, mTime.day, mTime.year + 2000U,
+                     mTime.hours, mTime.minutes, mTime.seconds );
+
+      (void)TIME_UTIL_ConvertSysFormatToDateFormat( &sTime, &sDateTime );  /* Convert to date and time format */
+      DBG_logPrintf( 'R', "mtr time (UTC)  :  %02hhu/%02hhu/%04hu %02hhu:%02hhu:%02hhu", sDateTime.month, sDateTime.day, sDateTime.year,
+                     sDateTime.hour, sDateTime.min, sDateTime.sec );
+   }
+   return 0;
+}
+#endif
 
 /*******************************************************************************
 
@@ -9074,68 +9074,68 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 }
 #endif
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_ds
-//
-//   Purpose: Exercise the remote disconnect switch
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:
-//
-//******************************************************************************/
-//#if ENABLE_HMC_TASKS
-//#if ( REMOTE_DISCONNECT == 1 )
-//static const HEEP_APPHDR_t CloseRelay =
-//{
-//   .TransactionType      = ( uint8_t )TT_REQUEST,
-//   .Resource             = ( uint8_t )rc,
-//  {.Method_Status        = ( uint8_t )method_put },
-//  {.Req_Resp_ID          = ( uint8_t )0 },
-//   .qos                  = ( uint8_t )0,
-//   .callback             = NULL,
-//   .appSecurityAuthMode  = ( uint8_t )0
-//};
-//uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] )
-//{
-//   uint16_t dummy=0;
-//   uint32_t retval = 1;
-//   if ( argc >= 2 )
-//   {
-//      HEEP_APPHDR_t   heepHdr;    /* Message header information */
-//      ExchangeWithID payloadBuf;    /* Request information  */    /* Request information  */
-//      ( void )memset( ( void * )&payloadBuf, 0, sizeof( payloadBuf ) );
-//      ( void )memcpy( ( uint8_t * )&heepHdr, ( uint8_t * )&CloseRelay, sizeof( heepHdr ) );
-//      if ( strcasecmp( "close", argv[1] ) == 0 )
-//      {
-//         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchConnect );
-//         payloadBuf.eventRdgQty.bits.eventQty = 1;
-//         retval = 0;
-//      }
-//      else if ( strcasecmp( "open", argv[1] ) == 0 )
-//      {
-//         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchDisconnect );
-//         payloadBuf.eventRdgQty.bits.eventQty = 1;
-//         retval = 0;
-//      }
-//      if ( argc > 2 )      /* User specify the message id?  */
-//      {
-//         heepHdr.Req_Resp_ID = ( uint8_t )atoi( argv[ 2 ] );
-//      }
-//      if ( 0 == retval )
-//      {
-//         HMC_DS_ExecuteSD( &heepHdr, &payloadBuf, dummy );
-//      }
-//   }
-//   return retval;
-//}
-//#endif
-//#endif
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_ds
+
+   Purpose: Exercise the remote disconnect switch
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+#if ENABLE_HMC_TASKS
+#if ( REMOTE_DISCONNECT == 1 )
+static const HEEP_APPHDR_t CloseRelay =
+{
+   .TransactionType      = ( uint8_t )TT_REQUEST,
+   .Resource             = ( uint8_t )rc,
+  {.Method_Status        = ( uint8_t )method_put },
+  {.Req_Resp_ID          = ( uint8_t )0 },
+   .qos                  = ( uint8_t )0,
+   .callback             = NULL,
+   .appSecurityAuthMode  = ( uint8_t )0
+};
+uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] )
+{
+   uint16_t dummy=0;
+   uint32_t retval = 1;
+   if ( argc >= 2 )
+   {
+      HEEP_APPHDR_t   heepHdr;    /* Message header information */
+      ExchangeWithID payloadBuf;    /* Request information  */    /* Request information  */
+      ( void )memset( ( void * )&payloadBuf, 0, sizeof( payloadBuf ) );
+      ( void )memcpy( ( uint8_t * )&heepHdr, ( uint8_t * )&CloseRelay, sizeof( heepHdr ) );
+      if ( strcasecmp( "close", argv[1] ) == 0 )
+      {
+         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchConnect );
+         payloadBuf.eventRdgQty.bits.eventQty = 1;
+         retval = 0;
+      }
+      else if ( strcasecmp( "open", argv[1] ) == 0 )
+      {
+         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchDisconnect );
+         payloadBuf.eventRdgQty.bits.eventQty = 1;
+         retval = 0;
+      }
+      if ( argc > 2 )      /* User specify the message id?  */
+      {
+         heepHdr.Req_Resp_ID = ( uint8_t )atoi( argv[ 2 ] );
+      }
+      if ( 0 == retval )
+      {
+         HMC_DS_ExecuteSD( &heepHdr, &payloadBuf, dummy );
+      }
+   }
+   return retval;
+}
+#endif
+#endif
+
 /******************************************************************************
 
    Function Name: printErr

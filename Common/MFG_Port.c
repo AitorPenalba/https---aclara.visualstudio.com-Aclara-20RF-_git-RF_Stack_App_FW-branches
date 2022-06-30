@@ -260,12 +260,6 @@ static const char       mfgpLockInEffect[] = {"LOCK IN EFFECT\n\r"}; /* When por
 #endif
 static OS_EVNT_Obj      _MfgpUartEvent;
 static OS_MSGQ_Obj      _CommandReceived_MSGQ;
-#if ( MCU_SELECTED == RA6E1 )
-/* For RA6E1, UART_read process is Transfered from polling to interrupt method */
-static OS_SEM_Obj       mfgReceiveSem_;
-/* For RA6E1, UART_write process is used in Semaphore method */
-OS_SEM_Obj       transferSem[MAX_UART_ID];
-#endif
 #if ( EP == 1 )
 static timer_t          rfTestModeTimerCfg;              /* rfTestMode timeout Timer configuration */
 #endif
@@ -1651,14 +1645,14 @@ returnStatus_t MFGP_cmdInit( void )
    // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
    // TODO: RA6 [name_Balaji]: Check the number of messages
    // TODO RA6: NRJ: determine if semaphores need to be counting
-   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS, "MFGP" ) && OS_SEM_Create( &mfgReceiveSem_, 0) && OS_SEM_Create( &transferSem[ UART_MANUF_TEST ], 0 ) )
+   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS, "MFGP" ) )
    {
       retVal = eSUCCESS;
    }
 #endif
    return(retVal);
 }
-#if ( MCU_SELECTED == NXP_K24 )  /* TODO: RA6E1: Add support */
+
 /***********************************************************************************************************************
    Function Name: mfgpReadByte
 
@@ -1694,6 +1688,10 @@ static void mfgpReadByte( uint8_t rxByte )
       {
          /* buffer contains at least one character, remove the last one entered */
          MFGP_numBytes -= 1;
+#if ( MCU_SELECTED == RA6E1 )
+         /* Gives GUI effect in Terminal for Backspace */
+         ( void )UART_echo( mfgUart, (uint8_t*)"\b\x20\b" , 3 );
+#endif
       }
    }
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -1749,6 +1747,9 @@ static void mfgpReadByte( uint8_t rxByte )
             INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
             OS_TASK_Sleep( 50U );
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+            ( void )UART_echo( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+#endif
             ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
             /* Call the command */
             OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
@@ -1778,223 +1779,12 @@ static void mfgpReadByte( uint8_t rxByte )
       {
          // Save character in buffer (space is available)
          MFGP_CommandBuffer[ MFGP_numBytes++] = rxByte;
+#if ( MCU_SELECTED == RA6E1 )
+         (void)UART_echo( mfgUart, &rxByte, sizeof( rxByte ) );
+#endif
       }
    }
 }
-#endif  // #if ( MCU_SELECTED == NXP_K24 )
-
-#if ( MCU_SELECTED == RA6E1 )
-/***********************************************************************************************************************
-   Function Name: mfgpReadCommandProcess
-
-   Purpose: This function is called to read and process command in MFG serial mode
-
-   Arguments:  void
-
-   Returns: None
-***********************************************************************************************************************/
-static void mfgpReadCommandProcess( void )
-{
-   // TODO: RA6 [name_Balaji]: To process the copy paste of multiple commands
-   uint8_t rxByte = 0;
-   buffer_t *commandBuf;
-   /* Instead of Polling method, Interrupt routine method is used in RA6E1 which
-    * reads byte-by-byte and stores the data in an array */
-   ( void )UART_read( mfgUart, &rxByte, sizeof( rxByte ) );
-   ( void )OS_SEM_Pend( &mfgReceiveSem_, OS_WAIT_FOREVER );
-   if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
-       ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
-       ( rxByte == 0xC0 ))           /* Left over SLIP protocol characters in buffer */
-   {
-       /* user canceled the in progress command */
-       memset( MFGP_CommandBuffer, 0, MFGP_numBytes );
-       memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
-       MFGP_numBytes = 0;
-       MFGP_numPrintBytes = 0;
-       rxByte = 0x0;
-   }/* end if () */
-   else if( ( rxByte != (uint8_t)0x00 ) &&
-          ( rxByte != LINE_FEED_CHAR ) &&
-          ( rxByte != CARRIAGE_RETURN_CHAR ) &&
-          ( rxByte != BACKSPACE_CHAR) &&
-          (rxByte != DELETE_CHAR ) )
-   {
-      MFGP_CommandBuffer[ MFGP_numBytes++ ] = rxByte;
-      MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
-      rxByte = 0x0;
-      for ( ; MFGP_numBytes < MFGP_MAX_MFG_COMMAND_CHARS ; MFGP_numBytes++ )
-       {
-          /* UART_read used to read characters while doing Copy/Paste */
-          ( void )UART_read ( mfgUart, &rxByte, sizeof(rxByte) );
-          /* 10millisecond is the delay timing where a successful UART_read happens */
-          ( void )OS_SEM_Pend( &mfgReceiveSem_, ( portTICK_RATE_MS * 2) );
-
-          if ( ( rxByte == ESCAPE_CHAR ) ||  /* User pressed ESC key */
-             ( rxByte == CTRL_C_CHAR ) ||  /* User pressed CRTL-C key */
-             ( rxByte == 0xC0 ))           /* Left over SLIP protocol characters in buffer */
-          {
-             /* user canceled the in progress command */
-             memset( MFGP_CommandBuffer, 0, MFGP_numBytes );
-             memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
-             MFGP_numBytes = 0;
-             MFGP_numPrintBytes = 0;
-             rxByte = 0x0;
-          }/* end if () */
-          else if( ( rxByte != (uint8_t)0x00 ) &&
-                 ( rxByte != LINE_FEED_CHAR ) &&
-                 ( rxByte != CARRIAGE_RETURN_CHAR ) &&
-                 ( rxByte != BACKSPACE_CHAR) &&
-                 (rxByte != DELETE_CHAR ) )
-          {
-             MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
-             MFGP_CommandBuffer[ MFGP_numBytes ] = rxByte;
-             rxByte = 0x0;
-          }/* end if () */
-          else if( ( rxByte == LINE_FEED_CHAR ) ||
-                 ( rxByte == CARRIAGE_RETURN_CHAR ) )
-          {
-             if ( MFGP_numBytes == 0 )
-             {
-                ( void )UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-             }
-             else
-             {
-                rxByte = 0x0;
-                ( void )UART_write( mfgUart, (uint8_t*)MFGP_PrintCmdBuffer, MFGP_numPrintBytes );
-                ( void )UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-                memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
-                commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
-                if ( commandBuf != NULL )
-                {
-                   commandBuf->data[ MFGP_numBytes ] = 0; /* Null terminating string */
-#if ( DTLS_DEBUG == 1 )
-                     INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
-                     OS_TASK_Sleep( 50U );
-#endif
-                     ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
-                     /* Call the command */
-                     OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
-#if ( USE_USB_MFG != 0 )
-                     event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
-                     if ( event_flags == 0 )    /* Check for time-out.  */
-                     {
-                        /* Unblock task(s) waiting on USB output  */
-                        USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
-                     }
-#endif
-                     MFGP_numBytes = 0;
-                  }
-                  else
-                  {
-                     ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
-                     MFGP_numBytes = 0;
-                  }
-                  break;
-               }
-            }/* end else if () */
-            else if( ( rxByte == BACKSPACE_CHAR ) ||
-                    ( rxByte == DELETE_CHAR ) )
-            {
-               if( MFGP_numBytes != 0 )
-               {
-                  /* buffer contains at least one character, remove the last one entered */
-                  /* Resets the last entered character */
-                  MFGP_CommandBuffer[ --MFGP_numBytes ] = 0x00;
-                  rxByte = 0x0;
-                  /* Gives GUI effect in Terminal for Backspace */
-                  ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b", 3 );
-               }
-            }/* end else if () */
-            else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
-            {
-               /* buffer is full */
-               MFGP_numBytes = 0;
-            }
-            else
-            {
-               /* Used to ECHO the received character when no more valid data is read */
-               UART_write( mfgUart, (uint8_t*)MFGP_PrintCmdBuffer, MFGP_numPrintBytes );
-               memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
-               MFGP_numPrintBytes = 0;
-               break;
-            }/* end else () */
-         }
-   }/* end if () */
-   else if ( ( rxByte == LINE_FEED_CHAR ) ||
-             ( rxByte == CARRIAGE_RETURN_CHAR ) )
-   {
-      if ( MFGP_numBytes == 0 )
-      {
-         ( void )UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-      }
-      else
-      {
-         ( void )UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-         MFGP_PrintCmdBuffer[ MFGP_numPrintBytes ] = rxByte;
-         rxByte = 0x0;
-
-         commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
-         if ( commandBuf != NULL )
-         {
-            commandBuf->data[ MFGP_numBytes ] = 0; /* Null terminating string */
-#if ( DTLS_DEBUG == 1 )
-            INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
-            OS_TASK_Sleep( 50U );
-#endif
-            ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
-            /* Call the command */
-            OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
-#if ( USE_USB_MFG != 0 )
-#if ( RTOS_SELECTION == MQX_RTOS )
-            event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
-#elif ( RTOS_SELECTION == FREE_RTOS )
-            // TODO: RA6 [name_Balaji]: Support 0xffffffff in future
-            event_flags = OS_EVNT_Wait ( &CMD_events, 0x00ffffff, (bool)false, ONE_SEC );
-#endif
-            if ( event_flags == 0 )    /* Check for time-out.  */
-            {
-               /* Unblock task(s) waiting on USB output  */
-               USB_resumeSendQueue( (bool)true );  /* Wake all tasks waiting for USB output completion. */
-            }
-#endif
-            MFGP_numBytes = 0;
-         }
-         else
-         {
-            ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
-            MFGP_numBytes = 0;
-         }
-      }
-   }
-   else if( ( rxByte == BACKSPACE_CHAR ) ||
-            ( rxByte == DELETE_CHAR ) )
-   {
-      if( MFGP_numBytes != 0 )
-      {
-         /* buffer contains at least one character, remove the last one entered */
-         /* Resets the last entered character */
-         MFGP_CommandBuffer[ --MFGP_numBytes ] = 0x00;
-         rxByte = 0x0;
-         /* Gives GUI effect in Terminal for Backspace */
-         ( void )UART_write( mfgUart, (uint8_t*)"\b\x20\b" , 3 );
-      }
-   }/* end else if () */
-   else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
-   {
-      /* buffer is full */
-      MFGP_numBytes = 0;
-   }
-   else
-   {
-      MFGP_PrintCmdBuffer[ MFGP_numPrintBytes++ ] = rxByte;
-      rxByte = 0x0;
-      ( void )UART_write( mfgUart, (uint8_t*)MFGP_PrintCmdBuffer, MFGP_numPrintBytes );
-      memset( MFGP_PrintCmdBuffer, 0, MFGP_numPrintBytes );
-      MFGP_numPrintBytes = 0;
-   }
-
-} /* end of mfgpReadCommandProcess() */
-#endif
 
 /***********************************************************************************************************************
    Function Name: MFGP_uartTask
@@ -2054,8 +1844,8 @@ void MFGP_uartCmdTask( taskParameter )
 /*lint -esym(715,Arg0) not referenced but required by API   */
 void MFGP_uartRecvTask( taskParameter )
 {
+   uint8_t rxByte;
 #if ( RTOS_SELECTION == MQX_RTOS )
-   uint8_t rxByte = 0;
    ( void )Arg0;
 #endif
 
@@ -2082,11 +1872,14 @@ void MFGP_uartRecvTask( taskParameter )
 
    for( ;; )
    {
-#if ( MCU_SELECTED == NXP_K24 )
 #if ( USE_USB_MFG != 0 )
       rxByte = usb_getc(); /* Task will suspend until input available.  */
 #else
+#if ( MCU_SELECTED == NXP_K24 )
       while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) )
+#elif ( MCU_SELECTED == RA6E1 )
+      while ( 0 != UART_getc ( mfgUart, &rxByte, sizeof( rxByte ), OS_WAIT_FOREVER ) )
+#endif
 #endif   // USE_USB_MFG
       {
          if ( _MfgPortState == DTLS_SERIAL_IO_e )
@@ -2129,64 +1922,21 @@ void MFGP_uartRecvTask( taskParameter )
 
          }/* end of else() */
       }/* end of while() */
-#elif ( MCU_SELECTED == RA6E1 )
-      // TODO: RA6 [name_Balaji]: Support MFGP_UartRead function for RA6E1
-      /* USE_USB_MFG is used for 9985T and
-       * ENABLE_B2B_COMM is used for DCU3 XCVR these are not supported
-       * for RA6E1 */
-      // TODO: RA6 [name_Balaji]: Verify the support of ECHO_OPTICAL_PORT functionality in RA6E1
-      mfgpReadCommandProcess();
-#endif   // MCU_SELECTED
    }/* end of for () */
 #else
    for( ;; )
    {
 #if ( MCU_SELECTED == NXP_K24 )
       while ( 0 != UART_read ( mfgUart, &rxByte, sizeof( rxByte ) ) )
+#elif ( MCU_SELECTED == RA6E1 )
+      while ( 0 != UART_getc ( mfgUart, &rxByte, sizeof( rxByte ), OS_WAIT_FOREVER ) )
+#endif
       {
          mfgpReadByte( rxByte );
       }
-#elif ( MCU_SELECTED == RA6E1 )
-      mfgpReadCommandProcess();
-#endif   // MCU_SELECTED
    }/* end for () */
 #endif   // USE_DTLS
 }
-#if ( MCU_SELECTED == RA6E1 )
-/*******************************************************************************
-
-  Function name: mfg_uart_callback
-
-  Purpose: Interrupt Handler for MFG UART Module,Postpones the semaphore wait
-            once one byte of data is read in SCI Channel 3 (MFG port)
-
-  Returns: None
-
-*******************************************************************************/
-void mfg_uart_callback( uart_callback_args_t *p_args )
-{
-
-    /* Handle the UART event */
-     switch ( p_args->event )
-    {
-       /* Receive complete */
-       case UART_EVENT_RX_COMPLETE:
-       {
-          OS_SEM_Post_fromISR( &mfgReceiveSem_ );
-          break;
-       }
-       /* Transmit complete */
-       case UART_EVENT_TX_COMPLETE:
-       {
-          OS_SEM_Post_fromISR( &transferSem[ UART_MANUF_TEST ] );
-          break;
-       }
-       default:
-       {
-       }
-    }/* end switch () */
-}/* end mfg_uart_callback () */
-#endif
 
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 /*******************************************************************************
@@ -2319,7 +2069,11 @@ void MFGP_optoTask( uint32_t Arg0 )
    {
       while ( !loggedOn )
       {
+#if ( MCU_SELECTED == NXP_K24 )
          if ( 0 != UART_read( UART_OPTICAL_PORT, &rxByte, sizeof( rxByte ) ) )
+#elif ( MCU_SELECTED == RA6E1 )
+         if ( 0 != UART_getc ( UART_OPTICAL_PORT, &rxByte, sizeof( rxByte ), OS_WAIT_FOREVER ) )
+#endif
          {
             if ( ( uint32_t )( ( uint8_t * )pOptoBuf - ( uint8_t * )&optoMsg ) >= sizeof( optoMsg ) )
             {
@@ -6659,11 +6413,19 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
       // DA requires UART in blocking mode so need to check for each byte
       while (UART_gotChar(UART_HOST_COMM_PORT) && bytesReceived < sizeof(rx_string))
       {
+#if ( MCU_SELECTED == NXP_K24 )
          (void)UART_read(UART_HOST_COMM_PORT, &rx_string[bytesReceived], 1);
+#elif ( MCU_SELECTED == RA6E1 )
+         ( void ) UART_getc ( UART_HOST_COMM_PORT, &rx_string[bytesReceived], 1, OS_WAIT_FOREVER );
+#endif
          bytesReceived++;
       }
 #else
+#if ( MCU_SELECTED == NXP_K24 )
       bytesReceived = UART_read( UART_HOST_COMM_PORT, rx_string, sizeof( rx_string ) );
+#elif ( MCU_SELECTED == RA6E1 )
+      // TODO: RA6E1 Can be implemented by using fgets (as this receives multiple bytes and the last byte is \n)
+#endif
 #endif
 
       if( ( bytesReceived != sizeof( rx_string ) ) || ( memcmp( tx_string, rx_string, sizeof( tx_string ) ) != 0 ) )

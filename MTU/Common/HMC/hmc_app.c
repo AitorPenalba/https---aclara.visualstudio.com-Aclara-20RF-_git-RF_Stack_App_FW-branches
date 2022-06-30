@@ -212,7 +212,6 @@ void HMC_APP_Task( taskParameter )
       BM_free( password );
    }
 #endif
-
    ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_ENABLE, NULL ); /* Enable the HMC */
    for ( ; ; )
    {
@@ -226,7 +225,6 @@ void HMC_APP_Task( taskParameter )
       ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_PROCESS, NULL ); /* Process HMC application */
 
       /* Todo:  This next section may 'go away' if HMC only communicates when a message is received in the queue. */
-
       if ( HMC_APP_main( ( uint8_t )HMC_APP_CMD_STATUS, NULL ) == ( uint8_t )HMC_APP_STATUS_LOGGED_OFF ) /* Logged in? */
       {
          if ( bHmcBusy )
