@@ -139,7 +139,6 @@ bool ADC_UnitTest(void);
 
 /* FUNCTION DEFINITIONS */
 
-
 /*******************************************************************************
 
   Function name: ADC_init
@@ -673,7 +672,7 @@ void ADC_Set_Man_Temperature  (float newTemperature)
 
   Arguments: None
 
-  Returns: Override temperature in Celcius(0)
+  Returns: Override temperature in Celsius(0)
 
   Notes:
 
@@ -690,9 +689,9 @@ float ADC_Get_Man_Temperature  ( void )
 
   Purpose: This function is used to get the current temperature of the processor
 
-  Arguments: bFahrenheit - Boolean to return the temperature in Celcius(0) or Farenheit(1)
+  Arguments: bFahrenheit - Boolean to return the temperature in Celsius(0) or Fahrenheit(1)
 
-  Returns: The converted result from the ADC capture in the desired unit (Celcius or Farenheit)
+  Returns: The converted result from the ADC capture in the desired unit (Celsius or Fahrenheit)
 
   Notes:
 
@@ -702,7 +701,9 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
 #if ( MCU_SELECTED == NXP_K24 )
    float voltage;
    float Temperature;
+
    voltage = ADC_Get_Ch_Voltage( ADC0_PROC_TEMPERATURE_CH );
+
    /* The conversion formula came from Freescale Ref. Manual K64P144M120SF5RM, section 35.4.8,
     *   and application note "Temperature Sensor for the HCS08 Microcontroller Family", AN3031
     * Convert voltage to degC: 25 - ((Voltage - Vtemp25) / m)
@@ -721,14 +722,12 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
 #endif
    if (bFahrenheit)
    {
-      /* Convert from Celcius to Farenheit */
+      /* Convert from Celsius to Fahrenheit */
       Temperature = ( ( ( Temperature * 9.0f ) / 5.0f ) + 32.0f );
    }
    return ( Temperature );
 #endif
 }
-
-
 
 //K22 is the only one that supports the Board temp. sensor
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A )
@@ -738,7 +737,7 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
 
   Purpose: This function is used to get the current temperature of the board
 
-  Arguments: bFahrenheit - Boolean to return the temperature in Celcius(0) or Farenheit(1)
+  Arguments: bFahrenheit - Boolean to return the temperature in Celsius(0) or Farenheit(1)
 
   Returns: ADC_Temperature - The converted result from the ADC capture in the desired unit
 

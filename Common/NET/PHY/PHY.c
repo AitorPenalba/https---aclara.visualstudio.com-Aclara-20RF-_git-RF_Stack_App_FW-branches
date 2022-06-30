@@ -746,9 +746,9 @@ static void PHY_TestMode(void)
          {
             DBG_logPrintf( 'I', "Test Mode # Cycle %u of %u (outer loop %u)", ++cycle1, test_mode.RepeatCnt, cycle2+1 );
 #if ( DCU == 1 )
-            
+
             (void)RADIO_Temperature_Get( (uint8_t)RADIO_0, &radioTemp );
-   
+
             clippedRadioTemp = radioTemp;
 
             // Clip temperature if needed.
@@ -2391,8 +2391,8 @@ static PHY_GET_STATUS_e Temperature_Get( int16_t *val )
    if ( RADIO_Get_Chip_Temperature( (uint8_t) RADIO_0, val) ) {
 #endif
       return ePHY_GET_SUCCESS;
-   } 
-   else 
+   }
+   else
    {
       return ePHY_GET_SERVICE_UNAVAILABLE;
    }

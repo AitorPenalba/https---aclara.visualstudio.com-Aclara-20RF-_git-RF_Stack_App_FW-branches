@@ -190,20 +190,11 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
             Timeout_msec = (ONE_MIN * 60 * 24 * 4);
          }
 
-#if 0
-         /* Convert the Timeout from Milliseconds into Ticks */
-         timeout_ticks = (uint32_t)  ((uint64_t) ((uint64_t) Timeout_msec * (uint64_t) _time_get_ticks_per_sec()) / 1000);
-         if( (uint32_t) ((uint64_t) ((uint64_t) Timeout_msec * (uint64_t) _time_get_ticks_per_sec()) % 1000) > 0)
-         {   /* Round the value up to ensure the time is >= the time requested */
-            timeout_ticks = timeout_ticks + 1;
-         } /* end if() */
-#else
          timeout_ticks = pdMS_TO_TICKS( Timeout_msec );
          if( (uint32_t) ( (uint64_t) ((uint64_t) Timeout_msec * (uint64_t) configTICK_RATE_HZ ) % ( TickType_t )1000U ) > 0 )
          {   /* Round the value up to ensure the time is >= the time requested */
             timeout_ticks = timeout_ticks + 1;
          }
-#endif
       } /* end else() */
    } /* end if() */
    else
@@ -229,6 +220,8 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
 #endif
    return ( SetMask );
 } /* end OS_EVNT_Wait () */
+
+
 #if( TM_EVENTS == 1 )
 static OS_EVNT_Obj eventObj;
 static OS_EVNT_Handle eventHandle = &eventObj;

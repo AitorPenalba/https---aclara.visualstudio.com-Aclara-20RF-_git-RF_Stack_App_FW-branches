@@ -5,7 +5,7 @@
  * Global Designator:  COMM_
  *
  * Contents:  This file is temporary and will be removed when full MSG_APP_ file is ready to be checked in.  This
- *          module ctonains implementation of transmit/receive (loopback).
+ *          module contains implementation of transmit/receive (loopback).
  *
  ******************************************************************************
  * Copyright (c) 2014 ACLARA.  All rights reserved.
@@ -17,7 +17,6 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdlib.h>       // rand()
-#include <stdbool.h>
 #include <string.h>
 #include "DBG_SerialDebug.h"
 

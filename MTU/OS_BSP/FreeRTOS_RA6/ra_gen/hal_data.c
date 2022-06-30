@@ -245,6 +245,37 @@ const lpm_instance_t g_lpm_SW_Standby =
     .p_ctrl = &g_lpm_SW_Standby_ctrl,
     .p_cfg = &g_lpm_SW_Standby_cfg
 };
+
+lpm_instance_ctrl_t g_lpm_DeepSWStandby_AGT_ctrl;
+
+const lpm_cfg_t g_lpm_DeepSWStandby_AGT_cfg =
+{
+    .low_power_mode     = LPM_MODE_DEEP,
+    .snooze_cancel_sources      = LPM_SNOOZE_CANCEL_SOURCE_NONE,
+    .standby_wake_sources       = LPM_STANDBY_WAKE_SOURCE_IRQ11 | LPM_STANDBY_WAKE_SOURCE_AGT1UD |  (lpm_standby_wake_source_t) 0,
+    .snooze_request_source      = LPM_SNOOZE_REQUEST_RXD0_FALLING,
+    .snooze_end_sources         =  (lpm_snooze_end_t) 0,
+    .dtc_state_in_snooze        = LPM_SNOOZE_DTC_DISABLE,
+#if BSP_FEATURE_LPM_HAS_SBYCR_OPE
+    .output_port_enable         = LPM_OUTPUT_PORT_ENABLE_HIGH_IMPEDANCE,
+#endif
+#if BSP_FEATURE_LPM_HAS_DEEP_STANDBY
+    .io_port_state              = LPM_IO_PORT_NO_CHANGE,
+    .power_supply_state         = LPM_POWER_SUPPLY_DEEPCUT0,
+    .deep_standby_cancel_source = LPM_DEEP_STANDBY_CANCEL_SOURCE_IRQ11 | LPM_DEEP_STANDBY_CANCEL_SOURCE_AGT1 |  (lpm_deep_standby_cancel_source_t) 0,
+    .deep_standby_cancel_edge   = LPM_DEEP_STANDBY_CANCEL_SOURCE_IRQ11_RISING |  (lpm_deep_standby_cancel_edge_t) 0,
+#endif
+    .p_extend           = NULL,
+};
+
+const lpm_instance_t g_lpm_DeepSWStandby_AGT =
+{
+    .p_api = &g_lpm_on_lpm,
+    .p_ctrl = &g_lpm_DeepSWStandby_AGT_ctrl,
+    .p_cfg = &g_lpm_DeepSWStandby_AGT_cfg
+};
+
+
 agt_instance_ctrl_t agt0_timer_lpm_cascade_trigger_ctrl;  /* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
 const agt_extended_cfg_t agt0_timer_lpm_cascade_trigger_extend =
 {

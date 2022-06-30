@@ -44,8 +44,6 @@
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>                       // Need mqx types
-#endif
-#if 0  // TODO: RA6E1 - file references
 #include <fio.h>                       // mqx file types
 #endif
 #include <CRC.h>                       // Aclara interface to Kinetis CRC engine

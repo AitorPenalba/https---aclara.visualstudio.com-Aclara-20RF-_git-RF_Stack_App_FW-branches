@@ -163,11 +163,11 @@
 
             /* Security attribution for LPM registers. */
 #ifndef BSP_TZ_CFG_LPMSAR
-#define BSP_TZ_CFG_LPMSAR ((2 > 0) ? 0xFFFFFCEAU : 0xFFFFFFFFU)
+#define BSP_TZ_CFG_LPMSAR ((3 > 0) ? 0xFFFFFCEAU : 0xFFFFFFFFU)
 #endif
             /* Deep Standby Interrupt Factor Security Attribution Register. */
 #ifndef BSP_TZ_CFG_DPFSAR
-#define BSP_TZ_CFG_DPFSAR ((2 > 0) ? 0xF2EFDFFCU : 0xFFFFFFFFU)
+#define BSP_TZ_CFG_DPFSAR ((3 > 0) ? 0xF2EFDFFCU : 0xFFFFFFFFU)
 #endif
 
             /* Security attribution for CGC registers. */
@@ -229,17 +229,17 @@
 
             /* Security attribution registers for SELSR0. */
 #ifndef BSP_TZ_CFG_ICUSARD
-#define BSP_TZ_CFG_ICUSARD ((2 > 0) ? 0xFFFFFFFEU : 0xFFFFFFFFU)
+#define BSP_TZ_CFG_ICUSARD ((3 > 0) ? 0xFFFFFFFEU : 0xFFFFFFFFU)
 #endif
 
             /* Security attribution registers for WUPEN0. */
 #ifndef BSP_TZ_CFG_ICUSARE
-#define BSP_TZ_CFG_ICUSARE ((2 > 0) ? 0x04F2FFFFU : 0xFFFFFFFFU)
+#define BSP_TZ_CFG_ICUSARE ((3 > 0) ? 0x04F2FFFFU : 0xFFFFFFFFU)
 #endif
 
             /* Security attribution registers for WUPEN1. */
 #ifndef BSP_TZ_CFG_ICUSARF
-#define BSP_TZ_CFG_ICUSARF ((2 > 0) ? 0xFFFFFFF8U : 0xFFFFFFFFU)
+#define BSP_TZ_CFG_ICUSARF ((3 > 0) ? 0xFFFFFFF8U : 0xFFFFFFFFU)
 #endif
 
             /* Set DTCSTSAR if the Secure program uses the DTC. */

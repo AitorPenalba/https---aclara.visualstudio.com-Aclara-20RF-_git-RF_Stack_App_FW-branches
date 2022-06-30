@@ -46,7 +46,7 @@
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
-#if ( RTOS_SELECTION == MQX_RTOS )  /* TODO: RA6E1: Add Support */
+#if ( RTOS_SELECTION == MQX_RTOS )
 typedef struct led_isr_struct_led
 {
    void *         OLD_ISR_DATA;
@@ -96,9 +96,11 @@ typedef union
 
 #if ( EP == 1 )
 static uint16_t LedTimerId;
+#if ( MCU_SELECTED == NXP_K24 )
 static enum_LedControl_t redLedControl = BLINK_SLOW; // Assign initial state of red LED
 static enum_LedControl_t blueLedControl = BLINK_SLOW; // Assign initial state of blue LED
 static enum_LedControl_t greenLedControl = STEADY_OFF; // Assign initial state of green LED
+#endif
 static bool diagnosticLedTimeout = (bool)false; // Identifies when 30 seconds LED timeout has occurred
 static DiagnosticsType_t diagnosticStatus;
 
@@ -464,6 +466,7 @@ static returnStatus_t createLedTimer(void)
 *********************************************/
 void LED_setBlueLedStatus(enum_BlueLedStatus_t status)
 {
+#if ( MCU_SELECTED == NXP_K24 )
    if (blueLedControl != MANUAL)
    {
       switch (status )
@@ -499,6 +502,7 @@ void LED_setBlueLedStatus(enum_BlueLedStatus_t status)
          }
       }
    }
+#endif
 }
 
 
@@ -523,6 +527,7 @@ void LED_setBlueLedStatus(enum_BlueLedStatus_t status)
 *********************************************/
 void LED_setGreenLedStatus(enum_GreenLedStatus_t status)
 {
+#if ( MCU_SELECTED == NXP_K24 )
    if (greenLedControl != MANUAL)
    {
       switch ( status )
@@ -563,6 +568,7 @@ void LED_setGreenLedStatus(enum_GreenLedStatus_t status)
          }
       }
    }
+#endif
 }
 
 
@@ -587,6 +593,7 @@ void LED_setGreenLedStatus(enum_GreenLedStatus_t status)
 *********************************************/
 void LED_setRedLedStatus(enum_RedLedStatus_t status)
 {
+#if ( MCU_SELECTED == NXP_K24 )
 #if ( TEST_TDMA == 0 )
    if (redLedControl != MANUAL)
    {
@@ -659,6 +666,7 @@ void LED_setRedLedStatus(enum_RedLedStatus_t status)
          }
       }
    }
+#endif
 #endif
 }
 

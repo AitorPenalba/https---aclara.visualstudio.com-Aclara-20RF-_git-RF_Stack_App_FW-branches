@@ -165,13 +165,7 @@ typedef struct
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
 returnStatus_t TIME_SYS_Init(void);
-#ifdef __mqx_h__
-void TIME_SYS_HandlerTask(uint32_t Arg0);
-#endif /* __mqx_h__ */
-// TODO: RA6E1 - Single declaration to support both
-#if (RTOS_SELECTION == FREE_RTOS)
 void TIME_SYS_HandlerTask( taskParameter );
-#endif
 
 #if ( EP == 1 )
 void           TIME_SYS_SetDSTAlarm(uint32_t date, uint32_t time);

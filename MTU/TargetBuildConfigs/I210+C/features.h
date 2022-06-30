@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2022 Aclara.  All Rights Reserved.
+ * Copyright 2022 Aclara. All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -104,5 +104,6 @@
 // TODO: RA6 [name_Balaji]: Move to appropriate place
 #define DAC_CODE_CONFIG                   1  /* Supports DAC0 for TX Power Control */
 #define LAST_GASP_RECONFIGURE_CLK         0  /* If enabled, the System Clock will be re-configured to use MOCO instead of Main Clock */
+#define LAST_GASP_USE_2_DEEP_SLEEP        1  /* If enabled, will use the different configurations of the Deep SW Standby Modes in Last Gasp to achieve the random sleep delay */
 #endif
 

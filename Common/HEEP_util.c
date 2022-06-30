@@ -197,7 +197,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
 {
   // OR_PM for all devices:
   { APP_MSG_SecurityHandler,   appSecurityAuthMode },
-#if 0 // TODO: RA6E1 OR_PM handlers
   { DFWA_OR_PM_Handler,        dfwStatus },
   { DFWA_OR_PM_Handler,        dfwStreamID },
   { DFWA_OR_PM_Handler,        dfwFileType },
@@ -236,7 +235,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { PHY_OR_PM_Handler,         phySyncDetectCount },
   { PHY_OR_PM_Handler,         phyDemodulator },
   { PHY_OR_PM_Handler,         phyMaxTxPayload },
-#endif
 #if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
   { PHY_OR_PM_Handler,         fngVSWR },
   { PHY_OR_PM_Handler,         fngVswrNotificationSet },
@@ -258,11 +256,9 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { EVL_OR_PM_Handler,         amBuMaxTimeDiversity },
   { EVL_OR_PM_Handler,         opportunisticAlarmIndexID },
   { EVL_OR_PM_Handler,         realTimeAlarmIndexID },
-#if 0 // TODO: RA6E1 OR_PM handlers
   { SELF_OR_PM_Handler,        stRTCFailCount },
   { SELF_OR_PM_Handler,        stSecurityFailCount },
   { SELF_OR_PM_Handler,        stNvmRWFailCount },
-#endif
   { TIME_UTIL_OR_PM_Handler,   dateTime },
   { NWK_OR_PM_Handler,         ipHEContext },
   { NWK_OR_PM_Handler,         iPifInDiscards },
@@ -293,7 +289,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { MIMTINFO_OR_PM_Handler,    dataConfigurationDocumentVersion },
   { MIMTINFO_OR_PM_Handler,    manufacturerNumber },
   { MIMTINFO_OR_PM_Handler,    repairInformation },
-#if 0 // TODO: RA6E1 OR_PM handlers
   { MAC_OR_PM_Handler,         macAckWaitDuration },
   { MAC_OR_PM_Handler,         macCsmaQuickAbort },
   { MAC_OR_PM_Handler,         macPacketId },
@@ -326,7 +321,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { MAC_OR_PM_Handler,         macReliabilityHighCount },
   { MAC_OR_PM_Handler,         macReliabilityMedCount },
   { MAC_OR_PM_Handler,         macReliabilityLowCount },
-#endif
 #if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
   { MAC_OR_PM_Handler,         macLinkParametersMaxOffset },
   { MAC_OR_PM_Handler,         macLinkParametersPeriod },

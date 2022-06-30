@@ -346,9 +346,9 @@ static void print_parameter_count_error(void);
 static bool strto_value(const char* argv, ValueType_e valueType, value_t * pValue);
 static void print_value(const char* argv, ValueType_e valueType, const value_t * pValue);
 
-static void NwkAttrSetGet(uint32_t argc, char *argv[], NWK_ATTRIBUTES_e eAttribute, ValueType_e valueType);
+//static void NwkAttrSetGet(uint32_t argc, char *argv[], NWK_ATTRIBUTES_e eAttribute, ValueType_e valueType);
 static void MacAttrSetGet(uint32_t argc, char *argv[], MAC_ATTRIBUTES_e eAttribute, ValueType_e valueType);
-static void PhyAttrSetGet(uint32_t argc, char *argv[], PHY_ATTRIBUTES_e eAttribute, ValueType_e valueType);
+//static void PhyAttrSetGet(uint32_t argc, char *argv[], PHY_ATTRIBUTES_e eAttribute, ValueType_e valueType);
 
 #if ( EP == 1 )
 static void MFGP_watchDogResetCount( uint32_t argc, char *argv[] );
@@ -714,10 +714,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "help",                       MFGP_CommandLine_Help,           "Display list of commands" },
    {  "h",                          MFGP_CommandLine_Help,           "Alias for help" },
    {  "?",                          MFGP_CommandLine_Help,           "Alias for help" },
-   {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
-
-// TODO: RA6 [name_Balaji]: Add functions to table once the respective module is integrated
-//   { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },
+// { "alarmMaskProfile",            MFGP_alarmMaskProfile,           "xxx" },  // Was commented in base code (K24)
    {  "amBuMaxTimeDiversity",       MFGP_amBuMaxTimeDiversity,       "Get/Set window of time in minutes during which a /bu/am message may bubble-in" },
    {  "capableOfEpBootloaderDFW",   MFGP_capableOfEpBootloaderDFW,   "Indicates if the device supports the Download Firmware feature for its code"},
    {  "capableOfEpPatchDFW",        MFGP_capableOfEpPatchDFW,        "Indicates if the device supports the Download Firmware feature for its bootloader"},
@@ -743,9 +740,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "dtlsMfgSubject2",            MFGP_dtlsMfgSubject2,            "Read/Write Mfg2 Subject partial cert" },           // 1360
    {  "dtlsNetworkHESubject",       MFGP_dtlsNetworkHESubject,       "Read/Write Head End Subject partial cert" },       // 1332
    {  "dtlsNetworkMSSubject",       MFGP_dtlsNetworkMSSubject,       "Read/Write Meter Shop Subject partial cert" },     // 1333
-#if 0
-   //These are defined in the HEEP, but not sure if they are valid or not!
-   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
+#if 0 // Turned off in K24
+//These are defined in the HEEP, but not sure if they are valid or not!
+//   {  "dtlsSecurityRootCA",         MFGP_dtlsSecurityRootCA,         "Read/Write Security Root CA " },                   // 1259
 #endif
    {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
    {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
@@ -907,9 +904,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "shipMode",                   MFGP_shipMode,                   "Set Ship Mode" },
    {  "spuriousresetcount",         MFGP_SpuriousResetCount,         "Get/Set spurious reset count" },
    {  "stnvmrwfailcount",           MFGP_nvFailCount,                "Get/Set NV failure count" },
-//   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },//[fixed by balaji PR]
+   {  "stnvmrwfailtest",            MFGP_nvtest,                     "Run external NV memory test" },
    {  "stRTCFailCount",             MFG_stRTCFailCount,              "Get/Set Real Time Clock test Fail Count" },
-//   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },//[fixed by balaji PR]
+   {  "stRTCFailTest",              MFG_stRTCFailTest,               "Start a Real Time Clock test" },
    {  "strx4gfsk",                  MFG_StRx4GFSK,                   "Start a Receiver BER test using normal radio processing" },
 #if ( DCU == 1 )
    {  "stRamRWFailCount",           MFG_ToolEP_SDRAMCount,           "Get/Set SDRAM test failure count" },
@@ -918,9 +915,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "stSecurityFailCount",        MFGP_stSecurityFailCount,        "Get/Set security device test failure count" },
    {  "stSecurityFailTest",         MFGP_stSecurityFailTest,         "Test security device" },
 #if ( DCU == 1 )
-//   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX. Specify SRFN or STAR" },
+   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX. Specify SRFN or STAR" },
 #else
-//   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX" },
+   {  "sttxblurttest",              MFG_StTxBlurtTest,               "Transmit a message to test TX" },
 #endif
    {  "sttxcwtest",                 MFG_StTxCwTest,                  "Start a CW transmitter test" },
 #if ( DCU == 1 )
@@ -982,26 +979,26 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
    {  "dstOffset",                  MFGP_dstOffset,                  "xxx" },
    {  "dstStartRule",               MFGP_dstStartRule,               "xxx" },
 #if ( ANSI_STANDARD_TABLES == 1 )
-//   {  "ansiTableOID",               MFGP_AnsiTblOID,                 "Get the meter's DEVICE_CLASS per ANSI Table 00" },
+   {  "ansiTableOID",               MFGP_AnsiTblOID,                 "Get the meter's DEVICE_CLASS per ANSI Table 00" },
 #endif
 #if ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-//   {  "edFwVersion",                MFGP_edFwVersion,                "Get the host's firmware version.revision.build" },
+   {  "edFwVersion",                MFGP_edFwVersion,                "Get the host's firmware version.revision.build" },
 #else
-//   {  "edFwVersion",                MFGP_edFwVersion,                "Get the meter's firmware version.revision" },
+   {  "edFwVersion",                MFGP_edFwVersion,                "Get the meter's firmware version.revision" },
 #endif
 #if ( ANSI_STANDARD_TABLES == 1 ) || ( ACLARA_LC == 1 ) || ( ACLARA_DA == 1 )
-//   {  "edHwVersion",                MFGP_edHwVersion,                "Get the host's hardware version.revision" },
+   {  "edHwVersion",                MFGP_edHwVersion,                "Get the host's hardware version.revision" },
 #endif
 #if ( HMC_KV == 1 ) || ( HMC_I210_PLUS == 1 )
-//   {  "edInfo",                     MFGP_edInfo,                     "xxx" },
+   {  "edInfo",                     MFGP_edInfo,                     "xxx" },
 #else // for SRNFI-210+C
-//   {  "edInfo",                     MFGP_edInfo,                     "Get the end device info" },
+   {  "edInfo",                     MFGP_edInfo,                     "Get the end device info" },
 #endif
 
 #if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
-//   {  "edManufacturer",             MFGP_edManufacturer,             "Get the meter manufacturer" },
+   {  "edManufacturer",             MFGP_edManufacturer,             "Get the meter manufacturer" },
 #elif ( ACLARA_DA == 1 )
-//   {  "edManufacturer",             MFGP_edManufacturer,             "Get the host manufacturer" },
+   {  "edManufacturer",             MFGP_edManufacturer,             "Get the host manufacturer" },
 #endif
    {  "edMfgSerialNumber",          MFGP_edMfgSerialNumber,          "Get the host's serial number" },
 #if ( ANSI_STANDARD_TABLES == 1 )
@@ -1019,15 +1016,15 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 #if ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )
    {  "edProgrammedDateTime",       MFGP_edProgrammedDateTime,       "Get the meters's last program datetime in seconds" },
    {  "edProgramId",                MFGP_edProgramId,                "Get the meter's program ID number" },
-//   {  "edProgrammerName",           MFGP_edProgrammerName,           "Get the name of the last programmer of the meter" },
+   {  "edProgrammerName",           MFGP_edProgrammerName,           "Get the name of the last programmer of the meter" },
 #endif
-//   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },
+   {  "edUtilitySerialNumber",      MFGP_edUtilitySerialNumber,      "xxx" },
 #if ( SAMPLE_METER_TEMPERATURE == 1 )
    {  "edTemperatureHystersis",     MFGP_edTemperatureHystersis,     "Get/Set The hysteresis from a maximum temperature threshold before a high temp alarm clears" },
    {  "edTempSampleRate",           MFGP_edTempSampleRate,           "Get/Set The period (in seconds) between temperature samples of the meter's thermometer" },
 #endif
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
-//   {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
+   {  "fwdkWh",                     MFG_bulkQuantity,                "Read forward kWh from meter" },
    {  "historicalRecovery",         MFGP_historicalRecovery,         "Get whether the endpoint supports historical data recovery" },
 #endif
    {  "initialRegistrationTimeout", MFGP_initialRegistrationTimemout,"Get/Set the initial registration timeout" },
@@ -1064,7 +1061,7 @@ static const struct_CmdLineEntry MFGP_EpCmdTable[] =
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
    {  "meterSessionFailureCount",   MFGP_meterSessionFailureCount,   "Get/Set the meterSessionFailureCount parameter" },
 #endif
-//   {  "meterShopMode",              MFGP_meterShopMode,              "Alias for decommissionMode" },
+   {  "meterShopMode",              MFGP_meterShopMode,              "Alias for decommissionMode" },
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
    {  "netkWh",                     MFG_bulkQuantity,                "Read net kWh from meter" },
 #endif
@@ -9890,7 +9887,7 @@ static void MFG_startDTLSsession ( uint32_t argc, char *argv[] )
    /* Make sure that only one start is active */
    if ( _MfgPortState == MFG_SERIAL_IO_e )
    {
-      uint32_t flags = 0;
+//      uint32_t flags = 0;
 #if !USE_USB_MFG
 #if 0 // TODO: RA6E1 Enable UART ioctl (check if required)
       (void)UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );

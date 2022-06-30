@@ -97,6 +97,14 @@ extern const lpm_instance_t g_lpm_SW_Standby;
 /** Access the LPM instance using these structures when calling API functions directly (::p_api is not used). */
 extern lpm_instance_ctrl_t g_lpm_SW_Standby_ctrl;
 extern const lpm_cfg_t g_lpm_SW_Standby_cfg;
+
+/** lpm Instance */
+extern const lpm_instance_t g_lpm_DeepSWStandby_AGT;
+
+/** Access the LPM instance using these structures when calling API functions directly (::p_api is not used). */
+extern lpm_instance_ctrl_t g_lpm_DeepSWStandby_AGT_ctrl;
+extern const lpm_cfg_t g_lpm_DeepSWStandby_AGT_cfg;
+
 /** AGT Timer Instance */
 extern const timer_instance_t agt0_timer_lpm_cascade_trigger;
 

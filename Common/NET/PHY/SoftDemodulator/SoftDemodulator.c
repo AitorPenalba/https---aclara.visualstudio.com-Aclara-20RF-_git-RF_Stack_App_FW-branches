@@ -22,8 +22,8 @@
 #include "project.h"
 #include <assert.h>
 #if( RTOS_SELECTION == MQX_RTOS )
-#include <mqx.h> 
-#include <bsp.h> 
+#include <mqx.h>
+#include <bsp.h>
 #endif
 #include <stdint.h>
 
@@ -60,7 +60,7 @@
 
 #define OFFSET(index) ((uint32_t)(((float)index*OSR)+0.5f)) // Make an offset based on sampling rate
 
-#if GET_TEMPERATURE_FROM_RADIO
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
 #define NUM_OF_RSSI_SAMPLE 9
 static uint8_t RSSI_Count = 0;
 #endif
@@ -340,12 +340,12 @@ void SD_PhaseSamplesListenerTask(taskParameter)
       if (samplesAvailable)
       {
          RADIO_CaptureRSSI((uint8_t)RADIO_0);
-#if GET_TEMPERATURE_FROM_RADIO
-         RSSI_Count++;       
+#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
+         RSSI_Count++;
          if ( RSSI_Count >= NUM_OF_RSSI_SAMPLE )
          {
-           RSSI_Count = 0;
-           RADIO_Temperature_Update();  // get radio adc                          
+            RSSI_Count = 0;
+            RADIO_Temperature_Update();  // get radio adc
          }
 #endif
          for (uint8_t i=0; i<SOFT_DEMOD_MAX_SYNC_PAYL_TASKS+1; i++)
@@ -469,7 +469,7 @@ void SD_PreambleDetectorTask(taskParameter)
    (void)   Arg0;
    #endif
    // Get and allocate the semaphore first
-   int8_t semId = 0; // preamble detector semaphore ID is always 0 
+   int8_t semId = 0; // preamble detector semaphore ID is always 0
    SD_FilteredPhaseSamplesSemaphores[semId].available = false; //So the PreProcessor task will always notify us
    OS_SEM_Reset(&SD_FilteredPhaseSamplesSemaphores[semId].semaphore);
 
@@ -508,9 +508,8 @@ void SD_PreambleDetectorTask(taskParameter)
 
                // unblock a new Sync and Payload Demodulator Task
                bool unblocked = SD_Unblock_Sync_Payload_Task();
-              
+
 #if( RTOS_SELECTION == MQX_RTOS ) //TODO: RA6E1 need check for FreeRTOS
-               
                // clear the flag if previously set
                (void)_lwevent_clear(&SD_Events, SYNC_DEMOD_TASK_SYNC );
 #endif
@@ -568,15 +567,15 @@ mutex lock). Once the PHY Task processes these bytes, the mutex is unlocked.
 #if ( RTOS_SELECTION == MQX_RTOS )
 
 void SD_SyncPayloadDemodTask(taskParameter)
-{    
-  
+{
+
    uint8_t semId = (uint8_t)arg0; //Param in Task.c
 #elif ( RTOS_SELECTION == FREE_RTOS )
  void SD_SyncPayloadDemodTask(void* pvParameter)
-{  
+{
    uint8_t semId = (uint8_t )pvParameter; //Param in Task.c - // TODO: RA6E1 Bob: we need to check on this with Mario and/or Mukesh
 #warning "THE ABOVE LINE OF CODE IS ALMOST CERTAINLY INCORRECT: do not enable soft demodulator!"
-#endif   
+#endif
    eSyncAndPayloadDemodFailCodes_t FailureCode;
    uint16_t readIndex;
 
@@ -608,7 +607,7 @@ void SD_SyncPayloadDemodTask(taskParameter)
       SPD_Pers.SyncFound = false;
       SPD_Pers.HeaderValid = false;
       SPD_Pers.ScldFreq = 0.0F;
-	  SPD_Pers.syncTime_msec = 0;
+     SPD_Pers.syncTime_msec = 0;
       SPD_Pers.syncTimeStamp.QSecFrac = 0;
       SPD_Pers.MlseOffset = 0;
       SPD_Pers.IdxSync2 = 0;

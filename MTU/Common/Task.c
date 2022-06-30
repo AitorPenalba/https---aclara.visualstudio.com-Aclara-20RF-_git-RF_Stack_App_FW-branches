@@ -624,7 +624,7 @@ void OS_TASK_Create_All ( bool initSuccess )
 
 #if ( RTOS_SELECTION == MQX_RTOS )
    /* Install exception handler */
-   (void)_int_install_exception_isr();  TODO:  What is the equivalent opertion in FREE RTOS
+   (void)_int_install_exception_isr();
 #elif ( RTOS_SELECTION == FREE_RTOS )
       // TODO: RA6: What is the equivalent operation for FreeRTOS?
 #endif
