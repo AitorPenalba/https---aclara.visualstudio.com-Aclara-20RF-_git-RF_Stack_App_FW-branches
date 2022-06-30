@@ -115,7 +115,7 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
    OS_QUEUE_Element_Handle ptr = ( OS_QUEUE_Element_Handle )QueueElement;
    if (pdPASS != xQueueSend ( *QueueHandle, (void *)&ptr, 0 ) )
    {
-      DBG_printf("Could not add item to queue at %s line %d", file, line);
+//      DBG_printf("Queue is full");
       EVL_FirmwareError( "OS_QUEUE_Enqueue" , file, line );
    }
 
@@ -148,16 +148,16 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
 *******************************************************************************/
 void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle )
 {
-  OS_QUEUE_Element_Handle QueueElement;
+   OS_QUEUE_Element_Handle QueueElement;
 #if( RTOS_SELECTION == FREE_RTOS )
-  if( pdPASS != xQueueReceive ( *QueueHandle, (void *) &QueueElement, 0))
-  {
-    QueueElement = NULL;
-  }/*lint !e816 area too small   */
+   if( pdPASS != xQueueReceive ( *QueueHandle, (void *) &QueueElement, 0))
+   {
+      QueueElement = NULL;
+   }/*lint !e816 area too small   */
 #elif( RTOS_SELECTION == MQX_RTOS )
-  QueueElement = (OS_QUEUE_Element*)_queue_dequeue ( QueueHandle ); /*lint !e816 area too small   */
+   QueueElement = (OS_QUEUE_Element*)_queue_dequeue ( QueueHandle ); /*lint !e816 area too small   */
 #endif
-  return ( (void *)QueueElement );
+   return ( (void *)QueueElement );
 } /* end OS_QUEUE_Dequeue () */
 
 /*******************************************************************************
@@ -189,9 +189,9 @@ bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *Q
    //NJ: TODO, LINKED Queue for MAC. Currently only places item at end of queue
    if (pdPASS != xQueueSend ( *QueueHandle, (void *)QueueElement, 0 ) )
    {
-     funcStatus = false;
+      funcStatus = false;
 
-     APP_PRINT("Could not add insert to queue");
+      APP_PRINT("Could not add insert to queue");
    }
 #elif( RTOS_SELECTION == MQX_RTOS )
    funcStatus = (bool)_queue_insert ( QueueHandle, (QUEUE_ELEMENT_STRUCT_PTR)QueuePosition, (QUEUE_ELEMENT_STRUCT_PTR)QueueElement );
@@ -217,9 +217,9 @@ void OS_QUEUE_Remove ( OS_QUEUE_Handle QueueHandle, void *QueueElement )
 {
 #if( RTOS_SELECTION == FREE_RTOS )
   //NRJ: TODO may not be possible with FreeRTOS
-  return;
+   return;
 #elif( RTOS_SELECTION == MQX_RTOS )
-  _queue_unlink ( QueueHandle, (QUEUE_ELEMENT_STRUCT_PTR)QueueElement );
+   _queue_unlink ( QueueHandle, (QUEUE_ELEMENT_STRUCT_PTR)QueueElement );
 #endif
 } /* end OS_QUEUE_Remove () */
 /*******************************************************************************
@@ -242,17 +242,17 @@ uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle )
 
   NumElements = (uint16_t) uxQueueMessagesWaiting( *QueueHandle );
 #elif( RTOS_SELECTION == MQX_RTOS )
-   bool QueueEmpty;
-   QueueEmpty = (bool)_queue_is_empty ( QueueHandle );
+  bool QueueEmpty;
+  QueueEmpty = (bool)_queue_is_empty ( QueueHandle );
 
-   if ( QueueEmpty == false )
-   {
-      NumElements = (uint16_t)_queue_get_size ( QueueHandle );
-   } /* end if() */
-   else
-   {
-      NumElements = 0;
-   } /* end else() */
+  if ( QueueEmpty == false )
+  {
+     NumElements = (uint16_t)_queue_get_size ( QueueHandle );
+  } /* end if() */
+  else
+  {
+     NumElements = 0;
+  } /* end else() */
 #endif
    return ( NumElements );
 } /* end OS_QUEUE_NumElements () */
