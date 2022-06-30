@@ -355,10 +355,10 @@ typedef enum
 #define HMC_MSG_MAX_RX_LEN             (64U)          /* This includes the 8 bytes of packet overhead */
 #define HMC_MSG_MAX_TX_LEN             (64U)
 #define HMC_REQ_MAX_BYTES              (HMC_MSG_MAX_RX_LEN-12U)   /* Max # of byte read/written when performing partial table access. */
-#define HMC_MSG_RETRIES                ((uint8_t)5)
+#define HMC_MSG_RETRIES                ((uint8_t)3)
 #define HMC_MSG_ERROR_TIME_OUT_mS      ((uint8_t)60)
-#define HMC_MSG_RESPONSE_TIME_OUT_mS   ((uint16_t)1000)
-#define HMC_MSG_TURN_AROUND_TIME_mS    ((uint8_t)5)      /* Ms */
+#define HMC_MSG_RESPONSE_TIME_OUT_mS   ((uint16_t)4000)
+#define HMC_MSG_TURN_AROUND_TIME_mS    ((uint8_t)1)      /* Ms */
 #define HMC_MSG_BUSY_DELAY_mS          ((uint16_t)2000)
 #define HMC_MSG_ICHAR_TIME_OUT_mS      ((uint16_t)1000)  /* Inter-character Time Out */
 #define HMC_MSG_TRAFFIC_TIME_OUT_mS    ((uint16_t)30000)
