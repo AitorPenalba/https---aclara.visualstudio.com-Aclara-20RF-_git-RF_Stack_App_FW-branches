@@ -333,46 +333,46 @@ void OS_QUEUE_Test( void )
    retVal = OS_QUEUE_Create( (void *) msgQueueHandle, NUM_ITEMS);
    if(true == retVal)
    {
-       OS_QUEUE_Enqueue( msgQueueHandle, (void *)ptr1);
-       rxMsg = (buffer_t * )OS_QUEUE_Dequeue(msgQueueHandle);
-       if( rxMsg->bufMaxSize == 250 )
-       {
+      OS_QUEUE_Enqueue( msgQueueHandle, (void *)ptr1);
+      rxMsg = (buffer_t * )OS_QUEUE_Dequeue(msgQueueHandle);
+      if( rxMsg->bufMaxSize == 250 )
+      {
          APP_PRINT(" Success");
-       }
-       else
-       {
+      }
+      else
+      {
          APP_PRINT(" Fail");
-       }
+      }
 
 
-     //queue the pointer to the element
-//     for(int i = 0; i< NUM_ITEMS; i++)
-//     {
-//       //enqueue elements one greater than the total length
-//       OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg);
-//     }
-//     OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg); //this should fail
-//     OS_QUEUE_Dequeue( msgQueueHandle );
-//     txMsg = &payload2;
-//     OS_QUEUE_Enqueue( msgQueueHandle, (void *) txMsg); // this should succeed
-//     length = OS_QUEUE_NumElements(msgQueueHandle);
-//     //dequeue all elements and print there msg length as ID
-//     for(int i = 0; i<length; i++)
-//     {
-//       rxMsg = (OS_QUEUE_Element*) OS_QUEUE_Dequeue( msgQueueHandle );
-//       if(rxMsg->dataLen == 200)
-//       {
-//         APP_PRINT("Message 1");
-//       }
-//       else if (rxMsg->dataLen == 100)
-//       {
-//         APP_PRINT("Message 2");
-//       }
-//       else
-//       {
-//         APP_PRINT("Unknown Message");
-//       }
-//     }
+      //queue the pointer to the element
+      //     for(int i = 0; i< NUM_ITEMS; i++)
+      //     {
+      //       //enqueue elements one greater than the total length
+      //       OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg);
+      //     }
+      //     OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg); //this should fail
+      //     OS_QUEUE_Dequeue( msgQueueHandle );
+      //     txMsg = &payload2;
+      //     OS_QUEUE_Enqueue( msgQueueHandle, (void *) txMsg); // this should succeed
+      //     length = OS_QUEUE_NumElements(msgQueueHandle);
+      //     //dequeue all elements and print there msg length as ID
+      //     for(int i = 0; i<length; i++)
+      //     {
+      //       rxMsg = (OS_QUEUE_Element*) OS_QUEUE_Dequeue( msgQueueHandle );
+      //       if(rxMsg->dataLen == 200)
+      //       {
+      //         APP_PRINT("Message 1");
+      //       }
+      //       else if (rxMsg->dataLen == 100)
+      //       {
+      //         APP_PRINT("Message 2");
+      //       }
+      //       else
+      //       {
+      //         APP_PRINT("Unknown Message");
+      //       }
+      //     }
 
 
    }

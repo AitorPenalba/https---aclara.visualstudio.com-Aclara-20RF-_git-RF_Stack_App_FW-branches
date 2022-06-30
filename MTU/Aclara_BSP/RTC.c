@@ -215,7 +215,7 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
       (void)R_RTC_CalendarTimeSet( &g_rtc0_ctrl, &pTime );
       checkTime = pTime;
       VBATREG_EnableRegisterAccess();
-      /*Validates if the time set is not all zero*/ /* TODO: RA6E1: Review the logic for VBATREG_RTC_VALID */
+      /*Validates if the time set is not all zero*/
       if( (0 == checkTime.tm_sec)
          && (0 == checkTime.tm_mon )
          && (0 == checkTime.tm_mday )
