@@ -456,6 +456,9 @@ void STRT_StartupTask ( taskParameter )
 
    // Enable cycle counter
    DWT_CTRL = DWT_CTRL | 1 ;
+#else
+   DCB->DEMCR = DCB->DEMCR | 0x01000000;
+   DWT->CTRL  = DWT->CTRL  | 1;
 #endif
 #if ( MQX_USE_LOGS == 1 )
    /* Create kernel log */
@@ -613,14 +616,29 @@ void STRT_StartupTask ( taskParameter )
 #if (TM_LINKED_LIST == 1)
    OS_LINKEDLIST_Test();
 #endif
-   // TODO: RA6E1 - Verify why this sleep required which causes NV self test fails for the first time
-   OS_TASK_Sleep( 20 ); // Sleep for 20 msec before creating other tasks
-   OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
-
 #if 1 // TODO: RA6E1 Bob: this is temporary code to turn on an LED connected to pin P301 using high drive capacity
    if ( initSuccess_ )
    {
-      R_BSP_PinCfg ( BSP_IO_PORT_03_PIN_01, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_HIGH | IOPORT_CFG_DRIVE_HIGH ) );
+#if ( TM_DELAY_FOR_TACKED_ON_LED == 1 )
+      OS_TASK_Sleep(2000);
+#endif
+      TEST_LED_TACKON_ON; /* Drive the pin for a tacked-on LED high with high drive strength */
+#if ( TM_DELAY_FOR_TACKED_ON_LED == 1 )
+      OS_TASK_Sleep(2000);
+#endif
+      TEST_LED_TACKON_OFF; /* Turn off the tacked-on LED */
+   }
+#endif
+   // TODO: RA6E1 - Verify why this sleep required which causes NV self test fails for the first time
+   OS_TASK_Sleep( 20 ); // Sleep for 20 msec before creating other tasks
+   OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
+#if 1 // TODO: RA6E1 Bob: this is temporary code to turn on an LED connected to pin P301 using high drive capacity
+   if ( initSuccess_ )
+   {
+#if ( TM_DELAY_FOR_TACKED_ON_LED == 1 )
+      OS_TASK_Sleep(2000);
+#endif
+      TEST_LED_TACKON_ON; /* Drive the pin for a tacked-on LED high with high drive strength */
    }
 #endif
 

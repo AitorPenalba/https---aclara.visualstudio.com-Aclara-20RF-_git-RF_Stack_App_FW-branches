@@ -225,15 +225,12 @@ uint32_t DBG_CommandLine_NoiseEstimateCount ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseEstimateRate ( uint32_t argc, char *argv[] );
 #endif // TODO: RA6E1 Bob: enable this command even without compile_switch.h
 uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] );
-uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] );
-#if 0 // TODO: RA6E1 Bob: back to the previous state
 #if ( NOISE_HIST_ENABLED == 1 )
 uint32_t DBG_CommandLine_NoiseHistogram ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseBurst     ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_BurstHistogram ( uint32_t argc, char *argv[] );
 #endif
 uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] );
-#endif
 uint32_t DBG_CommandLine_DebugDisable ( uint32_t argc, char *argv[] );
 #ifdef CompileSwitch_H
 #if 0

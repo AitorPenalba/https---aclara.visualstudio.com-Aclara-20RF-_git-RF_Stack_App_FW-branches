@@ -8,7 +8,7 @@
  *          module contains implementation of transmit/receive (loopback).
  *
  ******************************************************************************
- * Copyright (c) 2014 ACLARA.  All rights reserved.
+ * Copyright (c) 2014-2022 ACLARA.  All rights reserved.
  * This program may not be reproduced, in whole or in part, in any form or by
  * any means whatsoever without the written permission of:
  *    ACLARA, ST. LOUIS, MISSOURI USA

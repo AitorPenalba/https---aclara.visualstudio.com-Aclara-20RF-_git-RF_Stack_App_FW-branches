@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2010-2020 Aclara.  All Rights Reserved.
+ * Copyright 2010-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -25,8 +25,12 @@
 #include "project.h"
 
 #if ( PHASE_DETECTION == 1 )
+#if ( MCU_SELECTED == NXP_K24 )
 #include <bsp.h>
 #include "FTM.h"
+#elif ( MCU_SELECTED == RA6E1 )
+
+#endif
 #include "file_io.h"
 #include "timer_util.h"
 #include "time_sys.h"
@@ -343,9 +347,14 @@ returnStatus_t PD_init ( void )
 
       sync_record_init();
 
+#if ( MCU_SELECTED == NXP_K24 )
       // Configure FTM3_CH1 to capture timer when ZCD_METER signal is detected.
       (void)FTM3_Channel_Enable( 1, FTM_CnSC_CHIE_MASK | FTM_CnSC_ELSA_MASK, ZCD_hwIsr );
       HMC_ZCD_METER_TRIS(); // Map ZCD_METER signal to FTM3_CH1
+#elif ( MCU_SELECTED == RA6E1 )
+      // TODO: RA6E1 Bob: Need to set up the AGT to capture time from P114, ZCD_METER signal
+      HMC_ZCD_METER_TRIS(); // Set up the port pin to connect to the AGT peripheral
+#endif
 
       PD_AddSysTimer();
    }
@@ -884,9 +893,15 @@ void ZCD_hwIsr( void )
 
    // Need to read those 3 counters together so disable interrupts if they are not disabled already
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+#if ( MCU_SELECTED == NXP_K24 )
    cycleCounter  = DWT_CYCCNT;
    currentFTM    = (uint16_t)FTM3_CNT;
    capturedValue = (uint16_t)FTM3_C1V; // Save current captured value
+#elif ( MCU_SELECTED == RA6E1 )
+   cycleCounter  = DWT->CYCCNT;
+   // TODO: RA6E1 Bob: here is where we need to capture the AGT timer value
+#endif
+
    __set_PRIMASK(primask); // Restore interrupts
 
    // Convert FTM3_CNT into CYCCNT value

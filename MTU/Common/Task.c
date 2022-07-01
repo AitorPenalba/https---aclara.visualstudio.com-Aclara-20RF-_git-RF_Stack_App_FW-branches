@@ -650,7 +650,16 @@ void OS_TASK_Create_All ( bool initSuccess )
                 * that there is an issue creating a task.  Look at pTaskList->TASK_TEMPLATE_INDEX to figure out which task
                 * was not created properly.  */
                while(true) /*lint !e716  */
+#if ( RTOS_SELECTION == FREE_RTOS )
+               {
+                  OS_TASK_Sleep(500); /* If some task failed to start, blink tack-on LED at 1Hz forever or until IWDT gets us */
+                  TEST_LED_TACKON_ON;
+                  OS_TASK_Sleep(500);
+                  TEST_LED_TACKON_OFF;
+               }
+#else
                {}  /* Todo:  We may wish to discuss the definition of LEDs.  Maybe we could add code here. */
+#endif
             }
             // TODO: RA6: DG: Move these lines to OS_Task_Create
 
@@ -932,7 +941,14 @@ void OS_TASK_Sleep ( uint32_t MSec )
 #if (RTOS_SELECTION == MQX_RTOS)
    _time_delay ( MSec );
 #elif (RTOS_SELECTION == FREE_RTOS)
+#if 1 // TODO: RA6E1 Bob: temporary test code to guarantee minimum of MSec delay time
+   /* Increase the number of milliseconds by one tick's worth for FreeRTOS. This has the following effect:
+      0-4msec = 3msec, actual, 5-9msec = 8msec, actual, 10-14msec = 13msec, actual, etc. */
+   uint32_t delayInTicks = pdMS_TO_TICKS( ( MSec + ( (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ ) + 2U ) );
+   vTaskDelay( delayInTicks );
+#else
    vTaskDelay( pdMS_TO_TICKS(MSec) );
+#endif // 1
 #endif
 }
 /* ****************************************************************************************************************** */

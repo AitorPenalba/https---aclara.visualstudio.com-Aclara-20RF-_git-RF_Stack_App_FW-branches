@@ -1061,7 +1061,7 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac -= ((uint64_t)delayCore << 32) / (uint64_t)cpuFreq;
 #else
    __set_PRIMASK(primask); // Restore interrupts
-#endif // 0
+#endif
    if ((radio[(uint8_t)RADIO_0].demodulator == 0) || RADIO_Is_TX()) {
       RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_0, (bool)true); // Call PHY task for interrupt processing
    } else {
@@ -4708,8 +4708,8 @@ static void wait_us(uint32_t time)
    }
    while (TimeDiff < time);
    #else
-   #warning "Using the Renesas R_BSP_SoftwareDelay instead of OS_TICK_Get_Diff_InMicroseconds and dividing by 2!"
-   R_BSP_SoftwareDelay ((time+1)/2, BSP_DELAY_UNITS_MICROSECONDS);
+   #warning "Using the Renesas R_BSP_SoftwareDelay instead of OS_TICK_Get_Diff_InMicroseconds!"
+   R_BSP_SoftwareDelay ((time+1), BSP_DELAY_UNITS_MICROSECONDS);
    #endif
 #endif
 

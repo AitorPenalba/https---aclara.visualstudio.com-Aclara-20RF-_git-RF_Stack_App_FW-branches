@@ -64,7 +64,7 @@
 #define END_DEVICE_PROGRAMMING_FLASH      ED_PROG_FLASH_PATCH_ONLY  /* Supports programming of the meter Flash */
 #define END_DEVICE_PROGRAMMING_DISPLAY    0  /* Supports the ability to write to the meter display */
 #define VSWR_MEASUREMENT                  0  /* Supports VSWR measurements of antenna */
-#define PHASE_DETECTION                   0  /* Supports Phase Detection */
+#define PHASE_DETECTION                   1  /* Supports Phase Detection */
 #define LAST_GASP_SIMULATION              0  /* Supports Last Gasp Simulation Feature */
 #define MAC_LINK_PARAMETERS               0  /* Supports Decoding MAC Link Parameters Messages */
 #define MAC_CMD_RESP_TIME_DIVERSITY       0  /* Not an EP feature */

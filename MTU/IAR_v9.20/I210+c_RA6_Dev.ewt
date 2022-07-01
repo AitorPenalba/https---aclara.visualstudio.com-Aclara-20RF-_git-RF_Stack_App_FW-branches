@@ -1488,6 +1488,12 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\RTC.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\UART.c</name>
             </file>
             <file>
@@ -1844,7 +1850,7 @@
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Mutex.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_aclara.h</name>
+                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\OS_aclara.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_que.h</name>
@@ -1899,6 +1905,9 @@
                 </group>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\Radio\radio.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</name>
                 </file>
             </group>
             <group>
@@ -2319,7 +2328,7 @@
                 <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_HandlerTable.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\demand.c</name>
@@ -2362,6 +2371,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\OR_MR_Handler.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\PhaseDetect.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\PhaseDetect.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_config.c</name>

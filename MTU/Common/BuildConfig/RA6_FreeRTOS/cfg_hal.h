@@ -247,8 +247,13 @@
 #endif //( TEST_REGULATOR_CONTROL_DISABLE == 0 )
 
 // ZCD_METER
+#if ( MCU_SELECTED == NXP_K24 )
 #define HMC_ZCD_METER()          (((GPIOD_PDIR & (1<<1))>>1)^1) /* ZCD_METER signal from the host meter */
 #define HMC_ZCD_METER_TRIS()     { PORTD_PCR1 = 0x400; }         /* Map ZCD_METER signal to FTM3_CH1 input */
+#elif ( MCU_SELECTED == RA6E1 )
+#define HMC_ZCD_METER()          ( R_BSP_PinRead(BSP_IO_PORT_01_PIN_14 )
+#define HMC_ZCD_METER_TRIS()       R_BSP_PinCfg (BSP_IO_PORT_01_PIN_14, (uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_AGT)
+#endif // ( MCU_SELECTED )
 
 /* HMC trouble pin interrupt definitions   */
 #define HMC_TROUBLE_IRQIsrIndex       ((int)INT_PORTC)   /* Set to the same port that the HMC_TROUBLE signal is on */
@@ -262,10 +267,14 @@
 #define HMC_TROUBLE_BUSY_IRQ_EI()   {PORTC_ISFR = (1 << 11);PORTC_PCR11 |= PORT_PCR_IRQC(0xb);} /* IRQ - either edge */
 #elif ( MCU_SELECTED == RA6E1 )
 #define HMC_TROUBLE_BUSY_IRQ_EI()   (void)R_ICU_ExternalIrqEnable( &hmc_trouble_busy_ctrl );
-#endif
+#endif // MCU_SELECTED
 #else
+#if ( MCU_SELECTED == NXP_K24 )
 #define HMC_TROUBLE_BUSY_IRQ_EI()   {PORTC_ISFR = (1 << 11);PORTC_PCR11 |= PORT_PCR_IRQC(0xc);} /* IRQ - high level  */
-#endif
+#elif ( MCU_SELECTED == RA6E1 )
+#error "Need to reconfigure definition for signal T_I-210+C_METER as HIGH level, not currently supported by this FW"
+#endif // MCU_SELECTED
+#endif // HMC_TROUBLE_EDGE_TRIGGERED != 0
 
 /* Disable Meter trouble IRQ and reset IRQ flag */
 #if ( MCU_SELECTED == NXP_K24 )
@@ -380,6 +389,12 @@
 #define LED_HMC_INIT()           LED0_PIN_TRIS()
 
 #endif // #if ( MCU_SELECTED == NXP_K24 )
+
+#if ( MCU_SELECTED == RA6E1 )
+#define TEST_LED_TACKON          BSP_IO_PORT_03_PIN_01       /* Tack on LED is located on P301, TP119, pin 49 */
+#define TEST_LED_TACKON_ON       R_BSP_PinCfg( TEST_LED_TACKON, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_HIGH | IOPORT_CFG_DRIVE_HIGH ) )
+#define TEST_LED_TACKON_OFF      R_BSP_PinCfg( TEST_LED_TACKON, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_LOW                          ) )
+#endif
 
 #if ( ENABLE_TRACE_PINS_LAST_GASP == 1 )
 /* Trace D0 Config */
