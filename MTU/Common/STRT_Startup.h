@@ -50,9 +50,7 @@ typedef enum STRT_CPU_LOAD_PRINT_e
 /* FILE VARIABLE DEFINITIONS */
 
 /* FUNCTION PROTOTYPES */
-// #ifdef __mqx_h__ // TODO: RA6E1 Bob: No idea why the following line was conditioned on __mqx_h__
 extern void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode );
-// #endif /* __mqx_h__ */
 
 extern void STRT_StartupTask ( taskParameter );
 /* FUNCTION DEFINITIONS */
