@@ -16,6 +16,8 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include "DBG_SerialDebug.h"
+#include "radio.h"
+#include "SoftDemodulator.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
@@ -134,6 +136,7 @@ static bool setup_ADC1 ( void );
 #if ( TM_ADC_UNIT_TEST == 1 )
 bool ADC_UnitTest(void);
 #endif
+
 /* FUNCTION DEFINITIONS */
 
 /*******************************************************************************
@@ -669,7 +672,7 @@ void ADC_Set_Man_Temperature  (float newTemperature)
 
   Arguments: None
 
-  Returns: Override temperature in Celcius(0)
+  Returns: Override temperature in Celsius(0)
 
   Notes:
 
@@ -686,9 +689,9 @@ float ADC_Get_Man_Temperature  ( void )
 
   Purpose: This function is used to get the current temperature of the processor
 
-  Arguments: bFahrenheit - Boolean to return the temperature in Celcius(0) or Farenheit(1)
+  Arguments: bFahrenheit - Boolean to return the temperature in Celsius(0) or Fahrenheit(1)
 
-  Returns: The converted result from the ADC capture in the desired unit (Celcius or Farenheit)
+  Returns: The converted result from the ADC capture in the desired unit (Celsius or Fahrenheit)
 
   Notes:
 
@@ -710,7 +713,7 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
     *            voltage versus temperature slope in V/°C.
     * According to both K644 and K66 datasheets, Vtemp25=0.716 and m=0.00162
     */
-   Temperature = 25.0f - ((voltage - 0.716f) / 0.00162f);
+   Temperature = 25.0f - ( ( voltage - 0.716f ) / 0.00162f );
 #if ( OVERRIDE_TEMPERATURE == 1 )
    if ( ManualTemperature_ < 250.0)
    {
@@ -719,14 +722,10 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
 #endif
    if (bFahrenheit)
    {
-      /* Convert from Celcius to Farenheit */
-      Temperature = (((Temperature * 9.0f) / 5.0f) + 32.0f);
+      /* Convert from Celsius to Fahrenheit */
+      Temperature = ( ( ( Temperature * 9.0f ) / 5.0f ) + 32.0f );
    }
-
    return ( Temperature );
-#else                     //TODO: RA6E1 for renesas MCU
-    float Temperature=0.0;
-    return ( Temperature );
 #endif
 }
 
@@ -738,7 +737,7 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
 
   Purpose: This function is used to get the current temperature of the board
 
-  Arguments: bFahrenheit - Boolean to return the temperature in Celcius(0) or Farenheit(1)
+  Arguments: bFahrenheit - Boolean to return the temperature in Celsius(0) or Farenheit(1)
 
   Returns: ADC_Temperature - The converted result from the ADC capture in the desired unit
 

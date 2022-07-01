@@ -1754,7 +1754,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1826,6 +1826,9 @@
                     <name>$PROJ_DIR$\..\..\Common\NET\SM.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\SM_Protocol.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\NET\smtd_config.c</name>
                 </file>
                 <file>
@@ -1892,6 +1895,9 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_config_normal.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</name>
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\xradio.h</name>
@@ -2258,6 +2264,18 @@
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_start.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_sync.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_sync.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_time.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_time.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_tsk_lst.c</name>
                 </file>
                 <file>
@@ -2307,7 +2325,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\APP_MSG_HandlerTable.h</name>

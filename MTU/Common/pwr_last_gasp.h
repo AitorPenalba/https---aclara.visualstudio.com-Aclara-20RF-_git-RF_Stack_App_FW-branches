@@ -35,9 +35,7 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-
 #include "vbat_reg.h"
-
 
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTIONS */
@@ -98,6 +96,12 @@ typedef struct PWRLG_SysRegisterFile
    uint8_t  llwu_f3;
    uint8_t  pad;
    uint8_t  llwu_filt1;
+#if ( MCU_SELECTED == RA6E1 )
+#if ( LAST_GASP_USE_2_DEEP_SLEEP == 1 )
+   uint8_t  secondSleepReq;   /* 2nd Sleep Required? */
+   uint16_t SleepCounter;     /* 2nd Sleep Counter - in Secs */
+#endif
+#endif
 } *PWRLG_SysRegisterFilePtr, PWRLG_SysRegisterFile;
 
 
@@ -168,6 +172,15 @@ typedef struct PWRLG_SysRegisterFile
 #define PWRLG_LLWU_F3()            (PWRLG_RFSYS_BASE_PTR->llwu_f3)
 #define PWRLG_LLWU_FILT1_SET(x)    (PWRLG_RFSYS_BASE_PTR->llwu_filt1 = (x))
 #define PWRLG_LLWU_FILT1()         (PWRLG_RFSYS_BASE_PTR->llwu_filt1 )
+
+#if ( MCU_SELECTED == RA6E1 )
+#if ( LAST_GASP_USE_2_DEEP_SLEEP == 1 )
+#define PWRLG_SECOND_SLEEP_REQUIRED_SET(x)   (PWRLG_RFSYS_BASE_PTR->secondSleepReq = (x))
+#define PWRLG_SECOND_SLEEP_REQUIRED()        (PWRLG_RFSYS_BASE_PTR->secondSleepReq)
+#define PWRLG_SECOND_SLEEP_COUNTER_SET(x)    (PWRLG_RFSYS_BASE_PTR->SleepCounter = (x))
+#define PWRLG_SECOND_SLEEP_COUNTER()         (PWRLG_RFSYS_BASE_PTR->SleepCounter)
+#endif
+#endif
 
 #define PWRLG_STATE_SLEEP              0
 #define PWRLG_STATE_TRANSMIT           1

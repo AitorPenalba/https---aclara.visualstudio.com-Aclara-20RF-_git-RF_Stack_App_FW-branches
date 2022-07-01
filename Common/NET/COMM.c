@@ -17,7 +17,6 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include <stdlib.h>       // rand()
-#include <stdbool.h>
 #include <string.h>
 #include "DBG_SerialDebug.h"
 

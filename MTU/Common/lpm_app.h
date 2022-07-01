@@ -43,9 +43,10 @@
  */
 typedef enum e_app_lpm_state
 {
-   APP_LPM_SW_STANDBY_STATE = 0,  // SW Standby mode
-   APP_LPM_DEEP_SW_STANDBY_STATE, // Deep SW Standby mode
-   APP_LPM_NORMAL_STATE           // Normal mode
+   APP_LPM_SW_STANDBY_STATE = 0,       // SW Standby mode
+   APP_LPM_DEEP_SW_STANDBY_STATE,      // Deep SW Standby mode
+   APP_LPM_DEEP_SW_STANDBY_STATE_AGT,  // Deep SW Standby mode with AGT enabled
+   APP_LPM_NORMAL_STATE                // Normal mode
 } app_lpm_states_t;
 
 

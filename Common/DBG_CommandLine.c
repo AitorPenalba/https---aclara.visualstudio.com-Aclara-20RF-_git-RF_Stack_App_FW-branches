@@ -5175,7 +5175,7 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
       GetConf.eStatus = ePHY_GET_SUCCESS;
    }
    if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-      DBG_logPrintf( 'R', "Functnl Rev = %8sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(),  3) );
+      DBG_logPrintf( 'R', "Functnl Rev = %8sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(), 3) );
       DBG_logPrintf( 'R', "RevLtr      =   %c", ADC_GetHWRevLetter() );
       if ( argc != 0 )
       {
@@ -5184,13 +5184,26 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
          //The space between the "%" and "4" is actually a flag that specifies the plus sign (+) is "invisible" so positicve and negative numbers are justified the same
          DBG_logPrintf( 'R', "Radio Temp  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
       }
-#if ( MCU_SELECTED == NXP_K24 ) /* The K24 has an internal temperature measurement but the RA6E1 does not */
-      temperatureC = (int32_t)( 10 * ADC_Get_uP_Temperature( TEMP_IN_DEG_C ) );
+
+#if ( MCU_SELECTED == NXP_K24 )
+   temperatureC = (int32_t)( 10 * ADC_Get_uP_Temperature( TEMP_IN_DEG_C ) );
+   temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
+   DBG_logPrintf( 'R', "CPU Temp    = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+#elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1: Do we need this section? It is same as the Radio Temp obtained using PHY_GetRequest( ePhyAttr_Temperature );
+   int16_t        Temperature;
+   bool tempOK = RADIO_Get_Chip_Temperature( (uint8_t) RADIO_0, &Temperature );
+   if( tempOK )
+   {
+      temperatureC = (int32_t)( 10 * Temperature );
       temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
-      DBG_logPrintf( 'R', "CPU Temp    = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
-#elif ( MCU_SELECTED == RA6E1 )
-      DBG_logPrintf( 'R', "CPU Temp    = Unavailable on RA6E1");
+      DBG_logPrintf( 'R', "Radio Temp  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "Problem in RADIO_Get_Chip_Temperature");
+   }
 #endif
+
 #if ( EP == 1 )
       DBG_logPrintf( 'R', "SuperCap    = %-6sV", DBG_printFloat( floatStr, ADC_Get_SC_Voltage(), 3 ) );
       DBG_logPrintf( 'R', "Vin         = %-6sV", DBG_printFloat( floatStr, ADC_Get_4V0_Voltage(), 3 ) );
@@ -9159,70 +9172,71 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 
    return( 0 );
 }
-#endif // (EP == 1)
+#endif
+#endif
 
-#if ENABLE_HMC_TASKS
-#if ( REMOTE_DISCONNECT == 1 )
-/******************************************************************************
-
-   Function Name: DBG_CommandLine_ds
-
-   Purpose: Exercise the remote disconnect switch
-
-   Arguments:  argc - Number of Arguments passed to this function
-               argv - pointer to the list of arguments passed to this function
-
-   Returns: FuncStatus - Successful status of this function
-
-   Notes:
-
-******************************************************************************/
-static const HEEP_APPHDR_t CloseRelay =
-{
-   .TransactionType      = ( uint8_t )TT_REQUEST,
-   .Resource             = ( uint8_t )rc,
-  {.Method_Status        = ( uint8_t )method_put },
-  {.Req_Resp_ID          = ( uint8_t )0 },
-   .qos                  = ( uint8_t )0,
-   .callback             = NULL,
-   .appSecurityAuthMode  = ( uint8_t )0
-};
-uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] )
-{
-   uint16_t dummy=0;
-   uint32_t retval = 1;
-   if ( argc >= 2 )
-   {
-      HEEP_APPHDR_t   heepHdr;    /* Message header information */
-      ExchangeWithID payloadBuf;    /* Request information  */    /* Request information  */
-      ( void )memset( ( void * )&payloadBuf, 0, sizeof( payloadBuf ) );
-      ( void )memcpy( ( uint8_t * )&heepHdr, ( uint8_t * )&CloseRelay, sizeof( heepHdr ) );
-      if ( strcasecmp( "close", argv[1] ) == 0 )
-      {
-         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchConnect );
-         payloadBuf.eventRdgQty.bits.eventQty = 1;
-         retval = 0;
-      }
-      else if ( strcasecmp( "open", argv[1] ) == 0 )
-      {
-         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchDisconnect );
-         payloadBuf.eventRdgQty.bits.eventQty = 1;
-         retval = 0;
-      }
-      if ( argc > 2 )      /* User specify the message id?  */
-      {
-         heepHdr.Req_Resp_ID = ( uint8_t )atoi( argv[ 2 ] );
-      }
-      if ( 0 == retval )
-      {
-         HMC_DS_ExecuteSD( &heepHdr, &payloadBuf, dummy );
-      }
-   }
-   return retval;
-}
-#endif // ( REMOTE_DISCONNECT == 1 )
-#endif // ENABLE_HMC_TASKS
-
+///******************************************************************************
+//
+//   Function Name: DBG_CommandLine_ds
+//
+//   Purpose: Exercise the remote disconnect switch
+//
+//   Arguments:  argc - Number of Arguments passed to this function
+//               argv - pointer to the list of arguments passed to this function
+//
+//   Returns: FuncStatus - Successful status of this function
+//
+//   Notes:
+//
+//******************************************************************************/
+//#if ENABLE_HMC_TASKS
+//#if ( REMOTE_DISCONNECT == 1 )
+//static const HEEP_APPHDR_t CloseRelay =
+//{
+//   .TransactionType      = ( uint8_t )TT_REQUEST,
+//   .Resource             = ( uint8_t )rc,
+//  {.Method_Status        = ( uint8_t )method_put },
+//  {.Req_Resp_ID          = ( uint8_t )0 },
+//   .qos                  = ( uint8_t )0,
+//   .callback             = NULL,
+//   .appSecurityAuthMode  = ( uint8_t )0
+//};
+//uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] )
+//{
+//   uint16_t dummy=0;
+//   uint32_t retval = 1;
+//   if ( argc >= 2 )
+//   {
+//      HEEP_APPHDR_t   heepHdr;    /* Message header information */
+//      ExchangeWithID payloadBuf;    /* Request information  */    /* Request information  */
+//      ( void )memset( ( void * )&payloadBuf, 0, sizeof( payloadBuf ) );
+//      ( void )memcpy( ( uint8_t * )&heepHdr, ( uint8_t * )&CloseRelay, sizeof( heepHdr ) );
+//      if ( strcasecmp( "close", argv[1] ) == 0 )
+//      {
+//         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchConnect );
+//         payloadBuf.eventRdgQty.bits.eventQty = 1;
+//         retval = 0;
+//      }
+//      else if ( strcasecmp( "open", argv[1] ) == 0 )
+//      {
+//         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchDisconnect );
+//         payloadBuf.eventRdgQty.bits.eventQty = 1;
+//         retval = 0;
+//      }
+//      if ( argc > 2 )      /* User specify the message id?  */
+//      {
+//         heepHdr.Req_Resp_ID = ( uint8_t )atoi( argv[ 2 ] );
+//      }
+//      if ( 0 == retval )
+//      {
+//         HMC_DS_ExecuteSD( &heepHdr, &payloadBuf, dummy );
+//      }
+//   }
+//   return retval;
+//}
+//#endif
+//#endif
+//
 /******************************************************************************
 
    Function Name: printErr

@@ -286,7 +286,7 @@
     </module>
     <module id="module.middleware.rm_freertos_port.0"/>
     <module id="module.driver.uart_on_sci_uart.795696210">
-      <property id="module.driver.uart.name" value="g_uart2"/>
+      <property id="module.driver.uart.name" value="g_uart_HMC"/>
       <property id="module.driver.uart.channel" value="2"/>
       <property id="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
       <property id="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
@@ -300,8 +300,8 @@
       <property id="module.driver.uart.clk_src" value="module.driver.uart.clk_src.int_clk"/>
       <property id="module.driver.uart.rx_edge_start" value="module.driver.uart.rx_edge_start.falling_edge"/>
       <property id="module.driver.uart.noisecancel_en" value="module.driver.uart.noisecancel_en.disabled"/>
-      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.max"/>
-      <property id="module.driver.uart.callback" value="user_uart_callback"/>
+      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.one"/>
+      <property id="module.driver.uart.callback" value="hmc_uart_callback"/>
       <property id="module.driver.uart.rxi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.txi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.tei_ipl" value="board.icu.common.irq.priority12"/>
@@ -337,7 +337,7 @@
       <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority1"/>
     </module>
     <module id="module.driver.uart_on_sci_uart.653004113">
-      <property id="module.driver.uart.name" value="g_uart3"/>
+      <property id="module.driver.uart.name" value="g_uart_MFG"/>
       <property id="module.driver.uart.channel" value="3"/>
       <property id="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
       <property id="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
@@ -351,7 +351,7 @@
       <property id="module.driver.uart.clk_src" value="module.driver.uart.clk_src.int_clk"/>
       <property id="module.driver.uart.rx_edge_start" value="module.driver.uart.rx_edge_start.falling_edge"/>
       <property id="module.driver.uart.noisecancel_en" value="module.driver.uart.noisecancel_en.disabled"/>
-      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.max"/>
+      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.one"/>
       <property id="module.driver.uart.callback" value="mfg_uart_callback"/>
       <property id="module.driver.uart.rxi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.txi_ipl" value="board.icu.common.irq.priority12"/>
@@ -373,7 +373,7 @@
       <property id="module.driver.uart.clk_src" value="module.driver.uart.clk_src.int_clk"/>
       <property id="module.driver.uart.rx_edge_start" value="module.driver.uart.rx_edge_start.falling_edge"/>
       <property id="module.driver.uart.noisecancel_en" value="module.driver.uart.noisecancel_en.disabled"/>
-      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.max"/>
+      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.one"/>
       <property id="module.driver.uart.callback" value="dbg_uart_callback"/>
       <property id="module.driver.uart.rxi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.txi_ipl" value="board.icu.common.irq.priority12"/>
@@ -381,7 +381,7 @@
       <property id="module.driver.uart.eri_ipl" value="board.icu.common.irq.priority12"/>
     </module>
     <module id="module.driver.uart_on_sci_uart.522685831">
-      <property id="module.driver.uart.name" value="g_uart9"/>
+      <property id="module.driver.uart.name" value="g_uart_optical"/>
       <property id="module.driver.uart.channel" value="9"/>
       <property id="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
       <property id="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
@@ -395,8 +395,8 @@
       <property id="module.driver.uart.clk_src" value="module.driver.uart.clk_src.int_clk"/>
       <property id="module.driver.uart.rx_edge_start" value="module.driver.uart.rx_edge_start.falling_edge"/>
       <property id="module.driver.uart.noisecancel_en" value="module.driver.uart.noisecancel_en.disabled"/>
-      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.max"/>
-      <property id="module.driver.uart.callback" value="user_uart_callback"/>
+      <property id="module.driver.uart.rx_fifo_trigger" value="module.driver.uart.rx_fifo_trigger.one"/>
+      <property id="module.driver.uart.callback" value="optical_uart_callback"/>
       <property id="module.driver.uart.rxi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.txi_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.uart.tei_ipl" value="board.icu.common.irq.priority12"/>
@@ -760,6 +760,20 @@
       <property id="module.driver.external_irq.p_callback" value="isr_busy"/>
       <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority12"/>
     </module>
+    <module id="module.driver.lpm.355649270">
+      <property id="module.driver.lpm.name" value="g_lpm_DeepSWStandby_AGT"/>
+      <property id="module.driver.lpm.mode" value="module.driver.lpm.mode.deep"/>
+      <property id="module.driver.lpm.output_port_enable_standby" value="module.driver.lpm.output_port_enable_standby.high_impedance"/>
+      <property id="module.driver.lpm.standby_wake_sources" value="module.driver.lpm.standby_wake_irq11,module.driver.lpm.standby_wake_agt1ud"/>
+      <property id="module.driver.lpm.snooze_request" value="module.driver.lpm.snooze_request_rxd0_falling"/>
+      <property id="module.driver.lpm.snooze_end_sources" value=""/>
+      <property id="module.driver.lpm.snooze_dtc" value="module.driver.lpm.snooze_dtc.lpm_snooze_dtc_disable"/>
+      <property id="module.driver.lpm.snooze_cancel_source" value="enum.mcu.lpm.snooze_cancel_source.none"/>
+      <property id="module.driver.lpm.io_port_deep_standby_exit" value="module.driver.lpm.io_port_deep_standby_exit.no_change"/>
+      <property id="module.driver.lpm.power_supply_deep_standby" value="module.driver.lpm.power_supply_deep_standby.deepcut0"/>
+      <property id="module.driver.lpm.deep_standby_cancel_sources" value="module.driver.lpm.deep_standby_cancel_irq11,module.driver.lpm.deep_standby_cancel_agt1"/>
+      <property id="module.driver.lpm.deep_standby_cancel_edges" value="module.driver.lpm.deep_standby_cancel_irq11.edge"/>
+    </module>
     <context id="_hal.0">
       <stack module="module.driver.ioport_on_ioport.0"/>
       <stack module="module.middleware.rm_freertos_port.0"/>
@@ -794,6 +808,7 @@
       <stack module="module.driver.dac_on_dac.1013954723"/>
       <stack module="module.driver.watchdog_on_iwdt.259655036"/>
       <stack module="module.driver.external_irq_on_icu.2093440699"/>
+      <stack module="module.driver.lpm.355649270"/>
     </context>
     <config id="config.driver.wdt">
       <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>
@@ -869,7 +884,7 @@
     </config>
     <config id="config.driver.sci_uart">
       <property id="config.driver.sci_uart.param_checking_enable" value="config.driver.sci_uart.param_checking_enable.bsp"/>
-      <property id="config.driver.sci_uart.fifo_support" value="config.driver.sci_uart.fifo_support.disabled"/>
+      <property id="config.driver.sci_uart.fifo_support" value="config.driver.sci_uart.fifo_support.enabled"/>
       <property id="config.driver.sci_uart.dtc_support" value="config.driver.sci_uart.dtc_support.enabled"/>
       <property id="config.driver.sci_uart.flow_control" value="config.driver.sci_uart.flow_control.disabled"/>
     </config>
@@ -1199,7 +1214,7 @@
       <pinNumberSetting comment="RES" pinNumber="38"/>
       <pinNumberSetting comment="RX0TX1" pinNumber="41"/>
       <pinNumberSetting comment="SKY_EN" pinNumber="42"/>
-      <pinNumberSetting comment="ZCD_METER" pinNumber="54"/>
+      <pinNumberSetting comment="Miso_Busy" pinNumber="54"/>
       <pinNumberSetting comment="UART3_TX_AMR" pinNumber="55"/>
       <pinNumberSetting comment="UART3_RX_AMR" pinNumber="56"/>
       <pinNumberSetting comment="Reserved for : RLY_DRIVE" pinNumber="57"/>

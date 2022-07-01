@@ -174,6 +174,7 @@ uint32_t MILLISECONDS;
 
 } TIME_STRUCT, * TIME_STRUCT_PTR;
 #endif
+
 /* CONSTANTS */
 
 /* KTL - 16 byte key: "ultrapassword123" - This is temporary and will change to an external key later */
@@ -235,16 +236,23 @@ extern void        RTC_GetTimeInSecMicroSec  ( uint32_t *sec, uint32_t *microSec
 extern void        RTC_GetTimeAtRes          ( TIME_STRUCT *ptime, uint16_t fractRes );
 #elif ( MCU_SELECTED == RA6E1 )
 extern returnStatus_t RTC_init( void );
-extern void           RTC_ConfigureRTCCalendarAlarm( uint16_t seconds );
+extern void           RTC_ConfigureCalendarAlarm( uint16_t seconds );
 extern bool           RTC_SetAlarmTime ( rtc_alarm_time_t * const p_alarm );
 extern void           RTC_GetAlarmTime ( rtc_alarm_time_t * const p_alarm );
 extern void           RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg );
 extern void           rtc_callback(rtc_callback_args_t *p_args);
 extern bool           RTC_isRunning ( void );
+extern void           RTC_DisableCalendarAlarm ( void );
 #endif
 
 extern uint32_t    UART_write                ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
+#if ( MCU_SELECTED == NXP_K24 )
 extern uint32_t    UART_read                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength );
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+extern uint32_t    UART_getc                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength, uint32_t TimeoutMs );
+extern uint32_t    UART_echo                 ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
+#endif
 extern void        UART_fgets                ( enum_UART_ID UartId,       char    *DataBuffer, uint32_t DataLength );
 extern uint8_t     UART_flush                ( enum_UART_ID UartId );
 extern void        UART_RX_flush             ( enum_UART_ID UartId );

@@ -350,7 +350,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_HMC_TASKS
-//   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
+   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_SRFN_ILC_TASKS
    { eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
@@ -372,13 +372,13 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 
 #if ENABLE_ID_TASKS
-   //{ eID_TSK_IDX,               ID_task,                      1900,  31, (char *)pTskName_Id,     DEFAULT_ATTR, 0, 0 },
+   { eID_TSK_IDX,               ID_task,                      1900,  31, (char *)pTskName_Id,     DEFAULT_ATTR, 0, 0 },
 #endif
 
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-   //{ eDMD_TSK_IDX,              DEMAND_task,                  1200,  32, (char *)pTskName_Dmd,    DEFAULT_ATTR, 0, 0 },
+   { eDMD_TSK_IDX,              DEMAND_task,                  1200,  32, (char *)pTskName_Dmd,    DEFAULT_ATTR, 0, 0 },
 
-  // { eHD_DS_TSK_IDX,            HD_DailyShiftTask,            1600,  33, (char *)pTskName_HD_Ds,  DEFAULT_ATTR, 0, 0 },
+   { eHD_DS_TSK_IDX,            HD_DailyShiftTask,            1600,  33, (char *)pTskName_HD_Ds,  DEFAULT_ATTR, 0, 0 },
 #endif
 
 #if ( TEST_QUIET_MODE == 0 )
@@ -387,9 +387,8 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 
-   // TODO: RA6 [name_Balaji]: Check for Priority and change if required
-   /* Increased the Priority of DBG_CommandLineTask to handle large amount of Uart_read */
-   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  13, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   // TODO: RA6 [name_Balaji]: Check for Priority change in the future - 13 was set previously to handle packet loss during UART_read
+   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  35, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_PAR_TASKS
    { ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },
@@ -625,7 +624,7 @@ void OS_TASK_Create_All ( bool initSuccess )
 
 #if ( RTOS_SELECTION == MQX_RTOS )
    /* Install exception handler */
-   (void)_int_install_exception_isr();  TODO:  What is the equivalent opertion in FREE RTOS
+   (void)_int_install_exception_isr();
 #elif ( RTOS_SELECTION == FREE_RTOS )
       // TODO: RA6: What is the equivalent operation for FreeRTOS?
 #endif

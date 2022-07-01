@@ -37,6 +37,8 @@
 #include "file_io.h"
 #include "Temperature.h"
 #include "DFW_App.h"
+#include "radio.h"
+#include "radio_hal.h"
 #if ( EP == 1 ) && ( LOG_IN_METER == 1 )
 #include "PWR_Task.h"
 #endif
@@ -1042,12 +1044,17 @@ void ALRM_RealTimeTask ( taskParameter )
       // MKD 2019-08-06 Some of this code was handled in temperature.c but it was flawed.
       // I moved back the stack management here to decouple it from the alarm mamangement.
       // This code need to go away.
-      // The TB already handles this beahvior in the PHY and EPs need to do the same but it's not trivial because the algorithm would have to change in some fundamental ways.
+      // The TB already handles this behavior in the PHY and EPs need to do the same but it's not trivial because the algorithm would have to change in some fundamental ways.
       int32_t procTemp;
 
+#if ( MCU_SELECTED == NXP_K24 )
       // Avoid using radio temperature because it takes 1ms and this is disruptive to the soft-modem (when used).
       procTemp = (int32_t)ADC_Get_uP_Temperature( TEMP_IN_DEG_C );
-
+#elif ( MCU_SELECTED == RA6E1 )
+      int16_t Temperature;
+      bool tempOK = RADIO_Get_Chip_Temperature( (uint8_t) RADIO_0, &Temperature );
+      procTemp = (int32_t)Temperature;
+#endif
       // Check if stack is enabled/disabled
       if ( stackDisabled ) {
          // Stack is disabled, check if we can re-enable it.
@@ -1062,14 +1069,17 @@ void ALRM_RealTimeTask ( taskParameter )
             stackDisabled = ( bool )true;
          }
       }
+      if( !tempOK )
+      {
+         (void)SM_StartRequest(eSM_START_MUTE, NULL);
+         stackDisabled = ( bool )true;
+      }
 #endif
 #if ( LOG_IN_METER == 1 )
       // A condition was discovered above requiring the processor to be reset
       if ( resetProc )
       {
-#if 0 // TODO: RA6E1 Enable once DFW is in place
          (void)DFWA_WaitForSysIdle(ALRM_RESET_GRACE_PERIOD);   // Do not need unlock mutex since reset inevitable
-#endif
          //Keep all other tasks from running
          /* Increase the priority of the power and idle tasks. */
          (void)OS_TASK_Set_Priority(pTskName_Pwr, 10);
@@ -1079,7 +1089,6 @@ void ALRM_RealTimeTask ( taskParameter )
       }
 #endif
    }  /* End of ALRM_RealTimeTask forever loop  */
-
 }
 /*lint +esym(529,event) not subsequently accessed *//*lint +esym(438,event) last value not used*/
 /***********************************************************************************************************************
