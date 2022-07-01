@@ -12691,7 +12691,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    OS_TICK_Get_CurrentElapsedTicks(&time2);
    TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    DBG_logPrintf( 'R', "Noiseband end, took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV\r\n"
-                       "OS_TASK_Sleep(%u): Shortest delay = %u.%06u msec, Longest delay = %u.%06u msec, Average delay = %u.%06u msec",
                        TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 #endif
 
