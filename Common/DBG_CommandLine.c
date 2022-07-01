@@ -9172,71 +9172,70 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
 
    return( 0 );
 }
-#endif
-#endif
+#endif // (EP == 1)
 
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_ds
-//
-//   Purpose: Exercise the remote disconnect switch
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function
-//
-//   Notes:
-//
-//******************************************************************************/
-//#if ENABLE_HMC_TASKS
-//#if ( REMOTE_DISCONNECT == 1 )
-//static const HEEP_APPHDR_t CloseRelay =
-//{
-//   .TransactionType      = ( uint8_t )TT_REQUEST,
-//   .Resource             = ( uint8_t )rc,
-//  {.Method_Status        = ( uint8_t )method_put },
-//  {.Req_Resp_ID          = ( uint8_t )0 },
-//   .qos                  = ( uint8_t )0,
-//   .callback             = NULL,
-//   .appSecurityAuthMode  = ( uint8_t )0
-//};
-//uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] )
-//{
-//   uint16_t dummy=0;
-//   uint32_t retval = 1;
-//   if ( argc >= 2 )
-//   {
-//      HEEP_APPHDR_t   heepHdr;    /* Message header information */
-//      ExchangeWithID payloadBuf;    /* Request information  */    /* Request information  */
-//      ( void )memset( ( void * )&payloadBuf, 0, sizeof( payloadBuf ) );
-//      ( void )memcpy( ( uint8_t * )&heepHdr, ( uint8_t * )&CloseRelay, sizeof( heepHdr ) );
-//      if ( strcasecmp( "close", argv[1] ) == 0 )
-//      {
-//         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchConnect );
-//         payloadBuf.eventRdgQty.bits.eventQty = 1;
-//         retval = 0;
-//      }
-//      else if ( strcasecmp( "open", argv[1] ) == 0 )
-//      {
-//         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchDisconnect );
-//         payloadBuf.eventRdgQty.bits.eventQty = 1;
-//         retval = 0;
-//      }
-//      if ( argc > 2 )      /* User specify the message id?  */
-//      {
-//         heepHdr.Req_Resp_ID = ( uint8_t )atoi( argv[ 2 ] );
-//      }
-//      if ( 0 == retval )
-//      {
-//         HMC_DS_ExecuteSD( &heepHdr, &payloadBuf, dummy );
-//      }
-//   }
-//   return retval;
-//}
-//#endif
-//#endif
-//
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_ds
+
+   Purpose: Exercise the remote disconnect switch
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function
+
+   Notes:
+
+******************************************************************************/
+#if ENABLE_HMC_TASKS
+#if ( REMOTE_DISCONNECT == 1 )
+static const HEEP_APPHDR_t CloseRelay =
+{
+   .TransactionType      = ( uint8_t )TT_REQUEST,
+   .Resource             = ( uint8_t )rc,
+  {.Method_Status        = ( uint8_t )method_put },
+  {.Req_Resp_ID          = ( uint8_t )0 },
+   .qos                  = ( uint8_t )0,
+   .callback             = NULL,
+   .appSecurityAuthMode  = ( uint8_t )0
+};
+uint32_t DBG_CommandLine_ds( uint32_t argc, char *argv[] )
+{
+   uint16_t dummy=0;
+   uint32_t retval = 1;
+   if ( argc >= 2 )
+   {
+      HEEP_APPHDR_t   heepHdr;    /* Message header information */
+      ExchangeWithID payloadBuf;    /* Request information  */    /* Request information  */
+      ( void )memset( ( void * )&payloadBuf, 0, sizeof( payloadBuf ) );
+      ( void )memcpy( ( uint8_t * )&heepHdr, ( uint8_t * )&CloseRelay, sizeof( heepHdr ) );
+      if ( strcasecmp( "close", argv[1] ) == 0 )
+      {
+         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchConnect );
+         payloadBuf.eventRdgQty.bits.eventQty = 1;
+         retval = 0;
+      }
+      else if ( strcasecmp( "open", argv[1] ) == 0 )
+      {
+         payloadBuf.eventType = ( EDEventType )BIG_ENDIAN_16BIT( electricMeterRCDSwitchDisconnect );
+         payloadBuf.eventRdgQty.bits.eventQty = 1;
+         retval = 0;
+      }
+      if ( argc > 2 )      /* User specify the message id?  */
+      {
+         heepHdr.Req_Resp_ID = ( uint8_t )atoi( argv[ 2 ] );
+      }
+      if ( 0 == retval )
+      {
+         HMC_DS_ExecuteSD( &heepHdr, &payloadBuf, dummy );
+      }
+   }
+   return retval;
+}
+#endif // ( REMOTE_DISCONNECT == 1 )
+#endif // ENABLE_HMC_TASKS
+
 /******************************************************************************
 
    Function Name: printErr
@@ -14336,7 +14335,7 @@ static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] )
    Function Name: DBG_CommandLine_TestOsTaskSleep ( uint32_t argc, char *argv[] )
 
    Purpose: This function tests the OS_TASK_Sleep function to ensure that it waits
-            at least as long as requested and no more than 1 tick longer
+            at least as long as requested and no more than 1 tick + 2 msec longer
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
 
@@ -14356,22 +14355,28 @@ static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] )
       uint16_t numPasses          = atoi( argv[1] );
       uint16_t randomSleepMaxMsec = atoi( argv[2] );
       uint16_t randomDelayMaxUsec = atoi( argv[3] );
-      uint16_t pass = 0, fail = 0, maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ;
+      uint16_t pass = 0, fail = 0;
+      uint16_t maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ + 2; /* Maximum permissable extra delay (1 tick + 1 msec) */
+      R_BSP_SoftwareDelay( (uint32_t)aclara_randf( 0.0, (float)randomDelayMaxUsec ), BSP_DELAY_UNITS_MICROSECONDS );
       for ( uint16_t i = 0; i < numPasses; i++ )
       {
-         R_BSP_SoftwareDelay( (uint32_t)aclara_randf( 0.0, (float)randomDelayMaxUsec ), BSP_DELAY_UNITS_MICROSECONDS );
          uint32_t sleepMSec = (uint32_t)aclara_randf( 0.0, (float)randomSleepMaxMsec );
          uint32_t startTime = DWT->CYCCNT;
          OS_TASK_Sleep( sleepMSec ); // Be nice to other tasks
          uint32_t actualDelayMSec = (uint32_t)( ( 1000LL * (uint64_t)( DWT->CYCCNT - startTime ) ) / (uint32_t)getCoreClock() );
-         if ( ( actualDelayMSec >= sleepMSec ) && ( ( actualDelayMSec - sleepMSec ) <= maxExtraDelay ) )
-         {
-            pass++;
-         }
-         else
+         if ( actualDelayMSec < sleepMSec )
          {
             fail++;
             DBG_printf( "Pass # %u, Delay too short: %u < %u", i+1, actualDelayMSec, sleepMSec );
+         }
+         else if ( actualDelayMSec > sleepMSec + maxExtraDelay )
+         {
+            fail++;
+            DBG_printf( "Pass # %u, Delay too long:  %u > %u", i+1, actualDelayMSec, sleepMSec + maxExtraDelay );
+         }
+         else
+         {
+            pass++;
          }
       }
       DBG_printf("%u passes completed: %u good, %u bad", numPasses, pass, fail );
