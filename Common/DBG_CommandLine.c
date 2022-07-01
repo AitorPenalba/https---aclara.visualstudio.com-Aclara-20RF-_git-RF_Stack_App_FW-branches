@@ -12690,7 +12690,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    R_BSP_PinCfg (BSP_IO_PORT_02_PIN_01, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    OS_TICK_Get_CurrentElapsedTicks(&time2);
    TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
-   DBG_logPrintf( 'R', "Noiseband end, took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV\r\n"
+   DBG_logPrintf( 'R', "Noiseband end, took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV\r\n",
                        TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 #endif
 
