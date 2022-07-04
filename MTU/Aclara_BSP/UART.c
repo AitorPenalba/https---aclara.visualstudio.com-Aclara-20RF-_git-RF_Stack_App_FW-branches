@@ -882,7 +882,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
             /* buffer contains at least one character, remove the last one entered */
             /* Resets the last entered character */
             DataBuffer[ --DBGP_numBytes ] = 0x00;
-            DBGP_numPrintBytes--;
+            DBGP_printIndex--;
             rxByte = 0x0;
             /* Gives GUI effect in Terminal for Backspace */
             ( void )UART_echo( UART_DEBUG_PORT, (uint8_t*)"\b\x20\b", 3 );
