@@ -1489,7 +1489,7 @@ void OS_TASK_SummaryfreeRtos(void)
                (char*)taskState[taskStatusInfo.eCurrentState],
                taskStatusInfo.ulRunTimeCounter,
                pTaskList->usStackDepth,
-               (taskStatusInfo.usStackHighWaterMark)*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglob
+               (taskStatusInfo.usStackHighWaterMark)*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
                taskStatusInfo.pxStackBase);
       DBG_logPrintf('R',"%s",buffer );
    }
