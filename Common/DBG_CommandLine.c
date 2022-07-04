@@ -247,6 +247,9 @@ static char                   *argvar[MAX_CMDLINE_ARGS + 1];
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
+#if ( TM_UART_ECHO_COMMAND == 1 )
+static uint32_t DBG_CommandLine_EchoComment( uint32_t argc, char *argv[] );
+#endif
 static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_SendHeepMsg( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[]);
@@ -469,6 +472,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( EP == 1 )
 #if ( ENABLE_DEMAND_TASKS == 1 ) /* If Demand Feature is enabled */
    { "dumpdemand",   DBG_CommandLine_DMDDump,         "Prints the demand file/variables" },
+#endif
+#if ( TM_UART_ECHO_COMMAND == 1 )
+   { "echo",         DBG_CommandLine_EchoComment,     "Echos what was typed" },
 #endif
 #endif
    { "evladd",       DBG_CommandLine_EVLADD,          "Add an event to the log" },
@@ -3848,6 +3854,36 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
 {
    return 0;
 }
+
+#if ( TM_UART_ECHO_COMMAND == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_EchoComment
+
+   Purpose: Echos the command string in arg[0] for testing UART cut/paste
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: Always successful
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_EchoComment( uint32_t argc, char *argv[] )
+{
+   DBG_printfNoCr( "ECHO" );
+   if ( argc > 1 )
+   {
+      for ( uint32_t i = 1; i < argc; i++ )
+      {
+         DBG_printfNoCr( " %s", argv[i] );
+      }
+   }
+   DBG_printf( " " );
+   return 0;
+}
+#endif // TM_UART_ECHO_COMMAND
 
 /*******************************************************************************
 
@@ -14355,7 +14391,7 @@ static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] )
       uint16_t randomSleepMaxMsec = atoi( argv[2] );
       uint16_t randomDelayMaxUsec = atoi( argv[3] );
       uint16_t pass = 0, fail = 0;
-      uint16_t maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ + 2; /* Maximum permissable extra delay (1 tick + 1 msec) */
+      uint16_t maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ + 2; /* Maximum permissable extra delay (1 tick + 2 msec) */
       R_BSP_SoftwareDelay( (uint32_t)aclara_randf( 0.0, (float)randomDelayMaxUsec ), BSP_DELAY_UNITS_MICROSECONDS );
       for ( uint16_t i = 0; i < numPasses; i++ )
       {
