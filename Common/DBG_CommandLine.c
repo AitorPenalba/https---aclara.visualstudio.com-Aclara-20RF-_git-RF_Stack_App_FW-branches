@@ -838,13 +838,13 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "deleteeventtesttask",  DBG_CommandLine_OS_EventTaskDelete,     "Deletes the Event Test Task" },
 #endif
 #if ( TM_LINKED_LIST == 1)
-   { "oslinkedlistcreate",    DBG_CommandLine_OS_LinkedList_Create,     "Creates test LinkedList event" },
-   { "oslinkedlistremove",  DBG_CommandLine_OS_LinkedList_Remove,     "Creates test LinkedList event" },
-   { "oslinkedlistenq",     DBG_CommandLine_OS_LinkedList_Enqueue,     "Creates test LinkedList event" },
-   { "oslinkedlistdeq",     DBG_CommandLine_OS_LinkedList_Dequeue,     "Creates test LinkedList event" },
-   { "oslinkedlistinsert",  DBG_CommandLine_OS_LinkedList_Insert,     "Creates test LinkedList event" },
-   { "oslinkedlistnext",    DBG_CommandLine_OS_LinkedList_Next,     "Creates test LinkedList event" },
-   { "oslinkedlisthead",    DBG_CommandLine_OS_LinkedList_Head,     "Creates test LinkedList event" },
+   { "oslinkedlistcreate",    DBG_CommandLine_OS_LinkedList_Create,     "Creates test LinkedList" },
+   { "oslinkedlistremove",  DBG_CommandLine_OS_LinkedList_Remove,     "Removes a element from test LinkedList" },
+   { "oslinkedlistenq",     DBG_CommandLine_OS_LinkedList_Enqueue,     "Enqueues a element to test LinkedList" },
+   { "oslinkedlistdeq",     DBG_CommandLine_OS_LinkedList_Dequeue,     "Dequeue a element from test LinkedList" },
+   { "oslinkedlistinsert",  DBG_CommandLine_OS_LinkedList_Insert,     "Insert a element at a specific index in test LinkedList" },
+   { "oslinkedlistnext",    DBG_CommandLine_OS_LinkedList_Next,     "Returns the Next element from test LinkedList" },
+   { "oslinkedlisthead",    DBG_CommandLine_OS_LinkedList_Head,     "Returns the Head element from test LinkedList" },
    { "oslinkedlistnumele",    DBG_CommandLine_OS_LinkedList_NumElements,     "Adds LinkedList element and checks for the count" },
 #endif
    { 0, 0, 0 }
@@ -2479,17 +2479,17 @@ uint32_t DBG_CommandLine_OS_LinkedList_Create( uint32_t argc, char *argv[] )
       osEventTaskCreated = OS_LINKEDLIST_Create(osLinkedListTestHandle);
       if( osEventTaskCreated == TRUE )
       {
-         DBG_logPrintf( 'R', "oslinkedlistcreate Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'E', "oslinkedlistcreate Test Case Success" );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
       }
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Create() */
@@ -2520,7 +2520,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] 
            || ( numElementToAdd < 0 )
            || ( numElementToAdd == MAX_LINKEDLIST_DATA ) )
       {
-         DBG_logPrintf( 'R', "ERROR - Invalid Array Index, Should be less than 5" );
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
          return ( uint32_t )retVal;
       }
 
@@ -2536,21 +2536,21 @@ uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] 
       /* Validate the result */
       if ( numElementToAdd == numElementInsideList )
       {
-         DBG_logPrintf( 'R', "oslinkedlistnumele Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "oslinkedlistnumele Test Case Failure" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
       }
    }
    else if ( argc < 2 )
    {
-      DBG_logPrintf( 'E', "ERROR - Too few arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_NumElements() */
@@ -2582,13 +2582,13 @@ uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] )
            || ( indexElementToRemove < 0 )
            || ( indexElementToRemove == MAX_LINKEDLIST_DATA ) )
       {
-         DBG_logPrintf( 'R', "ERROR - Invalid Array Index, Should be less than 5" );
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
          return ( uint32_t )retVal;
       }
 
       if ( LinkedListdata[ indexElementToRemove ].NEXT == NULL )
       {
-         DBG_logPrintf( 'R', "ERROR - Invalid Array Index, Array Index already NULL" );
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Array Index already NULL" );
          return ( uint32_t )retVal;
       }
       
@@ -2603,22 +2603,22 @@ uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] )
       
       if ( ( numElementAfterRemove + 1 ) == numElementBeforeRemove )
       {
-         DBG_logPrintf( 'R', "oslinkedlistremove Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "oslinkedlistremove Test Case Failure" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
       }
 
    }
    else if ( argc < 2 )
    {
-      DBG_logPrintf( 'E', "ERROR - Too few arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Remove() */
@@ -2651,7 +2651,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] )
            || ( indexElementToEnq < 0 )
            || ( indexElementToEnq == MAX_LINKEDLIST_DATA ) )
       {
-         DBG_logPrintf( 'R', "ERROR - Invalid Array Index, Should be less than 5" );
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
          return ( uint32_t )retVal;
       }
 
@@ -2666,22 +2666,22 @@ uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] )
       
       if ( numElementAfterEnq == ( numElementBeforeEnq + 1 ) )
       {
-         DBG_logPrintf( 'R', "oslinkedlistenq Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "oslinkedlistenq Test Case Failure" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
       }
 
    }
    else if ( argc < 2 )
    {
-      DBG_logPrintf( 'E', "ERROR - Too few arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Enqueue() */
@@ -2719,8 +2719,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
 
       if (deqReturnElement == NULL)
       {
-         DBG_logPrintf( 'R', "LinkedList is already NULL" );
-         DBG_logPrintf( 'E', "oslinkedlistDeq Test Case Failure" );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure. LinkedList is already NULL" );
          return ( uint32_t )retVal;
       }
 
@@ -2729,18 +2728,18 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
 
       if ( ( numElementAfterDeq + 1 ) == numElementBeforeDeq )
       {
-         DBG_logPrintf( 'R', "oslinkedlistDeq Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'E', "oslinkedlistDeq Test Case Failure" );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
       }
 
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Dequeue() */
@@ -2780,15 +2779,15 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
            || ( indexElementToInsertAfter < 0 )
               )
       {
-         DBG_logPrintf( 'R', "ERROR - Invalid Array Index, Should be less than 5" );
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
          return ( uint32_t )retVal;
       }
 
 
       if ( LinkedListdata[ indexElementToInsertAfter ].NEXT == NULL )
       {
-         DBG_logPrintf( 'R', "LinkedList is already NULL" );
-         DBG_logPrintf( 'E', "oslinkedlistinsert Test Case Failure" );
+
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure. LinkedList is already NULL" );
          return ( uint32_t )retVal;
       }
 
@@ -2803,22 +2802,22 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
       
       if ( numElementAfterInsert == ( numElementBeforeInsert + 1 ) )
       {
-         DBG_logPrintf( 'R', "oslinkedlistinsert Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "oslinkedlistinsert Test Case Failure" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
       }
 
    }
    else if ( argc < 3 )
    {
-      DBG_logPrintf( 'E', "ERROR - Too few arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Insert() */
@@ -2848,18 +2847,18 @@ uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] )
 
       if ( headElement != NULL )
       {
-         DBG_logPrintf( 'R', "oslinkedlisthead Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'E', "oslinkedlisthead Test Case Failure" );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
       }
 
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Head() */
@@ -2891,7 +2890,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
            || ( indexElement < 0 )
            || ( indexElement == MAX_LINKEDLIST_DATA ) )
       {
-         DBG_logPrintf( 'R', "ERROR - Invalid Array Index, Should be less than 5" );
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
          return ( uint32_t )retVal;
       }
 
@@ -2900,22 +2899,22 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
 
       if ( nextElement != NULL )
       {
-         DBG_logPrintf( 'R', "oslinkedlistnext Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "oslinkedlistnext Test Case Failure" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
       }
 
    }
    else if ( argc < 2 )
    {
-      DBG_logPrintf( 'E', "ERROR - Too few arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Next() */
@@ -9621,7 +9620,7 @@ uint32_t DBG_CommandLine_PWR_BoostTest( uint32_t argc, char *argv[] )
 
    PWR_USE_LDO();
 
-   DBG_logPrintf( 'R', "Super Cap Volage Drop: %s -> %s, %s Ws",
+   DBG_logPrintf( 'R', "Super Cap Voltage Drop: %s -> %s, %s Ws",
                   DBG_printFloat( floatStr[0], fSuperCapV[0], 6 ),
                   DBG_printFloat( floatStr[1], fSuperCapV[1], 6 ),
                   DBG_printFloat( floatStr[2],
@@ -9690,7 +9689,7 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
    char floatStr[PRINT_FLOAT_SIZE];
 
    fSuperCapV = ADC_Get_SC_Voltage();
-   DBG_logPrintf( 'R', "Super Cap Volage: %s", DBG_printFloat( floatStr, fSuperCapV, 6 ) );
+   DBG_logPrintf( 'R', "Super Cap Voltage: %s", DBG_printFloat( floatStr, fSuperCapV, 6 ) );
 
    return( 0 );
 }
