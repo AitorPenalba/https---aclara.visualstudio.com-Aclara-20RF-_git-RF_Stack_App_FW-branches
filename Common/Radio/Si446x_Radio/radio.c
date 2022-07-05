@@ -167,7 +167,6 @@ extern uint32_t DMA_Complete_IRQ_ISR_Timestamp; // Used for a watchdog to make s
  *****************************************************************************/
 static RadioEvent_Fxn pEventHandler_Fxn;
 #if ( GET_TEMPERATURE_FROM_RADIO == 1 )
-//static bool bRadio_ready = FALSE;
 static float RADIO_Temperature;
 static bool bAvg_done = FALSE;
 #endif
@@ -2558,9 +2557,6 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    OS_TASK_Sleep( FIFTY_MSEC );
 #endif
    RADIO_Update_Freq();
-//#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
-//   bRadio_ready = TRUE;
-//#endif
 }
 
 #if 0 // Not RA6E1.  This was already removed in the K24 baseline code
@@ -6544,7 +6540,7 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
 
 #endif
 
-#if 0
+#if 0  // TODO: RA6E1: Bob: Do we need this?
 
 /*
    Function name: RADIO_Get_Current_Temperature
@@ -6618,21 +6614,6 @@ float RADIO_Get_Current_Temperature( bool bSoft_demod )
   return RADIO_Temperature;
 }
 
-///*
-//   Function name: RADIO_Is_Radio_Ready
-//
-//   Purpose: Used to check whether radio is initialized
-//
-//   Arguments: None
-//
-//   Return: bRadio_ready status of the radio
-//
-//*/
-//
-//bool RADIO_Is_Radio_Ready (void)
-//{
-//  return bRadio_ready;
-//}
 #endif
 
 /*!
