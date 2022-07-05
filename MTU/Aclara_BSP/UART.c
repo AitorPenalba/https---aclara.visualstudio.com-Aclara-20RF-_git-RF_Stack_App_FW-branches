@@ -859,7 +859,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
             }/* end else () */
          }/* end for () */
       }/* end else if () */
-      else if ( ( rxByte == LINE_FEED_CHAR ) || ( rxByte == CARRIAGE_RETURN_CHAR ) )
+      else if ( rxByte == CARRIAGE_RETURN_CHAR )
       {
             if( DBGP_numBytes == 0 )
             {
@@ -874,6 +874,11 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
             }
 
             lineComplete = true;
+      }
+      /* Fix for issue from Regression Test Tool Version 1.1.0 */
+      else if ( rxByte == LINE_FEED_CHAR )
+      {
+         rxByte = 0x0;
       }
       else if( rxByte == BACKSPACE_CHAR || rxByte == DELETE_CHAR )
       {
