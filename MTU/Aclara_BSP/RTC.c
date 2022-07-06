@@ -46,8 +46,11 @@ volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrenc
 #endif
 
 /* FUNCTION PROTOTYPES */
+#if ( MCU_SELECTED == RA6E1 )
 #if ( TM_RTC_UNIT_TEST == 1 )
 bool RTC_UnitTest(void);
+#endif
+static void RTC_Start ( void );
 #endif
 
 /* FUNCTION DEFINITIONS */
@@ -66,6 +69,12 @@ bool RTC_UnitTest(void);
 returnStatus_t RTC_init( void )
 {
    ( void )R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );
+
+   if( (bool)false == RTC_isRunning() )
+   {
+      VBATREG_RTC_VALID = 0;
+      RTC_Start();
+   }
 
    return( eSUCCESS );
 } /* end RTC_init () */
@@ -196,11 +205,11 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
      && (RT_Clock->min   <= MAX_RTC_MINUTE)
      && (RT_Clock->sec   <= MAX_RTC_SECOND) )
    {
-      pTime.tm_sec = RT_Clock->sec;
-      pTime.tm_mon = RT_Clock->month - 1;  //In RA6E1, Jan- 0 and Dec- 11
-      pTime.tm_mday = RT_Clock->day;
-      pTime.tm_year = (int16_t)RT_Clock->year - 1900; //In RA6E1, Year SINCE 1900 (2021 = 2021-1900 = 121)
-      pTime.tm_hour = RT_Clock->hour;
+      pTime.tm_sec   = RT_Clock->sec;
+      pTime.tm_mon   = RT_Clock->month - 1;  //In RA6E1, Jan- 0 and Dec- 11
+      pTime.tm_mday  = RT_Clock->day;
+      pTime.tm_year  = (int16_t)RT_Clock->year - 1900; //In RA6E1, Year SINCE 1900 (2021 = 2021-1900 = 121)
+      pTime.tm_hour  = RT_Clock->hour;
       pTime.tm_min   = RT_Clock->min;
       /* No Requirement for millisecond */
       (void)R_RTC_CalendarTimeSet( &g_rtc0_ctrl, &pTime );
@@ -441,7 +450,7 @@ void rtc_callback( rtc_callback_args_t *p_args )
 
 /*******************************************************************************
 
-  Function name: RTC_ConfigureRTCCalendarAlarm
+  Function name: RTC_ConfigureCalendarAlarm
 
   Purpose: To Configure the RTC Calendar Alarm
 
@@ -452,7 +461,7 @@ void rtc_callback( rtc_callback_args_t *p_args )
   Notes: Mostly used in Last Gasp
 
 *******************************************************************************/
-void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
+void RTC_ConfigureCalendarAlarm( uint16_t seconds )
 {
    uint16_t          alarm_hours, alarm_mins, alarm_secs;
    rtc_time_t        config_time    = { 0x00 };
@@ -463,6 +472,12 @@ void RTC_ConfigureRTCCalendarAlarm( uint16_t seconds )
       alarm_hours = ( seconds/ SECONDS_PER_HOUR );
       alarm_mins  = ( seconds -( SECONDS_PER_HOUR * alarm_hours))/ SECONDS_PER_MINUTE;
       alarm_secs  = ( seconds -( SECONDS_PER_HOUR * alarm_hours) - (alarm_mins * SECONDS_PER_MINUTE));
+   }
+
+   /* RTC should be started to use the Alarm */
+   if( (bool)false == RTC_isRunning() )
+   {
+      RTC_Start();
    }
 
    /* Get the current Calendar time */
@@ -532,7 +547,7 @@ bool RTC_isRunning ( void )
 {
    fsp_err_t   rtc_DriverStatus  = FSP_SUCCESS;
    rtc_info_t  rtc_status;
-   bool        retVal            = false;
+   bool        retVal            = (bool)false;
 
    /* Check if the RTC is running */
    rtc_DriverStatus = R_RTC_InfoGet( &g_rtc0_ctrl, &rtc_status );
@@ -549,6 +564,51 @@ bool RTC_isRunning ( void )
    }
 
    return (retVal);
+}
+
+/*******************************************************************************
+
+  Function name: RTC_Start
+
+  Purpose: Start the RTC if the RTC isn't running.
+
+  Arguments: None
+
+  Returns: None
+
+  Note: RTC should be started to be used as an Alarm
+*******************************************************************************/
+static void RTC_Start ( void )
+{
+   R_RTC->RCR2_b.START = 1U;
+
+   /* The START bit is updated in synchronization with the next cycle of the count source. Check if the bit is updated
+   * before proceeding (see section 26.2.18 "RTC Control Register 2 (RCR2)" of the RA6M3 manual R01UH0886EJ0100)*/
+   FSP_HARDWARE_REGISTER_WAIT(R_RTC->RCR2_b.START, 1U);
+}
+
+/*******************************************************************************
+
+  Function name: RTC_DisableCalendarAlarm
+
+  Purpose: Disable the RTC Calendar Alarm if it was configured
+
+  Arguments: None
+
+  Returns: None
+
+*******************************************************************************/
+void RTC_DisableCalendarAlarm ( void )
+{
+   R_RTC->RCR1    = 0U;
+
+   R_RTC->RSECAR  = 0U;
+   R_RTC->RMINAR  = 0U;
+   R_RTC->RHRAR   = 0U;
+   R_RTC->RWKAR   = 0U;
+   R_RTC->RDAYAR  = 0U;
+   R_RTC->RMONAR  = 0U;
+   R_RTC->RYRAR   = 0U;
 }
 
 #if ( TM_RTC_UNIT_TEST == 1 )

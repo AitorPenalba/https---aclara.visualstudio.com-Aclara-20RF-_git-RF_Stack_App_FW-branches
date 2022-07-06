@@ -248,8 +248,13 @@ returnStatus_t BM_init( void )
                   {
                      if ( ( ( uint32_t )pData < 0x20000000 ) && ( ( ( uint32_t )pData + allsize ) > 0x20000000 ) )
                      {
+#if ( RTOS_SELECTION == MQX_RTOS )
                         DBG_LW_printf( "BM_init: got buffer starting at 0x%08x, ending at: 0x%08x\n",
                                        ( uint32_t )pData, ( uint32_t )pData + allsize - 1  );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+                        (void)UART_polled_printf ( "BM_init: got buffer starting at 0x%08x, ending at: 0x%08x\n",
+                                       ( uint32_t )pData, ( uint32_t )pData + allsize - 1  );
+#endif // RTOS_SELECTION
                      }
 
                      for ( buf = 0; ( eSUCCESS == retVal ) && ( buf < BM_bufferPoolParams[pool].cnt ); buf++ )
@@ -277,7 +282,7 @@ returnStatus_t BM_init( void )
                   {
                      // Can't allocate memory for a buffer
                      DBG_LW_printf( "BM_init: not enough external RAM buffer space. Need at least %u bytes more\n",
-                                    ( externMemIndex_ + allsize ) - sizeof( extMemPool ) );
+                                    ( externMemIndex_ + allsize ) - sizeof( extMemPool ) ); // TODO: RA6E1 Bob: need to convert if T-Board goes to FreeRTOS
 
                      retVal = eFAILURE;
                   }
@@ -309,6 +314,7 @@ returnStatus_t BM_init( void )
 #if ( DCU == 1 )
    if ( retVal == eSUCCESS )
    {
+      // TODO: RA6E1 Bob: need to convert if T-Board goes to FreeRTOS
       DBG_LW_printf( "BM_init: %u bytes are not used in external RAM and could be reclaimed for MAC buffers.\n", sizeof( extMemPool ) - externMemIndex_ );
    }
 #endif

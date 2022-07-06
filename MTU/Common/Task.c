@@ -337,7 +337,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 #endif
 
-#if 0 // TODO: RA6E1: Add when the OS Events issue has been resolved 
+#if 0 // TODO: RA6E1: Add when the OS Events issue has been resolved
    { eSD_PS_LISTENER_IDX,       SD_PhaseSamplesListenerTask,   600,  16, (char *)pTskName_SdPsListener,        DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { eSD_PREAM_DET_IDX,         SD_PreambleDetectorTask,      6300,  18, (char *)pTskName_SdPreambleDetector,  DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 }, // |  Parameters here are the ID's
    { eSD_SYNC_PAYL_DEMOD1_IDX,  SD_SyncPayloadDemodTask,     11500,  19, (char *)pTskName_SdSyncPayloadDemod1, DEFAULT_ATTR|RFTEST_MODE_ATTR, ( void * ) 1, 0 }, // |  ID's 0-2, run sequentially by the preprocessor
@@ -350,7 +350,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eSTACK_TSK_IDX,            NWK_Task,                     1500,  23, (char *)pTskName_Nwk,    DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_HMC_TASKS
-//   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
+   { eHMC_TSK_IDX,              HMC_APP_Task,                 1900,  24, (char *)pTskName_Hmc,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ENABLE_SRFN_ILC_TASKS
    { eILC_DR_DR_TSK_IDX,        ILC_DRU_DRIVER_Task,           900,  25, (char *)pTskName_LcDruDrv,     DEFAULT_ATTR, 0, 0 },
@@ -372,13 +372,13 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 
 #if ENABLE_ID_TASKS
-   //{ eID_TSK_IDX,               ID_task,                      1900,  31, (char *)pTskName_Id,     DEFAULT_ATTR, 0, 0 },
+   { eID_TSK_IDX,               ID_task,                      1900,  31, (char *)pTskName_Id,     DEFAULT_ATTR, 0, 0 },
 #endif
 
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
-   //{ eDMD_TSK_IDX,              DEMAND_task,                  1200,  32, (char *)pTskName_Dmd,    DEFAULT_ATTR, 0, 0 },
+   { eDMD_TSK_IDX,              DEMAND_task,                  1200,  32, (char *)pTskName_Dmd,    DEFAULT_ATTR, 0, 0 },
 
-  // { eHD_DS_TSK_IDX,            HD_DailyShiftTask,            1600,  33, (char *)pTskName_HD_Ds,  DEFAULT_ATTR, 0, 0 },
+   { eHD_DS_TSK_IDX,            HD_DailyShiftTask,            1600,  33, (char *)pTskName_HD_Ds,  DEFAULT_ATTR, 0, 0 },
 #endif
 
 #if ( TEST_QUIET_MODE == 0 )
@@ -387,9 +387,8 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 
-   // TODO: RA6 [name_Balaji]: Check for Priority and change if required
-   /* Increased the Priority of DBG_CommandLineTask to handle large amount of Uart_read */
-   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  13, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   // TODO: RA6 [name_Balaji]: Check for Priority change in the future - 13 was set previously to handle packet loss during UART_read
+   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  35, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_PAR_TASKS
    { ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },
@@ -625,7 +624,7 @@ void OS_TASK_Create_All ( bool initSuccess )
 
 #if ( RTOS_SELECTION == MQX_RTOS )
    /* Install exception handler */
-   (void)_int_install_exception_isr();  TODO:  What is the equivalent opertion in FREE RTOS
+   (void)_int_install_exception_isr();
 #elif ( RTOS_SELECTION == FREE_RTOS )
       // TODO: RA6: What is the equivalent operation for FreeRTOS?
 #endif
@@ -651,7 +650,16 @@ void OS_TASK_Create_All ( bool initSuccess )
                 * that there is an issue creating a task.  Look at pTaskList->TASK_TEMPLATE_INDEX to figure out which task
                 * was not created properly.  */
                while(true) /*lint !e716  */
+#if ( RTOS_SELECTION == FREE_RTOS )
+               {
+                  OS_TASK_Sleep(500); /* If some task failed to start, blink tack-on LED at 1Hz forever or until IWDT gets us */
+                  TEST_LED_TACKON_ON;
+                  OS_TASK_Sleep(500);
+                  TEST_LED_TACKON_OFF;
+               }
+#else
                {}  /* Todo:  We may wish to discuss the definition of LEDs.  Maybe we could add code here. */
+#endif
             }
             // TODO: RA6: DG: Move these lines to OS_Task_Create
 
@@ -933,7 +941,14 @@ void OS_TASK_Sleep ( uint32_t MSec )
 #if (RTOS_SELECTION == MQX_RTOS)
    _time_delay ( MSec );
 #elif (RTOS_SELECTION == FREE_RTOS)
+#if 1 // TODO: RA6E1 Bob: temporary test code to guarantee minimum of MSec delay time
+   /* Increase the number of milliseconds by one tick's worth for FreeRTOS. This has the following effect:
+      0-4msec = 3msec, actual, 5-9msec = 8msec, actual, 10-14msec = 13msec, actual, etc. */
+   uint32_t delayInTicks = pdMS_TO_TICKS( ( MSec + ( (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ ) + 2U ) );
+   vTaskDelay( delayInTicks );
+#else
    vTaskDelay( pdMS_TO_TICKS(MSec) );
+#endif // 1
 #endif
 }
 /* ****************************************************************************************************************** */

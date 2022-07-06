@@ -128,8 +128,10 @@
 #define ENABLE_DEBUG_PORT              0  /* Use to enable/disable the Debug port */
 #if ( RTOS_SELECTION == MQX_RTOS )
 #define DEBUG_PORT_BAUD_RATE           0
+#define FULL_USER_INTERFACE            0  /* Prints actual error messages on debug commands rather than just ERROR */
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #define DEBUG_PORT_BAUD_RATE           1  /* Enable command to change the debug port baud rate */
+#define FULL_USER_INTERFACE            1  /* Prints actual error messages on debug commands rather than just ERROR */
 #endif
 
 /* For using trace signals on debugger - replaces LED signals! */
@@ -172,8 +174,8 @@
 
 /* HMC - Diags */
 #define ENABLE_PRNT_HMC_DIAGS_INFO     0
-#define ENABLE_PRNT_HMC_DIAGS_WARN     0   /* TODO: RA6E1: Enable later */
-#define ENABLE_PRNT_HMC_DIAGS_ERROR    0   /* TODO: RA6E1: Enable later */
+#define ENABLE_PRNT_HMC_DIAGS_WARN     1
+#define ENABLE_PRNT_HMC_DIAGS_ERROR    1
 
 /* HMC - Finish */
 #define ENABLE_PRNT_HMC_FINISH_INFO    0
@@ -197,8 +199,8 @@
 
 /* HMC - Start */
 #define ENABLE_PRNT_HMC_START_INFO     0
-#define ENABLE_PRNT_HMC_START_WARN     0  /* TODO: RA6E1: Enable HMC Print Later */
-#define ENABLE_PRNT_HMC_START_ERROR    0  /* TODO: RA6E1: Enable HMC Print Later */
+#define ENABLE_PRNT_HMC_START_WARN     1
+#define ENABLE_PRNT_HMC_START_ERROR    1
 
 /* HMC - Sync */
 #define ENABLE_PRNT_HMC_SYNC_INFO      0
@@ -295,6 +297,7 @@
 #define TEST_TDMA                         0     /* Basic TDMA test */
 #define TEST_DEVIATION                    0     /* Test 600Hz, 700Hz and 800Hz deviation */
 #define OVERRIDE_TEMPERATURE              0     /* 0=Do not include temperature override, 1=Do inlcude temperature override */
+#define TEST_SYNC_ERROR                   0     /* Allow configuration of the number of errored bit acceptable in SYNC */
 
 /* All unit/integration defines MUST code inside the #if below! */
 #if (TEST_MODE_ENABLE == 1)
@@ -307,8 +310,11 @@
 #define TM_EVENTS                         0
 #define TM_LINKED_LIST                    0
 #define TM_CRC_UNIT_TEST                  0
-#define TM_TIME_COMPOUND_TEST             0
-#define TM_OS_EVENT_TEST                  1
+#define TM_TIME_COMPOUND_TEST             1
+#define TM_BSP_SW_DELAY                   1 /* Tests the Renesas R_BSP_SoftwareDelay function */
+#define TM_1MHZ_OFF_ON_NOISEBAND          1 /* Adds two debug commands that run noiseband with the 1MHz clock from the SI4467 off or on */
+#define TM_DELAY_FOR_TACKED_ON_LED        1 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
+#define TM_MEASURE_SLEEP_TIMES            1 /* Adds code to measure the actual sleep times in noiseband based on the CYCCNT */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

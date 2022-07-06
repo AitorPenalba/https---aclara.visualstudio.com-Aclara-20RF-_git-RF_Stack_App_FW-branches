@@ -291,11 +291,11 @@
                 </option>
                 <option>
                     <name>IExtraOptionsCheck</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IExtraOptions</name>
-                    <state></state>
+                    <state>--no_path_in_file_macros</state>
                 </option>
                 <option>
                     <name>CCLangConformance</name>
@@ -1164,6 +1164,12 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\RTC.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\UART.c</name>
             </file>
             <file>
@@ -1484,6 +1490,12 @@
                     </file>
                 </group>
                 <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\COMM.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\COMM.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\Common\NET\indication.c</name>
                 </file>
                 <file>
@@ -1494,6 +1506,9 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\NET\SM.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\NET\SM_Protocol.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\NET\smtd_config.c</name>
@@ -1517,7 +1532,7 @@
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Mutex.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_aclara.h</name>
+                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\OS_aclara.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_que.h</name>
@@ -1572,6 +1587,9 @@
                 </group>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\Radio\radio.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</name>
                 </file>
             </group>
             <group>
@@ -1734,7 +1752,7 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
@@ -1862,6 +1880,12 @@
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_diags.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_eng.c</name>
                 </file>
                 <file>
@@ -1907,7 +1931,7 @@
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\HMC\HMC_seq_id.h</name>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_snapshot.c</name>
@@ -1920,6 +1944,18 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_start.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_sync.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_sync.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_time.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_time.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_tsk_lst.c</name>
@@ -1974,10 +2010,10 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_HandlerTable.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\demand.c</name>
@@ -2020,6 +2056,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\OR_MR_Handler.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\PhaseDetect.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Common\PhaseDetect.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\pwr_config.c</name>

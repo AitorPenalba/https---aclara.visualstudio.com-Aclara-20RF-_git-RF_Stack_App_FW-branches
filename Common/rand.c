@@ -240,9 +240,9 @@ int32_t aclara_rand(void)
       uint32_t utemp1, utemp2;
 
 #if ( MCU_SELECTED == NXP_K24 )
-   temp1 = ADC_Get_uP_Temperature(TEMP_IN_DEG_F);
+      temp1 = ADC_Get_uP_Temperature(TEMP_IN_DEG_F);
 #elif ( MCU_SELECTED == RA6E1 )
-   temp1 = ADC_Get_4V0_Voltage();
+      temp1 = ADC_Get_4V0_Voltage();
 #endif
       temp2 = ADC_Get_SC_Voltage();
 
@@ -351,7 +351,7 @@ uint32_t aclara_randu( uint32_t minVal, uint32_t maxVal )
    retVal = ((float)randVal)/RAND_MAX;       /* Convert random integer to floating point [0.0, 1.0] */
    retVal = retVal * ((maxVal+1) - minVal);  /* Scale to the range specified */
    randVal =  (uint32_t)retVal;              /* Convert uint32_t */
-   randVal += minVal;                        /* Offset the result by the minumum of the range */
+   randVal += minVal;                        /* Offset the result by the minimum of the range */
 
    if(randVal > maxVal)                      /* Limit to max value */
    {

@@ -191,7 +191,6 @@ static const uint8_t HMC_MASTER_PASSWORD[] =
 };
 #endif
 
-
 #if (ANSI_LOGON == 1)
 static const uint8_t HMC_MTR_USER_NAME[] =
 {
@@ -204,9 +203,6 @@ static const uint8_t  HMC_NEG_COMM[]       = {
    0x00, ALT_HMC_PACKET_SIZE, ALT_HMC_PAKCET_NUMBER, ALT_HMC_BAUD_CODE //deafults are used if parmeter switches not enabled
 };
 #endif
-
-
-
 
 #if (ANSI_LOGON == 1)
 static const uint8_t HMC_IdentifyStr[]   =   { CMD_IDENT };
@@ -564,8 +560,9 @@ returnStatus_t HMC_STRT_UpdatePasswords( void )
                /* Save unencrypted data   */
                (void)memset( mtrFileData.pad, 0, sizeof( mtrFileData.pad ) );
                (void)memcpy( mtrFile->data, (uint8_t *)&mtrFileData, sizeof( mtrFileData ) );   /* Copy unencrypted passwords to mtrFile->data  */
-               generateMD5( (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ) ); /* Compute integrity check over the file  */
-               encryptBuffer( (uint8_t *)&mtrFileData, (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ), key );        /* Encrypt in place  */
+               // TODO: RA6E1 Enable the below lines as it creates the issue while communicating the host with the meter
+//               generateMD5( (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ) ); /* Compute integrity check over the file  */
+//               encryptBuffer( (uint8_t *)&mtrFileData, (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ), key );        /* Encrypt in place  */
                retVal = FIO_fwrite( &fileHndlStart, 0, ( uint8_t * )&mtrFileData, ( lCnt )sizeof( mtrFileData ) );   /* Update the file   */
             }
             else
