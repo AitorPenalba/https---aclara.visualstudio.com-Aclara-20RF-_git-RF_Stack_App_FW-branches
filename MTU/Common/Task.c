@@ -1439,7 +1439,7 @@ void OS_TASK_Summary ( bool safePrint )
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
 /***********************************************************************************************************************
 
-   Function Name: OS_TASK_SummaryfreeRtos
+   Function Name: OS_TASK_SummaryFreeRTOS
 
    Purpose: This function will print the state of tasks.while using the free RTOS
 
@@ -1451,13 +1451,13 @@ void OS_TASK_Summary ( bool safePrint )
 
 **********************************************************************************************************************/
 
-void OS_TASK_SummaryfreeRtos ( void )
+void OS_TASK_SummaryFreeRTOS ( void )
 {
    int8_t index = 0;
-   char taskState[ 6 ][ 10 ] = { "Running", "Ready", "Blocked", "Suspended", "Deleted", "Invalid" };
-   char taskInformation[ 9 ][ 25 ] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskBasePriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth", "TaskStackHighWaterMark", "TaskStackBase" };
-   char taskInfo[ 9 ][ 25 ] = { "TName", "TNumber", "TCP", "TBP", "TState", "TRTC", "TSD", "TSHWM", "TSB" };
-   char buffer[ 150 ];
+   char taskState[6][10] = { "Running", "Ready", "Blocked", "Suspended", "Deleted", "Invalid" };
+   char taskInformation[9][25] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskBasePriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth", "TaskStackHighWaterMark", "TaskStackBase" };
+   char taskInfo[9][25] = { "TName", "TNumber", "TCP", "TBP", "TState", "TRTC", "TSD", "TSHWM", "TSB" };
+   char buffer[150];
    TaskStatus_t taskStatusInfo;
    TaskHandle_t taskHandle;
    OS_TASK_Template_t const *pTaskList;
@@ -1469,15 +1469,15 @@ void OS_TASK_SummaryfreeRtos ( void )
       index++;
    }
    snprintf( buffer, 150, "%10s %10s %10s %10s %10s %10s %10s %10s %10s\r\n", 
-                  taskInfo[ 0 ], 
-                  taskInfo[ 1 ], 
-                  taskInfo[ 2 ], 
-                  taskInfo[ 3 ], 
-                  taskInfo[ 4 ], 
-                  taskInfo[ 5 ], 
-                  taskInfo[ 6 ], 
-                  taskInfo[ 7 ], 
-                  taskInfo[ 8 ] );
+                  taskInfo[0], 
+                  taskInfo[1], 
+                  taskInfo[2], 
+                  taskInfo[3], 
+                  taskInfo[4], 
+                  taskInfo[5], 
+                  taskInfo[6], 
+                  taskInfo[7], 
+                  taskInfo[8] );
    DBG_logPrintf( 'R', "%s", buffer );
    for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {

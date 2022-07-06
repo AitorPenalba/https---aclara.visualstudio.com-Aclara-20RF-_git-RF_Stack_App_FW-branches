@@ -471,7 +471,7 @@ void OS_TASK_Summary ( bool safePrint );
 #endif
 
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
-void OS_TASK_SummaryfreeRtos(void);
+void OS_TASK_SummaryFreeRTOS(void);
 #endif
 
 void     OS_TICK_Get_CurrentElapsedTicks ( OS_TICK_Struct *TickValue );
