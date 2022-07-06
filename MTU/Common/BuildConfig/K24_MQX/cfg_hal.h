@@ -42,9 +42,19 @@
 #define HAL_TARGET_Y84050_1_REV_A     1000   /* Using Y84050-1-SCH Rev A Board ( should be 9975_XCVR    */
 #define HAL_TARGET_XCVR_9985_REV_A    1010   /* DCU 3 Transceiver Board with the 2MBx16 NOR and 2MBx16 SRAM.*/
 
+/* Define all supported processors */
+#define NXP_K24                         1
+#define RA6E1                           2
+
+/* Define all supported OSes */
+#define BARE_METAL                      0
+#define MQX_RTOS                        1
+#define FREE_RTOS                       2
+
+/* set hardware definition */
 #include "hal.h"
 
-// Now include the hardware specific HAL
+// Check for valid hardware board choice from hardware specific HAL
 #if ( ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84001_REV_A )    && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84020_1_REV_A )  && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84114_1_REV_A )  && \
@@ -52,6 +62,20 @@
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84030_1_REV_A ) )
 
 #error "Invalid HAL_TARGET_HARDWARE setting"
+#endif
+
+// check for valid processor choice from hardware specific HAL
+#if ( ( MCU_SELECTED != RA6E1 )    && \
+      ( MCU_SELECTED != NXP_K24 ))
+
+#error "Invalid MCU_SELECTED setting"
+#endif
+
+// check for valid RTOS choice from hardware specific HAL
+#if ( ( RTOS_SELECTION != MQX_RTOS )    && \
+      ( RTOS_SELECTION != FREE_RTOS ))
+
+#error "Invalid RTOS_SELECTION setting"
 #endif
 
 // Include HAL common to all End Point hardware
