@@ -352,9 +352,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { APP_MSG_minRegistrationTimeoutHandler,      minRegistrationTimeout },
   { DFWTDCFG_OR_PM_Handler,                     dfwApplyConfirmTimeDiversity },
   { DFWTDCFG_OR_PM_Handler,                     dfwDowloadConfirmTimeDiversity },
-#if 0 // TODO: RA6E1 Enable once DFW ported
   { DFWA_OR_PM_Handler,                         dfwDupDiscardPacketQty},
-#endif
   { DST_timeZoneOffsetHandler,                  timeZoneOffset },
   { DST_dstOffsetHandler,                       dstOffset },
   { DST_dstEnabledHandler,                      dstEnabled },
@@ -392,17 +390,13 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { PWRCFG_SIMLG_OR_PM_Handler,                 simulateLastGaspStatPPersistAttempts },
   { PWRCFG_SIMLG_OR_PM_Handler,                 simulateLastGaspStatMsgsSent },
 #endif
-#if 0 // TODO: RA6E1 OR_PM handlers
   { PWR_OR_PM_Handler,                          watchdogResetCount },
   { PWR_OR_PM_Handler,                          spuriousResetCount },
   { PWR_OR_PM_Handler,                          PowerFailCount },
-#endif
   { SMTDCFG_OR_PM_Handler,                      smLogTimeDiversity },
-#if 0 // TODO: RA6E1 OR_PM handlers
   { PHY_OR_PM_Handler,                          stTxCWTest },
   { PHY_OR_PM_Handler,                          stRx4GFSK },
   { PHY_OR_PM_Handler,                          stTxBlurtTest },
-#endif
   { TEMPERATURE_OR_PM_Handler,                  epMaxTemperature },
   { TEMPERATURE_OR_PM_Handler,                  epMinTemperature },
   { TEMPERATURE_OR_PM_Handler,                  epTempHysteresis },
@@ -432,10 +426,8 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { HD_dsBuReadingTypesHandler,                 dsBuReadingTypes },
   { HD_dsBuEnabledHandler,                      dsBuEnabled },
   { HD_historicalRecoveryHandler,               historicalRecovery },
-#if 0 // TODO: RA6E1 OR_PM handlers
   { HMC_OR_PM_Handler,                          meterCommLockout },
   { HMC_OR_PM_Handler,                          meterSessionFailureCount },
-#endif
   { ID_LpBuDataRedundancyHandler,               lpBuDataRedundancy},
   { ID_LpBuMaxTimeDiversityHandler,             lpBuMaxTimeDiversity},
   { ID_LpBuEnabledHandler,                      lpBuEnabled},
@@ -537,16 +529,18 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { NULL , invalidReadingType }
 };
 
-// TODO: RA6E1 PHY_OR_PM handler,SELF_OR_PM_Handler, MAC_OR_PM_Handler has to be added with this common call
 //lint -e750    Lint is complaining about macro not referenced
 #define HEEP_COMMON_CALLS APP_MSG_SecurityHandler \
                      ,DFWA_OR_PM_Handler \
+                     ,PHY_OR_PM_Handler \
                      ,EVL_OR_PM_Handler \
+                     ,SELF_OR_PM_Handler \
                      ,TIME_UTIL_OR_PM_Handler \
                      ,NWK_OR_PM_Handler \
                      ,SMTDCFG_OR_PM_Handler \
                      ,HEEP_util_OR_PM_Handler \
                      ,MIMTINFO_OR_PM_Handler \
+                     ,MAC_OR_PM_Handler \
                      ,TIME_SYNC_OR_PM_Handler \
                      ,TEMPERATURE_OR_PM_Handler
 
@@ -556,7 +550,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
 #define HEEP_DCU_CALLS
 #endif
 
-// TODO: RA6E1 PWR_OR_PM_Handler has to be added with this HEEP_EP_CALLS
 #if ( EP == 1 )
 #define HEEP_EP_CALLS ,APP_MSG_initialRegistrationTimeoutHandler \
                  ,APP_MSG_maxRegistrationTimeoutHandler \
@@ -576,6 +569,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
                  ,PWRCFG_RestorationDeclarationDelayHandler \
                  ,PWRCFG_PowerQualityEventDurationHandler \
                  ,PWRCFG_LastGaspMaxNumAttemptsHandler \
+                 ,PWR_OR_PM_Handler \
                  ,TIME_SYS_OR_PM_Handler \
                  ,SMTDCFG_OR_PM_Handler
 #else
@@ -594,7 +588,6 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
 #define HEEP_MTLS_CALLS
 #endif
 
-// TODO: RA6E1 HMC_OR_PM_Handler has to be added with this HEEP_NOT_LC_NOT_DA_CALLS
 #if ( EP == 1 ) && ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 #define HEEP_NOT_LC_NOT_DA_CALLS ,EDCFG_OR_PM_Handler \
                                   ,HD_dailySelfReadTimeHandler \
@@ -604,6 +597,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
                                   ,HD_dsBuReadingTypesHandler \
                                   ,HD_dsBuEnabledHandler \
                                   ,HD_historicalRecoveryHandler \
+                                  ,HMC_OR_PM_Handler \
                                   ,ID_LpBuDataRedundancyHandler \
                                   ,ID_LpBuMaxTimeDiversityHandler \
                                   ,ID_LpBuEnabledHandler \
