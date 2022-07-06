@@ -185,7 +185,9 @@ extern const   PartitionTbl_t PAR_partitionFptr;
 /* FUNCTION PROTOTYPES */
 
 bool PAR_timeSlice(void);
+#if (RTOS == 1)
 void PAR_appTask( taskParameter );
+#endif
 void PAR_flushPartitions(void);
 returnStatus_t PAR_init( void );
 returnStatus_t PAR_initRtos( void );

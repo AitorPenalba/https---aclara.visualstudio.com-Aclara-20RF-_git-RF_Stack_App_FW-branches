@@ -32,7 +32,6 @@
 #else
 #include <MK24F12.h>
 #endif   /* BOOTLOADER  */
-#include "project.h"
 #include "sys_clock.h"
 
 // </editor-fold>
