@@ -1087,13 +1087,7 @@ void UART_RX_flush ( enum_UART_ID UartId )
    uartRingBuf       [ (uint32_t)UartId ].head = 0;
    uartRingBuf       [ (uint32_t)UartId ].tail = 0;
 
-//   vSemaphoreDelete( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
    OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
-//   if ( ( UartId == UART_MANUF_TEST ) || ( UartId == UART_DEBUG_PORT ) ) // TODO: check optical port needed counting semaphore
-//   {
-//      semReceiveCount = MAX_RING_BUFFER_SIZE;
-//   }
-//   OS_SEM_Create( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem, semReceiveCount );
 
    if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
    {
