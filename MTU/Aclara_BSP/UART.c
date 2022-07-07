@@ -458,10 +458,17 @@ returnStatus_t UART_init ( void )
       }
 
       if( 0 == ( ( OS_SEM_Create( &UART_semHandle[i].receiveUART_sem, semReceiveCount ) ) &&
-                 ( OS_SEM_Create( &UART_semHandle[i].transmitUART_sem, 0 ) ) &&
-                 ( OS_SEM_Create( &UART_semHandle[i].echoUART_sem, semReceiveCount ) )  ) )
+                 ( OS_SEM_Create( &UART_semHandle[i].transmitUART_sem, 0 ) ) ) )
       {
          retVal |= eFAILURE;
+      }
+
+      if ( i != UART_HOST_COMM_PORT )
+      {
+         if ( 0 == ( OS_SEM_Create( &UART_semHandle[i].echoUART_sem, semReceiveCount ) ) )
+         {
+            retVal |= eFAILURE;
+         }
       }
    }
 
@@ -729,8 +736,15 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 *******************************************************************************/
 extern uint32_t UART_echo ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength )
 {
-   ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-   ( void )OS_SEM_Pend( &UART_semHandle[UartId].echoUART_sem, OS_WAIT_FOREVER );
+   if ( UartId != UART_HOST_COMM_PORT )   // Echo not required for HMC - If required enable the semaphore to perform write
+   {
+      ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+      ( void )OS_SEM_Pend( &UART_semHandle[UartId].echoUART_sem, OS_WAIT_FOREVER );
+   }
+   else
+   {
+      printf( "Echo of UART - HMC is not supported." );
+   }
 
    return DataLength; /* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 }
