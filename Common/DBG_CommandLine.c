@@ -10579,12 +10579,11 @@ uint32_t DBG_CommandLine_StackUsage ( uint32_t argc, char *argv[] )
 ******************************************************************************/
 uint32_t DBG_CommandLine_TaskSummary ( uint32_t argc, char *argv[] )
 {
-#if 0 // TODO: RA6E1 Bob: Re-enable this when Siva checks in OS_TASK_Summary
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TASK_Summary((bool)true);
-#else
-   DBG_printf( "The %s command is not ready yet.", argv[0] );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_TASK_SummaryFreeRTOS();
 #endif
-
    return ( 0 );
 }
 
