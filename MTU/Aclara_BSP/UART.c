@@ -458,10 +458,17 @@ returnStatus_t UART_init ( void )
       }
 
       if( 0 == ( ( OS_SEM_Create( &UART_semHandle[i].receiveUART_sem, semReceiveCount ) ) &&
-                 ( OS_SEM_Create( &UART_semHandle[i].transmitUART_sem, 0 ) ) &&
-                 ( ( i == UART_HOST_COMM_PORT ) || ( OS_SEM_Create( &UART_semHandle[i].echoUART_sem, semReceiveCount ) ) ) ) )
+                 ( OS_SEM_Create( &UART_semHandle[i].transmitUART_sem, 0 ) ) ) )
       {
          retVal |= eFAILURE;
+      }
+
+      if ( i != UART_HOST_COMM_PORT )
+      {
+         if ( 0 == ( OS_SEM_Create( &UART_semHandle[i].echoUART_sem, semReceiveCount ) ) )
+         {
+            retVal |= eFAILURE;
+         }
       }
    }
 
