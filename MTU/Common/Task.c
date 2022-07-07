@@ -1220,6 +1220,7 @@ void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad )
    }
 }
 
+#if ( RTOS_SELECTION == MQX_RTOS ) 
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_Summary
@@ -1430,6 +1431,69 @@ void OS_TASK_Summary ( bool safePrint )
       DBG_printf( str2 );
    } else {
       DBG_LW_printf( str2 );
+   }
+}
+#endif // #if ( RTOS_SELECTION == MQX_RTOS ) 
+#endif // #if 0
+
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+/***********************************************************************************************************************
+
+   Function Name: OS_TASK_SummaryFreeRTOS
+
+   Purpose: This function will print the state of tasks.while using the free RTOS
+
+   Arguments: None
+
+   Returns: None
+
+   Notes:
+
+**********************************************************************************************************************/
+
+void OS_TASK_SummaryFreeRTOS ( void )
+{
+   int8_t index = 0;
+   char taskState[6][10] = { "Running", "Ready", "Blocked", "Suspended", "Deleted", "Invalid" };
+   char taskInformation[9][25] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskBasePriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth", "TaskStackHighWaterMark", "TaskStackBase" };
+   char taskInfo[9][25] = { "TName", "TNumber", "TCP", "TBP", "TState", "TRTC", "TSD", "TSHWM", "TSB" };
+   char buffer[150];
+   TaskStatus_t taskStatusInfo;
+   TaskHandle_t taskHandle;
+   OS_TASK_Template_t const *pTaskList;
+
+   DBG_logPrintf( 'R', "OS_TASK_SUMMARY" );
+   while( index < 9 )
+   {
+      DBG_logPrintf( 'R', "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
+      index++;
+   }
+   snprintf( buffer, 150, "%10s %10s %10s %10s %10s %10s %10s %10s %10s\r\n", 
+                  taskInfo[0], 
+                  taskInfo[1], 
+                  taskInfo[2], 
+                  taskInfo[3], 
+                  taskInfo[4], 
+                  taskInfo[5], 
+                  taskInfo[6], 
+                  taskInfo[7], 
+                  taskInfo[8] );
+   DBG_logPrintf( 'R', "%s", buffer );
+   for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+   {
+      taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
+      vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid );
+      snprintf( buffer, 150, "%10s %10d %10d %10d %10s %10d %10d %10d   0x%x\r\n", 
+               ( char* )pTaskList->pcName, 
+               taskStatusInfo.xTaskNumber, 
+               taskStatusInfo.uxCurrentPriority, 
+               taskStatusInfo.uxBasePriority, 
+               ( char* )taskState[ taskStatusInfo.eCurrentState ],
+               taskStatusInfo.ulRunTimeCounter, 
+               pTaskList->usStackDepth, 
+               ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
+               taskStatusInfo.pxStackBase );
+      DBG_logPrintf( 'R', "%s", buffer );
    }
 }
 #endif

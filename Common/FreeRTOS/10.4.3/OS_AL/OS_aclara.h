@@ -470,6 +470,10 @@ void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
 void OS_TASK_Summary ( bool safePrint );
 #endif
 
+#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
+void OS_TASK_SummaryFreeRTOS(void);
+#endif
+
 void     OS_TICK_Get_CurrentElapsedTicks ( OS_TICK_Struct *TickValue );
 uint32_t OS_TICK_Get_ElapsedMilliseconds ( void );
 uint32_t OS_TICK_Get_Diff_InMicroseconds ( OS_TICK_Struct *PrevTickValue, OS_TICK_Struct *CurrTickValue );

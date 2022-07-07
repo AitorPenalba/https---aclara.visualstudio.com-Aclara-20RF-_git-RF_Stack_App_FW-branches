@@ -689,16 +689,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( DCU == 1 )
    { "sdtest",       DBG_CommandLine_sdtest,          "[count (default=1)] Exercise SDRAM" },
 #endif
-#if ( INCLUDE_ECC == 1 )
-#if ( RTOS_SELECTION == MQX_RTOS )
-   { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\n"
-                   "                                   Plus unpublished functions - see source code for details" },
-#elif ( RTOS_SELECTION == FREE_RTOS )
    { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\r\n"
                    "                                   Plus unpublished functions - see source code for details" },
-#endif // ( RTOS_SELECTION )
    { "sectest",      DBG_CommandLine_sectest,         "[count (default=1)] Exercise Security Device" },
-#endif // ( INCLUDE_ECC == 1)
    { "sendappmsg",   DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
 #if (USE_IPTUNNEL == 1)
    { "sendtunmsg",   DBG_CommandLine_SendIpTunMsg,    "send data (arg1) to address (arg2) with qos (arg3)" },
@@ -1766,9 +1759,9 @@ uint32_t DBG_CommandLine_TimeMicroSec( uint32_t argc, char *argv[] )
       delayMicroSec1 = delayMicroSec1 % sysTickLoad;
       tickValue2.tickCount = delayMicroSec2 / sysTickLoad ;
       delayMicroSec2 = delayMicroSec2 % sysTickLoad;
-      tickValue1.HW_TICKS = delayMicroSec1;
-      tickValue2.HW_TICKS = delayMicroSec2;
-      diffInSec = OS_TICK_Get_Diff_InMicroseconds( &tickValue2, &tickValue1 );
+      tickValue1.HW_TICKS = sysTickLoad - delayMicroSec1;
+      tickValue2.HW_TICKS = sysTickLoad - delayMicroSec2;
+      diffInSec = OS_TICK_Get_Diff_InMicroseconds( &tickValue1, &tickValue2 );
       /* If delay and difference are same */
       if ( diffInSec == diffInArg )
       {
@@ -3184,141 +3177,139 @@ static uint32_t DBG_CommandLine_getTBslot( uint32_t argc, char *argv[] )
    return 0;
 }
 #endif //#if ( DCU == 1 )
-//#if ( INCLUDE_ECC == 1 )
-//#include "ecc108_lib_return_codes.h"
-//static const char checkmac_failed[] = "ECC108_CHECKMAC_FAILED";
-//static const char parse_error[]  = "ECC108_PARSE_ERROR";
-//static const char cmd_fail[]  = "ECC108_CMD_FAIL";
-//static const char status_crc[]  = "ECC108_STATUS_CRC";
-//static const char status_unknown[]  = "ECC108_STATUS_UNKNOWN";
-//static const char status_ecc[]  = "ECC108_STATUS_ECC";
-//static const char func_fail[]  = "ECC108_FUNC_FAIL";
-//static const char gen_fail[]  = "ECC108_GEN_FAIL";
-//static const char bad_param[]  = "ECC108_BAD_PARAM";
-//static const char invalid_id[]  = "ECC108_INVALID_ID";
-//static const char invalid_size[]  = "ECC108_INVALID_SIZE";
-//static const char bad_crc[]  = "ECC108_BAD_CRC";
-//static const char rx_fail[]  = "ECC108_RX_FAIL";
-//static const char rx_no_response[]  = "ECC108_RX_NO_RESPONSE";
-//static const char resync_with_wakeup[]  = "ECC108_RESYNC_WITH_WAKEUP";
-//static const char comm_fail[]  = "ECC108_COMM_FAIL";
-//static const char timeout[]  = "ECC108_TIMEOUT";
-//static const char unknown[]  = "Unknown";
-//
-///*******************************************************************************
-//
-//   Function name: PrintECC_error
-//
-//   Purpose: Local helper function to print (translation of) error codes returned
-//            by the security chip.
-//   Arguments: uint8_t error code returned by the security chip.
-//
-//   Returns: None
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static void PrintECC_error( uint8_t ECCstatus )
-//{
-//   char  const *msg;
-//   if ( ECCstatus != ECC108_SUCCESS )
-//   {
-//      switch ( ECCstatus )
-//      {
-//         case ECC108_CHECKMAC_FAILED:
-//         {
-//            msg = checkmac_failed;
-//            break;
-//         }
-//         case ECC108_PARSE_ERROR:
-//         {
-//            msg = parse_error;
-//            break;
-//         }
-//         case ECC108_CMD_FAIL:
-//         {
-//            msg = cmd_fail;
-//            break;
-//         }
-//         case ECC108_STATUS_CRC:
-//         {
-//            msg = status_crc;
-//            break;
-//         }
-//         case ECC108_STATUS_UNKNOWN:
-//         {
-//            msg = status_unknown;
-//            break;
-//         }
-//         case ECC108_STATUS_ECC:
-//         {
-//            msg = status_ecc;
-//            break;
-//         }
-//         case ECC108_FUNC_FAIL:
-//         {
-//            msg = func_fail;
-//            break;
-//         }
-//         case ECC108_GEN_FAIL:
-//         {
-//            msg = gen_fail;
-//            break;
-//         }
-//         case ECC108_BAD_PARAM:
-//         {
-//            msg = bad_param;
-//            break;
-//         }
-//         case ECC108_INVALID_ID:
-//         {
-//            msg = invalid_id;
-//            break;
-//         }
-//         case ECC108_INVALID_SIZE:
-//         {
-//            msg = invalid_size;
-//            break;
-//         }
-//         case ECC108_BAD_CRC:
-//         {
-//            msg = bad_crc;
-//            break;
-//         }
-//         case ECC108_RX_FAIL:
-//         {
-//            msg = rx_fail;
-//            break;
-//         }
-//         case ECC108_RX_NO_RESPONSE:
-//         {
-//            msg = rx_no_response;
-//            break;
-//         }
-//         case ECC108_RESYNC_WITH_WAKEUP:
-//         {
-//            msg = resync_with_wakeup;
-//            break;
-//         }
-//         case ECC108_COMM_FAIL:
-//         {
-//            msg = comm_fail;
-//            break;
-//         }
-//         case ECC108_TIMEOUT:
-//         {
-//            msg = timeout;
-//            break;
-//         }
-//
-//         default:
-//            msg = unknown;
-//      }
-//      DBG_printf( "\nCode = 0x%02x, %s", ECCstatus, msg );
-//   }
-//}
-//#endif /* INCLUDE_ECC */
-//#if 0
+#include "ecc108_lib_return_codes.h"
+static const char checkmac_failed[] = "ECC108_CHECKMAC_FAILED";
+static const char parse_error[]  = "ECC108_PARSE_ERROR";
+static const char cmd_fail[]  = "ECC108_CMD_FAIL";
+static const char status_crc[]  = "ECC108_STATUS_CRC";
+static const char status_unknown[]  = "ECC108_STATUS_UNKNOWN";
+static const char status_ecc[]  = "ECC108_STATUS_ECC";
+static const char func_fail[]  = "ECC108_FUNC_FAIL";
+static const char gen_fail[]  = "ECC108_GEN_FAIL";
+static const char bad_param[]  = "ECC108_BAD_PARAM";
+static const char invalid_id[]  = "ECC108_INVALID_ID";
+static const char invalid_size[]  = "ECC108_INVALID_SIZE";
+static const char bad_crc[]  = "ECC108_BAD_CRC";
+static const char rx_fail[]  = "ECC108_RX_FAIL";
+static const char rx_no_response[]  = "ECC108_RX_NO_RESPONSE";
+static const char resync_with_wakeup[]  = "ECC108_RESYNC_WITH_WAKEUP";
+static const char comm_fail[]  = "ECC108_COMM_FAIL";
+static const char timeout[]  = "ECC108_TIMEOUT";
+static const char unknown[]  = "Unknown";
+
+/*******************************************************************************
+
+   Function name: PrintECC_error
+
+   Purpose: Local helper function to print (translation of) error codes returned
+            by the security chip.
+   Arguments: uint8_t error code returned by the security chip.
+
+   Returns: None
+
+   Notes:
+
+*******************************************************************************/
+static void PrintECC_error( uint8_t ECCstatus )
+{
+   char  const *msg;
+   if ( ECCstatus != ECC108_SUCCESS )
+   {
+      switch ( ECCstatus )
+      {
+         case ECC108_CHECKMAC_FAILED:
+         {
+            msg = checkmac_failed;
+            break;
+         }
+         case ECC108_PARSE_ERROR:
+         {
+            msg = parse_error;
+            break;
+         }
+         case ECC108_CMD_FAIL:
+         {
+            msg = cmd_fail;
+            break;
+         }
+         case ECC108_STATUS_CRC:
+         {
+            msg = status_crc;
+            break;
+         }
+         case ECC108_STATUS_UNKNOWN:
+         {
+            msg = status_unknown;
+            break;
+         }
+         case ECC108_STATUS_ECC:
+         {
+            msg = status_ecc;
+            break;
+         }
+         case ECC108_FUNC_FAIL:
+         {
+            msg = func_fail;
+            break;
+         }
+         case ECC108_GEN_FAIL:
+         {
+            msg = gen_fail;
+            break;
+         }
+         case ECC108_BAD_PARAM:
+         {
+            msg = bad_param;
+            break;
+         }
+         case ECC108_INVALID_ID:
+         {
+            msg = invalid_id;
+            break;
+         }
+         case ECC108_INVALID_SIZE:
+         {
+            msg = invalid_size;
+            break;
+         }
+         case ECC108_BAD_CRC:
+         {
+            msg = bad_crc;
+            break;
+         }
+         case ECC108_RX_FAIL:
+         {
+            msg = rx_fail;
+            break;
+         }
+         case ECC108_RX_NO_RESPONSE:
+         {
+            msg = rx_no_response;
+            break;
+         }
+         case ECC108_RESYNC_WITH_WAKEUP:
+         {
+            msg = resync_with_wakeup;
+            break;
+         }
+         case ECC108_COMM_FAIL:
+         {
+            msg = comm_fail;
+            break;
+         }
+         case ECC108_TIMEOUT:
+         {
+            msg = timeout;
+            break;
+         }
+
+         default:
+            msg = unknown;
+      }
+      DBG_printf( "\nCode = 0x%02x, %s", ECCstatus, msg );
+   }
+}
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_GenDFWkey
@@ -3415,7 +3406,7 @@ static const uint8_t slot14sig[ 64 ] =
 #if 0
 static const uint8_t fwen[ 32 ] = { 0 };
 #endif
-#if (INCLUDE_ECC == 1)
+
 uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
 {
 #if 0
@@ -3698,7 +3689,6 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 /* end DBG_CommandLine_secConfig() */
-#endif // #if (INCLUDE_ECC == 1)
 
 //#if 0 //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 ///*******************************************************************************
@@ -10624,12 +10614,11 @@ uint32_t DBG_CommandLine_StackUsage ( uint32_t argc, char *argv[] )
 ******************************************************************************/
 uint32_t DBG_CommandLine_TaskSummary ( uint32_t argc, char *argv[] )
 {
-#if 0 // TODO: RA6E1 Bob: Re-enable this when Siva checks in OS_TASK_Summary
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TASK_Summary((bool)true);
-#else
-   DBG_printf( "The %s command is not ready yet.", argv[0] );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_TASK_SummaryFreeRTOS();
 #endif
-
    return ( 0 );
 }
 
