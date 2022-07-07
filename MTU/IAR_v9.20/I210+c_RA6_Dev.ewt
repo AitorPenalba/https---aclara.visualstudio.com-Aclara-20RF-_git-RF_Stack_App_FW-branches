@@ -1906,6 +1906,9 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\Radio\radio.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</name>
+                </file>
             </group>
             <group>
                 <name>Security</name>
