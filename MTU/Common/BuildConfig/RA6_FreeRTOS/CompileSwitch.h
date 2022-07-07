@@ -311,6 +311,7 @@
 #define TM_CRC_UNIT_TEST                  1
 #define TM_TIME_COMPOUND_TEST             1
 #define TM_OS_EVENT_TEST                  1 /* Test the time compound functions */
+#define TM_INTERNAL_FLASH_TEST            1
 #define TM_BSP_SW_DELAY                   1 /* Tests the Renesas R_BSP_SoftwareDelay function */
 #define TM_ENHANCE_NOISEBAND_FOR_RA6E1    1 /* Enhancements to Noiseband: 1MHz clock test, list frequencies, control GPIO pins, extra HMC traffic */
 #define TM_DELAY_FOR_TACKED_ON_LED        0 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
