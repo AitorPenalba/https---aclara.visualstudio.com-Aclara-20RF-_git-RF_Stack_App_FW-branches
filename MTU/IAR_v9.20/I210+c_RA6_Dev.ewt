@@ -1802,7 +1802,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -2246,6 +2246,12 @@
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_diags.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_display.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_display.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.c</name>
                 </file>
                 <file>
@@ -2373,7 +2379,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\APP_MSG_HandlerTable.h</name>

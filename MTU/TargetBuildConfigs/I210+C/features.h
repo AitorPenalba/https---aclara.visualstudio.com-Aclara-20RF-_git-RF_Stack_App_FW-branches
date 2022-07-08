@@ -62,7 +62,7 @@
 #define LOAD_CONTROL_DEVICE               0  /* 1 -> supports load control and signed multicast messages.   */
 #define END_DEVICE_PROGRAMMING_CONFIG     1  /* Supports configuration of the meter by programming/writing tables */
 #define END_DEVICE_PROGRAMMING_FLASH      ED_PROG_FLASH_PATCH_ONLY  /* Supports programming of the meter Flash */
-#define END_DEVICE_PROGRAMMING_DISPLAY    0  /* Supports the ability to write to the meter display */
+#define END_DEVICE_PROGRAMMING_DISPLAY    1  /* Supports the ability to write to the meter display */
 #define VSWR_MEASUREMENT                  0  /* Supports VSWR measurements of antenna */
 #define PHASE_DETECTION                   1  /* Supports Phase Detection */
 #define LAST_GASP_SIMULATION              0  /* Supports Last Gasp Simulation Feature */

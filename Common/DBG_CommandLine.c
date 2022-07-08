@@ -144,7 +144,12 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #include "hmc_time.h"
 #endif
 #endif
-
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // Required for creating HMC traffic during noiseband testing
+#include "hmc_display.h"
+#include "hmc_start.h"
+#include "hmc_finish.h"
+#include "ID_intervalTask.h"
+#endif
 #if ( NOISE_HIST_ENABLED == 1 )
 #include "NH_NoiseHistData.h"
 #endif
@@ -247,6 +252,9 @@ static char                   *argvar[MAX_CMDLINE_ARGS + 1];
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
+#if ( TM_UART_ECHO_COMMAND == 1 )
+static uint32_t DBG_CommandLine_EchoComment( uint32_t argc, char *argv[] );
+#endif
 static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_SendHeepMsg( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[]);
@@ -329,7 +337,7 @@ static uint32_t DBG_CommandLine_usbaddr( uint32_t argc, char *argv[] );
 #if ( TEST_SYNC_ERROR == 1 )
 static uint32_t DBG_CommandLine_SyncError( uint32_t argc, char *argv[] );
 #endif
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseBandClkOff( uint32_t argc, char *argv[] );
 #define GPIO_PIN_TRISTATE 1
@@ -470,6 +478,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( ENABLE_DEMAND_TASKS == 1 ) /* If Demand Feature is enabled */
    { "dumpdemand",   DBG_CommandLine_DMDDump,         "Prints the demand file/variables" },
 #endif
+#if ( TM_UART_ECHO_COMMAND == 1 )
+   { "echo",         DBG_CommandLine_EchoComment,     "Echos what was typed" },
+#endif
 #endif
    { "evladd",       DBG_CommandLine_EVLADD,          "Add an event to the log" },
    { "evlcmd",       DBG_CommandLine_EVLCMD,          "Send Commands to EVL" },
@@ -583,7 +594,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
    { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
    { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+#if ( TM_TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    { "noisebandClkOn",  DBG_CommandLine_NoiseBandClkOn,     "Display/compute the noise for a range of frequencies with 1MHz clock out" },
    { "noisebandClkOff", DBG_CommandLine_NoiseBandClkOff,    "Display/compute the noise for a range of frequencies without 1MHz clock out" },
 #endif
@@ -1754,12 +1765,16 @@ uint32_t DBG_CommandLine_TimeMicroSec( uint32_t argc, char *argv[] )
       /* If delay and difference are same */
       if ( diffInSec == diffInArg )
       {
-         DBG_logPrintf( 'R', "Test Success!" );
+         DBG_logPrintf( 'R', "Test Success!  sysTickLoad=%lu, delayMicroSec1=%llu; delayMicroSec2=%llu; tickValue1 = [ %lu %lu ]; tickValue2 = [ %lu %lu ]; diffInSec=%lu, diffInArg=%lld",
+                             sysTickLoad, delayMicroSec1, delayMicroSec2, tickValue1.tickCount, tickValue1.HW_TICKS, tickValue2.tickCount, tickValue2.HW_TICKS,
+                             diffInSec, diffInArg);
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "Test Failure!" );
+         DBG_logPrintf( 'R', "Test Failure!  sysTickLoad=%lu, delayMicroSec1=%llu; delayMicroSec2=%llu; tickValue1 = [ %lu %lu ]; tickValue2 = [ %lu %lu ]; diffInSec=%lu, diffInArg=%lld",
+                             sysTickLoad, delayMicroSec1, delayMicroSec2, tickValue1.tickCount, tickValue1.HW_TICKS, tickValue2.tickCount, tickValue2.HW_TICKS,
+                             diffInSec, diffInArg);
       }
    }
    else
@@ -3838,6 +3853,36 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
 {
    return 0;
 }
+
+#if ( TM_UART_ECHO_COMMAND == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_EchoComment
+
+   Purpose: Echos the command string in arg[0] for testing UART cut/paste
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: Always successful
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_EchoComment( uint32_t argc, char *argv[] )
+{
+   DBG_printfNoCr( "ECHO" );
+   if ( argc > 1 )
+   {
+      for ( uint32_t i = 1; i < argc; i++ )
+      {
+         DBG_printfNoCr( " %s", argv[i] );
+      }
+   }
+   DBG_printf( " " );
+   return 0;
+}
+#endif // TM_UART_ECHO_COMMAND
 
 /*******************************************************************************
 
@@ -11952,6 +11997,7 @@ static int cmpfunc( const void *a, const void *b) {
   return *(char*)a - *(char*)b;
 }
 
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 typedef struct
 {
    char RadioSPI;
@@ -11974,10 +12020,6 @@ static char upperCase(char letter)
    }
 }
 
-#define CONFIG_PORTS_FOR_NOISEBAND 1
-#define LIST_FREQUENCIES_NOISEBAND 1
-
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 ) // Capability to change port pin configuration during noiseband run
 #warning "You have built a version that allows Noiseband to change many port configurations!"
 
 static bool checkOptions( char inputByte, char *option, char pAllowed[] )
@@ -12004,13 +12046,13 @@ static bool checkOptions( char inputByte, char *option, char pAllowed[] )
    *option = inputUpper;  // return the matching option for use in this run
    return ( (bool)true ); // found a matching option
 }
-#endif // Capability to change port pin configuration during noiseband run
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
 uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 {
    uint32_t      time;
    PHY_GetConf_t GetConf;
-#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 ) // Just to keep .hex file same as K24
    uint16_t      waittime, nSamples, samplingRate, i, j;
    uint8_t       radioNum;
 #else
@@ -12024,7 +12066,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static uint16_t nbChannels = 0;
    static uint8_t *workBuf = NULL;
    static NOISEBAND_Stats_t *noiseResults = NULL;
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    static uint8_t  radioNum = 0;
    static uint16_t waittime = 15, nSamples = 80, samplingRate = 1000, requestedSamplingRate = 1000;
    static uint16_t start = 0;
@@ -12032,25 +12074,19 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static uint16_t step  = 2;
    static uint8_t  boost = 0;
    static uint32_t channelsBeforeDelay = 3200 / 2;
+   static uint8_t  testModeHMC = 0;
+   static ports_s  portPins, ports = { '_', '_', '_', '_', '_', '_', '_', '_' };
+   OS_TICK_Struct time1,time2;
+   uint32_t       TimeDiff;
+   static float    lowestCapVoltage = 9.99;
 #else
-   static uint16_t waittime, nSamples, samplingRate;
    static uint16_t start = 0;
    static uint16_t end   = 0;
    static uint16_t step  = 0;
    static uint8_t  boost = 0;
-#endif
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
-   static ports_s  portPins, ports = { '_', '_', '_', '_', '_', '_', '_', '_' };
-   OS_TICK_Struct time1,time2;
-   uint32_t       TimeDiff;
-#if ( MCU_SELECTED == RA6E1 )
-   static float    lowestCapVoltage = 9.99;
-#endif
-#if 0 // TODO: No longer needed
-   static bool    cgcInitialized = (bool)false;
-#endif
-#endif
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    static bool     listFreqs = (bool)false;
 
    if ( argc == 2 ) // Special handling for noiseband f = list frequencies.  Might want to make this permanent.
@@ -12066,41 +12102,33 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          return ( 0 );
       }
    }
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    // No parameters
    if ( argc == 1 )
    {
       // Print data if available
       if ( noiseResults )
       {
-#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
          DBG_printf( "   min    med    max     avg stddev    P90    P95    P99   P995   P999");
 #else
          if ( listFreqs ) {
-            DBG_printf( "\r\nFrequency   min    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' "
+            DBG_printf( "\r\nFrequency   min    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d %d' "
                         "'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c' 'lowestCap=%d.%02dV'"
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
-                        " 'Radio GPIO=%02x%02x%02x%02x%02x'"
-#endif
-                        , radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, \
+                        " 'Radio GPIO=%02x%02x%02x%02x%02x'",
+                          radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, testModeHMC, \
                           ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter,
-                          (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
-                        , sArgStream.GPIO0, sArgStream.GPIO1, sArgStream.GPIO2, sArgStream.GPIO3, sArgStream.gen_config
-#endif
+                          (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U,
+                          sArgStream.GPIO0, sArgStream.GPIO1, sArgStream.GPIO2, sArgStream.GPIO3, sArgStream.gen_config
                           );
          } else {
-            DBG_printf( "\r\nmin    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' "
+            DBG_printf( "\r\nmin    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d %d' "
                         "'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c' 'lowestCap=%d.%02dV' "
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
-                        " 'Radio GPIO=%02x%02x%02x%02x%02x'"
-#endif
-                        , radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, \
+                        " 'Radio GPIO=%02x%02x%02x%02x%02x'",
+                          radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, testModeHMC, \
                           ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter,
-                          (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
-                        , sArgStream.GPIO0, sArgStream.GPIO1, sArgStream.GPIO2, sArgStream.GPIO3, sArgStream.gen_config
-#endif
+                          (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U,
+                          sArgStream.GPIO0, sArgStream.GPIO1, sArgStream.GPIO2, sArgStream.GPIO3, sArgStream.gen_config
                           );
          }
 #endif
@@ -12110,7 +12138,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
            OS_TASK_Sleep( 10 ); // TODO: RA6E1 Bob: this delay should not be needed but I experience a problem with UART/Debug that needs it
            // Get data into the appropriate buffer
             stats = &noiseResults[j];
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
             if ( listFreqs )
             {
                DBG_printf( "%3d.%04d %4d.%1d %4d.%1d %4d.%1d %4d.%02d %3u.%02u %4d.%1d %4d.%1d %4d.%1d %4d.%1d %4d.%1d",
@@ -12159,31 +12187,30 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          DBG_printf( "       start is the first channel to get RSSI for" );
          DBG_printf( "       end is the last channel to get RSSI for" );
          DBG_printf( "       step is the increment between channels (minimum 2)" );
-#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
          DBG_printf( "       boost (opt.) 0=LDO only(default), 1=LDO and Boost" );
 #else
-         DBG_printf( "       (optional) boost 0=LDO only(default), 1=LDO and Boost (must enter a value to reach the next option)" );
+         DBG_printf( "       (optional) boost 0=LDO only(default), 1=Boost, abort if Vcap is low, 2=Boost, ignore Vcap, 3=Boost, wait for Vcap" );
+         DBG_printf( "       (optional) HMC traffic: 0=Normal, 1=One LogOff/LogOn, 2=One Update LCD, 3=Disable other tasks, 4=Update LP Data" );
          DBG_printf( "       (optional) port pin configuration during test: 12345678 or ________" );
          DBG_printf( "           1=rSPIdrv:H|M|L 2=rSDNdrv:H|M|L|N|P 3=rCSdrv:H|M|L|N|P 4=rOSCdrv:H|M|L|N|P 5=MCUrGPIO:I|U 6=JTAG:H|L|J 7=Unused:L|H|I|P 8=Meter:L|H|I|P " );
          DBG_printf( "             For 1,2,3,4: H=High Drive, M=Mid Drive, L=Low Drive, N=NMOS, P=PMOS" );
          DBG_printf( "             For 5,6,7,8: H=High Output/Mid Drive, L=Low Output/Mid Drive, I=Input, U=Pulled-Up Input, J=JTAG" );
          DBG_printf( "             Do NOT use L or H for option 8 when a meter is connected as the output pins will conflict" );
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
       }
       return ( 0 );
    }
-
-   // More than one parameter
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
-   if ( argc > 10 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+   if ( argc > 11 )
 #else
-   if ( argc > 9 )
+   if ( argc > 9 ) // Keep code identical for K24
 #endif
    {
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
       return ( 0 );
    }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    if ( ( argc == 2 ) && ( ( *argv[1] == 'd' ) || ( *argv[1] == 'D' ) ) )
    {
       radioNum     = 0;
@@ -12195,6 +12222,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       end          = 3200;
       step         = 2;
       boost        = 0;  //Default to Off
+      testModeHMC  = 0;
       listFreqs    = (bool)false;
       portPins     = ports;
    }
@@ -12205,7 +12233,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       DBG_logPrintf( 'R', "ERROR - Not enough arguments" );
       return ( 0 );
    }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    else
    {
 #endif
@@ -12213,21 +12241,21 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       waittime     = ( uint16_t )atoi( argv[2] );
       nSamples     = ( uint16_t )atoi( argv[3] );
       samplingRate = ( uint16_t )atoi( argv[4] );
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       requestedSamplingRate = samplingRate;
 #endif
       start        = ( uint16_t )atoi( argv[5] );
       end          = ( uint16_t )atoi( argv[6] );
       step         = ( uint16_t )atoi( argv[7] );
       boost        = 0;  //Default to Off
-#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
-      if ( argc == 9 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+      if ( argc == 9 ) // Keep code identical for K24
 #else
       if ( argc >= 9 )
 #endif
       {
          boost = ( uint8_t )atoi( argv[8] );
-#if ( MCU_SELECTED == RA6E1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // Keep code identical for K24
          if ( ( boost == 1 ) && ( ADC_Get_SC_Voltage() < 2.3f ) )
          {
             DBG_printf( "You have requested boost mode but super-cap voltage < 2300 mV\r\n"
@@ -12242,14 +12270,18 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
             OS_TASK_Sleep ( 2000 );
             lv = ADC_Get_SC_Voltage();
          }
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       }
-
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
-      portPins = ports; // Start off with the values from the previous run
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       if ( argc >= 10 )
       {
-         ports_s *pPorts = (ports_s *)argv[9]; /* Point to the string containing the 9th parameter to noiseband */
+         testModeHMC = ( uint8_t )atoi( argv[9] ); // test mode for HMC traffic during noiseband test
+      }
+
+      portPins = ports; // Start off with the values from the previous run
+      if ( argc >= 11 )
+      {
+         ports_s *pPorts = (ports_s *)argv[10]; /* Point to the string containing the 9th parameter to noiseband */
          bool optionsOK = (bool)false;
          if (                      checkOptions( pPorts->RadioSPI,  (char *)&portPins.RadioSPI,  "_HML"   ) )  {
             if (                   checkOptions( pPorts->RadioSDN,  (char *)&portPins.RadioSDN,  "_HMLNP" ) )  {
@@ -12274,7 +12306,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
             return ( 0 );
          }
       }
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       if ( radioNum >= (uint8_t)MAX_RADIO )
       {
          DBG_logPrintf( 'R', "ERROR - invalid radio" );
@@ -12313,7 +12345,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       {
          step = 2;
       }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    }
 #endif
 
@@ -12323,7 +12355,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       return ( 0 );
    }
 
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Bob: should create an abstraction layer for _mem_get_free and malloc
+#if ( RTOS_SELECTION == MQX_RTOS )
       freeRam = (uint32_t)_mem_get_free();
 #elif (RTOS_SELECTION == FREE_RTOS)
       HeapStats_t hd;
@@ -12334,7 +12366,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 
    // Reserve RAM for processing
    // 1) Reserve work area
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 ) // just to produce same .hex file
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // just to produce same .hex file
    if ( workBuf == NULL )
    {
 #endif
@@ -12343,11 +12375,11 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          DBG_printf("Reduce the number of samples and/or the number of channels");
          return ( 0 );
       }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 ) // just to produce same .hex file
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // just to produce same .hex file
    }
 #endif
    // 2) Reserve statistics buffer
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    if ( noiseResults == NULL )
    {
 #endif
@@ -12358,29 +12390,23 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          workBuf = NULL;
          return ( 0 );
       }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    }
 #endif
-#if ( RTOS_SELECTION == MQX_RTOS )
-   #define MINIMUM_TIME 320 // TODO: RA6E1 Bob: verify whether this changed due to RA6E1 or was it always wrong even on K24
-#else
-   #define MINIMUM_TIME 320
-#endif
+#define MINIMUM_TIME 320 // microseconds
+#define PAUSE_MSEC     5 // milliseconds
    // This minimum sampling rate is around 320usec per read.
    // RSSI read will take a minimum time which is bounded by the SPI rate and radio turn around time.
    if (samplingRate < MINIMUM_TIME) {
       samplingRate = MINIMUM_TIME;
    }
-#if ( RTOS_SELECTION == MQX_RTOS )
-   #define PAUSE_MSEC 5
-   // TODO: RA6E1 Bob: restore original time calculation for K24/MQX
-#else
-   #define PAUSE_MSEC          5 // TODO: RA6E1 Bob: reflect this in the calculation of time
+   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) );
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+   #define ACTUAL_PAUSE_MSEC  PAUSE_MSEC + 3 // OS_TASK_Sleep averages 8msec delay when 5msec is requested under FreeRTOS
    #define DELAY_SEC          10 // How long to delay between batches of DELAY_CHANS channels
    #define ENERGY_IN_CAP 3600000 // Magic number to keep super-cap voltage above 2.1V
 
-   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) );
-   time += ( (uint32_t) ( nbChannels * PAUSE_MSEC + 999 ) ) / 1000 + 1 + waittime; /* account for PAUSE_MSEC and 1 second delay at start */
+   time += ( (uint32_t) ( nbChannels * ACTUAL_PAUSE_MSEC + 999 ) ) / 1000 + 1 + waittime; /* account for PAUSE_MSEC and 1 second delay at start */
    time += ( (uint32_t) ( nbChannels * 1 + 500 ) ) / 1000; /* RADIO_Get_RSSI delays for 1 msec per channel to discard noise after changing frequency */
    if ( boost != 0 )
    {
@@ -12401,10 +12427,10 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    } else {
       samplingRate = 0;
    }
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 // R_BSP_PinCfg (BSP_IO_PORT_04_PIN_06, ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_HIGH | (uint32_t)IOPORT_CFG_DRIVE_MID )); // P406: TP121 (used for timing verification)
    uint32_t portConfig;
-#define IOPORT_CFG_DRIVE_LOW 0UL // TODO: RA6E1 Bob: not sure if LOW is a valid drive capability value, let's support it for testing purposes
+#define IOPORT_CFG_DRIVE_LOW 0UL
 
 /* If non-blank, set up configurations for drive strength of the Radio SPI port pins */
    if ( ( portPins.RadioSPI != ' ' ) && ( portPins.RadioSPI != '_' ) )
@@ -12575,37 +12601,71 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_14, portConfig); // P114: ZCD_METER
       R_BSP_PinCfg ( BSP_IO_PORT_05_PIN_05, portConfig); // P505; T_I-210+C_METER
    }
-   // TODO: RA6E1 Bob: Add capability to configure UART pins but restore them afterwards
-   // TODO: RA6E1 Bob: Set unused GPIO pins on the radio to known state
-#if 0 // TODO: RA6E1 Bob: limited testing showed that this didn't make a difference
-   cgc_instance_ctrl_t  g_cgc0_ctrl;
-   cgc_cfg_t   g_cgc0_cfg;
-   if ( ! cgcInitialized )
-   {
-      (void) R_CGC_Open ( &g_cgc0_ctrl, &g_cgc0_cfg );
-      cgcInitialized = (bool)true;
-   }
-   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_HOCO ); //
-   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_MOCO );
-   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_LOCO );
-#endif
 
-#endif
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
    DBG_printf( "test should take %02u:%02u, %u seconds", time / 60, time % 60, time );
    OS_TICK_Get_CurrentElapsedTicks(&time1);
+
+   switch( testModeHMC )
+   {
+      case 1:
+      {
+         // Log off
+         DBG_printf(" HMC- Log off ");
+         (void)HMC_STRT_LogOn((uint8_t)HMC_APP_API_CMD_ABORT, (uint8_t far *)0);
+         (void)HMC_FINISH_LogOff((uint8_t)HMC_APP_API_CMD_ACTIVATE, (uint8_t far *)0);
+         // Log on
+         DBG_printf(" HMC- Log ON ");
+         (void)HMC_STRT_LogOn((uint8_t)HMC_APP_API_CMD_ACTIVATE, (uint8_t far *)0);
+
+         break;
+      }
+      case 2:
+      {
+#if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
+         DBG_printf(" HMC- Write NETREC to the Display ");
+         HMC_DISP_UpdateDisplayBuffer( HMC_DISP_MSG_VALID_TIME, HMC_DISP_POS_PD_LCD_MSG ); //Update the Display
+#endif
+         break;
+      }
+      case 3:
+      {
+         DBG_printf("Increasing the Priorities of the related tasks ");
+         /* Increase the priority of the DBG task and Print task */
+
+         ( void )OS_TASK_Set_Priority( pTskName_Dbg, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Phy, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Sm, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Print, 11 ); // Increasing priority
+         ( void )OS_TASK_Set_Priority( pTskName_Time, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Tmr, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Strt, 12 );
+
+         ( void )OS_TASK_Set_Priority( pTskName_Idle, 13 );
+
+         break;
+      }
+      case 4:
+      {
+         (void)HMC_MTRINFO_app( (uint8_t)HMC_APP_API_CMD_ACTIVATE, (void *)NULL ); //Request a Meter Info Read
+         break;
+      }
+      default:
+         break;
+   }
 #else
    DBG_printf( "test should take %02u:%02u", time / 60, time % 60 );
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+
    OS_TASK_Sleep( waittime * ONE_SEC );
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )  // just so we produce the same .hex file
+
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )  // just so we produce the same .hex file
    DBG_logPrintf( 'R', "noiseband start; delay between samples = %u, starting super-cap voltage=%u mV", samplingRate, (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 
    PWR_3P6LDO_EN_ON();    // TODO: RA6E1 Bob: This should already be in this condition, just being sure
    PWR_3V6BOOST_EN_OFF(); // TODO: RA6E1 Bob: This should already be in this condition, just being sure
 
    OS_TASK_Sleep( ONE_SEC ); /* Make sure debug printout of the above message has completed before we start */
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+
    union si446x_cmd_reply_union Si446xCmd;
    PHY_Lock();      // Function will not return if it fails
    /* Configure the radio's GPIO pins per the settings in sArgStream, from the noisebandclkon command */
@@ -12621,21 +12681,20 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
                               SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_EN_TRUE_BIT |          // Enable divided system clock output
                               SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_SEL_ENUM_DIV_30 << 3); // Divide clock by 30
    PHY_Unlock();    // Function will not return if it fails
-#endif
    lowestCapVoltage = 9.99;
 #else
    DBG_logPrintf( 'R', "noiseband start" );
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
    for ( j=0, i = start; i <= end; i += step, j++ )
    {
       PHY_Lock();      // Function will not return if it fails
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
       RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
 #else
       float lv = RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
       if ( lv < lowestCapVoltage ) lowestCapVoltage = lv;
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
       RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
       PHY_Unlock();    // Function will not return if it fails
       qsort( workBuf, nSamples, sizeof(uint8_t), cmpfunc); // Sort RSSI array
@@ -12657,7 +12716,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       noiseResults[j].P995 = workBuf[(uint32_t)((nSamples-1)*0.995)];
       noiseResults[j].P999 = workBuf[(uint32_t)((nSamples-1)*0.999)];
 
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )  // just so we produce the same .hex file
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )  // just so we produce the same .hex file
       if ( delayDuringTest )
       {
          if ( ( i != start ) && ( i != end ) && ( j % channelsBeforeDelay == 0) ) /* Have we just finished DELAY_CHANS channels? */
@@ -12668,10 +12727,17 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
             DBG_printf(" Capacitor charged up from %u mV to %u mV (%u mV)", vBefore, vAfter, vAfter-vBefore);
          }
       }
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       OS_TASK_Sleep( PAUSE_MSEC ); // Be nice to other tasks
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+         if ( ( j == (end/2) )&& ( 4 == testModeHMC ) )
+         {
+            ID_LoadLPTables_Helper();
+         }
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    }
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+   /* Put the debug port back into its default state after test has completed */
    R_BSP_PinCfg (BSP_IO_PORT_03_PIN_00, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    R_BSP_PinCfg (BSP_IO_PORT_01_PIN_08, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    R_BSP_PinCfg (BSP_IO_PORT_01_PIN_09, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
@@ -12679,9 +12745,9 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    R_BSP_PinCfg (BSP_IO_PORT_02_PIN_01, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    OS_TICK_Get_CurrentElapsedTicks(&time2);
    TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
-   DBG_logPrintf( 'R', "Noiseband end, took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV\r\n",
-                       TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
-#endif
+   DBG_printf( "Noiseband took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV",
+                TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
    // Get the RX channels
    GetConf = PHY_GetRequest( ePhyAttr_RxChannels );
@@ -12691,14 +12757,13 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          (void) Radio.StartRx(radioNum, GetConf.val.RxChannels[radioNum]);
       }
    }
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 0 )
+
    DBG_logPrintf( 'R', "noiseband end" );
-#endif
 
    return ( 0 );
 }//lint !e429 Custodial pointer has not been freed or returned
 
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 /******************************************************************************
 
    Function Name: DBG_CommandLine_NoiseBandClkOn
@@ -12715,7 +12780,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 ******************************************************************************/
 uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
 {
-#if 1
    if ( argc == 1 )
    {
       DBG_printf( "NoiseBandClkOn GPIO0 GPIO1 GPIO2 GPIO3 drv_strength:\r\n"
@@ -12770,19 +12834,7 @@ uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
          }
       }
    }
-#else
-   PHY_Lock();      // Function will not return if it fails
-   (void)si446x_set_property( 0,
-                              SI446X_PROP_GRP_ID_GLOBAL,
-                              1,
-                              SI446X_PROP_GRP_INDEX_GLOBAL_CLK_CFG,
-                              SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_EN_TRUE_BIT |          // Enable divided system clock output
-                              SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_SEL_ENUM_DIV_30 << 3); // Divide clock by 30
 
-   PHY_Unlock();    // Function will not return if it fails
-
-   DBG_CommandLine_NoiseBand ( argc, argv );
-#endif
    return ( 0 );
 }
 
@@ -12802,7 +12854,6 @@ uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
 ******************************************************************************/
 uint32_t DBG_CommandLine_NoiseBandClkOff ( uint32_t argc, char *argv[] )
 {
-#if 1
    sArgStream.GPIO0 = GPIO_PIN_TRISTATE;
    sArgStream.GPIO1 = GPIO_PIN_TRISTATE;
    sArgStream.GPIO2 = GPIO_PIN_TRISTATE;
@@ -12815,21 +12866,10 @@ uint32_t DBG_CommandLine_NoiseBandClkOff ( uint32_t argc, char *argv[] )
                               sArgStream.GPIO2,
                               sArgStream.GPIO3,
                               sArgStream.gen_config );
-#else
-   PHY_Lock();      // Function will not return if it fails
-   (void)si446x_set_property( 0,
-                              SI446X_PROP_GRP_ID_GLOBAL,
-                              1,
-                              SI446X_PROP_GRP_INDEX_GLOBAL_CLK_CFG,
-                              0); // Clock off
-   PHY_Unlock();    // Function will not return if it fails
-
-   DBG_CommandLine_NoiseBand ( argc, argv );
-#endif
 
    return ( 0 );
 }
-#endif // ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
 #if ( TEST_SYNC_ERROR == 1 )
 /******************************************************************************
@@ -14344,7 +14384,7 @@ static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] )
       uint16_t randomSleepMaxMsec = atoi( argv[2] );
       uint16_t randomDelayMaxUsec = atoi( argv[3] );
       uint16_t pass = 0, fail = 0;
-      uint16_t maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ + 2; /* Maximum permissable extra delay (1 tick + 1 msec) */
+      uint16_t maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ + 2; /* Maximum permissable extra delay (1 tick + 2 msec) */
       R_BSP_SoftwareDelay( (uint32_t)aclara_randf( 0.0, (float)randomDelayMaxUsec ), BSP_DELAY_UNITS_MICROSECONDS );
       for ( uint16_t i = 0; i < numPasses; i++ )
       {

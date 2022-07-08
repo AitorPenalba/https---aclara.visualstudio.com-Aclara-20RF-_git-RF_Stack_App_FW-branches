@@ -3808,3 +3808,21 @@ void ID_clearAllIdChannels()
    }
 }
 #endif
+
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+/***********************************************************************************************************************
+
+   Function name: ID_LoadLPTables_Helper
+
+   Purpose: Allows noiseband command to invoke LoadLPTables() during the run to create HMC traffic
+
+   Arguments: None
+
+   Returns: None
+
+ **********************************************************************************************************************/
+void ID_LoadLPTables_Helper( void )
+{
+   LoadLPTables();
+}
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
