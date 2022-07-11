@@ -119,7 +119,7 @@ FSP Configuration
       P111 54 IRQ_IRQ4 - - IRQ4 "IRQ mode" - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" Miso_Busy IO - Miso_Busy 
       P112 55 SCI2_TXD2 - L - "Peripheral mode" - - "AGT5: AGTOB5; QSPI: QSSL; SCI1: SCK1; SCI2: TXD2; SPI0: SSLA0; SSIE0: SSISCK0" UART2_TX_AMR O - UART3_TX_AMR 
       P113 56 SCI2_RXD2 - L - "Peripheral mode" - - "AGT5: AGTEE5; GPT2: GTIOC2A; SCI2: RXD2; SSIE0: SSIWS0" UART2_RX_AMR I - UART3_RX_AMR 
-      P114 57 AGT5_AGTIO5 - L - "Peripheral mode" - - "AGT5: AGTIO5; GPT2: GTIOC2B; SCI9: CTS9; SSIE0: SSIRXD0" ZCD_METER IO - "Reserved for : RLY_DRIVE" 
+      P114 57 GPT2_GTIOC2B - L - "Peripheral mode" - - "AGT5: AGTIO5; GPT2: GTIOC2B; SCI9: CTS9; SSIE0: SSIRXD0" ZCD_METER IO - "Reserved for : RLY_DRIVE" 
       P115 58 GPIO - L - "Output mode (Initial Low)" - - "GPT4: GTIOC4A; SSIE0: SSITXD0" TP120 IO - - 
       P200 40 GPIO - - None "Input mode" - - "IRQ: NMI" P3V3_D I - - 
       P201 39 GPIO - - - "Input mode" - - "SYSTEM: MD" MD_BOOT IO - - 
@@ -297,7 +297,6 @@ FSP Configuration
   User Events
     
   User Event Links
-    IOPORT EVENT 1 (Port 1 event): GPT (B)
     
   Module "I/O Port (r_ioport)"
     Parameter Checking: Default (BSP)
@@ -329,16 +328,13 @@ FSP Configuration
   Module "Timer, Low-Power (r_agt)"
     Parameter Checking: Default (BSP)
     Pin Output Support: Disabled
-    Pin Input Support: Disabled
+    Pin Input Support: Enabled
     
   Module "Timer, General PWM (r_gpt)"
     Parameter Checking: Default (BSP)
     Pin Output Support: Disabled
     Write Protect Enable: Disabled
     Clock Source: PCLKD
-    
-  Module "Event Link Controller (r_elc)"
-    Parameter Checking: Default (BSP)
     
   Module "SPI (r_spi)"
     Parameter Checking: Default (BSP)
@@ -369,6 +365,9 @@ FSP Configuration
     Parameter Checking: Default (BSP)
     
   Module "Independent Watchdog (r_iwdt)"
+    Parameter Checking: Default (BSP)
+    
+  Module "Event Link Controller (r_elc)"
     Parameter Checking: Default (BSP)
     
   FreeRTOS
@@ -617,8 +616,8 @@ FSP Configuration
       Period Interrupt Priority: Disabled
       Carry Interrupt Priority: Priority 12
       
-    Instance "g_timer5 Timer, Low-Power (r_agt)"
-      General: Name: g_timer5
+    Instance "AGT5_ZCD_Meter Timer, Low-Power (r_agt)"
+      General: Name: AGT5_ZCD_Meter
       General: Channel: 5
       General: Mode: Periodic
       General: Period: 0x10000
@@ -630,13 +629,13 @@ FSP Configuration
       Output: AGTO Output: Disabled
       Input: Measurement Mode: Measure Pulse Period
       Input: Input Filter: No Filter
-      Input: Enable Pin: Enable Pin Active High
+      Input: Enable Pin: Enable Pin Not Used
       Input: Trigger Edge: Trigger Edge Rising
-      Interrupts: Callback: timer_capture_callback
+      Interrupts: Callback: NULL
       Interrupts: Underflow Interrupt Priority: Priority 10
       
-    Instance "g_timer1 Timer, General PWM (r_gpt)"
-      General: Name: g_timer1
+    Instance "GPT1_Radio0_ICapture Timer, General PWM (r_gpt)"
+      General: Name: GPT1_Radio0_ICapture
       General: Channel: 1
       General: Mode: Periodic
       General: Period: 0x100000000
@@ -657,15 +656,15 @@ FSP Configuration
       Output: GTIOCB Stop Level: Pin Level Low
       Input: Count Up Source: 
       Input: Count Down Source: 
-      Input: Start Source: 
-      Input: Stop Source: 
-      Input: Clear Source: 
-      Input: Capture A Source: GTIOCA Rising Edge While GTIOCB Low
+      Input: Start Source: GTIOCA Rising Edge While GTIOCB Low, GPT1 COUNTER OVERFLOW (Overflow)
+      Input: Stop Source: GTIOCA Falling Edge While GTIOCB Low
+      Input: Clear Source: GTIOCA Rising Edge While GTIOCB Low
+      Input: Capture A Source: GTIOCA Falling Edge While GTIOCB Low
       Input: Capture B Source: 
       Input: Noise Filter A Sampling Clock Select: No Filter
       Input: Noise Filter B Sampling Clock Select: No Filter
-      Interrupts: Callback: isr_gpt_capture
-      Interrupts: Overflow/Crest Interrupt Priority: Disabled
+      Interrupts: Callback: Radio0_IC_ISR
+      Interrupts: Overflow/Crest Interrupt Priority: Priority 10
       Interrupts: Capture A Interrupt Priority: Priority 10
       Interrupts: Capture B Interrupt Priority: Disabled
       Interrupts: Underflow/Trough Interrupt Priority: Disabled
@@ -682,9 +681,6 @@ FSP Configuration
       Extra Features: Interrupt Skipping (GPTE/GPTEH only): Skip ADC Events: None
       Extra Features: Output Disable: GTIOCA Disable Setting: Disable Prohibited
       Extra Features: Output Disable: GTIOCB Disable Setting: Disable Prohibited
-      
-    Instance "g_elc Event Link Controller (r_elc)"
-      Name: g_elc
       
     Instance "g_spi1 SPI (r_spi)"
       Name: g_spi1
@@ -770,8 +766,8 @@ FSP Configuration
       Flash Ready Interrupt Priority: Priority 3
       Flash Error Interrupt Priority: Priority 3
       
-    Instance "g_timer0 Timer, Low-Power (r_agt)"
-      General: Name: g_timer0
+    Instance "AGT0_ExtFlashBusy Timer, Low-Power (r_agt)"
+      General: Name: AGT0_ExtFlashBusy
       General: Channel: 0
       General: Mode: One-Shot
       General: Period: 10
@@ -938,4 +934,55 @@ FSP Configuration
       Deep Standby Options: Power-Supply Control: Supply power to the Standby SRAM, low-speed on-chip oscillator, AGTn (n = 0-3) and USBFS/HS resume detecting unit
       Deep Standby Options: Cancel Sources: IRQ11, AGT1 Underflow
       Deep Standby Options: Cancel Edges: IRQ11 Rising Edge
+      
+    Instance "GPT2_ZCD_Meter Timer, General PWM (r_gpt)"
+      General: Name: GPT2_ZCD_Meter
+      General: Channel: 2
+      General: Mode: Periodic
+      General: Period: 0x100000000
+      General: Period Unit: Raw Counts
+      Output: Custom Waveform: GTIOA: Initial Output Level: Pin Level Low
+      Output: Custom Waveform: GTIOA: Cycle End Output Level: Pin Level Retain
+      Output: Custom Waveform: GTIOA: Compare Match Output Level: Pin Level Retain
+      Output: Custom Waveform: GTIOA: Retain Output Level at Count Stop: Disabled
+      Output: Custom Waveform: GTIOB: Initial Output Level: Pin Level Low
+      Output: Custom Waveform: GTIOB: Cycle End Output Level: Pin Level Retain
+      Output: Custom Waveform: GTIOB: Compare Match Output Level: Pin Level Retain
+      Output: Custom Waveform: GTIOB: Retain Output Level at Count Stop: Disabled
+      Output: Custom Waveform: Custom Waveform Enable: Disabled
+      Output: Duty Cycle Percent (only applicable in PWM mode): 50
+      Output: GTIOCA Output Enabled: False
+      Output: GTIOCA Stop Level: Pin Level Low
+      Output: GTIOCB Output Enabled: False
+      Output: GTIOCB Stop Level: Pin Level Low
+      Input: Count Up Source: 
+      Input: Count Down Source: GPT1 COUNTER OVERFLOW (Overflow)
+      Input: Start Source: GTIOCB Rising Edge While GTIOCA Low
+      Input: Stop Source: GTIOCB Falling Edge While GTIOCA Low
+      Input: Clear Source: GTIOCB Rising Edge While GTIOCA Low
+      Input: Capture A Source: 
+      Input: Capture B Source: GTIOCB Rising Edge While GTIOCA Low, GPT2 COUNTER OVERFLOW (Overflow)
+      Input: Noise Filter A Sampling Clock Select: No Filter
+      Input: Noise Filter B Sampling Clock Select: No Filter
+      Interrupts: Callback: ZCD_hwIsr
+      Interrupts: Overflow/Crest Interrupt Priority: Priority 10
+      Interrupts: Capture A Interrupt Priority: Disabled
+      Interrupts: Capture B Interrupt Priority: Priority 10
+      Interrupts: Underflow/Trough Interrupt Priority: Disabled
+      Extra Features: Extra Features: Disabled
+      Extra Features: Output Disable: POEG Link: POEG Channel 0
+      Extra Features: Output Disable: Output Disable POEG Trigger: 
+      Extra Features: ADC Trigger: Start Event Trigger (GPTE/GPTEH only): 
+      Extra Features: Dead Time: Dead Time Count Up (Raw Counts): 0
+      Extra Features: Dead Time: Dead Time Count Down (Raw Counts) (GPTE/GPTEH only): 0
+      Extra Features: ADC Trigger (GPTE/GPTEH only): ADC A Compare Match (Raw Counts): 0
+      Extra Features: ADC Trigger (GPTE/GPTEH only): ADC B Compare Match (Raw Counts): 0
+      Extra Features: Interrupt Skipping (GPTE/GPTEH only): Interrupt to Count: None
+      Extra Features: Interrupt Skipping (GPTE/GPTEH only): Interrupt Skip Count: 0
+      Extra Features: Interrupt Skipping (GPTE/GPTEH only): Skip ADC Events: None
+      Extra Features: Output Disable: GTIOCA Disable Setting: Disable Prohibited
+      Extra Features: Output Disable: GTIOCB Disable Setting: Disable Prohibited
+      
+    Instance "g_elc Event Link Controller (r_elc)"
+      Name: g_elc
       

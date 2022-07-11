@@ -330,7 +330,11 @@ void EVL_AlarmHandlerTask ( taskParameter )
                   RESTORATION_TIME_SET(0); /* Force time to be invalid */
                   if ( RTC_Valid() ) /* If never updated, bump the power quality count. */
                   {
-                     RESTORATION_TIME_SET ( RTC_TSR );   /* Record RTC seconds at power restored time.   */
+#if ( MCU_SELECTED == NXP_K24 )
+                     RESTORATION_TIME_SET ( RTC_TSR );         /* Record RTC seconds at power restored time.   */
+#elif ( MCU_SELECTED == RA6E1 )
+                     RESTORATION_TIME_SET( R_RTC->RSECCNT );   /* Record RTC seconds at power restored time.   */
+#endif
                   }
 
                   /* Delete the Start Alarm if active */
@@ -1548,7 +1552,7 @@ returnStatus_t EVL_Initalize( void )
    {
 #if ( LAST_GASP_SIMULATION == 1 ) && ( EP == 1 )
       //TODO RA6: NRJ: determine if semaphores need to be counting
-      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS) && OS_SEM_Create( &SimLGTxDoneSem, 0 ) )
+      if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS, "EVL") && OS_SEM_Create( &SimLGTxDoneSem, 0 ) )
 #else
       if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS, "EVL") )
 #endif
@@ -3844,7 +3848,6 @@ static void initiateSimLGTx( void )
 {
    OS_TICK_Struct             endTime;
    OS_TICK_Struct             startTime;
-   bool                       bOverflow = ( bool )false;
    SimStats_t                 *getLGSimStats;
    char                       floatStr[PRINT_FLOAT_SIZE];
    float                      Vcap;
@@ -3939,7 +3942,7 @@ static void initiateSimLGTx( void )
 
    OS_TICK_Get_CurrentElapsedTicks( &endTime );
    // Save the time spent transmitting
-   PREV_MSG_TIME_SET(  ( uint16_t ) ( _time_diff_microseconds( &endTime, &startTime, &bOverflow ) / 1000 ) );
+   PREV_MSG_TIME_SET(  ( uint16_t ) ( OS_TICK_Get_Diff_InMicroseconds( &startTime, &endTime ) / 1000 ) );
    PWRLG_SENT_SET( 1 );
 
    PWRLG_MESSAGE_NUM_SET( PWRLG_MESSAGE_NUM() + 1 );

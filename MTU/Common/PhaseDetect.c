@@ -29,7 +29,7 @@
 #include <bsp.h>
 #include "FTM.h"
 #elif ( MCU_SELECTED == RA6E1 )
-
+#include "AGT.h"
 #endif
 #include "file_io.h"
 #include "timer_util.h"
@@ -281,7 +281,9 @@ static buffer_t *BuildSurveyMessage(uint8_t SurveyPeriodQty);
 
 
 /* Zero Cross Functions */
+#if ( MCU_SELECTED == NXP_K24 )
 static void ZCD_hwIsr( void );
+#endif
 static uint32_t calc_period(uint32_t average, uint32_t value);
 
 static void printSyncInfo(const sync_record_t *pSyncRecord);
@@ -353,7 +355,8 @@ returnStatus_t PD_init ( void )
       HMC_ZCD_METER_TRIS(); // Map ZCD_METER signal to FTM3_CH1
 #elif ( MCU_SELECTED == RA6E1 )
       // TODO: RA6E1 Bob: Need to set up the AGT to capture time from P114, ZCD_METER signal
-      HMC_ZCD_METER_TRIS(); // Set up the port pin to connect to the AGT peripheral
+//      AGT_PD_Enable();
+      GPT_PD_Enable();
 #endif
 
       PD_AddSysTimer();
@@ -881,43 +884,92 @@ uint32_t calc_period(uint32_t average, uint32_t value)
  *
  ********************************************************************************************************************
  */
-static
-void ZCD_hwIsr( void )
-{
-   uint16_t capturedValue;
-   uint32_t cycleCounter;
-   uint16_t currentFTM;
-   uint32_t delay;
-   uint32_t delta;
-   uint32_t primask = __get_PRIMASK();
-
-   // Need to read those 3 counters together so disable interrupts if they are not disabled already
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
 #if ( MCU_SELECTED == NXP_K24 )
-   cycleCounter  = DWT_CYCCNT;
-   currentFTM    = (uint16_t)FTM3_CNT;
-   capturedValue = (uint16_t)FTM3_C1V; // Save current captured value
+static void ZCD_hwIsr( void )
 #elif ( MCU_SELECTED == RA6E1 )
-   cycleCounter  = DWT->CYCCNT;
-   // TODO: RA6E1 Bob: here is where we need to capture the AGT timer value
+uint32_t iCapture_overflows = 0U;
+uint64_t captured_time     = 0U;
+void ZCD_hwIsr(timer_callback_args_t * p_args)
 #endif
-
-   __set_PRIMASK(primask); // Restore interrupts
-
-   // Convert FTM3_CNT into CYCCNT value
-   delay = ((uint32_t)(uint16_t)(currentFTM - capturedValue))*2;
-   cycleCounter -= delay;
-
-   // Save the captured value
-   delta = cycleCounter - zc.PreviousCapturedValue;
-   zc.PreviousCapturedValue = cycleCounter;
-
-   // Sanitize the period
-   // This should not be necessary but the first delta can be wrong
-   if ( (delta > PD_NOMINAL_PERIOD_MIN) && (delta < PD_NOMINAL_PERIOD_MAX) )
+{
+#if ( MCU_SELECTED == RA6E1 )
+   if ( TIMER_EVENT_CAPTURE_A == p_args->event )
+#endif
    {
-      // Compute the average period
-      zc.Period = calc_period( zc.Period, delta);
+      static uint32_t   cycleCounter;
+      static uint32_t   delay;
+      static uint32_t   delta;
+#if ( MCU_SELECTED == NXP_K24 )
+      static uint16_t   currentFTM;
+      static uint16_t   capturedValue;
+#elif ( MCU_SELECTED == RA6E1 )
+//      timer_status_t    status;
+      timer_info_t      info;
+      static uint32_t   currentFTM;
+      static uint32_t   capturedValue;
+#endif
+      uint32_t primask = __get_PRIMASK();
+      // Need to read those 3 counters together so disable interrupts if they are not disabled already
+      __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+#if ( MCU_SELECTED == NXP_K24 )
+      cycleCounter  = DWT_CYCCNT;
+      currentFTM    = (uint16_t)FTM3_CNT;
+      capturedValue = (uint16_t)FTM3_C1V; // Save current captured value
+#elif ( MCU_SELECTED == RA6E1 )
+#if 0 // AGT
+      (void) R_AGT_InfoGet(&AGT5_ZCD_Meter_ctrl, &info);
+      uint32_t period = info.period_counts;
+      /* Read the current counter value. Counter value is in status.counter. */
+      (void)R_AGT_StatusGet( &AGT5_ZCD_Meter_ctrl, &status );
+      /* Process capture from AGTIO. */
+      captured_time     = ((uint64_t) period * iCapture_overflows) + p_args->capture;
+      iCapture_overflows = 0U;
+      cycleCounter  = DWT->CYCCNT;
+      currentFTM    = (uint16_t)status.counter;
+//      R_AGT_InfoGet() --> Period Count
+      capturedValue = (uint16_t)p_args->capture; // TODO: RA6E1: Do we need the captured time vs captured Value?
+#else // GPT
+      (void) R_GPT_InfoGet(&GPT2_ZCD_Meter_ctrl, &info);
+      uint64_t period = info.period_counts;
+      /* The maximum period is one more than the maximum 32-bit number, but will be reflected as 0 in
+      * timer_info_t::period_counts. */
+      if (0U == period)
+      {
+         period = UINT32_MAX + 1U;
+      }
+      cycleCounter       = DWT->CYCCNT;
+      currentFTM         = R_GPT1->GTCNT;
+      capturedValue      = (uint32_t)(period * iCapture_overflows) + p_args->capture;
+      iCapture_overflows = 0;
+
+#endif
+#endif
+      __set_PRIMASK(primask); // Restore interrupts
+
+      // Convert FTM3_CNT into CYCCNT value
+#if ( MCU_SELECTED == NXP_K24 )
+      delay = ((uint32_t)(uint16_t)(currentFTM - capturedValue))*2;
+#elif ( MCU_SELECTED == RA6E1 )
+      delay = (uint32_t)((currentFTM - capturedValue)*2);
+#endif
+      cycleCounter -= delay;
+
+      // Save the captured value
+      delta = cycleCounter - zc.PreviousCapturedValue;
+      zc.PreviousCapturedValue = cycleCounter;
+
+      // Sanitize the period
+      // This should not be necessary but the first delta can be wrong
+      if ( (delta > PD_NOMINAL_PERIOD_MIN) && (delta < PD_NOMINAL_PERIOD_MAX) )
+      {
+         // Compute the average period
+         zc.Period = calc_period( zc.Period, delta);
+      }
+   }
+   if (TIMER_EVENT_CYCLE_END == p_args->event)
+   {
+      /* An overflow occurred during capture. This must be accounted for at the application layer. */
+      iCapture_overflows++;
    }
 }
 

@@ -40,7 +40,7 @@
    #define ENABLE_HMC_TASKS               1  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
    #define ENABLE_PAR_TASKS               1  /* Used to 0=disable, 1=enable the Partition feature */
    #define ENABLE_PWR_TASKS               1  /* Used to 0=disable, 1=enable the Power feature */
-   #define ENABLE_DFW_TASKS               1  /* Used to 0=disable, 1=enable the DFW feature */           /* TODO: RA6E1: Enable */
+   #define ENABLE_DFW_TASKS               1  /* Used to 0=disable, 1=enable the DFW feature */
    #define ENABLE_DEMAND_TASKS            1  /* Used to 0=disable, 1=enable the Demand feature */
    #define ENABLE_FIO_TASKS               0  /* Used to 0=disable, 1=enable the FileIO CRC feature */
    #define ENABLE_LAST_GASP_TASK          1  /* Used to 0=disable, 1=enable the Last Gasp feature */

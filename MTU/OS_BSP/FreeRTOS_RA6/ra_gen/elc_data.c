@@ -1,8 +1,8 @@
 /* generated ELC source file - do not edit */
         #include "r_elc_api.h"
         const elc_cfg_t g_elc_cfg = {
-                        .link[ELC_PERIPHERAL_GPT_A] = ELC_EVENT_NONE, /* No allocation */
-            .link[ELC_PERIPHERAL_GPT_B] = ELC_EVENT_IOPORT_EVENT_1, /* IOPORT EVENT 1 (Port 1 event) */
+                        .link[ELC_PERIPHERAL_GPT_A] = ELC_EVENT_GPT1_COUNTER_OVERFLOW, /* GPT1 COUNTER OVERFLOW (Overflow) */
+            .link[ELC_PERIPHERAL_GPT_B] = ELC_EVENT_GPT2_COUNTER_OVERFLOW, /* GPT2 COUNTER OVERFLOW (Overflow) */
             .link[ELC_PERIPHERAL_GPT_C] = ELC_EVENT_NONE, /* No allocation */
             .link[ELC_PERIPHERAL_GPT_D] = ELC_EVENT_NONE, /* No allocation */
             .link[ELC_PERIPHERAL_GPT_E] = ELC_EVENT_NONE, /* No allocation */
@@ -28,6 +28,7 @@
  #if (2U == BSP_FEATURE_ELC_VERSION)
             uint32_t elcsarbc = UINT32_MAX;
 
+            elcsarbc &=  ~(1U << ELC_PERIPHERAL_GPT_A);
             elcsarbc &=  ~(1U << ELC_PERIPHERAL_GPT_B);
 
             /* Write the settings to ELCSARn Registers. */
@@ -35,6 +36,7 @@
             R_ELC->ELCSARB = elcsarbc;
  #else
             uint16_t elcsarbc[2] = {0xFFFFU, 0xFFFFU};
+            elcsarbc[ELC_PERIPHERAL_GPT_A / 16U] &= (uint16_t) ~(1U << (ELC_PERIPHERAL_GPT_A % 16U));
             elcsarbc[ELC_PERIPHERAL_GPT_B / 16U] &= (uint16_t) ~(1U << (ELC_PERIPHERAL_GPT_B % 16U));
 
             /* Write the settins to ELCSARn Registers. */

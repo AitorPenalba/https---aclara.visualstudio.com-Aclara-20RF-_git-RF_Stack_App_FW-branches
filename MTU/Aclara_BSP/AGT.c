@@ -26,7 +26,6 @@
 
 #include "project.h"
 #if ( MCU_SELECTED == RA6E1 )
-#include "AGT.h"
 #include "DBG_SerialDebug.h"
 
 /* ****************************************************************************************************************** */
@@ -54,10 +53,40 @@ static volatile uint8_t agt_event_ = AGT_EVENT_INVALID;
 /* FUNCTION PROTOTYPES */
 
 
-
 /* ****************************************************************************************************************** */
 
 /* FUNCTION DEFINITIONS */
+
+
+ /*******************************************************************************************************************//**
+ * @brief       This function opens AGT module for Phase Detect
+ * @param[IN]   None
+ * @retval      FSP_SUCCESS                  Upon successful open of AGT modules
+ * @retval      Any Other Error code apart from FSP_SUCCESS
+ **********************************************************************************************************************/
+returnStatus_t AGT_PD_Init( void )
+{
+   fsp_err_t err = FSP_SUCCESS;
+
+   /* Initializes the module. */
+   err = R_AGT_Open(&AGT5_ZCD_Meter_ctrl, &AGT5_ZCD_Meter_cfg);
+
+   /* Handle any errors. This function should be defined by the user. */
+   assert(FSP_SUCCESS == err);
+
+   return (returnStatus_t)err;
+}
+
+ /*******************************************************************************************************************//**
+ * @brief       This function enables the AGT Timer Capture for Phase Detect
+ * @param[IN]   None
+ * @retval      None
+ **********************************************************************************************************************/
+void AGT_PD_Enable( void )
+{
+   /* Enable captures. Captured values arrive in the interrupt. */
+   (void) R_AGT_Enable(&AGT5_ZCD_Meter_ctrl);
+}
 
 
  /*******************************************************************************************************************//**

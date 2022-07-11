@@ -75,6 +75,10 @@
 #define STACK_HYSTERISIS   5 /* Stack enable/disable temperature hysteresis */
 #endif
 
+#if ( MCU_SELECTED == RA6E1 )
+#define LWGPIO_VALUE_LOW   BSP_IO_LEVEL_LOW
+#endif
+
 #define BSP_IS_GLOBAL_INT_ENABLED()  (bool)(0 == __get_PRIMASK() ? TRUE : FALSE)
 
 #if ( MCU_SELECTED == RA6E1 )
@@ -283,6 +287,23 @@ extern returnStatus_t UART_reset     ( enum_UART_ID UartId );
 extern returnStatus_t WDOG_Init      ( void );
 extern returnStatus_t IO_init        ( void );
 extern returnStatus_t CRC_Shutdown   ( void );
+#if ( MCU_SELECTED == RA6E1 )
+extern fsp_err_t      AGT_LPM_Timer_Init      ( void );
+extern fsp_err_t      AGT_LPM_Timer_Start     ( void );
+extern fsp_err_t      AGT_LPM_Timer_Stop      ( void );
+extern fsp_err_t      AGT_LPM_Timer_Configure ( uint32_t const period );
+extern void           AGT_LPM_Timer_Wait      ( void );
+extern returnStatus_t AGT_PD_Init             ( void );
+extern void           AGT_PD_Enable           ( void );
+
+extern returnStatus_t GPT_PD_Init             ( void );
+extern void           GPT_PD_Enable           ( void );
+extern void           GPT_PD_Disable          ( void );
+extern returnStatus_t GPT_Radio0_Init         ( void );
+extern void           GPT_Radio0_Enable       ( void );
+extern void           GPT_Radio0_Disable      ( void );
+#endif
+
 #endif /* ERROR_CODES_H_ */
 
 
