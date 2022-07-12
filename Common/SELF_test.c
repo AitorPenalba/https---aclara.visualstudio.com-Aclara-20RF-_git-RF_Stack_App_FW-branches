@@ -444,7 +444,6 @@ static uint16_t RunSelfTest()
 
    /* Update the number of times self test has run */
    SELF_TestData.selfTestCount++;
-#if 0
    /* Update all the counters in the file */
    (void)FIO_fwrite( &SELF_testFile.handle, 0, (uint8_t *)SELF_testFile.Data, SELF_testFile.Size);
 
@@ -460,10 +459,6 @@ static uint16_t RunSelfTest()
 #endif
 #endif
    return SELF_TestData.lastResults.uAllResults.Bytes;
-#else
-   DBG_logPrintf( 'I', "Self Test completed" );
-   return 0;
-#endif
 }
 
 /***********************************************************************************************************************
@@ -694,7 +689,7 @@ returnStatus_t SELF_testRTC( void )
    } while ( retVal == eFAILURE );// TODO: RA6 [name_Balaji]: Need to test after OS_TICK_Get_ElapsedMilliseconds integration
    R_RTC_Close (&g_rtc0_ctrl);// TODO: RA6 [name_Balaji]: Closing RTC, for now as there is no other known method to check the RTC valid or not
 #endif // #if 0
-#endif
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 #if ( TM_RTC_UNIT_TEST == 1 )
 // TODO: RA6 [name_Balaji]: Remove unit test if not required
    bool isRTCUnitTestFailed;
@@ -704,6 +699,7 @@ returnStatus_t SELF_testRTC( void )
      DBG_printf( "ERROR - RTC failed to Set Error Adjustment\n" );
    }
 #endif // TM_RTC_UNIT_TEST
+#if 0 /* TODO: RA6E1: Add this code when the Self-Test is added */
    if ( retVal == eFAILURE )
    {
       if( SELF_TestData.RTCFail < ( ( 1 << ( 8 * sizeof( SELF_TestData.RTCFail ) ) ) - 1 ) ) /* Do not let counter rollover.  */
@@ -711,7 +707,9 @@ returnStatus_t SELF_testRTC( void )
          SELF_TestData.RTCFail++;
       }
    }
-
+#else
+   retVal = eSUCCESS;
+#endif
    DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );
    return retVal;
 }
