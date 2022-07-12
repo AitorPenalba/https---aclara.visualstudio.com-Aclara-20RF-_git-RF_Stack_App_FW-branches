@@ -927,7 +927,7 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       cycleCounter  = DWT->CYCCNT;
       currentFTM    = (uint16_t)status.counter;
 //      R_AGT_InfoGet() --> Period Count
-      capturedValue = (uint16_t)p_args->capture; // TODO: RA6E1: Do we need the captured time vs captured Value?
+      capturedValue = (uint16_t)p_args->capture; // TODO: RA6E1: Consider Overflow & period
 #else // GPT
       (void) R_GPT_InfoGet(&GPT2_ZCD_Meter_ctrl, &info);
       uint64_t period = info.period_counts;
@@ -937,11 +937,10 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       {
          period = UINT32_MAX + 1U;
       }
-      cycleCounter       = DWT->CYCCNT;
-      currentFTM         = R_GPT1->GTCNT;
       capturedValue      = (uint32_t)(period * iCapture_overflows) + p_args->capture;
       iCapture_overflows = 0;
-
+      cycleCounter       = DWT->CYCCNT;
+      currentFTM         = R_GPT2->GTCNT;
 #endif
 #endif
       __set_PRIMASK(primask); // Restore interrupts

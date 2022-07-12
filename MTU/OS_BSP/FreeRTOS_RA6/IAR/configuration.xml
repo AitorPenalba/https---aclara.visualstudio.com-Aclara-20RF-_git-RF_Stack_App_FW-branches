@@ -490,9 +490,9 @@
       <property id="module.driver.timer.gtiocb_stop_level" value="module.driver.timer.gtiocb_stop_level.pin_level_low"/>
       <property id="module.driver.timer.count_up_source" value=""/>
       <property id="module.driver.timer.count_down_source" value=""/>
-      <property id="module.driver.timer.start_source" value="module.driver.gpt.source_gtioca_rising_gtiocb_low,_signal.event.gpt1.counter.overflow"/>
-      <property id="module.driver.timer.stop_source" value="module.driver.gpt.source_gtioca_falling_gtiocb_low"/>
-      <property id="module.driver.timer.clear_source" value="module.driver.gpt.source_gtioca_rising_gtiocb_low"/>
+      <property id="module.driver.timer.start_source" value=""/>
+      <property id="module.driver.timer.stop_source" value=""/>
+      <property id="module.driver.timer.clear_source" value=""/>
       <property id="module.driver.timer.capture_a_source" value="module.driver.gpt.source_gtioca_falling_gtiocb_low"/>
       <property id="module.driver.timer.capture_b_source" value=""/>
       <property id="module.driver.timer.gtioca_filter" value="module.driver.timer.gtioc_filter.gtioc_filter_none"/>
@@ -791,9 +791,9 @@
       <property id="module.driver.timer.gtiocb_stop_level" value="module.driver.timer.gtiocb_stop_level.pin_level_low"/>
       <property id="module.driver.timer.count_up_source" value=""/>
       <property id="module.driver.timer.count_down_source" value=""/>
-      <property id="module.driver.timer.start_source" value="module.driver.gpt.source_gtiocb_rising_gtioca_low"/>
-      <property id="module.driver.timer.stop_source" value="module.driver.gpt.source_gtiocb_falling_gtioca_low"/>
-      <property id="module.driver.timer.clear_source" value="module.driver.gpt.source_gtiocb_rising_gtioca_low"/>
+      <property id="module.driver.timer.start_source" value=""/>
+      <property id="module.driver.timer.stop_source" value=""/>
+      <property id="module.driver.timer.clear_source" value=""/>
       <property id="module.driver.timer.capture_a_source" value=""/>
       <property id="module.driver.timer.capture_b_source" value="module.driver.gpt.source_gtiocb_rising_gtioca_low"/>
       <property id="module.driver.timer.gtioca_filter" value="module.driver.timer.gtioc_filter.gtioc_filter_none"/>

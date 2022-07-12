@@ -656,9 +656,9 @@ FSP Configuration
       Output: GTIOCB Stop Level: Pin Level Low
       Input: Count Up Source: 
       Input: Count Down Source: 
-      Input: Start Source: GTIOCA Rising Edge While GTIOCB Low, GPT1 COUNTER OVERFLOW (Overflow)
-      Input: Stop Source: GTIOCA Falling Edge While GTIOCB Low
-      Input: Clear Source: GTIOCA Rising Edge While GTIOCB Low
+      Input: Start Source: 
+      Input: Stop Source: 
+      Input: Clear Source: 
       Input: Capture A Source: GTIOCA Falling Edge While GTIOCB Low
       Input: Capture B Source: 
       Input: Noise Filter A Sampling Clock Select: No Filter
@@ -957,9 +957,9 @@ FSP Configuration
       Output: GTIOCB Stop Level: Pin Level Low
       Input: Count Up Source: 
       Input: Count Down Source: 
-      Input: Start Source: GTIOCB Rising Edge While GTIOCA Low
-      Input: Stop Source: GTIOCB Falling Edge While GTIOCA Low
-      Input: Clear Source: GTIOCB Rising Edge While GTIOCA Low
+      Input: Start Source: 
+      Input: Stop Source: 
+      Input: Clear Source: 
       Input: Capture A Source: 
       Input: Capture B Source: GTIOCB Rising Edge While GTIOCA Low
       Input: Noise Filter A Sampling Clock Select: No Filter

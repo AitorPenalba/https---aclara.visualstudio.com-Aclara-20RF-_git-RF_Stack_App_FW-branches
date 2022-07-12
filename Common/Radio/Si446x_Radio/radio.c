@@ -1044,10 +1044,10 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    {
       period = UINT32_MAX + 1U;
    }
-   cycleCounter   = DWT->CYCCNT;
-   currentFTM     = R_GPT1->GTCNT;    // Connected to radio interrupt
    capturedFTM    = (uint32_t)(period * iCapture_overflows) + R_GPT1->GTCCR[0]; // Captured counter when radio interrupt happened; 0 = GPT_PRV_CAPTURE_EVENT_A
    iCapture_overflows = 0; // Clear
+   cycleCounter   = DWT->CYCCNT;
+   currentFTM     = R_GPT1->GTCNT;    // Connected to radio interrupt
 #endif
    __set_PRIMASK(primask); // Restore interrupts
 
