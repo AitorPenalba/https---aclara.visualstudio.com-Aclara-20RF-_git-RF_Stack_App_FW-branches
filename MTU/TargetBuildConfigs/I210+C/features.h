@@ -93,7 +93,6 @@
 #endif
 #define FREE_RTOS                         2
 
-#define INCLUDE_ECC                       0 /* TODO: RA6E1: Temporary conditional*/
 #define RTOS_SELECTION                    FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
 #define DBG_TESTS                         1
 #define SEGGER_RTT                        0

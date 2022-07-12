@@ -706,7 +706,9 @@ static void MFGP_macRSSI                     ( uint32_t argc, char *argv[] );
 extern float cachedVSWR;
 static void MFGP_Vswr                        ( uint32_t argc, char *argv[] );
 #endif
-
+#if ( TM_UART_ECHO_COMMAND == 1 )
+static void MFGP_CommandLine_EchoComment     ( uint32_t argc, char *argv[] );
+#endif
 static void StTxCwTestCompletedTimerExpired(uint8_t cmd, void *pData);
 
 static const struct_CmdLineEntry MFGP_CmdTable[] =
@@ -746,6 +748,9 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
 #endif
    {  "dtlsServerCertificateSerialNum", MFGP_dtlsServerCertificateSN, "Read Network Root CA cert (DER format)" },        // 1362
    {  "dtlsNetworkRootCA",          MFGP_dtlsNetworkRootCA,          "Read/Write Network Root CA cert (DER format)" },   // 1258
+#if ( TM_UART_ECHO_COMMAND == 1 )
+   {  "echo",                       MFGP_CommandLine_EchoComment,    "Echo back comment for testing UART" },
+#endif
    {  "engBuEnabled",               MFGP_engBuEnabled,               "Get/Set the engBuStats" },
    {  "engBuTrafficClass",          MFGP_engBuTrafficClass,          "Get/Set Eng Stats bubble-up Traffic Class" },
    {  "engData1",                   MFGP_engData1,                   "Get the engData1 stats" },
@@ -11165,6 +11170,38 @@ static void MFGP_timeState( uint32_t argc, char *argv[] )
    /* Always print read back value  */
    MFG_printf( "%s %u\n", argv[ 0 ], TIME_SYS_TimeState());
 }
+
+#if ( TM_UART_ECHO_COMMAND == 1 )
+/*******************************************************************************
+
+   Function name: MFGP_CommandLine_EchoComment
+
+   Purpose: Echos the command string in arg[0] for testing UART cut/paste
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: Always successful
+
+   Notes:
+
+*******************************************************************************/
+static void MFGP_CommandLine_EchoComment( uint32_t argc, char *argv[] )
+{
+   if ( argc == 1 )
+   {
+      MFG_printf( "ECHO\r\n" );
+   }
+   else if ( argc == 2 )
+   {
+      MFG_printf( "ECHO %s\r\n", argv[1] );
+   }
+   else if ( argc == 3 )
+   {
+      MFG_printf( "ECHO %s %s\r\n", argv[1], argv[2] );
+   }
+}
+#endif // TM_UART_ECHO_COMMAND
 
 /***********************************************************************************************************************
    Function Name: MFGP_engBuEnabled

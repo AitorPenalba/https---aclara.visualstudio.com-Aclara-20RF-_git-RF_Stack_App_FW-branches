@@ -167,7 +167,6 @@ extern uint32_t DMA_Complete_IRQ_ISR_Timestamp; // Used for a watchdog to make s
  *****************************************************************************/
 static RadioEvent_Fxn pEventHandler_Fxn;
 #if ( GET_TEMPERATURE_FROM_RADIO == 1 )
-static bool bRadio_ready = FALSE;
 static float RADIO_Temperature;
 static bool bAvg_done = FALSE;
 #endif
@@ -943,12 +942,16 @@ static void vRadio_PowerUp(void)
    si446x_reset();
 
    OS_TASK_Sleep(TEN_MSEC); // Give some time to radio to get all out of reset
-
+#if ( TM_BYPASS_SI4467_GPIP0_WAIT == 0 ) // TODO: RA6E1 Bob: Set to 0 for tempoaray code for Faiz to test cutting trace from SI4467_GPIO0 to the MCU
    // Monitor GPIO0 of radio 0 for power on reset
    while( RDO_0_GPIO0() == (uint32_t)BSP_IO_LEVEL_LOW  ) {
       INFO_printf("Waiting on radio 0 to get out of reset");
       OS_TASK_Sleep(TEN_MSEC);
    }
+#else
+   OS_TASK_Sleep( 2000 );
+   #warning "You have built a version of code that does not wait for the radio to come out of reset!!  Do not check it in this way!!"
+#endif // ( TM_BYPASS_SI4467_GPIP0_WAIT == 0 )
 #if ( DCU == 1 )
    // Monitor GPIO0 of radio 1 for power on reset
    while( RDO_1_GPIO0() == (uint32_t)LWGPIO_VALUE_LOW ) {
@@ -2578,9 +2581,6 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    OS_TASK_Sleep( FIFTY_MSEC );
 #endif
    RADIO_Update_Freq();
-#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
-   bRadio_ready = TRUE;
-#endif
 }
 
 #if 0 // Not RA6E1.  This was already removed in the K24 baseline code
@@ -3918,15 +3918,14 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
    // Get current time
    OS_TICK_Get_CurrentElapsedTicks(&CurrentTime);
 
-   // TODO: TICKS[] structure variable usage handling
    // Recalibrate every 4 hours or after power up
    // MKD 4-24-14 This should be done when temperature changes by 30 degree C but it takes a long time to retrieve the temperatures so we recalibrate every 4 hours instead.
 #if ( RTOS_SELECTION == MQX_RTOS )
    if (( _time_diff_hours(&CurrentTime, &radio[radioNum].CallibrationTime, &overflow) > 3) ||
-         ( (radio[radioNum].CallibrationTime.TICKS[0] == 0) && (radio[radioNum].CallibrationTime.TICKS[1] == 0) ))
+         ( ( radio[radioNum].CallibrationTime.TICKS[0] == 0 ) && ( radio[radioNum].CallibrationTime.TICKS[1] == 0 ) ) )
 #elif ( RTOS_SELECTION == FREE_RTOS )
-      if (( OS_TICK_Get_Diff_InHours(&CurrentTime, &radio[radioNum].CallibrationTime) > 3) ||
-          ( (radio[radioNum].CallibrationTime.tickCount == 0) && (radio[radioNum].CallibrationTime.xNumOfOverflows == 0) ))
+   if ( ( OS_TICK_Get_Diff_InHours ( &CurrentTime, &radio[radioNum].CallibrationTime ) > 3 ) ||
+        ( ( radio[radioNum].CallibrationTime.HW_TICKS == 0 ) && ( radio[radioNum].CallibrationTime.tickCount == 0 ) ) )
 #endif
    {
       INFO_printf("Radio calibration in progress");
@@ -3939,7 +3938,7 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 
       // Set next refresh in 4 hours
       radio[radioNum].CallibrationTime = CurrentTime;
-    }
+   }
 
    // Update RSSI jump threshold if it changed
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
@@ -4708,12 +4707,11 @@ void SetFreq(uint8_t radioNum, uint32_t freq)
  **********************************************************************************************************************/
 static void wait_us(uint32_t time)
 {
-   OS_TICK_Struct time1,time2;
-   uint32_t       TimeDiff;
-
    if (time == 0) return;
 
 #if ( MCU_SELECTED == NXP_K24 )
+   OS_TICK_Struct time1,time2;
+   uint32_t       TimeDiff;
    bool           Overflow;
    _time_get_elapsed_ticks(&time1);
 
@@ -4725,6 +4723,8 @@ static void wait_us(uint32_t time)
    while (TimeDiff < time);
 #elif ( MCU_SELECTED == RA6E1 )
    #if 0 // TODO: RA6E1 Bob: This does not appear to be working properly
+   OS_TICK_Struct time1,time2;
+   uint32_t       TimeDiff;
    OS_TICK_Get_CurrentElapsedTicks(&time1);
 
    // Wait for a while
@@ -6562,7 +6562,7 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
 
 #endif
 
-#if 0
+#if 0  // TODO: RA6E1: Bob: Do we need this?
 
 /*
    Function name: RADIO_Get_Current_Temperature
@@ -6636,21 +6636,6 @@ float RADIO_Get_Current_Temperature( bool bSoft_demod )
   return RADIO_Temperature;
 }
 
-/*
-   Function name: RADIO_Is_Radio_Ready
-
-   Purpose: Used to check whether radio is initialized
-
-   Arguments: None
-
-   Return: bRadio_ready status of the radio
-
-*/
-
-bool RADIO_Is_Radio_Ready (void)
-{
-  return bRadio_ready;
-}
 #endif
 
 /*!

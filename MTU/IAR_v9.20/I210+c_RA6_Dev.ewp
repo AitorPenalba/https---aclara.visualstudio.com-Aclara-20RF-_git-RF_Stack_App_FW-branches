@@ -371,6 +371,9 @@
                     <state>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\Si446x_Library\Si446x</state>
                     <state>$PROJ_DIR$\..\..\Common\Security</state>
                     <state>$PROJ_DIR$\..\..\Common\wolfssl</state>
+                    <state>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ</state>
+                    <state>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\Minibsdiff</state>
+                    <state>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded</state>
                     <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_cfg\fsp_cfg</state>
                     <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_cfg</state>
                     <state>$PROJ_DIR$\..\OS_BSP\FreeRTOS_RA6\ra_cfg\aws</state>
@@ -1180,6 +1183,54 @@
             <name>Common</name>
             <group>
                 <name>DFW</name>
+                <group>
+                    <name>Minibs_XZ</name>
+                    <group>
+                        <name>Minibsdiff</name>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\Minibsdiff\bspatch.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\Minibsdiff\bspatch.h</name>
+                        </file>
+                    </group>
+                    <group>
+                        <name>XZ_Embedded</name>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_config.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_dec_lzma2.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_dec_stream.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_lzma2.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_private.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_stream.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xzminidec.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xzminidec.h</name>
+                        </file>
+                    </group>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\dfw_xzmini_interface.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\dfw_xzmini_interface.h</name>
+                    </file>
+                </group>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\DFW\dfw_app.c</name>
                 </file>
@@ -1436,7 +1487,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -2013,7 +2064,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>

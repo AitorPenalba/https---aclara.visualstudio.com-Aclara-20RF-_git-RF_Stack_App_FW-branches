@@ -1022,7 +1022,7 @@ void DFWI_Init_MsgHandler(HEEP_APPHDR_t *appMsgRxInfo, void *payloadBuf, uint16_
    {
       appMsgTxInfo.Method_Status   = (uint8_t)NotModified;
    }
-   if ( ((uint8_t)OK == appMsgTxInfo.Method_Status ) || ((uint8_t)BadRequest == appMsgTxInfo.Method_Status ) )
+   if ( ((uint8_t)OK == appMsgTxInfo.Method_Status ) || ( ((uint8_t)BadRequest == appMsgTxInfo.Method_Status) && (NULL != pBuf) ) )
    {
       // send the message to message handler. The called function will free the buffer
       /*lint -e(644) If appMsgTxInfo.Method_Status is OK, then pBuf was initialized */
@@ -3543,6 +3543,12 @@ static uint8_t packMissingPackets( dl_packetcnt_t numToPack,  dl_packetid_t  *pm
             *pmPData *= -1;
             // Put the ending consecutive missing packet id in the buffer
             bytes = (uint8_t)snprintf((char *)&textStr[0], MAX_MISSING_PKT_ID_STR, "-%d", *pmPData);
+            // Break the buffer packing if the buffer reaches the maximum size
+            if ( ( pPktBuf->x.dataLen + bytes ) > pPktBuf->bufMaxSize )
+            {
+               break;
+            }
+
             PACK_Buffer((bytes * 8), (uint8_t *)&textStr[0], simpleRdgInfo.pPackCfg);
             rdgSize            += bytes;
             pPktBuf->x.dataLen += bytes;
@@ -3551,6 +3557,12 @@ static uint8_t packMissingPackets( dl_packetcnt_t numToPack,  dl_packetid_t  *pm
          {
             // Put the next non-consecutive missing packet id in the buffer
             bytes = (uint8_t)snprintf((char *)&textStr[0], MAX_MISSING_PKT_ID_STR, ",%d", *pmPData);
+            // Break the buffer packing if the buffer reaches the maximum size
+            if ( ( pPktBuf->x.dataLen + bytes ) > pPktBuf->bufMaxSize )
+            {
+               break;
+            }
+
             PACK_Buffer((bytes * 8), (uint8_t *)&textStr[0], ppackCfg);
             rdgSize            += bytes;
             pPktBuf->x.dataLen += bytes;
