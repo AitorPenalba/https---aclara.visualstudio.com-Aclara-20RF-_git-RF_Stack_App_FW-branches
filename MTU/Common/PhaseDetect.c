@@ -893,7 +893,7 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
 #endif
 {
 #if ( MCU_SELECTED == RA6E1 )
-   if ( TIMER_EVENT_CAPTURE_A == p_args->event )
+   if ( ( TIMER_EVENT_CAPTURE_A == p_args->event ) || ( TIMER_EVENT_CAPTURE_B == p_args->event ) )
 #endif
    {
       static uint32_t   cycleCounter;

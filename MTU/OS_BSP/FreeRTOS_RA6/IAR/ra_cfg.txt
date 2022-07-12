@@ -956,12 +956,12 @@ FSP Configuration
       Output: GTIOCB Output Enabled: False
       Output: GTIOCB Stop Level: Pin Level Low
       Input: Count Up Source: 
-      Input: Count Down Source: GPT1 COUNTER OVERFLOW (Overflow)
+      Input: Count Down Source: 
       Input: Start Source: GTIOCB Rising Edge While GTIOCA Low
       Input: Stop Source: GTIOCB Falling Edge While GTIOCA Low
       Input: Clear Source: GTIOCB Rising Edge While GTIOCA Low
       Input: Capture A Source: 
-      Input: Capture B Source: GTIOCB Rising Edge While GTIOCA Low, GPT2 COUNTER OVERFLOW (Overflow)
+      Input: Capture B Source: GTIOCB Rising Edge While GTIOCA Low
       Input: Noise Filter A Sampling Clock Select: No Filter
       Input: Noise Filter B Sampling Clock Select: No Filter
       Interrupts: Callback: ZCD_hwIsr

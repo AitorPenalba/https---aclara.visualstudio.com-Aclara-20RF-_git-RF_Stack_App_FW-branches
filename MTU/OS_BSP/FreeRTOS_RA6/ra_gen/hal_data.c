@@ -43,9 +43,9 @@ const gpt_extended_cfg_t GPT2_ZCD_Meter_extend =
     .stop_source         = (gpt_source_t) (GPT_SOURCE_GTIOCB_FALLING_WHILE_GTIOCA_LOW |  GPT_SOURCE_NONE),
     .clear_source        = (gpt_source_t) (GPT_SOURCE_GTIOCB_RISING_WHILE_GTIOCA_LOW |  GPT_SOURCE_NONE),
     .count_up_source     = (gpt_source_t) ( GPT_SOURCE_NONE),
-    .count_down_source   = (gpt_source_t) (GPT_SOURCE_GPT_A |  GPT_SOURCE_NONE),
+    .count_down_source   = (gpt_source_t) ( GPT_SOURCE_NONE),
     .capture_a_source    = (gpt_source_t) ( GPT_SOURCE_NONE),
-    .capture_b_source    = (gpt_source_t) (GPT_SOURCE_GPT_B | GPT_SOURCE_GTIOCB_RISING_WHILE_GTIOCA_LOW |  GPT_SOURCE_NONE),
+    .capture_b_source    = (gpt_source_t) (GPT_SOURCE_GTIOCB_RISING_WHILE_GTIOCA_LOW |  GPT_SOURCE_NONE),
     .capture_a_ipl       = (BSP_IRQ_DISABLED),
     .capture_b_ipl       = (10),
 #if defined(VECTOR_NUMBER_GPT2_CAPTURE_COMPARE_A)

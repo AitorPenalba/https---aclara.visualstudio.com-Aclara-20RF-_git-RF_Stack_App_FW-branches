@@ -1182,7 +1182,7 @@ static void MAC_PHY_CheckForFailure( void )
       }
    }
 #elif ( MCU_SELECTED == RA6E1 )
-   if ( ( DataReqTime.tickCount != 0 ) || ( DataReqTime.xNumOfOverflows != 0 ) )
+   if ( ( DataReqTime.HW_TICKS != 0 ) || ( DataReqTime.tickCount != 0 ) )
    {
       // Check if PHY as been accessed recently
       OS_TICK_Get_CurrentElapsedTicks(&time);
@@ -5390,7 +5390,7 @@ static bool Process_DataReq( buffer_t *pBuf )
                _time_get_elapsed_ticks(&DataReqTime);
             }
 #elif ( MCU_SELECTED == RA6E1 )
-            if ( ( DataReqTime.tickCount == 0 ) && (DataReqTime.xNumOfOverflows == 0) )
+            if ( ( DataReqTime.HW_TICKS == 0 ) && (DataReqTime.tickCount == 0) )
             {
                OS_TICK_Get_CurrentElapsedTicks(&DataReqTime);
             }
