@@ -883,12 +883,11 @@ uint32_t calc_period(uint32_t average, uint32_t value)
 #if ( MCU_SELECTED == NXP_K24 )
 static void ZCD_hwIsr( void )
 #elif ( MCU_SELECTED == RA6E1 )
-uint32_t iCapture_overflows = 0U;
-uint64_t captured_time     = 0U;
 void ZCD_hwIsr(timer_callback_args_t * p_args)
 #endif
 {
 #if ( MCU_SELECTED == RA6E1 )
+   static uint32_t   iCapture_overflows = 0U;
    if ( ( TIMER_EVENT_CAPTURE_A == p_args->event ) || ( TIMER_EVENT_CAPTURE_B == p_args->event ) )
 #endif
    {
@@ -899,7 +898,6 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       static uint16_t   currentFTM;
       static uint16_t   capturedValue;
 #elif ( MCU_SELECTED == RA6E1 )
-//      timer_status_t    status;
       timer_info_t      info;
       static uint32_t   currentFTM;
       static uint32_t   capturedValue;
@@ -912,19 +910,6 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       currentFTM    = (uint16_t)FTM3_CNT;
       capturedValue = (uint16_t)FTM3_C1V; // Save current captured value
 #elif ( MCU_SELECTED == RA6E1 )
-#if 0 // AGT
-      (void) R_AGT_InfoGet(&AGT5_ZCD_Meter_ctrl, &info);
-      uint32_t period = info.period_counts;
-      /* Read the current counter value. Counter value is in status.counter. */
-      (void)R_AGT_StatusGet( &AGT5_ZCD_Meter_ctrl, &status );
-      /* Process capture from AGTIO. */
-      captured_time     = ((uint64_t) period * iCapture_overflows) + p_args->capture;
-      iCapture_overflows = 0U;
-      cycleCounter  = DWT->CYCCNT;
-      currentFTM    = (uint16_t)status.counter;
-//      R_AGT_InfoGet() --> Period Count
-      capturedValue = (uint16_t)p_args->capture; // TODO: RA6E1: Consider Overflow & period
-#else // GPT
       (void) R_GPT_InfoGet(&GPT2_ZCD_Meter_ctrl, &info);
       uint64_t period = info.period_counts;
       /* The maximum period is one more than the maximum 32-bit number, but will be reflected as 0 in
@@ -937,7 +922,6 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       iCapture_overflows = 0;
       cycleCounter       = DWT->CYCCNT;
       currentFTM         = R_GPT2->GTCNT;
-#endif
 #endif
       __set_PRIMASK(primask); // Restore interrupts
 
@@ -961,11 +945,13 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
          zc.Period = calc_period( zc.Period, delta);
       }
    }
+#if ( MCU_SELECTED == RA6E1 )
    if (TIMER_EVENT_CYCLE_END == p_args->event)
    {
       /* An overflow occurred during capture. This must be accounted for at the application layer. */
       iCapture_overflows++;
    }
+#endif
 }
 
 

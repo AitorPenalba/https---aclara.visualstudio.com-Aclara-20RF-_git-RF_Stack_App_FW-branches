@@ -1022,7 +1022,6 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    uint16_t capturedFTM;
    uint16_t delayFTM;
 #elif ( MCU_SELECTED == RA6E1 )
-   timer_info_t   info;
    uint64_t       period;
    uint32_t       currentFTM;
    uint32_t       capturedFTM;
@@ -1035,16 +1034,9 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    currentFTM     = (uint16_t)FTM1_CNT; // Connected to radio interrupt
    capturedFTM    = (uint16_t)FTM1_C0V; // Captured counter when radio interrupt happened
 #elif ( MCU_SELECTED == RA6E1 )
-   (void) R_GPT_InfoGet(&GPT1_Radio0_ICapture_ctrl, &info);
-   period = info.period_counts;
-   /* The maximum period is one more than the maximum 32-bit number, but will be reflected as 0 in
-   * timer_info_t::period_counts. */
-   if (0U == period)
-   {
-      period = UINT32_MAX + 1U;
-   }
+   period         = R_GPT1->GTPR + 1;   // Duplicating the FSP function R_GPT_InfoGet()
    capturedFTM    = (uint32_t)(period * iCapture_overflows) + R_GPT1->GTCCR[0]; // Captured counter when radio interrupt happened; 0 = GPT_PRV_CAPTURE_EVENT_A
-   iCapture_overflows = 0; // Clear
+   iCapture_overflows = 0;
    cycleCounter   = DWT->CYCCNT;
    currentFTM     = R_GPT1->GTCNT;    // Connected to radio interrupt
 #endif
