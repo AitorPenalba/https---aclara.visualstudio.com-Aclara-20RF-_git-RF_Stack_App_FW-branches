@@ -354,7 +354,6 @@ returnStatus_t PD_init ( void )
       (void)FTM3_Channel_Enable( 1, FTM_CnSC_CHIE_MASK | FTM_CnSC_ELSA_MASK, ZCD_hwIsr );
       HMC_ZCD_METER_TRIS(); // Map ZCD_METER signal to FTM3_CH1
 #elif ( MCU_SELECTED == RA6E1 )
-      // TODO: RA6E1 Bob: Need to set up the AGT to capture time from P114, ZCD_METER signal
 //      AGT_PD_Enable();
       GPT_PD_Enable();
 #endif

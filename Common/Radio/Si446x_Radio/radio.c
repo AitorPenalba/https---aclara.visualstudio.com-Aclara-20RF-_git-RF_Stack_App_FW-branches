@@ -898,7 +898,6 @@ void RADIO_Update_Freq_Watchdog(void)
       if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
 
 #endif
-
          RADIO_Update_Freq();
       }
    }
@@ -2516,7 +2515,7 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    RDO_0_IRQ_TRIS(); // Make CPU pin IRQ_Si4460 into FTM1_CH0 to capture when a radio interrupt happens
 
    // Configure FTM1_CH0 to capture timer when radio IRQ is detected.
-#if ( MCU_SELECTED == NXP_K24 ) //TODO: Add the AGT Timer module for input capture
+#if ( MCU_SELECTED == NXP_K24 )
    (void)FTM1_Channel_Enable( 0, FTM_CnSC_CHIE_MASK | FTM_CnSC_ELSB_MASK, Radio0_IRQ_ISR ); // Capture on falling edge
 #elif ( MCU_SELECTED == RA6E1 )
    GPT_Radio0_Enable();
@@ -5233,7 +5232,7 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
       PWR_USE_BOOST();
 #else
       PWR_3V6BOOST_EN_TRIS_ON();
-      R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS); // TODO: RA6E1 Bob: should not need '/2' -- test it in HW
+      R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000, BSP_DELAY_UNITS_MICROSECONDS);
       PWR_3P6LDO_EN_TRIS_OFF();
 #endif
 #if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
@@ -5244,7 +5243,7 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
       if ( fSuperCapV < SUPER_CAP_MIN_VOLTAGE ) {
 #if 0
          PWR_3P6LDO_EN_TRIS_ON();
-         R_BSP_SoftwareDelay (((uint32_t)PWR_3P6LDO_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS);
+         R_BSP_SoftwareDelay (((uint32_t)PWR_3P6LDO_EN_ON_DLY_MS)*1000, BSP_DELAY_UNITS_MICROSECONDS);
          PWR_3V6BOOST_EN_TRIS_OFF();
 #else
          PWR_USE_LDO();
