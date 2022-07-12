@@ -220,16 +220,6 @@ extern const timer_cfg_t GPT1_Radio0_ICapture_cfg;
 #ifndef Radio0_IC_ISR
 void Radio0_IC_ISR(timer_callback_args_t * p_args);
 #endif
-/** AGT Timer Instance */
-extern const timer_instance_t AGT5_ZCD_Meter;
-
-/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
-extern agt_instance_ctrl_t AGT5_ZCD_Meter_ctrl;
-extern const timer_cfg_t AGT5_ZCD_Meter_cfg;
-
-#ifndef NULL
-void NULL(timer_callback_args_t * p_args);
-#endif
 /* RTC Instance. */
 extern const rtc_instance_t g_rtc0;
 

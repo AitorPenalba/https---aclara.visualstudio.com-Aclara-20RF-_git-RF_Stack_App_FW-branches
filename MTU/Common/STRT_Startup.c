@@ -238,7 +238,6 @@ const STRT_FunctionList_t startUpTbl[] =
 #if ( MCU_SELECTED == NXP_K24 )
    INIT( FTM3_Init, STRT_FLAG_LAST_GASP),
 #elif ( MCU_SELECTED == RA6E1 )
-//   INIT( AGT_PD_Init, STRT_FLAG_NONE ),
    INIT( GPT_PD_Init, STRT_FLAG_NONE ),
 #endif
 #if ( PHASE_DETECTION == 1 )                                                // Used for ZCD_METER interrupt (FTM3_CH1). Must be before PD_init.
@@ -360,7 +359,7 @@ const STRT_FunctionList_t startUpTbl[] =
 #if ( MCU_SELECTED == NXP_K24 )
    INIT( FTM3_Init, STRT_FLAG_LAST_GASP),
 #elif ( MCU_SELECTED == RA6E1 )
-   INIT ( AGT_PD_Init, STRT_FLAG_NONE ),
+   INIT( GPT_PD_Init, STRT_FLAG_NONE ),
 #endif
 #if ( PHASE_DETECTION == 1 )                                                // Used for ZCD_METER interrupt (FTM3_CH1). Must be before PD_init.
    INIT( PD_init, STRT_FLAG_NONE ),

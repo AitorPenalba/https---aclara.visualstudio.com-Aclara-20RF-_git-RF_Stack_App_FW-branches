@@ -53,7 +53,17 @@
 
 /* FUNCTION DEFINITIONS */
 
-/* ADD */
+/*********************************************************************************************************************
+
+   Function name: GPT_PD_Init
+
+   Purpose: Initializes the GPT for Phase Detect as an Input Capture
+
+   Arguments: None
+
+   Returns: FSP_SUCCESS - Upon successful initialization
+
+**********************************************************************************************************************/
 returnStatus_t GPT_PD_Init( void )
 {
    fsp_err_t err = FSP_SUCCESS;
@@ -67,8 +77,17 @@ returnStatus_t GPT_PD_Init( void )
    return (returnStatus_t)err;
 }
 
-/* ADD */
+/*********************************************************************************************************************
 
+   Function name: GPT_PD_Enable
+
+   Purpose: Enables and Starts the GPT used in PhaseDetect
+
+   Arguments: None
+
+   Returns: None
+
+**********************************************************************************************************************/
 void GPT_PD_Enable( void )
 {
    /* Enable captures. Captured values arrive in the interrupt. */
@@ -76,7 +95,17 @@ void GPT_PD_Enable( void )
    (void) R_GPT_Start(&GPT2_ZCD_Meter_ctrl);
 }
 
-/* ADD */
+/*********************************************************************************************************************
+
+   Function name: GPT_PD_Disable
+
+   Purpose: This function disables the GPT used in PhaseDetect
+
+   Arguments: None
+
+   Returns: None
+
+**********************************************************************************************************************/
 void GPT_PD_Disable( void )
 {
    /* Disables captures. */
@@ -84,11 +113,21 @@ void GPT_PD_Disable( void )
 }
 
 
-/* ADD */
+/*********************************************************************************************************************
+
+   Function name: GPT_Radio0_Init
+
+   Purpose: Initializes the GPT for Radio0 ISR as Input Capture
+
+   Arguments: None
+
+   Returns: FSP_SUCCESS - Upon successful initialization
+
+**********************************************************************************************************************/
 returnStatus_t GPT_Radio0_Init( void )
 {
    fsp_err_t err = FSP_SUCCESS;
-//   R_BSP_MODULE_START(FSP_IP_POEG, 0U);
+
    /* Initializes the module. */
    err = R_GPT_Open(&GPT1_Radio0_ICapture_ctrl, &GPT1_Radio0_ICapture_cfg);
 
@@ -98,8 +137,17 @@ returnStatus_t GPT_Radio0_Init( void )
    return (returnStatus_t)err;
 }
 
-/* ADD */
+/*********************************************************************************************************************
 
+   Function name: GPT_Radio0_Enable
+
+   Purpose: Enables and Starts the GPT used in Radio0 ISR
+
+   Arguments: None
+
+   Returns: None
+
+**********************************************************************************************************************/
 void GPT_Radio0_Enable( void )
 {
    /* Enable captures. Captured values arrive in the interrupt. */
@@ -107,7 +155,17 @@ void GPT_Radio0_Enable( void )
    (void) R_GPT_Start(&GPT1_Radio0_ICapture_ctrl);
 }
 
-/* ADD */
+/*********************************************************************************************************************
+
+   Function name: GPT_Radio0_Disable
+
+   Purpose: This function disables the GPT used in Radio ISR
+
+   Arguments: None
+
+   Returns: None
+
+**********************************************************************************************************************/
 void GPT_Radio0_Disable( void )
 {
    /* Disables captures. */

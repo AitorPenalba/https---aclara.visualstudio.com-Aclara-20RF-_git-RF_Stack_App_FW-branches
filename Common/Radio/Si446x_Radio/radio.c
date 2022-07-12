@@ -5227,27 +5227,17 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
    if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
 #endif
    if ( boost ) {
-#if 0 // TODO: RA6E1 Bob: this was done temporarily since the other delay function did not seem to be working.  Need to debug original function.
       // Turn on boost
       PWR_USE_BOOST();
-#else
-      PWR_3V6BOOST_EN_TRIS_ON();
-      R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000, BSP_DELAY_UNITS_MICROSECONDS);
-      PWR_3P6LDO_EN_TRIS_OFF();
-#endif
+
 #if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       // Get voltage
       fSuperCapV = ADC_Get_SC_Voltage();
 #endif
       // Make sure the capacitor voltage is high enough to compute noise estimate with boost turned on.
       if ( fSuperCapV < SUPER_CAP_MIN_VOLTAGE ) {
-#if 0
-         PWR_3P6LDO_EN_TRIS_ON();
-         R_BSP_SoftwareDelay (((uint32_t)PWR_3P6LDO_EN_ON_DLY_MS)*1000, BSP_DELAY_UNITS_MICROSECONDS);
-         PWR_3V6BOOST_EN_TRIS_OFF();
-#else
+
          PWR_USE_LDO();
-#endif
 #if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
          INFO_printf("vf %u", (uint32_t)(fSuperCapV*100));
 #endif

@@ -28,8 +28,6 @@
 #if ( MCU_SELECTED == NXP_K24 )
 #include <bsp.h>
 #include "FTM.h"
-#elif ( MCU_SELECTED == RA6E1 )
-#include "AGT.h"
 #endif
 #include "file_io.h"
 #include "timer_util.h"
