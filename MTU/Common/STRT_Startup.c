@@ -135,7 +135,9 @@
 #include "hmc_display.h"
 #endif
 #include "version.h"
+#if ( MCU_SELECTED == NXP_K24 )
 #include "FTM.h" // Used for radio interrupt (FTM1_CH0), radio TCXO (FTM1_CH1) and ZCD_METER interrupt (FTM3_CH1)
+#endif
 
 /* #DEFINE DEFINITIONS */
 #define PRINT_CPU_STATS_IN_SEC 5 /* Print the Cpu statistics every x seconds */
@@ -167,6 +169,7 @@ static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_OFF;
 /* Power Up Table - Define all modules that require initialization below. */
 const STRT_FunctionList_t startUpTbl[] =
 {
+#if 1 // TODO: RA6: Add later
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               // Initialize the IWDT
    INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
@@ -232,6 +235,14 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SMTDCFG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+#if ( MCU_SELECTED == NXP_K24 )
+   INIT( FTM3_Init, STRT_FLAG_LAST_GASP),
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_PD_Init, STRT_FLAG_NONE ),
+#endif
+#if ( PHASE_DETECTION == 1 )                                                // Used for ZCD_METER interrupt (FTM3_CH1). Must be before PD_init.
+   INIT( PD_init, STRT_FLAG_NONE ),
+#endif
 #if ( USE_DTLS == 1 )
    INIT( DTLS_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
 #endif
@@ -255,8 +266,13 @@ const STRT_FunctionList_t startUpTbl[] =
 #if ENABLE_PWR_TASKS
    INIT( PWR_printResetCause, STRT_FLAG_NONE ),                   //Prints the reset cause
 #endif
+#if ( MCU_SELECTED == NXP_K24 )
+   INIT( FTM1_Init, STRT_FLAG_LAST_GASP )                         // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_Radio0_Init, STRT_FLAG_LAST_GASP )                   // Used for radio interrupt (GPT) and radio TCXO (FTM1_CH1).
+#endif
 
-#if 0 // TODO: RA6: Add later
+#else  // TODO: RA6E1: This is the actual list
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS
    INIT( PWR_waitForStablePower, STRT_FLAG_NONE ),
@@ -340,7 +356,11 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SMTDCFG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+#if ( MCU_SELECTED == NXP_K24 )
    INIT( FTM3_Init, STRT_FLAG_LAST_GASP),
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_PD_Init, STRT_FLAG_NONE ),
+#endif
 #if ( PHASE_DETECTION == 1 )                                                // Used for ZCD_METER interrupt (FTM3_CH1). Must be before PD_init.
    INIT( PD_init, STRT_FLAG_NONE ),
 #endif
@@ -370,13 +390,17 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( HMC_DISP_Init, STRT_FLAG_NONE ),
 #endif
    INIT( LED_init, STRT_FLAG_NONE ),                              // LED init must happen after version init as it requires HW rev letter
-#if ( HMC_I210_PLUS_C == 1 )                                      // TODO: Verify the changes GIPO Pin configs for other EPs, and then make necessary changes
+#if ( ( HMC_I210_PLUS_C == 1 ) && ( MCU_SELECTED == NXP_K24 ) )   // TODO: Verify the changes GIPO Pin configs for other EPs, and then make necessary changes
    INIT( IO_init, STRT_FLAG_NONE ),                               // Configuring the GPIOs
 #endif
 #if ENABLE_PWR_TASKS
    INIT( PWR_printResetCause, STRT_FLAG_NONE ),                   //Prints the reset cause
 #endif
-   INIT( FTM1_Init, STRT_FLAG_LAST_GASP)                           // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+#if ( MCU_SELECTED == NXP_K24 )
+   INIT( FTM1_Init, STRT_FLAG_LAST_GASP )                           // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_Radio0_Init, STRT_FLAG_LAST_GASP )                      // Used for radio interrupt (GPT) and radio TCXO (FTM1_CH1).
+#endif
 #endif /* #if 0*/
 };
 

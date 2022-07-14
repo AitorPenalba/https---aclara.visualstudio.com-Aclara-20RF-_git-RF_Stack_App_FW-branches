@@ -201,9 +201,13 @@
 #endif
 
 /* Use selected regulator */
+#if ( RTOS_SELECTION == MQX_RTOS )
 #define PWR_USE_LDO()            { PWR_3P6LDO_EN_TRIS_ON();   OS_TASK_Sleep( PWR_3P6LDO_EN_ON_DLY_MS );   PWR_3V6BOOST_EN_TRIS_OFF(); }
 #define PWR_USE_BOOST()          { PWR_3V6BOOST_EN_TRIS_ON(); OS_TASK_Sleep( PWR_3V6BOOST_EN_ON_DLY_MS ); PWR_3P6LDO_EN_TRIS_OFF(); }
-
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define PWR_USE_LDO()            { PWR_3P6LDO_EN_TRIS_ON();   R_BSP_SoftwareDelay (((uint32_t)PWR_3P6LDO_EN_ON_DLY_MS)*1000, BSP_DELAY_UNITS_MICROSECONDS);   PWR_3V6BOOST_EN_TRIS_OFF(); }
+#define PWR_USE_BOOST()          { PWR_3V6BOOST_EN_TRIS_ON(); R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000, BSP_DELAY_UNITS_MICROSECONDS); PWR_3P6LDO_EN_TRIS_OFF(); }
+#endif
 
 /* Regulator selected? */
 #if ( MCU_SELECTED == NXP_K24 )

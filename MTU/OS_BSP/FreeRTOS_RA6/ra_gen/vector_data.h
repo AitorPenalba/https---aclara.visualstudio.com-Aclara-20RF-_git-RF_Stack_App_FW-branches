@@ -3,7 +3,7 @@
         #define VECTOR_DATA_H
                 /* Number of interrupts allocated */
         #ifndef VECTOR_DATA_IRQ_COUNT
-        #define VECTOR_DATA_IRQ_COUNT    (36)
+        #define VECTOR_DATA_IRQ_COUNT    (39)
         #endif
         /* ISR prototypes */
         void sci_uart_rxi_isr(void);
@@ -18,6 +18,7 @@
         void rtc_alarm_periodic_isr(void);
         void rtc_carry_isr(void);
         void agt_int_isr(void);
+        void gpt_counter_overflow_isr(void);
         void gpt_capture_a_isr(void);
         void spi_rxi_isr(void);
         void spi_txi_isr(void);
@@ -25,6 +26,7 @@
         void spi_eri_isr(void);
         void fcu_frdyi_isr(void);
         void fcu_fiferr_isr(void);
+        void gpt_capture_b_isr(void);
 
         /* Vector table allocations */
         #define VECTOR_NUMBER_SCI2_RXI ((IRQn_Type) 0) /* SCI2 RXI (Received data full) */
@@ -75,28 +77,34 @@
         #define RTC_CARRY_IRQn          ((IRQn_Type) 22) /* RTC CARRY (Carry interrupt) */
         #define VECTOR_NUMBER_AGT5_INT ((IRQn_Type) 23) /* AGT5 INT (AGT interrupt) */
         #define AGT5_INT_IRQn          ((IRQn_Type) 23) /* AGT5 INT (AGT interrupt) */
-        #define VECTOR_NUMBER_GPT1_CAPTURE_COMPARE_A ((IRQn_Type) 24) /* GPT1 CAPTURE COMPARE A (Compare match A) */
-        #define GPT1_CAPTURE_COMPARE_A_IRQn          ((IRQn_Type) 24) /* GPT1 CAPTURE COMPARE A (Compare match A) */
-        #define VECTOR_NUMBER_SPI1_RXI ((IRQn_Type) 25) /* SPI1 RXI (Receive buffer full) */
-        #define SPI1_RXI_IRQn          ((IRQn_Type) 25) /* SPI1 RXI (Receive buffer full) */
-        #define VECTOR_NUMBER_SPI1_TXI ((IRQn_Type) 26) /* SPI1 TXI (Transmit buffer empty) */
-        #define SPI1_TXI_IRQn          ((IRQn_Type) 26) /* SPI1 TXI (Transmit buffer empty) */
-        #define VECTOR_NUMBER_SPI1_TEI ((IRQn_Type) 27) /* SPI1 TEI (Transmission complete event) */
-        #define SPI1_TEI_IRQn          ((IRQn_Type) 27) /* SPI1 TEI (Transmission complete event) */
-        #define VECTOR_NUMBER_SPI1_ERI ((IRQn_Type) 28) /* SPI1 ERI (Error) */
-        #define SPI1_ERI_IRQn          ((IRQn_Type) 28) /* SPI1 ERI (Error) */
-        #define VECTOR_NUMBER_FCU_FRDYI ((IRQn_Type) 29) /* FCU FRDYI (Flash ready interrupt) */
-        #define FCU_FRDYI_IRQn          ((IRQn_Type) 29) /* FCU FRDYI (Flash ready interrupt) */
-        #define VECTOR_NUMBER_FCU_FIFERR ((IRQn_Type) 30) /* FCU FIFERR (Flash access error interrupt) */
-        #define FCU_FIFERR_IRQn          ((IRQn_Type) 30) /* FCU FIFERR (Flash access error interrupt) */
-        #define VECTOR_NUMBER_AGT0_INT ((IRQn_Type) 31) /* AGT0 INT (AGT interrupt) */
-        #define AGT0_INT_IRQn          ((IRQn_Type) 31) /* AGT0 INT (AGT interrupt) */
-        #define VECTOR_NUMBER_ICU_IRQ13 ((IRQn_Type) 32) /* ICU IRQ13 (External pin interrupt 13) */
-        #define ICU_IRQ13_IRQn          ((IRQn_Type) 32) /* ICU IRQ13 (External pin interrupt 13) */
-        #define VECTOR_NUMBER_AGT1_INT ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
-        #define AGT1_INT_IRQn          ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
-        #define VECTOR_NUMBER_ICU_IRQ14 ((IRQn_Type) 34) /* ICU IRQ14 (External pin interrupt 14) */
-        #define ICU_IRQ14_IRQn          ((IRQn_Type) 34) /* ICU IRQ14 (External pin interrupt 14) */
-        #define VECTOR_NUMBER_ICU_IRQ4 ((IRQn_Type) 35) /* ICU IRQ4 (External pin interrupt 4) */
-        #define ICU_IRQ4_IRQn          ((IRQn_Type) 35) /* ICU IRQ4 (External pin interrupt 4) */
+        #define VECTOR_NUMBER_GPT1_COUNTER_OVERFLOW ((IRQn_Type) 24) /* GPT1 COUNTER OVERFLOW (Overflow) */
+        #define GPT1_COUNTER_OVERFLOW_IRQn          ((IRQn_Type) 24) /* GPT1 COUNTER OVERFLOW (Overflow) */
+        #define VECTOR_NUMBER_GPT1_CAPTURE_COMPARE_A ((IRQn_Type) 25) /* GPT1 CAPTURE COMPARE A (Compare match A) */
+        #define GPT1_CAPTURE_COMPARE_A_IRQn          ((IRQn_Type) 25) /* GPT1 CAPTURE COMPARE A (Compare match A) */
+        #define VECTOR_NUMBER_SPI1_RXI ((IRQn_Type) 26) /* SPI1 RXI (Receive buffer full) */
+        #define SPI1_RXI_IRQn          ((IRQn_Type) 26) /* SPI1 RXI (Receive buffer full) */
+        #define VECTOR_NUMBER_SPI1_TXI ((IRQn_Type) 27) /* SPI1 TXI (Transmit buffer empty) */
+        #define SPI1_TXI_IRQn          ((IRQn_Type) 27) /* SPI1 TXI (Transmit buffer empty) */
+        #define VECTOR_NUMBER_SPI1_TEI ((IRQn_Type) 28) /* SPI1 TEI (Transmission complete event) */
+        #define SPI1_TEI_IRQn          ((IRQn_Type) 28) /* SPI1 TEI (Transmission complete event) */
+        #define VECTOR_NUMBER_SPI1_ERI ((IRQn_Type) 29) /* SPI1 ERI (Error) */
+        #define SPI1_ERI_IRQn          ((IRQn_Type) 29) /* SPI1 ERI (Error) */
+        #define VECTOR_NUMBER_FCU_FRDYI ((IRQn_Type) 30) /* FCU FRDYI (Flash ready interrupt) */
+        #define FCU_FRDYI_IRQn          ((IRQn_Type) 30) /* FCU FRDYI (Flash ready interrupt) */
+        #define VECTOR_NUMBER_FCU_FIFERR ((IRQn_Type) 31) /* FCU FIFERR (Flash access error interrupt) */
+        #define FCU_FIFERR_IRQn          ((IRQn_Type) 31) /* FCU FIFERR (Flash access error interrupt) */
+        #define VECTOR_NUMBER_AGT0_INT ((IRQn_Type) 32) /* AGT0 INT (AGT interrupt) */
+        #define AGT0_INT_IRQn          ((IRQn_Type) 32) /* AGT0 INT (AGT interrupt) */
+        #define VECTOR_NUMBER_ICU_IRQ13 ((IRQn_Type) 33) /* ICU IRQ13 (External pin interrupt 13) */
+        #define ICU_IRQ13_IRQn          ((IRQn_Type) 33) /* ICU IRQ13 (External pin interrupt 13) */
+        #define VECTOR_NUMBER_AGT1_INT ((IRQn_Type) 34) /* AGT1 INT (AGT interrupt) */
+        #define AGT1_INT_IRQn          ((IRQn_Type) 34) /* AGT1 INT (AGT interrupt) */
+        #define VECTOR_NUMBER_ICU_IRQ14 ((IRQn_Type) 35) /* ICU IRQ14 (External pin interrupt 14) */
+        #define ICU_IRQ14_IRQn          ((IRQn_Type) 35) /* ICU IRQ14 (External pin interrupt 14) */
+        #define VECTOR_NUMBER_ICU_IRQ4 ((IRQn_Type) 36) /* ICU IRQ4 (External pin interrupt 4) */
+        #define ICU_IRQ4_IRQn          ((IRQn_Type) 36) /* ICU IRQ4 (External pin interrupt 4) */
+        #define VECTOR_NUMBER_GPT2_COUNTER_OVERFLOW ((IRQn_Type) 37) /* GPT2 COUNTER OVERFLOW (Overflow) */
+        #define GPT2_COUNTER_OVERFLOW_IRQn          ((IRQn_Type) 37) /* GPT2 COUNTER OVERFLOW (Overflow) */
+        #define VECTOR_NUMBER_GPT2_CAPTURE_COMPARE_B ((IRQn_Type) 38) /* GPT2 CAPTURE COMPARE B (Compare match B) */
+        #define GPT2_CAPTURE_COMPARE_B_IRQn          ((IRQn_Type) 38) /* GPT2 CAPTURE COMPARE B (Compare match B) */
         #endif /* VECTOR_DATA_H */

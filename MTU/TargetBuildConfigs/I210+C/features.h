@@ -59,13 +59,13 @@
 #define LOG_IN_METER                      1
 #define OPTICAL_PASS_THROUGH              0
 #define SAMPLE_METER_TEMPERATURE          0  /* Is sampling the meter's thermometer required, some meter's do this on their own */
-#define LOAD_CONTROL_DEVICE               0  /* 1 -> supports load control and signed multicast messages.   */
+#define LOAD_CONTROL_DEVICE               1  /* 1 -> supports load control and signed multicast messages.   */
 #define END_DEVICE_PROGRAMMING_CONFIG     1  /* Supports configuration of the meter by programming/writing tables */
 #define END_DEVICE_PROGRAMMING_FLASH      ED_PROG_FLASH_PATCH_ONLY  /* Supports programming of the meter Flash */
 #define END_DEVICE_PROGRAMMING_DISPLAY    1  /* Supports the ability to write to the meter display */
 #define VSWR_MEASUREMENT                  0  /* Supports VSWR measurements of antenna */
 #define PHASE_DETECTION                   1  /* Supports Phase Detection */
-#define LAST_GASP_SIMULATION              0  /* Supports Last Gasp Simulation Feature */
+#define LAST_GASP_SIMULATION              1  /* Supports Last Gasp Simulation Feature */ // TODO: RA6E1: Enable and verify this feature
 #define MAC_LINK_PARAMETERS               0  /* Supports Decoding MAC Link Parameters Messages */
 #define MAC_CMD_RESP_TIME_DIVERSITY       0  /* Not an EP feature */
 #define TX_THROTTLE_CONTROL               0  /* 0=No Tx Throttling, 1=Tx Throttling */
