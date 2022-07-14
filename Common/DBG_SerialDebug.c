@@ -103,7 +103,7 @@ static OS_MUTEX_Obj     mutex_;
 static OS_MUTEX_Obj     logPrintf_mutex_;
 static OS_MUTEX_Obj     DBG_logPrintHex_mutex_;
 static OS_MSGQ_Obj      mQueueHandle_;                      /* Message Queue Handle */
-//static _task_id         taskPrintFilter_;                   /* If set, only print messages from this task id   */
+static OS_TASK_id       taskPrintFilter_;                   /* If set, only print messages from this task id   */
 static uint16_t         line_num_ = 0;                      /* Line number used by DBG_log */
 #if ENABLE_TMR_TASKS
 static uint16_t         PortTimerID = INVALID_TIMER_ID;     /* Debug port timeout timer ID  */
@@ -180,7 +180,6 @@ returnStatus_t DBG_init( void )
          OS_MUTEX_Create( &logPrintf_mutex_ ) &&
          OS_MUTEX_Create( &DBG_logPrintHex_mutex_ ) )
    {
-#if 1 // TODO: RA6: DG: Enable this code when the FIO issue is resolved.
       if ( eSUCCESS == FIO_fopen(&dbgFileHndl_,                 /* File Handle so that PHY access the file. */
                                  ePART_SEARCH_BY_TIMING,        /* Search for the best partition according to the timing. */
                                  (uint16_t) eFN_DBG_CONFIG,     /* File ID (filename) */
@@ -202,13 +201,6 @@ returnStatus_t DBG_init( void )
             retVal = FIO_fread( &dbgFileHndl_, (uint8_t *)&ConfigAttr, 0, (lCnt)sizeof(DBG_ConfigAttr_t));
          }
       }
-#else
-      // TODO: RA6: Enabling the DBG Port All the time
-      ConfigAttr.version        = DBG_PORT_CONFIG_VERSION;   // File Format Version Default
-      ConfigAttr.PortTimeout_hh = 255;  // Port Enabled
-      ConfigAttr.echoState      = DBG_PORT_ECHO_DEFAULT;     // Echo ON
-      retVal = eSUCCESS;
-#endif
    }
 #if (TM_SEMAPHORE == 1)
 OS_SEM_TestCreate();
@@ -220,8 +212,8 @@ OS_MSGQ_TestCreate();
 OS_EVENT_TestCreate();
 #endif
 
-//   DBG_PortTimer_Manage ( );
-//   DBG_PortEcho_Set( DBG_PortEcho_Get() ); // Get the echo setting and update the current UART setting
+   DBG_PortTimer_Manage ( );
+   DBG_PortEcho_Set( DBG_PortEcho_Get() ); // Get the echo setting and update the current UART setting
    return( retVal );
 }
 /***********************************************************************************************************************
@@ -260,7 +252,6 @@ void DBG_TxTask( taskParameter )
 #endif
       OS_MUTEX_Unlock( &mutex_ ); // Function will not return if it fails
       BM_free( pBuf );
-
    }
 }  /*lint !e715 !e818  pvParameters is not used */
 
@@ -294,11 +285,9 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
 #endif
       )
    {
-#if (MQX_RTOS == 1)
       if (( taskPrintFilter_ == 0 )            ||                /* Filter active? */
-            taskPrintFilter_ == _task_get_id() ||                /* Filter match?  */
-            _task_get_id() == _task_get_id_from_name( "DBG" ) )  /* DBG task */
-#endif
+            taskPrintFilter_ == OS_TASK_GetId() ||                /* Filter match?  */
+            OS_TASK_GetId() == OS_TASK_GetID_fromName( "DBG" ) )  /* DBG task */
       {
          OS_MUTEX_Lock( &logPrintf_mutex_ ); // Function will not return if it fails
 
@@ -312,6 +301,7 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
             /* DEVELOPER NOTE:  Update DBG_SIZE_OF_LINE_COUNT_AND_CATEGORY #def if you modify the below line */
             len += (uint16_t)snprintf( logPrintf_buf, (int32_t)sizeof( logPrintf_buf ), "[%05d %c]", ++line_num_, category );
          }
+
          // Build time/data header
          if ( options & PRINT_DATE_TIME )
          {
@@ -520,7 +510,7 @@ char * DBG_printFloat( char *str, float f, uint32_t precision )
    return str;
 }
 
-#if (MQX_RTOS == 1)  /* TODO: RA6E1: Add Support*/
+
 /***********************************************************************************************************************
 
    Function name: DBG_SetTaskFilter()
@@ -532,7 +522,7 @@ char * DBG_printFloat( char *str, float f, uint32_t precision )
    Returns: none
 
  **********************************************************************************************************************/
-void DBG_SetTaskFilter( _task_id tid )
+void DBG_SetTaskFilter( OS_TASK_id tid )
 {
    taskPrintFilter_ = tid;
 }
@@ -547,11 +537,11 @@ void DBG_SetTaskFilter( _task_id tid )
    Returns: tid - mqx task id
 
  **********************************************************************************************************************/
-_task_id DBG_GetTaskFilter(  void )
+OS_TASK_id DBG_GetTaskFilter( void )
 {
    return ( taskPrintFilter_ );
 }
-#endif // #if (MQX_RTOS == 1)
+
 /*******************************************************************************
 
    Function name: DBG_PortEcho_Get

@@ -85,8 +85,8 @@ void           DBG_DisableDebug ( void );
 bool           DBG_GetDebug ( void );
 void           DBG_processMfgPortCmd(uint8_t const *pSrc, uint16_t len);
 char          *DBG_printFloat(char *str, float f, uint32_t precision);
-//void           DBG_SetTaskFilter( _task_id tid );  /* TODO: RA6E1: Add Support*/
-//_task_id       DBG_GetTaskFilter(  void );         /* TODO: RA6E1: Add Support*/
+void           DBG_SetTaskFilter( OS_TASK_id tid );
+OS_TASK_id     DBG_GetTaskFilter(  void );
 #if 0 /* TODO: RA6E1: Add Support*/
 void           DBG_LW_printf( char const *fmt, ... );
 #endif

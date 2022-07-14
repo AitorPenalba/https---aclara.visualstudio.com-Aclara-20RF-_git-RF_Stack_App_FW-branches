@@ -354,7 +354,6 @@ returnStatus_t PD_init ( void )
 #elif ( MCU_SELECTED == RA6E1 )
       GPT_PD_Enable();
 #endif
-
       PD_AddSysTimer();
    }
    return ( retVal );

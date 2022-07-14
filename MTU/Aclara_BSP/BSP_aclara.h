@@ -206,10 +206,13 @@ extern float       ADC_Get_SC_Voltage        ( void );
 extern float       ADC_Get_4V0_Voltage       ( void );
 extern float       ADC_GetHWRevVoltage       ( void );
 extern uint8_t     ADC_GetHWRevLetter        ( void );
-
+#if ( MCU_SELECTED == NXP_K24 )
 extern char const *BSP_Get_BspRevision       ( void );
 extern char const *BSP_Get_IoRevision        ( void );
 extern char const *BSP_Get_PspRevision       ( void );
+#elif ( MCU_SELECTED == RA6E1 )
+extern char const *BSP_Get_BSPVersion        ( void );
+#endif
 extern uint16_t    BSP_Get_ResetStatus       ( void );
 extern void        BSP_Setup_VREF            ( void );
 

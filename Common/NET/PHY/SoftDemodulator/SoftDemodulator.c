@@ -509,10 +509,8 @@ void SD_PreambleDetectorTask(taskParameter)
                // unblock a new Sync and Payload Demodulator Task
                bool unblocked = SD_Unblock_Sync_Payload_Task();
 
-#if( RTOS_SELECTION == MQX_RTOS ) //TODO: RA6E1 need check for FreeRTOS
                // clear the flag if previously set
-               (void)_lwevent_clear(&SD_Events, SYNC_DEMOD_TASK_SYNC );
-#endif
+               OS_EVNT_Clear(&SD_Events, SYNC_DEMOD_TASK_SYNC );
 
                if (unblocked)
                {
