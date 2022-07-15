@@ -221,7 +221,27 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
    return ( SetMask );
 } /* end OS_EVNT_Wait () */
 
+/*******************************************************************************
 
+  Function name: OS_EVNT_CLEAR
+
+  Purpose: This function is used to Clear an Event Bit
+
+  Arguments: EventHandle - pointer to the Handle structure of the Event
+             EventMask - Bit Mask of the Events to check
+
+  Returns:   None
+
+*******************************************************************************/
+void OS_EVNT_CLEAR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line )
+{
+   ( void )xEventGroupClearBits( *EventHandle, EventMask );
+}
+
+
+/*******************************************************************************
+                                 TEST CODE
+*******************************************************************************/
 #if( TM_EVENTS == 1 )
 static OS_EVNT_Obj eventObj;
 static OS_EVNT_Handle eventHandle = &eventObj;
@@ -268,4 +288,24 @@ void OS_EVENT_TestSet(void)
   OS_EVNT_Set(eventHandle, BIT_4 );
   return;
 }
+#endif
+
+#if( RTOS_SELECTION == FREE_RTOS )
+/*******************************************************************************
+
+  Function name: OS_EVNT_DELETE
+
+  Purpose: This function is used to delete an event
+
+  Arguments: EventHandle - pointer to the Handle structure of the Event
+
+  Returns: None
+
+  Notes: Function will not return if it fails
+
+*******************************************************************************/
+void OS_EVNT_DELETE ( OS_EVNT_Obj EventObject )
+{
+   vEventGroupDelete( EventObject );
+} /* end OS_EVNT_DELETE () */
 #endif

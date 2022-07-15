@@ -561,7 +561,6 @@ returnStatus_t HMC_STRT_UpdatePasswords( void )
                (void)memset( mtrFileData.pad, 0, sizeof( mtrFileData.pad ) );
                (void)memcpy( mtrFile->data, (uint8_t *)&mtrFileData, sizeof( mtrFileData ) );   /* Copy unencrypted passwords to mtrFile->data  */
 #warning "The encryption of meter passwords is DISABLED in this build.  Do not release this way!"
-// TODO: RA6E1 Bob: bypass encryption of meter passwords temporarily
 //               generateMD5( (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ) ); /* Compute integrity check over the file  */
 //               encryptBuffer( (uint8_t *)&mtrFileData, (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ), key );        /* Encrypt in place  */
                retVal = FIO_fwrite( &fileHndlStart, 0, ( uint8_t * )&mtrFileData, ( lCnt )sizeof( mtrFileData ) );   /* Update the file   */

@@ -61,6 +61,17 @@ uint32_t DBG_CommandLine_OS_EventCreateWait( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] );
 #endif
 
+#if ( TM_LINKED_LIST == 1)
+uint32_t DBG_CommandLine_OS_LinkedList_Create( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] );
+#endif
+
 #if ( DAC_CODE_CONFIG == 1 )
 uint32_t DBG_CommandLine_DAC_SetDacStep ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_setPwrSel ( uint32_t argc, char *argv[] );

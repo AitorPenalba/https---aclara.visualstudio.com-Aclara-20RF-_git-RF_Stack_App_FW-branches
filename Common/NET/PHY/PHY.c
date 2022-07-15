@@ -3471,7 +3471,7 @@ PHY_SET_STATUS_e  PHY_Attribute_Set( PHY_SetReq_t const *pSetReq)
 
 #if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // This function should only be called inside the PHY task
-   if ( _task_get_id() != _task_get_id_from_name( "PHY" ) ) {
+   if ( OS_TASK_GetId() != OS_TASK_GetID_fromName( "PHY" ) ) {
      ERR_printf("WARNING: PHY_Attribute_Set should only be called from the PHY task. Please use PHY_SetRequest instead.");
    }
 #endif
@@ -3634,8 +3634,8 @@ PHY_GET_STATUS_e PHY_Attribute_Get( PHY_GetReq_t const *pGetReq, PHY_ATTRIBUTES_
 
 #if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    // This function should only be called inside the PHY task
-   if ( ( _task_get_id() != _task_get_id_from_name( "PHY" ) )     &&
-        ( _task_get_id() != _task_get_id_from_name( "PSLSNR" ) ) ) {
+   if ( ( OS_TASK_GetId() != OS_TASK_GetID_fromName( "PHY" ) )     &&
+        ( OS_TASK_GetId() != OS_TASK_GetID_fromName( "PSLSNR" ) ) ) {
      ERR_printf("WARNING: PHY_Attribute_Get should only be called from the PHY task. Please use PHY_GetRequest instead.");
    }
 #endif

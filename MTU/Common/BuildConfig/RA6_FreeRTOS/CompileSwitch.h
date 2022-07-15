@@ -40,7 +40,7 @@
    #define ENABLE_HMC_TASKS               1  /* Used to 0=disable, 1=enable the Host Meter Comm feature */
    #define ENABLE_PAR_TASKS               1  /* Used to 0=disable, 1=enable the Partition feature */
    #define ENABLE_PWR_TASKS               1  /* Used to 0=disable, 1=enable the Power feature */
-   #define ENABLE_DFW_TASKS               1  /* Used to 0=disable, 1=enable the DFW feature */           /* TODO: RA6E1: Enable */
+   #define ENABLE_DFW_TASKS               1  /* Used to 0=disable, 1=enable the DFW feature */
    #define ENABLE_DEMAND_TASKS            1  /* Used to 0=disable, 1=enable the Demand feature */
    #define ENABLE_FIO_TASKS               0  /* Used to 0=disable, 1=enable the FileIO CRC feature */
    #define ENABLE_LAST_GASP_TASK          1  /* Used to 0=disable, 1=enable the Last Gasp feature */
@@ -107,7 +107,7 @@
 
 #define HAL_IGNORE_BROWN_OUT_SIGNAL    0 /* 1 = Ignore brown-out signal, 0 = Use Brown Out Signal */
 
-#define DFW_TEST_KEY                   1  /* 1=Use DFW test key, 0=Used default DFW Key */
+#define DFW_TEST_KEY                   0  /* 1=Use DFW test key, 0=Used default DFW Key */
 #define DFW_XZCOMPRESS_BSPATCHING      1  /* Update firmware patching technique - Uses XZ for decompression and minibs for patching */
 /* Note:  All of the following DFW tests must be disabled "0" before releasing code! */
 /* Select one below for DFW testing */
@@ -309,7 +309,7 @@
 #define TM_QUEUE                          0
 #define TM_MSGQ                           0
 #define TM_EVENTS                         0
-#define TM_LINKED_LIST                    0
+#define TM_LINKED_LIST                    1
 #define TM_CRC_UNIT_TEST                  0
 #define TM_TIME_COMPOUND_TEST             1
 #define TM_OS_EVENT_TEST                  1 /* Test the time compound functions */

@@ -533,7 +533,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
 #if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Verify the change
          if ( ( AllocWatchDog[type].TICKS[0] == 0 ) && ( AllocWatchDog[type].TICKS[1] == 0 ) )
 #elif( RTOS_SELECTION == FREE_RTOS )
-         if ( ( AllocWatchDog[type].tickCount == 0 ) && ( AllocWatchDog[type].xNumOfOverflows == 0 ) )
+         if ( ( AllocWatchDog[type].HW_TICKS == 0 ) && ( AllocWatchDog[type].tickCount == 0 ) )
 #endif
          {
             // Save timestamp
