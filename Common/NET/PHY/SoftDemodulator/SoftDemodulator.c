@@ -510,7 +510,12 @@ void SD_PreambleDetectorTask(taskParameter)
                bool unblocked = SD_Unblock_Sync_Payload_Task();
 
                // clear the flag if previously set
+#if ( RTOS_SELECTION == MQX_RTOS )
+               /* TODO: Remove this check once we are done hex compare for RA6E1. Abstraction handles this already */
+               (void)_lwevent_clear(&SD_Events, SYNC_DEMOD_TASK_SYNC );
+#else
                OS_EVNT_Clear(&SD_Events, SYNC_DEMOD_TASK_SYNC );
+#endif
 
                if (unblocked)
                {

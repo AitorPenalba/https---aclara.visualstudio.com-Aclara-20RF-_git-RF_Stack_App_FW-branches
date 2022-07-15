@@ -225,7 +225,7 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
 
   Function name: OS_EVNT_CLEAR
 
-  Purpose: This function is used to wait for an Event Mask for the specified time
+  Purpose: This function is used to Clear an Event Bit
 
   Arguments: EventHandle - pointer to the Handle structure of the Event
              EventMask - Bit Mask of the Events to check
