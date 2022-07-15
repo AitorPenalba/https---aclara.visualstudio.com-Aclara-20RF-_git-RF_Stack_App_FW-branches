@@ -1046,7 +1046,6 @@ returnStatus_t HMC_STRT_SetMasterPassword( uint8_t *pwd, uint16_t numberOfBytes 
       if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) )               &&
          ( eSUCCESS == HMC_STRT_UpdatePasswords() ) )                            /* Decrypt the values from the file.   */
       {
-         {
 #elif ( MCU_SELECTED == RA6E1 ) // The following does not depend on compiler optimization
       if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) ) )
       {
