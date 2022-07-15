@@ -269,3 +269,23 @@ void OS_EVENT_TestSet(void)
   return;
 }
 #endif
+
+#if( RTOS_SELECTION == FREE_RTOS )
+/*******************************************************************************
+
+  Function name: OS_EVNT_DELETE
+
+  Purpose: This function is used to delete an event
+
+  Arguments: EventHandle - pointer to the Handle structure of the Event
+
+  Returns: None
+
+  Notes: Function will not return if it fails
+
+*******************************************************************************/
+void OS_EVNT_DELETE ( OS_EVNT_Obj EventObject )
+{
+   vEventGroupDelete( EventObject );
+} /* end OS_EVNT_DELETE () */
+#endif
