@@ -319,6 +319,7 @@
 #define TM_MEASURE_SLEEP_TIMES            1 /* Adds a debug command to measure the actual sleep times based on the CYCCNT */
 #define TM_BYPASS_SI4467_GPIP0_WAIT       0 /* Bypass signal SI4467_GPIO0 after resetting the radio.  Used to test cutting this trace */
 #define TM_UART_ECHO_COMMAND              1 /* Adds an echo command to the debug port for testing UART echoing */
+#define TM_INSTRUMENT_NOISEBAND_TIMING    0 /* Adds instrumentation of noiseband timing to determine if there are bugs */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

@@ -43,6 +43,10 @@
 /* FILE VARIABLE DEFINITIONS */
 static uint8_t    DisplayNewBuf_[HMC_DISP_TOTAL_BUFF_LENGTH];
 static uint8_t    DisplayOldBuf_[HMC_DISP_TOTAL_BUFF_LENGTH];
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+static uint8_t    HMC_DISP_ContinuousDisplayUpdate_ = 0;
+#define CONTINUOUS 0xA5
+#endif
 
 static uint8_t    password_[METER_PASSWORD_SIZE] = {0};               /* used to store the reader access password */
 static uint8_t    mPassword_[METER_PASSWORD_SIZE] = {0};              /* used to store the master access password */
@@ -116,9 +120,9 @@ static const tWritePartial Table_MtrDisp[] =
 
 static const HMC_PROTO_TableCmd Cmd_MtrDisp[] =
 {
-   {(HMC_PROTO_MEM_PGM  ), (uint8_t)sizeof(Table_MtrDisp),      (uint8_t far *)&Table_MtrDisp[0]},
+   {(HMC_PROTO_MEM_PGM  ), (uint8_t)sizeof(Table_MtrDisp),         (uint8_t far *)&Table_MtrDisp[0]},
    {(HMC_PROTO_MEM_PGM  ), (uint8_t)ARRAY_IDX_CNT(DisplayNewBuf_), (uint8_t far *)&DisplayNewBuf_[0]},
-   {(HMC_PROTO_MEM_NULL ), (uint8_t)0,                          (uint8_t far *)0}
+   {(HMC_PROTO_MEM_NULL ), (uint8_t)0,                             (uint8_t far *)0}
 };
 
 static const HMC_PROTO_Table SecurityTbl[] =
@@ -180,7 +184,9 @@ uint8_t HMC_DISP_applet( uint8_t ucCmd, void *pData )
    {
      case (uint8_t)HMC_APP_API_CMD_STATUS:
 	  {
-         HMC_DISP_PRNT_INFO( 'I',  "DISP  HMC_APP_API_CMD_STATUS0" );
+#if ( MCU_SELECTED == NXP_K24 )
+         HMC_DISP_PRNT_INFO( 'I',  "DISP  HMC_APP_API_CMD_STATUS0" ); // This is pretty useless debug
+#endif
          if (bWriteToMeter_)
          {
             HMC_DISP_PRNT_INFO( 'I',  "DISP  HMC_APP_API_CMD_STATUS1" );
@@ -226,6 +232,12 @@ uint8_t HMC_DISP_applet( uint8_t ucCmd, void *pData )
             {
                HMC_DISP_PRNT_INFO( 'I',  "DISP  Copying the buffers");
                (void)memcpy( DisplayOldBuf_, DisplayNewBuf_, HMC_DISP_TOTAL_BUFF_LENGTH );
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+               if ( HMC_DISP_ContinuousDisplayUpdate_ == CONTINUOUS )
+               {
+                  pCurrentCmd_--; /* Back up and repeat the write to Table 119 without logging out and back in */
+               }
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
             }
             pCurrentCmd_++;
             /* Is the next item in the table NULL?  If so, that is all, we're all done.  */
@@ -322,23 +334,63 @@ void HMC_DISP_UpdateDisplayBuffer ( void const *msg, uint8_t pos )
 {
    uint8_t              buf[HMC_DISP_MSG_LENGTH];
 
-   /* Check whether position is valid or not */
-   if ( HMC_DISP_POS_NIC_MODE >= pos )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+   if ( ( HMC_DISP_ContinuousDisplayUpdate_ != CONTINUOUS ) ||
+        ( 0 == memcmp( msg, HMC_DISP_MSG_NOISEBAND, HMC_DISP_MSG_LENGTH ) ) )
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    {
-      /* Clear the buffer */
-      (void)memset( buf, 0, sizeof( buf ) );
-      /* Copy the messag to the local buffer */
-      (void)memcpy( buf, msg, HMC_DISP_MSG_LENGTH );
-      /* Copy the messag to the new buffer */
-      (void)memcpy( &DisplayNewBuf_[pos*HMC_DISP_MSG_LENGTH], buf, HMC_DISP_MSG_LENGTH );
-      /* Compare the old and new buffers */
-      if( 0 != memcmp( DisplayNewBuf_, DisplayOldBuf_, HMC_DISP_TOTAL_BUFF_LENGTH ) )
+      /* Check whether position is valid or not */
+      if ( HMC_DISP_POS_NIC_MODE >= pos )
       {
-         /* Trigger the applet to write the new values to the meter */
-         HMC_DISP_PRNT_INFO( 'I',  "DISP  TRIGGER %s  %d", msg, pos );
-         (void)HMC_DISP_applet( (uint8_t)HMC_APP_API_CMD_ACTIVATE, NULL );
+         /* Clear the buffer */
+         (void)memset( buf, 0, sizeof( buf ) );
+         /* Copy the messag to the local buffer */
+         (void)memcpy( buf, msg, HMC_DISP_MSG_LENGTH );
+         /* Copy the messag to the new buffer */
+         (void)memcpy( &DisplayNewBuf_[pos*HMC_DISP_MSG_LENGTH], buf, HMC_DISP_MSG_LENGTH );
+         /* Compare the old and new buffers */
+         if( 0 != memcmp( DisplayNewBuf_, DisplayOldBuf_, HMC_DISP_TOTAL_BUFF_LENGTH ) )
+         {
+            /* Trigger the applet to write the new values to the meter */
+            HMC_DISP_PRNT_INFO( 'I',  "DISP  TRIGGER %s  %d", msg, pos );
+            (void)HMC_DISP_applet( (uint8_t)HMC_APP_API_CMD_ACTIVATE, NULL );
+         }
       }
    }
 }
 
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+/* *********************************************************************************************************************
+ *
+ * Function name: HMC_DISP_SetContinuousUpdate
+ *
+ * Purpose: Causes the HMC_DISP applet to continuously write the most recently requested string to the meter's display
+ *          as fast as possible to create as much HMC UART traffic as possible during noiseband testing
+ *
+ * Arguments: None
+ *
+ * Returns: None
+ *
+ ******************************************************************************************************************** */
+void HMC_DISP_SetContinuousUpdate( void )
+{
+   HMC_DISP_ContinuousDisplayUpdate_ = CONTINUOUS;
+}
+
+/* *********************************************************************************************************************
+ *
+ * Function name: HMC_DISP_ClearContinuousUpdate
+ *
+ * Purpose: Reverts the HMC_DISP applet back into its normal mode for writes to the meter's display
+ *
+ * Arguments: None
+ *
+ * Returns: None
+ *
+ ******************************************************************************************************************** */
+void HMC_DISP_ClearContinuousUpdate( void )
+{
+   HMC_DISP_ContinuousDisplayUpdate_ = 0;
+}
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 #endif

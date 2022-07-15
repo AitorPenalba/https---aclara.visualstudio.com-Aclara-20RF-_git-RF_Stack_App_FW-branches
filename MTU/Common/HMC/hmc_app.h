@@ -94,6 +94,9 @@ returnStatus_t HMC_APP_RTOS_Init( void );
 bool HMC_APP_status(void);
 returnStatus_t HMC_APP_TaskPowerDown(void);
 returnStatus_t HMC_APP_ResetAppletTimeout(void);
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+void     HMC_APP_SetScanDelay(uint32_t delay);
+#endif
 
 #undef GLOBAL
 

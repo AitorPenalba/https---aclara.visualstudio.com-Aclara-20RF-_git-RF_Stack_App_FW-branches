@@ -305,14 +305,14 @@ typedef enum
 
 /* Set PCR for GPIO, Make Output */
 #define HMC_COMM_SENSE_TRIS()
-#endif
+#endif // MCU_SELECTED
 
 #if ( HMC_KV == 1 )
 //This is the PR_KV_METER (Password Recovery) signal
 //TODO add this to code
 #define HMC_PW_RECOVERY()           (((GPIOD_PDIR & (1<<5))>>5)^1) /* COMM_FORCE signal from the host meter */
 #define HMC_PW_RECOVERY_TRIS()      { PORTD_PCR5 = 0x100;   GPIOD_PDDR &= ~(1<<5); } /* Set for GPIO, Make Input */
-#endif
+#endif // ( HMC_KV == 1 )
 
 #if ( HMC_I210_PLUS_C == 1 )
 #if ( MCU_SELECTED == NXP_K24 )
@@ -326,14 +326,18 @@ typedef enum
 #define HMC_MUX_CTRL_TRIS()
 #define HMC_MUX_CTRL_ASSERT()       R_BSP_PinWrite(BSP_IO_PORT_00_PIN_04, BSP_IO_LEVEL_LOW)
 #define HMC_MUX_CTRL_RELEASE()      R_BSP_PinWrite(BSP_IO_PORT_00_PIN_04, BSP_IO_LEVEL_HIGH)
-#endif
-#endif
+#endif // MCU_SELECTED
+#endif // ( HMC_I210_PLUS_C == 1 )
 
 //This is the T_KV_METER (Meter Trouble) signal
-//TODO Add this to code
+#if ( MCU_SELECTED == NXP_K24 )
 #define HMC_TROUBLE()               (((GPIOC_PDIR & (1<<11))>>11)) /* TROUBLE signal from the host meter */
 #define HMC_TROUBLE_TRIS()          { PORTC_PCR11= 0x100;   GPIOC_PDDR &= ~(1<<11); } /* Set for GPIO, Make Input */
-#endif
+#elif ( MCU_SELECTED == RA6E1 )
+#define HMC_TROUBLE()               R_BSP_PinRead(BSP_IO_PORT_05_PIN_05) /* Signal T_I-210+C_METER */
+#define HMC_TROUBLE_TRIS()                                               /* Pin already set as input in pin_data */
+#endif // MCU SELECTED
+#endif // ( HMC_KV || HMC_I210_PLUS_C )
 
 #define MAX_NBR_CONST_ENTRIES       ((uint8_t)25)     /* Used to dimension standard table 15 */
 #define MAX_NBR_SOURCES             ((uint8_t)100)    /* Used to dimension standard table 16 */

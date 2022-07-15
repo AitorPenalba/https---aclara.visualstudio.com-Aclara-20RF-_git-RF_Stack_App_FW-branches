@@ -316,7 +316,7 @@ static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
 const OS_TASK_Template_t  Task_template_list[] =
 {
    /* Task Index,               Function,                    Stack, Pri, Name,                    Attributes,    Param, Time Slice */
-   { eSTRT_TSK_IDX,             STRT_StartupTask,             1900,   13, (char *)pTskName_Strt,   DEFAULT_ATTR_STRT, 0, 0 },
+   { eSTRT_TSK_IDX,             STRT_StartupTask,             1900,  13, (char *)pTskName_Strt,   DEFAULT_ATTR_STRT, 0, 0 },
 #if ENABLE_PWR_TASKS
    { ePWR_TSK_IDX,              PWR_task,                     1000,  12, (char *)pTskName_Pwr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { ePWROR_TSK_IDX,            PWROR_Task,                   1700,  12, (char *)pTskName_PwrRestore, DEFAULT_ATTR, 0, 0 },
@@ -1220,7 +1220,7 @@ void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad )
    }
 }
 
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_Summary
@@ -1433,7 +1433,7 @@ void OS_TASK_Summary ( bool safePrint )
       DBG_LW_printf( str2 );
    }
 }
-#endif // #if ( RTOS_SELECTION == MQX_RTOS ) 
+#endif // #if ( RTOS_SELECTION == MQX_RTOS )
 #endif // #if 0
 
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
@@ -1468,29 +1468,29 @@ void OS_TASK_SummaryFreeRTOS ( void )
       DBG_logPrintf( 'R', "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
       index++;
    }
-   snprintf( buffer, 150, "%10s %10s %10s %10s %10s %10s %10s %10s %10s\r\n", 
-                  taskInfo[0], 
-                  taskInfo[1], 
-                  taskInfo[2], 
-                  taskInfo[3], 
-                  taskInfo[4], 
-                  taskInfo[5], 
-                  taskInfo[6], 
-                  taskInfo[7], 
+   snprintf( buffer, 150, "%10s %10s %10s %10s %10s %10s %10s %10s %10s\r\n",
+                  taskInfo[0],
+                  taskInfo[1],
+                  taskInfo[2],
+                  taskInfo[3],
+                  taskInfo[4],
+                  taskInfo[5],
+                  taskInfo[6],
+                  taskInfo[7],
                   taskInfo[8] );
    DBG_logPrintf( 'R', "%s", buffer );
    for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
       taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
       vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid );
-      snprintf( buffer, 150, "%10s %10d %10d %10d %10s %10d %10d %10d   0x%x\r\n", 
-               ( char* )pTaskList->pcName, 
-               taskStatusInfo.xTaskNumber, 
-               taskStatusInfo.uxCurrentPriority, 
-               taskStatusInfo.uxBasePriority, 
+      snprintf( buffer, 150, "%10s %10d %10d %10d %10s %10d %10d %10d   0x%x\r\n",
+               ( char* )pTaskList->pcName,
+               taskStatusInfo.xTaskNumber,
+               taskStatusInfo.uxCurrentPriority,
+               taskStatusInfo.uxBasePriority,
                ( char* )taskState[ taskStatusInfo.eCurrentState ],
-               taskStatusInfo.ulRunTimeCounter, 
-               pTaskList->usStackDepth, 
+               taskStatusInfo.ulRunTimeCounter,
+               pTaskList->usStackDepth,
                ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
                taskStatusInfo.pxStackBase );
       DBG_logPrintf( 'R', "%s", buffer );

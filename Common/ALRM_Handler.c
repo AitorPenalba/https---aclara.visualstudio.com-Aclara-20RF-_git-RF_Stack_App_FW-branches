@@ -500,6 +500,7 @@ void ALRM_RealTimeTask ( taskParameter )
       {
 #if (  METER_TROUBLE_SIGNAL == 1 )
          ALRM_PRNT_INFO( 'A', "HMC_TROUBLE = %d", HMC_TROUBLE() );
+#warning "HMC_TROUBLE is defined as P505, Pin 81 in this build.  It will be moving to P111, Pin 54 in the Rev B layout"
          /* Run if IRQ occurred, previous check had events set, or trouble signal is active. */
 #endif
          if ( clearEventLogs_ )
