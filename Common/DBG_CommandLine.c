@@ -2958,14 +2958,13 @@ uint32_t DBG_CommandLine_CpuLoadEnable( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] )
 {
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Bob: Need to create the FreeRTOS equivalent and add to the code
-   _task_id tid;
+   OS_TASK_id tid;
    if ( argc > 1 )
    {
       tid = strtoul( argv[1], NULL, 0 );
       DBG_SetTaskFilter( tid );
    }
-#endif
+
    return 0;
 }
 
@@ -3345,10 +3344,8 @@ uint32_t DBG_CommandLine_SimulatePowerDown ( uint32_t argc, char *argv[] )
       ( void )OS_TASK_Set_Priority( pTskName_Print, 11 ); // Increasing priority
       ( void )OS_TASK_Set_Priority( pTskName_Dbg, 11 );
       // Note: Increase the MFG port priority to have MFG port access to use "reboot" command
-#if 0  // TODO: RA6E1 Bob: Unable to figure out why these two extern symbols cannot be resolved
       ( void )OS_TASK_Set_Priority( pTskName_Mfg, 11 );
       ( void )OS_TASK_Set_Priority( pTskName_MfgUartRecv, 11 );
-#endif  // TODO: RA6E1 Bob: Unable to figure out why these two extern symbols cannot be resolved
       ( void )OS_TASK_Set_Priority( pTskName_MfgUartCmd, 11 );
       ( void )OS_TASK_Set_Priority( pTskName_Idle, 13 );
 
@@ -3517,7 +3514,7 @@ static uint32_t DBG_CommandLine_sdtest ( uint32_t argc, char *argv[] )
    pTask = (char **)tasks;
    do
    {
-      id = _task_get_id_from_name( *pTask );
+      id = OS_TASK_GetID_fromName( *pTask );
       if ( id != 0 )
       {
          (void)_task_destroy( id );
@@ -7063,13 +7060,24 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
 #endif
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
    DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] );
-#if 0  // TODO: RA6: Add the following lines for RA6 and FreeRTOS
+#if ( ( MCU_SELECTED == NXP_K24 ) || ( DCU == 1 ) )
    DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
                   BSP_Get_BspRevision(), BSP_Get_IoRevision(), BSP_Get_PspRevision(), __VER__ );
+#endif
+#if ( RTOS_SELECTION == MQX_RTOS )
    DBG_logPrintf( 'R', "MQX=%s MQXgen=%s MQXLibraryDate=%s",
                   OS_Get_OsVersion(), OS_Get_OsGenRevision(), OS_Get_OsLibDate() );
-   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );  // TODO: RA6: Enable this line
 #endif
+#if ( ( MCU_SELECTED == NXP_K24 ) || ( DCU == 1 ) )
+   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );  // TODO: RA6: Support this line
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+   DBG_logPrintf( 'R', "BSP=%s IAR=%d", BSP_Get_BSPVersion(), __VER__ );
+#endif
+#if ( RTOS_SELECTION == FREE_RTOS )
+   DBG_logPrintf( 'R', "FreeRTOS=%s", tskKERNEL_VERSION_NUMBER );
+#endif
+
 #if ( DCU == 1 )
    DBG_logPrintf( 'R', "TBImageTarget: %s", VER_strGetDCUVersion() );
 #endif
@@ -13543,7 +13551,7 @@ static void DBG_NoiseMeasurements ( uint8_t command, uint32_t argc, char *argv[]
 
       OS_TASK_Sleep( nh.waitTime * ONE_SEC );
       previousDebugFilter = DBG_GetTaskFilter();
-      (void)DBG_SetTaskFilter ( _task_get_id_from_name( "DBG" ) );
+      (void)DBG_SetTaskFilter ( OS_TASK_GetID_fromName( "DBG" ) );
 
       NOISEHIST_CollectData ( nh );
 

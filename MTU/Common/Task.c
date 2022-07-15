@@ -1046,6 +1046,32 @@ OS_TASK_id OS_TASK_GetId (void)
 
 /***********************************************************************************************************************
  *
+ * Function Name: OS_TASK_GetID_fromName
+ *
+ * Purpose: This function will return the TaskID from the Name provided
+ *
+ * Arguments:
+ *
+ * Returns: OS_TASK_id TaskId
+ *
+ **********************************************************************************************************************/
+OS_TASK_id OS_TASK_GetID_fromName ( const char *taskName )
+{
+#if (RTOS_SELECTION == MQX_RTOS) /* MQX */
+   return ( _task_get_id_from_name( taskName ) );
+#elif (RTOS_SELECTION == FREE_RTOS)
+   TaskHandle_t  taskHandle;
+   TaskStatus_t  taskDetails;
+
+   taskHandle = xTaskGetHandle( taskName );
+   vTaskGetInfo(taskHandle, &taskDetails, pdFALSE, eRunning );
+
+   return ( taskDetails.xTaskNumber );
+#endif
+} /* end OS_TASK_GetID_fromName () */
+
+/***********************************************************************************************************************
+ *
  * Function Name: OS_TASK_IsCurrentTask
  *
  * Purpose: This function will see if current task is the task name passed in.
@@ -1131,7 +1157,7 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
    {
       // Retrieve some task pointers
       // Make sure task ID is valid. Invalid number means task is dead.
-      taskID = _task_get_id_from_name( pTaskList->TASK_NAME );
+      taskID = OS_TASK_GetID_fromName( pTaskList->TASK_NAME );
       if ( taskID ) {
          TASK_TD[pTaskList->TASK_TEMPLATE_INDEX] = _task_get_td( taskID );
       } else {
@@ -1220,7 +1246,7 @@ void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad )
    }
 }
 
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_Summary
@@ -1262,13 +1288,13 @@ void OS_TASK_Summary ( bool safePrint )
    }
    for ( pTaskList = MQX_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
-      taskID = _task_get_id_from_name( pTaskList->TASK_NAME );
+      taskID = OS_TASK_GetID_fromName( pTaskList->TASK_NAME );
       if ( taskID == 0 ) {
          continue; // Skip bad task
       }
       task_td = _task_get_td( taskID );
       // Find active task
-      if ( _task_get_id() == taskID )
+      if ( OS_TASK_GetId() == taskID )
       {
          ( void )strcpy( str, "Active" );
       }
@@ -1433,7 +1459,7 @@ void OS_TASK_Summary ( bool safePrint )
       DBG_LW_printf( str2 );
    }
 }
-#endif // #if ( RTOS_SELECTION == MQX_RTOS ) 
+#endif // #if ( RTOS_SELECTION == MQX_RTOS )
 #endif // #if 0
 
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
@@ -1468,29 +1494,29 @@ void OS_TASK_SummaryFreeRTOS ( void )
       DBG_logPrintf( 'R', "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
       index++;
    }
-   snprintf( buffer, 150, "%10s %10s %10s %10s %10s %10s %10s %10s %10s\r\n", 
-                  taskInfo[0], 
-                  taskInfo[1], 
-                  taskInfo[2], 
-                  taskInfo[3], 
-                  taskInfo[4], 
-                  taskInfo[5], 
-                  taskInfo[6], 
-                  taskInfo[7], 
+   snprintf( buffer, 150, "%10s %10s %10s %10s %10s %10s %10s %10s %10s\r\n",
+                  taskInfo[0],
+                  taskInfo[1],
+                  taskInfo[2],
+                  taskInfo[3],
+                  taskInfo[4],
+                  taskInfo[5],
+                  taskInfo[6],
+                  taskInfo[7],
                   taskInfo[8] );
    DBG_logPrintf( 'R', "%s", buffer );
    for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
       taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
       vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid );
-      snprintf( buffer, 150, "%10s %10d %10d %10d %10s %10d %10d %10d   0x%x\r\n", 
-               ( char* )pTaskList->pcName, 
-               taskStatusInfo.xTaskNumber, 
-               taskStatusInfo.uxCurrentPriority, 
-               taskStatusInfo.uxBasePriority, 
+      snprintf( buffer, 150, "%10s %10d %10d %10d %10s %10d %10d %10d   0x%x\r\n",
+               ( char* )pTaskList->pcName,
+               taskStatusInfo.xTaskNumber,
+               taskStatusInfo.uxCurrentPriority,
+               taskStatusInfo.uxBasePriority,
                ( char* )taskState[ taskStatusInfo.eCurrentState ],
-               taskStatusInfo.ulRunTimeCounter, 
-               pTaskList->usStackDepth, 
+               taskStatusInfo.ulRunTimeCounter,
+               pTaskList->usStackDepth,
                ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
                taskStatusInfo.pxStackBase );
       DBG_logPrintf( 'R', "%s", buffer );

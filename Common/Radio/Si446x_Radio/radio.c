@@ -853,7 +853,7 @@ void RADIO_RX_Watchdog(void)
       OS_INT_enable( ); // Enable interrupts.
     #if ( MCU_SELECTED == NXP_K24 )
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-    #elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Modify variable to get core clock from a function
+    #elif ( MCU_SELECTED == RA6E1 )
       if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
     #endif
          INFO_printf("Soft-Demod FIFO purged");
@@ -894,7 +894,7 @@ void RADIO_Update_Freq_Watchdog(void)
 
 #if ( MCU_SELECTED == NXP_K24 )
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-#elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Modify variable to get core clock from a function
+#elif ( MCU_SELECTED == RA6E1 )
       if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
 
 #endif

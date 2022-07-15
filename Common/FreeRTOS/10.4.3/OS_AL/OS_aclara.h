@@ -130,6 +130,7 @@
 #define OS_EVNT_Set(EventHandle, EventMask)              OS_EVNT_SET(EventHandle, EventMask, __FILE__, __LINE__)
 #define OS_EVNT_Set_from_ISR(EventHandle, EventMask)     OS_EVNT_SET_from_ISR(EventHandle, EventMask, __FILE__, __LINE__)
 #define OS_EVNT_Wait(EventHandle, EventMask, WaitForAll, Timeout) OS_EVNT_WAIT(EventHandle, EventMask, WaitForAll, Timeout, __FILE__, __LINE__)
+#define OS_EVNT_Clear(EventHandle, EventMask)            OS_EVNT_CLEAR(EventHandle, EventMask, __FILE__, __LINE__)
 #if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
 #define OS_MSGQ_Create( MsgqHandle, numItems, name )     OS_MSGQ_CREATE( MsgqHandle, numItems, name )
 #else
@@ -218,7 +219,7 @@ typedef struct
 #if ( RTOS_SELECTION == MQX_RTOS )
 #define taskParameter         uint32_t Arg0
 #define OS_TASK_Template_t    TASK_TEMPLATE_STRUCT
-
+typedef _task_id              OS_TASK_id;
 #elif ( RTOS_SELECTION == FREE_RTOS )
 typedef UBaseType_t           OS_TASK_id;
 #define taskParameter   void* pvParameters
@@ -397,6 +398,7 @@ void OS_EVNT_SET_from_ISR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char
 void OS_EVNT_DELETE ( OS_EVNT_Obj EventObject );
 #endif
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
+void     OS_EVNT_CLEAR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 
 bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *QueueElement );
 void OS_QUEUE_Remove ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
@@ -463,6 +465,7 @@ void                    OS_TASK_Sleep ( uint32_t MSec );
 void                    OS_TASK_Exit ( void );
 void                    OS_TASK_ExitId ( char const *pTaskName );
 OS_TASK_id              OS_TASK_GetId (void);
+OS_TASK_id              OS_TASK_GetID_fromName ( const char *taskName );
 bool                    OS_TASK_IsCurrentTask ( char const *pTaskName );
 char *                  OS_TASK_GetTaskName ( void );
 #if 0  //TODO: RA6E1: need to still get updated to RA6

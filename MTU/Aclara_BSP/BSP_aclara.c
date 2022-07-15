@@ -49,7 +49,7 @@ static bool Vref_Initialized = false;
 
 /* FUNCTION DEFINITIONS */
 
-#if ( RTOS_SELECTION == MQX_RTOS )  /* TODO: RA6E1: Add similar functionality for RA6 with FreeRTOS */
+#if ( RTOS_SELECTION == MQX_RTOS )
 /*******************************************************************************
 
   Function name: BSP_Get_BspRevision
@@ -103,7 +103,27 @@ char const *BSP_Get_PspRevision ( void )
 {
   return ( _mqx_psp_revision ); /*lint !e605*/
 }
+
+#elif ( MCU_SELECTED == RA6E1 )
+
+/*******************************************************************************
+
+  Function name: BSP_Get_BSPVersion
+
+  Purpose: This function will return the current BSP/FSP Version String
+
+  Arguments:
+
+  Returns: BspRevision - pointer to the BSP/FSP Version string
+
+*******************************************************************************/
+char const *BSP_Get_BSPVersion ( void )
+{
+   return ( FSP_VERSION_STRING );
+}
+
 #endif // #if ( RTOS_SELECTION == MQX_RTOS )
+
 /*******************************************************************************
 
   Function name: BSP_Get_ResetStatus

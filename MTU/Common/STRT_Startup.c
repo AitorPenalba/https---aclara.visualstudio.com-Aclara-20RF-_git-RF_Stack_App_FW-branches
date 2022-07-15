@@ -176,6 +176,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
    INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
    INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
+   INIT( TMR_HandlerInit, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ), // TODO: RA6E1: Had to move it before DBG_Init as it was needed. Move this to appropriate position in official list
    INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
    INIT( VBATREG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),    // Needed early to check validity of RTC. // TODO: RA6E1: DG: Move this to appropriate position
    INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
@@ -184,7 +185,6 @@ const STRT_FunctionList_t startUpTbl[] =
                                                                                     //       because the error logging (ERR_printf, DBG_logPrintf, etc) uses the clock
                                                                                     //       to time stamp the message and, in the process, uses the time mutex.
                                                                                     // NOTE2: This needs to be after FIO_init since it uses the file system.
-   INIT( TMR_HandlerInit, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( TIME_SYNC_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
@@ -472,7 +472,7 @@ void STRT_StartupTask ( taskParameter )
    uint8_t              quiet = 0;
    uint8_t              rfTest = 0;
 
-#if ( MCU_SELECTED == NXP_K24 )  // TODO: RA6E1: Do we need to support this?
+#if ( MCU_SELECTED == NXP_K24 )
    // Enable to use DWT module.
    // This is needed for DWT_CYCCNT to work properly when the debugger (I-jet) is not plugged in.
    // When the debugger is plugged in, the following registers are programmed by the IAR environment.
@@ -480,7 +480,7 @@ void STRT_StartupTask ( taskParameter )
 
    // Enable cycle counter
    DWT_CTRL = DWT_CTRL | 1 ;
-#else
+#elif ( MCU_SELECTED == RA6E1 )
    DCB->DEMCR = DCB->DEMCR | 0x01000000;
    DWT->CTRL  = DWT->CTRL  | 1;
 #endif
@@ -736,7 +736,7 @@ void STRT_StartupTask ( taskParameter )
          OS_TASK_Summary((bool)false);
 #endif
 #elif ( MCU_SELECTED == FREE_RTOS )
-//         OS_TASK_Summary((bool)false); /* TODO: RA6E1: Add Support later */
+         OS_TASK_SummaryFreeRTOS(); // Always uses DBG_printf
 #endif
          printStackAndTask = 0;
       }
