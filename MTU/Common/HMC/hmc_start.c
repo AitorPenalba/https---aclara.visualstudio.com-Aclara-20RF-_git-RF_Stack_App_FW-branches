@@ -560,6 +560,7 @@ returnStatus_t HMC_STRT_UpdatePasswords( void )
                /* Save unencrypted data   */
                (void)memset( mtrFileData.pad, 0, sizeof( mtrFileData.pad ) );
                (void)memcpy( mtrFile->data, (uint8_t *)&mtrFileData, sizeof( mtrFileData ) );   /* Copy unencrypted passwords to mtrFile->data  */
+#warning "The encryption of meter passwords is DISABLED in this build.  Do not release this way!"
 //               generateMD5( (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ) ); /* Compute integrity check over the file  */
 //               encryptBuffer( (uint8_t *)&mtrFileData, (uint8_t *)&mtrFileData, (int32_t)sizeof( mtrFileData ), key );        /* Encrypt in place  */
                retVal = FIO_fwrite( &fileHndlStart, 0, ( uint8_t * )&mtrFileData, ( lCnt )sizeof( mtrFileData ) );   /* Update the file   */
@@ -989,15 +990,24 @@ returnStatus_t HMC_STRT_SetPassword( uint8_t *pwd, uint16_t numberOfBytes )
    }
    else
    {
+#if ( MCU_SELECTED == NXP_K24 )
       if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) )               &&
          ( eSUCCESS == HMC_STRT_UpdatePasswords() ) )                            /* Decrypt the values from the file.   */
       {
-         (void)memset( mtrFileData.password, 0, sizeof( mtrFileData.password ) );
-         (void)memcpy( mtrFileData.password, pwd, numberOfBytes );
-         retVal = HMC_STRT_UpdatePasswords();                                    /* Encrypt the values and write the file.   */
-         if ( eSUCCESS == retVal )
          {
-            startTimer( 100 );   /* Password changing; if stuck in loop waiting for ISC delay to complete, cause the delay loop to exit quickly.  */
+#elif ( MCU_SELECTED == RA6E1 ) // The following does not depend on compiler optimization
+      if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) ) )
+      {
+         if ( eSUCCESS == HMC_STRT_UpdatePasswords() )                           /* Decrypt the values from the file.   */
+         {
+#endif
+            (void)memset( mtrFileData.password, 0, sizeof( mtrFileData.password ) );
+            (void)memcpy( mtrFileData.password, pwd, numberOfBytes );
+            retVal = HMC_STRT_UpdatePasswords();                                 /* Encrypt the values and write the file.   */
+            if ( eSUCCESS == retVal )
+            {
+               startTimer( 100 );   /* Password changing; if stuck in loop waiting for ISC delay to complete, cause the delay loop to exit quickly.  */
+            }
          }
       }
    }
@@ -1032,12 +1042,20 @@ returnStatus_t HMC_STRT_SetMasterPassword( uint8_t *pwd, uint16_t numberOfBytes 
    }
    else
    {
+#if ( MCU_SELECTED == NXP_K24 )
       if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) )               &&
          ( eSUCCESS == HMC_STRT_UpdatePasswords() ) )                            /* Decrypt the values from the file.   */
       {
-         ( void )memset( mtrFileData.masterPassword, 0, sizeof( mtrFileData.masterPassword ) );
-         ( void )memcpy( mtrFileData.masterPassword, pwd, numberOfBytes );
-         retVal = HMC_STRT_UpdatePasswords();                                    /* Encrypt the values and write the file.   */
+#elif ( MCU_SELECTED == RA6E1 ) // The following does not depend on compiler optimization
+      if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) ) )
+      {
+         if ( eSUCCESS == HMC_STRT_UpdatePasswords() )                           /* Decrypt the values from the file.   */
+#endif
+         {
+            ( void )memset( mtrFileData.masterPassword, 0, sizeof( mtrFileData.masterPassword ) );
+            ( void )memcpy( mtrFileData.masterPassword, pwd, numberOfBytes );
+            retVal = HMC_STRT_UpdatePasswords();                                 /* Encrypt the values and write the file.   */
+         }
       }
    }
 #else
@@ -1064,11 +1082,20 @@ returnStatus_t HMC_STRT_GetPassword( uint8_t *pwd )
 {
    returnStatus_t retVal = eFAILURE;
 #if ( ANSI_SECURITY == 1 )
+#if ( MCU_SELECTED == NXP_K24 )
    if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) )               &&
       ( eSUCCESS == HMC_STRT_UpdatePasswords() ) )                            /* Decrypt the values from the file.   */
    {
-      (void)memcpy( pwd, mtrFileData.password, sizeof( mtrFileData.password ) );
-      retVal = eSUCCESS;
+      {
+#elif ( MCU_SELECTED == RA6E1 ) // The following does not depend on compiler optimization
+   if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) ) )
+   {
+      if ( eSUCCESS == HMC_STRT_UpdatePasswords() )                           /* Decrypt the values from the file.   */
+      {
+#endif
+         (void)memcpy( pwd, mtrFileData.password, sizeof( mtrFileData.password ) );
+         retVal = eSUCCESS;
+      }
    }
 #else
    retVal = eSUCCESS;
@@ -1092,11 +1119,20 @@ returnStatus_t HMC_STRT_GetMasterPassword( uint8_t *pwd )
 {
    returnStatus_t retVal = eFAILURE;
 #if ( ANSI_SECURITY == 1 )
+#if ( MCU_SELECTED == NXP_K24 )
    if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) )               &&
       ( eSUCCESS == HMC_STRT_UpdatePasswords() ) )                            /* Decrypt the values from the file.   */
    {
-      (void)memcpy( pwd, mtrFileData.masterPassword, sizeof( mtrFileData.masterPassword ) );
-      retVal = eSUCCESS;
+      {
+#elif ( MCU_SELECTED == RA6E1 ) // The following does not depend on compiler optimization
+   if ( eSUCCESS == FIO_fread( &fileHndlStart, ( uint8_t * )&mtrFileData, 0, ( lCnt )sizeof( mtrFileData ) ) )
+   {
+      if ( eSUCCESS == HMC_STRT_UpdatePasswords() )                           /* Decrypt the values from the file.   */
+      {
+#endif
+         (void)memcpy( pwd, mtrFileData.masterPassword, sizeof( mtrFileData.masterPassword ) );
+         retVal = eSUCCESS;
+      }
    }
 #else
    retVal = eSUCCESS;

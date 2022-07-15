@@ -109,6 +109,9 @@ static uint16_t      hmcAppletTimerId_ = 0;/* Timer Id for applets */ // Timeout
 #if ( ( END_DEVICE_PROGRAMMING_CONFIG == 1 ) || ( END_DEVICE_PROGRAMMING_FLASH >  ED_PROG_FLASH_NOT_SUPPORTED ) )
 static bool SkipToLogoff = false;
 #endif
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+static uint32_t      taskScanDelay_ = HMC_APP_TASK_DELAY_MS;
+#endif
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
@@ -219,6 +222,7 @@ void HMC_APP_Task( taskParameter )
       pSysQueue = OS_QUEUE_Dequeue( &HMC_APP_QueueHandle ); // THIS QUEUE IS NEVER USED! (RCZ,1/25/18)
       if ( NULL != pSysQueue )                            // Is for messages from RTOS ? (RCZ,1/25/18)
       {
+         DBG_printf( "HMC_app received a queue message: %lu", pSysQueue ); // TODO: RA6E1 Bob: checking claim that this queue is never used
          /* Got message, this message can be for applet serviced by this task */
          ( void )HMC_APP_main( ( uint8_t )HMC_APP_CMD_MSG, pSysQueue );
       }
@@ -235,7 +239,12 @@ void HMC_APP_Task( taskParameter )
 #ifdef TM_TIME_INTEGRATION_TESTING
          OS_TASK_Sleep( HMC_APP_TASK_DELAY_MS_TST ); /* Test Code! */
 #else
-         OS_TASK_Sleep( HMC_APP_TASK_DELAY_MS ); /* Since we're NOT logged in, we're just scanning applets. */
+   #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+         if ( taskScanDelay_ > 0 )
+   #endif
+         {
+            OS_TASK_Sleep( HMC_APP_TASK_DELAY_MS ); /* Since we're NOT logged in, we're just scanning applets. */
+         }
 #endif
       }
       else
@@ -245,7 +254,12 @@ void HMC_APP_Task( taskParameter )
             bHmcBusy = true;
             SYSBUSY_setBusy();
          }
-         OS_TASK_Sleep( 5 );
+   #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+         if ( taskScanDelay_ > 0 )
+   #endif
+         {
+            OS_TASK_Sleep( 5 );
+         }
       }
    }
 }  /*lint !e715 !e818  pvParameters is not used */
@@ -826,3 +840,21 @@ uint8_t HMC_APP_main( uint8_t ucCmd, void *pData )
    }
    return( ucRetVal );
 }
+
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+/**********************************************************************************************************************
+
+   Function name: HMC_APP_SetScanDelay()
+
+   Purpose: Allow the delay between scans of Applets to be altered externally
+
+   Arguments: uint32_t delay - number of milliseconds to delay between scans
+
+   Returns:    nothing
+
+ **********************************************************************************************************************/
+void     HMC_APP_SetScanDelay(uint32_t delay)
+{
+   taskScanDelay_ = delay;
+}
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )

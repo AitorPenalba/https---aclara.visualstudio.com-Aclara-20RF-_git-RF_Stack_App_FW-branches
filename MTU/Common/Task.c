@@ -316,7 +316,7 @@ static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
 const OS_TASK_Template_t  Task_template_list[] =
 {
    /* Task Index,               Function,                    Stack, Pri, Name,                    Attributes,    Param, Time Slice */
-   { eSTRT_TSK_IDX,             STRT_StartupTask,             1900,   13, (char *)pTskName_Strt,   DEFAULT_ATTR_STRT, 0, 0 },
+   { eSTRT_TSK_IDX,             STRT_StartupTask,             1900,  13, (char *)pTskName_Strt,   DEFAULT_ATTR_STRT, 0, 0 },
 #if ENABLE_PWR_TASKS
    { ePWR_TSK_IDX,              PWR_task,                     1000,  12, (char *)pTskName_Pwr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { ePWROR_TSK_IDX,            PWROR_Task,                   1700,  12, (char *)pTskName_PwrRestore, DEFAULT_ATTR, 0, 0 },

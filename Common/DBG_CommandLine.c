@@ -85,7 +85,7 @@
 #include "ecc108_apps.h"
 #include "ecc108_config.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
-//#include "ecc108_mqx.h"
+#include "ecc108_mqx.h"
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "ecc108_freertos.h"
 #include "ecc108_lib_return_codes.h"
@@ -135,7 +135,7 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #include "hmc_ds.h"
 #include "hmc_request.h"
 #include "hmc_eng.h"
-#endif
+#endif // (ACLARA_LC == 0 ) && (ACLARA_DA == 0)
 #include "intf_cim_cmd.h"
 #if ( DEMAND_IN_METER == 1 )
 #include "hmc_demand.h"
@@ -143,13 +143,13 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #if ( CLOCK_IN_METER == 1 )
 #include "hmc_time.h"
 #endif
-#endif
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // Required for creating HMC traffic during noiseband testing
 #include "hmc_display.h"
 #include "hmc_start.h"
 #include "hmc_finish.h"
 #include "ID_intervalTask.h"
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#endif // (EP == 1)
 #if ( NOISE_HIST_ENABLED == 1 )
 #include "NH_NoiseHistData.h"
 #endif
@@ -354,10 +354,10 @@ typedef struct
    uint8_t gen_config;
 } ArgStream_s;
 static ArgStream_s sArgStream
-             = {SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DIV_CLK,            /* GPIO0 */
-                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,          /* GPIO1 */
-                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,          /* GPIO2 */
-                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,          /* GPIO3 */
+             = {SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_TRISTATE,           /* GPIO0 */
+                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_TRISTATE,           /* GPIO1 */
+                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_TRISTATE,           /* GPIO2 */
+                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_TRISTATE,           /* GPIO3 */
                 SI446X_CMD_GPIO_PIN_CFG_ARG_GEN_CONFIG_DRV_STRENGTH_ENUM_LOW << 5}; /* Low Drive Strength */
 #endif
 #if ( TM_MEASURE_SLEEP_TIMES == 1 )
@@ -604,7 +604,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
    { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
    { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
-#if ( TM_TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    { "noisebandClkOn",  DBG_CommandLine_NoiseBandClkOn,     "Display/compute the noise for a range of frequencies with 1MHz clock out" },
    { "noisebandClkOff", DBG_CommandLine_NoiseBandClkOff,    "Display/compute the noise for a range of frequencies without 1MHz clock out" },
 #endif
@@ -6352,7 +6352,11 @@ uint32_t DBG_CommandLine_HmcCmd  ( uint32_t argc, char *argv[] )
                {
                   if ( ( ( tblOffset % 16U ) == 0 ) && ( i != 0 ) )     /* If on hex 10 boundary, new line  */
                   {
+#if ( RTOS_SELECTION == MQX_RTOS )
                      pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "\n%06x ", tblOffset );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+                     pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "\r\n%06x ", tblOffset );
+#endif
                   }
                   pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "%02X ", pBuffer->data[i] );
                   tblOffset++;
@@ -12570,8 +12574,8 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static uint32_t channelsBeforeDelay = 3200 / 2;
    static uint8_t  testModeHMC = 0;
    static ports_s  portPins, ports = { '_', '_', '_', '_', '_', '_', '_', '_' };
-   OS_TICK_Struct time1,time2;
-   uint32_t       TimeDiff;
+   OS_TICK_Struct  time1, time2;
+   uint32_t        TimeDiff;
    static float    lowestCapVoltage = 9.99;
 #else
    static uint16_t start = 0;
@@ -12686,6 +12690,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 #else
          DBG_printf( "       (optional) boost 0=LDO only(default), 1=Boost, abort if Vcap is low, 2=Boost, ignore Vcap, 3=Boost, wait for Vcap" );
          DBG_printf( "       (optional) HMC traffic: 0=Normal, 1=One LogOff/LogOn, 2=One Update LCD, 3=Disable other tasks, 4=Update LP Data" );
+         DBG_printf( "                               5=Update LCD Continuously" );
          DBG_printf( "       (optional) port pin configuration during test: 12345678 or ________" );
          DBG_printf( "           1=rSPIdrv:H|M|L 2=rSDNdrv:H|M|L|N|P 3=rCSdrv:H|M|L|N|P 4=rOSCdrv:H|M|L|N|P 5=MCUrGPIO:I|U 6=JTAG:H|L|J 7=Unused:L|H|I|P 8=Meter:L|H|I|P " );
          DBG_printf( "             For 1,2,3,4: H=High Drive, M=Mid Drive, L=Low Drive, N=NMOS, P=PMOS" );
@@ -12850,70 +12855,74 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    }
 
 #if ( RTOS_SELECTION == MQX_RTOS )
-      freeRam = (uint32_t)_mem_get_free();
+   freeRam = (uint32_t)_mem_get_free();
 #elif (RTOS_SELECTION == FREE_RTOS)
-      HeapStats_t hd;
-      (void) vPortGetHeapStats ( &hd );              /* Get the statistics for the heap.  This assumes the use of heap_4.c */
-      freeRam = hd.xSizeOfLargestFreeBlockInBytes;   /* We need a contiguous block so find size of largest one */
-      DBG_printf("\n\rFreeRTOS vPortGetHeapStats returned %d bytes are available in the largest block", freeRam);
+   HeapStats_t hd;
+   (void) vPortGetHeapStats ( &hd );              /* Get the statistics for the heap.  This assumes the use of heap_4.c */
+   freeRam = hd.xSizeOfLargestFreeBlockInBytes;   /* We need a contiguous block so find size of largest one */
+   DBG_printf("\n\rFreeRTOS vPortGetHeapStats returned %d bytes are available in the largest block", freeRam);
 #endif
 
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // just to produce same .hex file
+   // Free previous buffers, if any, prior to allocating new ones
+   if ( workBuf      != NULL) { free( workBuf );      workBuf = NULL;      }
+   if ( noiseResults != NULL) { free( noiseResults ); noiseResults = NULL; }
+#endif
    // Reserve RAM for processing
    // 1) Reserve work area
-#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // just to produce same .hex file
-   if ( workBuf == NULL )
-   {
-#endif
-      if ( (workBuf = (uint8_t*)malloc( nSamples )) == NULL) {
-         DBG_printf("%u bytes needed out of %u available", nSamples, freeRam);
-         DBG_printf("Reduce the number of samples and/or the number of channels");
-         return ( 0 );
-      }
-#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // just to produce same .hex file
+   if ( (workBuf = (uint8_t*)malloc( nSamples )) == NULL) {
+      DBG_printf("%u bytes needed out of %u available", nSamples, freeRam);
+      DBG_printf("Reduce the number of samples and/or the number of channels");
+      return ( 0 );
    }
-#endif
+
    // 2) Reserve statistics buffer
-#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
-   if ( noiseResults == NULL )
-   {
-#endif
-      if ( (noiseResults = (NOISEBAND_Stats_t*)malloc( sizeof(NOISEBAND_Stats_t)*nbChannels )) == NULL) {
-         DBG_printf("%u bytes needed out of %u available", nSamples+(sizeof(NOISEBAND_Stats_t)*nbChannels), freeRam);
-         DBG_printf("Reduce the number of samples and/or the number of channels");
-         free( workBuf );
-         workBuf = NULL;
-         return ( 0 );
-      }
-#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+   if ( (noiseResults = (NOISEBAND_Stats_t*)malloc( sizeof(NOISEBAND_Stats_t)*nbChannels )) == NULL) {
+      DBG_printf("%u bytes needed out of %u available", nSamples+(sizeof(NOISEBAND_Stats_t)*nbChannels), freeRam);
+      DBG_printf("Reduce the number of samples and/or the number of channels");
+      free( workBuf );
+      workBuf = NULL;
+      return ( 0 );
    }
-#endif
+
+#if ( MCU_SELECTED == NXP_K24 )
 #define MINIMUM_TIME 320 // microseconds
 #define PAUSE_MSEC     5 // milliseconds
    // This minimum sampling rate is around 320usec per read.
    // RSSI read will take a minimum time which is bounded by the SPI rate and radio turn around time.
+#elif ( MCU_SELECTED == RA6E1 )
+#define MINIMUM_TIME 130 // microseconds based on OS_TICK_Get_Diff_InMicroseconds measurements on RA6E1/FreeRTOS
+#define PAUSE_MSEC     5 // milliseconds
+#endif
    if (samplingRate < MINIMUM_TIME) {
       samplingRate = MINIMUM_TIME;
    }
-   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) );
-#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 ) // Following is identical to K24
+   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) ); /* Rough time in seconds */
+#else
+   time  = (uint32_t)( nbChannels * ( (float)samplingRate*1.05f/1000.0f) * ((float)nSamples ) ); /* Rough time in milliseconds */
+   time += (uint32_t)( nbChannels * ( (float)( samplingRate - MINIMUM_TIME ) * 0.05f/1000.0f ) * ((float)nSamples )); /* R_BSP_SW_Delay runs 5% high */
+   time += (uint32_t)( nbChannels * ( (float)samplingRate/1000.0f + 1.414f + ( 0.0002f * nSamples ) ) + 0.999f );      /* Adjustment for setup and post-proc times */
    #define ACTUAL_PAUSE_MSEC  PAUSE_MSEC + 3 // OS_TASK_Sleep averages 8msec delay when 5msec is requested under FreeRTOS
    #define DELAY_SEC          10 // How long to delay between batches of DELAY_CHANS channels
    #define ENERGY_IN_CAP 3600000 // Magic number to keep super-cap voltage above 2.1V
 
-   time += ( (uint32_t) ( nbChannels * ACTUAL_PAUSE_MSEC + 999 ) ) / 1000 + 1 + waittime; /* account for PAUSE_MSEC and 1 second delay at start */
-   time += ( (uint32_t) ( nbChannels * 1 + 500 ) ) / 1000; /* RADIO_Get_RSSI delays for 1 msec per channel to discard noise after changing frequency */
+   time += ( (uint32_t) ( nbChannels * ACTUAL_PAUSE_MSEC ) ) + 1000 * (1 + waittime);     /* account for PAUSE_MSEC and requested delay at start */
+//   time += ( (uint32_t) ( nbChannels * 1 + 500 ) ) / 1000; /* RADIO_Get_RSSI delays for 1 msec per channel to discard noise after changing frequency */
    if ( boost != 0 )
    {
-      time += (uint32_t)nbChannels * (PWR_3P6LDO_EN_ON_DLY_MS + PWR_3V6BOOST_EN_ON_DLY_MS ) / 1000; // Boost/LDO time delays
+      time += (uint32_t)nbChannels * (PWR_3P6LDO_EN_ON_DLY_MS + PWR_3V6BOOST_EN_ON_DLY_MS ); // Boost/LDO time delays
    }
+   if ( testModeHMC == 5 ) time = (uint32_t)( time * 1.15 ); /* account for HMC running at a much higher duty-cycle */
    bool delayDuringTest = (bool)false;
    if ( (boost != 0) && ( (uint32_t)nSamples * (uint32_t)samplingRate * (uint32_t)nbChannels > ENERGY_IN_CAP ) )
    {  /* At risk of depleting super-cap during this run.  Insert delays between every channelsBeforeDelay channels */
       delayDuringTest = (bool)true;
       channelsBeforeDelay = ENERGY_IN_CAP / ( (uint32_t)nSamples * (uint32_t)samplingRate );
-      time += (uint32_t)( ( ( nbChannels - 2 ) / channelsBeforeDelay ) * DELAY_SEC );
+      time += (uint32_t)( ( ( nbChannels - 2 ) / channelsBeforeDelay ) * DELAY_SEC * 1000 );
       DBG_printf( "A delay of %u msec will be inserted every %u channel steps for super-cap recharging", (uint32_t)(DELAY_SEC*1000), channelsBeforeDelay );
    }
+   time = (uint32_t)( ( time + 500 ) /1000 );
 #endif
    // Remove the time it takes to read RSSI from the sampling rate so that we read RSSI at the specified rate
    if (samplingRate > MINIMUM_TIME) {
@@ -13097,8 +13106,9 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    }
 
    DBG_printf( "test should take %02u:%02u, %u seconds", time / 60, time % 60, time );
-   OS_TICK_Get_CurrentElapsedTicks(&time1);
+   OS_TICK_Get_CurrentElapsedTicks(&time1); /* Get the starting time for the entire test */
 
+   bool updateDisplayDuringNoiseband = (bool)false;
    switch( testModeHMC )
    {
       case 1:
@@ -13143,6 +13153,13 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          (void)HMC_MTRINFO_app( (uint8_t)HMC_APP_API_CMD_ACTIVATE, (void *)NULL ); //Request a Meter Info Read
          break;
       }
+      case 5:
+      {
+         updateDisplayDuringNoiseband = (bool)true;
+         DBG_printf( "To keep the HMC UART busy, noiseband will write to the meter's display as fast as possible" );
+         HMC_DISP_UpdateDisplayBuffer( HMC_DISP_MSG_VALID_TIME, HMC_DISP_POS_PD_LCD_MSG ); //Update the Display
+         break;
+      }
       default:
          break;
    }
@@ -13153,7 +13170,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    OS_TASK_Sleep( waittime * ONE_SEC );
 
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )  // just so we produce the same .hex file
-   DBG_logPrintf( 'R', "noiseband start; delay between samples = %u, starting super-cap voltage=%u mV", samplingRate, (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
+   DBG_printf( "Noiseband start; delay between samples = %u, starting super-cap voltage=%u mV", samplingRate, (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 
    PWR_3P6LDO_EN_ON();    // TODO: RA6E1 Bob: This should already be in this condition, just being sure
    PWR_3V6BOOST_EN_OFF(); // TODO: RA6E1 Bob: This should already be in this condition, just being sure
@@ -13176,26 +13193,51 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
                               SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_SEL_ENUM_DIV_30 << 3); // Divide clock by 30
    PHY_Unlock();    // Function will not return if it fails
    lowestCapVoltage = 9.99;
+
+   static uint32_t oldTaskPriorityDBG, oldTaskPriorityPRN, oldTaskPriorityHMC, oldTaskPriorityPHY, oldTaskPriorityIDL;
+   if ( updateDisplayDuringNoiseband )
+   {
+      oldTaskPriorityDBG = OS_TASK_Set_Priority( pTskName_Dbg,   19 );
+      oldTaskPriorityPRN = OS_TASK_Set_Priority( pTskName_Print, 19 );
+      oldTaskPriorityHMC = OS_TASK_Set_Priority( pTskName_Hmc,   17 );
+      oldTaskPriorityPHY = OS_TASK_Set_Priority( pTskName_Phy,   18 );
+      oldTaskPriorityIDL = OS_TASK_Set_Priority( pTskName_Idle,  24 );
+      HMC_APP_SetScanDelay( 0UL ); /* Cause HMC_app to run Applets at an accelerated speed, no deliberate delays */
+      HMC_DISP_SetContinuousUpdate(); /* This will cause HMC_display to continuously update the meter's LCD */
+      HMC_DISP_UpdateDisplayBuffer( HMC_DISP_MSG_NOISEBAND, HMC_DISP_POS_PD_LCD_MSG ); //Update the Display
+   }
 #else
    DBG_logPrintf( 'R', "noiseband start" );
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
+#if ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+   #define CAPTURE_TIMES 8
+   OS_TICK_Struct  times [CAPTURE_TIMES];
+   uint32_t        deltas[CAPTURE_TIMES-1];
+   uint64_t        totals[CAPTURE_TIMES-1] = { 0 };
+   #define CAPTURE_TIME(x) OS_TICK_GetCurrentElapsedTicks( &times[x] )
+#else
+   #define CAPTURE_TIME(x)
+#endif // ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
    for ( j=0, i = start; i <= end; i += step, j++ )
    {
+      CAPTURE_TIME(0); /* Get the starting time */
       PHY_Lock();      // Function will not return if it fails
+      CAPTURE_TIME(1); /* Measure duration of PHY_Lock */
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
       RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
 #else
       float lv = RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
       if ( lv < lowestCapVoltage ) lowestCapVoltage = lv;
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
-      RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
+      CAPTURE_TIME(2); /* Measure duration of the RSSI vector acquisition */
       PHY_Unlock();    // Function will not return if it fails
+      CAPTURE_TIME(3); /* Measure duration of the PHY_Unlock */
       qsort( workBuf, nSamples, sizeof(uint8_t), cmpfunc); // Sort RSSI array
-
+      CAPTURE_TIME(4); /* Measure duration of the quick sort function */
       // Compute average and stddev
       computeAvgAndStddev( workBuf, nSamples, &average, &stddev );
-
+      CAPTURE_TIME(5); /* Measure duration of the statistics */
       // Update stats
       min = workBuf[0];
       max = workBuf[nSamples-1];
@@ -13222,15 +13264,27 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          }
       }
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+      CAPTURE_TIME(6); /* Measure duration of the tabulation */
       OS_TASK_Sleep( PAUSE_MSEC ); // Be nice to other tasks
+      CAPTURE_TIME(7); /* Measure duration of the PAUSE_MSEC */
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
-         if ( ( j == (end/2) )&& ( 4 == testModeHMC ) )
-         {
-            ID_LoadLPTables_Helper();
-         }
+      if ( ( j == (end/2) )&& ( 4 == testModeHMC ) )
+      {
+         ID_LoadLPTables_Helper();
+      }
+   #if ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+      for ( uint32_t k = 0; k < CAPTURE_TIMES-1; k++ )
+      {
+         deltas[k] = OS_TICK_Get_Diff_InMicroseconds( &times[k], &times[k+1] );
+         totals[k] += deltas[k];
+      }
+//      DBG_printf( "Noiseband Chan %4u: Lock %10u RSSI %10u Unlock %10u Qsort %10u Stats %10u Tabulate %10u PAUSE %10u",
+//                   i, deltas[0], deltas[1], deltas[2], deltas[3], deltas[4], deltas[5], deltas[6] ); // TODO: RA6E1 Bob: remove later
+   #endif // ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    }
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+
    /* Put the debug port back into its default state after test has completed */
    R_BSP_PinCfg (BSP_IO_PORT_03_PIN_00, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    R_BSP_PinCfg (BSP_IO_PORT_01_PIN_08, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
@@ -13241,6 +13295,23 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    DBG_printf( "Noiseband took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV",
                 TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
+   if ( updateDisplayDuringNoiseband )
+   {
+      HMC_APP_SetScanDelay( HMC_APP_TASK_DELAY_MS ); /* Restore normal timing of HMC_app Applet scanning process  */
+      HMC_DISP_ClearContinuousUpdate();              /* Stop updating the LCD display of the meter continuously   */
+      (void)OS_TASK_Set_Priority( pTskName_Idle,  oldTaskPriorityIDL ); /* Put the task priorities back to normal */
+      (void)OS_TASK_Set_Priority( pTskName_Phy,   oldTaskPriorityPHY );
+      (void)OS_TASK_Set_Priority( pTskName_Hmc,   oldTaskPriorityHMC );
+      (void)OS_TASK_Set_Priority( pTskName_Print, oldTaskPriorityPRN );
+      (void)OS_TASK_Set_Priority( pTskName_Dbg,   oldTaskPriorityDBG );
+   }
+   #if ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+   DBG_printf( "Noiseband TOTALS:    Lock %10llu RSSI %10llu Unlock %10llu Qsort %10llu Stats %10llu Tabulate %10llu PAUSE %10llu",
+                   totals[0], totals[1], totals[2], totals[3], totals[4], totals[5], totals[6] );
+   for ( uint32_t k = 0; k < CAPTURE_TIMES-1; k++ ) { totals[k] = ( totals[k] + nbChannels/2 ) / nbChannels; }
+   DBG_printf( "Noiseband AVERAGES:  Lock %10llu RSSI %10llu Unlock %10llu Qsort %10llu Stats %10llu Tabulate %10llu PAUSE %10llu",
+                   totals[0], totals[1], totals[2], totals[3], totals[4], totals[5], totals[6] );
+   #endif // ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
    // Get the RX channels

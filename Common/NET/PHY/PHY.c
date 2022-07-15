@@ -1276,7 +1276,7 @@ void PHY_Task( taskParameter )
    }
 
    INFO_printf("count %u count2 %u",count, count2);
-#endif
+#endif // Not RA6E1.  This was already removed in the K24 baseline code
    timeout = ONE_SEC; // Do some background processing every second.
    defaultTimeout = timeout;
 
@@ -1341,8 +1341,8 @@ void PHY_Task( taskParameter )
       if ( TMR_AddTimer( &VSWRtimerCfg ) != eSUCCESS ) {
          ERR_printf("Failed to create VSWR timer");
       }
-#endif
-#endif
+#endif // ( VSWR_MEASUREMENT == 1 )
+#endif // ( DCU == 1 )
       for (;;)
       {
          uint32_t event_flags;
@@ -1449,7 +1449,7 @@ void PHY_Task( taskParameter )
                   }
                }
             }
-#endif
+#endif // ( DCU == 1 )
          }
 
          // Process messages from other task

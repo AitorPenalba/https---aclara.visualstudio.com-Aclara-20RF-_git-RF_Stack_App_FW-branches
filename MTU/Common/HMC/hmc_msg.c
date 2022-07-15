@@ -308,7 +308,10 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
 #if ( MCU_SELECTED == NXP_K24 )
                   numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
 #elif ( MCU_SELECTED == RA6E1 )
-                  numRxBytes = UART_getc( UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult), 10 ); // Setting 10 ms for now. Will be checked later
+                  /* Get a byte if one is waiting.  Otherwise, we wait 10 msec and then we get numRxBytes == 0. There is nothing magic
+                     about 10 msec because the actual protocol timeout is handled by a TMR_ timer.  We just need to avoid 100% CPU usage
+                     while we are waiting for the protocol timer to expire in the case that the meter fails to respond. */
+                  numRxBytes = UART_getc( UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult), 10 );
 #endif
                   timerCfg.usiTimerId = resExpiredTimerId_;
                   (void)TMR_ReadTimer(&timerCfg);
@@ -398,7 +401,7 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
                            (void)TMR_ResetTimer(comTimerExpiredTimerId_, comSettings_.uiTrafficTimeOut_mS); /* reset the session timer */
                            // We are receiving a response packet, having already gotten our ACK.
 
-                           /* If buffer is full, collect byte */
+                           /* If buffer is not full, collect byte */
                            if ( pTxRx_ <= (uint8_t *) &pData->RxPacket.uiPacketCRC16.BE.Lsb )
                            {
                               /* Process Rx Data */
@@ -574,20 +577,41 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
 #if ( MCU_SELECTED == NXP_K24 )
                         numRxBytes = UART_read(UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult));
 #elif ( MCU_SELECTED == RA6E1 )
-                        numRxBytes = UART_getc( UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult), 10 ); // Setting 10 ms for now. Will be checked later
+                        if ( sendAckNak_ == 0) /* For RA6E1, we don't want to do a UART_getc after we have the whole message for timing reasons */
+                        {
+                           /* Get a byte if one is waiting.  Otherwise, we wait 10 msec and then we get numRxBytes == 0. There is nothing magic
+                              about 10 msec because the actual protocol timeout is handled by a TMR_ timer.  We just need to avoid 100% CPU usage
+                              while we are waiting for the protocol timer to expire in the case that the meter fails to respond. */
+                           numRxBytes = UART_getc( UART_HOST_COMM_PORT, &ucResult, sizeof(ucResult), 10 );
+                        }
+                        else
+                        {
+                           /* This follwoing line is not strictly necessary because any time sendAckNak_ is non-zero, eMode_ will no longer contain
+                              HMC_MSG_MODE_RX so the while loop will still exit.  This line is included only in the event that testing shows that one
+                              or both of the OS_TASK_Sleep calls below needs to be reinstated for RA6E1.  Testing thus far inidates that they will not
+                              need to be reinstated. */
+                           numRxBytes = 0;
+                        }
 #endif
+#if ( RTOS_SELECTION == MQX_RTOS )
                         /* If no bytes were received, and we're still in RX mode, pause the task for 1mS.  Note: If the
                          * RTOS tick time is greater than 1mS, the delay here may take longer which may slow down comm.
                          * a little! */
+                        /* For RA6E1, the delay occurs in the UART_Getc function above (timeout parameter) whereas for
+                           NXP/MQX, an explicit delay was required because the UART_read function returned immediately if
+                           no bytes were waitning.  Therefore, this was needed to prevent 100% CPU usage and a watchdog. */
                         if ((0 == numRxBytes) && (HMC_MSG_MODE_RX == eMode_))
                         {
                            OS_TASK_Sleep ( 1 );
                         }
+#endif // ( RTOS_SELECTION == MQX_RTOS )
                      } /* while (!DVR_UART_App(UART_HOST_COMM_PORT, PORT_RX_EMPTY, NULL) &UART_STATUS_RC_NOT_EMPTY) */
+#if ( RTOS_SELECTION == MQX_RTOS )
                      if (0 == numRxBytes)
                      {
-                        OS_TASK_Sleep(1);
+                        OS_TASK_Sleep(1); // TODO: RA6E1 Bob: it would be helpful to know why this was needed on K24
                      }
+#endif // ( RTOS_SELECTION == MQX_RTOS )
                   }
                }
             } /* end if (eMode_ == HMC_MSG_MODE_RX) */
