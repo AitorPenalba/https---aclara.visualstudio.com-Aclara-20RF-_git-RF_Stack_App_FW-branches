@@ -561,7 +561,15 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
             }
             else
             {
-               finalBytes = ( destAddr + cnt ) - startAddr;
+               if ( destAddrLocal == ( ( uint32_t ) pSrc ) )
+               {
+                  finalBytes = cnt;
+               }
+               else
+               {
+                  finalBytes = ( destAddr + cnt ) - startAddr;
+               }
+
                memcpy ( &localVar[initialBytes], ( uint8_t * ) destAddrLocal, finalBytes );
                memcpy ( &localVar[initialBytes + finalBytes], ( uint8_t * )( destAddr + cnt ), ( eraseBytes - initialBytes - finalBytes ) );
             }
