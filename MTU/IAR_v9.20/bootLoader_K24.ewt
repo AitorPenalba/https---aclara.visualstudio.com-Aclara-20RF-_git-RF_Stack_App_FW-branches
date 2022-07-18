@@ -1432,9 +1432,6 @@
             <name>$PROJ_DIR$\..\Bootloader\Include\features_BL.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Bootloader\Include\meter_BL.h</name>
-        </file>
-        <file>
             <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\partition_cfg_BL.h</name>
         </file>
         <file>
@@ -1502,10 +1499,10 @@
         <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock_BL.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\Common\version_BL.c</name>
+        <name>$PROJ_DIR$\..\Common\version.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\Common\version_BL.h</name>
+        <name>$PROJ_DIR$\..\Common\version.h</name>
     </file>
     <file>
         <name>$PROJ_DIR$\..\Aclara_BSP\WDOG_BL.c</name>
