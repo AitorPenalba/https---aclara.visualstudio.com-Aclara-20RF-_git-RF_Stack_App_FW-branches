@@ -185,4 +185,8 @@ returnStatus_t ID_rdIntervalData(uint8_t *pQual, double *pVal, uint8_t ch, sysTi
 returnStatus_t ID_rdIntervalDataCfg(idChCfg_t *pIdCfg, uint8_t ch);
 #endif
 
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+void ID_LoadLPTables_Helper( void ); // Allows noiseband command to invoke LoadLPTables() during the run to create HMC traffic
+#endif
+
 #endif

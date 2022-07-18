@@ -85,7 +85,7 @@
 #include "ecc108_apps.h"
 #include "ecc108_config.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
-//#include "ecc108_mqx.h"
+#include "ecc108_mqx.h"
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "ecc108_freertos.h"
 #include "ecc108_lib_return_codes.h"
@@ -135,7 +135,7 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #include "hmc_ds.h"
 #include "hmc_request.h"
 #include "hmc_eng.h"
-#endif
+#endif // (ACLARA_LC == 0 ) && (ACLARA_DA == 0)
 #include "intf_cim_cmd.h"
 #if ( DEMAND_IN_METER == 1 )
 #include "hmc_demand.h"
@@ -143,8 +143,13 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #if ( CLOCK_IN_METER == 1 )
 #include "hmc_time.h"
 #endif
-#endif
-
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // Required for creating HMC traffic during noiseband testing
+#include "hmc_display.h"
+#include "hmc_start.h"
+#include "hmc_finish.h"
+#include "ID_intervalTask.h"
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#endif // (EP == 1)
 #if ( NOISE_HIST_ENABLED == 1 )
 #include "NH_NoiseHistData.h"
 #endif
@@ -202,6 +207,10 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define MAX_SAMPLE_LOOP_COUNT    5                               /* Maximum Number of Sample for DBG_CommandLine_TimeElapsed */
 #endif
 
+#if ( TM_LINKED_LIST == 1)
+#define MAX_LINKEDLIST_DATA      5
+#endif
+
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -247,6 +256,9 @@ static char                   *argvar[MAX_CMDLINE_ARGS + 1];
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
+#if ( TM_UART_ECHO_COMMAND == 1 )
+static uint32_t DBG_CommandLine_EchoComment( uint32_t argc, char *argv[] );
+#endif
 static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_SendHeepMsg( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_SM_NwActiveActTimeout(uint32_t argc, char *argv[]);
@@ -329,7 +341,7 @@ static uint32_t DBG_CommandLine_usbaddr( uint32_t argc, char *argv[] );
 #if ( TEST_SYNC_ERROR == 1 )
 static uint32_t DBG_CommandLine_SyncError( uint32_t argc, char *argv[] );
 #endif
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseBandClkOff( uint32_t argc, char *argv[] );
 #define GPIO_PIN_TRISTATE 1
@@ -342,10 +354,10 @@ typedef struct
    uint8_t gen_config;
 } ArgStream_s;
 static ArgStream_s sArgStream
-             = {SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DIV_CLK,            /* GPIO0 */
-                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,          /* GPIO1 */
-                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,          /* GPIO2 */
-                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,          /* GPIO3 */
+             = {SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_TRISTATE,           /* GPIO0 */
+                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_TRISTATE,           /* GPIO1 */
+                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_TRISTATE,           /* GPIO2 */
+                SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_TRISTATE,           /* GPIO3 */
                 SI446X_CMD_GPIO_PIN_CFG_ARG_GEN_CONFIG_DRV_STRENGTH_ENUM_LOW << 5}; /* Low Drive Strength */
 #endif
 #if ( TM_MEASURE_SLEEP_TIMES == 1 )
@@ -360,10 +372,16 @@ static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] );
 const char pTskName_OSEVNTTest[]      = "TMEVT";
 static OS_EVNT_Obj eventTestObj;
 static OS_EVNT_Handle eventTestHandle = &eventTestObj;
-bool osEventTaskCreated = FALSE;
-bool osEventCreated = FALSE;
-uint32_t waitBit;
-bool waitForAll;
+static bool osEventTaskCreated = FALSE;
+static bool osEventCreated = FALSE;
+static uint32_t waitBit;
+static bool waitForAll;
+#endif
+
+#if ( TM_LINKED_LIST == 1)
+static OS_List_Obj osLinkedListTestObj;
+static OS_List_Handle osLinkedListTestHandle = &osLinkedListTestObj;
+static OS_Linked_List_Element LinkedListdata[MAX_LINKEDLIST_DATA];
 #endif
 
 static const struct_CmdLineEntry DBG_CmdTable[] =
@@ -469,6 +487,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( EP == 1 )
 #if ( ENABLE_DEMAND_TASKS == 1 ) /* If Demand Feature is enabled */
    { "dumpdemand",   DBG_CommandLine_DMDDump,         "Prints the demand file/variables" },
+#endif
+#if ( TM_UART_ECHO_COMMAND == 1 )
+   { "echo",         DBG_CommandLine_EchoComment,     "Echos what was typed" },
 #endif
 #endif
    { "evladd",       DBG_CommandLine_EVLADD,          "Add an event to the log" },
@@ -583,7 +604,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
    { "networkid",    DBG_CommandLine_NetworkId,       "get (no args) or set (arg1) Network ID" },
    { "noiseband",    DBG_CommandLine_NoiseBand,       "Display/compute the noise for a range of channels" },
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    { "noisebandClkOn",  DBG_CommandLine_NoiseBandClkOn,     "Display/compute the noise for a range of frequencies with 1MHz clock out" },
    { "noisebandClkOff", DBG_CommandLine_NoiseBandClkOff,    "Display/compute the noise for a range of frequencies without 1MHz clock out" },
 #endif
@@ -678,16 +699,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( DCU == 1 )
    { "sdtest",       DBG_CommandLine_sdtest,          "[count (default=1)] Exercise SDRAM" },
 #endif
-#if ( INCLUDE_ECC == 1 )
-#if ( RTOS_SELECTION == MQX_RTOS )
-   { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\n"
-                   "                                   Plus unpublished functions - see source code for details" },
-#elif ( RTOS_SELECTION == FREE_RTOS )
    { "secconfig",    DBG_CommandLine_secConfig,       "Set ECCX08 device configuration to Aclara defaults\r\n"
                    "                                   Plus unpublished functions - see source code for details" },
-#endif // ( RTOS_SELECTION )
    { "sectest",      DBG_CommandLine_sectest,         "[count (default=1)] Exercise Security Device" },
-#endif // ( INCLUDE_ECC == 1)
    { "sendappmsg",   DBG_CommandLine_SendAppMsg,      "send data (arg1) to address (arg2) with qos (arg3)" },
 #if (USE_IPTUNNEL == 1)
    { "sendtunmsg",   DBG_CommandLine_SendIpTunMsg,    "send data (arg1) to address (arg2) with qos (arg3)" },
@@ -822,6 +836,16 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "createtesteventandwait",  DBG_CommandLine_OS_EventCreateWait,     "Create and Wait for Event Set Bits argument\r\n"
                                      "                                   are WaitBit (hex) and WaitForAll (bool)" },
    { "deleteeventtesttask",  DBG_CommandLine_OS_EventTaskDelete,     "Deletes the Event Test Task" },
+#endif
+#if ( TM_LINKED_LIST == 1)
+   { "oslinkedlistcreate",    DBG_CommandLine_OS_LinkedList_Create,     "Creates test LinkedList" },
+   { "oslinkedlistremove",  DBG_CommandLine_OS_LinkedList_Remove,     "Removes a element from test LinkedList" },
+   { "oslinkedlistenq",     DBG_CommandLine_OS_LinkedList_Enqueue,     "Enqueues a element to test LinkedList" },
+   { "oslinkedlistdeq",     DBG_CommandLine_OS_LinkedList_Dequeue,     "Dequeue a element from test LinkedList" },
+   { "oslinkedlistinsert",  DBG_CommandLine_OS_LinkedList_Insert,     "Insert a element at a specific index in test LinkedList" },
+   { "oslinkedlistnext",    DBG_CommandLine_OS_LinkedList_Next,     "Returns the Next element from test LinkedList" },
+   { "oslinkedlisthead",    DBG_CommandLine_OS_LinkedList_Head,     "Returns the Head element from test LinkedList" },
+   { "oslinkedlistnumele",    DBG_CommandLine_OS_LinkedList_NumElements,     "Adds LinkedList element and checks for the count" },
 #endif
    { 0, 0, 0 }
 };
@@ -1755,18 +1779,22 @@ uint32_t DBG_CommandLine_TimeMicroSec( uint32_t argc, char *argv[] )
       delayMicroSec1 = delayMicroSec1 % sysTickLoad;
       tickValue2.tickCount = delayMicroSec2 / sysTickLoad ;
       delayMicroSec2 = delayMicroSec2 % sysTickLoad;
-      tickValue1.HW_TICKS = delayMicroSec1;
-      tickValue2.HW_TICKS = delayMicroSec2;
-      diffInSec = OS_TICK_Get_Diff_InMicroseconds( &tickValue2, &tickValue1 );
+      tickValue1.HW_TICKS = sysTickLoad - delayMicroSec1;
+      tickValue2.HW_TICKS = sysTickLoad - delayMicroSec2;
+      diffInSec = OS_TICK_Get_Diff_InMicroseconds( &tickValue1, &tickValue2 );
       /* If delay and difference are same */
       if ( diffInSec == diffInArg )
       {
-         DBG_logPrintf( 'R', "Test Success!" );
+         DBG_logPrintf( 'R', "Test Success!  sysTickLoad=%lu, delayMicroSec1=%llu; delayMicroSec2=%llu; tickValue1 = [ %lu %lu ]; tickValue2 = [ %lu %lu ]; diffInSec=%lu, diffInArg=%lld",
+                             sysTickLoad, delayMicroSec1, delayMicroSec2, tickValue1.tickCount, tickValue1.HW_TICKS, tickValue2.tickCount, tickValue2.HW_TICKS,
+                             diffInSec, diffInArg);
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "Test Failure!" );
+         DBG_logPrintf( 'R', "Test Failure!  sysTickLoad=%lu, delayMicroSec1=%llu; delayMicroSec2=%llu; tickValue1 = [ %lu %lu ]; tickValue2 = [ %lu %lu ]; diffInSec=%lu, diffInArg=%lld",
+                             sysTickLoad, delayMicroSec1, delayMicroSec2, tickValue1.tickCount, tickValue1.HW_TICKS, tickValue2.tickCount, tickValue2.HW_TICKS,
+                             diffInSec, diffInArg);
       }
    }
    else
@@ -2410,7 +2438,7 @@ uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] )
       {
          OS_TASK_ExitId( pTskName_OSEVNTTest );
          osEventTaskCreated = FALSE;
-         vEventGroupDelete( eventTestObj );
+         OS_EVNT_DELETE( eventTestObj );
          DBG_logPrintf( 'R', "Test Event Task Delete Success" );
          retVal = eSUCCESS;
       }
@@ -2426,6 +2454,472 @@ uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] )
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_EventTaskDelete() */
 #endif
+
+#if ( TM_LINKED_LIST == 1)
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_Create
+
+   Purpose: This function will test OS_LINKEDLIST_Create function and 
+             create the Test event
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_Create( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   bool osEventTaskCreated;
+   if ( argc == 1 )
+   {
+      /* Creates the LINKED_LIST handle*/
+      osEventTaskCreated = OS_LINKEDLIST_Create(osLinkedListTestHandle);
+      if( osEventTaskCreated == TRUE )
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_LinkedList_Create() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_NumElements
+
+   Purpose: This function will test OS_LINKEDLIST_NumElements function by 
+             adding the number of elements from the user to the LinkedList
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t numElementToAdd;
+   uint8_t numElementInsideList;
+   if ( argc == 2 )
+   {
+      numElementToAdd = ( uint32_t )atoi( argv[1] );
+      /* Validate input from user */
+      if ( ( numElementToAdd > MAX_LINKEDLIST_DATA )
+           || ( numElementToAdd < 0 )
+           || ( numElementToAdd == MAX_LINKEDLIST_DATA ) )
+      {
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
+         return ( uint32_t )retVal;
+      }
+
+      /* Enqueue elements to the list */
+      for( uint8_t index = 0; index < numElementToAdd; index++ )
+      {
+         OS_LINKEDLIST_Enqueue( osLinkedListTestHandle, &LinkedListdata[ index ] );
+      }
+
+      /* Get the Count from the API */
+      numElementInsideList = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+
+      /* Validate the result */
+      if ( numElementToAdd == numElementInsideList )
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+      }
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_LinkedList_NumElements() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_Remove
+
+   Purpose: This function will test OS_LINKEDLIST_Remove function by 
+             removing the number of elements from the user to the LinkedList
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t indexElementToRemove;
+   uint8_t numElementBeforeRemove;
+   uint8_t numElementAfterRemove;
+   if ( argc == 2 )
+   {
+      indexElementToRemove = ( uint32_t )atoi( argv[1] );
+      /* Validate input from user */
+      if ( ( indexElementToRemove > MAX_LINKEDLIST_DATA )
+           || ( indexElementToRemove < 0 )
+           || ( indexElementToRemove == MAX_LINKEDLIST_DATA ) )
+      {
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
+         return ( uint32_t )retVal;
+      }
+
+      if ( LinkedListdata[ indexElementToRemove ].NEXT == NULL )
+      {
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Array Index already NULL" );
+         return ( uint32_t )retVal;
+      }
+      
+      /* Get the Count from the API */
+      numElementBeforeRemove = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+      
+      /* Remove elements from the list */
+      OS_LINKEDLIST_Remove( osLinkedListTestHandle, &LinkedListdata[ indexElementToRemove ] );
+      
+      /* Get the Count from the API */
+      numElementAfterRemove = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+      
+      if ( ( numElementAfterRemove + 1 ) == numElementBeforeRemove )
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+      }
+
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_LinkedList_Remove() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_Enqueue
+
+   Purpose: This function will test OS_LINKEDLIST_Enqueue function by 
+             adding the number of elements from the user to the LinkedList
+             and validating the number of elements
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t indexElementToEnq;
+   uint8_t numElementBeforeEnq;
+   uint8_t numElementAfterEnq;
+   if ( argc == 2 )
+   {
+      indexElementToEnq = ( uint32_t )atoi( argv[1] );
+      /* Validate input from user */
+      if ( ( indexElementToEnq > MAX_LINKEDLIST_DATA )
+           || ( indexElementToEnq < 0 )
+           || ( indexElementToEnq == MAX_LINKEDLIST_DATA ) )
+      {
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
+         return ( uint32_t )retVal;
+      }
+
+      /* Get the Count from the API */
+      numElementBeforeEnq = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+      
+      /* Remove elements from the list */
+      OS_LINKEDLIST_Enqueue( osLinkedListTestHandle, &LinkedListdata[ indexElementToEnq ] );
+      
+      /* Get the Count from the API */
+      numElementAfterEnq = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+      
+      if ( numElementAfterEnq == ( numElementBeforeEnq + 1 ) )
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+      }
+
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_LinkedList_Enqueue() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_Dequeue
+
+   Purpose: This function will test OS_LINKEDLIST_Dequeue function by 
+             removing the number of elements from the user to the LinkedList
+             and validating with the count
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t indexElementToDeq;
+   uint8_t numElementBeforeDeq;
+   uint8_t numElementAfterDeq;
+   static OS_Linked_List_Element_Handle deqReturnElement; 
+
+   if ( argc == 1 )
+   {
+
+      /* Get the Count from the API */
+      numElementBeforeDeq = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+
+      /* Dequeue elements from the list */
+      deqReturnElement = OS_LINKEDLIST_Dequeue( osLinkedListTestHandle );
+
+      if (deqReturnElement == NULL)
+      {
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure. LinkedList is already NULL" );
+         return ( uint32_t )retVal;
+      }
+
+      /* Get the Count from the API */
+      numElementAfterDeq = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+
+      if ( ( numElementAfterDeq + 1 ) == numElementBeforeDeq )
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
+      }
+
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_LinkedList_Dequeue() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_Insert
+
+   Purpose: This function will test OS_LINKEDLIST_Insert function by 
+             inserting the element in the LinkedList and validating 
+             the number of count
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t indexElementToInsertAfter;
+   uint8_t indexElementToInsert;
+   uint8_t numElementBeforeInsert;
+   uint8_t numElementAfterInsert;
+   bool isValueInserted;
+   if ( argc == 3 )
+   {
+      indexElementToInsertAfter = ( uint32_t )atoi( argv[1] );
+      indexElementToInsert = ( uint32_t )atoi( argv[2] );
+      /* Validate input from user */
+      if ( ( indexElementToInsert > MAX_LINKEDLIST_DATA )
+           || ( indexElementToInsert == MAX_LINKEDLIST_DATA )
+           || ( indexElementToInsert < 0 )
+           || ( indexElementToInsertAfter > MAX_LINKEDLIST_DATA )
+           || ( indexElementToInsertAfter == MAX_LINKEDLIST_DATA )
+           || ( indexElementToInsertAfter < 0 )
+              )
+      {
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
+         return ( uint32_t )retVal;
+      }
+
+
+      if ( LinkedListdata[ indexElementToInsertAfter ].NEXT == NULL )
+      {
+
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure. LinkedList is already NULL" );
+         return ( uint32_t )retVal;
+      }
+
+      /* Get the Count from the API */
+      numElementBeforeInsert = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+      
+      /* Insert elements to the list */
+      isValueInserted = OS_LINKEDLIST_Insert( osLinkedListTestHandle, &LinkedListdata[ indexElementToInsertAfter ], &LinkedListdata[ indexElementToInsert ] );
+      
+      /* Get the Count from the API */
+      numElementAfterInsert = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
+      
+      if ( numElementAfterInsert == ( numElementBeforeInsert + 1 ) )
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+      }
+
+   }
+   else if ( argc < 3 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_LinkedList_Insert() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_Head
+
+   Purpose: This function will test OS_LINKEDLIST_Head function by 
+             validating the return from the function
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   static OS_Linked_List_Element_Handle headElement;
+   if ( argc == 1 )
+   {
+
+      /* Get Head elements from the list */
+      headElement = OS_LINKEDLIST_Head( osLinkedListTestHandle );
+
+      if ( headElement != NULL )
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
+      }
+
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_LinkedList_Head() */
+
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_Next
+
+   Purpose: This function will test OS_LINKEDLIST_Next function by 
+             validating the return from the function
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function 
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t indexElement;
+   static OS_Linked_List_Element_Handle nextElement;
+   if ( argc == 2 )
+   {
+      indexElement = ( uint32_t )atoi( argv[1] );
+      /* Validate input from user */
+      if ( ( indexElement > MAX_LINKEDLIST_DATA )
+           || ( indexElement < 0 )
+           || ( indexElement == MAX_LINKEDLIST_DATA ) )
+      {
+         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
+         return ( uint32_t )retVal;
+      }
+
+      /* Get next elements from the list */
+      nextElement = OS_LINKEDLIST_Next( osLinkedListTestHandle, &LinkedListdata[ indexElement ] );
+
+      if ( nextElement != NULL )
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+      }
+
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_OS_LinkedList_Next() */
+
+#endif   //TM_LINKED_LIST
 
 // TODO: RA6 [name_Balaji]: Add support to the following function in RA6E1
 /*******************************************************************************
@@ -2464,14 +2958,13 @@ uint32_t DBG_CommandLine_CpuLoadEnable( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] )
 {
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Bob: Need to create the FreeRTOS equivalent and add to the code
-   _task_id tid;
+   OS_TASK_id tid;
    if ( argc > 1 )
    {
       tid = strtoul( argv[1], NULL, 0 );
       DBG_SetTaskFilter( tid );
    }
-#endif
+
    return 0;
 }
 
@@ -2851,10 +3344,8 @@ uint32_t DBG_CommandLine_SimulatePowerDown ( uint32_t argc, char *argv[] )
       ( void )OS_TASK_Set_Priority( pTskName_Print, 11 ); // Increasing priority
       ( void )OS_TASK_Set_Priority( pTskName_Dbg, 11 );
       // Note: Increase the MFG port priority to have MFG port access to use "reboot" command
-#if 0  // TODO: RA6E1 Bob: Unable to figure out why these two extern symbols cannot be resolved
       ( void )OS_TASK_Set_Priority( pTskName_Mfg, 11 );
       ( void )OS_TASK_Set_Priority( pTskName_MfgUartRecv, 11 );
-#endif  // TODO: RA6E1 Bob: Unable to figure out why these two extern symbols cannot be resolved
       ( void )OS_TASK_Set_Priority( pTskName_MfgUartCmd, 11 );
       ( void )OS_TASK_Set_Priority( pTskName_Idle, 13 );
 
@@ -3023,7 +3514,7 @@ static uint32_t DBG_CommandLine_sdtest ( uint32_t argc, char *argv[] )
    pTask = (char **)tasks;
    do
    {
-      id = _task_get_id_from_name( *pTask );
+      id = OS_TASK_GetID_fromName( *pTask );
       if ( id != 0 )
       {
          (void)_task_destroy( id );
@@ -3169,141 +3660,139 @@ static uint32_t DBG_CommandLine_getTBslot( uint32_t argc, char *argv[] )
    return 0;
 }
 #endif //#if ( DCU == 1 )
-//#if ( INCLUDE_ECC == 1 )
-//#include "ecc108_lib_return_codes.h"
-//static const char checkmac_failed[] = "ECC108_CHECKMAC_FAILED";
-//static const char parse_error[]  = "ECC108_PARSE_ERROR";
-//static const char cmd_fail[]  = "ECC108_CMD_FAIL";
-//static const char status_crc[]  = "ECC108_STATUS_CRC";
-//static const char status_unknown[]  = "ECC108_STATUS_UNKNOWN";
-//static const char status_ecc[]  = "ECC108_STATUS_ECC";
-//static const char func_fail[]  = "ECC108_FUNC_FAIL";
-//static const char gen_fail[]  = "ECC108_GEN_FAIL";
-//static const char bad_param[]  = "ECC108_BAD_PARAM";
-//static const char invalid_id[]  = "ECC108_INVALID_ID";
-//static const char invalid_size[]  = "ECC108_INVALID_SIZE";
-//static const char bad_crc[]  = "ECC108_BAD_CRC";
-//static const char rx_fail[]  = "ECC108_RX_FAIL";
-//static const char rx_no_response[]  = "ECC108_RX_NO_RESPONSE";
-//static const char resync_with_wakeup[]  = "ECC108_RESYNC_WITH_WAKEUP";
-//static const char comm_fail[]  = "ECC108_COMM_FAIL";
-//static const char timeout[]  = "ECC108_TIMEOUT";
-//static const char unknown[]  = "Unknown";
-//
-///*******************************************************************************
-//
-//   Function name: PrintECC_error
-//
-//   Purpose: Local helper function to print (translation of) error codes returned
-//            by the security chip.
-//   Arguments: uint8_t error code returned by the security chip.
-//
-//   Returns: None
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static void PrintECC_error( uint8_t ECCstatus )
-//{
-//   char  const *msg;
-//   if ( ECCstatus != ECC108_SUCCESS )
-//   {
-//      switch ( ECCstatus )
-//      {
-//         case ECC108_CHECKMAC_FAILED:
-//         {
-//            msg = checkmac_failed;
-//            break;
-//         }
-//         case ECC108_PARSE_ERROR:
-//         {
-//            msg = parse_error;
-//            break;
-//         }
-//         case ECC108_CMD_FAIL:
-//         {
-//            msg = cmd_fail;
-//            break;
-//         }
-//         case ECC108_STATUS_CRC:
-//         {
-//            msg = status_crc;
-//            break;
-//         }
-//         case ECC108_STATUS_UNKNOWN:
-//         {
-//            msg = status_unknown;
-//            break;
-//         }
-//         case ECC108_STATUS_ECC:
-//         {
-//            msg = status_ecc;
-//            break;
-//         }
-//         case ECC108_FUNC_FAIL:
-//         {
-//            msg = func_fail;
-//            break;
-//         }
-//         case ECC108_GEN_FAIL:
-//         {
-//            msg = gen_fail;
-//            break;
-//         }
-//         case ECC108_BAD_PARAM:
-//         {
-//            msg = bad_param;
-//            break;
-//         }
-//         case ECC108_INVALID_ID:
-//         {
-//            msg = invalid_id;
-//            break;
-//         }
-//         case ECC108_INVALID_SIZE:
-//         {
-//            msg = invalid_size;
-//            break;
-//         }
-//         case ECC108_BAD_CRC:
-//         {
-//            msg = bad_crc;
-//            break;
-//         }
-//         case ECC108_RX_FAIL:
-//         {
-//            msg = rx_fail;
-//            break;
-//         }
-//         case ECC108_RX_NO_RESPONSE:
-//         {
-//            msg = rx_no_response;
-//            break;
-//         }
-//         case ECC108_RESYNC_WITH_WAKEUP:
-//         {
-//            msg = resync_with_wakeup;
-//            break;
-//         }
-//         case ECC108_COMM_FAIL:
-//         {
-//            msg = comm_fail;
-//            break;
-//         }
-//         case ECC108_TIMEOUT:
-//         {
-//            msg = timeout;
-//            break;
-//         }
-//
-//         default:
-//            msg = unknown;
-//      }
-//      DBG_printf( "\nCode = 0x%02x, %s", ECCstatus, msg );
-//   }
-//}
-//#endif /* INCLUDE_ECC */
-//#if 0
+#include "ecc108_lib_return_codes.h"
+static const char checkmac_failed[] = "ECC108_CHECKMAC_FAILED";
+static const char parse_error[]  = "ECC108_PARSE_ERROR";
+static const char cmd_fail[]  = "ECC108_CMD_FAIL";
+static const char status_crc[]  = "ECC108_STATUS_CRC";
+static const char status_unknown[]  = "ECC108_STATUS_UNKNOWN";
+static const char status_ecc[]  = "ECC108_STATUS_ECC";
+static const char func_fail[]  = "ECC108_FUNC_FAIL";
+static const char gen_fail[]  = "ECC108_GEN_FAIL";
+static const char bad_param[]  = "ECC108_BAD_PARAM";
+static const char invalid_id[]  = "ECC108_INVALID_ID";
+static const char invalid_size[]  = "ECC108_INVALID_SIZE";
+static const char bad_crc[]  = "ECC108_BAD_CRC";
+static const char rx_fail[]  = "ECC108_RX_FAIL";
+static const char rx_no_response[]  = "ECC108_RX_NO_RESPONSE";
+static const char resync_with_wakeup[]  = "ECC108_RESYNC_WITH_WAKEUP";
+static const char comm_fail[]  = "ECC108_COMM_FAIL";
+static const char timeout[]  = "ECC108_TIMEOUT";
+static const char unknown[]  = "Unknown";
+
+/*******************************************************************************
+
+   Function name: PrintECC_error
+
+   Purpose: Local helper function to print (translation of) error codes returned
+            by the security chip.
+   Arguments: uint8_t error code returned by the security chip.
+
+   Returns: None
+
+   Notes:
+
+*******************************************************************************/
+static void PrintECC_error( uint8_t ECCstatus )
+{
+   char  const *msg;
+   if ( ECCstatus != ECC108_SUCCESS )
+   {
+      switch ( ECCstatus )
+      {
+         case ECC108_CHECKMAC_FAILED:
+         {
+            msg = checkmac_failed;
+            break;
+         }
+         case ECC108_PARSE_ERROR:
+         {
+            msg = parse_error;
+            break;
+         }
+         case ECC108_CMD_FAIL:
+         {
+            msg = cmd_fail;
+            break;
+         }
+         case ECC108_STATUS_CRC:
+         {
+            msg = status_crc;
+            break;
+         }
+         case ECC108_STATUS_UNKNOWN:
+         {
+            msg = status_unknown;
+            break;
+         }
+         case ECC108_STATUS_ECC:
+         {
+            msg = status_ecc;
+            break;
+         }
+         case ECC108_FUNC_FAIL:
+         {
+            msg = func_fail;
+            break;
+         }
+         case ECC108_GEN_FAIL:
+         {
+            msg = gen_fail;
+            break;
+         }
+         case ECC108_BAD_PARAM:
+         {
+            msg = bad_param;
+            break;
+         }
+         case ECC108_INVALID_ID:
+         {
+            msg = invalid_id;
+            break;
+         }
+         case ECC108_INVALID_SIZE:
+         {
+            msg = invalid_size;
+            break;
+         }
+         case ECC108_BAD_CRC:
+         {
+            msg = bad_crc;
+            break;
+         }
+         case ECC108_RX_FAIL:
+         {
+            msg = rx_fail;
+            break;
+         }
+         case ECC108_RX_NO_RESPONSE:
+         {
+            msg = rx_no_response;
+            break;
+         }
+         case ECC108_RESYNC_WITH_WAKEUP:
+         {
+            msg = resync_with_wakeup;
+            break;
+         }
+         case ECC108_COMM_FAIL:
+         {
+            msg = comm_fail;
+            break;
+         }
+         case ECC108_TIMEOUT:
+         {
+            msg = timeout;
+            break;
+         }
+
+         default:
+            msg = unknown;
+      }
+      DBG_printf( "\nCode = 0x%02x, %s", ECCstatus, msg );
+   }
+}
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_GenDFWkey
@@ -3400,7 +3889,7 @@ static const uint8_t slot14sig[ 64 ] =
 #if 0
 static const uint8_t fwen[ 32 ] = { 0 };
 #endif
-#if (INCLUDE_ECC == 1)
+
 uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
 {
 #if 0
@@ -3683,7 +4172,6 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 /* end DBG_CommandLine_secConfig() */
-#endif // #if (INCLUDE_ECC == 1)
 
 //#if 0 //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 ///*******************************************************************************
@@ -3848,6 +4336,36 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
 {
    return 0;
 }
+
+#if ( TM_UART_ECHO_COMMAND == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_EchoComment
+
+   Purpose: Echos the command string in arg[0] for testing UART cut/paste
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: Always successful
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_EchoComment( uint32_t argc, char *argv[] )
+{
+   DBG_printfNoCr( "ECHO" );
+   if ( argc > 1 )
+   {
+      for ( uint32_t i = 1; i < argc; i++ )
+      {
+         DBG_printfNoCr( " %s", argv[i] );
+      }
+   }
+   DBG_printf( " " );
+   return 0;
+}
+#endif // TM_UART_ECHO_COMMAND
 
 /*******************************************************************************
 
@@ -5834,7 +6352,11 @@ uint32_t DBG_CommandLine_HmcCmd  ( uint32_t argc, char *argv[] )
                {
                   if ( ( ( tblOffset % 16U ) == 0 ) && ( i != 0 ) )     /* If on hex 10 boundary, new line  */
                   {
+#if ( RTOS_SELECTION == MQX_RTOS )
                      pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "\n%06x ", tblOffset );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+                     pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "\r\n%06x ", tblOffset );
+#endif
                   }
                   pPtr += snprintf( pPtr, sizeof( respDataHex ) - ( pPtr - respDataHex ), "%02X ", pBuffer->data[i] );
                   tblOffset++;
@@ -6542,13 +7064,24 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
 #endif
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
    DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] );
-#if 0  // TODO: RA6: Add the following lines for RA6 and FreeRTOS
+#if ( ( MCU_SELECTED == NXP_K24 ) || ( DCU == 1 ) )
    DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
                   BSP_Get_BspRevision(), BSP_Get_IoRevision(), BSP_Get_PspRevision(), __VER__ );
+#endif
+#if ( RTOS_SELECTION == MQX_RTOS )
    DBG_logPrintf( 'R', "MQX=%s MQXgen=%s MQXLibraryDate=%s",
                   OS_Get_OsVersion(), OS_Get_OsGenRevision(), OS_Get_OsLibDate() );
-   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );  // TODO: RA6: Enable this line
 #endif
+#if ( ( MCU_SELECTED == NXP_K24 ) || ( DCU == 1 ) )
+   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );  // TODO: RA6: Support this line
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+   DBG_logPrintf( 'R', "BSP=%s IAR=%d", BSP_Get_BSPVersion(), __VER__ );
+#endif
+#if ( RTOS_SELECTION == FREE_RTOS )
+   DBG_logPrintf( 'R', "FreeRTOS=%s", tskKERNEL_VERSION_NUMBER );
+#endif
+
 #if ( DCU == 1 )
    DBG_logPrintf( 'R', "TBImageTarget: %s", VER_strGetDCUVersion() );
 #endif
@@ -9099,7 +9632,7 @@ uint32_t DBG_CommandLine_PWR_BoostTest( uint32_t argc, char *argv[] )
 
    PWR_USE_LDO();
 
-   DBG_logPrintf( 'R', "Super Cap Volage Drop: %s -> %s, %s Ws",
+   DBG_logPrintf( 'R', "Super Cap Voltage Drop: %s -> %s, %s Ws",
                   DBG_printFloat( floatStr[0], fSuperCapV[0], 6 ),
                   DBG_printFloat( floatStr[1], fSuperCapV[1], 6 ),
                   DBG_printFloat( floatStr[2],
@@ -9168,7 +9701,7 @@ uint32_t DBG_CommandLine_PWR_SuperCap( uint32_t argc, char *argv[] )
    char floatStr[PRINT_FLOAT_SIZE];
 
    fSuperCapV = ADC_Get_SC_Voltage();
-   DBG_logPrintf( 'R', "Super Cap Volage: %s", DBG_printFloat( floatStr, fSuperCapV, 6 ) );
+   DBG_logPrintf( 'R', "Super Cap Voltage: %s", DBG_printFloat( floatStr, fSuperCapV, 6 ) );
 
    return( 0 );
 }
@@ -10579,12 +11112,11 @@ uint32_t DBG_CommandLine_StackUsage ( uint32_t argc, char *argv[] )
 ******************************************************************************/
 uint32_t DBG_CommandLine_TaskSummary ( uint32_t argc, char *argv[] )
 {
-#if 0 // TODO: RA6E1 Bob: Re-enable this when Siva checks in OS_TASK_Summary
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TASK_Summary((bool)true);
-#else
-   DBG_printf( "The %s command is not ready yet.", argv[0] );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   OS_TASK_SummaryFreeRTOS();
 #endif
-
    return ( 0 );
 }
 
@@ -11963,6 +12495,7 @@ static int cmpfunc( const void *a, const void *b) {
   return *(char*)a - *(char*)b;
 }
 
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 typedef struct
 {
    char RadioSPI;
@@ -11985,10 +12518,6 @@ static char upperCase(char letter)
    }
 }
 
-#define CONFIG_PORTS_FOR_NOISEBAND 1
-#define LIST_FREQUENCIES_NOISEBAND 1
-
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 ) // Capability to change port pin configuration during noiseband run
 #warning "You have built a version that allows Noiseband to change many port configurations!"
 
 static bool checkOptions( char inputByte, char *option, char pAllowed[] )
@@ -12015,13 +12544,13 @@ static bool checkOptions( char inputByte, char *option, char pAllowed[] )
    *option = inputUpper;  // return the matching option for use in this run
    return ( (bool)true ); // found a matching option
 }
-#endif // Capability to change port pin configuration during noiseband run
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
 uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 {
    uint32_t      time;
    PHY_GetConf_t GetConf;
-#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 ) // Just to keep .hex file same as K24
    uint16_t      waittime, nSamples, samplingRate, i, j;
    uint8_t       radioNum;
 #else
@@ -12035,7 +12564,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static uint16_t nbChannels = 0;
    static uint8_t *workBuf = NULL;
    static NOISEBAND_Stats_t *noiseResults = NULL;
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    static uint8_t  radioNum = 0;
    static uint16_t waittime = 15, nSamples = 80, samplingRate = 1000, requestedSamplingRate = 1000;
    static uint16_t start = 0;
@@ -12043,25 +12572,19 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static uint16_t step  = 2;
    static uint8_t  boost = 0;
    static uint32_t channelsBeforeDelay = 3200 / 2;
+   static uint8_t  testModeHMC = 0;
+   static ports_s  portPins, ports = { '_', '_', '_', '_', '_', '_', '_', '_' };
+   OS_TICK_Struct  time1, time2;
+   uint32_t        TimeDiff;
+   static float    lowestCapVoltage = 9.99;
 #else
-   static uint16_t waittime, nSamples, samplingRate;
    static uint16_t start = 0;
    static uint16_t end   = 0;
    static uint16_t step  = 0;
    static uint8_t  boost = 0;
-#endif
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
-   static ports_s  portPins, ports = { '_', '_', '_', '_', '_', '_', '_', '_' };
-   OS_TICK_Struct time1,time2;
-   uint32_t       TimeDiff;
-#if ( MCU_SELECTED == RA6E1 )
-   static float    lowestCapVoltage = 9.99;
-#endif
-#if 0 // TODO: No longer needed
-   static bool    cgcInitialized = (bool)false;
-#endif
-#endif
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    static bool     listFreqs = (bool)false;
 
    if ( argc == 2 ) // Special handling for noiseband f = list frequencies.  Might want to make this permanent.
@@ -12077,41 +12600,33 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          return ( 0 );
       }
    }
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    // No parameters
    if ( argc == 1 )
    {
       // Print data if available
       if ( noiseResults )
       {
-#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
          DBG_printf( "   min    med    max     avg stddev    P90    P95    P99   P995   P999");
 #else
          if ( listFreqs ) {
-            DBG_printf( "\r\nFrequency   min    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' "
+            DBG_printf( "\r\nFrequency   min    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d %d' "
                         "'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c' 'lowestCap=%d.%02dV'"
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
-                        " 'Radio GPIO=%02x%02x%02x%02x%02x'"
-#endif
-                        , radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, \
+                        " 'Radio GPIO=%02x%02x%02x%02x%02x'",
+                          radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, testModeHMC, \
                           ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter,
-                          (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
-                        , sArgStream.GPIO0, sArgStream.GPIO1, sArgStream.GPIO2, sArgStream.GPIO3, sArgStream.gen_config
-#endif
+                          (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U,
+                          sArgStream.GPIO0, sArgStream.GPIO1, sArgStream.GPIO2, sArgStream.GPIO3, sArgStream.gen_config
                           );
          } else {
-            DBG_printf( "\r\nmin    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d' "
+            DBG_printf( "\r\nmin    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d %d' "
                         "'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c' 'lowestCap=%d.%02dV' "
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
-                        " 'Radio GPIO=%02x%02x%02x%02x%02x'"
-#endif
-                        , radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, \
+                        " 'Radio GPIO=%02x%02x%02x%02x%02x'",
+                          radioNum, waittime, nSamples, requestedSamplingRate, start, end, step, boost, testModeHMC, \
                           ports.RadioSPI, ports.RadioSDN, ports.RadioCS, ports.RadioOSC, ports.RadioGPIO, ports.JtagPins, ports.Unused, ports.Meter,
-                          (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
-                        , sArgStream.GPIO0, sArgStream.GPIO1, sArgStream.GPIO2, sArgStream.GPIO3, sArgStream.gen_config
-#endif
+                          (uint32_t)(lowestCapVoltage), ((uint32_t)(lowestCapVoltage*100)) % 100U,
+                          sArgStream.GPIO0, sArgStream.GPIO1, sArgStream.GPIO2, sArgStream.GPIO3, sArgStream.gen_config
                           );
          }
 #endif
@@ -12121,7 +12636,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
            OS_TASK_Sleep( 10 ); // TODO: RA6E1 Bob: this delay should not be needed but I experience a problem with UART/Debug that needs it
            // Get data into the appropriate buffer
             stats = &noiseResults[j];
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
             if ( listFreqs )
             {
                DBG_printf( "%3d.%04d %4d.%1d %4d.%1d %4d.%1d %4d.%02d %3u.%02u %4d.%1d %4d.%1d %4d.%1d %4d.%1d %4d.%1d",
@@ -12170,31 +12685,31 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          DBG_printf( "       start is the first channel to get RSSI for" );
          DBG_printf( "       end is the last channel to get RSSI for" );
          DBG_printf( "       step is the increment between channels (minimum 2)" );
-#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
          DBG_printf( "       boost (opt.) 0=LDO only(default), 1=LDO and Boost" );
 #else
-         DBG_printf( "       (optional) boost 0=LDO only(default), 1=LDO and Boost (must enter a value to reach the next option)" );
+         DBG_printf( "       (optional) boost 0=LDO only(default), 1=Boost, abort if Vcap is low, 2=Boost, ignore Vcap, 3=Boost, wait for Vcap" );
+         DBG_printf( "       (optional) HMC traffic: 0=Normal, 1=One LogOff/LogOn, 2=One Update LCD, 3=Disable other tasks, 4=Update LP Data" );
+         DBG_printf( "                               5=Update LCD Continuously" );
          DBG_printf( "       (optional) port pin configuration during test: 12345678 or ________" );
          DBG_printf( "           1=rSPIdrv:H|M|L 2=rSDNdrv:H|M|L|N|P 3=rCSdrv:H|M|L|N|P 4=rOSCdrv:H|M|L|N|P 5=MCUrGPIO:I|U 6=JTAG:H|L|J 7=Unused:L|H|I|P 8=Meter:L|H|I|P " );
          DBG_printf( "             For 1,2,3,4: H=High Drive, M=Mid Drive, L=Low Drive, N=NMOS, P=PMOS" );
          DBG_printf( "             For 5,6,7,8: H=High Output/Mid Drive, L=Low Output/Mid Drive, I=Input, U=Pulled-Up Input, J=JTAG" );
          DBG_printf( "             Do NOT use L or H for option 8 when a meter is connected as the output pins will conflict" );
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
       }
       return ( 0 );
    }
-
-   // More than one parameter
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
-   if ( argc > 10 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+   if ( argc > 11 )
 #else
-   if ( argc > 9 )
+   if ( argc > 9 ) // Keep code identical for K24
 #endif
    {
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
       return ( 0 );
    }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    if ( ( argc == 2 ) && ( ( *argv[1] == 'd' ) || ( *argv[1] == 'D' ) ) )
    {
       radioNum     = 0;
@@ -12206,6 +12721,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       end          = 3200;
       step         = 2;
       boost        = 0;  //Default to Off
+      testModeHMC  = 0;
       listFreqs    = (bool)false;
       portPins     = ports;
    }
@@ -12216,7 +12732,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       DBG_logPrintf( 'R', "ERROR - Not enough arguments" );
       return ( 0 );
    }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    else
    {
 #endif
@@ -12224,21 +12740,21 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       waittime     = ( uint16_t )atoi( argv[2] );
       nSamples     = ( uint16_t )atoi( argv[3] );
       samplingRate = ( uint16_t )atoi( argv[4] );
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       requestedSamplingRate = samplingRate;
 #endif
       start        = ( uint16_t )atoi( argv[5] );
       end          = ( uint16_t )atoi( argv[6] );
       step         = ( uint16_t )atoi( argv[7] );
       boost        = 0;  //Default to Off
-#if ( LIST_FREQUENCIES_NOISEBAND == 0 )
-      if ( argc == 9 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+      if ( argc == 9 ) // Keep code identical for K24
 #else
       if ( argc >= 9 )
 #endif
       {
          boost = ( uint8_t )atoi( argv[8] );
-#if ( MCU_SELECTED == RA6E1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // Keep code identical for K24
          if ( ( boost == 1 ) && ( ADC_Get_SC_Voltage() < 2.3f ) )
          {
             DBG_printf( "You have requested boost mode but super-cap voltage < 2300 mV\r\n"
@@ -12253,14 +12769,18 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
             OS_TASK_Sleep ( 2000 );
             lv = ADC_Get_SC_Voltage();
          }
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       }
-
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
-      portPins = ports; // Start off with the values from the previous run
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       if ( argc >= 10 )
       {
-         ports_s *pPorts = (ports_s *)argv[9]; /* Point to the string containing the 9th parameter to noiseband */
+         testModeHMC = ( uint8_t )atoi( argv[9] ); // test mode for HMC traffic during noiseband test
+      }
+
+      portPins = ports; // Start off with the values from the previous run
+      if ( argc >= 11 )
+      {
+         ports_s *pPorts = (ports_s *)argv[10]; /* Point to the string containing the 9th parameter to noiseband */
          bool optionsOK = (bool)false;
          if (                      checkOptions( pPorts->RadioSPI,  (char *)&portPins.RadioSPI,  "_HML"   ) )  {
             if (                   checkOptions( pPorts->RadioSDN,  (char *)&portPins.RadioSDN,  "_HMLNP" ) )  {
@@ -12285,7 +12805,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
             return ( 0 );
          }
       }
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       if ( radioNum >= (uint8_t)MAX_RADIO )
       {
          DBG_logPrintf( 'R', "ERROR - invalid radio" );
@@ -12324,7 +12844,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       {
          step = 2;
       }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    }
 #endif
 
@@ -12334,77 +12854,75 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       return ( 0 );
    }
 
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 Bob: should create an abstraction layer for _mem_get_free and malloc
-      freeRam = (uint32_t)_mem_get_free();
+#if ( RTOS_SELECTION == MQX_RTOS )
+   freeRam = (uint32_t)_mem_get_free();
 #elif (RTOS_SELECTION == FREE_RTOS)
-      HeapStats_t hd;
-      (void) vPortGetHeapStats ( &hd );              /* Get the statistics for the heap.  This assumes the use of heap_4.c */
-      freeRam = hd.xSizeOfLargestFreeBlockInBytes;   /* We need a contiguous block so find size of largest one */
-      DBG_printf("\n\rFreeRTOS vPortGetHeapStats returned %d bytes are available in the largest block", freeRam);
+   HeapStats_t hd;
+   (void) vPortGetHeapStats ( &hd );              /* Get the statistics for the heap.  This assumes the use of heap_4.c */
+   freeRam = hd.xSizeOfLargestFreeBlockInBytes;   /* We need a contiguous block so find size of largest one */
+   DBG_printf("\n\rFreeRTOS vPortGetHeapStats returned %d bytes are available in the largest block", freeRam);
 #endif
 
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) // just to produce same .hex file
+   // Free previous buffers, if any, prior to allocating new ones
+   if ( workBuf      != NULL) { free( workBuf );      workBuf = NULL;      }
+   if ( noiseResults != NULL) { free( noiseResults ); noiseResults = NULL; }
+#endif
    // Reserve RAM for processing
    // 1) Reserve work area
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 ) // just to produce same .hex file
-   if ( workBuf == NULL )
-   {
-#endif
-      if ( (workBuf = (uint8_t*)malloc( nSamples )) == NULL) {
-         DBG_printf("%u bytes needed out of %u available", nSamples, freeRam);
-         DBG_printf("Reduce the number of samples and/or the number of channels");
-         return ( 0 );
-      }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 ) // just to produce same .hex file
+   if ( (workBuf = (uint8_t*)malloc( nSamples )) == NULL) {
+      DBG_printf("%u bytes needed out of %u available", nSamples, freeRam);
+      DBG_printf("Reduce the number of samples and/or the number of channels");
+      return ( 0 );
    }
-#endif
+
    // 2) Reserve statistics buffer
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
-   if ( noiseResults == NULL )
-   {
-#endif
-      if ( (noiseResults = (NOISEBAND_Stats_t*)malloc( sizeof(NOISEBAND_Stats_t)*nbChannels )) == NULL) {
-         DBG_printf("%u bytes needed out of %u available", nSamples+(sizeof(NOISEBAND_Stats_t)*nbChannels), freeRam);
-         DBG_printf("Reduce the number of samples and/or the number of channels");
-         free( workBuf );
-         workBuf = NULL;
-         return ( 0 );
-      }
-#if ( LIST_FREQUENCIES_NOISEBAND == 1 )
+   if ( (noiseResults = (NOISEBAND_Stats_t*)malloc( sizeof(NOISEBAND_Stats_t)*nbChannels )) == NULL) {
+      DBG_printf("%u bytes needed out of %u available", nSamples+(sizeof(NOISEBAND_Stats_t)*nbChannels), freeRam);
+      DBG_printf("Reduce the number of samples and/or the number of channels");
+      free( workBuf );
+      workBuf = NULL;
+      return ( 0 );
    }
-#endif
-#if ( RTOS_SELECTION == MQX_RTOS )
-   #define MINIMUM_TIME 320 // TODO: RA6E1 Bob: verify whether this changed due to RA6E1 or was it always wrong even on K24
-#else
-   #define MINIMUM_TIME 320
-#endif
+
+#if ( MCU_SELECTED == NXP_K24 )
+#define MINIMUM_TIME 320 // microseconds
+#define PAUSE_MSEC     5 // milliseconds
    // This minimum sampling rate is around 320usec per read.
    // RSSI read will take a minimum time which is bounded by the SPI rate and radio turn around time.
+#elif ( MCU_SELECTED == RA6E1 )
+#define MINIMUM_TIME 130 // microseconds based on OS_TICK_Get_Diff_InMicroseconds measurements on RA6E1/FreeRTOS
+#define PAUSE_MSEC     5 // milliseconds
+#endif
    if (samplingRate < MINIMUM_TIME) {
       samplingRate = MINIMUM_TIME;
    }
-#if ( RTOS_SELECTION == MQX_RTOS )
-   #define PAUSE_MSEC 5
-   // TODO: RA6E1 Bob: restore original time calculation for K24/MQX
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 ) // Following is identical to K24
+   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) ); /* Rough time in seconds */
 #else
-   #define PAUSE_MSEC          5 // TODO: RA6E1 Bob: reflect this in the calculation of time
+   time  = (uint32_t)( nbChannels * ( (float)samplingRate*1.05f/1000.0f) * ((float)nSamples ) ); /* Rough time in milliseconds */
+   time += (uint32_t)( nbChannels * ( (float)( samplingRate - MINIMUM_TIME ) * 0.05f/1000.0f ) * ((float)nSamples )); /* R_BSP_SW_Delay runs 5% high */
+   time += (uint32_t)( nbChannels * ( (float)samplingRate/1000.0f + 1.414f + ( 0.0002f * nSamples ) ) + 0.999f );      /* Adjustment for setup and post-proc times */
+   #define ACTUAL_PAUSE_MSEC  PAUSE_MSEC + 3 // OS_TASK_Sleep averages 8msec delay when 5msec is requested under FreeRTOS
    #define DELAY_SEC          10 // How long to delay between batches of DELAY_CHANS channels
    #define ENERGY_IN_CAP 3600000 // Magic number to keep super-cap voltage above 2.1V
 
-   time = ( uint32_t )( nbChannels * ((float)samplingRate/1000.0f) * ((float)nSamples/1000.0f) );
-   time += ( (uint32_t) ( nbChannels * PAUSE_MSEC + 999 ) ) / 1000 + 1 + waittime; /* account for PAUSE_MSEC and 1 second delay at start */
-   time += ( (uint32_t) ( nbChannels * 1 + 500 ) ) / 1000; /* RADIO_Get_RSSI delays for 1 msec per channel to discard noise after changing frequency */
+   time += ( (uint32_t) ( nbChannels * ACTUAL_PAUSE_MSEC ) ) + 1000 * (1 + waittime);     /* account for PAUSE_MSEC and requested delay at start */
+//   time += ( (uint32_t) ( nbChannels * 1 + 500 ) ) / 1000; /* RADIO_Get_RSSI delays for 1 msec per channel to discard noise after changing frequency */
    if ( boost != 0 )
    {
-      time += (uint32_t)nbChannels * (PWR_3P6LDO_EN_ON_DLY_MS + PWR_3V6BOOST_EN_ON_DLY_MS ) / 1000; // Boost/LDO time delays
+      time += (uint32_t)nbChannels * (PWR_3P6LDO_EN_ON_DLY_MS + PWR_3V6BOOST_EN_ON_DLY_MS ); // Boost/LDO time delays
    }
+   if ( testModeHMC == 5 ) time = (uint32_t)( time * 1.15 ); /* account for HMC running at a much higher duty-cycle */
    bool delayDuringTest = (bool)false;
    if ( (boost != 0) && ( (uint32_t)nSamples * (uint32_t)samplingRate * (uint32_t)nbChannels > ENERGY_IN_CAP ) )
    {  /* At risk of depleting super-cap during this run.  Insert delays between every channelsBeforeDelay channels */
       delayDuringTest = (bool)true;
       channelsBeforeDelay = ENERGY_IN_CAP / ( (uint32_t)nSamples * (uint32_t)samplingRate );
-      time += (uint32_t)( ( ( nbChannels - 2 ) / channelsBeforeDelay ) * DELAY_SEC );
+      time += (uint32_t)( ( ( nbChannels - 2 ) / channelsBeforeDelay ) * DELAY_SEC * 1000 );
       DBG_printf( "A delay of %u msec will be inserted every %u channel steps for super-cap recharging", (uint32_t)(DELAY_SEC*1000), channelsBeforeDelay );
    }
+   time = (uint32_t)( ( time + 500 ) /1000 );
 #endif
    // Remove the time it takes to read RSSI from the sampling rate so that we read RSSI at the specified rate
    if (samplingRate > MINIMUM_TIME) {
@@ -12412,10 +12930,10 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    } else {
       samplingRate = 0;
    }
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 // R_BSP_PinCfg (BSP_IO_PORT_04_PIN_06, ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_HIGH | (uint32_t)IOPORT_CFG_DRIVE_MID )); // P406: TP121 (used for timing verification)
    uint32_t portConfig;
-#define IOPORT_CFG_DRIVE_LOW 0UL // TODO: RA6E1 Bob: not sure if LOW is a valid drive capability value, let's support it for testing purposes
+#define IOPORT_CFG_DRIVE_LOW 0UL
 
 /* If non-blank, set up configurations for drive strength of the Radio SPI port pins */
    if ( ( portPins.RadioSPI != ' ' ) && ( portPins.RadioSPI != '_' ) )
@@ -12586,37 +13104,79 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       R_BSP_PinCfg ( BSP_IO_PORT_01_PIN_14, portConfig); // P114: ZCD_METER
       R_BSP_PinCfg ( BSP_IO_PORT_05_PIN_05, portConfig); // P505; T_I-210+C_METER
    }
-   // TODO: RA6E1 Bob: Add capability to configure UART pins but restore them afterwards
-   // TODO: RA6E1 Bob: Set unused GPIO pins on the radio to known state
-#if 0 // TODO: RA6E1 Bob: limited testing showed that this didn't make a difference
-   cgc_instance_ctrl_t  g_cgc0_ctrl;
-   cgc_cfg_t   g_cgc0_cfg;
-   if ( ! cgcInitialized )
-   {
-      (void) R_CGC_Open ( &g_cgc0_ctrl, &g_cgc0_cfg );
-      cgcInitialized = (bool)true;
-   }
-   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_HOCO ); //
-   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_MOCO );
-   (void) R_CGC_ClockStop ( &g_cgc0_ctrl, CGC_CLOCK_LOCO );
-#endif
 
-#endif
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
    DBG_printf( "test should take %02u:%02u, %u seconds", time / 60, time % 60, time );
-   OS_TICK_Get_CurrentElapsedTicks(&time1);
+   OS_TICK_Get_CurrentElapsedTicks(&time1); /* Get the starting time for the entire test */
+
+   bool updateDisplayDuringNoiseband = (bool)false;
+   switch( testModeHMC )
+   {
+      case 1:
+      {
+         // Log off
+         DBG_printf(" HMC- Log off ");
+         (void)HMC_STRT_LogOn((uint8_t)HMC_APP_API_CMD_ABORT, (uint8_t far *)0);
+         (void)HMC_FINISH_LogOff((uint8_t)HMC_APP_API_CMD_ACTIVATE, (uint8_t far *)0);
+         // Log on
+         DBG_printf(" HMC- Log ON ");
+         (void)HMC_STRT_LogOn((uint8_t)HMC_APP_API_CMD_ACTIVATE, (uint8_t far *)0);
+
+         break;
+      }
+      case 2:
+      {
+#if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
+         DBG_printf(" HMC- Write NETREC to the Display ");
+         HMC_DISP_UpdateDisplayBuffer( HMC_DISP_MSG_VALID_TIME, HMC_DISP_POS_PD_LCD_MSG ); //Update the Display
+#endif
+         break;
+      }
+      case 3:
+      {
+         DBG_printf("Increasing the Priorities of the related tasks ");
+         /* Increase the priority of the DBG task and Print task */
+
+         ( void )OS_TASK_Set_Priority( pTskName_Dbg, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Phy, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Sm, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Print, 11 ); // Increasing priority
+         ( void )OS_TASK_Set_Priority( pTskName_Time, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Tmr, 11 );
+         ( void )OS_TASK_Set_Priority( pTskName_Strt, 12 );
+
+         ( void )OS_TASK_Set_Priority( pTskName_Idle, 13 );
+
+         break;
+      }
+      case 4:
+      {
+         (void)HMC_MTRINFO_app( (uint8_t)HMC_APP_API_CMD_ACTIVATE, (void *)NULL ); //Request a Meter Info Read
+         break;
+      }
+      case 5:
+      {
+         updateDisplayDuringNoiseband = (bool)true;
+         DBG_printf( "To keep the HMC UART busy, noiseband will write to the meter's display as fast as possible" );
+         HMC_DISP_UpdateDisplayBuffer( HMC_DISP_MSG_VALID_TIME, HMC_DISP_POS_PD_LCD_MSG ); //Update the Display
+         break;
+      }
+      default:
+         break;
+   }
 #else
    DBG_printf( "test should take %02u:%02u", time / 60, time % 60 );
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+
    OS_TASK_Sleep( waittime * ONE_SEC );
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )  // just so we produce the same .hex file
-   DBG_logPrintf( 'R', "noiseband start; delay between samples = %u, starting super-cap voltage=%u mV", samplingRate, (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
+
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )  // just so we produce the same .hex file
+   DBG_printf( "Noiseband start; delay between samples = %u, starting super-cap voltage=%u mV", samplingRate, (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 
    PWR_3P6LDO_EN_ON();    // TODO: RA6E1 Bob: This should already be in this condition, just being sure
    PWR_3V6BOOST_EN_OFF(); // TODO: RA6E1 Bob: This should already be in this condition, just being sure
 
    OS_TASK_Sleep( ONE_SEC ); /* Make sure debug printout of the above message has completed before we start */
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+
    union si446x_cmd_reply_union Si446xCmd;
    PHY_Lock();      // Function will not return if it fails
    /* Configure the radio's GPIO pins per the settings in sArgStream, from the noisebandclkon command */
@@ -12632,28 +13192,52 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
                               SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_EN_TRUE_BIT |          // Enable divided system clock output
                               SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_SEL_ENUM_DIV_30 << 3); // Divide clock by 30
    PHY_Unlock();    // Function will not return if it fails
-#endif
    lowestCapVoltage = 9.99;
+
+   static uint32_t oldTaskPriorityDBG, oldTaskPriorityPRN, oldTaskPriorityHMC, oldTaskPriorityPHY, oldTaskPriorityIDL;
+   if ( updateDisplayDuringNoiseband )
+   {
+      oldTaskPriorityDBG = OS_TASK_Set_Priority( pTskName_Dbg,   19 );
+      oldTaskPriorityPRN = OS_TASK_Set_Priority( pTskName_Print, 19 );
+      oldTaskPriorityHMC = OS_TASK_Set_Priority( pTskName_Hmc,   17 );
+      oldTaskPriorityPHY = OS_TASK_Set_Priority( pTskName_Phy,   18 );
+      oldTaskPriorityIDL = OS_TASK_Set_Priority( pTskName_Idle,  24 );
+      HMC_APP_SetScanDelay( 0UL ); /* Cause HMC_app to run Applets at an accelerated speed, no deliberate delays */
+      HMC_DISP_SetContinuousUpdate(); /* This will cause HMC_display to continuously update the meter's LCD */
+      HMC_DISP_UpdateDisplayBuffer( HMC_DISP_MSG_NOISEBAND, HMC_DISP_POS_PD_LCD_MSG ); //Update the Display
+   }
 #else
    DBG_logPrintf( 'R', "noiseband start" );
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
+#if ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+   #define CAPTURE_TIMES 8
+   OS_TICK_Struct  times [CAPTURE_TIMES];
+   uint32_t        deltas[CAPTURE_TIMES-1];
+   uint64_t        totals[CAPTURE_TIMES-1] = { 0 };
+   #define CAPTURE_TIME(x) OS_TICK_GetCurrentElapsedTicks( &times[x] )
+#else
+   #define CAPTURE_TIME(x)
+#endif // ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
    for ( j=0, i = start; i <= end; i += step, j++ )
    {
+      CAPTURE_TIME(0); /* Get the starting time */
       PHY_Lock();      // Function will not return if it fails
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+      CAPTURE_TIME(1); /* Measure duration of PHY_Lock */
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
       RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
 #else
       float lv = RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
       if ( lv < lowestCapVoltage ) lowestCapVoltage = lv;
-#endif
-      RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
+      CAPTURE_TIME(2); /* Measure duration of the RSSI vector acquisition */
       PHY_Unlock();    // Function will not return if it fails
+      CAPTURE_TIME(3); /* Measure duration of the PHY_Unlock */
       qsort( workBuf, nSamples, sizeof(uint8_t), cmpfunc); // Sort RSSI array
-
+      CAPTURE_TIME(4); /* Measure duration of the quick sort function */
       // Compute average and stddev
       computeAvgAndStddev( workBuf, nSamples, &average, &stddev );
-
+      CAPTURE_TIME(5); /* Measure duration of the statistics */
       // Update stats
       min = workBuf[0];
       max = workBuf[nSamples-1];
@@ -12668,7 +13252,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       noiseResults[j].P995 = workBuf[(uint32_t)((nSamples-1)*0.995)];
       noiseResults[j].P999 = workBuf[(uint32_t)((nSamples-1)*0.999)];
 
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )  // just so we produce the same .hex file
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )  // just so we produce the same .hex file
       if ( delayDuringTest )
       {
          if ( ( i != start ) && ( i != end ) && ( j % channelsBeforeDelay == 0) ) /* Have we just finished DELAY_CHANS channels? */
@@ -12679,10 +13263,29 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
             DBG_printf(" Capacitor charged up from %u mV to %u mV (%u mV)", vBefore, vAfter, vAfter-vBefore);
          }
       }
-#endif
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+      CAPTURE_TIME(6); /* Measure duration of the tabulation */
       OS_TASK_Sleep( PAUSE_MSEC ); // Be nice to other tasks
+      CAPTURE_TIME(7); /* Measure duration of the PAUSE_MSEC */
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+      if ( ( j == (end/2) )&& ( 4 == testModeHMC ) )
+      {
+         ID_LoadLPTables_Helper();
+      }
+   #if ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+      for ( uint32_t k = 0; k < CAPTURE_TIMES-1; k++ )
+      {
+         deltas[k] = OS_TICK_Get_Diff_InMicroseconds( &times[k], &times[k+1] );
+         totals[k] += deltas[k];
+      }
+//      DBG_printf( "Noiseband Chan %4u: Lock %10u RSSI %10u Unlock %10u Qsort %10u Stats %10u Tabulate %10u PAUSE %10u",
+//                   i, deltas[0], deltas[1], deltas[2], deltas[3], deltas[4], deltas[5], deltas[6] ); // TODO: RA6E1 Bob: remove later
+   #endif // ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    }
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+
+   /* Put the debug port back into its default state after test has completed */
    R_BSP_PinCfg (BSP_IO_PORT_03_PIN_00, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    R_BSP_PinCfg (BSP_IO_PORT_01_PIN_08, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    R_BSP_PinCfg (BSP_IO_PORT_01_PIN_09, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
@@ -12690,9 +13293,26 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    R_BSP_PinCfg (BSP_IO_PORT_02_PIN_01, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
    OS_TICK_Get_CurrentElapsedTicks(&time2);
    TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
-   DBG_logPrintf( 'R', "Noiseband end, took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV\r\n",
-                       TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
-#endif
+   DBG_printf( "Noiseband took %d seconds, Lowest super-cap voltage = %u mV, Final super-cap voltage  = %u mV",
+                TimeDiff/1000000, (uint32_t)(lowestCapVoltage*1000.0), (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
+   if ( updateDisplayDuringNoiseband )
+   {
+      HMC_APP_SetScanDelay( HMC_APP_TASK_DELAY_MS ); /* Restore normal timing of HMC_app Applet scanning process  */
+      HMC_DISP_ClearContinuousUpdate();              /* Stop updating the LCD display of the meter continuously   */
+      (void)OS_TASK_Set_Priority( pTskName_Idle,  oldTaskPriorityIDL ); /* Put the task priorities back to normal */
+      (void)OS_TASK_Set_Priority( pTskName_Phy,   oldTaskPriorityPHY );
+      (void)OS_TASK_Set_Priority( pTskName_Hmc,   oldTaskPriorityHMC );
+      (void)OS_TASK_Set_Priority( pTskName_Print, oldTaskPriorityPRN );
+      (void)OS_TASK_Set_Priority( pTskName_Dbg,   oldTaskPriorityDBG );
+   }
+   #if ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+   DBG_printf( "Noiseband TOTALS:    Lock %10llu RSSI %10llu Unlock %10llu Qsort %10llu Stats %10llu Tabulate %10llu PAUSE %10llu",
+                   totals[0], totals[1], totals[2], totals[3], totals[4], totals[5], totals[6] );
+   for ( uint32_t k = 0; k < CAPTURE_TIMES-1; k++ ) { totals[k] = ( totals[k] + nbChannels/2 ) / nbChannels; }
+   DBG_printf( "Noiseband AVERAGES:  Lock %10llu RSSI %10llu Unlock %10llu Qsort %10llu Stats %10llu Tabulate %10llu PAUSE %10llu",
+                   totals[0], totals[1], totals[2], totals[3], totals[4], totals[5], totals[6] );
+   #endif // ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
    // Get the RX channels
    GetConf = PHY_GetRequest( ePhyAttr_RxChannels );
@@ -12702,14 +13322,13 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          (void) Radio.StartRx(radioNum, GetConf.val.RxChannels[radioNum]);
       }
    }
-#if ( CONFIG_PORTS_FOR_NOISEBAND == 0 )
+
    DBG_logPrintf( 'R', "noiseband end" );
-#endif
 
    return ( 0 );
 }//lint !e429 Custodial pointer has not been freed or returned
 
-#if ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 /******************************************************************************
 
    Function Name: DBG_CommandLine_NoiseBandClkOn
@@ -12726,7 +13345,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 ******************************************************************************/
 uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
 {
-#if 1
    if ( argc == 1 )
    {
       DBG_printf( "NoiseBandClkOn GPIO0 GPIO1 GPIO2 GPIO3 drv_strength:\r\n"
@@ -12781,19 +13399,7 @@ uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
          }
       }
    }
-#else
-   PHY_Lock();      // Function will not return if it fails
-   (void)si446x_set_property( 0,
-                              SI446X_PROP_GRP_ID_GLOBAL,
-                              1,
-                              SI446X_PROP_GRP_INDEX_GLOBAL_CLK_CFG,
-                              SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_EN_TRUE_BIT |          // Enable divided system clock output
-                              SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_SEL_ENUM_DIV_30 << 3); // Divide clock by 30
 
-   PHY_Unlock();    // Function will not return if it fails
-
-   DBG_CommandLine_NoiseBand ( argc, argv );
-#endif
    return ( 0 );
 }
 
@@ -12813,7 +13419,6 @@ uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] )
 ******************************************************************************/
 uint32_t DBG_CommandLine_NoiseBandClkOff ( uint32_t argc, char *argv[] )
 {
-#if 1
    sArgStream.GPIO0 = GPIO_PIN_TRISTATE;
    sArgStream.GPIO1 = GPIO_PIN_TRISTATE;
    sArgStream.GPIO2 = GPIO_PIN_TRISTATE;
@@ -12826,21 +13431,10 @@ uint32_t DBG_CommandLine_NoiseBandClkOff ( uint32_t argc, char *argv[] )
                               sArgStream.GPIO2,
                               sArgStream.GPIO3,
                               sArgStream.gen_config );
-#else
-   PHY_Lock();      // Function will not return if it fails
-   (void)si446x_set_property( 0,
-                              SI446X_PROP_GRP_ID_GLOBAL,
-                              1,
-                              SI446X_PROP_GRP_INDEX_GLOBAL_CLK_CFG,
-                              0); // Clock off
-   PHY_Unlock();    // Function will not return if it fails
-
-   DBG_CommandLine_NoiseBand ( argc, argv );
-#endif
 
    return ( 0 );
 }
-#endif // ( TM_1MHZ_OFF_ON_NOISEBAND == 1 )
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
 #if ( TEST_SYNC_ERROR == 1 )
 /******************************************************************************
@@ -13028,7 +13622,7 @@ static void DBG_NoiseMeasurements ( uint8_t command, uint32_t argc, char *argv[]
 
       OS_TASK_Sleep( nh.waitTime * ONE_SEC );
       previousDebugFilter = DBG_GetTaskFilter();
-      (void)DBG_SetTaskFilter ( _task_get_id_from_name( "DBG" ) );
+      (void)DBG_SetTaskFilter ( OS_TASK_GetID_fromName( "DBG" ) );
 
       NOISEHIST_CollectData ( nh );
 
@@ -14355,7 +14949,7 @@ static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] )
       uint16_t randomSleepMaxMsec = atoi( argv[2] );
       uint16_t randomDelayMaxUsec = atoi( argv[3] );
       uint16_t pass = 0, fail = 0;
-      uint16_t maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ + 2; /* Maximum permissable extra delay (1 tick + 1 msec) */
+      uint16_t maxExtraDelay = (uint32_t)1000 / (uint32_t)configTICK_RATE_HZ + 2; /* Maximum permissable extra delay (1 tick + 2 msec) */
       R_BSP_SoftwareDelay( (uint32_t)aclara_randf( 0.0, (float)randomDelayMaxUsec ), BSP_DELAY_UNITS_MICROSECONDS );
       for ( uint16_t i = 0; i < numPasses; i++ )
       {

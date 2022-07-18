@@ -160,3 +160,20 @@ uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool Wai
 
    return ( SetMask );
 } /* end OS_EVNT_Wait () */
+
+/*******************************************************************************
+
+  Function name: OS_EVNT_CLEAR
+
+  Purpose: This function is used to wait for an Event Mask for the specified time
+
+  Arguments: EventHandle - pointer to the Handle structure of the Event
+             EventMask - Bit Mask of the Events to check
+
+  Returns:   None
+
+*******************************************************************************/
+void OS_EVNT_CLEAR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line )
+{
+   ( void )_lwevent_clear(LWEVENT_STRUCT_PTR, _mqx_uint);
+}

@@ -74,6 +74,10 @@
 #include "dfwtd_config.h"
 #endif
 
+#if DFW_XZCOMPRESS_BSPATCHING
+#include "dfw_xzmini_interface.h"
+#endif
+
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 #define DFW_SHA_CHUNK_SIZE       (32)              /* SHA chunk of data size */
@@ -218,13 +222,26 @@ PACK_END
 typedef enum
 {
    eDFWA_CMD_RESET_PROCESSOR = ( ( uint8_t )0 ), // Command to reset the processor
-   eDFWA_CMD_WRITE_DATA,            // Write data to PGM memory
-   eDFWA_CMD_FILL_REGION,           // Fill PGM region
-   eDFWA_CMD_COPY_DATA,             // Copy PGM data
-   eDFWA_CMD_WRITE_DATA_NV,         // Write data to NV
-   eDFWA_CMD_FILL_REGION_NV,        // Fill NV region
-   eDFWA_CMD_COPY_DATA_NV           // Copy NV data to NV data
-} eMacroCmd_t;                      // Macro commands in the patch
+   eDFWA_CMD_WRITE_DATA,                         // Write data to PGM memory
+   eDFWA_CMD_FILL_REGION,                        // Fill PGM region
+   eDFWA_CMD_COPY_DATA,                          // Copy PGM data
+   eDFWA_CMD_WRITE_DATA_NV,                      // Write data to NV
+   eDFWA_CMD_FILL_REGION_NV,                     // Fill NV region
+   eDFWA_CMD_COPY_DATA_NV,                       // Copy NV data to NV data
+   eDFWA_CMD_PATCH_DECOMPRESS_TECHNOLOGY         // Decompress and patch technology
+} eMacroCmd_t;                                   // Macro commands in the patch
+
+typedef enum
+{
+   eDFW_ACLARA_PATCH = ( ( uint8_t )0 ),  // Acalara patch
+   eDFW_MINIBSDIFF_PATCH                  // Minibsdiff patch
+} ePatchTechnology;
+
+typedef enum
+{
+   eDFW_NO_COMPRESSION = ( ( uint8_t )0 ),  // Acalara patch
+   eDFW_XZ_COMPRESSION                      // Minibsdiff patch
+} eCompressionTechnology;
 
 typedef enum
 {
@@ -274,6 +291,16 @@ typedef struct  PACK_MID
    uint8_t       srcAddr[3];  // Source address
    uint8_t       length[2];   // Number of bytes to copy
 } macroCmdCopy_t;
+PACK_END
+
+PACK_BEGIN
+typedef struct  PACK_MID
+{
+   eMacroCmd_t              command: 8;            // Patch & decompression type command
+   ePatchTechnology         patchType: 4;          // Patch type
+   eCompressionTechnology   compressionType: 4;    // Compression technology type
+   uint8_t                  length[3];             // Length of the compressed data
+} macroCmdPatchDecompressionType_t;
 PACK_END
 
 #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( ( DCU == 1 ) &&  ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )) )
@@ -342,6 +369,15 @@ static const PartSection_t BLPartSections[] =
 #define MUTLI_TARGET_REVISION_LIMIT          ((uint8_t)0x2A)   /* Revision where multiple targets were introduced to DFW */
 #define ENCRYPTION_KEY_CHANGE_REVISION_LIMIT ((uint8_t)0x32)   /* Revision where encryption key structure changed */
 #endif  // endif for ( DCU == 1 )
+
+#if ( EP == 1 )
+#if ( DFW_TEST_KEY == 1 )
+#define DTLS_MAJOR_MINOR_UPDATE_VERSION_LIMIT  ((uint8_t)0xFF) /* Version where DTLS file structure was smaller */
+#else
+#define DTLS_MAJOR_MINOR_UPDATE_VERSION_LIMIT  ((uint8_t)0x01) /* Version where DTLS file structure was smaller */
+#endif
+#define DTLS_MAJOR_MINOR_UPDATE_REVISION_LIMIT ((uint8_t)0x2A) /* Revision where DTLS file structure was smaller */
+#endif
 
 /* Currently DFW will be returning events in the /DF/CO resource response to indicate when ep firmware or meter
    configurations have changes via the DFW process.  The following values are compiled out, but could be utilized
@@ -479,6 +515,9 @@ static void             dfwUnitTestToggleOutput( uint8_t seq, uint32_t numToggle
 #endif
 #if  ( DCU == 1 )
 static returnStatus_t updateEncryptPartition( void );
+#endif
+#if ( EP == 1 )
+static returnStatus_t updateDtlsMajorMinorFiles( void );
 #endif
 
 /* ****************************************************************************************************************** */
@@ -671,8 +710,14 @@ returnStatus_t DFWA_init( void )
                else
 #endif // ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
                {
-                  // If patch state is updating NV, start the NV update process
-                  if( eDFWP_EXEC_NV_COMMANDS == dfwVars.ePatchState || eDFWP_COPY_NV_IMAGE_TO_NV == dfwVars.ePatchState )
+                  // If patch state is updating NV or doing BL swap, start the process if the patch is for application or bootloader
+#if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( DCU == 1 ) )
+                  if( eDFWP_EXEC_NV_COMMANDS == dfwVars.ePatchState || eDFWP_COPY_NV_IMAGE_TO_NV == dfwVars.ePatchState ||
+                      eDFWP_DO_FLASH_SWAP == dfwVars.ePatchState )
+#else
+                  if( eDFWP_EXEC_NV_COMMANDS == dfwVars.ePatchState || eDFWP_COPY_NV_IMAGE_TO_NV == dfwVars.ePatchState ||
+                      eDFWP_BL_SWAP == dfwVars.ePatchState || eDFWP_DO_FLASH_SWAP == dfwVars.ePatchState )
+#endif
                   {
                      ( void )doPatch(); /* Continue patching */
                   }
@@ -818,7 +863,7 @@ void DFWA_task( taskParameter )
    }
    ( void )DFWA_getFileVars( &dfwVars ); // Read the DFW NV variables (status, etc...)
 
-   //If download completed, but still need to decrypt or if decryption has completed, send message to task to (re)start execution
+   // If download completed, but still need to decrypt or if decryption has completed, send message to task to (re)start execution
    if ( ( eDFWP_EXEC_PGM_COMMANDS == dfwVars.ePatchState ) &&
         ( ( eDFWD_READY == dfwVars.decryptState ) || ( eDFWD_DONE == dfwVars.decryptState ) ) )
    {
@@ -1695,13 +1740,34 @@ static returnStatus_t doPatch( void )
          {
             case eDFWP_EXEC_PGM_COMMANDS:
             {
-               DFW_PRNT_INFO( "Copying PGM to Image" );
-               /* TODO The next to last sector contain non-program data and MUST be excluded from Patching.  This
-                  sector contains data that may change between the time of the following pgm copy and the DFW Apply
-                  (swap time).  To ensure the sector is current, it needs to be copied just prior to the swap.  If this
-                  fails, then the swap cannot take place.
-               */
-               if ( eSUCCESS == DFWA_CopyPgmToPgmImagePartition( false, dfwVars.initVars.target ) ) // Copy PGM to image, if no errors, patch it!
+               returnStatus_t retStatus = eSUCCESS;
+               bool copyRequired = true;
+#if DFW_XZCOMPRESS_BSPATCHING
+               macroCmdPatchDecompressionType_t patchDecompressType;
+               dSize   PatchOffset = ( dSize )sizeof( patchHeader_t );
+               ( void ) PAR_partitionFptr.parRead( ( uint8_t * )&patchDecompressType, PatchOffset,
+                                                   ( lCnt )sizeof( patchDecompressType ), pDFWPatch );
+               if( eDFWA_CMD_PATCH_DECOMPRESS_TECHNOLOGY == patchDecompressType.command )
+               {
+                  if( ( eDFW_MINIBSDIFF_PATCH == patchDecompressType.patchType ) &&
+                      ( eDFW_XZ_COMPRESSION == patchDecompressType.compressionType ) )
+                  {
+                     copyRequired = false;
+                  }
+               }
+#endif
+               if( copyRequired )
+               {
+                  DFW_PRNT_INFO("Copying PGM to Image");
+                  /* TODO The next to last sector contain non-program data and MUST be excluded from Patching.  This
+                   * sector contains data that may change between the time of the following pgm copy and the DFW Apply
+                   * (swap time).  To ensure the sector is current, it needs to be copied just prior to the swap.  If this
+                   * fails, then the swap cannot take place.
+                   */
+                  retStatus = DFWA_CopyPgmToPgmImagePartition(false, dfwVars.initVars.target); // Copy PGM to image, if no errors, patch it!
+               }
+
+               if ( eSUCCESS == retStatus )
                {
                   dfwUnitTestToggleOutput_TST1( 500, 3, 5 );
                   DFW_PRNT_INFO( "Exe Macro Cmds" );
@@ -2105,6 +2171,15 @@ static returnStatus_t doPatch( void )
                         ( void )OS_TASK_Set_Priority( pTskName_Idle, 12 );
                         PWR_SafeReset();
                      }
+                  }
+#endif
+
+#if ( EP == 1 )
+                  // check to see if we need to update the DTLS Major and Minor partition after the patch
+                  if( ( dfwVars.initVars.firmwareVersion.field.version == DTLS_MAJOR_MINOR_UPDATE_VERSION_LIMIT  ) &&
+                      ( dfwVars.initVars.firmwareVersion.field.revision <= DTLS_MAJOR_MINOR_UPDATE_REVISION_LIMIT )  )
+                  {
+                     (void)updateDtlsMajorMinorFiles();
                   }
 #endif
 
@@ -2530,7 +2605,7 @@ static eDfwErrorCodes_t validatePatchHeader( eValidatePatch_t valPatchCmd, dl_df
          }
          /* If decryption is ready(enabled) and the patch is not successfully decrypted */
          else if ( ( ( DFW_ENDPOINT_FIRMWARE_FILE_TYPE == fileType ) || IS_METER_FIRM_UPGRADE( fileType ) ) &&
-                  eSUCCESS != decryptPatch( &dfwVars, &patchHeader ) )
+                   eSUCCESS != decryptPatch( &dfwVars, &patchHeader ) )
          {
             EventKeyValuePair_s  keyVal;     /* Event key/value pair info  */
             EventData_s          event;      /* Event info  */
@@ -2723,6 +2798,7 @@ static eDfwErrorCodes_t executeMacroCmds( eDfwPatchState_t ePatchState, patchHea
       macroCmdWrite_t  write; // Write Command structure
       macroCmdFill_t   fill;  // Fill Command structure
       macroCmdCopy_t   copy;  // Copy Command structure
+      macroCmdPatchDecompressionType_t patchDecompressType; // Decompress and write command structure
    } patchCmd_;               // Union used for patch command - All structures have the command as the 1st parameter.
 
    patchLen = ( uint32_t )pPatchHeader->patchLength;     // Get the patch length (it is in big endian at this point)
@@ -2761,7 +2837,7 @@ static eDfwErrorCodes_t executeMacroCmds( eDfwPatchState_t ePatchState, patchHea
                DstAddr     = getThreeByteAddr( &patchCmd_.write.destAddr[0] );      /* Get dest addr */
                Length      = EXTRACT_LEN( patchCmd_.write.length );                 /* Retrieve length */
                SrcAddr     = PatchOffset + sizeof( macroCmdWrite_t ); /* Point to 1st byte of data(1st byte after len) */
-               patchLen   -= ( int32_t )sizeof( macroCmdWrite_t ) + ( uint16_t )Length; /* Adjust patch length */
+               patchLen   -= ( int32_t )sizeof( macroCmdWrite_t ) + Length;   /* Adjust patch length */
                PatchOffset = SrcAddr + Length;                                /* Point to next command */
                ReadCount   = sizeof( Buffer );                                /* Limit read to available buffer space */
                while ( Length )  /* Write payload of the write command */
@@ -2788,6 +2864,62 @@ static eDfwErrorCodes_t executeMacroCmds( eDfwPatchState_t ePatchState, patchHea
                }
                break;
             }
+#if DFW_XZCOMPRESS_BSPATCHING
+            case eDFWA_CMD_PATCH_DECOMPRESS_TECHNOLOGY:
+            {
+               int32_t newsz, ctrllen, datalen;
+               PartitionData_t const *pOldImagePartition;
+               Length = getThreeByteAddr( &patchCmd_.patchDecompressType.length[0] );
+               dSize patchSrcOffset = PatchOffset + sizeof( macroCmdPatchDecompressionType_t );
+               PatchOffset = patchSrcOffset + Length;        /* End of the compressed patch, also points to next command */
+               patchLen   -= ( int32_t )sizeof( macroCmdPatchDecompressionType_t ) + Length; /* Adjust patch length */
+               if( eDFWP_EXEC_PGM_COMMANDS == ePatchState )
+               {
+                  if( ( eDFW_MINIBSDIFF_PATCH == patchCmd_.patchDecompressType.patchType ) &&
+                      ( eDFW_XZ_COMPRESSION == patchCmd_.patchDecompressType.compressionType ) )
+                  {
+                     if( eSUCCESS == DFW_XZMINI_uncompressPatch_init( pDFWPatch, patchSrcOffset, PatchOffset ) )
+                     {
+                        /* Validate the patch header */
+                        if( eSUCCESS == DFW_XZMINI_bspatch_valid_header( &newsz, &ctrllen, &datalen ) )
+                        {
+                           DFW_vars_t dfwVars;
+                           ( void )DFWA_getFileVars( &dfwVars );
+#if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( ( DCU == 1 ) &&  ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84050_1_REV_A )) )
+                           ( void )PAR_partitionFptr.parOpen( &pOldImagePartition, ePART_APP_CODE, 0L );
+                           /* Check for power down before processing. */
+                           PWR_CheckPowerDown();
+                           /* Set the swap state to INIT */
+                           ( void )DFWA_SetSwapState( eFS_INIT );
+#else
+                           if( eFWT_APP == dfwVars.initVars.target )
+                           {
+                              pOldImagePartition = pAppCodePart_;
+                           }
+                           else if( eFWT_BL == dfwVars.initVars.target )
+                           {
+                              pOldImagePartition = pDFWBLInfoPar_;
+                           }
+#endif
+                           /* Erase the NV image partition before start patching */
+                           ( void )PAR_partitionFptr.parErase( 0, DFW_PGM_IMAGE_SIZE, pDFWImagePTbl_ );
+                           /* Apply patch */
+                           if ( eSUCCESS == DFW_XZMINI_bspatch( pOldImagePartition, dfwVars.initVars.target, pDFWImagePTbl_, ( off_t ) newsz ) ) //lint !e644, pOldImagePartition initialized with Appcode/BLinfo partition
+                           {
+                              DFW_PRNT_INFO("XZ Minibs - Patch applied successfully");
+                           }
+                           else
+                           {
+                              DFW_PRNT_INFO("XZ Minibs - Patch failed");
+                           }
+                        }
+                     }
+                  }
+               }
+
+               break;
+            }
+#endif
             case eDFWA_CMD_FILL_REGION:
             case eDFWA_CMD_FILL_REGION_NV:
             {
@@ -5016,6 +5148,89 @@ static returnStatus_t updateEncryptPartition( void )
             PWR_CheckPowerDown(); // Check for power down before processing.
             retStatus = PAR_partitionFptr.parWrite( dataWriteBlock2.lDestOffset, tempDestBuffer,
                                                     ( dSize )( dataWriteBlock2.dataSize ), pEncryptKey );
+         }
+      }
+
+      BM_free( pBuf ); // deallocate the buffer
+   }
+
+   return retStatus;
+}
+#endif
+
+/*********************************************************************************************************************
+
+   \fn       updateDtlsMajorMinorFiles
+
+   \brief    This function is used to update DtlsMajor and DtlsMinor structures contained within
+             the named partions #144 and #145
+
+   \param    none
+
+   \return   returnStatus_t
+
+   \details  Each partition contains a single file.  Both files expanded in size. The systim_t structure
+             contained within the DtlsMajor file expanded by 8 bytes.
+
+*********************************************************************************************************************/
+#if ( EP == 1 )
+static returnStatus_t updateDtlsMajorMinorFiles( void )
+{
+   PartitionData_t const *pDtlsMajorData;  // pointer to partition that will be modified
+   PartitionData_t const *pDtlsMinorData;  // pointer to partition that will be modified
+   returnStatus_t retStatus = eFAILURE;    // return status
+   buffer_t *pBuf;                         // pointer to buffer for temporary storage
+
+   /* Due to the size of the DtlsMajorSession_s data structure, a single buffer large enough to build the new
+      structure size of 1052 bytes is available. The new structure will be built in RAM, then writing the updated
+      structure to extflash when finished.  By doing this, only one write to extflash will be required for the update.
+   */
+   pBuf = BM_alloc( 1052 ); // allocate a large buffer to build the new structure and file header
+   if( NULL != pBuf )
+   {
+      uint8_t *tempDestBuffer = pBuf->data; // pointer to data buffer in RAM
+
+      if ( ( eSUCCESS == PAR_partitionFptr.parOpen( &pDtlsMajorData, ePART_DTLS_MAJOR_DATA, 0L ) ) &&
+           ( eSUCCESS == PAR_partitionFptr.parOpen( &pDtlsMinorData, ePART_DTLS_MINOR_DATA, 0L ) )  )
+      {
+         retStatus = eSUCCESS; // initialize return to SUCCESS, it will get updated later on a failure
+
+         // initialize the temporary storage buffer in RAM
+         ( void )memset( tempDestBuffer, 0, 1052 ); // initialize the temporary storage buffer
+
+         /* read the partition data minus the file header and old systime_t structure, then
+            store this data offset 8 bytes futher at temporary location.  This will make room
+            for the new 8 bytes that will be added to the structure */
+         retStatus = PAR_partitionFptr.parRead( tempDestBuffer + (dSize)(sizeof(tFileHeader) + 16),
+                                                (dSize)(sizeof(tFileHeader) + 8),
+                                                ( lAddr )(1028), pDtlsMajorData );
+
+         if( eSUCCESS == retStatus )
+         {
+            // Now copy file header and first 8 bytes of systime_t structure to same file offset in temp location
+            retStatus = PAR_partitionFptr.parRead( tempDestBuffer, (dSize)0,
+                                                   ( lAddr )(sizeof(tFileHeader) + 8), pDtlsMajorData );
+         }
+
+         if( eSUCCESS == retStatus )
+         {  // first we need to update the file size to 1044 bytes before writing the RAM copy back to external flash
+
+            uint16_t dtlsMajorFileSize = 1044; // inialize the size variable that will be written into the partition
+            // write the new file size offsetting 4 bytes into the file header, which is at the front of the partition
+            (void)memcpy( (uint8_t *)(tempDestBuffer + 4), (uint8_t *)&dtlsMajorFileSize, sizeof(dtlsMajorFileSize) );
+
+            // Write temporary buffer from RAM back to extflash partition that will contain the updated DTLS major structure
+            PWR_CheckPowerDown(); // Check for power down before processing.
+            retStatus = PAR_partitionFptr.parWrite( ( dSize)0, tempDestBuffer, ( lCnt )1052, pDtlsMajorData );
+         }
+
+         // update the DTLS minor size to the new data size of 110
+         if( eSUCCESS == retStatus )
+         {
+            uint16_t dtlsMinorFileSize = 110;  // inialize the size variable that will be written into the partition
+            // write the new file size offsetting 4 bytes into the file header, which is at the front of the partition
+            retStatus = PAR_partitionFptr.parWrite( ( dSize)4, (uint8_t *)&dtlsMinorFileSize,
+                                                    ( lCnt )sizeof(dtlsMinorFileSize), pDtlsMinorData );
          }
       }
 

@@ -374,7 +374,7 @@ void *OS_LINKEDLIST_Head ( OS_List_Handle list )
   return ((void *) list->head.NEXT);
 #endif
 }
-#if( TM_LINKED_LIST == 1)
+#if( TM_LINKED_LIST == 2)
 static OS_List_Obj testList;
 static OS_List_Handle handle = &testList;
 static OS_Linked_List_Element data1;

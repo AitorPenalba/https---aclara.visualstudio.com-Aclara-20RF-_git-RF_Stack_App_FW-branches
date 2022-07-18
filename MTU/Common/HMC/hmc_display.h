@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2020 Aclara.  All Rights Reserved.
+ * Copyright 2020-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -54,6 +54,9 @@ enum
 #define HMC_DISP_MSG_MODE_SHOP      "SHOP  "
 #define HMC_DISP_MSG_MODE_SECURE    "SECURE"
 #define HMC_DISP_MSG_MODE_RUN       "RUN   "
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#define HMC_DISP_MSG_NOISEBAND      "NBTEST"
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
 /* Lengths of messages and buffers */
 #define HMC_DISP_MSG_LENGTH         ((uint8_t)6)
@@ -70,6 +73,10 @@ enum
 extern uint8_t HMC_DISP_applet ( uint8_t, void * );
 returnStatus_t HMC_DISP_Init ( void );
 void           HMC_DISP_UpdateDisplayBuffer ( void const *, uint8_t  );
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+void           HMC_DISP_SetContinuousUpdate( void );
+void           HMC_DISP_ClearContinuousUpdate( void );
+#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 
-#endif
+#endif // ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #endif

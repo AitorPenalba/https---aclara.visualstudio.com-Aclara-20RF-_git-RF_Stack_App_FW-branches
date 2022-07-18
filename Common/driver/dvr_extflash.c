@@ -455,7 +455,7 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
 #elif ( MCU_SELECTED == RA6E1 )
       OS_MUTEX_Create( &qspiMutex_);
       /* Initializes the timer module. */
-      R_AGT_Open(&g_timer0_ctrl, &g_timer0_cfg);
+      R_AGT_Open(&AGT0_ExtFlashBusy_ctrl, &AGT0_ExtFlashBusy_cfg);
       NV_SPI_PORT_INIT( &g_qspi0_ctrl, &g_qspi0_cfg );
       R_QSPI_SpiProtocolSet(&g_qspi0_ctrl, SPI_FLASH_PROTOCOL_EXTENDED_SPI);
       (void)MisoBusy_isr_init();
@@ -1649,15 +1649,15 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    timer_info_t   info;
    uint32_t       timer_freq_hz;
 
-   (void) R_AGT_InfoGet(&g_timer0_ctrl, &info);
+   (void) R_AGT_InfoGet(&AGT0_ExtFlashBusy_ctrl, &info);
 
    timer_freq_hz = info.clock_frequency;
    uint32_t period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000);
 
-   R_AGT_PeriodSet( &g_timer0_ctrl, period_counts );
+   R_AGT_PeriodSet( &AGT0_ExtFlashBusy_ctrl, period_counts );
 
    /* Start the timer. */
-   (void) R_AGT_Start(&g_timer0_ctrl);
+   (void) R_AGT_Start(&AGT0_ExtFlashBusy_ctrl);
 }
 #endif
 /***********************************************************************************************************************

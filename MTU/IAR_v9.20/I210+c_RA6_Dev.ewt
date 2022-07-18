@@ -1455,9 +1455,6 @@
                 <name>$PROJ_DIR$\..\Aclara_BSP\AGT.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Aclara_BSP\AGT.h</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.c</name>
             </file>
             <file>
@@ -1471,6 +1468,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\CRC.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Aclara_BSP\GPT.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Aclara_BSP\LED.c</name>
@@ -1504,6 +1504,54 @@
             <name>Common</name>
             <group>
                 <name>DFW</name>
+                <group>
+                    <name>Minibs_XZ</name>
+                    <group>
+                        <name>Minibsdiff</name>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\Minibsdiff\bspatch.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\Minibsdiff\bspatch.h</name>
+                        </file>
+                    </group>
+                    <group>
+                        <name>XZ_Embedded</name>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_config.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_dec_lzma2.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_dec_stream.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_lzma2.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_private.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xz_stream.h</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xzminidec.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\XZ_Embedded\xzminidec.h</name>
+                        </file>
+                    </group>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\dfw_xzmini_interface.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\Common\DFW\Minibs_XZ\dfw_xzmini_interface.h</name>
+                    </file>
+                </group>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\DFW\dfw_app.c</name>
                 </file>
@@ -1754,7 +1802,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1850,7 +1898,7 @@
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Mutex.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\OS_aclara.h</name>
+                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_aclara.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_que.h</name>
@@ -1905,9 +1953,6 @@
                 </group>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\Radio\radio.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\Common\Radio\Si446x_Radio\radio_TCXO.c</name>
                 </file>
             </group>
             <group>
@@ -2171,7 +2216,7 @@
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\cfg_hal.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\CompileSwitch.h</name>
+                    <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\compileswitch.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\BuildConfig\RA6_FreeRTOS\filenames.h</name>
@@ -2196,6 +2241,12 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_diags.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_display.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_display.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_ds.c</name>
@@ -2249,7 +2300,7 @@
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.h</name>
+                    <name>$PROJ_DIR$\..\Common\HMC\HMC_seq_id.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_snapshot.c</name>
@@ -2325,10 +2376,10 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_Handler.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\APP_MSG_HandlerTable.h</name>
+                <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\demand.c</name>

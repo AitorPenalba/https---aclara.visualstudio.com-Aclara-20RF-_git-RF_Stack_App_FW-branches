@@ -167,12 +167,13 @@ extern uint32_t DMA_Complete_IRQ_ISR_Timestamp; // Used for a watchdog to make s
  *****************************************************************************/
 static RadioEvent_Fxn pEventHandler_Fxn;
 #if ( GET_TEMPERATURE_FROM_RADIO == 1 )
-static bool bRadio_ready = FALSE;
 static float RADIO_Temperature;
 static bool bAvg_done = FALSE;
 #endif
 
-
+#if ( MCU_SELECTED == RA6E1 )
+static uint32_t iCapture_overflows = 0U;
+#endif
 
 #if ( MCU_SELECTED == NXP_K24 )
 static void Radio0_IRQ_ISR(void);
@@ -763,7 +764,6 @@ void RF_SetHardwareMode(RFHardwareMode_e newMode)
 ******************************************************************************/
 void RADIO_TX_Watchdog(void)
 {
-#if 0 //TODO Melvin: include the code after dependent modules integrated
    OS_TICK_Struct time;
    uint32_t       TimeDiff;
    bool           Overflow;
@@ -800,7 +800,6 @@ void RADIO_TX_Watchdog(void)
 #endif
       }
    }
-#endif
 }
 
 /******************************************************************************
@@ -822,7 +821,7 @@ void RADIO_RX_WatchdogService(uint8_t radioNum)
 #if ( MCU_SELECTED == NXP_K24 )
    radio[radioNum].lastFIFOFullTimeStamp = DWT_CYCCNT;
 #elif ( MCU_SELECTED == RA6E1 )
-   radio[radioNum].lastFIFOFullTimeStamp=DWT->CYCCNT;
+   radio[radioNum].lastFIFOFullTimeStamp = DWT->CYCCNT;
 #endif
    OS_INT_enable( ); // Enable interrupts.
 }
@@ -854,7 +853,7 @@ void RADIO_RX_Watchdog(void)
       OS_INT_enable( ); // Enable interrupts.
     #if ( MCU_SELECTED == NXP_K24 )
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-    #elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Modify variable to get core clock from a function
+    #elif ( MCU_SELECTED == RA6E1 )
       if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
     #endif
          INFO_printf("Soft-Demod FIFO purged");
@@ -885,7 +884,6 @@ void RADIO_RX_Watchdog(void)
 ******************************************************************************/
 void RADIO_Update_Freq_Watchdog(void)
 {
-#if 0  //TODO Melvin: include the code after dependent modules integrated
    uint32_t timeStamp;
 
    // Make sure radio 0 is initialized because we won't get TCXO output until it is done
@@ -895,17 +893,14 @@ void RADIO_Update_Freq_Watchdog(void)
       OS_INT_enable( ); // Enable interrupts.
 
 #if ( MCU_SELECTED == NXP_K24 )
-
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-#elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Modify variable to get core clock from a function
+#elif ( MCU_SELECTED == RA6E1 )
       if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
 
 #endif
-
          RADIO_Update_Freq();
       }
    }
-#endif
 }
 
 /*!
@@ -946,16 +941,16 @@ static void vRadio_PowerUp(void)
    si446x_reset();
 
    OS_TASK_Sleep(TEN_MSEC); // Give some time to radio to get all out of reset
-
+#if ( TM_BYPASS_SI4467_GPIP0_WAIT == 0 ) // TODO: RA6E1 Bob: Set to 0 for tempoaray code for Faiz to test cutting trace from SI4467_GPIO0 to the MCU
    // Monitor GPIO0 of radio 0 for power on reset
-#if ( RTOS_SELECTION == MQX_RTOS )  //TODO Melvin: need to replace LWGPIO_VALUE_LOW with BSP_IO_LEVEL_LOW
-   while( RDO_0_GPIO0() == (uint32_t)LWGPIO_VALUE_LOW ) {
-#elif (RTOS_SELECTION == FREE_RTOS)
    while( RDO_0_GPIO0() == (uint32_t)BSP_IO_LEVEL_LOW  ) {
-#endif
       INFO_printf("Waiting on radio 0 to get out of reset");
       OS_TASK_Sleep(TEN_MSEC);
    }
+#else
+   OS_TASK_Sleep( 2000 );
+   #warning "You have built a version of code that does not wait for the radio to come out of reset!!  Do not check it in this way!!"
+#endif // ( TM_BYPASS_SI4467_GPIP0_WAIT == 0 )
 #if ( DCU == 1 )
    // Monitor GPIO0 of radio 1 for power on reset
    while( RDO_1_GPIO0() == (uint32_t)LWGPIO_VALUE_LOW ) {
@@ -1013,29 +1008,45 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #endif // RTOS_SELECTION
 {
    uint32_t primask = __get_PRIMASK();
-//#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: include the code once interrupt enable/disable added
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
-//#endif
 
    // There is no guarantee that this interrupt was from a time sync (it could be from preamble or FIFO almost full) but only the time sync interrupt will validate this value
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
 
 #if ( EP == 1 )
-#if 0 //TODO Melvin: include the code after replacement for Flexible Timer Module (FTM) is integrated
    uint32_t cycleCounter;
    uint32_t cpuFreq;
+   uint32_t delayCore;
+#if ( MCU_SELECTED == NXP_K24 )
    uint16_t currentFTM;
    uint16_t capturedFTM;
    uint16_t delayFTM;
-   uint32_t delayCore;
+#elif ( MCU_SELECTED == RA6E1 )
+   uint64_t       period;
+   uint32_t       currentFTM;
+   uint32_t       capturedFTM;
+   uint32_t       delayFTM;
+#endif
 
    // Need to read those 3 counters together so disable interrupts if they are not disabled already
+#if ( MCU_SELECTED == NXP_K24 )
    cycleCounter   = DWT_CYCCNT;
    currentFTM     = (uint16_t)FTM1_CNT; // Connected to radio interrupt
    capturedFTM    = (uint16_t)FTM1_C0V; // Captured counter when radio interrupt happened
+#elif ( MCU_SELECTED == RA6E1 )
+   period         = R_GPT1->GTPR + 1;   // Duplicating the FSP function R_GPT_InfoGet()
+   capturedFTM    = (uint32_t)(period * iCapture_overflows) + R_GPT1->GTCCR[0]; // Captured counter when radio interrupt happened; 0 = GPT_PRV_CAPTURE_EVENT_A
+   iCapture_overflows = 0;
+   cycleCounter   = DWT->CYCCNT;
+   currentFTM     = R_GPT1->GTCNT;    // Connected to radio interrupt
+#endif
    __set_PRIMASK(primask); // Restore interrupts
 
+#if ( MCU_SELECTED == NXP_K24 )
    FTM_CnSC_REG(FTM1_BASE_PTR, 0) &= ~FTM_CnSC_CHF_MASK; // Acknowledge channel interrupt
+#elif ( MCU_SELECTED == RA6E1 )
+   // Interrupt is acknowledged in the ISR handler in the FSP
+#endif
 
    /* Compute when the interrupt really happened relative to the cycle counter based on:
          1) The FTM capture time
@@ -1059,15 +1070,13 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    // Update the fractional Sync time to remove the delay between when the interrupt happened and when it was processed.
    (void)TIME_SYS_GetRealCpuFreq( &cpuFreq, NULL, NULL );
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac -= ((uint64_t)delayCore << 32) / (uint64_t)cpuFreq;
-#else
-   __set_PRIMASK(primask); // Restore interrupts
-#endif
+
    if ((radio[(uint8_t)RADIO_0].demodulator == 0) || RADIO_Is_TX()) {
       RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_0, (bool)true); // Call PHY task for interrupt processing
    } else {
 #if ( RTOS_SELECTION == MQX_RTOS )
       OS_EVNT_Set( &SD_Events, SOFT_DEMOD_RAW_PHASE_SAMPLES_AVAILABLE_EVENT); // Call soft-modem task for samples processing
-#elif (RTOS_SELECTION == FREE_RTOS )
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_EVNT_Set_from_ISR( &SD_Events, SOFT_DEMOD_RAW_PHASE_SAMPLES_AVAILABLE_EVENT); // Call soft-modem task for samples processing
 #endif // RTOS_SELECTION
    }
@@ -1079,6 +1088,17 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #endif // RTOS_SELECTION
 #endif // ( EP == 1 )
 }
+
+#if ( MCU_SELECTED == RA6E1 )
+void Radio0_IC_ISR(timer_callback_args_t * p_args)
+{
+   if (TIMER_EVENT_CYCLE_END == p_args->event)
+   {
+      /* An overflow occurred during capture. This must be accounted for. */
+      iCapture_overflows++;
+   }
+}
+#endif
 
 #if ( DCU == 1 )
 /******************************************************************************
@@ -1996,9 +2016,9 @@ bool RADIO_TCXO_Get ( uint8_t radioNum, uint32_t *TCXOfreq, TIME_SYS_SOURCE_e *s
    uint32_t lastUpdate;
 
    uint32_t primask = __get_PRIMASK();
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add the below code once the disable interrupt is added
+
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
-#endif
+
    *TCXOfreq  = radio[radioNum].TCXOFreq;
    lastUpdate = radio[radioNum].TCXOLastUpdate;
    if ( source != NULL ) {
@@ -2043,9 +2063,7 @@ bool RADIO_TCXO_Set ( uint8_t radioNum, uint32_t TCXOfreq, TIME_SYS_SOURCE_e sou
    // Make sure radio TCXO is within expected values (30MHz +/-25ppm)
    if ( (TCXOfreq > RADIO_TCXO_MIN) && (TCXOfreq < RADIO_TCXO_MAX) ) {
       uint32_t primask = __get_PRIMASK();
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO Melvin: add the below code once disable interrupt is added
       __disable_interrupt(); // This is critical but fast. Disable all interrupts.
-#endif
 
       // Check if the new TCXO frequency is different than the current one.
       if ( radio[radioNum].TCXOFreq != TCXOfreq ) {
@@ -2489,12 +2507,12 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    RDO_0_IRQ_TRIS(); // Make CPU pin IRQ_Si4460 into FTM1_CH0 to capture when a radio interrupt happens
 
    // Configure FTM1_CH0 to capture timer when radio IRQ is detected.
-#if ( MCU_SELECTED == NXP_K24 ) //TODO: Add the AGT Timer module for input capture
+#if ( MCU_SELECTED == NXP_K24 )
    (void)FTM1_Channel_Enable( 0, FTM_CnSC_CHIE_MASK | FTM_CnSC_ELSB_MASK, Radio0_IRQ_ISR ); // Capture on falling edge
 #elif ( MCU_SELECTED == RA6E1 )
-//TODO Melvin: Add AGT Timer
+   GPT_Radio0_Enable();
 #endif
-#endif
+#endif // #if ( DCU == 1 )
 #if 0 // Not RA6E1.  This was already removed in the K24 baseline code
    for (radioNum=(uint8_t)RADIO_0; radioNum<(uint8_t)MAX_RADIO; radioNum++) {
 
@@ -2554,9 +2572,6 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    OS_TASK_Sleep( FIFTY_MSEC );
 #endif
    RADIO_Update_Freq();
-#if ( GET_TEMPERATURE_FROM_RADIO == 1 )
-   bRadio_ready = TRUE;
-#endif
 }
 
 #if 0 // Not RA6E1.  This was already removed in the K24 baseline code
@@ -3800,9 +3815,7 @@ static void updateTCXO ( uint8_t radioNum )
    union si446x_cmd_reply_union Si446xCmd;
 
    uint32_t primask = __get_PRIMASK();
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO: add the below line once the disable interrupt is added
    __disable_interrupt(); // This is critical but fast. Disable all interrupts.
-#endif
    freq = radio[radioNum].TCXOFreq;
    __set_PRIMASK(primask); // Restore interrupts
 
@@ -3893,15 +3906,19 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 
    INFO_printf("Start RX radio %hu on channel = %hu (%u Hz)", radioNum, chan, CHANNEL_TO_FREQ(chan));
 
-#if ( RTOS_SELECTION == MQX_RTOS ) //TODO: RA6E1: Melvin: timer module
    // Get current time
    OS_TICK_Get_CurrentElapsedTicks(&CurrentTime);
 
-   // TODO: TICKS[] structure variable usage handling
    // Recalibrate every 4 hours or after power up
    // MKD 4-24-14 This should be done when temperature changes by 30 degree C but it takes a long time to retrieve the temperatures so we recalibrate every 4 hours instead.
+#if ( RTOS_SELECTION == MQX_RTOS )
    if (( _time_diff_hours(&CurrentTime, &radio[radioNum].CallibrationTime, &overflow) > 3) ||
-         ( (radio[radioNum].CallibrationTime.TICKS[0] == 0) && (radio[radioNum].CallibrationTime.TICKS[1] == 0) )) {
+         ( ( radio[radioNum].CallibrationTime.TICKS[0] == 0 ) && ( radio[radioNum].CallibrationTime.TICKS[1] == 0 ) ) )
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   if ( ( OS_TICK_Get_Diff_InHours ( &CurrentTime, &radio[radioNum].CallibrationTime ) > 3 ) ||
+        ( ( radio[radioNum].CallibrationTime.HW_TICKS == 0 ) && ( radio[radioNum].CallibrationTime.tickCount == 0 ) ) )
+#endif
+   {
       INFO_printf("Radio calibration in progress");
 
       if ( Radio_Calibrate(radioNum) ) {
@@ -3912,9 +3929,8 @@ void vRadio_StartRX(uint8_t radioNum, uint16_t chan)
 
       // Set next refresh in 4 hours
       radio[radioNum].CallibrationTime = CurrentTime;
-    }
+   }
 
-#endif
    // Update RSSI jump threshold if it changed
    GetReq.eAttribute = ePhyAttr_RssiJumpThreshold;
 
@@ -4682,12 +4698,11 @@ void SetFreq(uint8_t radioNum, uint32_t freq)
  **********************************************************************************************************************/
 static void wait_us(uint32_t time)
 {
-   OS_TICK_Struct time1,time2;
-   uint32_t       TimeDiff;
-
    if (time == 0) return;
 
 #if ( MCU_SELECTED == NXP_K24 )
+   OS_TICK_Struct time1,time2;
+   uint32_t       TimeDiff;
    bool           Overflow;
    _time_get_elapsed_ticks(&time1);
 
@@ -4699,6 +4714,8 @@ static void wait_us(uint32_t time)
    while (TimeDiff < time);
 #elif ( MCU_SELECTED == RA6E1 )
    #if 0 // TODO: RA6E1 Bob: This does not appear to be working properly
+   OS_TICK_Struct time1,time2;
+   uint32_t       TimeDiff;
    OS_TICK_Get_CurrentElapsedTicks(&time1);
 
    // Wait for a while
@@ -5202,27 +5219,17 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
    if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
 #endif
    if ( boost ) {
-#if 0 // TODO: RA6E1 Bob: this was done temporarily since the other delay function did not seem to be working.  Need to debug original function.
       // Turn on boost
       PWR_USE_BOOST();
-#else
-      PWR_3V6BOOST_EN_TRIS_ON();
-      R_BSP_SoftwareDelay (((uint32_t)PWR_3V6BOOST_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS); // TODO: RA6E1 Bob: should not need '/2' -- test it in HW
-      PWR_3P6LDO_EN_TRIS_OFF();
-#endif
+
 #if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       // Get voltage
       fSuperCapV = ADC_Get_SC_Voltage();
 #endif
       // Make sure the capacitor voltage is high enough to compute noise estimate with boost turned on.
       if ( fSuperCapV < SUPER_CAP_MIN_VOLTAGE ) {
-#if 0
-         PWR_3P6LDO_EN_TRIS_ON();
-         R_BSP_SoftwareDelay (((uint32_t)PWR_3P6LDO_EN_ON_DLY_MS)*1000/2, BSP_DELAY_UNITS_MICROSECONDS);
-         PWR_3V6BOOST_EN_TRIS_OFF();
-#else
+
          PWR_USE_LDO();
-#endif
 #if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
          INFO_printf("vf %u", (uint32_t)(fSuperCapV*100));
 #endif
@@ -6536,7 +6543,7 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
 
 #endif
 
-#if 0
+#if 0  // TODO: RA6E1: Bob: Do we need this?
 
 /*
    Function name: RADIO_Get_Current_Temperature
@@ -6610,21 +6617,6 @@ float RADIO_Get_Current_Temperature( bool bSoft_demod )
   return RADIO_Temperature;
 }
 
-/*
-   Function name: RADIO_Is_Radio_Ready
-
-   Purpose: Used to check whether radio is initialized
-
-   Arguments: None
-
-   Return: bRadio_ready status of the radio
-
-*/
-
-bool RADIO_Is_Radio_Ready (void)
-{
-  return bRadio_ready;
-}
 #endif
 
 /*!

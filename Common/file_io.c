@@ -34,9 +34,8 @@
 #endif
 #include "crc32.h"
 #include "filenames.h"
-#if 0 // TODO: RA6 Melvin:
 #include "EVL_event_log.h"
-#endif
+
 
 #ifdef TM_PARTITION_USAGE
 #include "DBG_SerialDebug.h"
@@ -850,7 +849,6 @@ bool FIO_fIntegrityCheck( void )
 
       if( fileCheckSumError )
       {
-#if 0 // TODO: RA6 Melvin: EVL module addition
          // One or more files have a checksum problem, log an event indicating device corruption
          EventKeyValuePair_s  keyVal;     /* Event key/value pair info  */
          EventData_s          progEvent;  /* Event info  */
@@ -860,7 +858,6 @@ bool FIO_fIntegrityCheck( void )
          progEvent.eventKeyValuePairsCount = 0;
          progEvent.eventKeyValueSize = 0;
          ( void )EVL_LogEvent( 200, &progEvent, &keyVal, TIMESTAMP_NOT_PROVIDED, NULL );
-#endif
       }
    }
 

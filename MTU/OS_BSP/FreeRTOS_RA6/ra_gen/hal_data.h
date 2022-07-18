@@ -34,6 +34,18 @@
 #include "r_iic_master.h"
 #include "r_i2c_master_api.h"
 FSP_HEADER
+
+/** Timer on GPT Instance. */
+extern const timer_instance_t GPT2_ZCD_Meter;
+
+/** Access the GPT instance using these structures when calling API functions directly (::p_api is not used). */
+extern gpt_instance_ctrl_t GPT2_ZCD_Meter_ctrl;
+extern const timer_cfg_t GPT2_ZCD_Meter_cfg;
+
+#ifndef ZCD_hwIsr
+void ZCD_hwIsr(timer_callback_args_t * p_args);
+#endif
+
 /** DAC on DAC Instance. */
 extern const dac_instance_t g_dac0_ULPC;
 
@@ -139,11 +151,11 @@ extern const crc_instance_t g_crc1;
 extern crc_instance_ctrl_t g_crc1_ctrl;
 extern const crc_cfg_t g_crc1_cfg;
 /** AGT Timer Instance */
-extern const timer_instance_t g_timer0;
+extern const timer_instance_t AGT0_ExtFlashBusy;
 
 /** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
-extern agt_instance_ctrl_t g_timer0_ctrl;
-extern const timer_cfg_t g_timer0_cfg;
+extern agt_instance_ctrl_t AGT0_ExtFlashBusy_ctrl;
+extern const timer_cfg_t AGT0_ExtFlashBusy_cfg;
 
 #ifndef g_timer0_callback
 void g_timer0_callback(timer_callback_args_t * p_args);
@@ -199,24 +211,14 @@ void spi_callback(spi_callback_args_t * p_args);
 #endif
 #undef RA_NOT_DEFINED
 /** Timer on GPT Instance. */
-extern const timer_instance_t g_timer1;
+extern const timer_instance_t GPT1_Radio0_ICapture;
 
 /** Access the GPT instance using these structures when calling API functions directly (::p_api is not used). */
-extern gpt_instance_ctrl_t g_timer1_ctrl;
-extern const timer_cfg_t g_timer1_cfg;
+extern gpt_instance_ctrl_t GPT1_Radio0_ICapture_ctrl;
+extern const timer_cfg_t GPT1_Radio0_ICapture_cfg;
 
-#ifndef isr_gpt_capture
-void isr_gpt_capture(timer_callback_args_t * p_args);
-#endif
-/** AGT Timer Instance */
-extern const timer_instance_t g_timer5;
-
-/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
-extern agt_instance_ctrl_t g_timer5_ctrl;
-extern const timer_cfg_t g_timer5_cfg;
-
-#ifndef timer_capture_callback
-void timer_capture_callback(timer_callback_args_t * p_args);
+#ifndef Radio0_IC_ISR
+void Radio0_IC_ISR(timer_callback_args_t * p_args);
 #endif
 /* RTC Instance. */
 extern const rtc_instance_t g_rtc0;

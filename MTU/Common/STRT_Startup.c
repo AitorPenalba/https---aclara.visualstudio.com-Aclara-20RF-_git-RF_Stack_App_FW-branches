@@ -135,7 +135,9 @@
 #include "hmc_display.h"
 #endif
 #include "version.h"
+#if ( MCU_SELECTED == NXP_K24 )
 #include "FTM.h" // Used for radio interrupt (FTM1_CH0), radio TCXO (FTM1_CH1) and ZCD_METER interrupt (FTM3_CH1)
+#endif
 
 /* #DEFINE DEFINITIONS */
 #define PRINT_CPU_STATS_IN_SEC 5 /* Print the Cpu statistics every x seconds */
@@ -167,12 +169,14 @@ static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_OFF;
 /* Power Up Table - Define all modules that require initialization below. */
 const STRT_FunctionList_t startUpTbl[] =
 {
+#if 1 // TODO: RA6: Add later
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               // Initialize the IWDT
    INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
    INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
    INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
    INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
+   INIT( TMR_HandlerInit, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ), // TODO: RA6E1: Had to move it before DBG_Init as it was needed. Move this to appropriate position in official list
    INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
    INIT( VBATREG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),    // Needed early to check validity of RTC. // TODO: RA6E1: DG: Move this to appropriate position
    INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
@@ -181,7 +185,6 @@ const STRT_FunctionList_t startUpTbl[] =
                                                                                     //       because the error logging (ERR_printf, DBG_logPrintf, etc) uses the clock
                                                                                     //       to time stamp the message and, in the process, uses the time mutex.
                                                                                     // NOTE2: This needs to be after FIO_init since it uses the file system.
-   INIT( TMR_HandlerInit, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
    INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
    INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( TIME_SYNC_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
@@ -232,6 +235,14 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SMTDCFG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+#if ( MCU_SELECTED == NXP_K24 )
+   INIT( FTM3_Init, STRT_FLAG_LAST_GASP),
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_PD_Init, STRT_FLAG_NONE ),
+#endif
+#if ( PHASE_DETECTION == 1 )                                                // Used for ZCD_METER interrupt (FTM3_CH1). Must be before PD_init.
+   INIT( PD_init, STRT_FLAG_NONE ),
+#endif
 #if ( USE_DTLS == 1 )
    INIT( DTLS_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
 #endif
@@ -255,8 +266,13 @@ const STRT_FunctionList_t startUpTbl[] =
 #if ENABLE_PWR_TASKS
    INIT( PWR_printResetCause, STRT_FLAG_NONE ),                   //Prints the reset cause
 #endif
+#if ( MCU_SELECTED == NXP_K24 )
+   INIT( FTM1_Init, STRT_FLAG_LAST_GASP )                         // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_Radio0_Init, STRT_FLAG_LAST_GASP )                   // Used for radio interrupt (GPT) and radio TCXO (FTM1_CH1).
+#endif
 
-#if 0 // TODO: RA6: Add later
+#else  // TODO: RA6E1: This is the actual list
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS
    INIT( PWR_waitForStablePower, STRT_FLAG_NONE ),
@@ -340,7 +356,11 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
    INIT( SMTDCFG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
+#if ( MCU_SELECTED == NXP_K24 )
    INIT( FTM3_Init, STRT_FLAG_LAST_GASP),
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_PD_Init, STRT_FLAG_NONE ),
+#endif
 #if ( PHASE_DETECTION == 1 )                                                // Used for ZCD_METER interrupt (FTM3_CH1). Must be before PD_init.
    INIT( PD_init, STRT_FLAG_NONE ),
 #endif
@@ -370,13 +390,17 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( HMC_DISP_Init, STRT_FLAG_NONE ),
 #endif
    INIT( LED_init, STRT_FLAG_NONE ),                              // LED init must happen after version init as it requires HW rev letter
-#if ( HMC_I210_PLUS_C == 1 )                                      // TODO: Verify the changes GIPO Pin configs for other EPs, and then make necessary changes
+#if ( ( HMC_I210_PLUS_C == 1 ) && ( MCU_SELECTED == NXP_K24 ) )   // TODO: Verify the changes GIPO Pin configs for other EPs, and then make necessary changes
    INIT( IO_init, STRT_FLAG_NONE ),                               // Configuring the GPIOs
 #endif
 #if ENABLE_PWR_TASKS
    INIT( PWR_printResetCause, STRT_FLAG_NONE ),                   //Prints the reset cause
 #endif
-   INIT( FTM1_Init, STRT_FLAG_LAST_GASP)                           // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+#if ( MCU_SELECTED == NXP_K24 )
+   INIT( FTM1_Init, STRT_FLAG_LAST_GASP )                           // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_Radio0_Init, STRT_FLAG_LAST_GASP )                      // Used for radio interrupt (GPT) and radio TCXO (FTM1_CH1).
+#endif
 #endif /* #if 0*/
 };
 
@@ -448,7 +472,7 @@ void STRT_StartupTask ( taskParameter )
    uint8_t              quiet = 0;
    uint8_t              rfTest = 0;
 
-#if ( MCU_SELECTED == NXP_K24 )  // TODO: RA6E1: Do we need to support this?
+#if ( MCU_SELECTED == NXP_K24 )
    // Enable to use DWT module.
    // This is needed for DWT_CYCCNT to work properly when the debugger (I-jet) is not plugged in.
    // When the debugger is plugged in, the following registers are programmed by the IAR environment.
@@ -456,7 +480,7 @@ void STRT_StartupTask ( taskParameter )
 
    // Enable cycle counter
    DWT_CTRL = DWT_CTRL | 1 ;
-#else
+#elif ( MCU_SELECTED == RA6E1 )
    DCB->DEMCR = DCB->DEMCR | 0x01000000;
    DWT->CTRL  = DWT->CTRL  | 1;
 #endif
@@ -613,7 +637,7 @@ void STRT_StartupTask ( taskParameter )
 #if (TM_QUEUE == 1)
    OS_QUEUE_Test();
 #endif
-#if (TM_LINKED_LIST == 1)
+#if (TM_LINKED_LIST == 2)
    OS_LINKEDLIST_Test();
 #endif
 #if 1 // TODO: RA6E1 Bob: this is temporary code to turn on an LED connected to pin P301 using high drive capacity
@@ -712,7 +736,7 @@ void STRT_StartupTask ( taskParameter )
          OS_TASK_Summary((bool)false);
 #endif
 #elif ( MCU_SELECTED == FREE_RTOS )
-//         OS_TASK_Summary((bool)false); /* TODO: RA6E1: Add Support later */
+         OS_TASK_SummaryFreeRTOS(); // Always uses DBG_printf
 #endif
          printStackAndTask = 0;
       }
