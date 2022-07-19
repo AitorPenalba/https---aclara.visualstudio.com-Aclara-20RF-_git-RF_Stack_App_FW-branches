@@ -87,9 +87,9 @@
 #include "ecc108_mqx.h"
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "ecc108_freertos.h"
-#include "ecc108_lib_return_codes.h"
+#include "crc.h"
 #endif
-#include "ecc108_physical.h" // TODO: RA6E1 Bob: This is needed by DBG_CommandLine_MacAddr
+#include "ecc108_lib_return_codes.h"
 //#include "compiler_types.h"
 #include "si446x_api_lib.h"
 #include "si446x_cmd.h"
@@ -251,7 +251,7 @@ static PartitionData_t const  *pTestPartition_;    /* Pointer to partition infor
 
 static char                   DbgCommandBuffer[MAX_DBG_COMMAND_CHARS + 1];
 static char                   *argvar[MAX_CMDLINE_ARGS + 1];
-//static void PrintECC_error( uint8_t ECCstatus ); //TODO: RA6E1 Bob: temporarily removed
+static void PrintECC_error( uint8_t ECCstatus );
 
 static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_DebugFilter( uint32_t argc, char *argv[] );
@@ -299,7 +299,7 @@ static uint32_t DBG_CommandLine_NumMac( uint32_t argc, char *argv[] );
 #endif
 #if ( ENABLE_DEMAND_TASKS == 1 )
 #if ( DEMAND_IN_METER == 1 )
-//static void DBGC_DemandResetCallBack( returnStatus_t result ); //TODO: RA6E1 Bob: temporarily removed
+static void DBGC_DemandResetCallBack( returnStatus_t result );
 static uint32_t DBG_CommandLine_DemandReset( uint32_t argc, char *argv[] );
 #endif
 #endif
@@ -393,7 +393,6 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( DAC_CODE_CONFIG == 1 )
    { "setdac0step",               DBG_CommandLine_DAC_SetDacStep,      "Set the DAC Step, range for steps is 0 - 4096 eg.) setdac0step 2200" },
    { "pwrsel",                    DBG_CommandLine_setPwrSel,           "Set/reset pwrsel pin" },
-//   { "setdaccode",                DBG_CommandLine_DAC_Code,            "Set DAC Code Eg: setdaccode <channelNumber> <dBM>" }, // TODO: RA6E1 Bob: not needed yet
 #endif
 #if ( FAKE_TRAFFIC == 1 )
    { "bhgencount",   DBG_CommandLine_ipBhaulGenCount, "get (no args) or set (arg1) backhaul fake record gen count" },
@@ -428,7 +427,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    { "clockswtest",  DBG_CommandLine_clockswtest,     "Count cycle counter at 2 different clock settings over 5 seconds" },
 #endif
-//   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" }, // TODO: RA6E1 Bob: this commmand needs to have GPIOs redefined
+   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" },
    { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
 #if ( MCU_SELECTED == RA6E1 )
    { "coreClocks",   DBG_CommandLine_CoreClocks,      "Display the CPU core clocks in Hz" },
@@ -817,7 +816,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
 #endif
 #if ( TM_CRC_UNIT_TEST == 1)
-   { "crcunittest",  DBG_CommandLine_CrcCalculate,     "Displays CRC results" },
+   { "crcunittest",          DBG_CommandLine_CrcCalculate,     "Displays CRC results" },
 #endif
 #if ( TM_TIME_COMPOUND_TEST == 1)
    { "ticktestelapsed",      DBG_CommandLine_TimeElapsed,    "Displays Time compound's difference in ElapsedMilliseconds" },
@@ -831,20 +830,20 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "ticktestfuture",       DBG_CommandLine_TimeFuture,     "Displays Time compound's difference between two tick struct results" },
 #endif
 #if ( TM_OS_EVENT_TEST == 1)
-   { "eventtestset",         DBG_CommandLine_OS_EventSet,     "Sets the Event Bits argument is SetBit (hex) " },
+   { "eventtestset",         DBG_CommandLine_OS_EventSet,    "Sets the Event Bits argument is SetBit (hex) " },
    { "createtesteventandwait",  DBG_CommandLine_OS_EventCreateWait,     "Create and Wait for Event Set Bits argument\r\n"
                                      "                                   are WaitBit (hex) and WaitForAll (bool)" },
-   { "deleteeventtesttask",  DBG_CommandLine_OS_EventTaskDelete,     "Deletes the Event Test Task" },
+   { "deleteeventtesttask",  DBG_CommandLine_OS_EventTaskDelete,        "Deletes the Event Test Task" },
 #endif
 #if ( TM_LINKED_LIST == 1)
-   { "oslinkedlistcreate",    DBG_CommandLine_OS_LinkedList_Create,     "Creates test LinkedList" },
-   { "oslinkedlistremove",  DBG_CommandLine_OS_LinkedList_Remove,     "Removes a element from test LinkedList" },
-   { "oslinkedlistenq",     DBG_CommandLine_OS_LinkedList_Enqueue,     "Enqueues a element to test LinkedList" },
-   { "oslinkedlistdeq",     DBG_CommandLine_OS_LinkedList_Dequeue,     "Dequeue a element from test LinkedList" },
-   { "oslinkedlistinsert",  DBG_CommandLine_OS_LinkedList_Insert,     "Insert a element at a specific index in test LinkedList" },
-   { "oslinkedlistnext",    DBG_CommandLine_OS_LinkedList_Next,     "Returns the Next element from test LinkedList" },
-   { "oslinkedlisthead",    DBG_CommandLine_OS_LinkedList_Head,     "Returns the Head element from test LinkedList" },
-   { "oslinkedlistnumele",    DBG_CommandLine_OS_LinkedList_NumElements,     "Adds LinkedList element and checks for the count" },
+   { "oslinkedlistcreate",   DBG_CommandLine_OS_LinkedList_Create,      "Creates test LinkedList" },
+   { "oslinkedlistremove",   DBG_CommandLine_OS_LinkedList_Remove,      "Removes a element from test LinkedList" },
+   { "oslinkedlistenq",      DBG_CommandLine_OS_LinkedList_Enqueue,     "Enqueues a element to test LinkedList" },
+   { "oslinkedlistdeq",      DBG_CommandLine_OS_LinkedList_Dequeue,     "Dequeue a element from test LinkedList" },
+   { "oslinkedlistinsert",   DBG_CommandLine_OS_LinkedList_Insert,      "Insert a element at a specific index in test LinkedList" },
+   { "oslinkedlistnext",     DBG_CommandLine_OS_LinkedList_Next,        "Returns the Next element from test LinkedList" },
+   { "oslinkedlisthead",     DBG_CommandLine_OS_LinkedList_Head,        "Returns the Head element from test LinkedList" },
+   { "oslinkedlistnumele",   DBG_CommandLine_OS_LinkedList_NumElements, "Adds LinkedList element and checks for the count" },
 #endif
    { 0, 0, 0 }
 };
@@ -1037,7 +1036,7 @@ static void DBG_CommandLine_Process ( void )
          {
             /* This is the line of code that is actually calling the handler function
                for the command that was received */
-#if 0
+#if 0 // TODO: RA6E1 Bob: making the #pragma into _pragma with conditional compile is a big job.  Deferred for now.
 #if ( EP == 1 )
 #if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 ) /* meter specific code */
 /* TODO: Make a group of the calls by feature set ( similar to HEEP_Util.c pragma calls ) */
@@ -1090,7 +1089,7 @@ static void DBG_CommandLine_Process ( void )
                DBG_CommandLine_AfcEnable, DBG_CommandLine_AfcRSSIThreshold,  DBG_CommandLine_AfcTemperatureRange
 #if ( USE_USB_MFG != 0 )
 #pragma  calls=DBG_CommandLine_BDT
-#endif
+#endif // ( USE_USB_MFG != 0 )
 #else // LC or DA
 #pragma  calls=DBG_CommandLine_Help,DBG_CommandLine_PWR_BoostTest, DBG_CommandLine_Buffers, \
                DBG_CommandLine_PWR_SuperCap, DBG_CommandLine_CCA, DBG_CommandLine_CCAAdaptiveThreshold, \
@@ -1139,7 +1138,7 @@ static void DBG_CommandLine_Process ( void )
                DBG_CommandLine_tunnel
 #if ( USE_USB_MFG != 0 )
 #pragma  calls=DBG_CommandLine_BDT
-#endif
+#endif // ( USE_USB_MFG != 0 )
 #endif // #if ( ACLARA_LC != 1 ) && ( ACLARA_DA != 1 )
 #else  // DCU
 #pragma  calls=DBG_CommandLine_Help,DBG_CommandLine_PWR_BoostTest, DBG_CommandLine_Buffers, \
@@ -1193,9 +1192,9 @@ static void DBG_CommandLine_Process ( void )
 #if ( USE_USB_MFG != 0 )
 #warning "Fix this, the list can't be built like this, which is why the whole list is cloned 3 times"
 #pragma  calls=DBG_CommandLine_usbaddr
-#endif
-#endif
-#endif /* #if 0*/
+#endif // ( USE_USB_MFG != 0 )
+#endif // ( EP == 1 )
+#endif /* #if 0 // TODO: RA6E1 Bob: making the #pragma into _pragma with conditional compile is a big job.  Deferred for now.*/
             (void)CmdEntry->pfnCmd( argc, argvar );
 
             /***************************************************************************
@@ -1203,7 +1202,7 @@ static void DBG_CommandLine_Process ( void )
             ****************************************************************************/
             if ( DBG_IsPortEnabled () )
             {
-               DBG_PortTimer_Manage ( );// TODO: RA6 [name_Balaji]: Integrate Timer for DBG module
+               DBG_PortTimer_Manage ( );
             }
             /***************************************************************************
                Reset the rfTestmode timer upon execution of a valid command
@@ -1572,9 +1571,10 @@ uint32_t DBG_CommandLine_DebugDisable( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
 {
-   returnStatus_t retVal = eFAILURE;
+   returnStatus_t retVal = eSUCCESS;
    uint16_t crc16;   /* Used to store CRC results */
    uint32_t crc32;   /* Used to store CRC results */
+   uint8_t  dataBuf[100];
 
    if ( argc == 1 )
    {
@@ -1583,17 +1583,53 @@ uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
    }
    else if ( argc == 2 )
    {
-      /* The number of arguments must be 1 */
-      crc16 = CRC_16_Calculate( (uint8_t *)argv[1], strlen( argv[1] ) );
-      DBG_logPrintf( 'R', "CRC_16_Calculate: %x", crc16 );
-      /* Setting the Seed value to 0 and KeepLock value to false */ //TODO: RA6E1 Bob: temporarily removed
-//      CRC_ecc108_crc( strlen( argv[1] ), argv[1], (uint8_t *)&crc16, 0, false ); //TODO: RA6E1 Bob: temporarily removed
-//      DBG_logPrintf( 'R', "CRC_ecc108_crc: %x", crc16 );
-      crc16 = CRC_16_PhyHeader( (uint8_t *)argv[1], strlen( argv[1] ) );
-      DBG_logPrintf( 'R', "CRC_16_PhyHeader: %x", crc16 );
-      crc32 = CRC_32_Calculate( (uint8_t *)argv[1], strlen( argv[1] ) );
-      DBG_logPrintf( 'R', "CRC_32_Calculate: %x", crc32 );
-      retVal = eSUCCESS;
+      uint16_t srcIndex, bufIndex, srcLength;
+      srcLength = strlen( argv[1] );
+      if ( srcLength <= sizeof(dataBuf) )
+      {
+         if ( ( srcLength % 2 ) == 0 ) /* Any hex string must be an even number of hex digits */
+         {
+            for ( srcIndex = 0, bufIndex = 0; ( ( bufIndex < sizeof(dataBuf) ) && ( srcIndex < srcLength ) ); bufIndex++, srcIndex += 2 )
+            {
+               if ( eSUCCESS != ASCII_atohByte( argv[1][srcIndex], argv[1][srcIndex+1], &dataBuf[bufIndex] ) )
+               {
+                  retVal = eFAILURE;
+               }
+            }
+            if ( eSUCCESS == retVal )
+            {
+               srcLength /= 2; /* Convert ASCII byte length to binary byte length */
+               DBG_printfNoCr( "Byte string is %u long: ", srcLength );
+               for ( bufIndex = 0 ; bufIndex < srcLength ; bufIndex++ )
+               {
+                  DBG_printfNoCr( "%02x", dataBuf[ bufIndex ] );
+               }
+               DBG_printf( " " );
+               /* The number of arguments must be 1 */
+               crc16 = CRC_16_Calculate( (uint8_t *)dataBuf, srcLength );
+               DBG_logPrintf( 'R', "CRC_16_Calculate: %x", crc16 );
+               /* Setting the Seed value to 0 and KeepLock value to false */
+               CRC_ecc108_crc( srcLength, (uint8_t *)&dataBuf, (uint8_t *)&crc16, 0, false );
+               DBG_logPrintf( 'R', "CRC_ecc108_crc: %x", crc16 );
+               crc16 = CRC_16_PhyHeader( (uint8_t *)&dataBuf, srcLength );
+               DBG_logPrintf( 'R', "CRC_16_PhyHeader: %x", crc16 );
+               crc32 = CRC_32_Calculate( (uint8_t *)&dataBuf, srcLength );
+               DBG_logPrintf( 'R', "CRC_32_Calculate: %x", crc32 );
+            }
+            else
+            {
+               DBG_logPrintf( 'R', "ERROR - invalid hex digit(s) in the input string %s", argv[1] );
+            }
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "ERROR - length of hex input string must be even but it is %u", srcLength );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "ERROR - input hex string is too long, max size = %u", sizeof(dataBuf) );
+      }
    }
    else
    {
@@ -1601,7 +1637,7 @@ uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] )
       DBG_logPrintf( 'R', "ERROR - Too many arguments" );
    }
 
-   return ( uint32_t )retVal;
+   return ( 0 );
 }/* end DBG_CommandLine_CrcCalculate() */
 #endif
 
@@ -2516,7 +2552,6 @@ uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] 
       numElementToAdd = ( uint32_t )atoi( argv[1] );
       /* Validate input from user */
       if ( ( numElementToAdd > MAX_LINKEDLIST_DATA )
-           || ( numElementToAdd < 0 )
            || ( numElementToAdd == MAX_LINKEDLIST_DATA ) )
       {
          DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
@@ -2578,7 +2613,6 @@ uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] )
       indexElementToRemove = ( uint32_t )atoi( argv[1] );
       /* Validate input from user */
       if ( ( indexElementToRemove > MAX_LINKEDLIST_DATA )
-           || ( indexElementToRemove < 0 )
            || ( indexElementToRemove == MAX_LINKEDLIST_DATA ) )
       {
          DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
@@ -2647,7 +2681,6 @@ uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] )
       indexElementToEnq = ( uint32_t )atoi( argv[1] );
       /* Validate input from user */
       if ( ( indexElementToEnq > MAX_LINKEDLIST_DATA )
-           || ( indexElementToEnq < 0 )
            || ( indexElementToEnq == MAX_LINKEDLIST_DATA ) )
       {
          DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
@@ -2702,7 +2735,6 @@ uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   uint8_t indexElementToDeq;
    uint8_t numElementBeforeDeq;
    uint8_t numElementAfterDeq;
    static OS_Linked_List_Element_Handle deqReturnElement;
@@ -2772,10 +2804,8 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
       /* Validate input from user */
       if ( ( indexElementToInsert > MAX_LINKEDLIST_DATA )
            || ( indexElementToInsert == MAX_LINKEDLIST_DATA )
-           || ( indexElementToInsert < 0 )
            || ( indexElementToInsertAfter > MAX_LINKEDLIST_DATA )
            || ( indexElementToInsertAfter == MAX_LINKEDLIST_DATA )
-           || ( indexElementToInsertAfter < 0 )
               )
       {
          DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
@@ -2801,12 +2831,12 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
 
       if ( numElementAfterInsert == ( numElementBeforeInsert + 1 ) )
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success; isValueInserted = %u", (uint16_t)isValueInserted );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure; isValueInserted = %u", (uint16_t)isValueInserted );
       }
 
    }
@@ -2886,7 +2916,6 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
       indexElement = ( uint32_t )atoi( argv[1] );
       /* Validate input from user */
       if ( ( indexElement > MAX_LINKEDLIST_DATA )
-           || ( indexElement < 0 )
            || ( indexElement == MAX_LINKEDLIST_DATA ) )
       {
          DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
@@ -2920,7 +2949,6 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
 
 #endif   //TM_LINKED_LIST
 
-// TODO: RA6 [name_Balaji]: Add support to the following function in RA6E1
 /*******************************************************************************
 
    Function name: DBG_CommandLine_CpuLoadEnable
@@ -3417,7 +3445,7 @@ uint32_t DBG_CommandLine_NvEraseTest ( uint8_t sectors, bool nvLocation )
       }
       /* Get the OS tick */
       OS_TICK_Get_CurrentElapsedTicks(&startTick);
-      // TODO: Select the Partition based on the size?
+      // TODO: Select the Partition based on the size? // RA6E1 Bob: This TODO was in the original K24 starting point
       if ( eSUCCESS == PAR_partitionFptr.parOpen(&pTestPartition_, partition, 0L) )
       {
          for ( ; sectors > 0 ; sectors-- )
@@ -3659,7 +3687,7 @@ static uint32_t DBG_CommandLine_getTBslot( uint32_t argc, char *argv[] )
    return 0;
 }
 #endif //#if ( DCU == 1 )
-#include "ecc108_lib_return_codes.h"
+
 static const char checkmac_failed[] = "ECC108_CHECKMAC_FAILED";
 static const char parse_error[]  = "ECC108_PARSE_ERROR";
 static const char cmd_fail[]  = "ECC108_CMD_FAIL";
@@ -3868,7 +3896,8 @@ static uint32_t DBG_CommandLine_GenDFWkey( uint32_t argc, char *argv[] )
    Notes:
 
 *******************************************************************************/
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
+#warning "Switch TM_TEST_SECURITY_CHIP is enabled!  The project will not compile!"
 static const uint8_t verifyMsg[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 static const uint8_t slot12sig[ 64 ] =
 {
@@ -3884,39 +3913,39 @@ static const uint8_t slot14sig[ 64 ] =
    0x78, 0x8C, 0x37, 0x64, 0xBF, 0x98, 0xD1, 0xCC, 0xA6, 0x51, 0x0E, 0xC3, 0x44, 0x88, 0x6F, 0xE2,
    0xF9, 0x5E, 0x4B, 0xE7, 0x1F, 0x4F, 0x73, 0x31, 0xB4, 0x2C, 0x3F, 0x03, 0xE5, 0xD6, 0x2F, 0xB2
 };
-#endif
-#if 0
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
+#if ( TM_TEST_SECURITY_CHIP == 1 )
 static const uint8_t fwen[ 32 ] = { 0 };
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
 
 uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
 {
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
    uint8_t        response[ VERIFY_256_SIGNATURE_SIZE ];
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
    char           *endptr;             /* Used with strtoul */
    uint32_t       LoopCount = 1;
    uint8_t        ECCstatus;
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
    Sha256         sha;                 /* sha256 working area  */
    uint8_t        response[ 512 ];     /* Value returned by some ecc108e routines   */
    PartitionData_t const *pPart;       /* Used to access the security info partition  */
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
 
    if ( argc == 2 )
    {
       LoopCount = strtoul( argv[1], &endptr, 0 );
    }
    DBG_logPrintf( 'R', "Exercising security device %d times...", LoopCount );
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
    if ( ECC108_SUCCESS == ecc108_open() )
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
    {
       ECCstatus = ECC108_SUCCESS;
       do
       {
          ECCstatus = ecc108e_SelfTest();
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
          ECCstatus = ecc108e_Verify( 14, sizeof( verifyMsg ), ( uint8_t * )verifyMsg, ( uint8_t * )slot14sig );
          /* sha256 the message */
          ( void )wc_InitSha256( &sha );
@@ -3967,7 +3996,7 @@ uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
          ECCstatus = ecc108e_checkmac_firmware();
          ECCstatus = ecc108e_verify_external();
          ECCstatus = ecc108e_verify_host();
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
          if( LoopCount )
          {
             LoopCount--;
@@ -3976,16 +4005,16 @@ uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
       while( ( ECC108_SUCCESS == ECCstatus ) && ( LoopCount != 0 ) );
       PrintECC_error( ECCstatus );
       DBG_printf( "Security Device Test %s", ( ECC108_SUCCESS == ECCstatus ) ? "Success!" : "Failed!!!!" );
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
       ecc108_close();
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
    }
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
    else
    {
       DBG_logPrintf( 'R', "Failed to open device %s", i2cName );
    }
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
    return ( 0 );  /*lint !e438 endptr value not used; OK */
 }
 
@@ -4019,20 +4048,20 @@ uint32_t DBG_CommandLine_sectest ( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
 {
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
    uint8_t        customize = 0;    /* Request to customize the data zone flag            */
    uint8_t        genkey = 0;       /* Request to generate a new private/public key pair  */
    uint8_t        verifykey = 0;    /* Request to verify all the public keys              */
    uint16_t       crc;              /* Computed CRC of config zone                        */
    uint64_t       *psn = NULL;
    uint64_t       sn = 0;
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
    uint8_t        crcconfig = 0;    /* Request to compute config zone CRC, with optional S/N   */
    uint8_t        ECCstatus;        /* Function return value                              */
    uint8_t        lockdata = 0;     /* Request to lock the data zone flag                 */
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
    uint8_t        lockconfig = 0;   /* Request to lock the config zone flag               */
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
 
    if ( argc >= 2 )     /* Extra parameter on command line - not advertised   */
    {
@@ -4040,7 +4069,7 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
       {
          lockdata = 1;
       }
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
       else if ( strcasecmp( "lockconfig", argv[1] ) == 0 )
       {
          lockconfig = 1;
@@ -4057,10 +4086,10 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
       {
          verifykey = 1;
       }
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
       else if ( strcasecmp( "crcconfig", argv[1] ) == 0 )
       {
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
          crcconfig = 1;
          if( argc == 3 )      /* S/N provided?  */
          {
@@ -4075,22 +4104,22 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
             sn = strtoull( argv[2], &endptr, 0 );
             psn = &sn;
          }
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
       }
    }
    if ( ECC108_SUCCESS == ecc108_open() )
    {
       if( lockdata != 0 )
       {
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
          DBG_logPrintf( 'R', "Attempting to lock ECCx08 data." );
          ecc108e_sleep();
          ECCstatus = ecc108e_lock_data_zone();
          PrintECC_error( ECCstatus );
          DBG_logPrintf( 'R', "ECCx08 lock data %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
       }
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
       else if ( customize != 0 )
       {
          DBG_logPrintf( 'R', "Attempting to customize ECCx08." );
@@ -4112,40 +4141,40 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
          PrintECC_error( ECCstatus );
          DBG_logPrintf( 'R', "ECCx08 gen key %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
       }
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
       else if ( crcconfig != 0 ) /*lint !e774 crcconfig always 0; OK temporary code */
       {
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
          DBG_logPrintf( 'R', "Computing ECCx08 config zone CRC." );
          PrintECC_error( ECCstatus );
          DBG_logPrintf( 'R', "Computing config CRC%s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
       }
       else
       {
 //       ECCstatus = ecc108e_check_lock_status();  /* Returns failure on "UNlocked" */
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
          if ( ECCstatus != ECC108_FUNC_FAIL )      /* Make sure not locked already  */
          {
             PrintECC_error( ECCstatus );
             DBG_logPrintf( 'R', "ECCx08 config already locked." );
          }
          else
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
          {
-#if 0
+#if ( TM_TEST_SECURITY_CHIP == 1 )
             DBG_logPrintf( 'R', "Writing default values to the ECCx08 configuration zone." );
 //          ECCstatus = ecc108e_write_config(); /* Attempt to write default config data   */
             PrintECC_error( ECCstatus );
             DBG_logPrintf( 'R', "ECCx08 config update %s.", ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" : "failed" );
             if ( ECCstatus == ECC108_SUCCESS )
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
             {
                ECCstatus = ecc108e_verify_config();
                PrintECC_error( ECCstatus );
                DBG_logPrintf( 'R', "ECCx08 config verification %s.",
                               ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
-#if 0 // DG: DeadCode
+#if ( TM_TEST_SECURITY_CHIP == 1 )
                if ( ECCstatus == ECC108_SUCCESS )
                {
                   if( lockconfig != 0 ) /*lint !e774 lockconfig always 0; OK temporary code */
@@ -4157,7 +4186,7 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
                                     ( ECCstatus == ECC108_SUCCESS ) ? "succeeded" :  "failed" );
                   }
                }
-#endif
+#endif // ( TM_TEST_SECURITY_CHIP == 1 )
                ecc108e_sleep();
             }
          }
@@ -4172,84 +4201,83 @@ uint32_t DBG_CommandLine_secConfig ( uint32_t argc, char *argv[] )
 }
 /* end DBG_CommandLine_secConfig() */
 
-//#if 0 //( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-///*******************************************************************************
-//
-//   Function name: DBG_CommandLine_clockswtest
-//
-//   Purpose: Capture cyclecounter difference at two different clock speed settings over 5 seconds
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//*******************************************************************************/
-//static uint32_t DBG_CommandLine_clockswtest ( uint32_t argc, char *argv[] )
-//{
-//   char           floatStr[PRINT_FLOAT_SIZE];
-//   uint32_t       startCycles;
-//   uint32_t       endCycles;
-//   uint32_t       diffCycles;
-//   float          clockFreq;
-//   returnStatus_t retVal = eSUCCESS;
-//
-//   if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_DEFAULT )
-//   {
-//      retVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
-//   }
-//
-//   if ( retVal == eSUCCESS )
-//   {
-//      DBG_printf( "Getting current cycle counter and sleeping 5 seconds" );
-//      startCycles = DWT_CYCCNT;
-//
-//      OS_TASK_Sleep( ONE_SEC * 5 );
-//
-//      endCycles = DWT_CYCCNT;
-//      diffCycles = endCycles - startCycles;
-//      clockFreq = (float)diffCycles / 5.0E6;
-//
-//      DBG_printf( "Start cycles: %lu, End cycles: %lu, diff: %lu, freq: %s MHz", startCycles, endCycles, diffCycles, DBG_printFloat( floatStr, clockFreq, 3 ) );
-//
-//
-//      DBG_printf( "Switching clock to 120MHz" );
-//
-//      retVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_3 ); /* Set clock to 120MHz, normal run mode.  */
-//      if ( retVal == eSUCCESS )
-//      {
-//         startCycles = DWT_CYCCNT;
-//
-//         OS_TASK_Sleep( ONE_SEC * 5 );
-//
-//         endCycles = DWT_CYCCNT;
-//         diffCycles = endCycles - startCycles;
-//         clockFreq = (float)diffCycles / 5.0E6;
-//
-//         DBG_printf( "Start cycles: %lu, End cycles: %lu, diff: %lu, freq: %s MHz", startCycles, endCycles, diffCycles, DBG_printFloat( floatStr, clockFreq, 3 ) );
-//      }
-//      else
-//      {
-//         DBG_printf( "Unable to switch clock to 120MHz" );
-//      }
-//   }
-//   else
-//   {
-//      DBG_printf( "Unable to switch clock to default configuration" );
-//   }
-//
-//   if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_DEFAULT )
-//   {
-//      (void)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
-//   }
-//
-//   return 0;
-//}
-//#endif   /* HAL_TARGET_XCVR_9985_REV_A  */
-//
-#if 0//(DBG_TESTS == 1)
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_clockswtest
+
+   Purpose: Capture cyclecounter difference at two different clock speed settings over 5 seconds
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+*******************************************************************************/
+static uint32_t DBG_CommandLine_clockswtest ( uint32_t argc, char *argv[] )
+{
+   char           floatStr[PRINT_FLOAT_SIZE];
+   uint32_t       startCycles;
+   uint32_t       endCycles;
+   uint32_t       diffCycles;
+   float          clockFreq;
+   returnStatus_t retVal = eSUCCESS;
+
+   if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_DEFAULT )
+   {
+      retVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
+   }
+
+   if ( retVal == eSUCCESS )
+   {
+      DBG_printf( "Getting current cycle counter and sleeping 5 seconds" );
+      startCycles = DWT_CYCCNT;
+
+      OS_TASK_Sleep( ONE_SEC * 5 );
+
+      endCycles = DWT_CYCCNT;
+      diffCycles = endCycles - startCycles;
+      clockFreq = (float)diffCycles / 5.0E6;
+
+      DBG_printf( "Start cycles: %lu, End cycles: %lu, diff: %lu, freq: %s MHz", startCycles, endCycles, diffCycles, DBG_printFloat( floatStr, clockFreq, 3 ) );
+
+
+      DBG_printf( "Switching clock to 120MHz" );
+
+      retVal = (returnStatus_t)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_3 ); /* Set clock to 120MHz, normal run mode.  */
+      if ( retVal == eSUCCESS )
+      {
+         startCycles = DWT_CYCCNT;
+
+         OS_TASK_Sleep( ONE_SEC * 5 );
+
+         endCycles = DWT_CYCCNT;
+         diffCycles = endCycles - startCycles;
+         clockFreq = (float)diffCycles / 5.0E6;
+
+         DBG_printf( "Start cycles: %lu, End cycles: %lu, diff: %lu, freq: %s MHz", startCycles, endCycles, diffCycles, DBG_printFloat( floatStr, clockFreq, 3 ) );
+      }
+      else
+      {
+         DBG_printf( "Unable to switch clock to 120MHz" );
+      }
+   }
+   else
+   {
+      DBG_printf( "Unable to switch clock to default configuration" );
+   }
+
+   if ( _bsp_get_clock_configuration() != BSP_CLOCK_CONFIGURATION_DEFAULT )
+   {
+      (void)_bsp_set_clock_configuration( BSP_CLOCK_CONFIGURATION_DEFAULT ); /* Set clock to 180MHz, high speed run mode.  */
+   }
+
+   return 0;
+}
+#endif   /* HAL_TARGET_XCVR_9985_REV_A  */
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_clocktst
@@ -4270,7 +4298,7 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
    uint8_t string[VER_HW_STR_LEN];   /* Version string including the two '.' and a NULL */
 
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
-
+#if ( MCU_SELECTED == NXP_K24 ) // The CLKOUT pin is grounded in the Y8409x K24 NIC, not in RA6E1
    /* Rev C HW, PTC3/CLKOUT pin is grounded */
    if ( 'C' == string[0] )
    {
@@ -4278,7 +4306,7 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
 
       return( 0 );
    }
-
+#endif // ( MCU_SELECTED == NXP_K24 )
    if( argc != 2 )      /* Must be at least on parameter */
    {
       DBG_logPrintf( 'R', "1/0 (on/off) parameter required" );
@@ -4288,34 +4316,49 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
       ( void )sscanf( argv[1], "%lu", &on ); /* Get user's request   */
       if( on == 0 )
       {
+#if ( MCU_SELECTED == NXP_K24 )
          SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
          OSC_CR &= ~( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Disable the clock output   */
+#elif ( MCU_SELECTED == RA6E1 )
+         DBG_logPrintf( 'R', "clocktst command is not currently supported for RA6E1"); // TODO: RA6E1 Bob: Support this?
+#endif // MCU_SELECTED
 #if ( DCU == 1 )
          PORTE_PCR0 &= ~PORT_PCR_MUX( 7 );
          PORTE_PCR0 |= PORT_PCR_MUX( 1 );          /* Set PTE0 as normal GPIO    */
 #else
+   #if ( MCU_SELECTED == NXP_K24 )
          PORTC_PCR3 &= ~PORT_PCR_MUX( 7 );
          PORTC_PCR3 |= PORT_PCR_MUX( 1 );          /* Set PTC3 as normal GPIO    */
-#endif
+   #elif ( MCU_SELECTED == RA6E1 )
+
+   #endif // MCU_SELECTED
+#endif // ( DCU == 1 )
       }
       else
       {
+#if ( MCU_SELECTED == NXP_K24 )
          SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
          SIM_SOPT2 |= ( SIM_SOPT2_CLKOUTSEL( 6 ) ); /* Select the external oscillator as the source clock */
+#elif ( MCU_SELECTED == RA6E1 )
+         DBG_logPrintf( 'R', "clocktst command is not currently supported for RA6E1"); // TODO: RA6E1 Bob: Support this?
+#endif // MCU_SELECTED
 #if ( DCU == 1 )
 //         RTC_CR |= ( uint8_t )( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Enable the clock output    */
 //         PORTE_PCR0 |= PORT_PCR_MUX( 7 );    /* Set PTE0 as RTC_CLKOUT signal  */
          PORTE_PCR0 |= PORT_PCR_MUX( 5 );    /* Set PTE0 as TRACE_CLKOUT signal (i.e. 60MHz) */
 #else
+   #if ( MCU_SELECTED == NXP_K24 )
          OSC_CR |= ( uint8_t )( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Enable the clock output    */
          PORTC_PCR3 |= PORT_PCR_MUX( 5 );    /* Set PTC3 as CLKOUT signal  */
-#endif
+   #elif ( MCU_SELECTED == RA6E1 )
+
+   #endif // MCU_SELECTED
+#endif // ( DCU == 1 )
       }
       DBG_logPrintf( 'R', "clock: %s", on == 0 ? "off" : "on" );
    }
    return 0;
 }
-#endif //DBG_TESTS
 
 /*******************************************************************************
 
@@ -5706,7 +5749,7 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
    temperatureC = (int32_t)( 10 * ADC_Get_uP_Temperature( TEMP_IN_DEG_C ) );
    temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
    DBG_logPrintf( 'R', "CPU Temp    = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
-#elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1: Do we need this section? It is same as the Radio Temp obtained using PHY_GetRequest( ePhyAttr_Temperature );
+#elif ( MCU_SELECTED == RA6E1 )
    int16_t        Temperature;
    bool tempOK = RADIO_Get_Chip_Temperature( (uint8_t) RADIO_0, &Temperature );
    if( tempOK )
@@ -6473,8 +6516,7 @@ static uint32_t DBG_CommandLine_HmcwCmd  ( uint32_t argc, char *argv[] )
          {
             if ( !HmcCmdSemCreated )
             {
-               //TODO RA6: NRJ: determine if semaphores need to be counting
-               if ( OS_SEM_Create ( &HMC_CMD_SEM, 0 ) )
+               if ( OS_SEM_Create ( &HMC_CMD_SEM, 10 ) ) /* Assume that up to 10 commands can be pending before HMC completes them */
                {
                   HmcCmdSemCreated = ( bool )true;
                } /* end if() */
@@ -11252,7 +11294,7 @@ uint32_t DBG_CommandLine_TXMode ( uint32_t argc, char *argv[] )
 }
 
 #if ( EP == 1 )
-#if 1 // TODO: RA6E1 Bob: This command was removed from original K24 code but enabling for RA6E1 testing
+#if ( MCU_SELECTED == RA6E1 ) // RA6E1 Bob: This command was removed from original K24 code but enabling for RA6E1 testing
 /******************************************************************************
 
    Function Name: DBG_CommandLine_AfcEnable
@@ -11396,7 +11438,7 @@ uint32_t DBG_CommandLine_AfcTemperatureRange ( uint32_t argc, char *argv[] )
 
    return ( 0 );
 }
-#endif // TODO: RA6E1 Bob: This command was removed from original K24 code
+#endif // ( MCU_SELECTED == RA6E1 ) // RA6E1 Bob: This command was removed from original K24 code
 #endif // ( EP == 1 )
 
 /******************************************************************************
@@ -12517,7 +12559,7 @@ static char upperCase(char letter)
    }
 }
 
-#warning "You have built a version that allows Noiseband to change many port configurations!"
+#warning "You have built the enhanced version of Noiseband that allows it to change many port configurations!"
 
 static bool checkOptions( char inputByte, char *option, char pAllowed[] )
 {
@@ -13170,8 +13212,8 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )  // just so we produce the same .hex file
    DBG_printf( "Noiseband start; delay between samples = %u, starting super-cap voltage=%u mV", samplingRate, (uint32_t)(ADC_Get_SC_Voltage()*1000.0) );
 
-   PWR_3P6LDO_EN_ON();    // TODO: RA6E1 Bob: This should already be in this condition, just being sure
-   PWR_3V6BOOST_EN_OFF(); // TODO: RA6E1 Bob: This should already be in this condition, just being sure
+   PWR_3P6LDO_EN_ON();    // RA6E1 Bob: This should already be in this condition, just being sure
+   PWR_3V6BOOST_EN_OFF(); // RA6E1 Bob: This should already be in this condition, just being sure
 
    OS_TASK_Sleep( ONE_SEC ); /* Make sure debug printout of the above message has completed before we start */
 
@@ -14611,111 +14653,111 @@ uint32_t DBG_CommandLine_EVLGETLOG( uint32_t argc, char *argv[] )
    return( uRetVal );
 } /* end DBG_CommandLine_EVLGETLOG () */
 
-//#if ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_MAC_LinkParameters ( uint32_t argc, char *argv[] )
-//
-//   Purpose: This function is used to set/get the MAC Link Parameters
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_MAC_LinkParameters ( uint32_t argc, char *argv[] )
-//{
-//
-//#if 0 // DG: 05/17/21: Removing repeated code
-//   struct
-//   {
-//      char*            name;
-//   } field[] =
-//     {
-//      {"offset" },
-//      {"period" },
-//      {"start" },
-//#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
-//      {"max_td" },
-//#endif
-//   };
-//#endif
-//   if ( argc > 1 )
-//   {
-//      if ( strcasecmp( "get", argv[1] ) == 0 )
-//      {
-//         MAC_LinkParameters_Config_Print();
-//      }
-//#if 0 // DG: 05/17/21: Removing repeated code
-//      else if ( strcasecmp( "set", argv[1] ) == 0 )
-//      {
-//         if( argc >= 4 )
-//         {
-//            int index = 0;
-//            do
-//            {
-//               if ( strcasecmp( field[index].name, argv[2] ) == 0 )
-//               {
-//                  uint32_t value;
-//                  value = ( uint32_t )atoi( argv[3] );
-//                  if ( index == 0 )
-//                  {
-//                     //eMacAttr_LinkParamMaxOffset
-//                     ( void )MAC_SetRequest( eMacAttr_LinkParamMaxOffset, &value);
-//                  }
-//                  else if ( index == 1 )
-//                  {
-//                     //eMacAttr_LinkParamPeriod
-//                     ( void )MAC_SetRequest( eMacAttr_LinkParamPeriod, &value);
-//                  }
-//                  else if ( index == 2 )
-//                  {
-//                     //eMacAttr_LinkParamStart
-//                     ( void )MAC_SetRequest( eMacAttr_LinkParamStart, &value);
-//                  }
-//#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
-//                  else if( index == 3 )
-//                  {
-//                     //eMacAttr_CmdRespMaxTimeDiversity
-//                     ( void )MAC_SetRequest( eMacAttr_CmdRespMaxTimeDiversity, &value );
-//                  }
-//#endif
-//                  MAC_LinkParameters_Config_Print();
-//                  break;
-//               }
-//            }while ( index++ < 5 );
-//            if( index > 5 )
-//            {
-//               INFO_printf( "Error: Unavailable" );
-//            }
-//         }
-//         else
-//         {
-//            INFO_printf( "Error: Too many Arguments" );
-//         }
-//      }
-//#endif
-//      else if( strcasecmp( "send", argv[1] ) == 0 )
-//      {
-//         ( void )MAC_LinkParametersPush_Request( BROADCAST_MODE, NULL, NULL );
-//      }
-//   }
-//   else
-//   {
-//      DBG_logPrintf( 'R', "mac_lp get <cr>" );
-//#if 0 // DG: 05/17/21: Removing repeated feature
-//      DBG_logPrintf( 'R', "mac_lp set %s|%s|%s|%s val<cr>",
-//                     field[0].name, field[1].name, field[2].name, field[3].name);
-//#endif
-//      DBG_logPrintf( 'R', "mac_lp send <cr>" );
-//   }
-//   return ( 0 );
-//}
-//#endif // end of ( MAC_LINK_PARAMETERS == 1 ) section
-//
+#if ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_MAC_LinkParameters ( uint32_t argc, char *argv[] )
+
+   Purpose: This function is used to set/get the MAC Link Parameters
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_MAC_LinkParameters ( uint32_t argc, char *argv[] )
+{
+
+#if 0 // DG: 05/17/21: Removing repeated code
+   struct
+   {
+      char*            name;
+   } field[] =
+     {
+      {"offset" },
+      {"period" },
+      {"start" },
+#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
+      {"max_td" },
+#endif
+   };
+#endif // DG: 05/17/21: Removing repeated code
+   if ( argc > 1 )
+   {
+      if ( strcasecmp( "get", argv[1] ) == 0 )
+      {
+         MAC_LinkParameters_Config_Print();
+      }
+#if 0 // DG: 05/17/21: Removing repeated code
+      else if ( strcasecmp( "set", argv[1] ) == 0 )
+      {
+         if( argc >= 4 )
+         {
+            int index = 0;
+            do
+            {
+               if ( strcasecmp( field[index].name, argv[2] ) == 0 )
+               {
+                  uint32_t value;
+                  value = ( uint32_t )atoi( argv[3] );
+                  if ( index == 0 )
+                  {
+                     //eMacAttr_LinkParamMaxOffset
+                     ( void )MAC_SetRequest( eMacAttr_LinkParamMaxOffset, &value);
+                  }
+                  else if ( index == 1 )
+                  {
+                     //eMacAttr_LinkParamPeriod
+                     ( void )MAC_SetRequest( eMacAttr_LinkParamPeriod, &value);
+                  }
+                  else if ( index == 2 )
+                  {
+                     //eMacAttr_LinkParamStart
+                     ( void )MAC_SetRequest( eMacAttr_LinkParamStart, &value);
+                  }
+#if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
+                  else if( index == 3 )
+                  {
+                     //eMacAttr_CmdRespMaxTimeDiversity
+                     ( void )MAC_SetRequest( eMacAttr_CmdRespMaxTimeDiversity, &value );
+                  }
+#endif
+                  MAC_LinkParameters_Config_Print();
+                  break;
+               }
+            }while ( index++ < 5 );
+            if( index > 5 )
+            {
+               INFO_printf( "Error: Unavailable" );
+            }
+         }
+         else
+         {
+            INFO_printf( "Error: Too many Arguments" );
+         }
+      }
+#endif // DG: 05/17/21: Removing repeated code
+      else if( strcasecmp( "send", argv[1] ) == 0 )
+      {
+         ( void )MAC_LinkParametersPush_Request( BROADCAST_MODE, NULL, NULL );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "mac_lp get <cr>" );
+#if 0 // DG: 05/17/21: Removing repeated feature
+      DBG_logPrintf( 'R', "mac_lp set %s|%s|%s|%s val<cr>",
+                     field[0].name, field[1].name, field[2].name, field[3].name);
+#endif // DG: 05/17/21: Removing repeated feature
+      DBG_logPrintf( 'R', "mac_lp send <cr>" );
+   }
+   return ( 0 );
+}
+#endif // end of ( MAC_LINK_PARAMETERS == 1 ) section
+
 #if (USE_DTLS == 1)
 
 uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
