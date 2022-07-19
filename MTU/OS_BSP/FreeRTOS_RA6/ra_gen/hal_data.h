@@ -118,16 +118,6 @@ extern lpm_instance_ctrl_t g_lpm_DeepSWStandby_AGT_ctrl;
 extern const lpm_cfg_t g_lpm_DeepSWStandby_AGT_cfg;
 
 /** AGT Timer Instance */
-extern const timer_instance_t agt0_timer_lpm_cascade_trigger;
-
-/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
-extern agt_instance_ctrl_t agt0_timer_lpm_cascade_trigger_ctrl;
-extern const timer_cfg_t agt0_timer_lpm_cascade_trigger_cfg;
-
-#ifndef NULL
-void NULL(timer_callback_args_t * p_args);
-#endif
-/** AGT Timer Instance */
 extern const timer_instance_t agt1_timer_cascade_lpm_trigger;
 
 /** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
