@@ -15,7 +15,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-//#include "OS_aclara.h"
 #include "DBG_SerialDebug.h"
 #include "buffer.h"
 
