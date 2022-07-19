@@ -50,7 +50,6 @@
 #include "SM.h"
 #if ( MCU_SELECTED == RA6E1 )
 #include "lpm_app.h"
-#include "AGT.h"
 #include "bsp_pin_cfg.h"
 #endif
 
