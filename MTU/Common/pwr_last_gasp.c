@@ -715,18 +715,24 @@ void PWRLG_TxFailure( void )
 #endif
 //         LG_PRNT_INFO("\nTx-Fail:LLS\n");
          /* The CSMA back-off is long, switch to LLS mode.  */
-#if ( MCU_SELECTED == NXP_K24 )
 #if ( PWRLG_PRINT_ENABLE == 0 )
          EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
 #else
          /* Subtracting the sleep delay added for print*/
-//         EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS );
-         EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
+#if ( MCU_SELECTED == NXP_K24 )
+         EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS ); // TODO: RA6E1: Below section is correct. Remove this line after hex compare
+#elif ( MCU_SELECTED == RA6E1 )
+         if( uMilliseconds > OS_SLEEP_PRINT_DELAY_MS )
+         {
+            EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS );
+         }
+         else
+         {
+            EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
+         }
 #endif
-#elif( MCU_SELECTED == RA6E1 )
-         // TODO: RA6E1: Support SW Standby instead
-         OS_TASK_Sleep( uMilliseconds );
 #endif
+
 #if ( LAST_GASP_SIMULATION == 1 )
       }
       else
