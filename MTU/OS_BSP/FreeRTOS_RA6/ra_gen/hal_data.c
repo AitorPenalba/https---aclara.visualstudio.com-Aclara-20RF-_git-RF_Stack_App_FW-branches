@@ -140,6 +140,46 @@ const wdt_cfg_t g_wdt0_cfg =
     .p_callback = NULL,
 };
 
+agt_instance_ctrl_t agt2_Freq_Sync_ctrl;
+const agt_extended_cfg_t agt2_Freq_Sync_extend =
+{
+    .count_source     = AGT_CLOCK_SUBCLOCK,
+    .agto             = AGT_PIN_CFG_DISABLED,
+    .agtoa            = AGT_PIN_CFG_DISABLED,
+    .agtob            = AGT_PIN_CFG_DISABLED,
+    .measurement_mode = AGT_MEASURE_DISABLED,
+    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
+    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+};
+const timer_cfg_t agt2_Freq_Sync_cfg =
+{
+    .mode                = TIMER_MODE_PERIODIC,
+    /* Actual period: 1 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x08000, .duty_cycle_counts = 0x4000, .source_div = (timer_source_div_t)0,
+    .channel             = 2,
+    .p_callback          = NULL,
+    /** If NULL then do not add & */
+#if defined(NULL)
+    .p_context           = NULL,
+#else
+    .p_context           = &NULL,
+#endif
+    .p_extend            = &agt2_Freq_Sync_extend,
+    .cycle_end_ipl       = (BSP_IRQ_DISABLED),
+#if defined(VECTOR_NUMBER_AGT0_INT)
+    .cycle_end_irq       = VECTOR_NUMBER_AGT0_INT,
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t agt2_Freq_Sync =
+{
+    .p_ctrl        = &agt2_Freq_Sync_ctrl,
+    .p_cfg         = &agt2_Freq_Sync_cfg,
+    .p_api         = &g_timer_on_agt
+};
+
 /* Instance structure to use this module. */
 const wdt_instance_t g_wdt0 =
 {
@@ -873,11 +913,11 @@ const rtc_cfg_t g_rtc0_cfg =
     .clock_source            = RTC_CLOCK_SOURCE_SUBCLK,
     .freq_compare_value_loco = 255,
     .p_err_cfg               = &g_rtc0_err_cfg,
-    .p_callback              = rtc_callback,
+    .p_callback              = RTC_Callback,
     .p_context               = NULL,
     .alarm_ipl               = (12),
     .periodic_ipl            = (BSP_IRQ_DISABLED),
-    .carry_ipl               = (12),
+    .carry_ipl               = (BSP_IRQ_DISABLED),  /*Aclara change from 12 */
 #if defined(VECTOR_NUMBER_RTC_ALARM)
     .alarm_irq               = VECTOR_NUMBER_RTC_ALARM,
 #else

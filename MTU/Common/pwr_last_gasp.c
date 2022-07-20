@@ -910,7 +910,7 @@ void PWRLG_Startup( void )
                   R_SYSTEM->DPSIFR2 = 0U;
                   LG_PRNT_INFO("DPSIFR2:%ld", R_SYSTEM->DPSIFR2);
 #endif
-                  RTC_DisableCalendarAlarm();
+                  RTC_DisableAlarm();
                   PWRLG_SOFTWARE_RESET_SET( 1 );   /* Done with LG */
                   LG_PRNT_INFO("Complete");
 #endif
@@ -2586,7 +2586,7 @@ void PWRLG_RestLastGaspFlags( void )
 static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode )
 {
    /* Note: In RA6E1, RTC Alarm is used for LPTMR_SECONDS and Deep Software Standby Mode
-           In RA6E1, AGT Alarm is used for LPTMR_MILLISECONDS and Software Standby Mode */
+            In RA6E1, AGT Alarm is used for LPTMR_MILLISECONDS and Software Standby Mode */
 
    if ( uCounter != 0 ) /* If 0 time requested, resume with existing settings.   */
    {
@@ -2594,7 +2594,11 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
       {
          case LPTMR_SECONDS:
          {
-            RTC_ConfigureCalendarAlarm(uCounter);
+            if( (bool)false == RTC_isRunning() )   //RTC has to be running, but make sure anyway
+            {
+               RTC_Start();
+            }
+            RTC_ConfigureAlarm(uCounter);
             break;
          }
          case LPTMR_MILLISECONDS:
@@ -2607,7 +2611,7 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
          {
             /* No need to set the timer */
             // TODO: RA6: Review: 1. Disable RTC ALARM ? OR Set Timer to max value? OR Reconfigure Deep SW Standby?
-            RTC_DisableCalendarAlarm();
+            RTC_DisableAlarm();
             break;
          }
       }

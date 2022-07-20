@@ -650,56 +650,38 @@ returnStatus_t SELF_testRTC( void )
       {
          retVal = eFAILURE;
       }
-   } while ( ( retVal == eFAILURE ) && ( OS_TICK_Get_ElapsedMilliseconds() < 1200 ) );
+   } while ( ( retVal == eFAILURE ) && ( OS_TICK_Get_ElapsedMilliseconds() < 1200 ) ); //TODO: K24: SG: Verify the Elapsed actually works
 #elif ( MCU_SELECTED == RA6E1 )
-
-#if 0 /* TODO: RA6E1: 1. This section is not correct. The System relies on having the RTC keeping the time. We cannot set the time here.
-                          2. R_RTC_Close() Stops the RTC  */
-   sysTime_dateFormat_t setTime =
-   {
-   .sec  = 55,
-   .min  = 59,
-   .hour = 23,       /* 24-HOUR mode */
-   .day = 31,
-   .month  = 12,
-   .year = 2021
-   };
-   sysTime_dateFormat_t getTime1;
-   sysTime_dateFormat_t getTime2;
-   bool isTimeSetSuccess;
-   isTimeSetSuccess = RTC_SetDateTime (&setTime);// TODO: RA6 [name_Balaji]: Remove Set Time as this is not a valid method
-   if(isTimeSetSuccess == 0)
-   {
-     retVal = eFAILURE;
-   }
+   uint32_t       RTC_time_1;    /* Used for difference in RTC */
+   uint32_t       RTCTime1_msec; /* Used for difference in RTC prescalar   */
+   uint32_t       RTC_time_2;    /* Used for difference in RTC */
+   uint32_t       RTCTime2_msec; /* Used for difference in RTC prescalar   */
+   OS_TICK_Struct startTick, currentTick;
+   OS_TICK_Get_CurrentElapsedTicks( &startTick );
    do
    {
       retVal = eSUCCESS;                        /* Assume success */
       tries++;
 
-      RTC_GetDateTime (&getTime1);              /* Record RTC milliseconds, at entry.    */
-      OS_TASK_Sleep( 10 );                      /* Wait for 10ms.                   */
-      RTC_GetDateTime (&getTime2);              /* Record RTC milliseconds after wait.   */
+      RTC_GetTimeInSecMicroSec( &RTC_time_1, &RTCTime1_msec );   /* Record RTC seconds, at entry.    */
+      OS_TASK_Sleep( TEN_MSEC );                /* Wait for 10ms.                   */
+      RTC_GetTimeInSecMicroSec( &RTC_time_2, &RTCTime2_msec );   /* Record RTC seconds after wait.   */
 
-      /* If readings don't change, then not running.  */
-      if ( getTime1.msec == getTime2.msec )
+      /* The "prescaler" cycles from 0 to 127 then rollsover. If readings don't change, then not running.  */
+      if ( ( RTC_time_1 == RTC_time_2 ) && ( RTCTime1_msec == RTCTime2_msec ) )
       {
          retVal = eFAILURE;
       }
-   } while ( retVal == eFAILURE );// TODO: RA6 [name_Balaji]: Need to test after OS_TICK_Get_ElapsedMilliseconds integration
-   R_RTC_Close (&g_rtc0_ctrl);// TODO: RA6 [name_Balaji]: Closing RTC, for now as there is no other known method to check the RTC valid or not
-#endif // #if 0
-#endif // #if ( MCU_SELECTED == NXP_K24 )
+      OS_TICK_Get_CurrentElapsedTicks( &currentTick );
+   } while ( ( retVal == eFAILURE ) && ( OS_TICK_Get_Diff_InMilliseconds( &startTick, &currentTick ) < 1200 ) );
+#endif
 #if ( TM_RTC_UNIT_TEST == 1 )
 // TODO: RA6 [name_Balaji]: Remove unit test if not required
-   bool isRTCUnitTestFailed;
-   isRTCUnitTestFailed = RTC_UnitTest();
-   if (isRTCUnitTestFailed == 1)
+   if ( !RTC_UnitTest() )
    {
-     DBG_printf( "ERROR - RTC failed to Set Error Adjustment\n" );
+     DBG_printf( "ERROR - RTC failed unit test\n" );
    }
 #endif // TM_RTC_UNIT_TEST
-#if 0 /* TODO: RA6E1: Add this code when the Self-Test is added */
    if ( retVal == eFAILURE )
    {
       if( SELF_TestData.RTCFail < ( ( 1 << ( 8 * sizeof( SELF_TestData.RTCFail ) ) ) - 1 ) ) /* Do not let counter rollover.  */
@@ -707,9 +689,7 @@ returnStatus_t SELF_testRTC( void )
          SELF_TestData.RTCFail++;
       }
    }
-#else
-   retVal = eSUCCESS;
-#endif
+
    DBG_logPrintf( 'I', "SELF_testRTC: Done - Up time = %ld ms, attempts: %hd", OS_TICK_Get_ElapsedMilliseconds(), tries );
    return retVal;
 }
@@ -735,6 +715,9 @@ returnStatus_t SELF_testSecurity( void )
          retVal = eSUCCESS;
       }
    }
+#if ( MCU_SELECTED == RA6E1 ) //TODO: RA6E1: SG: Add this to the next release of the K24
+   DBG_logPrintf( 'I', "SELF_testSecurity: Done - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
+#endif
    if ( eFAILURE == retVal )
    {
       /* If any failure, update the counter w/o overflow  */
@@ -775,7 +758,7 @@ returnStatus_t SELF_testNV( void )
       }
    }
 
-#if ( MCU_SELECTED == RA6E1 )
+#if ( MCU_SELECTED == RA6E1 ) //TODO: RA6E1: SG: Add this to the next release of the K24
    DBG_logPrintf( 'I', "SELF_testNV: Done - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
 #endif
    return ( ( 0 == errCount ) ? eSUCCESS : eFAILURE );

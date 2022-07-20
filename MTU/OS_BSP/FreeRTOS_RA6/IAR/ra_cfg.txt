@@ -611,7 +611,7 @@ FSP Configuration
       Automatic Adjustment Period: 10 Seconds
       Adjustment Type (Plus-Minus): NONE
       Error Adjustment Value: 0
-      Callback: rtc_callback
+      Callback: RTC_Callback
       Alarm Interrupt Priority: Priority 12
       Period Interrupt Priority: Disabled
       Carry Interrupt Priority: Priority 12
@@ -985,4 +985,22 @@ FSP Configuration
       
     Instance "g_elc Event Link Controller (r_elc)"
       Name: g_elc
+      
+    Instance "agt2_Freq_Sync Timer, Low-Power (r_agt)"
+      General: Name: agt2_Freq_Sync
+      General: Channel: 0
+      General: Mode: Periodic
+      General: Period: 0x08000
+      General: Period Unit: Raw Counts
+      Output: Duty Cycle Percent (only applicable in PWM mode): 50
+      General: Count Source: SUBCLOCK
+      Output: AGTOA Output: Disabled
+      Output: AGTOB Output: Disabled
+      Output: AGTO Output: Disabled
+      Input: Measurement Mode: Measure Disabled
+      Input: Input Filter: No Filter
+      Input: Enable Pin: Enable Pin Not Used
+      Input: Trigger Edge: Trigger Edge Rising
+      Interrupts: Callback: NULL
+      Interrupts: Underflow Interrupt Priority: Disabled
       

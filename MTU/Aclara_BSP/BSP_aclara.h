@@ -79,6 +79,10 @@
 #define LWGPIO_VALUE_LOW   BSP_IO_LEVEL_LOW
 #endif
 
+#if ( MCU_SELECTED == RA6E1 )
+#define AGT_FREQ_SYNC_TIMER_COUNT_MAX ((uint16_t)32768)
+#endif
+
 #define BSP_IS_GLOBAL_INT_ENABLED()  (bool)(0 == __get_PRIMASK() ? TRUE : FALSE)
 
 #if ( MCU_SELECTED == RA6E1 )
@@ -239,17 +243,17 @@ extern void        RTC_GetDateTime           ( sysTime_dateFormat_t *RT_Clock );
 extern bool        RTC_SetDateTime           ( const sysTime_dateFormat_t *RT_Clock );
 extern bool        RTC_Valid                 ( void );
 extern void        RTC_GetTimeInSecMicroSec  ( uint32_t *sec, uint32_t *microSec );
-#if ( MCU_SELECTED == NXP_K24 )
 extern void        RTC_GetTimeAtRes          ( TIME_STRUCT *ptime, uint16_t fractRes );
-#elif ( MCU_SELECTED == RA6E1 )
+#if ( MCU_SELECTED == RA6E1 )
 extern returnStatus_t RTC_init( void );
-extern void           RTC_ConfigureCalendarAlarm( uint16_t seconds );
-extern bool           RTC_SetAlarmTime ( rtc_alarm_time_t * const p_alarm );
-extern void           RTC_GetAlarmTime ( rtc_alarm_time_t * const p_alarm );
-extern void           RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg );
-extern void           rtc_callback(rtc_callback_args_t *p_args);
-extern bool           RTC_isRunning ( void );
-extern void           RTC_DisableCalendarAlarm ( void );
+extern void           RTC_ConfigureAlarm( uint32_t seconds );
+extern void           RTC_DisableAlarm  ( void );
+extern void           RTC_Start         ( void );
+extern void           RTC_Callback      (rtc_callback_args_t *p_args);
+extern bool           RTC_isRunning     ( void );
+#if ( TM_RTC_UNIT_TEST == 1 )
+extern bool           RTC_UnitTest      ( void );
+#endif
 #endif
 
 extern uint32_t    UART_write                ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
@@ -298,6 +302,10 @@ extern fsp_err_t      AGT_LPM_Timer_Configure ( uint32_t const period );
 extern void           AGT_LPM_Timer_Wait      ( void );
 extern returnStatus_t AGT_PD_Init             ( void );
 extern void           AGT_PD_Enable           ( void );
+extern returnStatus_t AGT_FreqSyncTimerInit   (void);
+extern returnStatus_t AGT_FreqSyncTimerStart  (void);
+extern returnStatus_t AGT_FreqSyncTimerStop   (void);
+extern returnStatus_t AGT_FreqSyncTimerCount  (uint16_t *count);
 
 extern returnStatus_t GPT_PD_Init             ( void );
 extern void           GPT_PD_Enable           ( void );

@@ -245,4 +245,105 @@ void AGT_LPM_Timer_Wait( void )
    (void)AGT_LPM_Timer_Stop();
 }
 #endif
+
+ /*******************************************************************************************************************//**
+ * @brief       This function opens AGT2 module
+ * @param[IN]   None
+ * @retval      eSUCCESS                  Upon successful open of AGT modules
+ * @retval      eFAILURE                  Any Other Error code apart from FSP_SUCCESS
+ **********************************************************************************************************************/
+returnStatus_t AGT_FreqSyncTimerInit( void )
+{
+   fsp_err_t      err;
+   returnStatus_t rtnVal = eFAILURE;
+
+   /* Open AGT2 Timer in Periodic mode */
+	err = R_AGT_Open(&agt2_Freq_Sync_ctrl, &agt2_Freq_Sync_cfg);
+	if(FSP_SUCCESS == err)
+	{
+      rtnVal = eSUCCESS;
+	}
+
+	return rtnVal;
+}
+
+/*******************************************************************************************************************//**
+ * @brief       This function starts AGT2 module
+ * @param[IN]   None
+ * @retval      eSUCCESS                  Upon successful start of AGT modules
+ * @retval      eFAILURE                  Any Other Error code apart from FSP_SUCCESS
+ **********************************************************************************************************************/
+returnStatus_t AGT_FreqSyncTimerStart(void)
+{
+   fsp_err_t      err;
+   returnStatus_t rtnVal = eFAILURE;
+
+	/* Start AGT2 timer */
+	err = R_AGT_Start(&agt2_Freq_Sync_ctrl);
+	if(FSP_SUCCESS == err)
+	{
+      rtnVal = eSUCCESS;
+	}
+
+	return rtnVal;
+}
+
+/*******************************************************************************************************************//**
+ * @brief       This function stops AGT2 Timer
+ * @param[IN]   None
+ * @retval      eSUCCESS                  Upon successful open/start of AGT modules
+ * @retval      eFAILURE                  Any Other Error code apart from FSP_SUCCESS
+ **********************************************************************************************************************/
+returnStatus_t AGT_FreqSyncTimerStop(void)
+{
+	fsp_err_t      err;
+   returnStatus_t rtnVal     = eFAILURE;
+   timer_status_t agt_status = {0};
+
+	/* Stop AGT timer if running */
+	err = R_AGT_StatusGet(&agt2_Freq_Sync_ctrl, &agt_status);
+	if(FSP_SUCCESS == err)
+	{
+		if(agt_status.state)
+		{
+			/* Stop Timer */
+			err = R_AGT_Stop(&agt2_Freq_Sync_ctrl);
+			if(FSP_SUCCESS == err)
+			{
+				/* Reset counter */
+				err = R_AGT_Reset(&agt2_Freq_Sync_ctrl);
+			}
+		}
+	}
+	if(FSP_SUCCESS == err)
+	{
+      rtnVal = eSUCCESS;
+	}
+
+	return rtnVal;
+}
+
+/*******************************************************************************************************************//**
+ * @brief       This Reads the current AGT2 Timer count
+ * @param[IN]   None
+ * @retval      eSUCCESS                  Upon successful open/start of AGT modules
+ * @retval      eFAILURE                  Any Other Error code apart from FSP_SUCCESS
+ **********************************************************************************************************************/
+returnStatus_t AGT_FreqSyncTimerCount(uint16_t *count)
+{
+	fsp_err_t      err;
+   returnStatus_t rtnVal     = eFAILURE;
+   timer_status_t agt_status = {0};
+
+	/* Stop AGT timer if running */
+	err = R_AGT_StatusGet(&agt2_Freq_Sync_ctrl, &agt_status);
+   *count = (uint16_t)agt_status.counter;
+	if(FSP_SUCCESS == err)
+	{
+      rtnVal = eSUCCESS;
+	}
+
+	return rtnVal;
+}
+
 #endif // #if ( MCU_SELECTED == RA6E1 )

@@ -79,7 +79,7 @@
 #define RTC_RFRL_MIN_VALUE_LOCO             (0x7U)
 #define RTC_RFRL_MAX_VALUE_LOCO             (0x1FFU)
 
-#define RTC_SUB_CLK_STABLIZATION_TIME_MS    (100)
+#define RTC_SUB_CLK_STABLIZATION_TIME_US    (190)  /* Aclara Changed from 100ms to 190us */
 #define RTC_LOCO_STABLIZATION_TIME_US       (190)
 
 /***********************************************************************************************************************
@@ -788,7 +788,7 @@ static void r_rtc_set_clock_source (rtc_instance_ctrl_t * const p_ctrl, rtc_cfg_
      * See 26.3.2 "Clock and Count Mode Setting Procedure" of the RA6M3 manual R01UH0886EJ0100)*/
     if (RTC_CLOCK_SOURCE_SUBCLK == p_ctrl->p_cfg->clock_source)
     {
-        R_BSP_SoftwareDelay(RTC_SUB_CLK_STABLIZATION_TIME_MS, BSP_DELAY_UNITS_MILLISECONDS);
+        R_BSP_SoftwareDelay(RTC_SUB_CLK_STABLIZATION_TIME_US, BSP_DELAY_UNITS_MICROSECONDS);   /* Aclara Changed from 100ms to 190us */
     }
     else
     {

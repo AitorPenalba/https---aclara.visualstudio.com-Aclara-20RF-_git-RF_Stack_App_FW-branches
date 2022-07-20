@@ -338,6 +338,12 @@ returnStatus_t TIME_SYS_Init( void )
          FileStatus_t   fileStatusCfg;  //Contains the file status
          statusTimeRequest_ = 0; //Default, time not needed
          _nuDST_TimeChanged = (bool)false; //DST related time change notification
+
+#if ( MCU_SELECTED == RA6E1 )
+         /* Configure the timer for Frequency Adjustments - Using external 32kHz osc, periodic at 1 second */
+         (void)AGT_FreqSyncTimerInit();
+         (void)AGT_FreqSyncTimerStart();
+#endif
 #endif
          _timeSysSemCreated = (bool)true;
 
@@ -2153,19 +2159,15 @@ void TIME_SYS_HandlerTask( taskParameter )
    CLOCK_INFO_t clockInfoCopy;
    uint32_t     error = 0;
 #else
-#if ( MCU_SELECTED == NXP_K24 )    //Use of RTC as synchronization source only works for K24, not RA6E1
    uint16_t     loopCnt = 0;       //Counts between RTC samples
-#endif
+//TODO: Used when RTC crystal is source for Sys Tick adjustment.  Put back in when using TCXO.
    uint32_t     sec;               //To get seconds from RTC
    uint32_t     usec;              //To get micro-seconds from RTC
-//TODO: Used when RTC crystal is source for Sys Tick adjustment.  Put back in when using TCXO.
-#if ( MCU_SELECTED == NXP_K24 )    //Use of RTC as synchronization source only works for K24, not RA6E1
    uint64_t     currTime;          //Current RTC time
    uint64_t     lastTime;          //Last RTC time
    int64_t      diffRTC;           //Difference between last and current time(RTC)
    int64_t      accDiffRTC = 0;    //Difference between last and current time(RTC), accumulated
    int64_t      lastAccDiffRTC = 0;//Difference between last and current time(RTC), accumulated
-#endif
 //End TODO
    sysTime_t    timeSys;
 //TODO: Not used when RTC crystal is source for Sys Tick adjustment.  Put back in when using TCXO.
@@ -2197,12 +2199,15 @@ void TIME_SYS_HandlerTask( taskParameter )
 #if (EP == 1)
    getSysTime( &timeSys );
    DST_ComputeDSTParams(TIME_SYS_IsTimeValid(), timeSys.date, timeSys.time); // Compute the DST dates on power-up
-   RTC_GetTimeInSecMicroSec( &sec, &usec); // Get RTC time and store the current time
-#if ( MCU_SELECTED == NXP_K24 )    //Use of RTC as synchronization source only works for K24, not RA6E1
-//TODO: Used when RTC crystal is source for Sys Tick adjustment.  Remove when using TCXO.
-   lastTime = ((uint64_t)sec * 1000000) + usec;
-//End TODO
+   //TODO: Used when RTC crystal is source for Sys Tick adjustment.  Remove when using TCXO.
+   RTC_GetTimeInSecMicroSec( &sec, &usec); // Get RTC time in seconds (will be ignoring usec) to ensure measurement intervals are ten seconds apart
+#if ( MCU_SELECTED == RA6E1 )    //Use of AGT as synchronization source only works for RA6E1
+   usec = 0;   // Need to clear previous uint32_t value call since next only returns uint6_t
+   (void)AGT_FreqSyncTimerCount( (uint16_t *)&usec ); // Get current AGT count
+   usec = (AGT_FREQ_SYNC_TIMER_COUNT_MAX - (uint64_t)usec)*1000000/AGT_FREQ_SYNC_TIMER_COUNT_MAX;   // Convert count (down counter) to usec
 #endif
+   lastTime = ((uint64_t)sec * 1000000) + usec;
+   //End TODO
 #endif
 
    for ( ; ; ) /* RTOS Task, keep running forever */
@@ -2262,9 +2267,7 @@ void TIME_SYS_HandlerTask( taskParameter )
       }
 #endif
 #if (EP == 1)  //TODO: Used when RTC crystal is source for Sys Tick adjustment.  Remove when using TCXO.
-#if ( MCU_SELECTED == NXP_K24 )    //Use of RTC as synchronization source only works for K24, not RA6E1
       accDiffRTC -= (portTICK_RATE_MS * 1000);
-#endif
 #endif         //End TODO
       if (0 == (--cnt))
       {
@@ -2335,12 +2338,14 @@ void TIME_SYS_HandlerTask( taskParameter )
             }
             loopCnt++;
 #else
-#if ( MCU_SELECTED != RA6E1 ) /* TODO: RA6E1 - RTC accuracy is 128th of a second. In K24, it is 32000th of a second.
-                                       Hence we cannot sync the RTC with the timesys in sub-millisecond level of 10/100 sec.
-                                       Once radio TCXO is in place, it will be used for the timesync in RA6E1 */
             if ( loopCnt >= 1000 )  //1000 sys ticks
             {
-               RTC_GetTimeInSecMicroSec( &sec, &usec); //Get RTC time and store the current time
+               RTC_GetTimeInSecMicroSec( &sec, &usec); // Get RTC time and store the current time
+#if ( MCU_SELECTED == RA6E1 )    //Use of AGT as synchronization source only works for RA6E1
+               usec = 0;   //previous call returns a uint32_t value, next only returns uint6_t
+               (void)AGT_FreqSyncTimerCount( (uint16_t *)&usec ); // Get current AGT count
+               usec = (AGT_FREQ_SYNC_TIMER_COUNT_MAX - (uint64_t)usec)*1000000/AGT_FREQ_SYNC_TIMER_COUNT_MAX;   // Convert count (down counter) to usec
+#endif
                currTime = ((uint64_t)sec * 1000000) + usec;
                diffRTC = (int64_t)(currTime - lastTime); //compute the difference in RTC last and now (in micro-seconds)
                lastTime = currTime;
@@ -2417,10 +2422,9 @@ void TIME_SYS_HandlerTask( taskParameter )
             //    set timeAdjust to 0
             //    adjust accDiffRTC by timeoffset
             loopCnt++;
-#endif
-#endif
+#endif   //#if 0
          }
-#endif
+#endif   //#if (EP == 1)
       }
    }
 }/*lint !e715  Arg0 is not used. */
