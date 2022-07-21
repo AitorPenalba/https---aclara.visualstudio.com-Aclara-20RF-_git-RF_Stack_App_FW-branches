@@ -312,7 +312,6 @@ static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
    Task priority. Lower number is for higher priorities.  More than one task can have the same priority level.  Having
    no gaps between priority values improves performance */
 /*lint -e{641}  Suppress the index conversion from enum to int for this section. */
-// TODO: RA6: as modules are brought into the firmware, need to uncomment the appropriate row in the task list
 const OS_TASK_Template_t  Task_template_list[] =
 {
    /* Task Index,               Function,                    Stack, Pri, Name,                    Attributes,    Param, Time Slice */
