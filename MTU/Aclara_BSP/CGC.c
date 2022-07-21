@@ -107,6 +107,7 @@ fsp_err_t CGC_Stop_Unused_Clocks( void )
                      {
                         err = R_CGC_ClockStop(&g_cgc0_ctrl, CGC_CLOCK_LOCO);
                      }
+                     err = R_CGC_ClockStop(&g_cgc0_ctrl, CGC_CLOCK_HOCO);
                   }
                   break;
                }

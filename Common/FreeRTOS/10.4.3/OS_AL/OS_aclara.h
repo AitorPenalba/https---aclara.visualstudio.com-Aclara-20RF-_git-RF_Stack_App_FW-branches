@@ -214,8 +214,6 @@ typedef struct
 } OS_TICK_Struct, * OS_TICK_Struct_Ptr;
 
 
-#define OS_TASK_Summary  /* TODO: RA6E1: Add Support for this function */
-
 #if ( RTOS_SELECTION == MQX_RTOS )
 #define taskParameter         uint32_t Arg0
 #define OS_TASK_Template_t    TASK_TEMPLATE_STRUCT

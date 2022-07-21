@@ -15,9 +15,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-//#include <mqx.h>      /* TODO: RA6: DG: We might not need this as its already included in project.h */
-//#include <mutex.h>    /* TODO: RA6: DG: We might not need this as its already included in project.h */
-//#include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
 #include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
