@@ -445,7 +445,7 @@
       <property id="module.driver.rtc.err_adjustment_period" value="module.driver.rtc.err_adjustment_period.p1"/>
       <property id="module.driver.rtc.err_adjustment_type" value="module.driver.rtc.err_adjustment_type.t1"/>
       <property id="module.driver.rtc.err_adjustment_value" value="0"/>
-      <property id="module.driver.rtc.p_callback" value="rtc_callback"/>
+      <property id="module.driver.rtc.p_callback" value="RTC_Callback"/>
       <property id="module.driver.rtc.alarm_ipl" value="board.icu.common.irq.priority12"/>
       <property id="module.driver.rtc.periodic_ipl" value="_disabled"/>
       <property id="module.driver.rtc.carry_ipl" value="board.icu.common.irq.priority12"/>
@@ -801,6 +801,24 @@
     </module>
     <module id="module.driver.elc_on_elc.476475565">
       <property id="module.driver.elc.name" value="g_elc"/>
+    </module>
+    <module id="module.driver.timer_on_agt.985511842">
+      <property id="module.driver.timer.name" value="agt2_Freq_Sync"/>
+      <property id="module.driver.timer.channel" value="0"/>
+      <property id="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
+      <property id="module.driver.timer.period" value="0x08000"/>
+      <property id="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_raw_counts"/>
+      <property id="module.driver.timer.duty_cycle" value="50"/>
+      <property id="module.driver.timer.count_source" value="module.driver.timer.count_source.clock_fsub"/>
+      <property id="module.driver.timer.agtoa_output_enable" value="module.driver.timer.agtoa_output_enable.false"/>
+      <property id="module.driver.timer.agtob_output_enable" value="module.driver.timer.agtob_output_enable.false"/>
+      <property id="module.driver.timer.agto_output_enable" value="module.driver.timer.agto_output_enable.false"/>
+      <property id="module.driver.timer.measurement_mode" value="module.driver.timer.measurement_mode.measure_disabled"/>
+      <property id="module.driver.timer.agtio_filter" value="module.driver.timer.agtio_filter.agtio_filter_none"/>
+      <property id="module.driver.timer.enable_pin" value="module.driver.timer.enable_pin.enable_pin_not_used"/>
+      <property id="module.driver.timer.trigger_edge" value="module.driver.timer.trigger_edge.trigger_edge_rising"/>
+      <property id="module.driver.timer.p_callback" value="NULL"/>
+      <property id="module.driver.timer.ipl" value="_disabled"/>
     </module>
     <context id="_hal.0">
       <stack module="module.driver.ioport_on_ioport.0"/>

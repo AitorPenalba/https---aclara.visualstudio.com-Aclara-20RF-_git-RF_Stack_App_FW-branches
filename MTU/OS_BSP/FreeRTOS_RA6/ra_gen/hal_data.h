@@ -55,7 +55,6 @@ extern const dac_cfg_t g_dac0_ULPC_cfg;
 /** WDT on IWDT Instance. */
 extern const wdt_instance_t g_wdt0;
 
-
 /** Access the IWDT instance using these structures when calling API functions directly (::p_api is not used). */
 extern iwdt_instance_ctrl_t g_wdt0_ctrl;
 extern const wdt_cfg_t g_wdt0_cfg;
@@ -63,6 +62,19 @@ extern const wdt_cfg_t g_wdt0_cfg;
 #ifndef NULL
 void NULL(wdt_callback_args_t * p_args);
 #endif
+
+/** AGT Timer Instance */
+extern const timer_instance_t agt2_Freq_Sync;
+
+/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
+extern agt_instance_ctrl_t agt2_Freq_Sync_ctrl;
+extern const timer_cfg_t agt2_Freq_Sync_cfg;
+
+#ifndef NULL
+void NULL(timer_callback_args_t * p_args);
+#endif
+
+
 /** External IRQ on ICU Instance. */
 extern const external_irq_instance_t miso_busy;
 
@@ -217,8 +229,8 @@ extern const rtc_instance_t g_rtc0;
 extern rtc_instance_ctrl_t g_rtc0_ctrl;
 extern const rtc_cfg_t g_rtc0_cfg;
 
-#ifndef rtc_callback
-void rtc_callback(rtc_callback_args_t * p_args);
+#ifndef RTC_Callback
+void RTC_Callback(rtc_callback_args_t * p_args);
 #endif
 /** ADC on ADC Instance. */
 extern const adc_instance_t g_adc0;
