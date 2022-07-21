@@ -15,7 +15,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-//#include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
 #include "buffer.h"
 #include "DBG_SerialDebug.h"
 #include "EVL_event_log.h"
