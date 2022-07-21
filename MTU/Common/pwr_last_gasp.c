@@ -1265,8 +1265,8 @@ static void NextSleep( void )
       {
          EnterVLLS( 1, LPTMR_MILLISECONDS, 1 );
 #if ( ( MCU_SELECTED == RA6E1 ) && ( LAST_GASP_USE_2_DEEP_SLEEP == 0 ) )
-         EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */ // TODO: RA6E1: Verify
-         // RESET();  /* Forcing MCU to go through a reset */ // TODO: DG: Verify
+         EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */
+         // RESET();  /* Forcing MCU to go through a reset */
 #endif
       }
    }
@@ -1297,8 +1297,8 @@ static void NextSleep( void )
          EnterVLLS( uCounter, LPTMR_MILLISECONDS, 1 );
 #if ( ( MCU_SELECTED == RA6E1 ) && ( LAST_GASP_USE_2_DEEP_SLEEP == 0 ) )
          /* In K24, above line make the MCU go through a reset, where as for RA6, we need to force it to go through reset to keep the same functionality */
-         EnterVLLS( 0, LPTMR_SECONDS, 1 );  // TODO: RA6E1: Verify
-         //RESET(); // TODO: RA6E1: Verify
+         EnterVLLS( 0, LPTMR_SECONDS, 1 );
+         //RESET();
 #endif
       }
    }
@@ -1620,7 +1620,6 @@ uint8_t PWRLG_LastGasp( void )
       )
 #endif
 #elif ( MCU_SELECTED == RA6E1)
-      /* TODO: RA6: DG: Do we need to further check the wake-up source? */
       if ( ( R_SYSTEM->RSTSR0_b.DPSRSTF )  &&   /* Deep Software Standby Reset Flag */
            ( 0 != PWRLG_LLWU() ) )              /* LLWU cause set in LP RAM   */
 #endif
@@ -1848,7 +1847,7 @@ void PWRLG_CalculateSleep( uint8_t step )
 #if ( MCU_SELECTED == NXP_K24 )
    aclara_srand( RTC_TPR );   /* Use the RTC prescale register as a seed to the random function.   */
 #elif ( MCU_SELECTED == RA6E1 )
-   aclara_srand( R_RTC->R64CNT ); // TODO: RA6: DG: Review this
+   aclara_srand( R_RTC->R64CNT );
 #endif
    switch( step )
    {
@@ -2610,8 +2609,6 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
          case LPTMR_SLEEP_FOREVER:
          default:
          {
-            /* No need to set the timer */
-            // TODO: RA6: Review: 1. Disable RTC ALARM ? OR Set Timer to max value? OR Reconfigure Deep SW Standby?
             RTC_DisableCalendarAlarm();
             break;
          }
@@ -2695,7 +2692,7 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
 #endif
 
 #if ( ( MCU_SELECTED == RA6E1 ) && ( PWRLG_PRINT_ENABLE == 0 ) && ( LAST_GASP_RECONFIGURE_CLK == 1 ) )
-   CGC_Switch_SystemClock_to_MOCO();  /* TODO: RA6E1: DG: Revisit the ()call order */
+   CGC_Switch_SystemClock_to_MOCO();
 #endif
 
    HardwareShutdown();
@@ -2769,7 +2766,7 @@ static void ClearVBATT ( void )
    {
       memset( (void *)&R_SYSTEM->VBTBKR[0], 0, 128 * sizeof( char ) );
    }
-   PWRLG_SOFTWARE_RESET_SET(1); // TODO: RA6E1: Fail safe.
+   PWRLG_SOFTWARE_RESET_SET(1);
 }
 #endif
 #if ( LAST_GASP_USE_2_DEEP_SLEEP == 1 )
