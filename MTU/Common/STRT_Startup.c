@@ -169,110 +169,6 @@ static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_OFF;
 /* Power Up Table - Define all modules that require initialization below. */
 const STRT_FunctionList_t startUpTbl[] =
 {
-#if 1 // TODO: RA6: Add later
-   INIT( WDOG_Init, STRT_FLAG_NONE ),                                               // Initialize the IWDT
-   INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
-   INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
-   INIT( FIO_finit, STRT_FLAG_LAST_GASP ),                                          // This must be after CRC_initialize because it uses CRC.
-   INIT( BM_init, STRT_FLAG_LAST_GASP ),                                            // We need this to have buffers for DBG and MFG port
-   INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
-   INIT( TMR_HandlerInit, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ), // TODO: RA6E1: Had to move it before DBG_Init as it was needed. Move this to appropriate position in official list
-   INIT( DBG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // We need this to print errors ASAP
-   INIT( VBATREG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),    // Needed early to check validity of RTC. // TODO: RA6E1: DG: Move this to appropriate position
-   INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
-   INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: Move this to the necessary position
-   INIT( TIME_SYS_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),   // NOTE: This needs to be called as soon as possible in order to create the time mutexes early on
-                                                                                    //       because the error logging (ERR_printf, DBG_logPrintf, etc) uses the clock
-                                                                                    //       to time stamp the message and, in the process, uses the time mutex.
-                                                                                    // NOTE2: This needs to be after FIO_init since it uses the file system.
-   INIT( DST_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // This should come before TIME_SYS_SetTimeFromRTC
-   INIT( TIME_SYS_SetTimeFromRTC, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   INIT( TIME_SYNC_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   INIT( SYSBUSY_init, STRT_FLAG_NONE ),
-   INIT( PWR_powerUp, STRT_FLAG_NONE),                                              // Read reset reason
-   INIT( SELF_init, STRT_FLAG_NONE ),
-#if ENABLE_DFW_TASKS
-   INIT( DFWA_init, STRT_FLAG_NONE ),
-   INIT( DFWTDCFG_init, STRT_FLAG_NONE ),
-#endif
-#if ENABLE_PWR_TASKS
-   INIT( PWRCFG_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),                         /* Must be before PWR_TSK_init so restoration delay is available*/
-   INIT( PWR_TSK_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
-   INIT( PWROR_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
-#endif
-#if ENABLE_ALRM_TASKS
-   INIT( ALRM_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
-   INIT( TEMPERATURE_init, STRT_FLAG_NONE ),
-#endif
-#if ENABLE_MFG_TASKS
-   INIT( MFGP_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
-   INIT( MFGP_cmdInit, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
-#endif
-   INIT( MIMTINFO_init, STRT_FLAG_NONE ),
-   INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
-                                                                                       quiet and rftest mode flags can't be checked before this init
-                                                                                       has been run */
-#if ( DAC_CODE_CONFIG == 1 )
-   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),  /* TODO: RA6E1: Review the order */
-#endif
-#if ENABLE_HMC_TASKS
-#if ( END_DEVICE_PROGRAMMING_CONFIG == 1 )
-   INIT( HMC_PRG_MTR_init, STRT_FLAG_NONE ),                                        /* RCZ Added - Necessary for meter access (R/W/Procedures)  */
-#endif
-   INIT( HMC_STRT_init, STRT_FLAG_NONE ),
-   INIT( HMC_APP_RTOS_Init, STRT_FLAG_NONE ),
-   INIT( HMC_ENG_init, STRT_FLAG_NONE ),
-#endif
-   INIT( PAR_initRtos, STRT_FLAG_NONE ),
-   INIT( PHY_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),                        // Initialize the Physical layer for Radio interfaces
-#if ( ENABLE_HMC_TASKS == 1 )
-   INIT( DEMAND_init, STRT_FLAG_NONE ),
-   INIT( ID_init, STRT_FLAG_NONE ),
-   //INIT(LPCFG_init, STRT_FLAG_NONE),
-   //INIT(DSCFG_init, STRT_FLAG_NONE),
-#endif   /* end of ENABLE_HMC_TASKS  == 1 */
-   INIT( MAC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   INIT( NWK_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   INIT( SM_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   INIT( SMTDCFG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-#if ( MCU_SELECTED == NXP_K24 )
-   INIT( FTM3_Init, STRT_FLAG_LAST_GASP),
-#elif ( MCU_SELECTED == RA6E1 )
-   INIT( GPT_PD_Init, STRT_FLAG_NONE ),
-#endif
-#if ( PHASE_DETECTION == 1 )                                                // Used for ZCD_METER interrupt (FTM3_CH1). Must be before PD_init.
-   INIT( PD_init, STRT_FLAG_NONE ),
-#endif
-#if ( USE_DTLS == 1 )
-   INIT( DTLS_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-#endif
-#if ( USE_MTLS == 1 )
-   INIT( MTLS_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-#endif
-   INIT( APP_MSG_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
-#if ( ENABLE_HMC_TASKS == 1 )
-   INIT( HD_init, STRT_FLAG_NONE ),
-   INIT( OR_MR_init, STRT_FLAG_NONE ),
-#endif   /* end of ENABLE_HMC_TASKS  == 1 */
-   INIT( SEC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   INIT( EDCFG_init, STRT_FLAG_NONE ),
-   INIT( EVL_Initalize, STRT_FLAG_RFTEST ),
-   INIT( VER_Init, (STRT_FLAG_LAST_GASP|STRT_FLAG_RFTEST) ),
-   INIT( FIO_init, (STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
-#if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
-   INIT( HMC_DISP_Init, STRT_FLAG_NONE ),
-#endif
-   INIT( LED_init, STRT_FLAG_NONE ),                              // LED init must happen after version init as it requires HW rev letter
-#if ENABLE_PWR_TASKS
-   INIT( PWR_printResetCause, STRT_FLAG_NONE ),                   //Prints the reset cause
-#endif
-#if ( MCU_SELECTED == NXP_K24 )
-   INIT( FTM1_Init, STRT_FLAG_LAST_GASP )                         // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
-#elif ( MCU_SELECTED == RA6E1 )
-   INIT( GPT_Radio0_Init, STRT_FLAG_LAST_GASP )                   // Used for radio interrupt (GPT) and radio TCXO (FTM1_CH1).
-#endif
-
-#else  // TODO: RA6E1: This is the actual list
    INIT( WDOG_Init, STRT_FLAG_NONE ),                                               /* Watchdog needs to be kicked while waiting for stable power. */
 #if ENABLE_PWR_TASKS
    INIT( PWR_waitForStablePower, STRT_FLAG_NONE ),
@@ -288,7 +184,8 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
    INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        /* Needed for proper aclara_randu behavior which is needed by
                                                                                        other init modules so it needs to be called ASAP */
-   INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
+   INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: RA6E1: Move this to the necessary position
+	INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
 
@@ -396,12 +293,14 @@ const STRT_FunctionList_t startUpTbl[] =
 #if ENABLE_PWR_TASKS
    INIT( PWR_printResetCause, STRT_FLAG_NONE ),                   //Prints the reset cause
 #endif
-#if ( MCU_SELECTED == NXP_K24 )
-   INIT( FTM1_Init, STRT_FLAG_LAST_GASP )                           // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
-#elif ( MCU_SELECTED == RA6E1 )
-   INIT( GPT_Radio0_Init, STRT_FLAG_LAST_GASP )                      // Used for radio interrupt (GPT) and radio TCXO (FTM1_CH1).
+#if ( DAC_CODE_CONFIG == 1 )
+   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),  /* TODO: RA6E1: Review the order */
 #endif
-#endif /* #if 0*/
+#if ( MCU_SELECTED == NXP_K24 )
+   INIT( FTM1_Init, STRT_FLAG_LAST_GASP)                           // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+#elif ( MCU_SELECTED == RA6E1 )
+   INIT( GPT_Radio0_Init, STRT_FLAG_LAST_GASP )                   // Used for radio interrupt (GPT) and radio TCXO (FTM1_CH1).
+#endif
 };
 
 const uint8_t uStartUpTblCnt = ARRAY_IDX_CNT( startUpTbl );
@@ -653,8 +552,7 @@ void STRT_StartupTask ( taskParameter )
       TEST_LED_TACKON_OFF; /* Turn off the tacked-on LED */
    }
 #endif
-   // TODO: RA6E1 - Verify why this sleep required which causes NV self test fails for the first time
-   OS_TASK_Sleep( 20 ); // Sleep for 20 msec before creating other tasks
+
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
 #if 1 // TODO: RA6E1 Bob: this is temporary code to turn on an LED connected to pin P301 using high drive capacity
    if ( initSuccess_ )
