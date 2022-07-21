@@ -174,7 +174,9 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( PWR_waitForStablePower, STRT_FLAG_NONE ),
 #endif
    /* Past this point, power is good.  Continue to power the unit up! */
-
+#if ( MCU_SELECTED == RA6E1 )
+   INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),
+#endif
    INIT( UART_init, STRT_FLAG_LAST_GASP ),                                          // We need this ASAP to print error messages to debug port
 
    INIT( CRC_initialize, STRT_FLAG_LAST_GASP ),
@@ -184,7 +186,6 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
    INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        /* Needed for proper aclara_randu behavior which is needed by
                                                                                        other init modules so it needs to be called ASAP */
-   INIT( RTC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        // TODO: RA6E1: Move this to the necessary position
 	INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
@@ -294,10 +295,10 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( PWR_printResetCause, STRT_FLAG_NONE ),                   //Prints the reset cause
 #endif
 #if ( DAC_CODE_CONFIG == 1 )
-   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),  /* TODO: RA6E1: Review the order */
+   INIT( DVR_DAC0_init, STRT_FLAG_NONE ),
 #endif
 #if ( MCU_SELECTED == NXP_K24 )
-   INIT( FTM1_Init, STRT_FLAG_LAST_GASP)                           // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
+   INIT( FTM1_Init, STRT_FLAG_LAST_GASP )                         // Used for radio interrupt (FTM1_CH0) and radio TCXO (FTM1_CH1).
 #elif ( MCU_SELECTED == RA6E1 )
    INIT( GPT_Radio0_Init, STRT_FLAG_LAST_GASP )                   // Used for radio interrupt (GPT) and radio TCXO (FTM1_CH1).
 #endif

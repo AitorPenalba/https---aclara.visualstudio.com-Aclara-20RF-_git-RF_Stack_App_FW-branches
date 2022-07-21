@@ -719,9 +719,6 @@ void PWRLG_TxFailure( void )
          EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
 #else
          /* Subtracting the sleep delay added for print*/
-#if ( MCU_SELECTED == NXP_K24 )
-         EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS ); // TODO: RA6E1: Below section is correct. Remove this line after hex compare
-#elif ( MCU_SELECTED == RA6E1 )
          if( uMilliseconds > OS_SLEEP_PRINT_DELAY_MS )
          {
             EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS );
@@ -730,7 +727,6 @@ void PWRLG_TxFailure( void )
          {
             EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
          }
-#endif
 #endif
 
 #if ( LAST_GASP_SIMULATION == 1 )
