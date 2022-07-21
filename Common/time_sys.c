@@ -340,9 +340,12 @@ returnStatus_t TIME_SYS_Init( void )
          _nuDST_TimeChanged = (bool)false; //DST related time change notification
 
 #if ( MCU_SELECTED == RA6E1 )
-         /* Configure the timer for Frequency Adjustments - Using external 32kHz osc, periodic at 1 second */
-         (void)AGT_FreqSyncTimerInit();
-         (void)AGT_FreqSyncTimerStart();
+         if ( 0 == PWRLG_LastGasp() )
+         {
+            /* Configure the timer for Frequency Adjustments - Using external 32kHz osc, periodic at 1 second */
+            (void)AGT_FreqSyncTimerInit();
+            (void)AGT_FreqSyncTimerStart();
+         }
 #endif
 #endif
          _timeSysSemCreated = (bool)true;
