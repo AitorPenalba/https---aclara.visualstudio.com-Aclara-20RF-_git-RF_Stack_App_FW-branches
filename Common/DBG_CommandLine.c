@@ -365,6 +365,7 @@ static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] );
 #if ( MCU_SELECTED == RA6E1 )
 static uint32_t DBG_CommandLine_CoreClocks( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] );
+static uint32_t DBG_CommandLine_FlashSecurity( uint32_t argc, char *argv[] );
 #endif
 
 #if ( TM_OS_EVENT_TEST == 1)
@@ -500,6 +501,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
    { "file",         DBG_CommandLine_PrintFiles,      "Print File list or file content (optional param, filename)" },
    { "filedump",     DBG_CommandLine_DumpFiles,       "Print the contents of files in the un-named partitions" },
+#if ( MCU_SELECTED == RA6E1 )
+   { "flashsecurity",DBG_CommandLine_FlashSecurity,   "Display the Device Lifecycle Management state for RA6" },
+#endif
    { "freeram",      DBG_CommandLine_FreeRAM,         "Display remaining free internal RAM" },
 #if ( DCU == 1 )
    { "frontendgain", DBG_CommandLine_FrontEndGain,    "Display/Set the front end gain" },
@@ -13703,6 +13707,7 @@ uint32_t DBG_CommandLine_BurstHistogram ( uint32_t argc, char *argv[] )
 }
 #endif
 
+#if ( MCU_SELECTED == NXP_K24 )
 #if 0 // RA6E1 Bob: This command was removed from original K24 code
 /***********************************************************************************************************************
    Function Name: DBG_CommandLine_FlashSecurity
@@ -13831,7 +13836,49 @@ uint32_t DBG_CommandLine_FlashSecurity( uint32_t argc, char *argv[] )
    return( 0 );
 }
 #endif // RA6E1 Bob: This command was removed from original K24 code
+#elif ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+   Function Name: DBG_CommandLine_FlashSecurity
 
+   Purpose: For RA6E1, the firmware is not able to alter the Device Lifecycle state.  This must be done by an external device
+            such as the E2 Lite programmer.  Therefore, this function only interrogates the MCU's current Device Lifecycle
+            state and displays it.
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: void
+***********************************************************************************************************************/
+uint32_t DBG_CommandLine_FlashSecurity( uint32_t argc, char *argv[] )
+{
+   /* Names of the Device Lifecycle states.  Our current understanding is that we will only occupy SSD (Secure Software
+      Development) and DPL (Deployed).  In SSD, an IDE can Can program/erase/read all code/data flash.  In DPL, an IDE
+      has no access to code/data flash.  The MCU must pass through the NSECSD state on the way from SSD to DPL but the
+      firmware should probably never see the device in the NSECSD state.  TODO: RA6E1 Bob: Update this as more is known. */
+   const char * dlmText[] = { "RSVD", "CM", "SSD", "NSECSD", "DPL", "LCK_DBG", "LCK_BOOT", "RMA_REQ", "RMA_ACK" };
+   void * pText;
+   uint32_t dlmmon = R_PSCU->DLMMON; /* Retrieve the Device Lifecycle Monitor register value */
+
+   if ( argc > 1 )
+   {
+      DBG_printf( "For the RA6E1, flash security cannot be set by commands, it can only be examined!" );
+   }
+   else
+   {
+      if ( ( dlmmon & 0x0F ) < ARRAY_IDX_CNT(dlmText) )
+      {
+         pText = (void *)&dlmText[ ( dlmmon & 0x0F ) ][ 0 ];
+      }
+      else
+      {
+         pText = (void *)&dlmText[ 0 ][ 0 ];
+      }
+      DBG_printf( "Current Device Lifecycle Management State Monitor Register = %08x (%s)", dlmmon, pText );
+   }
+   return ( 0 );
+}
+#endif // MCU_SELECTED
 #if ( FAKE_TRAFFIC == 1 )
 /***********************************************************************************************************************
    Function Name: DBG_CommandLine_ipBhaulGenCount
