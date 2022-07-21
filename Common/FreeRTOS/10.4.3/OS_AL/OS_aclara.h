@@ -469,6 +469,7 @@ char *                  OS_TASK_GetTaskName ( void );
 #if 0  //TODO: RA6E1: need to still get updated to RA6
 uint32_t OS_TASK_UpdateCpuLoad ( void );
 void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
+void OS_TASK_Summary ( bool safePrint );
 #endif
 
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
