@@ -2936,7 +2936,6 @@ static bool Process_DataReq( PHY_Request_t const *pReq )
 #endif
    // Some check on RxTime
    RxTime = pReq->DataReq.RxTime == 0 ? 0 : (uint32_t)(((uint64_t)(pReq->DataReq.RxTime - DWT_CYCCNT))*1000/getCoreClock());
-
    INFO_printf("DataReq: %u msec channel=%u power=%d.%1u mode=%u modeParameters=%u framing=%u detection=%u len=%u prio=%u",
       RxTime, // print future time in msec
       pReq->DataReq.channel,

@@ -1085,9 +1085,21 @@ void UART_RX_flush ( enum_UART_ID UartId )
    ringBufoverflow   [ (uint32_t)UartId ] = false;
    uartRingBuf       [ (uint32_t)UartId ].head = 0;
    uartRingBuf       [ (uint32_t)UartId ].tail = 0;
-
-   OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
-
+   
+   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
+   {
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+   }
+   else if( UartId == UART_HOST_COMM_PORT )
+   {
+      /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem ); 
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+   }
+   else
+   {
+      //do nothing
+   }
    if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
    {
       ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );

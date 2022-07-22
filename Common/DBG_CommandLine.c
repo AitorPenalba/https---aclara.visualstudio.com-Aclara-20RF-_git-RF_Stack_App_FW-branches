@@ -7093,6 +7093,9 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    uint8_t                    string[VER_HW_STR_LEN];
    firmwareVersion_u          ver;
    const firmwareVersionDT_s *dt;
+   uint8_t                    uniqueID[14];
+   uint8_t                    index = 0;
+   const uint8_t                    *mcuVersion = ( uint8_t * )0x010081B0;
 
    ver = VER_getFirmwareVersion(eFWT_APP);
    dt  = VER_getFirmwareVersionDT();
@@ -7111,6 +7114,18 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
                   BSP_Get_BspRevision(), BSP_Get_IoRevision(), BSP_Get_PspRevision(), __VER__ );
 #endif
+
+#if ( MCU_SELECTED == RA6E1 )
+   const bsp_unique_id_t *uniqueId = R_BSP_UniqueIdGet();
+   while( index < 4 )
+   {
+      DBG_logPrintf( 'R',"Unique ID %d - %x", index, uniqueId->unique_id_words[index]);
+      index++;
+   }
+   DBG_logPrintf( 'R', "Part Numbering Info %s",( uint8_t *)0x010080f0);
+   DBG_logPrintf( 'R', "MCU Version Register %d",*(mcuVersion));
+#endif
+
 #if ( RTOS_SELECTION == MQX_RTOS )
    DBG_logPrintf( 'R', "MQX=%s MQXgen=%s MQXLibraryDate=%s",
                   OS_Get_OsVersion(), OS_Get_OsGenRevision(), OS_Get_OsLibDate() );

@@ -394,7 +394,7 @@ returnStatus_t TIME_SYS_Init( void )
 #endif
       }
    }
-   TIME_SYS_SetRealCpuFreq( getCoreClock(), eTIME_SYS_SOURCE_NONE, (bool)true ); // Nominal CPU clock rate
+TIME_SYS_SetRealCpuFreq( getCoreClock(), eTIME_SYS_SOURCE_NONE, (bool)true ); // Nominal CPU clock rate
 #if ( DCU == 1 )
    if (VER_getDCUVersion() != eDCU2) {
       ResetGPSStats(); // The CPU freq is not reset here because we want to keep whatever value was computed until we lost the GPS
