@@ -5920,7 +5920,7 @@ static void MFGP_FlashSecurity( uint32_t argc, char *argv[] )
    /* At end of process, report the results as 1 or 0, based on the registers matching the Lock or Unlock mask.   */
    (void)memcpy( fprot, (uint8_t *)destAddr, sizeof( fprot ) );
    MFG_printf( "%s %d\n", argv[0], (  memcmp( fprot, LockMask, sizeof( fprot ) ) == 0 ? 1 : 0 ) );
-#else //K24 target
+#elif ( MCU_SELECTED == NXP_K24 ) //K24 target
    PartitionData_t const   *pImagePTbl;            // Image partition for PGM memory
    dSize                   destAddr = 0x40Cu;      // Destination address of the FSEC field
    uint8_t                 fprot;                  // Values read
@@ -6016,6 +6016,8 @@ static void MFGP_FlashSecurity( uint32_t argc, char *argv[] )
    /* At end of process, report the results as 1 or 0, based on the registers matching the Lock or Unlock mask.   */
    (void)memcpy( &fprot, (uint8_t *)destAddr, sizeof( fprot ) );  //This directly reads from internal Flash
    MFG_printf( "%s %d\n", argv[0], ( flashSecEnabled == fprot ? 1 : 0 ) );
+#elif ( MCU_SELECTED == RA6E1 )
+#warning "The flashSecurityEnabled command needs to be modified for RA6E1!" // TODO: RA6E1: Support this feature later
 #endif // endif to #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( DCU == 1 ) )
 }
 

@@ -25,6 +25,8 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "OS_aclara.h"
 #endif
 #include "compileswitch.h"
 #include "compiler_types.h"
@@ -4713,7 +4715,6 @@ static void wait_us(uint32_t time)
    }
    while (TimeDiff < time);
 #elif ( MCU_SELECTED == RA6E1 )
-   #if 0 // TODO: RA6E1 Bob: This does not appear to be working properly
    OS_TICK_Struct time1,time2;
    uint32_t       TimeDiff;
    OS_TICK_Get_CurrentElapsedTicks(&time1);
@@ -4724,10 +4725,6 @@ static void wait_us(uint32_t time)
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    }
    while (TimeDiff < time);
-   #else
-   #warning "Using the Renesas R_BSP_SoftwareDelay instead of OS_TICK_Get_Diff_InMicroseconds!"
-   R_BSP_SoftwareDelay ((time+1), BSP_DELAY_UNITS_MICROSECONDS);
-   #endif
 #endif
 
 }
