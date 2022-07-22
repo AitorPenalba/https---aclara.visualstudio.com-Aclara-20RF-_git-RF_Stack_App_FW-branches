@@ -213,6 +213,7 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define MAX_LINKEDLIST_DATA      5
 #endif
 
+
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
