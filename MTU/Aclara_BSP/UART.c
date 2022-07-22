@@ -1073,7 +1073,6 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
 *******************************************************************************/
 void UART_RX_flush ( enum_UART_ID UartId )
 {
-   uint16_t semReceiveCount = 0;
    if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
    {
       uint32_t remainingBytes;
