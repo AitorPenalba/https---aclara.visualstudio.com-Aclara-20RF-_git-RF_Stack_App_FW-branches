@@ -209,8 +209,7 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #if ( TM_LINKED_LIST == 1)
 #define MAX_LINKEDLIST_DATA      5
 #endif
-#define MPARTNUMBER              0x010080f0
-#define MCUVERSION               0x010081B0
+
 
 /* MACRO DEFINITIONS */
 
@@ -7096,7 +7095,7 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    firmwareVersion_u          ver;
    const firmwareVersionDT_s *dt;
    uint8_t                    index = 0;
-   const uint8_t                    *mcuVersion = ( uint8_t * )MCUVERSION;
+   const uint8_t             *mcuVersion = ( uint8_t * )MCUVERSION_ADDR;
 
    ver = VER_getFirmwareVersion(eFWT_APP);
    dt  = VER_getFirmwareVersionDT();
@@ -7123,7 +7122,7 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
       DBG_logPrintf( 'R',"Unique ID %d - %x", index, uniqueId->unique_id_words[index] );
       index++;
    }
-   DBG_logPrintf( 'R', "Part Numbering Info %s",Get_comDeviceMicroMPN() );
+   DBG_logPrintf( 'R', "Part Numbering Info %s",VER_getComDeviceMicroMPN() );
    DBG_logPrintf( 'R', "MCU Version Register %d",*(mcuVersion));
 #endif
 
@@ -7168,24 +7167,7 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_Versions () */
 
-/*******************************************************************************
 
-   Function name: Get_comDeviceMicroMPN
-
-   Purpose: This function get MPart Number
-            
-
-   Arguments:  None
-               
-   Returns: Pointer for the Part Number
-
-   Notes:
-
-*******************************************************************************/
-uint8_t* Get_comDeviceMicroMPN ( void )
-{
-   return ( uint8_t* )MPARTNUMBER;
-}
 #if (EP == 1)
 static const char * const ResetReasons[] =
 {

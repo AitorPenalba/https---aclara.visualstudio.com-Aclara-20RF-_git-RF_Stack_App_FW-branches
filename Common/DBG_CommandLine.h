@@ -300,7 +300,7 @@ uint32_t DBG_CommandLine_MAC_LinkParameters ( uint32_t argc, char *argv[] );
 #endif
 
 #endif /* CompileSwitch_H */
-uint8_t* Get_comDeviceMicroMPN( void );
+
 /* FUNCTION DEFINITIONS */
 
 #endif /* this must be the last line of the file */

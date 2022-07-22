@@ -192,7 +192,6 @@
 #endif
 
 /* Temporary definition of MFG_logPrintf()   */
-// TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if (USE_DTLS == 1)
 #define MFG_logPrintf MFG_printf
 #define MFG_printf(fmt, args...) \
@@ -214,13 +213,7 @@
 #define MFG_logPrintf MFG_printf
 #define MFG_printf (void)DBG_printfNoCr
 #endif  // USE_DTLS
-//// TODO: RA6 [name_Balaji]:Check for _mqx_int once integrated
-//#define MFG_logPrintf MFG_printf
-//#define MFG_printf(fmt, args...) \
-//{ \
-//      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (int32_t)sizeof(MFGP_CommandBuffer), fmt, ##args); \
-//      MFG_puts( mfgUart, (uint8_t *)MFGP_CommandBuffer, MFGP_CmdLen ); \
-//}
+
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
@@ -6438,9 +6431,10 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
 #if ( MCU_SELECTED == NXP_K24 )
       bytesReceived = UART_read( UART_HOST_COMM_PORT, rx_string, sizeof( rx_string ) );
 #elif ( MCU_SELECTED == RA6E1 )
+      bytesReceived = 0;
       while( TRUE )
       {
-         ( void ) UART_getc ( UART_HOST_COMM_PORT, &rx_string[bytesReceived], 1, OS_WAIT_FOREVER );
+         ( void ) UART_getc ( UART_HOST_COMM_PORT, &rx_string[ bytesReceived ], 1, 10 );
          if( rx_string[ bytesReceived ] == '\n')
          {
             break;
@@ -9871,7 +9865,7 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
 
 #if 0 // TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
 #if !USE_USB_MFG
-      UART_RX_flush( mfgUart  );
+      UART_flush( mfgUart  );
       ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #else
       usb_flush();
