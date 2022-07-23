@@ -922,7 +922,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 #endif
 }
 
-#if ( MCU_SELECTED == NXP_K24 )
+
 /*******************************************************************************
 
   Function name: UART_flush
@@ -931,14 +931,50 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 
   Arguments: UartId - Identifier of the particular UART to receive data in
 
-  Returns: ???
+  Returns: None
 
   Notes:
 
 *******************************************************************************/
-uint8_t UART_flush( enum_UART_ID UartId )
+void UART_flush( enum_UART_ID UartId )
 {
-   return ( (uint8_t)fflush(UartHandle[UartId]) );
+#if ( RTOS_SELECTION == MQX_RTOS )
+   (void)fflush(UartHandle[UartId]);
+#elif ( RTOS_SELECTION == FREE_RTOS )
+
+   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
+   {
+      uint32_t remainingBytes;
+      ( void )R_SCI_UART_ReadStop( (void *)UartCtrl[ (uint32_t)UartId ], &remainingBytes );
+      ( void )R_SCI_UART_Close   ( (void *)UartCtrl[ (uint32_t)UartId ] );
+   }
+
+   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
+   // Setting bool values to false at init
+   ringBufoverflow   [ (uint32_t)UartId ] = false;
+   uartRingBuf       [ (uint32_t)UartId ].head = 0;
+   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
+   
+   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
+   {
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
+   }
+   else if( UartId == UART_HOST_COMM_PORT )
+   {
+      /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+   }
+   else
+   {
+      //do nothing
+   }
+   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
+   {
+      ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );
+   }
+   OS_INT_enable();
+#endif
 }
 
 /*******************************************************************************
@@ -956,9 +992,10 @@ uint8_t UART_flush( enum_UART_ID UartId )
 *******************************************************************************/
 void UART_RX_flush ( enum_UART_ID UartId )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    bool     charsAvailable;
    uint8_t  trash;
-   /* user canceled the in progress command */
+   /* user canceled the in progress command */  
    do
    {
       ( void )UART_ioctl ( UartId, IO_IOCTL_CHAR_AVAIL, &charsAvailable );
@@ -968,8 +1005,41 @@ void UART_RX_flush ( enum_UART_ID UartId )
       }
    }
    while ( charsAvailable );/* Loop while bytes in queue  */
-}
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
+   {
+      uint32_t remainingBytes;
+      ( void )R_SCI_UART_ReadStop( (void *)UartCtrl[ (uint32_t)UartId ], &remainingBytes );
+      ( void )R_SCI_UART_Close   ( (void *)UartCtrl[ (uint32_t)UartId ] );
+   }
 
+   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
+   // Setting bool values to false at init
+   ringBufoverflow   [ (uint32_t)UartId ] = false;
+   uartRingBuf       [ (uint32_t)UartId ].head = 0;
+   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
+   
+   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
+   {
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+   }
+   else if( UartId == UART_HOST_COMM_PORT )
+   {
+      /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+   }
+   else
+   {
+      //do nothing
+   }
+   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
+   {
+      ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );
+   }
+   OS_INT_enable();
+#endif
+}
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_gotChar
@@ -1058,54 +1128,55 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
 }
 #elif ( MCU_SELECTED == RA6E1 )
 
-/*******************************************************************************
-
-  Function name: UART_RX_flush
-
-  Purpose: This function flushes the uart RX buffers. This is not native to the OS.
-
-  Arguments: UartId - Identifier of the particular UART to receive data in
-
-  Returns: none
-
-  Notes:
-
-*******************************************************************************/
-void UART_RX_flush ( enum_UART_ID UartId )
-{
-   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
-   {
-      uint32_t remainingBytes;
-      ( void )R_SCI_UART_ReadStop( (void *)UartCtrl[ (uint32_t)UartId ], &remainingBytes );
-      ( void )R_SCI_UART_Close   ( (void *)UartCtrl[ (uint32_t)UartId ] );
-   }
-
-   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
-   // Setting bool values to false at init
-   ringBufoverflow   [ (uint32_t)UartId ] = false;
-   uartRingBuf       [ (uint32_t)UartId ].head = 0;
-   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
-   
-   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
-   {
-      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
-   }
-   else if( UartId == UART_HOST_COMM_PORT )
-   {
-      /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
-      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem ); 
-      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
-   }
-   else
-   {
-      //do nothing
-   }
-   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
-   {
-      ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );
-   }
-   OS_INT_enable();
-}
+///*******************************************************************************
+//
+//  Function name: UART_RX_flush
+//
+//  Purpose: This function flushes the uart RX buffers. This is not native to the OS.
+//
+//  Arguments: UartId - Identifier of the particular UART to receive data in
+//
+//  Returns: none
+//
+//  Notes:
+//
+//*******************************************************************************/
+//void UART_RX_flush ( enum_UART_ID UartId )
+//{
+//   uint16_t semReceiveCount = 0;
+//   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
+//   {
+//      uint32_t remainingBytes;
+//      ( void )R_SCI_UART_ReadStop( (void *)UartCtrl[ (uint32_t)UartId ], &remainingBytes );
+//      ( void )R_SCI_UART_Close   ( (void *)UartCtrl[ (uint32_t)UartId ] );
+//   }
+//
+//   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
+//   // Setting bool values to false at init
+//   ringBufoverflow   [ (uint32_t)UartId ] = false;
+//   uartRingBuf       [ (uint32_t)UartId ].head = 0;
+//   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
+//   
+//   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
+//   {
+//      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+//   }
+//   else if( UartId == UART_HOST_COMM_PORT )
+//   {
+//      /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
+//      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem ); 
+//      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+//   }
+//   else
+//   {
+//      //do nothing
+//   }
+//   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
+//   {
+//      ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );
+//   }
+//   OS_INT_enable();
+//}
 
 #endif // #if ( MCU_SELECTED == NXP_K24 )
 

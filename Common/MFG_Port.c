@@ -1667,9 +1667,7 @@ static void mfgpReadByte( uint8_t rxByte )
       MFGP_numBytes = 0;
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-#if 0 // TODO: RA6E1 Implement UART flush functionality
       (void)UART_flush ( mfgUart  );
-#endif
 #else
       usb_send( CRLF, sizeof( CRLF ) );
       usb_flush();
@@ -1726,9 +1724,7 @@ static void mfgpReadByte( uint8_t rxByte )
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
-#if 0 // TODO: RA6E1 Implement UART flush functionality
             (void)UART_flush ( mfgUart  );
-#endif
 #else
             MFG_printf( mfgpLockInEffect );
 #endif
@@ -6452,9 +6448,7 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
             stP0LoopbackFailCount++;
          }
       }
-#if 0 // TODO: RA6E1 Implement UART flush functionality
       ( void )UART_flush ( UART_HOST_COMM_PORT ); /* Wait until all characters sent before re-enabling HMC!   */
-#endif
    }
    MFG_logPrintf( "%s %d\n", argv[0], stP0LoopbackFailCount );
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
