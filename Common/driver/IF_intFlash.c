@@ -919,7 +919,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          }
          else
          {
-            retVal = ( returnStatus_t ) eFAILURE;
+            retVal = ( fsp_err_t ) eFAILURE;
          }
       }
       else if( dest < FLASH_HP_CODEFLASH_BLOCK8_START_ADDRESS )
@@ -932,7 +932,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          }
          else
          {
-            retVal = ( returnStatus_t ) eFAILURE;
+            retVal = ( fsp_err_t ) eFAILURE;
          }
       }
       else
@@ -944,7 +944,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          }
          else
          {
-            retVal = ( returnStatus_t ) eFAILURE;
+            retVal = ( fsp_err_t ) eFAILURE;
          }
       }
    }
@@ -967,12 +967,12 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
       }
       else
       {
-         retVal = ( returnStatus_t ) eFAILURE;
+         retVal = ( fsp_err_t ) eFAILURE;
       }
    }
    else
    {
-      retVal = ( returnStatus_t ) eFAILURE;
+      retVal = ( fsp_err_t ) eFAILURE;
    }
 
    eRetVal = ( returnStatus_t ) retVal;
@@ -1039,13 +1039,13 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        /* Write supports when it is a multiply of 128 bytes - If not handle it accordingly */
        if( ( cnt % BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE ) == 0 )
        {
-          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
+          retVal = (returnStatus_t) R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
        }
        else
        {
-          uint32_t localSrcAddr, localDstAddr, remainingByte;
+          uint32_t localDstAddr, remainingByte;
           uint32_t localCnt = BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE * ( cnt / BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
-          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
+          retVal =(returnStatus_t) R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
           remainingByte = cnt - localCnt;
           if ( ( address + localCnt + BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE ) < FLASH_HP_CODEFLASH_END_ADDRESS )
           {
@@ -1066,9 +1066,9 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
     {
        if( ( cnt % BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE ) == 0 )
        {
-          retVal = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
+          retVal =(returnStatus_t) R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
           /* Error Handle */
-          if (FSP_SUCCESS == retVal)
+          if (FSP_SUCCESS == ( fsp_err_t )retVal)
           {
              /* Wait for the write complete event flag, if BGO is SET  */
              if ( true == g_flash0_cfg.data_flash_bgo )

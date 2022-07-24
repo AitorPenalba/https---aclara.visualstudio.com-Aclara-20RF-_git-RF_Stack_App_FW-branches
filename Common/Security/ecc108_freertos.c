@@ -72,7 +72,7 @@ static bool                     _i2cTransmitRecieveSemCreated = (bool)false;
 volatile i2c_master_event_t     i2c_event = I2C_MASTER_EVENT_ABORTED;
 
 static uint8_t                  sendVal[IIC_TRANSMIT_MAX_VALUE];
-static uint8_t                  receiveVal[ECC108_RSP_SIZE_MAX];
+//static uint8_t                  receiveVal[ECC108_RSP_SIZE_MAX];
 
 /***********************************************************************************************************************
    Function Name: iic_eventCallback

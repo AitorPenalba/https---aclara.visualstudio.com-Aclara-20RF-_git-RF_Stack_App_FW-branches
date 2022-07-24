@@ -1056,7 +1056,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
 #if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof(instr) ); /* WR the Instr to the chip */
 #elif ( MCU_SELECTED == RA6E1 )
-         eRetVal = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false ); /* WR the Instr to the chip */
+         eRetVal =( returnStatus_t )NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof(instr), false ); /* WR the Instr to the chip */
 #endif
       }
       else
@@ -1075,7 +1075,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
 #if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_WRITE( pDevice->port, (uint8_t*)&sIA, sizeof(sIA) ); /* WR the Instr to the chip */
 #elif ( MCU_SELECTED == RA6E1 )
-         eRetVal = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, (uint8_t*)&sIA, sizeof(sIA), false ); /* WR the Instr to the chip */
+         eRetVal =( returnStatus_t )NV_SPI_PORT_WRITE( &g_qspi0_ctrl, (uint8_t*)&sIA, sizeof(sIA), false ); /* WR the Instr to the chip */
 #endif
       }
       NV_CS_INACTIVE(); /* Release the chip select  */
@@ -1808,7 +1808,7 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
 #if ( MCU_SELECTED == NXP_K24 )
       eRetVal = NV_SPI_PORT_WRITE( pDevice->port, ( uint8_t * ) & sIA, sizeof ( sIA ) ); /* WR the Instr to the chip */
 #elif ( MCU_SELECTED == RA6E1 )
-      eRetVal = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, ( uint8_t * ) & sIA, sizeof ( sIA ), true); /* WR the Instr to the chip */
+      eRetVal =( returnStatus_t )NV_SPI_PORT_WRITE( &g_qspi0_ctrl, ( uint8_t * ) & sIA, sizeof ( sIA ), true); /* WR the Instr to the chip */
 #endif
 
       if ( eSUCCESS == eRetVal )
@@ -1817,7 +1817,7 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
 #if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_READ( pDevice->port, pDest, (uint16_t)Cnt ); /* Read the data back */
 #elif ( MCU_SELECTED == RA6E1 )
-         eRetVal = NV_SPI_PORT_READ( &g_qspi0_ctrl, pDest, (uint16_t)Cnt, false ); /* Read the data back */
+         eRetVal =( returnStatus_t )NV_SPI_PORT_READ( &g_qspi0_ctrl, pDest, (uint16_t)Cnt, false ); /* Read the data back */
 #endif
          if ( eSUCCESS == eRetVal )
          {
@@ -1874,7 +1874,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 #if ( MCU_SELECTED == NXP_K24 )
          eRetVal = NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof ( instr ) ); /* WR the Instr to the chip */
 #elif ( MCU_SELECTED == RA6E1 )
-         eRetVal = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof ( instr ), true ); /* WR the Instr to the chip */
+         eRetVal =( returnStatus_t )NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof ( instr ), true ); /* WR the Instr to the chip */
 #endif
 
          if ( eSUCCESS == eRetVal )
@@ -1886,7 +1886,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 #if ( MCU_SELECTED == NXP_K24 )
             eRetVal = NV_SPI_PORT_READ( pDevice->port, &mfgId[0], sizeof(mfgId) ); /* Read the data back */
 #elif ( MCU_SELECTED == RA6E1 )
-            eRetVal = NV_SPI_PORT_READ( &g_qspi0_ctrl, &mfgId[0], sizeof(mfgId), false ); /* Read the data back */
+            eRetVal =( returnStatus_t )NV_SPI_PORT_READ( &g_qspi0_ctrl, &mfgId[0], sizeof(mfgId), false ); /* Read the data back */
 #endif
             if ( eSUCCESS == eRetVal )
             {

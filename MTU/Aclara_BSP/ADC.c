@@ -683,6 +683,7 @@ float ADC_Get_Man_Temperature  ( void )
 }
 #endif
 
+
 #if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
@@ -728,7 +729,6 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
    return ( Temperature );
 }
 #endif
-
 //K22 is the only one that supports the Board temp. sensor
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A )
 /*******************************************************************************

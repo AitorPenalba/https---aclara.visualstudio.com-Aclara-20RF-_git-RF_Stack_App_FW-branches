@@ -601,7 +601,7 @@ uint32_t MFGP_AllowDtlsConnect( void )
 void MFGP_DtlsInit( enum_UART_ID uartId )
 {
 #if !USE_USB_MFG
-   uint32_t vector;
+
 
    _AuthenticationAttempts = 0;
    _TimeForAuthentication = MFGP_15_MINUTES_IN_SECONDS;
@@ -613,6 +613,7 @@ void MFGP_DtlsInit( enum_UART_ID uartId )
    {
       dtlsUart = UART_MANUF_TEST;
 #if ( RTOS_SELECTION == MQX_RTOS )
+   uint32_t vector;
       if ( mqxUART_isr == NULL )
       {
          vector = ( uint32_t )INT_UART0_RX_TX;
