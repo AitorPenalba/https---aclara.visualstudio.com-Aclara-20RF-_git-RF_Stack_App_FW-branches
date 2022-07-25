@@ -9,7 +9,7 @@
       internal calls to support the APIs.
 
  ******************************************************************************
-   Copyright (c) 2015-2021 ACLARA.  All rights reserved.
+   Copyright (c) 2015-2022 ACLARA.  All rights reserved.
    This program may not be reproduced, in whole or in part, in any form or by
    any means whatsoever without the written permission of:
       ACLARA, ST. LOUIS, MISSOURI USA
@@ -331,9 +331,11 @@ void EVL_AlarmHandlerTask ( taskParameter )
                   if ( RTC_Valid() ) /* If never updated, bump the power quality count. */
                   {
 #if ( MCU_SELECTED == NXP_K24 )
-                     RESTORATION_TIME_SET ( RTC_TSR );         /* Record RTC seconds at power restored time.   */
+                     RESTORATION_TIME_SET ( RTC_TSR );               /* Record RTC seconds at power restored time.   */
 #elif ( MCU_SELECTED == RA6E1 )
-                     RESTORATION_TIME_SET( R_RTC->RSECCNT );   /* Record RTC seconds at power restored time.   */
+                     TIME_STRUCT currentTime = { 0 };
+                     RTC_GetTimeAtRes (&currentTime, 1);
+                     RESTORATION_TIME_SET( currentTime.SECONDS );    /* Record RTC seconds at power restored time.   */
 #endif
                   }
 
@@ -1216,7 +1218,7 @@ static int32_t EventLogWrite( PartitionData_t const *nvram, RingBufferHead_s *he
       nBytesOver = length - RINGBUFFER_AVAILABLE_SPACE( head );
       if( eFAILURE == EventLogMakeRoom( nvram, head, nBytesOver ) )
       {  /* We were unable to make room to store the next event due to a data corruption issue in the
-	        event logger.  We need to erase the event log partition that has experienced corruption. */
+           event logger.  We need to erase the event log partition that has experienced corruption. */
          if( eFAILURE == ( retVal = eraseEventLogPartition( nvram->ePartition ) ) )
          {
            length = (uint32_t)EVL_ERROR;
@@ -1248,7 +1250,7 @@ static int32_t EventLogWrite( PartitionData_t const *nvram, RingBufferHead_s *he
          if ( overwrite )
          {
             retVal = PAR_partitionFptr.parWrite( ( uint32_t )RINGBUFFER_STARTS_AT( head, 0 ),
-	                                         data, ( lCnt )nBytesToEnd, nvram );
+                                            data, ( lCnt )nBytesToEnd, nvram );
          }
          else
          {
@@ -1264,12 +1266,12 @@ static int32_t EventLogWrite( PartitionData_t const *nvram, RingBufferHead_s *he
       if ( overwrite )
       {
          retVal = PAR_partitionFptr.parWrite( ( uint32_t )RINGBUFFER_STARTS_AT( head, nBytesWritten ),
-	                                        data + nBytesWritten, ( lCnt )nBytesLeft, nvram );
+                                           data + nBytesWritten, ( lCnt )nBytesLeft, nvram );
       }
       else
       {
          retVal = PAR_partitionFptr.parWrite( ( uint32_t )RINGBUFFER_END( head ),
-	                                      data + nBytesWritten, ( lCnt )nBytesLeft, nvram );
+                                         data + nBytesWritten, ( lCnt )nBytesLeft, nvram );
       }
 #if ( EP == 1 )
       PWR_unlockMutex( PWR_MUTEX_ONLY ); // Function will not return if it fails
@@ -2235,7 +2237,7 @@ returnStatus_t EVL_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(_EvlMetaData.oThreshold) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-     	       *(uint8_t *)value = _EvlMetaData.oThreshold;
+               *(uint8_t *)value = _EvlMetaData.oThreshold;
                retVal = eSUCCESS;
                if (attr != NULL)
                {
@@ -2249,7 +2251,7 @@ returnStatus_t EVL_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(_EvlMetaData.rtThreshold) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-     	       *(uint8_t *)value = _EvlMetaData.rtThreshold;
+               *(uint8_t *)value = _EvlMetaData.rtThreshold;
                retVal = eSUCCESS;
                if (attr != NULL)
                {
@@ -2263,7 +2265,7 @@ returnStatus_t EVL_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(_EvlMetaData.realTimeAlarm) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-     	       *(uint8_t *)value = (uint8_t)_EvlMetaData.realTimeAlarm;
+               *(uint8_t *)value = (uint8_t)_EvlMetaData.realTimeAlarm;
                retVal = eSUCCESS;
                if (attr != NULL)
                {
@@ -2277,7 +2279,7 @@ returnStatus_t EVL_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(_EvlMetaData.amBuMaxTimeDiversity) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-     	       *((uint8_t *)value) = EVL_getAmBuMaxTimeDiversity();
+               *((uint8_t *)value) = EVL_getAmBuMaxTimeDiversity();
                retVal = eSUCCESS;
                if (attr != NULL)
                {
@@ -2291,7 +2293,7 @@ returnStatus_t EVL_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(_EvlMetaData.HighAlarmSequence) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-     	       *((uint8_t *)value) = EVL_GetRealTimeIndex();
+               *((uint8_t *)value) = EVL_GetRealTimeIndex();
                retVal = eSUCCESS;
                if (attr != NULL)
                {
@@ -2305,7 +2307,7 @@ returnStatus_t EVL_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(_EvlMetaData.NormalAlarmSequence) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-     	       *((uint8_t *)value) = EVL_GetNormalIndex();
+               *((uint8_t *)value) = EVL_GetNormalIndex();
                retVal = eSUCCESS;
                if (attr != NULL)
                {
