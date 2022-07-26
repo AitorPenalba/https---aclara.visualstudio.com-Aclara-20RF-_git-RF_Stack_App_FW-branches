@@ -112,7 +112,11 @@ extern const uint8_t uStartUpTblCnt;
 //These MAY become configurable
 static const float fCapacitanceRevB          = ( float )10.0;     /* Rev B HW's Super cap capacitance value in Farads */
 static const float fCapacitanceRevC          = ( float )5.0;      /* Rev C HW's Super cap capacitance value in Farads */
+#if ( MCU_SELECTED == NXP_K24 )
+static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */
+#elif ( MCU_SELECTED == RA6E1 )
 static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */  // TODO: RA6E1: This value needs to be updated
+#endif
 static const float fEnergyCollisionDetection = ( float )0.0;      /* Energy used to detect a collision */
 static const float fEnergyTransmit           = ( float )0.65;     /* Energy used to transmit the message */
 static const float fMinimumRunVoltageRevB    = ( float )1.7;      /* Minimum supercap voltage needed to run micro */
@@ -869,7 +873,9 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
                   RESTORATION_TIME_SET ( RTC_TSR );         /* Record RTC seconds at power restored time.   */
 #elif ( MCU_SELECTED == RA6E1 )
-                  RESTORATION_TIME_SET( R_RTC->RSECCNT );   /* Record RTC seconds at power restored time.   */
+                  TIME_STRUCT currentTime = { 0 };
+                  RTC_GetTimeAtRes (&currentTime, 1);
+                  RESTORATION_TIME_SET( currentTime.SECONDS );   /* Record RTC seconds at power restored time.   */
 #endif
                }
                VBATREG_PWR_QUAL_COUNT++;           /* Increment the power quality count.  */
@@ -999,7 +1005,9 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
                   RESTORATION_TIME_SET ( RTC_TSR );         /* Record RTC seconds at power restored time.   */
 #elif ( MCU_SELECTED == RA6E1 )
-                  RESTORATION_TIME_SET( R_RTC->RSECCNT );   /* Record RTC seconds at power restored time.   */
+                  TIME_STRUCT currentTime = { 0 };
+                  RTC_GetTimeAtRes (&currentTime, 1);
+                  RESTORATION_TIME_SET( currentTime.SECONDS );   /* Record RTC seconds at power restored time.   */
 #endif
                }
                VBATREG_PWR_QUAL_COUNT++;              /* Increment the power quality count.  */
@@ -1139,7 +1147,9 @@ void PWRLG_Restoration( uint16_t powerAnomalyCount )
 #if ( MCU_SELECTED == NXP_K24 )
                RESTORATION_TIME_SET ( RTC_TSR );       /* Record RTC seconds at power restored time. */
 #elif ( MCU_SELECTED == RA6E1 )
-               RESTORATION_TIME_SET( R_RTC->RSECCNT ); /* Record RTC seconds at power restored time. */
+               TIME_STRUCT currentTime = { 0 };
+               RTC_GetTimeAtRes (&currentTime, 1);
+               RESTORATION_TIME_SET( currentTime.SECONDS );   /* Record RTC seconds at power restored time.   */
 #endif
             }
             VBATREG_PWR_QUAL_COUNT = powerAnomalyCount + 1;    /* Increment the power quality/anomaly count. */
@@ -1986,6 +1996,13 @@ static uint32_t CalculateSleepWindow( uint8_t uMessagesRemaining )
    fSuperCapEnergyForSleep = fSuperCapEnergy - ( uMessagesRemaining * ( fEnergyCollisionDetection + fEnergyTransmit ) );
    // Tremain = 30sec(Esleep/E30secSleep)
    fSleepSecondsRemaining      = ( float )( 30.0 * fSuperCapEnergyForSleep / fEnergy30SecondSleep );
+#if 1  // TEST CODE : TODO: RA6E1: Remove
+   if ( fSleepSecondsRemaining < 10 )
+   {
+      LG_PRNT_INFO("\fSuperCapVoltage:%ld; fMinimumRunVoltage: %d; fCapacitance: %d; uMessagesRemaining: %d \n\r",
+                     (uint32_t)(fSuperCapVoltage*1000), (uint32_t)(fMinimumRunVoltage*1000), (uint32_t)(fCapacitance*1000), uMessagesRemaining);
+   }
+#endif
    if ( fSleepSecondsRemaining < 0 )
    {
       fSleepSecondsRemaining = 0;

@@ -59,6 +59,9 @@
 #if ( USE_MTLS == 1 )
 #include "mtls.h"
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+#include "pwr_last_gasp.h"
+#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */

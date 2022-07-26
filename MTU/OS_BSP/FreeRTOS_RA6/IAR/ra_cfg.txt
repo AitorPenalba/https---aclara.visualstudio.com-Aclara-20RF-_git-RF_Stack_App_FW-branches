@@ -970,7 +970,7 @@ FSP Configuration
       
     Instance "agt2_Freq_Sync Timer, Low-Power (r_agt)"
       General: Name: agt2_Freq_Sync
-      General: Channel: 0
+      General: Channel: 2
       General: Mode: Periodic
       General: Period: 0x08000
       General: Period Unit: Raw Counts
