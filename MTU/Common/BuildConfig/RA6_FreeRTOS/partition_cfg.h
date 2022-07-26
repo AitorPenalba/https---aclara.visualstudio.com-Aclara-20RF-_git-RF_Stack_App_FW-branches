@@ -1582,8 +1582,6 @@ partitions_EXTERN const PartitionData_t sPartitionData[]
          0                                    /* Number of banks (Must have at least 1 bank!) */
       }
    }// </editor-fold>
-#else
-   ,
 #endif   // end of TM_INTERNAL_FLASH_TEST
 };
 

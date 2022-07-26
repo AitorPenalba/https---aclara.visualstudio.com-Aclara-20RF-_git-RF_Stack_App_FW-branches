@@ -213,6 +213,10 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define MAX_LINKEDLIST_DATA      5
 #endif
 
+#if ( TM_INTERNAL_FLASH_TEST == 1 )
+#define MAX_INTERNAL_FLASH_READ_SIZE   100                      /* Maximum size of internal flash read's buffer */
+#endif // TM_INTERNAL_FLASH_TEST
+
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -2586,7 +2590,7 @@ uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] )
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestopen" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_IntFlash_OpenPartition() */
@@ -2606,7 +2610,7 @@ uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   uint8_t userDataRead[100];
+   uint8_t userDataRead[ MAX_INTERNAL_FLASH_READ_SIZE ];
    lAddr addressOffset;
    lCnt sizeToRead;
    uint32_t sizeofData;
@@ -2615,44 +2619,51 @@ uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] )
       /* The number of arguments must be 2 */
       addressOffset = ( lAddr )strtol( argv[1], NULL, 16 );
       sizeToRead = ( lCnt )atoi ( argv[2] );
-      /* Getting the Last address to read */
-      sizeofData = addressOffset + sizeToRead;
-      if ( ( addressOffset < TM_INT_FLASH_SIZE ) )
+      if( sizeToRead < MAX_INTERNAL_FLASH_READ_SIZE )
       {
-         if( sizeofData < TM_INT_FLASH_SIZE ) 
+         /* Getting the Last address to read */
+         sizeofData = addressOffset + sizeToRead;
+         if ( ( addressOffset < TM_INT_FLASH_SIZE ) )
          {
-            /* Clearing the Previous read data */
-            memset( userDataRead, '\0', sizeof(userDataRead) );
-            if ( eSUCCESS == PAR_partitionFptr.parRead( userDataRead,
-                                                 addressOffset,
-                                                 sizeToRead,
-                                                 pTM_IntFlashPart_ ) )
+            if( sizeofData < TM_INT_FLASH_SIZE ) 
             {
-               DBG_logPrintf( 'R', "InternalFlash_Success Test Success %s", userDataRead );
-               retVal = eSUCCESS;
+               /* Clearing the Previous read data */
+               memset( userDataRead, '\0', sizeof(userDataRead) );
+               if ( eSUCCESS == PAR_partitionFptr.parRead( userDataRead,
+                                                   addressOffset,
+                                                   sizeToRead,
+                                                   pTM_IntFlashPart_ ) )
+               {
+                  DBG_logPrintf( 'R', "InternalFlash_Success Test Success %s", userDataRead );
+                  retVal = eSUCCESS;
+               }
+               else
+               {
+                  DBG_logPrintf( 'E', "InternalFlash_Failure Test Failure" );
+               }
             }
             else
             {
-               DBG_logPrintf( 'E', "InternalFlash_Failure Test Failure" );
+               DBG_logPrintf( 'E', "ERROR - Invalid_Argument Size to Read should be less than 0x2000" );
             }
          }
          else
          {
-            DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Size to Read should be less than 0x2000" );
+            DBG_logPrintf( 'E', "ERROR - Invalid_Argument Address to Read should be less than 0x2000" );
          }
       }
       else
       {
-         DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Address to Read should be less than 0x2000" );
+         DBG_logPrintf( 'E', "ERROR - Invalid_Argument size of data to read should be less than 100" );
       }
    }
    else if ( argc < 3 )
    {
-      DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Too few arguments" );
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestread 0 4" );
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestread 0 4" );
    }
 
    return ( uint32_t )retVal;
@@ -2683,7 +2694,7 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
       userDataWrite = argv[2];
       if ( addressOffset < TM_INT_FLASH_SIZE )
       {
-         if( ( addressOffset + sizeof( userDataWrite ) ) < TM_INT_FLASH_SIZE )
+         if( ( addressOffset + strlen( userDataWrite ) ) < TM_INT_FLASH_SIZE )
          {
             if ( eSUCCESS == PAR_partitionFptr.parWrite( addressOffset,
                                                    userDataWrite,
@@ -2723,21 +2734,21 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
          }
          else
          {
-            DBG_logPrintf( 'R', "ERROR - InternalFlash_Failure Size to Write should be less than 0x2000" );
+            DBG_logPrintf( 'R', "ERROR - Invalid_Argument Size to Write should be less than 0x2000" );
          }
       }
       else
       {
-         DBG_logPrintf( 'R', "ERROR - InternalFlash_Failure Address to Write should be less than 0x2000" );
+         DBG_logPrintf( 'R', "ERROR - Invalid_Argument Address to Write should be less than 0x2000" );
       }
    }
    else if ( argc < 3 )
    {
-      DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Too few arguments" );
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestwrite 0 abcd" );
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestwrite 0 abcd" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_IntFlash_WritePartition() */
@@ -2775,7 +2786,7 @@ uint32_t DBG_CommandLine_IntFlash_ErasePartition( uint32_t argc, char *argv[] )
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtesterase" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_IntFlash_ErasePartition() */
@@ -2809,7 +2820,7 @@ uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] )
    }
    else
    {
-      DBG_logPrintf( 'E', "ERROR - InternalFlash_Failure Too many arguments" );
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestclose" );
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_IntFlash_ClosePartition() */
