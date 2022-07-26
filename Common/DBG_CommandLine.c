@@ -13930,9 +13930,9 @@ uint32_t DBG_CommandLine_FlashSecurity( uint32_t argc, char *argv[] )
    }
    else
    {
-      if ( ( dlmmon & 0x0F ) < ARRAY_IDX_CNT(dlmText) )
+      if ( ( dlmmon & R_PSCU_DLMMON_DLMMON_Msk ) < ARRAY_IDX_CNT(dlmText) )
       {
-         pText = (void *)&dlmText[ ( dlmmon & 0x0F ) ][ 0 ];
+         pText = (void *)&dlmText[ ( dlmmon & R_PSCU_DLMMON_DLMMON_Msk ) ][ 0 ];
       }
       else
       {
