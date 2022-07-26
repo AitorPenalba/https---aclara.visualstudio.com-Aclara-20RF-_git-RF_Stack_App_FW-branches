@@ -186,7 +186,7 @@ const STRT_FunctionList_t startUpTbl[] =
    INIT( VDEV_init, STRT_FLAG_NONE ),                                               // Needed to be done ASAP because it might need to virgin the flash
    INIT( ADC_init, (STRT_FLAG_LAST_GASP|STRT_FLAG_QUIET|STRT_FLAG_RFTEST) ),        /* Needed for proper aclara_randu behavior which is needed by
                                                                                        other init modules so it needs to be called ASAP */
-	INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
+   INIT( MODECFG_init, STRT_FLAG_LAST_GASP ),                                       /* Must be before PWR_TSK_init so the mode is available. Note,
                                                                                        quiet and rftest mode flags can't be checked before this init
                                                                                        has been run */
 

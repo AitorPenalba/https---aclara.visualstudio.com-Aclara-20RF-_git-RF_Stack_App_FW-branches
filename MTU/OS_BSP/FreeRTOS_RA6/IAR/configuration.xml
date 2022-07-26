@@ -802,9 +802,9 @@
     <module id="module.driver.elc_on_elc.476475565">
       <property id="module.driver.elc.name" value="g_elc"/>
     </module>
-    <module id="module.driver.timer_on_agt.985511842">
+    <module id="module.driver.timer_on_agt.1354150675">
       <property id="module.driver.timer.name" value="agt2_Freq_Sync"/>
-      <property id="module.driver.timer.channel" value="0"/>
+      <property id="module.driver.timer.channel" value="2"/>
       <property id="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
       <property id="module.driver.timer.period" value="0x08000"/>
       <property id="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_raw_counts"/>
@@ -844,7 +844,6 @@
       <stack module="module.driver.crc_on_crc.1606105617"/>
       <stack module="module.driver.external_irq_on_icu.209142090"/>
       <stack module="module.driver.timer_on_agt.1395115336"/>
-      <stack module="module.driver.timer_on_agt.369109059"/>
       <stack module="module.driver.lpm.456371821"/>
       <stack module="module.driver.lpm.63954745"/>
       <stack module="module.driver.cgc_on_cgc.570942820"/>
@@ -856,6 +855,7 @@
       <stack module="module.driver.lpm.355649270"/>
       <stack module="module.driver.timer_on_gpt.630953836"/>
       <stack module="module.driver.elc_on_elc.476475565"/>
+      <stack module="module.driver.timer_on_agt.1354150675"/>
     </context>
     <config id="config.driver.wdt">
       <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>

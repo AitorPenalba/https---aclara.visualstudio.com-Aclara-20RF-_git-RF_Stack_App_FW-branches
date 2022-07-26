@@ -166,8 +166,8 @@ const timer_cfg_t agt2_Freq_Sync_cfg =
 #endif
     .p_extend            = &agt2_Freq_Sync_extend,
     .cycle_end_ipl       = (BSP_IRQ_DISABLED),
-#if defined(VECTOR_NUMBER_AGT0_INT)
-    .cycle_end_irq       = VECTOR_NUMBER_AGT0_INT,
+#if defined(VECTOR_NUMBER_AGT2_INT)
+    .cycle_end_irq       = VECTOR_NUMBER_AGT2_INT,
 #else
     .cycle_end_irq       = FSP_INVALID_VECTOR,
 #endif

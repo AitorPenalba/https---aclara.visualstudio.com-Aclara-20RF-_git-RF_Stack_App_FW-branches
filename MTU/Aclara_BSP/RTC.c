@@ -48,7 +48,7 @@ typedef struct
       uint32_t Word;
    }BCount;
    uint8_t SubSec;
-}rtc_time_primative;
+}rtc_time_primitive;
 #endif
 
 /* CONSTANTS */
@@ -60,8 +60,8 @@ volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrenc
 
 /* FUNCTION PROTOTYPES */
 #if ( MCU_SELECTED == RA6E1 )
-static void rtc_time_get( rtc_time_primative *time);
-static void rtc_time_set( rtc_time_primative *time);
+static void rtc_time_get( rtc_time_primitive *time);
+static void rtc_time_set( rtc_time_primitive *time);
 #endif   //#if ( MCU_SELECTED == RA6E1 )
 
 /* FUNCTION DEFINITIONS */
@@ -234,7 +234,7 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
      && (RT_Clock->min   <= MAX_RTC_MINUTE)
      && (RT_Clock->sec   <= MAX_RTC_SECOND) )
    {
-      rtc_time_primative currentTime;
+      rtc_time_primitive currentTime;
       sysTime_t          sysTime;
 
       //Convert calendar date/time to Seconds (milliseconds not used)
@@ -328,7 +328,7 @@ void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
       ptime->SECONDS      = seconds;
       ptime->MILLISECONDS = ( ( (uint32_t)fractSeconds   * (uint32_t)1000 / (uint32_t)fractRes ) / 32768 ) * fractRes;
 #elif ( MCU_SELECTED == RA6E1 )
-      rtc_time_primative rtcTime;
+      rtc_time_primitive rtcTime;
 
       rtc_time_get(&rtcTime);
       ptime->SECONDS      = rtcTime.BCount.Word;
@@ -376,7 +376,7 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 
    return;
 #elif ( MCU_SELECTED == RA6E1 )
-   rtc_time_primative rtcTime;
+   rtc_time_primitive rtcTime;
 
    rtc_time_get(&rtcTime);
    *sec      = rtcTime.BCount.Word;
@@ -401,17 +401,19 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 *******************************************************************************/
 void RTC_ConfigureAlarm( uint32_t seconds )
 {
-   rtc_time_primative time;  //Used for convenience on word/byte conversion
+   rtc_time_primitive time;  //Used for convenience on word/byte conversion
 
    /* Disable the ICU alarm interrupt request */
    R_BSP_IrqDisable(g_rtc0_ctrl.p_cfg->alarm_irq);
    /* Compare all bits - exact match required */
-   R_RTC->BCNT0AER  = 0xFF;
-   R_RTC->BCNT1AER  = 0xFF;
-   R_RTC->BCNT2AER  = 0xFF;
-   R_RTC->BCNT3AER  = 0xFF;
+   R_RTC->BCNT0AER_b.ENB  = 0xFF;
+   R_RTC->BCNT1AER_b.ENB  = 0xFF;
+   R_RTC->BCNT2AER_b.ENB  = 0xFF;
+   R_RTC->BCNT3AER_b.ENB  = 0xFF;
 
-   time.BCount.Word = seconds;
+   rtc_time_get( &time );        // Get current value of the Registers
+   time.BCount.Word += seconds;  // Add the time delay
+
    R_RTC->BCNT0AR   = time.BCount.Byte[0];
    R_RTC->BCNT1AR   = time.BCount.Byte[1];
    R_RTC->BCNT2AR   = time.BCount.Byte[2];
@@ -420,6 +422,10 @@ void RTC_ConfigureAlarm( uint32_t seconds )
    /* Enable the RTC alarm interrupt */
    R_RTC->RCR1 |= R_RTC_RCR1_AIE_Msk;
    FSP_HARDWARE_REGISTER_WAIT((R_RTC->RCR1 & R_RTC_RCR1_AIE_Msk), R_RTC_RCR1_AIE_Msk);
+
+   R_BSP_SoftwareDelay( 200, BSP_DELAY_UNITS_MICROSECONDS );  // As per Datasheet Figure 23.7
+
+   R_BSP_IrqStatusClear(g_rtc0_ctrl.p_cfg->alarm_irq);       // As per Datasheet Figure 23.7
 
    R_BSP_IrqEnable(g_rtc0_ctrl.p_cfg->alarm_irq);   //Enabled the RTC in the NVIC
 }
@@ -523,9 +529,9 @@ void RTC_Callback( rtc_callback_args_t *p_args )
 
   Function name: rtc_time_get
 
-  Purpose: Return the current RTC Time in seconds and subseconds
+  Purpose: Return the current RTC Time in seconds and sub-seconds
 
-  Arguments: rtc_time_primative *time - Seconds, subseconds
+  Arguments: rtc_time_primitive *time - Seconds, sub-seconds
 
   Returns: None
 
@@ -533,7 +539,7 @@ void RTC_Callback( rtc_callback_args_t *p_args )
          keeps running while debugger stopped.
 
 *******************************************************************************/
-static void rtc_time_get( rtc_time_primative *time)
+static void rtc_time_get( rtc_time_primitive *time)
 {
    time->BCount.Word = 0;
    time->SubSec      = 0;
@@ -556,9 +562,9 @@ static void rtc_time_get( rtc_time_primative *time)
 
   Function name: rtc_time_set
 
-  Purpose: Sets the current RTC Time in seconds and subseconds
+  Purpose: Sets the current RTC Time in seconds and sub-seconds
 
-  Arguments: rtc_time_primative *time - Seconds, subseconds
+  Arguments: rtc_time_primitive *time - Seconds, sub-seconds
 
   Returns: None
 
@@ -566,7 +572,7 @@ static void rtc_time_get( rtc_time_primative *time)
          keeps running while debugger stopped.
 
 *******************************************************************************/
-static void rtc_time_set( rtc_time_primative *time)
+static void rtc_time_set( rtc_time_primitive *time)
 {
    //1. Stop RTC and ensure in binary mode
    R_RTC->RCR2 = (R_RTC_RCR2_CNTMD_Msk & ~R_RTC_RCR2_START_Msk);
