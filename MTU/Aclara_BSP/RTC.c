@@ -406,10 +406,10 @@ void RTC_ConfigureAlarm( uint32_t seconds )
    /* Disable the ICU alarm interrupt request */
    R_BSP_IrqDisable(g_rtc0_ctrl.p_cfg->alarm_irq);
    /* Compare all bits - exact match required */
-   R_RTC->BCNT0AER_b.ENB  = 0xF;
-   R_RTC->BCNT1AER_b.ENB  = 0xF;
-   R_RTC->BCNT2AER_b.ENB  = 0xF;
-   R_RTC->BCNT3AER_b.ENB  = 0xF;
+   R_RTC->BCNT0AER_b.ENB  = 0xFF;
+   R_RTC->BCNT1AER_b.ENB  = 0xFF;
+   R_RTC->BCNT2AER_b.ENB  = 0xFF;
+   R_RTC->BCNT3AER_b.ENB  = 0xFF;
 
    rtc_time_get( &time );        // Get current value of the Registers
    time.BCount.Word += seconds;  // Add the time delay
@@ -423,9 +423,9 @@ void RTC_ConfigureAlarm( uint32_t seconds )
    R_RTC->RCR1 |= R_RTC_RCR1_AIE_Msk;
    FSP_HARDWARE_REGISTER_WAIT((R_RTC->RCR1 & R_RTC_RCR1_AIE_Msk), R_RTC_RCR1_AIE_Msk);
 
-   R_BSP_SoftwareDelay( 200, BSP_DELAY_UNITS_MICROSECONDS );  // As per Datasheet
+   R_BSP_SoftwareDelay( 200, BSP_DELAY_UNITS_MICROSECONDS );  // As per Datasheet Figure 23.7
 
-   R_BSP_IrqStatusClear(g_rtc0_ctrl.p_cfg->alarm_irq);
+   R_BSP_IrqStatusClear(g_rtc0_ctrl.p_cfg->alarm_irq);       // As per Datasheet Figure 23.7
 
    R_BSP_IrqEnable(g_rtc0_ctrl.p_cfg->alarm_irq);   //Enabled the RTC in the NVIC
 }

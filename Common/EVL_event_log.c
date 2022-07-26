@@ -310,7 +310,7 @@ void EVL_AlarmHandlerTask ( taskParameter )
                      {
                         if ( 0 != pSysMem->uMessageCounts.total )
                         {
-                            initiateSimLGTx();
+                           initiateSimLGTx();
                         }
                         else
                         {
@@ -320,7 +320,7 @@ void EVL_AlarmHandlerTask ( taskParameter )
                      break;
                      default:
                      {
-                         EVL_LGSimCancel();
+                        EVL_LGSimCancel();
                      }
                   } /*lint !e788 not all enums used within switch */
                }
