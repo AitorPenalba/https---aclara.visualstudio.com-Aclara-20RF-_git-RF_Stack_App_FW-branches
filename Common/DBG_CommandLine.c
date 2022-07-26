@@ -11885,6 +11885,7 @@ void vApplicationMallocFailedHook( void )
 {
    mallocFailures++;
    DBG_logPrintf( 'R', "FreeRTOS malloc failure hook was called, no other info available" );
+   freeRAMdump( "after malloc failure");
 }
 #endif
 
