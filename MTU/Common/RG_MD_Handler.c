@@ -63,6 +63,7 @@ static const meterReadingType RG_MD_RdgType_[] =
    comDeviceHardwareVersion,
    comDeviceMACAddress,
    comDeviceType,
+   comDeviceMicroMPN,
 #if ( ACLARA_LC != 1 ) && (ACLARA_DA != 1) /* meter specific code */
    demandPresentConfiguration,
    edFwVersion,

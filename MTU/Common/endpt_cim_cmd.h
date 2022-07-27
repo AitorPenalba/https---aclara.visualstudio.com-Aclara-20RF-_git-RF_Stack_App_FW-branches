@@ -60,6 +60,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getCommBLVerNum( firmwareVersion_u *fwVer );
 enum_CIM_QualityCode ENDPT_CIM_CMD_getCommHWVerNum( char *devTypeBuff, uint8_t devTypeBuffSize, uint8_t *devTypeLeng );
 enum_CIM_QualityCode ENDPT_CIM_CMD_getCommMACID( uint64_t *macId );
 enum_CIM_QualityCode ENDPT_CIM_CMD_getComDeviceType( char *devTypeBuff, uint8_t devTypeBuffSize, uint8_t *devTypeLeng );
+enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBuff, uint8_t devPartNumberBuffSize, uint8_t *devPartNumberLeng );
 enum_CIM_QualityCode ENDPT_CIM_CMD_getNewRegistrationRequired( uint8_t *canDisconnect );
 enum_CIM_QualityCode ENDPT_CIM_CMD_getInstallationDateTime( uint32_t *installDateTime );
 enum_CIM_QualityCode ENDPT_CIM_CMD_getDemandPresentConfig( uint64_t *demandConfig );

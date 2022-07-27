@@ -117,6 +117,9 @@ ReadingsValueTypecast ENDPT_CIM_CMD_getDataType( meterReadingType RdgType )
       case comDeviceType:   // Official Field Equipment Type
          rdgTypeDataType = ASCIIStringValue;
          break;
+      case comDeviceMicroMPN:   // Official Field Equipment Type
+         rdgTypeDataType = ASCIIStringValue;
+         break;
       case demandPresentConfiguration:   // Demand Present Configuration
          rdgTypeDataType = uintValue;
          break;
@@ -255,6 +258,9 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getStrValue( meterReadingType RdgType,
          break;
       case comDeviceType:   // Official Field Equipment Type
          retVal = ENDPT_CIM_CMD_getComDeviceType((char *)valBuff, valBuffSize, readingLeng);
+         break;
+      case comDeviceMicroMPN:   // Official Field Equipment Type
+         retVal = ENDPT_CIM_CMD_getComDevicePartNumber((char *)valBuff, valBuffSize, readingLeng);
          break;
       default:
          retVal = CIM_QUALCODE_KNOWN_MISSING_READ;
@@ -462,7 +468,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getCommMACID( uint64_t *fullMacAddr )
 
 /***********************************************************************************************************************
  *
- * Function name: ENDPT_CIM_CMD_comDeviceType
+ * Function name: ENDPT_CIM_CMD_getComDeviceType
  *
  * Purpose: Gets the Communication device MACID
  *
@@ -486,6 +492,52 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDeviceType( char *devTypeBuff, uint8_t 
    (void)strncpy (devTypeBuff, pDevType, devTypeBuffSize);
    devTypeBuff[devTypeBuffSize-1] = '\0';   // ensure the buffer is null-terminated
    *devTypeLeng = (uint8_t)strlen(devTypeBuff);
+   return CIM_QUALCODE_SUCCESS;
+}
+
+/***********************************************************************************************************************
+ *
+ * Function name: ENDPT_CIM_CMD_getComDevicePartNumber
+ *
+ * Purpose: Gets the Communication device MACID
+ *
+ * Arguments: char *devTypeBuff: Comm device type (includes the trailing null)
+ *            uint8_t devTypeBuffSize: The size of devTypeBuff, into which the value will be copied, including the
+ *                                     trailing null
+ *            uint8_t *devTypeLeng: The number of bytes in the returned device type, not including the trailing null
+ *
+ * Returns: enum_CIM_QualityCode SUCCESS/FAIL indication
+ *
+ * Side effects: N/A
+ *
+ * Reentrant: Yes
+ *
+ **********************************************************************************************************************/
+enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBuff, uint8_t devPartNumberBuffSize, uint8_t *devPartNumberLeng )
+{
+   char const *pDevPartNumber;
+   int index = 0;
+
+   pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
+   while( index < devPartNumberBuffSize )
+   {
+      if(*( pDevPartNumber + index ) == '\0' )
+      {
+         while( index <devPartNumberBuffSize )
+         {
+           *( devPartNumberBuff + index )  = ' ';
+            index++;
+         }
+      }
+      else
+      {
+         *( devPartNumberBuff + index ) = *( pDevPartNumber + index );
+      }
+      index++;
+   }
+//   (void)strncpy (devPartNumberBuff, pDevPartNumber, devPartNumberBuffSize);
+   devPartNumberBuff[index-1] = '\0';   // ensure the buffer is null-terminated
+   *devPartNumberLeng = (uint8_t)strlen(devPartNumberBuff);
    return CIM_QUALCODE_SUCCESS;
 }
 
@@ -857,6 +909,39 @@ returnStatus_t ENDPT_CIM_CMD_OR_PM_Handler( enum_MessageMethod action, meterRead
             }
             break;
          }
+      case comDeviceMicroMPN :
+      {
+         char partNumber[17];
+         int index = 0;
+         char *pDevPartNumber;
+         pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
+         while( index < 17 )
+         {
+            if(*( pDevPartNumber + index ) == '\0' )
+            {
+               while( index < 17 )
+               {
+                  partNumber[ index ]= ' ';
+                  index++;
+               }
+            }
+            else
+            {
+               partNumber[ index ] = *( pDevPartNumber + index );
+            }
+            index++;
+         }
+         partNumber[ index - 1 ] = '\0';
+         (void)strncpy ((char *)value, partNumber, 17);
+
+         if (attr != NULL)
+         {
+             attr->rValLen = 17;
+             attr->rValTypecast = (uint8_t)ASCIIStringValue;
+         }
+         break;
+      }
+
          default :
          {
             retVal = eAPP_NOT_HANDLED;
