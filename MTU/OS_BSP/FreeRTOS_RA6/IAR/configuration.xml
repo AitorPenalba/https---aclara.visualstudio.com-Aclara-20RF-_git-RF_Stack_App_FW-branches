@@ -827,7 +827,7 @@
       <property id="module.driver.timer.period" value="0x10000"/>
       <property id="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_raw_counts"/>
       <property id="module.driver.timer.duty_cycle" value="50"/>
-      <property id="module.driver.timer.count_source" value="module.driver.timer.count_source.clock_pclkb"/>
+      <property id="module.driver.timer.count_source" value="module.driver.timer.count_source.clock_fsub"/>
       <property id="module.driver.timer.agtoa_output_enable" value="module.driver.timer.agtoa_output_enable.false"/>
       <property id="module.driver.timer.agtob_output_enable" value="module.driver.timer.agtob_output_enable.false"/>
       <property id="module.driver.timer.agto_output_enable" value="module.driver.timer.agto_output_enable.false"/>

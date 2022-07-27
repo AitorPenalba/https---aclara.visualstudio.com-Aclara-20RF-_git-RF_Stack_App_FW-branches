@@ -993,7 +993,7 @@ FSP Configuration
       General: Period: 0x10000
       General: Period Unit: Raw Counts
       Output: Duty Cycle Percent (only applicable in PWM mode): 50
-      General: Count Source: PCLKB
+      General: Count Source: SUBCLOCK
       Output: AGTOA Output: Disabled
       Output: AGTOB Output: Disabled
       Output: AGTO Output: Disabled
