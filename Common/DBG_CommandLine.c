@@ -694,7 +694,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
                    "                                   Set: Params - yy mm dd hh mm ss" },
    { "rxchannels",   DBG_CommandLine_RxChannels,      "set/print the RX channel list.\r\n"
                    "                                   Type ""rxchannels"" with no arguments for more help" },
-#endif // ( RTOS_SELECTION )
+#endif // ( MCU_SELECTED )
    { "rxdetection",  DBG_CommandLine_RxDetection,     "Set/print the detection configuration" },
    { "rxframing",    DBG_CommandLine_RxFraming,       "Set/print the framing configuration" },
    { "rxmode",       DBG_CommandLine_RxMode,          "Set/print the PHY mode configuration" },
@@ -3222,7 +3222,6 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_NvRead () */
 
-#if (DBG_TESTS == 1)
 /*******************************************************************************
 
    Function name: DBG_CommandLine_NvTest
@@ -3257,7 +3256,6 @@ uint32_t DBG_CommandLine_NvTest ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 /* end DBG_CommandLine_NvTest() */
-#endif
 
 #if ( SIMULATE_POWER_DOWN == 1 )
 
@@ -11157,11 +11155,7 @@ uint32_t DBG_CommandLine_StackUsage ( uint32_t argc, char *argv[] )
 ******************************************************************************/
 uint32_t DBG_CommandLine_TaskSummary ( uint32_t argc, char *argv[] )
 {
-#if ( RTOS_SELECTION == MQX_RTOS )
    OS_TASK_Summary((bool)true);
-#elif ( RTOS_SELECTION == FREE_RTOS )
-   OS_TASK_SummaryFreeRTOS();
-#endif
    return ( 0 );
 }
 
@@ -14181,108 +14175,108 @@ uint32_t DBG_CommandLine_RelLowCnt ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
-//#if ( DCU == 1 )
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_TxPacketDelay
-//
-//   Purpose: This function sets/gets tx packet delay
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//
-//uint32_t DBG_CommandLine_TxPacketDelay ( uint32_t argc, char *argv[] )
-//{
-//   uint16_t packetDelay;
-//
-//   uint32_t tempInputCleaning;
-//
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else if ( argc == 2 )
-//   {
-//      tempInputCleaning = (uint32_t)atoi( argv[1] );
-//
-//      if (tempInputCleaning > 10000)
-//      {
-//         DBG_printf( "Value too large\n" );
-//      }
-//      else
-//      {
-//         MAC_SetConf_t SetConf;
-//         packetDelay = ( uint16_t )tempInputCleaning;
-//         SetConf = MAC_SetRequest( eMacAttr_TxPacketDelay, &packetDelay);
-//         if (SetConf.eStatus != eMAC_SET_SUCCESS) {
-//            DBG_printf( "MAC set API returned an error" );
-//         }
-//      }
-//   }
-//
-//   else if ( argc == 1 )
-//   {
-//      MAC_GetConf_t GetConf;
-//      GetConf = MAC_GetRequest( eMacAttr_TxPacketDelay );
-//      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//         DBG_printf( "PacketDelay is %d", GetConf.val.TxPacketDelay );
-//      }
-//   }
-//   return ( 0 );
-//}
-//#endif
-//#if 0
-///******************************************************************************
-//
-//   Function Name: DBG_CommandLine_PacketTimeout
-//
-//   Purpose: This function sets/gets packet ID duplicate detection timeout
-//
-//   Arguments:  argc - Number of Arguments passed to this function
-//               argv - pointer to the list of arguments passed to this function
-//
-//   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
-//
-//   Notes:
-//
-//******************************************************************************/
-//uint32_t DBG_CommandLine_PacketTimeout ( uint32_t argc, char *argv[] )
-//{
-//   uint16_t packetTimeout;
-//
-//   if ( argc > 3 )
-//   {
-//      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
-//   }
-//
-//   else if ( argc == 2 )
-//   {
-//      MAC_SetConf_t SetConf;
-//      packetTimeout = ( uint16_t )( atoi( argv[1] ) );
-//      SetConf = MAC_SetRequest( eMacAttr_PacketTimeout, &packetTimeout);
-//      if (SetConf.eStatus != eMAC_SET_SUCCESS) {
-//         DBG_printf( "MAC set API returned an error" );
-//      }
-//   }
-//
-//   else if ( argc == 1 )
-//   {
-//      MAC_GetConf_t GetConf;
-//      GetConf = MAC_GetRequest( eMacAttr_PacketTimeout );
-//      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
-//         DBG_printf( "Reassembly timeout is %d", GetConf.val.PacketTimeout );
-//      }
-//   }
-//   return ( 0 );
-//}
-//#endif
+#if ( DCU == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_TxPacketDelay
+
+   Purpose: This function sets/gets tx packet delay
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+
+uint32_t DBG_CommandLine_TxPacketDelay ( uint32_t argc, char *argv[] )
+{
+   uint16_t packetDelay;
+
+   uint32_t tempInputCleaning;
+
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else if ( argc == 2 )
+   {
+      tempInputCleaning = (uint32_t)atoi( argv[1] );
+
+      if (tempInputCleaning > 10000)
+      {
+         DBG_printf( "Value too large\n" );
+      }
+      else
+      {
+         MAC_SetConf_t SetConf;
+         packetDelay = ( uint16_t )tempInputCleaning;
+         SetConf = MAC_SetRequest( eMacAttr_TxPacketDelay, &packetDelay);
+         if (SetConf.eStatus != eMAC_SET_SUCCESS) {
+            DBG_printf( "MAC set API returned an error" );
+         }
+      }
+   }
+
+   else if ( argc == 1 )
+   {
+      MAC_GetConf_t GetConf;
+      GetConf = MAC_GetRequest( eMacAttr_TxPacketDelay );
+      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+         DBG_printf( "PacketDelay is %d", GetConf.val.TxPacketDelay );
+      }
+   }
+   return ( 0 );
+}
+#endif
+#if 0
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_PacketTimeout
+
+   Purpose: This function sets/gets packet ID duplicate detection timeout
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+uint32_t DBG_CommandLine_PacketTimeout ( uint32_t argc, char *argv[] )
+{
+   uint16_t packetTimeout;
+
+   if ( argc > 3 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+
+   else if ( argc == 2 )
+   {
+      MAC_SetConf_t SetConf;
+      packetTimeout = ( uint16_t )( atoi( argv[1] ) );
+      SetConf = MAC_SetRequest( eMacAttr_PacketTimeout, &packetTimeout);
+      if (SetConf.eStatus != eMAC_SET_SUCCESS) {
+         DBG_printf( "MAC set API returned an error" );
+      }
+   }
+
+   else if ( argc == 1 )
+   {
+      MAC_GetConf_t GetConf;
+      GetConf = MAC_GetRequest( eMacAttr_PacketTimeout );
+      if (GetConf.eStatus == eMAC_GET_SUCCESS) {
+         DBG_printf( "Reassembly timeout is %d", GetConf.val.PacketTimeout );
+      }
+   }
+   return ( 0 );
+}
+#endif
 /*******************************************************************************
 
    Function name: DBG_CommandLine_EVLADD

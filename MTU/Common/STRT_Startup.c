@@ -160,11 +160,7 @@
 /* FILE VARIABLE DEFINITIONS */
 static bool initSuccess_ = true; //Default, system init successful
 
-#if 0 // TODO: RA6E1: Revert when we have OS_Task_Summary
 static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_SMART;
-#else
-static STRT_CPU_LOAD_PRINT_e CpuLoadPrint = eSTRT_CPU_LOAD_PRINT_OFF;
-#endif
 
 /* Power Up Table - Define all modules that require initialization below. */
 const STRT_FunctionList_t startUpTbl[] =
@@ -576,7 +572,7 @@ void STRT_StartupTask ( taskParameter )
 
    // Reset all CPU stats
    // This MUST be done after the tasks are started
-//   (void)OS_TASK_UpdateCpuLoad();  /* TODO: RA6E1: Add Support later */
+   (void)OS_TASK_UpdateCpuLoad();
 
    if ( quiet == 0 )
    {
@@ -610,7 +606,7 @@ void STRT_StartupTask ( taskParameter )
       TempIdleCount = CurrentIdleCount - PrevIdleCount;
       PrevIdleCount = CurrentIdleCount;
 
-//      CpuLoad[CpuIdx] = OS_TASK_UpdateCpuLoad();  /* TODO: RA6E1: Add Support later */
+      CpuLoad[CpuIdx] = OS_TASK_UpdateCpuLoad();
 
       if ( TempIdleCount > 0 )
       {
@@ -635,7 +631,7 @@ void STRT_StartupTask ( taskParameter )
          OS_TASK_Summary((bool)false);
 #endif
 #elif ( MCU_SELECTED == FREE_RTOS )
-         OS_TASK_SummaryFreeRTOS(); // Always uses DBG_printf
+         OS_TASK_Summary((bool)false);
 #endif
          printStackAndTask = 0;
       }

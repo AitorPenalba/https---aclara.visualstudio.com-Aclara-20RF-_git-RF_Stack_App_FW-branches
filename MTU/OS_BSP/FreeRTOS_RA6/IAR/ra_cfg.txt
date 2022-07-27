@@ -986,3 +986,21 @@ FSP Configuration
       Interrupts: Callback: NULL
       Interrupts: Underflow Interrupt Priority: Disabled
       
+    Instance "AGT3_RunTimeStats Timer, Low-Power (r_agt)"
+      General: Name: AGT3_RunTimeStats
+      General: Channel: 3
+      General: Mode: Periodic
+      General: Period: 0x10000
+      General: Period Unit: Raw Counts
+      Output: Duty Cycle Percent (only applicable in PWM mode): 50
+      General: Count Source: PCLKB
+      Output: AGTOA Output: Disabled
+      Output: AGTOB Output: Disabled
+      Output: AGTO Output: Disabled
+      Input: Measurement Mode: Measure Disabled
+      Input: Input Filter: No Filter
+      Input: Enable Pin: Enable Pin Not Used
+      Input: Trigger Edge: Trigger Edge Rising
+      Interrupts: Callback: NULL
+      Interrupts: Underflow Interrupt Priority: Disabled
+      
