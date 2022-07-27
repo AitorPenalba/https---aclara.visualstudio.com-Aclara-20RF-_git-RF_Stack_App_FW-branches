@@ -27,7 +27,7 @@
             #define configUSE_IDLE_HOOK (1)
             #endif
             #ifndef configUSE_MALLOC_FAILED_HOOK
-            #define configUSE_MALLOC_FAILED_HOOK (0)
+            #define configUSE_MALLOC_FAILED_HOOK (1) // RA6E1 Bob: created handler in DBG_CommandLine.c
             #endif
             #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
             #define configUSE_DAEMON_TASK_STARTUP_HOOK (0)

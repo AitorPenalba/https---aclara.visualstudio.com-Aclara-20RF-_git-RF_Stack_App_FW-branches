@@ -11821,6 +11821,67 @@ uint32_t DBG_CommandLine_Buffers( uint32_t argc, char *argv[] )
 
    return ( 0 );
 }
+#if ( RTOS_SELECTION == FREE_RTOS )
+/******************************************************************************
+
+   Function Name: freeRAMdump
+
+   Purpose: This function retrieves and prints the FreeRTOS Heap statistics
+
+   Arguments: None
+
+   Returns:   None
+
+   Notes:
+
+******************************************************************************/
+static uint32_t mallocFailures = 0; /* File global variable shared with vApplicationMallocFailedHook */
+static void freeRAMdump( char * pString )
+{
+   HeapStats_t heepInfo;
+   (void)vPortGetHeapStats( &heepInfo );
+   DBG_printf( "Heap Statistics: %s \r\n"
+            "  Availale Heap Space           %6u \r\n"
+            "  Size of Largest Free Block    %6u \r\n"
+            "  Size of Smallest Free Block   %6u \r\n"
+            "  Number of Free Blocks         %6u \r\n"
+            "  Minimum Ever Free Remaining   %6u \r\n"
+            "  Number of Successful Allocs   %6u \r\n"
+            "  Number of Successful Frees    %6u \r\n"
+            "  Number of Unsuccessful Allocs %6u ",
+            pString,
+            heepInfo.xAvailableHeapSpaceInBytes,
+            heepInfo.xSizeOfLargestFreeBlockInBytes,
+            heepInfo.xSizeOfSmallestFreeBlockInBytes,
+            heepInfo.xNumberOfFreeBlocks,
+            heepInfo.xMinimumEverFreeBytesRemaining,
+            heepInfo.xNumberOfSuccessfulAllocations,
+            heepInfo.xNumberOfSuccessfulFrees,
+            mallocFailures                           );
+}
+
+/******************************************************************************
+
+   Function Name: vApplicationMallocFailedHook
+
+   Purpose: This function is called by FreeRTOS if an malloc fails.  To enable this feature
+            conditional compile switch configUSE_MALLOC_FAILED_HOOK needs to be set to (1)
+            in FreeRTOSConfig.h
+
+   Arguments: None
+
+   Returns:   None
+
+   Notes:
+
+******************************************************************************/
+void vApplicationMallocFailedHook( void )
+{
+   mallocFailures++;
+   DBG_logPrintf( 'R', "FreeRTOS malloc failure hook was called, no other info available" );
+   freeRAMdump( "after malloc failure");
+}
+#endif
 
 /******************************************************************************
 
@@ -11843,27 +11904,31 @@ uint32_t DBG_CommandLine_FreeRAM ( uint32_t argc, char *argv[] )
                ( uint32_t )BSP_DEFAULT_END_OF_KERNEL_MEMORY - ( uint32_t )_mem_get_highwater(),
                ( uint32_t )_mem_get_free() );
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   HeapStats_t heepInfo;
-   (void)vPortGetHeapStats( &heepInfo );
-   DBG_printf( "Heap Statistics: \r\n"
-               "  Availale Heap Space          %6u \r\n"
-               "  Size of Largest Free Block   %6u \r\n"
-               "  Size of Smallest Free Block  %6u \r\n"
-               "  Number of Free Blocks        %6u \r\n"
-               "  Minimum Ever Free Remaining  %6u \r\n"
-               "  Number of Successful Allocs  %6u \r\n"
-               "  Number of Successful Frees   %6u \r\n",
-               heepInfo.xAvailableHeapSpaceInBytes,
-               heepInfo.xSizeOfLargestFreeBlockInBytes,
-               heepInfo.xSizeOfSmallestFreeBlockInBytes,
-               heepInfo.xNumberOfFreeBlocks,
-               heepInfo.xMinimumEverFreeBytesRemaining,
-               heepInfo.xNumberOfSuccessfulAllocations,
-               heepInfo.xNumberOfSuccessfulFrees         );
+   if ( argc == 1 )
+   {
+      freeRAMdump( " " );
+   }
+   else if ( argc == 2 )
+   {
+      uint32_t bytes = atol( argv[1] );
+      freeRAMdump( "before malloc call ");
+      void * pBuffer = malloc( bytes );
+      DBG_printf( "FreeRTOS malloc returned %08x for buffer of %u bytes", pBuffer, bytes );
+      freeRAMdump( "after malloc call" );
+      if ( pBuffer != NULL)
+      {
+         free( pBuffer );
+         DBG_printf( "FreeRTOS free called to return buffer at %08x", pBuffer );
+         freeRAMdump( "after free call" );
+      }
+   }
+   else
+   {
+      DBG_printf( "Too many args!" );
+   }
 #endif // RTOS_SELECTION
    return ( 0 );
 }
-
 
 /******************************************************************************
 
@@ -13860,9 +13925,9 @@ uint32_t DBG_CommandLine_FlashSecurity( uint32_t argc, char *argv[] )
    }
    else
    {
-      if ( ( dlmmon & 0x0F ) < ARRAY_IDX_CNT(dlmText) )
+      if ( ( dlmmon & R_PSCU_DLMMON_DLMMON_Msk ) < ARRAY_IDX_CNT(dlmText) )
       {
-         pText = (void *)&dlmText[ ( dlmmon & 0x0F ) ][ 0 ];
+         pText = (void *)&dlmText[ ( dlmmon & R_PSCU_DLMMON_DLMMON_Msk ) ][ 0 ];
       }
       else
       {
