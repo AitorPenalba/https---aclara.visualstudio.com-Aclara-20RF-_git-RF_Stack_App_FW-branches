@@ -422,7 +422,7 @@ buffer_t *RG_MD_BuildMetadataPacket(void)
             /***
             * High-order 8 bits of the 12-byte value size
             ***/
-            //RdgInfo =  (uint8_t)((numberOfBytes & 0x0F00) >> 4);
+            RdgInfo =  (uint8_t)((numberOfBytes & 0x0F00) >> 4);
             RdgInfo |= (uint8_t)((numberOfBytes & 0x00F0) >> 4);
             PACK_Buffer((sizeof(RdgInfo) * 8), &RdgInfo, &packCfg);
             pBuf->x.dataLen += sizeof(RdgInfo);

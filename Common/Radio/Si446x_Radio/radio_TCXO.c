@@ -137,7 +137,7 @@ static void Disable_DMA_Reset_Filter( void )
    (void)memset( FTM,     0, sizeof(FTM) );
 }
 
-#if 0
+#if ( MCU_SELECTED == NXP_K24 )
 /******************************************************************************
 
  Function Name: DMA_Complete_IRQ_ISR

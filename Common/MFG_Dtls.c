@@ -613,7 +613,7 @@ void MFGP_DtlsInit( enum_UART_ID uartId )
    {
       dtlsUart = UART_MANUF_TEST;
 #if ( RTOS_SELECTION == MQX_RTOS )
-   uint32_t vector;
+      uint32_t vector;
       if ( mqxUART_isr == NULL )
       {
          vector = ( uint32_t )INT_UART0_RX_TX;
