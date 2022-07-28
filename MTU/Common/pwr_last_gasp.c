@@ -1853,7 +1853,9 @@ void PWRLG_CalculateSleep( uint8_t step )
 #if ( MCU_SELECTED == NXP_K24 )
    aclara_srand( RTC_TPR );   /* Use the RTC prescale register as a seed to the random function.   */
 #elif ( MCU_SELECTED == RA6E1 )
-   aclara_srand( R_RTC->R64CNT );
+   TIME_STRUCT currentTime = { 0 };
+   RTC_GetTimeAtRes (&currentTime, 1);
+   aclara_srand( currentTime.SECONDS );
 #endif
    switch( step )
    {
@@ -2702,7 +2704,6 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
    }
 
    LG_PRNT_INFO( "\nEnter LPM, count: %d, units: %d, mode: %d\n", uCounter, ( uint8_t )eUnits, uMode );
-//   LG_PRNT_INFO("\n HW Rev Letter: %c \n\r", hwRevLetter_);
 
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
    TRACE_D0_LOW();

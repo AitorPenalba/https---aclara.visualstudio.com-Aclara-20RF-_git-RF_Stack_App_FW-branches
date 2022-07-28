@@ -207,14 +207,20 @@ typedef enum
    eNW_CON_TSK_IDX,
 #endif
    eIDL_TSK_IDX,
+#if ( RTOS_SELECTION == MQX_RTOS )
    eINT_TSK_IDX, // Keep that next to last. This is not really a task index. This is a place holder to keep track of CPU load for interrupt
+#endif
    eLAST_TSK_IDX // Keep this last
 }eOsTaskIndex_t;
 
-//static uint32_t TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track of the CPU load for each task for the last 10 seconds.
-//static TD_STRUCT *TASK_TD[eLAST_TSK_IDX];                       // Task descriptor list
-//static uint32_t cpuLoadIndex = 0;
-//static uint32_t CPUTotal;
+static uint32_t   TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track of the CPU load for each task for the last 10 seconds.
+#if ( RTOS_SELECTION == MQX_RTOS )
+static TD_STRUCT  *TASK_TD[eLAST_TSK_IDX];                       // Task descriptor list
+#elif ( RTOS_SELECTION == FREE_RTOS )
+static uint32_t   Task_RunTimeCounters_[eLAST_TSK_IDX];            // Local Copy of Run Time Counters for every Task
+#endif
+static uint32_t   cpuLoadIndex = 0;
+static uint32_t   CPUTotal;
 
 /* The following structure will be used to store task handle information for FreeRTOS. Each
    task handle will be tied to a specific task name as each task is created. When a task
@@ -298,7 +304,11 @@ const char pTskName_LcTimeSync[]    = "LC_TS";
 const char pTskName_B2BRead[]       = "B2BRD";
 const char pTskName_HostReset[]     = "HSTRST";
 #endif
+#if ( RTOS_SELECTION == MQX_RTOS )
 const char pTskName_Idle[]          = "IDL";
+#elif ( RTOS_SELECTION == FREE_RTOS )
+const char pTskName_Idle[]          = "IDLE";
+#endif
 #if (SIGNAL_NW_STATUS == 1)
 const char pTskName_NwConn[]        = "NWCON";
 #endif
@@ -416,6 +426,8 @@ const OS_TASK_Template_t  Task_template_list[] =
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed
 #if ( RTOS_SELECTION == MQX_RTOS )
    { eIDL_TSK_IDX,              IDL_IdleTask,                  336,  39, (char *)pTskName_Idle,   DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+#elif ( RTOS_SELECTION == FREE_RTOS ) /* NOTE: This is a dummy entry for FreeRTOS used to print details of Idle Task conveniently */
+   { eIDL_TSK_IDX,              NULL,                          0,    0, (char *)pTskName_Idle,   0, 0, 0 },
 #endif
    { 0 }
 };
@@ -593,7 +605,7 @@ void HardFault_Handler( void )
  *
  * Function Name: OS_TASK_Create_All
  *
- * Purpose: This function is used to start all of the tasks that were not auto started in the MQX_template_list[] above
+ * Purpose: This function is used to start all of the tasks that were not auto started in the Task_template_list[] above
  *
 * Arguments: bool initSuccess: true: All init functions successful, false otherwise
  *
@@ -640,6 +652,10 @@ void OS_TASK_Create_All ( bool initSuccess )
 #if ( RTOS_SELECTION == MQX_RTOS )
             if ( MQX_NULL_TASK_ID == (taskID = OS_TASK_Create(pTaskList) ) )
 #elif (RTOS_SELECTION == FREE_RTOS)
+            if( pTaskList->TASK_TEMPLATE_INDEX == eIDL_TSK_IDX )
+            {
+               continue; // Skip the Idle Task. We are using the Idle Task created by FreeRTOS
+            }
             if ( pdPASS != OS_TASK_Create(pTaskList) )
 #endif
             {
@@ -1125,7 +1141,7 @@ char * OS_TASK_GetTaskName ( void )
 #endif
 } /* end OS_TASK_GetTaskName () */
 
-#if 0
+#if ( RTOS_SELECTION == MQX_RTOS )
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_UpdateCpuLoad
@@ -1145,16 +1161,16 @@ char * OS_TASK_GetTaskName ( void )
  **********************************************************************************************************************/
 uint32_t OS_TASK_UpdateCpuLoad ( void )
 {
-   TASK_TEMPLATE_STRUCT const *pTaskList; /* Pointer to task list which contains all tasks in the system */
+   OS_TASK_Template_t const *pTaskList; /* Pointer to task list which contains all tasks in the system */
    uint32_t                   CPULoad = 0;
-   uint32_t                   taskID;
+   OS_TASK_id                 taskID;
 
    // Rebuild the TASK_TD array each time to account for tasks that could be dead or invalid.
-   for ( pTaskList = MQX_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+   for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
       // Retrieve some task pointers
       // Make sure task ID is valid. Invalid number means task is dead.
-      taskID = OS_TASK_GetID_fromName( pTaskList->TASK_NAME );
+      taskID = OS_TASK_GetID_fromName( pTaskList->pcName );
       if ( taskID ) {
          TASK_TD[pTaskList->TASK_TEMPLATE_INDEX] = _task_get_td( taskID );
       } else {
@@ -1167,7 +1183,7 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
 
    TASK_CPUload[eINT_TSK_IDX][cpuLoadIndex] = 0; // Reset interrupt accumulator
 
-   for ( pTaskList = MQX_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+   for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
       // Skip bad task
       if ( TASK_TD[pTaskList->TASK_TEMPLATE_INDEX] == 0 ) {
@@ -1205,6 +1221,69 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
 
 } /* end OS_TASK_UpdateCpuLoad () */
 
+#elif ( RTOS_SELECTION == FREE_RTOS )
+/***********************************************************************************************************************
+                     FreeRTOS Version of OS_TASK_UpdateCpuLoad
+***********************************************************************************************************************/
+uint32_t OS_TASK_UpdateCpuLoad ( void )
+{
+#if ( GENERATE_RUN_TIME_STATS == 0 )
+#warning "Function will NOT provide ulRunTimeCounter values without this feature"
+#endif
+   OS_TASK_Template_t const *pTaskList; /* Pointer to task list which contains all tasks in the system */
+   uint32_t                 CPULoad = 0;
+   TaskStatus_t             taskStatusInfo;
+   TaskHandle_t             taskHandle;
+
+   // Rebuild the TASK_TD array each time to account for tasks that could be dead or invalid.
+   for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+   {
+      // Retrieve some task pointers
+      // Make sure task ID is valid. Invalid number means task is dead.
+      if( pTaskList->TASK_TEMPLATE_INDEX == eIDL_TSK_IDX )
+      {
+         /* Get the task Handle for FreeRTOS Idle task */
+         taskHandle = xTaskGetIdleTaskHandle();
+      }
+      else
+      {
+         taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
+      }
+      vTaskGetInfo( taskHandle, &taskStatusInfo, pdFALSE, eInvalid );  // No need to get the HighWaterMark and Task Stat, which are time consuming
+      Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = taskStatusInfo.ulRunTimeCounter;
+   }
+
+   CPUTotal = 0;
+   cpuLoadIndex = (cpuLoadIndex+1)%TASK_CPULOAD_SIZE;
+
+   for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+   {
+      // Save CPU load for this task without the time spent in the interrupt
+      TASK_CPUload[pTaskList->TASK_TEMPLATE_INDEX][cpuLoadIndex] = Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX];
+
+      // The IDLE task run time is not counted toward the CPU load. Without doing this, the CPU load time would be %100
+      if( pTaskList->TASK_TEMPLATE_INDEX != eIDL_TSK_IDX )
+      {
+         CPULoad  += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX]; // Compute total CPU load including intterupt time
+      }
+      CPUTotal += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX];    // This is the task run time including any time spent in the interrupt handler
+      Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;            // Reset task run time
+   }
+
+   // Sanity check
+   if ( CPULoad > CPUTotal ) {
+      CPULoad = CPUTotal;
+   }
+
+   // Make sure we don't divide by 0
+   if ( CPUTotal != 0 ) {
+      CPULoad = (uint32_t)((((float)CPULoad*100)/CPUTotal)+0.5);
+   }
+
+   return CPULoad;
+} /* end OS_TASK_UpdateCpuLoad () */
+#endif
+
 /***********************************************************************************************************************
  *
  * Function Name: OS_TASK_GetCpuLoad
@@ -1223,14 +1302,16 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
  * Notes:
  *
  **********************************************************************************************************************/
-void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad )
+void OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint32_t * CPULoad )
 {
    uint32_t i; // Loop counter
 
+#if ( RTOS_SELECTION == MQX_RTOS )
    // Check if this is to retrieve the CPU load interrupt
    if ( taskIdx == 0xFFFFFFFF) {
       taskIdx = (uint32_t)eINT_TSK_IDX;
    }
+#endif
 
    for (i=0 ; i<TASK_CPULOAD_SIZE; i++) {
      // Retrieve CPU load
@@ -1457,66 +1538,94 @@ void OS_TASK_Summary ( bool safePrint )
    }
 }
 #endif // #if ( RTOS_SELECTION == MQX_RTOS )
-#endif // #if 0
 
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
 /***********************************************************************************************************************
 
-   Function Name: OS_TASK_SummaryFreeRTOS
+   Function Name: OS_TASK_Summary
 
-   Purpose: This function will print the state of tasks.while using the free RTOS
+   Purpose: This function will print the Task Info for FreeRTOS
 
-   Arguments: None
+   Arguments: bool safePrint
 
    Returns: None
 
-   Notes:
-
 **********************************************************************************************************************/
-
-void OS_TASK_SummaryFreeRTOS ( void )
+void OS_TASK_Summary ( bool safePrint )
 {
-   int8_t index = 0;
+   int8_t                     index = 0;
+   TaskStatus_t               taskStatusInfo;
+   TaskHandle_t               taskHandle;
+   OS_TASK_Template_t const   *pTaskList;
+   uint32_t                   CPULoad[TASK_CPULOAD_SIZE];
    char taskState[6][10] = { "Running", "Ready", "Blocked", "Suspended", "Deleted", "Invalid" };
-   char taskInformation[9][25] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskBasePriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth", "TaskStackHighWaterMark", "TaskStackBase" };
-   char taskInfo[9][25] = { "TName", "TNumber", "TCP", "TBP", "TState", "TRTC", "TSD", "TSHWM", "TSB" };
+   char taskInformation[8][25] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth",
+                                    "TaskStackHighWaterMark", "TaskStackBase" };
+   char taskInfo[10][25] = { "TName", "TNumber", "TCP", "TState", "TRTC", "TSD", "TSHWM", "TSB", "CPU load (last 10 secs)","(Oldest)"};
    char buffer[150];
-   TaskStatus_t taskStatusInfo;
-   TaskHandle_t taskHandle;
-   OS_TASK_Template_t const *pTaskList;
 
-   DBG_logPrintf( 'R', "OS_TASK_SUMMARY" );
-   while( index < 9 )
+   while( index < ((sizeof( taskInfo)/sizeof(taskInfo[0])) - 2) )  // Excluding the CPU Load Strings
    {
-      DBG_logPrintf( 'R', "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
+      if (safePrint)
+      {
+         DBG_printf( "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
+      }
+      else
+      {
+         DBG_LW_printf( "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
+      }
       index++;
    }
-   snprintf( buffer, 150, "%10s %10s %10s %10s %10s %10s %10s %10s %10s\r\n",
-                  taskInfo[0],
-                  taskInfo[1],
-                  taskInfo[2],
-                  taskInfo[3],
-                  taskInfo[4],
-                  taskInfo[5],
-                  taskInfo[6],
-                  taskInfo[7],
-                  taskInfo[8] );
-   DBG_logPrintf( 'R', "%s", buffer );
+   snprintf( buffer, sizeof(buffer), "%-8s %4s %5s %8s %10s %5s %5s %10s %30s %15s\n", taskInfo[0], taskInfo[1], taskInfo[2], taskInfo[3], taskInfo[4],
+                                      taskInfo[5], taskInfo[6], taskInfo[7], taskInfo[8], taskInfo[9] );
+   if (safePrint)
+   {
+      buffer[strlen(buffer)-1] = 0; // remove \n. It will be added back when printed
+      DBG_printf( buffer );
+   }
+   else
+   {
+      DBG_LW_printf( buffer );
+   }
    for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
-      taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
+      if( pTaskList->pvTaskCode != NULL )
+      {
+         taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
+      }
+      else
+      {
+         taskHandle = xTaskGetIdleTaskHandle();
+      }
       vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid );
-      snprintf( buffer, 150, "%10s %10d %10d %10d %10s %10d %10d %10d   0x%x\r\n",
-               ( char* )pTaskList->pcName,
-               taskStatusInfo.xTaskNumber,
-               taskStatusInfo.uxCurrentPriority,
-               taskStatusInfo.uxBasePriority,
-               ( char* )taskState[ taskStatusInfo.eCurrentState ],
-               taskStatusInfo.ulRunTimeCounter,
-               pTaskList->usStackDepth,
+      OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, CPULoad );
+      snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
+               ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, ( char* )taskState[ taskStatusInfo.eCurrentState ],
+               taskStatusInfo.ulRunTimeCounter, pTaskList->usStackDepth,
                ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
-               taskStatusInfo.pxStackBase );
-      DBG_logPrintf( 'R', "%s", buffer );
+               taskStatusInfo.pxStackBase,
+               CPULoad[0]/10, CPULoad[0]%10,
+               CPULoad[1]/10, CPULoad[1]%10,
+               CPULoad[2]/10, CPULoad[2]%10,
+               CPULoad[3]/10, CPULoad[3]%10,
+               CPULoad[4]/10, CPULoad[4]%10,
+               CPULoad[5]/10, CPULoad[5]%10,
+               CPULoad[6]/10, CPULoad[6]%10,
+               CPULoad[7]/10, CPULoad[7]%10,
+               CPULoad[8]/10, CPULoad[8]%10,
+               CPULoad[9]/10, CPULoad[9]%10);
+
+      if (safePrint)
+      {
+         buffer[strlen(buffer)-1] = 0; // remove \n. It will be added back when printed
+         DBG_printf( buffer );
+         // Throttle printing process because we don't have enough buffers
+         OS_TASK_Sleep(TEN_MSEC); // About how long it takes to print one line
+      }
+      else
+      {
+         DBG_LW_printf( buffer );
+      }
    }
 }
 #endif
@@ -1571,4 +1680,23 @@ void OS_TASK_Create_PWRLG( void )
 //      printf("Unable to create PWRLG_Task"); // Note: printf doesn't work here yet. TODO: RA6: Initialize UART prior to this?
    }
 }
-#endif
+
+/***********************************************************************************************************************
+ *
+ * Function Name: vApplicationStackOverflowHook
+ *
+ * Purpose: Application Hook for StackOverflow
+ *
+ * Arguments: TaskHandle_t xTask
+ *            char * pcTaskName
+ *
+ * Returns: None
+ *
+ **********************************************************************************************************************/
+void vApplicationStackOverflowHook( TaskHandle_t xTask, char * pcTaskName )
+{
+   ERR_printf("!!STACK OVERFLOW!!");
+   DBG_logPrintf('E',"Task: %s ", pcTaskName );
+}
+
+#endif /* FREE_RTOS */

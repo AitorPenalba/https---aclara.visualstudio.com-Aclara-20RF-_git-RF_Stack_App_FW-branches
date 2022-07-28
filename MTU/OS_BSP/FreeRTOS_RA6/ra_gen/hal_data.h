@@ -35,6 +35,17 @@
 #include "r_i2c_master_api.h"
 FSP_HEADER
 
+/** AGT Timer Instance */
+extern const timer_instance_t AGT3_RunTimeStats;
+
+/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
+extern agt_instance_ctrl_t AGT3_RunTimeStats_ctrl;
+extern const timer_cfg_t AGT3_RunTimeStats_cfg;
+
+#ifndef NULL
+void NULL(timer_callback_args_t * p_args);
+#endif
+
 /** Timer on GPT Instance. */
 extern const timer_instance_t GPT2_ZCD_Meter;
 

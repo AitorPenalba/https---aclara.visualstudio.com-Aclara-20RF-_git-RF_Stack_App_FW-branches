@@ -6,7 +6,84 @@
 #define ADC_TRIGGER_ADC0_B      ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1        ADC_TRIGGER_SYNC_ELC
 #define ADC_TRIGGER_ADC1_B      ADC_TRIGGER_SYNC_ELC
-
+agt_instance_ctrl_t AGT3_RunTimeStats_ctrl;
+const agt_extended_cfg_t AGT3_RunTimeStats_extend =
+{
+    .count_source     = AGT_CLOCK_PCLKB,
+    .agto             = AGT_PIN_CFG_DISABLED,
+    .agtoa            = AGT_PIN_CFG_DISABLED,
+    .agtob            = AGT_PIN_CFG_DISABLED,
+    .measurement_mode = AGT_MEASURE_DISABLED,
+    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
+    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+};
+const timer_cfg_t AGT3_RunTimeStats_cfg =
+{
+    .mode                = TIMER_MODE_PERIODIC,
+    /* Actual period: 0.017476266666666667 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x10000, .duty_cycle_counts = 0x8000, .source_div = (timer_source_div_t)3,
+    .channel             = 3,
+    .p_callback          = NULL,
+    /** If NULL then do not add & */
+#if defined(NULL)
+    .p_context           = NULL,
+#else
+    .p_context           = &NULL,
+#endif
+    .p_extend            = &AGT3_RunTimeStats_extend,
+    .cycle_end_ipl       = (BSP_IRQ_DISABLED),
+#if defined(VECTOR_NUMBER_AGT3_INT)
+    .cycle_end_irq       = VECTOR_NUMBER_AGT3_INT,
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t AGT3_RunTimeStats =
+{
+    .p_ctrl        = &AGT3_RunTimeStats_ctrl,
+    .p_cfg         = &AGT3_RunTimeStats_cfg,
+    .p_api         = &g_timer_on_agt
+};
+agt_instance_ctrl_t agt2_Freq_Sync_ctrl;
+const agt_extended_cfg_t agt2_Freq_Sync_extend =
+{
+    .count_source     = AGT_CLOCK_SUBCLOCK,
+    .agto             = AGT_PIN_CFG_DISABLED,
+    .agtoa            = AGT_PIN_CFG_DISABLED,
+    .agtob            = AGT_PIN_CFG_DISABLED,
+    .measurement_mode = AGT_MEASURE_DISABLED,
+    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
+    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+};
+const timer_cfg_t agt2_Freq_Sync_cfg =
+{
+    .mode                = TIMER_MODE_PERIODIC,
+    /* Actual period: 1 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x8000, .duty_cycle_counts = 0x4000, .source_div = (timer_source_div_t)0,
+    .channel             = 2,
+    .p_callback          = NULL,
+    /** If NULL then do not add & */
+#if defined(NULL)
+    .p_context           = NULL,
+#else
+    .p_context           = &NULL,
+#endif
+    .p_extend            = &agt2_Freq_Sync_extend,
+    .cycle_end_ipl       = (BSP_IRQ_DISABLED),
+#if defined(VECTOR_NUMBER_AGT2_INT)
+    .cycle_end_irq       = VECTOR_NUMBER_AGT2_INT,
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t agt2_Freq_Sync =
+{
+    .p_ctrl        = &agt2_Freq_Sync_ctrl,
+    .p_cfg         = &agt2_Freq_Sync_cfg,
+    .p_api         = &g_timer_on_agt
+};
 gpt_instance_ctrl_t GPT2_ZCD_Meter_ctrl;
 #if 0
 const gpt_extended_pwm_cfg_t GPT2_ZCD_Meter_pwm_extend =
@@ -140,45 +217,6 @@ const wdt_cfg_t g_wdt0_cfg =
     .p_callback = NULL,
 };
 
-agt_instance_ctrl_t agt2_Freq_Sync_ctrl;
-const agt_extended_cfg_t agt2_Freq_Sync_extend =
-{
-    .count_source     = AGT_CLOCK_SUBCLOCK,
-    .agto             = AGT_PIN_CFG_DISABLED,
-    .agtoa            = AGT_PIN_CFG_DISABLED,
-    .agtob            = AGT_PIN_CFG_DISABLED,
-    .measurement_mode = AGT_MEASURE_DISABLED,
-    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
-    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
-    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
-};
-const timer_cfg_t agt2_Freq_Sync_cfg =
-{
-    .mode                = TIMER_MODE_PERIODIC,
-    /* Actual period: 1 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x08000, .duty_cycle_counts = 0x4000, .source_div = (timer_source_div_t)0,
-    .channel             = 2,
-    .p_callback          = NULL,
-    /** If NULL then do not add & */
-#if defined(NULL)
-    .p_context           = NULL,
-#else
-    .p_context           = &NULL,
-#endif
-    .p_extend            = &agt2_Freq_Sync_extend,
-    .cycle_end_ipl       = (BSP_IRQ_DISABLED),
-#if defined(VECTOR_NUMBER_AGT2_INT)
-    .cycle_end_irq       = VECTOR_NUMBER_AGT2_INT,
-#else
-    .cycle_end_irq       = FSP_INVALID_VECTOR,
-#endif
-};
-/* Instance structure to use this module. */
-const timer_instance_t agt2_Freq_Sync =
-{
-    .p_ctrl        = &agt2_Freq_Sync_ctrl,
-    .p_cfg         = &agt2_Freq_Sync_cfg,
-    .p_api         = &g_timer_on_agt
-};
 
 /* Instance structure to use this module. */
 const wdt_instance_t g_wdt0 =

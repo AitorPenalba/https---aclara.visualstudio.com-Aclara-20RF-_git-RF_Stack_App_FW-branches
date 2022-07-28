@@ -94,8 +94,6 @@
 #define FREE_RTOS                         2
 
 #define RTOS_SELECTION                    FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
-#define DBG_TESTS                         1
-#define SEGGER_RTT                        0
 // TODO: RA6 [name_Balaji]: Move to Appropriate location
 #define NXP_K24                           1
 #define RA6E1                             2
@@ -104,5 +102,11 @@
 #define DAC_CODE_CONFIG                   1  /* Supports DAC0 for TX Power Control */
 #define LAST_GASP_RECONFIGURE_CLK         0  /* If enabled, the System Clock will be re-configured to use MOCO instead of Main Clock */
 #define LAST_GASP_USE_2_DEEP_SLEEP        1  /* If enabled, will use the different configurations of the Deep SW Standby Modes in Last Gasp to achieve the random sleep delay */
+#if( RTOS_SELECTION == FREE_RTOS )
+#define GENERATE_RUN_TIME_STATS           1  /* Enable the FreeRTOS feature to generate the Run-Time Stats. For this to work, among other things
+                                                   configGENERATE_RUN_TIME_STATS should be enabled in FreeRTOSConfig.h. Please refer FreeRTOS document for more info. */
+#else
+#define GENERATE_RUN_TIME_STATS           0
+#endif
 #endif
 

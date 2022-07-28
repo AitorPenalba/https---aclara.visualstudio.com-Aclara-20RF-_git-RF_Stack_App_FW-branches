@@ -298,4 +298,79 @@ returnStatus_t AGT_FreqSyncTimerCount(uint16_t *count)
 	return rtnVal;
 }
 
+#if ( GENERATE_RUN_TIME_STATS == 1 )
+ /*******************************************************************************************************************//**
+ * @brief       This function opens AGT3 module
+ * @param[IN]   None
+ * @retval      None
+ **********************************************************************************************************************/
+static void AGT_RunTimeStatsInit( void )
+{
+   fsp_err_t      err;
+
+   /* Open AGT3 Timer in Periodic mode */
+	err = R_AGT_Open(&AGT3_RunTimeStats_ctrl, &AGT3_RunTimeStats_cfg);
+   assert(FSP_SUCCESS == err);
+}
+
+/*******************************************************************************************************************//**
+ * @brief       This function starts AGT3 module
+ * @param[IN]   None
+ * @retval      None
+ **********************************************************************************************************************/
+void AGT_RunTimeStatsStart(void)
+{
+   fsp_err_t      err;
+
+   AGT_RunTimeStatsInit();
+	/* Start AGT3 timer */
+	err = R_AGT_Start(&AGT3_RunTimeStats_ctrl);
+   assert(FSP_SUCCESS == err);
+}
+
+/*******************************************************************************************************************//**
+ * @brief       This function stops AGT3 Timer
+ * @param[IN]   None
+ * @retval      None
+ **********************************************************************************************************************/
+void AGT_RunTimeStatsStop(void)
+{
+	fsp_err_t      err;
+   timer_status_t agt_status = {0};
+
+	/* Stop AGT timer if running */
+	err = R_AGT_StatusGet(&AGT3_RunTimeStats_ctrl, &agt_status);
+	if(FSP_SUCCESS == err)
+	{
+		if(agt_status.state)
+		{
+			/* Stop Timer */
+			err = R_AGT_Stop(&AGT3_RunTimeStats_ctrl);
+			if(FSP_SUCCESS == err)
+			{
+				/* Reset counter */
+				err = R_AGT_Reset(&AGT3_RunTimeStats_ctrl);
+			}
+		}
+	}
+   assert(FSP_SUCCESS == err);
+
+}
+
+/*******************************************************************************************************************//**
+ * @brief       This Reads the current AGT3 Timer count
+ * @param[IN]   None
+ * @retval      uint16_t counts
+ **********************************************************************************************************************/
+uint16_t AGT_RunTimeStatsCount( void )
+{
+   timer_status_t agt_status = {0};
+
+	/* Stop AGT timer if running */
+	( void )R_AGT_StatusGet(&AGT3_RunTimeStats_ctrl, &agt_status);
+
+	return ( (uint16_t)agt_status.counter );
+}
+#endif // (GENERATE_RUN_TIME_STATS == 1)
+
 #endif // #if ( MCU_SELECTED == RA6E1 )

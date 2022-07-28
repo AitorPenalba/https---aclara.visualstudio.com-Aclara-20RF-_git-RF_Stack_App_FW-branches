@@ -306,7 +306,10 @@ extern returnStatus_t AGT_FreqSyncTimerInit   (void);
 extern returnStatus_t AGT_FreqSyncTimerStart  (void);
 extern returnStatus_t AGT_FreqSyncTimerStop   (void);
 extern returnStatus_t AGT_FreqSyncTimerCount  (uint16_t *count);
-
+#if ( GENERATE_RUN_TIME_STATS == 1 )
+extern void           AGT_RunTimeStatsStart   ( void );
+extern uint16_t       AGT_RunTimeStatsCount   ( void );
+#endif
 extern returnStatus_t GPT_PD_Init             ( void );
 extern void           GPT_PD_Enable           ( void );
 extern void           GPT_PD_Disable          ( void );
