@@ -557,7 +557,7 @@ returnStatus_t ADC_ShutDown ( void )
 #endif   //#if ENABLE_ADC1
 #elif ( MCU_SELECTED == RA6E1 )
    //Closes the ADC driver, disables the interrupts and Stops the ADC
-   //   (void)R_ADC_Close( &g_adc0_ctrl );  // TODO: RA6E1: Do We need this?
+   (void)R_ADC_Close( &g_adc0_ctrl );  // TODO: RA6E1: Do We need this?
 #endif
    return ( eSUCCESS );
 } /* end ADC_ShutDown () */
