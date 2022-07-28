@@ -990,10 +990,10 @@ FSP Configuration
       General: Name: AGT3_RunTimeStats
       General: Channel: 3
       General: Mode: Periodic
-      General: Period: 0x10000
+      General: Period: 0x80000
       General: Period Unit: Raw Counts
       Output: Duty Cycle Percent (only applicable in PWM mode): 50
-      General: Count Source: SUBCLOCK
+      General: Count Source: PCLKB
       Output: AGTOA Output: Disabled
       Output: AGTOB Output: Disabled
       Output: AGTO Output: Disabled

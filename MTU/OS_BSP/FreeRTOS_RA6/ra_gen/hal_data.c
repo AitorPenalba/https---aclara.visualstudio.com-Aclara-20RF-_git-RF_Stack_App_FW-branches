@@ -21,7 +21,7 @@ const agt_extended_cfg_t AGT3_RunTimeStats_extend =
 const timer_cfg_t AGT3_RunTimeStats_cfg =
 {
     .mode                = TIMER_MODE_PERIODIC,
-    /* Actual period: 0.0021845333333333334 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x10000, .duty_cycle_counts = 0x8000, .source_div = (timer_source_div_t)0,
+    /* Actual period: 0.017476266666666667 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x10000, .duty_cycle_counts = 0x8000, .source_div = (timer_source_div_t)3,
     .channel             = 3,
     .p_callback          = NULL,
     /** If NULL then do not add & */

@@ -1231,9 +1231,9 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
 #warning "Function will NOT provide ulRunTimeCounter values without this feature"
 #endif
    OS_TASK_Template_t const *pTaskList; /* Pointer to task list which contains all tasks in the system */
-   uint32_t                   CPULoad = 0;
-   TaskStatus_t               taskStatusInfo;
-   TaskHandle_t               taskHandle;
+   uint32_t                 CPULoad = 0;
+   TaskStatus_t             taskStatusInfo;
+   TaskHandle_t             taskHandle;
 
    // Rebuild the TASK_TD array each time to account for tasks that could be dead or invalid.
    for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
@@ -1559,9 +1559,9 @@ void OS_TASK_Summary ( bool safePrint )
    OS_TASK_Template_t const   *pTaskList;
    uint32_t                   CPULoad[TASK_CPULOAD_SIZE];
    char taskState[6][10] = { "Running", "Ready", "Blocked", "Suspended", "Deleted", "Invalid" };
-   char taskInformation[9][25] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskBasePriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth",
+   char taskInformation[8][25] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth",
                                     "TaskStackHighWaterMark", "TaskStackBase" };
-   char taskInfo[11][25] = { "TName", "TNumber", "TCP", "TBP", "TState", "TRTC", "TSD", "TSHWM", "TSB", "CPU load (last 10 secs)","(Oldest)"};
+   char taskInfo[10][25] = { "TName", "TNumber", "TCP", "TState", "TRTC", "TSD", "TSHWM", "TSB", "CPU load (last 10 secs)","(Oldest)"};
    char buffer[150];
 
    while( index < ((sizeof( taskInfo)/sizeof(taskInfo[0])) - 2) )  // Excluding the CPU Load Strings
@@ -1576,8 +1576,8 @@ void OS_TASK_Summary ( bool safePrint )
       }
       index++;
    }
-   snprintf( buffer, sizeof(buffer), "%-8s %4s %5s %5s %8s %10s %5s %5s %10s %30s %15s\r\n", taskInfo[0], taskInfo[1], taskInfo[2], taskInfo[3], taskInfo[4],
-                                      taskInfo[5], taskInfo[6], taskInfo[7], taskInfo[8], taskInfo[9], taskInfo[10] );
+   snprintf( buffer, sizeof(buffer), "%-8s %4s %5s %8s %10s %5s %5s %10s %30s %15s\n", taskInfo[0], taskInfo[1], taskInfo[2], taskInfo[3], taskInfo[4],
+                                      taskInfo[5], taskInfo[6], taskInfo[7], taskInfo[8], taskInfo[9] );
    if (safePrint)
    {
       buffer[strlen(buffer)-1] = 0; // remove \n. It will be added back when printed
@@ -1599,9 +1599,9 @@ void OS_TASK_Summary ( bool safePrint )
       }
       vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid );
       OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, CPULoad );
-      snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %5u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
-               ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, taskStatusInfo.uxBasePriority,
-               ( char* )taskState[ taskStatusInfo.eCurrentState ], taskStatusInfo.ulRunTimeCounter, pTaskList->usStackDepth,
+      snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
+               ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, ( char* )taskState[ taskStatusInfo.eCurrentState ],
+               taskStatusInfo.ulRunTimeCounter, pTaskList->usStackDepth,
                ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
                taskStatusInfo.pxStackBase,
                CPULoad[0]/10, CPULoad[0]%10,
