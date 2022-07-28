@@ -941,9 +941,10 @@ const rtc_instance_t g_rtc0 =
     .p_api         = &g_rtc_on_rtc
 };
 adc_instance_ctrl_t g_adc0_ctrl;
+/* ADC_ADD_AVERAGE_SIXTEEN can't be found in RASC, found in r_adc.h */
 const adc_extended_cfg_t g_adc0_cfg_extend =
 {
-    .add_average_count   = ADC_ADD_SIXTEEN,
+    .add_average_count   = ADC_ADD_AVERAGE_SIXTEEN,
     .clearing            = ADC_CLEAR_AFTER_READ_ON,
     .trigger_group_b     = ADC_TRIGGER_SYNC_ELC,
     .double_trigger_mode = ADC_DOUBLE_TRIGGER_DISABLED,
@@ -1009,7 +1010,7 @@ const adc_channel_cfg_t g_adc0_channel_cfg =
     .scan_mask           = ADC_MASK_CHANNEL_5 | ADC_MASK_CHANNEL_7 | ADC_MASK_CHANNEL_8 |  0,
     .scan_mask_group_b   =  0,
     .priority_group_a    = ADC_GROUP_A_PRIORITY_OFF,
-    .add_mask            =  0,
+    .add_mask            = ADC_MASK_CHANNEL_5 | ADC_MASK_CHANNEL_7 | ADC_MASK_CHANNEL_8 |  0,
     .sample_hold_mask    =  0,
     .sample_hold_states  = 24,
 #if ((0) | (0))
