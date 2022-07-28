@@ -1727,7 +1727,11 @@ static void mfgpReadByte( uint8_t rxByte )
 #endif
    else
    {
+#if ( MCU_SELECTED == NXP_K24 )
       if( (rxByte == LINE_FEED_CHAR) || (rxByte == CARRIAGE_RETURN_CHAR) )
+#elif ( MCU_SELECTED == RA6E1 )
+      if( rxByte == CARRIAGE_RETURN_CHAR )
+#endif
       {
 #if (USE_DTLS == 1)
          if ( !MFGP_AllowDtlsConnect() )
@@ -1775,6 +1779,12 @@ static void mfgpReadByte( uint8_t rxByte )
          }
 
       }
+#if ( MCU_SELECTED == RA6E1 )
+      else if ( rxByte == LINE_FEED_CHAR )
+      {
+         rxByte = 0x0;
+      }
+#endif
       else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
       {
          /* buffer is full */
