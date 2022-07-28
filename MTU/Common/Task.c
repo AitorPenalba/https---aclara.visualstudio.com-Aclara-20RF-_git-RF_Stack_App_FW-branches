@@ -1240,15 +1240,18 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
    {
       // Retrieve some task pointers
       // Make sure task ID is valid. Invalid number means task is dead.
-      taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
+      if( pTaskList->TASK_TEMPLATE_INDEX == eIDL_TSK_IDX )
+      {
+         /* Get the task Handle for FreeRTOS Idle task */
+         taskHandle = xTaskGetIdleTaskHandle();
+      }
+      else
+      {
+         taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
+      }
       vTaskGetInfo( taskHandle, &taskStatusInfo, pdFALSE, eInvalid );  // No need to get the HighWaterMark and Task Stat, which are time consuming
-
       Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = taskStatusInfo.ulRunTimeCounter;
    }
-   /* Get the Run Time Counter for FreeRTOS Idle task */
-   taskHandle = xTaskGetIdleTaskHandle();
-   vTaskGetInfo( taskHandle, &taskStatusInfo, pdFALSE, eInvalid );  // No need to get the HighWaterMark and Task Stat, which are time consuming
-   Task_RunTimeCounters_[eIDL_TSK_IDX] = taskStatusInfo.ulRunTimeCounter;
 
    CPUTotal = 0;
    cpuLoadIndex = (cpuLoadIndex+1)%TASK_CPULOAD_SIZE;
@@ -1263,8 +1266,8 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
       {
          CPULoad  += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX]; // Compute total CPU load including intterupt time
       }
-      CPUTotal += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX];// This is the task run time including any time spent in the interrupt handler
-      Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;        // Reset task run time
+      CPUTotal += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX];    // This is the task run time including any time spent in the interrupt handler
+      Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;            // Reset task run time
    }
 
    // Sanity check
@@ -1596,7 +1599,7 @@ void OS_TASK_Summary ( bool safePrint )
       }
       vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid );
       OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, CPULoad );
-      snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %5u %8s %10d %5d %5d   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
+      snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %5u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
                ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, taskStatusInfo.uxBasePriority,
                ( char* )taskState[ taskStatusInfo.eCurrentState ], taskStatusInfo.ulRunTimeCounter, pTaskList->usStackDepth,
                ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
