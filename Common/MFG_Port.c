@@ -1724,7 +1724,9 @@ static void mfgpReadByte( uint8_t rxByte )
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
+#if 0
             (void)UART_flush ( mfgUart  );
+#endif
 #else
             MFG_printf( mfgpLockInEffect );
 #endif
@@ -9859,7 +9861,7 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
 
 #if 0 // TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
 #if !USE_USB_MFG
-      UART_flush( mfgUart  );
+      UART_RX_flush( mfgUart  );
       ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #else
       usb_flush();
