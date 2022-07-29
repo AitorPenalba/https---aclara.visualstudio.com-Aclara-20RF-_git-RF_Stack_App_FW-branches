@@ -209,7 +209,6 @@
    } \
 }
 #else
-/* TODO: RA6: Revisit and Add later */
 #define MFG_logPrintf MFG_printf
 #define MFG_printf (void)DBG_printfNoCr
 #endif  // USE_DTLS
@@ -6439,7 +6438,7 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
          }
          bytesReceived++;
       }
-      // TODO: RA6E1 Can be implemented by using fgets (as this receives multiple bytes and the last byte is \n)
+
 #endif
 #endif
 

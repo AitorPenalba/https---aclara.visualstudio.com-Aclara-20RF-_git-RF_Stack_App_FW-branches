@@ -931,7 +931,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 
   Arguments: UartId - Identifier of the particular UART to receive data in
 
-  Returns: None
+  Returns: uint8_t - UART_flush status
 
   Notes:
 
@@ -941,14 +941,14 @@ uint8_t UART_flush( enum_UART_ID UartId )
 #if ( RTOS_SELECTION == MQX_RTOS )
    return ( (uint8_t)fflush(UartHandle[UartId]) );
 #elif ( RTOS_SELECTION == FREE_RTOS )
-
+#if 0
    if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
    {
       uint32_t remainingBytes;
       ( void )R_SCI_UART_ReadStop( (void *)UartCtrl[ (uint32_t)UartId ], &remainingBytes );
       ( void )R_SCI_UART_Close   ( (void *)UartCtrl[ (uint32_t)UartId ] );
    }
-
+#endif
    OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
    // Setting bool values to false at init
    ringBufoverflow   [ (uint32_t)UartId ] = false;
@@ -969,10 +969,12 @@ uint8_t UART_flush( enum_UART_ID UartId )
    {
       //do nothing
    }
+#if 0
    if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
    {
       ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );
    }
+#endif
    OS_INT_enable();
    return eSUCCESS;
 #endif
@@ -1007,13 +1009,14 @@ void UART_RX_flush ( enum_UART_ID UartId )
    }
    while ( charsAvailable );/* Loop while bytes in queue  */
 #elif ( RTOS_SELECTION == FREE_RTOS )
+#if 0
    if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
    {
       uint32_t remainingBytes;
       ( void )R_SCI_UART_ReadStop( (void *)UartCtrl[ (uint32_t)UartId ], &remainingBytes );
       ( void )R_SCI_UART_Close   ( (void *)UartCtrl[ (uint32_t)UartId ] );
    }
-
+#endif
    OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
    // Setting bool values to false at init
    ringBufoverflow   [ (uint32_t)UartId ] = false;
@@ -1033,10 +1036,12 @@ void UART_RX_flush ( enum_UART_ID UartId )
    {
       //do nothing
    }
+#if 0
    if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
    {
       ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );
    }
+#endif
    OS_INT_enable();
 #endif
 }
