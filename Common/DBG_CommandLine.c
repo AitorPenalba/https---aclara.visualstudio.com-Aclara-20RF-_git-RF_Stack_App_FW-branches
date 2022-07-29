@@ -2622,7 +2622,7 @@ uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] )
       if( sizeToRead < MAX_INTERNAL_FLASH_READ_SIZE )
       {
          /* Getting the Last address to read */
-         sizeofData = addressOffset + sizeToRead;
+         sizeofData = ( addressOffset + sizeToRead ) - 1;
          if ( ( addressOffset < TM_INT_FLASH_SIZE ) )
          {
             if( sizeofData < TM_INT_FLASH_SIZE ) 
@@ -2694,7 +2694,8 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
       userDataWrite = argv[2];
       if ( addressOffset < TM_INT_FLASH_SIZE )
       {
-         if( ( addressOffset + strlen( userDataWrite ) ) < TM_INT_FLASH_SIZE )
+         /* Getting the Last address to write */
+         if( ( ( addressOffset + strlen( userDataWrite ) ) -1 ) < TM_INT_FLASH_SIZE )
          {
             if ( eSUCCESS == PAR_partitionFptr.parWrite( addressOffset,
                                                    userDataWrite,
