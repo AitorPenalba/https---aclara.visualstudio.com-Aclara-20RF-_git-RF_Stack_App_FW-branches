@@ -280,8 +280,8 @@ uint8_t ecc108c_send_and_receive(uint8_t *tx_buffer, uint8_t rx_size, uint8_t *r
 #if ( ( MCU_SELECTED == NXP_K24 ) && ( RTOS_SELECTION == MQX_RTOS ) )
       delay_10us(execution_delay * 100);  // Wait minimum command execution time and then start polling for a response.
 #elif ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-      delay_10us(execution_delay * 100);  // Wait minimum command execution time and then start polling for a response.
-//      R_BSP_SoftwareDelay( execution_delay, BSP_DELAY_UNITS_MILLISECONDS );
+//      delay_10us(execution_delay * 100);  // Wait minimum command execution time and then start polling for a response.
+      R_BSP_SoftwareDelay( execution_delay, BSP_DELAY_UNITS_MILLISECONDS );
 #endif
       // Retry loop for receiving a response.
       n_retries_receive = ECC108_RETRY_COUNT + 1;

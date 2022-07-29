@@ -58,6 +58,7 @@
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 #define STRING_BUFFER_SIZE 32
+#define PARTNUMBER_BUFFER_SIZE 17
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -523,11 +524,14 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBu
    {
       if(*( pDevPartNumber + index ) == '\0' )
       {
-         while( index <devPartNumberBuffSize )
+         /*while( index <devPartNumberBuffSize )
          {
            *( devPartNumberBuff + index )  = ' ';
             index++;
          }
+         */
+        //index = devPartNumberBuffSize;
+        break;
       }
       else
       {
@@ -536,7 +540,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBu
       index++;
    }
 //   (void)strncpy (devPartNumberBuff, pDevPartNumber, devPartNumberBuffSize);
-   devPartNumberBuff[index-1] = '\0';   // ensure the buffer is null-terminated
+   devPartNumberBuff[devPartNumberBuffSize-1] = '\0';   // ensure the buffer is null-terminated
    *devPartNumberLeng = (uint8_t)strlen(devPartNumberBuff);
    return CIM_QUALCODE_SUCCESS;
 }
@@ -909,38 +913,55 @@ returnStatus_t ENDPT_CIM_CMD_OR_PM_Handler( enum_MessageMethod action, meterRead
             }
             break;
          }
-      case comDeviceMicroMPN :
-      {
-         char partNumber[17];
-         int index = 0;
-         char *pDevPartNumber;
-         pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
-         while( index < 17 )
+         case comDeviceMicroMPN :
          {
-            if(*( pDevPartNumber + index ) == '\0' )
-            {
-               while( index < 17 )
+            uint8_t numberOfBytes = 0; //store length of string returned
+            uint8_t strBuffer[PARTNUMBER_BUFFER_SIZE]; //store string returned
+            (void) memset(strBuffer, 0, PARTNUMBER_BUFFER_SIZE);
+
+            if ( PARTNUMBER_BUFFER_SIZE <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
+            {  //The reading will fit in the buffer
+     	       (void)ENDPT_CIM_CMD_getStrValue( id, strBuffer, sizeof(strBuffer), &numberOfBytes);
+               (void)memcpy((char *)value, strBuffer, numberOfBytes);
+               retVal = eSUCCESS;
+               if (attr != NULL)
                {
-                  partNumber[ index ]= ' ';
-                  index++;
+                  attr->rValLen = numberOfBytes;
+                  attr->rValTypecast = (uint8_t)ASCIIStringValue;
                }
             }
-            else
+            break;
+/*            char partNumber[17];
+            int index = 0;
+            char *pDevPartNumber;
+            pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
+            while( index < 17 )
             {
-               partNumber[ index ] = *( pDevPartNumber + index );
+               if(*( pDevPartNumber + index ) == '\0' )
+               {
+                  while( index < 17 )
+                  {
+                     partNumber[ index ]= ' ';
+                     index++;
+                  }
+               }
+               else
+               {
+                  partNumber[ index ] = *( pDevPartNumber + index );
+               }
+               index++;
             }
-            index++;
-         }
-         partNumber[ index - 1 ] = '\0';
-         (void)strncpy ((char *)value, partNumber, 17);
+            partNumber[ index - 1 ] = '\0';
+            (void)strncpy ((char *)value, partNumber, 17);
 
-         if (attr != NULL)
-         {
-             attr->rValLen = 17;
-             attr->rValTypecast = (uint8_t)ASCIIStringValue;
+            if (attr != NULL)
+            {
+                attr->rValLen = 17;
+                attr->rValTypecast = (uint8_t)ASCIIStringValue;
+            }
+            break;
+*/
          }
-         break;
-      }
 
          default :
          {
