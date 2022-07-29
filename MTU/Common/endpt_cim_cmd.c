@@ -524,14 +524,13 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBu
    {
       if(*( pDevPartNumber + index ) == '\0' )
       {
-         /*while( index <devPartNumberBuffSize )
+         while( index <devPartNumberBuffSize )
          {
-           *( devPartNumberBuff + index )  = ' ';
+            *( devPartNumberBuff + index )  = *(char *)"0";
             index++;
          }
-         */
-        //index = devPartNumberBuffSize;
-        break;
+          
+         break;
       }
       else
       {
@@ -540,7 +539,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBu
       index++;
    }
 //   (void)strncpy (devPartNumberBuff, pDevPartNumber, devPartNumberBuffSize);
-   devPartNumberBuff[devPartNumberBuffSize-1] = '\0';   // ensure the buffer is null-terminated
+   devPartNumberBuff[devPartNumberBuffSize] = '\0';   // ensure the buffer is null-terminated
    *devPartNumberLeng = (uint8_t)strlen(devPartNumberBuff);
    return CIM_QUALCODE_SUCCESS;
 }
