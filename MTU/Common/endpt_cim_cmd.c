@@ -915,18 +915,18 @@ returnStatus_t ENDPT_CIM_CMD_OR_PM_Handler( enum_MessageMethod action, meterRead
          {
             uint8_t numberOfBytes = 0; //store length of string returned
             uint8_t strBuffer[PARTNUMBER_BUFFER_SIZE]; //store string returned
-            (void) memset(strBuffer, 0, PARTNUMBER_BUFFER_SIZE);
+            (void) memset( strBuffer, 0, PARTNUMBER_BUFFER_SIZE );
 
             if ( PARTNUMBER_BUFFER_SIZE <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
-            {  //The reading will fit in the buffer
-     	       (void)ENDPT_CIM_CMD_getStrValue( id, strBuffer, sizeof(strBuffer), &numberOfBytes);
-               (void)memcpy((char *)value, strBuffer, numberOfBytes);
-               retVal = eSUCCESS;
-               if (attr != NULL)
-               {
-                  attr->rValLen = numberOfBytes;
-                  attr->rValTypecast = (uint8_t)ASCIIStringValue;
-               }
+            {   //The reading will fit in the buffer
+                (void)ENDPT_CIM_CMD_getStrValue( id, strBuffer, sizeof( strBuffer ), &numberOfBytes );
+                (void)memcpy( (char *)value, strBuffer, numberOfBytes );
+                retVal = eSUCCESS;
+                if ( attr != NULL )
+                {
+                   attr->rValLen = numberOfBytes;
+                   attr->rValTypecast = (uint8_t)ASCIIStringValue;
+                }
             }
             break;
          }

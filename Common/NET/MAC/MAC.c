@@ -60,7 +60,6 @@
 #include "time_util.h"
 #include "timer_util.h"
 #include "time_sync.h"
-//#include "time_sys.h"  // TODO: RA6E1: Do we need this include?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
 #endif
@@ -1190,8 +1189,7 @@ static void MAC_PHY_CheckForFailure( void )
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InSeconds( &time, &DataReqTime );
 
       // TODO: RA6E1 Overflow check removed as there is no support. Add support to overflow flag
-      //if ( ( TimeDiff > 600 ) /* || Overflow */ )
-      if ( ( TimeDiff > 600 ) || ( DataReqTime.xNumOfOverflows != 0 ) )
+      if ( ( TimeDiff > 600 ) /* || Overflow */ )
       {
          // More than 5 minutes elapsed between MAC/PHY
          ERR_printf("PHY didn't received a frame in a timely manner");

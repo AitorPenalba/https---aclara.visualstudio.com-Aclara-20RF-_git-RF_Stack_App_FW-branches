@@ -2712,7 +2712,7 @@ typedef enum
    macIsIAG                           = 1642, /* Indicates if this device serves the role of an IAG (Intre-Access Network Gateway) */
    macIsRouter                        = 1643, /* Indicates if this device serves the role of an router */
    macState                           = 1644, /* The current state of the MAC layer. */
-   comDeviceMicroMPN                  = 1659, /*  */
+   comDeviceMicroMPN                  = 1659, /* Microcontroller PartNumber. Need to send the partnumber over the air*/
 // macTxFrames                        = 9996, /* Check if needed */
 
    edPwrRelSustainedIntrpMin          = 3600, /* bulkQuantity electricitySecondaryMetered ieee1366SustainedInterruption (min)*/
