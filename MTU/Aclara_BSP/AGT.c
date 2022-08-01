@@ -65,7 +65,7 @@ fsp_err_t AGT_LPM_Timer_Init( void )
 {
    fsp_err_t err = FSP_SUCCESS;
 
-   err = R_AGT_Open(&agt1_timer_cascade_lpm_trigger_ctrl, &agt1_timer_cascade_lpm_trigger_cfg);
+   err = R_AGT_Open(&AGT1_LPM_Wakeup_ctrl, &AGT1_LPM_Wakeup_cfg);
 
    return err;
 }
@@ -82,7 +82,7 @@ fsp_err_t AGT_LPM_Timer_Start(void)
 
    agt_event_ = AGT_EVENT_INVALID; // Set it to invalid value
    /* Start AGT1 timer */
-   err = R_AGT_Start(&agt1_timer_cascade_lpm_trigger_ctrl);
+   err = R_AGT_Start(&AGT1_LPM_Wakeup_ctrl);
    if(err != FSP_SUCCESS)
    {
       printf("Error:AGT1");
@@ -103,18 +103,18 @@ fsp_err_t AGT_LPM_Timer_Stop(void)
    timer_status_t agt_status = {0};
 
 	agt_status.state = TIMER_STATE_STOPPED; //Reset status
-	err =  R_AGT_StatusGet(&agt1_timer_cascade_lpm_trigger_ctrl, &agt_status);
+	err =  R_AGT_StatusGet(&AGT1_LPM_Wakeup_ctrl, &agt_status);
 	if(FSP_SUCCESS == err)
 	{
 		if(agt_status.state)
 		{
 			/* Stop Timer */
-			err = R_AGT_Stop(&agt1_timer_cascade_lpm_trigger_ctrl);
+			err = R_AGT_Stop(&AGT1_LPM_Wakeup_ctrl);
          agt_event_ = AGT_EVENT_INVALID; // Set it to invalid value
 			if(FSP_SUCCESS == err)
 			{
 				/* Reset counter */
-				err = R_AGT_Reset(&agt1_timer_cascade_lpm_trigger_ctrl);
+				err = R_AGT_Reset(&AGT1_LPM_Wakeup_ctrl);
 			}
 		}
 	}
@@ -123,7 +123,7 @@ fsp_err_t AGT_LPM_Timer_Stop(void)
 }
 
 /*******************************************************************************************************************//**
- * @brief       This function configures AGT0 AGT1 timer
+ * @brief       This function configures AGT1 timer
  * @param[IN]   uint32_t period in milliseconds
  * @retval      FSP_SUCCESS
  * @retval      Any Other Error code apart from FSP_SUCCESS
@@ -150,7 +150,7 @@ fsp_err_t AGT_LPM_Timer_Configure( uint32_t period )
    *
    * This example uses the last option (R_FSP_SystemClockHzGet).
    */
-   (void) R_AGT_InfoGet(&agt1_timer_cascade_lpm_trigger_ctrl, &info);
+   (void) R_AGT_InfoGet(&AGT1_LPM_Wakeup_ctrl, &info);
 
    timer_freq_hz = info.clock_frequency;
 #if 0  /* DBG Code */
@@ -163,13 +163,13 @@ fsp_err_t AGT_LPM_Timer_Configure( uint32_t period )
    uint32_t period_counts = (uint32_t) (((uint64_t) timer_freq_hz * period) / 1000);
    /* Set the calculated period. This will return an error if parameter checking is enabled and the calculated
    * period is larger than UINT16_MAX. */
-   err = R_AGT_PeriodSet(&agt1_timer_cascade_lpm_trigger_ctrl, period_counts);
+   err = R_AGT_PeriodSet(&AGT1_LPM_Wakeup_ctrl, period_counts);
 
    assert(FSP_SUCCESS == err);
    agt_event_ = AGT_EVENT_INVALID; // Set it to invalid value
 
 #if 0  /* DBG Code */
-   (void) R_AGT_InfoGet(&agt1_timer_cascade_lpm_trigger_ctrl, &info);
+   (void) R_AGT_InfoGet(&AGT1_LPM_Wakeup_ctrl, &info);
    printf("Period:%ld",info.period_counts);
 #endif
    return err;
@@ -299,8 +299,9 @@ returnStatus_t AGT_FreqSyncTimerCount(uint16_t *count)
 }
 
 #if ( GENERATE_RUN_TIME_STATS == 1 )
+
  /*******************************************************************************************************************//**
- * @brief       This function opens AGT3 module
+ * @brief       This function opens AGT4 and AGT5 modules in cascade
  * @param[IN]   None
  * @retval      None
  **********************************************************************************************************************/
@@ -309,12 +310,16 @@ static void AGT_RunTimeStatsInit( void )
    fsp_err_t      err;
 
    /* Open AGT3 Timer in Periodic mode */
-	err = R_AGT_Open(&AGT3_RunTimeStats_ctrl, &AGT3_RunTimeStats_cfg);
+	err = R_AGT_Open(&AGT4_RunTimeStats_0_ctrl, &AGT4_RunTimeStats_0_cfg);
+   if( FSP_SUCCESS == err )
+   {
+      err = R_AGT_Open(&AGT5_RunTimeStats_1_ctrl, &AGT5_RunTimeStats_1_cfg);
+   }
    assert(FSP_SUCCESS == err);
 }
 
 /*******************************************************************************************************************//**
- * @brief       This function starts AGT3 module
+ * @brief       This function starts AGT4 and AGT5 modules
  * @param[IN]   None
  * @retval      None
  **********************************************************************************************************************/
@@ -323,13 +328,18 @@ void AGT_RunTimeStatsStart(void)
    fsp_err_t      err;
 
    AGT_RunTimeStatsInit();
-	/* Start AGT3 timer */
-	err = R_AGT_Start(&AGT3_RunTimeStats_ctrl);
+	/* Start AGT4 timer */
+	err = R_AGT_Start(&AGT4_RunTimeStats_0_ctrl);
+   if( FSP_SUCCESS == err )
+   {
+      /* Start AGT5 timer */
+      err = R_AGT_Start(&AGT5_RunTimeStats_1_ctrl);
+   }
    assert(FSP_SUCCESS == err);
 }
 
 /*******************************************************************************************************************//**
- * @brief       This function stops AGT3 Timer
+ * @brief       This function stops AGT4 and AGT5 Timers
  * @param[IN]   None
  * @retval      None
  **********************************************************************************************************************/
@@ -339,17 +349,25 @@ void AGT_RunTimeStatsStop(void)
    timer_status_t agt_status = {0};
 
 	/* Stop AGT timer if running */
-	err = R_AGT_StatusGet(&AGT3_RunTimeStats_ctrl, &agt_status);
+	err = R_AGT_StatusGet(&AGT4_RunTimeStats_0_ctrl, &agt_status);
 	if(FSP_SUCCESS == err)
 	{
 		if(agt_status.state)
 		{
 			/* Stop Timer */
-			err = R_AGT_Stop(&AGT3_RunTimeStats_ctrl);
+			err = R_AGT_Stop(&AGT4_RunTimeStats_0_ctrl);
 			if(FSP_SUCCESS == err)
 			{
 				/* Reset counter */
-				err = R_AGT_Reset(&AGT3_RunTimeStats_ctrl);
+				err = R_AGT_Reset(&AGT4_RunTimeStats_0_ctrl);
+			}
+
+         /* Stop Timer */
+			err = R_AGT_Stop(&AGT5_RunTimeStats_1_ctrl);
+			if(FSP_SUCCESS == err)
+			{
+				/* Reset counter */
+				err = R_AGT_Reset(&AGT5_RunTimeStats_1_ctrl);
 			}
 		}
 	}
@@ -358,19 +376,33 @@ void AGT_RunTimeStatsStop(void)
 }
 
 /*******************************************************************************************************************//**
- * @brief       This Reads the current AGT3 Timer count
+ * @brief       This Reads the current AGT4 and AGT5 Timer counter value
  * @param[IN]   None
- * @retval      uint16_t counts
+ * @retval      uint32_t counter Value
  **********************************************************************************************************************/
-uint16_t AGT_RunTimeStatsCount( void )
+uint32_t AGT_RunTimeStatsCount( void )
 {
-   timer_status_t agt_status = {0};
+   timer_status_t    agt_status5 = {0};
+   timer_status_t    agt_status4 = {0};
+   static uint32_t   counterVal = 0;
 
 	/* Stop AGT timer if running */
-	( void )R_AGT_StatusGet(&AGT3_RunTimeStats_ctrl, &agt_status);
+   (void)R_AGT_Stop(&AGT4_RunTimeStats_0_ctrl);
+   (void)R_AGT_Stop(&AGT5_RunTimeStats_1_ctrl);
 
-	return ( (uint16_t)agt_status.counter );
+   ( void )R_AGT_StatusGet(&AGT5_RunTimeStats_1_ctrl, &agt_status5);
+   ( void )R_AGT_StatusGet(&AGT4_RunTimeStats_0_ctrl, &agt_status4);
+   counterVal = agt_status5.counter;
+
+   counterVal = (65536 - counterVal) << 16;
+   counterVal |= (uint16_t)(65536 - (uint16_t)agt_status4.counter);
+
+   R_AGT_Start(&AGT4_RunTimeStats_0_ctrl);
+   R_AGT_Start(&AGT5_RunTimeStats_1_ctrl);
+
+	return ( counterVal );
 }
+
 #endif // (GENERATE_RUN_TIME_STATS == 1)
 
 #endif // #if ( MCU_SELECTED == RA6E1 )

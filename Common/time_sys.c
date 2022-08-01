@@ -2371,10 +2371,10 @@ void TIME_SYS_HandlerTask( taskParameter )
 
                         do
                         {
-#if (RTOS_SELECTION == MQX_RTOS)
+#if ( MCU_SELECTED == NXP_K24 )
                            regVal = SYST_RVR;
                            rawRead = SYST_RVR; //reread the value
-#elif (RTOS_SELECTION == FREE_RTOS)
+#elif ( MCU_SELECTED == RA6E1 )
                            regVal = SysTick->LOAD;
                            rawRead = SysTick->LOAD; //reread the value
 #endif
@@ -2721,11 +2721,7 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
          __disable_interrupt(); // Disable all interrupts. This section is time critical.
          do {
             // Add processing latency to the timeSync time to compensate for processing delays
-#if ( MCU_SELECTED == NXP_K24 )
             timePlusLatency = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT_CYCCNT - pDataInd->timeStampCYCCNT);
-#elif ( MCU_SELECTED == RA6E1 )
-            timePlusLatency = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT->CYCCNT - pDataInd->timeStampCYCCNT);
-#endif
 
             currentTimeCombined = (((timePlusLatency >> 16) * 100LL) >> 16) * 10LL;     // Convert the updated timeSync time in 10ms granularity
             currentTimeRebuilt  = (((currentTimeCombined / 10LL) << 16) / 100LL) << 16; // Convert the converted timeSync back in Q32.32 format.
@@ -2736,11 +2732,8 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
 
             // This is where the magic happens. We refine the time from a 10ms granularity to usec precision.
             // Recompute with time setting added latency
-#if ( MCU_SELECTED == NXP_K24 )
             timePlusLatency2 = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT_CYCCNT - pDataInd->timeStampCYCCNT);
-#elif ( MCU_SELECTED == RA6E1 )
-            timePlusLatency2 = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT->CYCCNT - pDataInd->timeStampCYCCNT);
-#endif
+
             diffTime = timePlusLatency2 - currentTimeRebuilt;
 #if ( MCU_SELECTED == NXP_K24 )
             systRVRUpdate = (2*SYST_RVR)-(uint32_t)((diffTime * (uint64_t)cpuFreq) >> 32); // Compute RVR to waste the remainder of 10ms

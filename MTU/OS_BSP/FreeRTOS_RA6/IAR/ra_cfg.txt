@@ -325,11 +325,6 @@ FSP Configuration
   Module "Realtime Clock (r_rtc)"
     Parameter Checking: Default (BSP)
     
-  Module "Timer, Low-Power (r_agt)"
-    Parameter Checking: Default (BSP)
-    Pin Output Support: Disabled
-    Pin Input Support: Enabled
-    
   Module "Timer, General PWM (r_gpt)"
     Parameter Checking: Default (BSP)
     Pin Output Support: Disabled
@@ -353,6 +348,11 @@ FSP Configuration
     Parameter Checking: Default (BSP)
     Code Flash Programming Enable: Enabled
     Data Flash Programming Enable: Enabled
+    
+  Module "Timer, Low-Power (r_agt)"
+    Parameter Checking: Default (BSP)
+    Pin Output Support: Disabled
+    Pin Input Support: Enabled
     
   Module "Low Power Modes (r_lpm)"
     Parameter Checking: Default (BSP)
@@ -616,24 +616,6 @@ FSP Configuration
       Period Interrupt Priority: Disabled
       Carry Interrupt Priority: Priority 12
       
-    Instance "AGT5_ZCD_Meter Timer, Low-Power (r_agt)"
-      General: Name: AGT5_ZCD_Meter
-      General: Channel: 5
-      General: Mode: Periodic
-      General: Period: 0x10000
-      General: Period Unit: Raw Counts
-      Output: Duty Cycle Percent (only applicable in PWM mode): 50
-      General: Count Source: PCLKB
-      Output: AGTOA Output: Disabled
-      Output: AGTOB Output: Disabled
-      Output: AGTO Output: Disabled
-      Input: Measurement Mode: Measure Pulse Period
-      Input: Input Filter: No Filter
-      Input: Enable Pin: Enable Pin Not Used
-      Input: Trigger Edge: Trigger Edge Rising
-      Interrupts: Callback: NULL
-      Interrupts: Underflow Interrupt Priority: Priority 10
-      
     Instance "GPT1_Radio0_ICapture Timer, General PWM (r_gpt)"
       General: Name: GPT1_Radio0_ICapture
       General: Channel: 1
@@ -799,8 +781,8 @@ FSP Configuration
       Callback: Radio0_IRQ_ISR
       Pin Interrupt Priority: Priority 12
       
-    Instance "agt1_timer_cascade_lpm_trigger Timer, Low-Power (r_agt)"
-      General: Name: agt1_timer_cascade_lpm_trigger
+    Instance "AGT1_LPM_Wakeup Timer, Low-Power (r_agt)"
+      General: Name: AGT1_LPM_Wakeup
       General: Channel: 1
       General: Mode: One-Shot
       General: Period: 10
@@ -986,14 +968,32 @@ FSP Configuration
       Interrupts: Callback: NULL
       Interrupts: Underflow Interrupt Priority: Disabled
       
-    Instance "AGT3_RunTimeStats Timer, Low-Power (r_agt)"
-      General: Name: AGT3_RunTimeStats
-      General: Channel: 3
+    Instance "AGT4_RunTimeStats_0 Timer, Low-Power (r_agt)"
+      General: Name: AGT4_RunTimeStats_0
+      General: Channel: 4
       General: Mode: Periodic
-      General: Period: 0x80000
+      General: Period: 0x10000
       General: Period Unit: Raw Counts
       Output: Duty Cycle Percent (only applicable in PWM mode): 50
-      General: Count Source: PCLKB
+      General: Count Source: SUBCLOCK
+      Output: AGTOA Output: Disabled
+      Output: AGTOB Output: Disabled
+      Output: AGTO Output: Disabled
+      Input: Measurement Mode: Measure Disabled
+      Input: Input Filter: No Filter
+      Input: Enable Pin: Enable Pin Not Used
+      Input: Trigger Edge: Trigger Edge Rising
+      Interrupts: Callback: NULL
+      Interrupts: Underflow Interrupt Priority: Disabled
+      
+    Instance "AGT5_RunTimeStats_1 Timer, Low-Power (r_agt)"
+      General: Name: AGT5_RunTimeStats_1
+      General: Channel: 5
+      General: Mode: Periodic
+      General: Period: 0xFFFF
+      General: Period Unit: Raw Counts
+      Output: Duty Cycle Percent (only applicable in PWM mode): 50
+      General: Count Source: AGT Underflow
       Output: AGTOA Output: Disabled
       Output: AGTOB Output: Disabled
       Output: AGTO Output: Disabled

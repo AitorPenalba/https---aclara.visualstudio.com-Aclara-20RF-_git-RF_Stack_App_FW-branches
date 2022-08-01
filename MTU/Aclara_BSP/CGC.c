@@ -64,13 +64,12 @@
    Notes:
 
 **********************************************************************************************************************/
-
 fsp_err_t CGC_Stop_Unused_Clocks( void )
 {
    fsp_err_t                err              = FSP_SUCCESS;
    cgc_clock_t       		 sys_clock_source = CGC_CLOCK_PLL;
    cgc_divider_cfg_t 		 sys_divider_cf   = {0};
-	agt_extended_cfg_t const *p_agt1_extend	= agt1_timer_cascade_lpm_trigger_cfg.p_extend;
+	agt_extended_cfg_t const *p_agt1_extend	= AGT1_LPM_Wakeup_cfg.p_extend;
 
    /* Open CGC module */
    err = R_CGC_Open(&g_cgc0_ctrl, &g_cgc0_cfg);

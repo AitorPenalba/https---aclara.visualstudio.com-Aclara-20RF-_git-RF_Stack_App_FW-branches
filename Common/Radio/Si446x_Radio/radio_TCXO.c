@@ -9,7 +9,7 @@
  ***********************************************************************************************************************
  * A product of Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2018-2021 Aclara.  All Rights Reserved.
+ * Copyright 2018-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include "project.h"
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <bsp.h>
 #include <mqx_prv.h>
 #endif
@@ -312,7 +312,7 @@ static void DMA_Complete_IRQ_ISR( void )
    }
    DMAcntr++;
 
-#if ( MCU_SELECTED == NXP_K24 )  //TODO Melvin: DMA interrupts has to be replaced
+#if ( MCU_SELECTED == NXP_K24 )  //TODO: RA6E1: Melvin: DMA interrupts has to be replaced
    DMA_Complete_IRQ_ISR_Timestamp = DWT_CYCCNT;
 #endif
 }

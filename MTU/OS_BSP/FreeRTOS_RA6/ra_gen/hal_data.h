@@ -36,11 +36,22 @@
 FSP_HEADER
 
 /** AGT Timer Instance */
-extern const timer_instance_t AGT3_RunTimeStats;
+extern const timer_instance_t AGT5_RunTimeStats_1;
 
 /** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
-extern agt_instance_ctrl_t AGT3_RunTimeStats_ctrl;
-extern const timer_cfg_t AGT3_RunTimeStats_cfg;
+extern agt_instance_ctrl_t AGT5_RunTimeStats_1_ctrl;
+extern const timer_cfg_t AGT5_RunTimeStats_1_cfg;
+
+#ifndef NULL
+void NULL(timer_callback_args_t * p_args);
+#endif
+
+/** AGT Timer Instance */
+extern const timer_instance_t AGT4_RunTimeStats_0;
+
+/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
+extern agt_instance_ctrl_t AGT4_RunTimeStats_0_ctrl;
+extern const timer_cfg_t AGT4_RunTimeStats_0_cfg;
 
 #ifndef NULL
 void NULL(timer_callback_args_t * p_args);
@@ -141,11 +152,11 @@ extern lpm_instance_ctrl_t g_lpm_DeepSWStandby_AGT_ctrl;
 extern const lpm_cfg_t g_lpm_DeepSWStandby_AGT_cfg;
 
 /** AGT Timer Instance */
-extern const timer_instance_t agt1_timer_cascade_lpm_trigger;
+extern const timer_instance_t AGT1_LPM_Wakeup;
 
 /** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
-extern agt_instance_ctrl_t agt1_timer_cascade_lpm_trigger_ctrl;
-extern const timer_cfg_t agt1_timer_cascade_lpm_trigger_cfg;
+extern agt_instance_ctrl_t AGT1_LPM_Wakeup_ctrl;
+extern const timer_cfg_t AGT1_LPM_Wakeup_cfg;
 
 #ifndef agt1_timer_callback
 void agt1_timer_callback(timer_callback_args_t * p_args);
