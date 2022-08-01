@@ -394,11 +394,7 @@ returnStatus_t TIME_SYS_Init( void )
 #endif
       }
    }
-#if ( MCU_SELECTED == NXP_K24 )
    TIME_SYS_SetRealCpuFreq( getCoreClock(), eTIME_SYS_SOURCE_NONE, (bool)true ); // Nominal CPU clock rate
-#elif ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 [name_Suriya] - Verify variable to get core clock from a function
-   TIME_SYS_SetRealCpuFreq( SystemCoreClock, eTIME_SYS_SOURCE_NONE, (bool)true ); // Nominal CPU clock rate
-#endif
 #if ( DCU == 1 )
    if (VER_getDCUVersion() != eDCU2) {
       ResetGPSStats(); // The CPU freq is not reset here because we want to keep whatever value was computed until we lost the GPS

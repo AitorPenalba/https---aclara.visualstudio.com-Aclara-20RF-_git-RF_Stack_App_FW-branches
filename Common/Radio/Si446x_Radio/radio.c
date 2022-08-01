@@ -849,11 +849,8 @@ void RADIO_RX_Watchdog(void)
       OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
       timeStamp = radio[(uint8_t)RADIO_0].lastFIFOFullTimeStamp;
       OS_INT_enable( ); // Enable interrupts.
-    #if ( MCU_SELECTED == NXP_K24 )
+
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-    #elif ( MCU_SELECTED == RA6E1 )
-      if ( ((DWT_CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
-    #endif
          INFO_printf("Soft-Demod FIFO purged");
          // Read through the buffer
          si446x_read_rx_fifo((uint8_t)RADIO_0, 128, temp);
@@ -890,11 +887,7 @@ void RADIO_Update_Freq_Watchdog(void)
       timeStamp = DMA_Complete_IRQ_ISR_Timestamp;
       OS_INT_enable( ); // Enable interrupts.
 
-#if ( MCU_SELECTED == NXP_K24 )
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-#elif ( MCU_SELECTED == RA6E1 )
-      if ( ((DWT_CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
-#endif
          RADIO_Update_Freq();
       }
    }

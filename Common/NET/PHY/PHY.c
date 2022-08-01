@@ -2935,12 +2935,8 @@ static bool Process_DataReq( PHY_Request_t const *pReq )
    power = 0;
 #endif
    // Some check on RxTime
-#if ( MCU_SELECTED == NXP_K24 )
    RxTime = pReq->DataReq.RxTime == 0 ? 0 : (uint32_t)(((uint64_t)(pReq->DataReq.RxTime - DWT_CYCCNT))*1000/getCoreClock());
-#elif ( MCU_SELECTED == RA6E1 )
-   // TODO: RA6E1 [name_Suriya] - Modify variable to get core clock from a function
-   RxTime = pReq->DataReq.RxTime == 0 ? 0 : (uint32_t)(((uint64_t)(pReq->DataReq.RxTime - DWT_CYCCNT))*1000/SystemCoreClock);
-#endif
+
    INFO_printf("DataReq: %u msec channel=%u power=%d.%1u mode=%u modeParameters=%u framing=%u detection=%u len=%u prio=%u",
       RxTime, // print future time in msec
       pReq->DataReq.channel,
