@@ -368,7 +368,6 @@ void STRT_StartupTask ( taskParameter )
    uint8_t              quiet = 0;
    uint8_t              rfTest = 0;
 
-#if ( MCU_SELECTED == NXP_K24 )
    // Enable to use DWT module.
    // This is needed for DWT_CYCCNT to work properly when the debugger (I-jet) is not plugged in.
    // When the debugger is plugged in, the following registers are programmed by the IAR environment.
@@ -376,10 +375,7 @@ void STRT_StartupTask ( taskParameter )
 
    // Enable cycle counter
    DWT_CTRL = DWT_CTRL | 1 ;
-#elif ( MCU_SELECTED == RA6E1 )
-   DCB->DEMCR = DCB->DEMCR | 0x01000000;
-   DWT->CTRL  = DWT->CTRL  | 1;
-#endif
+
 #if ( MQX_USE_LOGS == 1 )
    /* Create kernel log */
    if ( _klog_create( 192, 1 ) != MQX_OK )

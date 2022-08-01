@@ -347,12 +347,10 @@ uint8_t si446x_start_rx(uint8_t radioNum, U8 CHANNEL, U8 CONDITION, U16 RX_LEN, 
     Pro2Cmd[6] = NEXT_STATE2;
     Pro2Cmd[7] = NEXT_STATE3;
 
-#if ( MCU_SELECTED == NXP_K24 )  //TODO Melvin: replace DWT_CYCCNT with RA6E1 equivalent
     RADIO_Set_RxStart(radioNum, DWT_CYCCNT); //Record the timestamp and set the flag
-#endif
 
     if ( radio_comm_SendCmd(radioNum, SI446X_CMD_ARG_COUNT_START_RX, Pro2Cmd) ) {
-       /* Timeout occured */
+       /* Timeout occurred */
        return SI446X_CTS_TIMEOUT;
     } else {
        return SI446X_SUCCESS;

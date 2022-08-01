@@ -221,7 +221,7 @@
             /* Aclara Added -- Start */
             #if ( configGENERATE_RUN_TIME_STATS == 1 )
             extern void       AGT_RunTimeStatsStart( void );
-            extern uint16_t   AGT_RunTimeStatsCount( void );
+            extern uint32_t   AGT_RunTimeStatsCount( void );
             #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() AGT_RunTimeStatsStart()
             #define portGET_RUN_TIME_COUNTER_VALUE()         AGT_RunTimeStatsCount()
             #endif

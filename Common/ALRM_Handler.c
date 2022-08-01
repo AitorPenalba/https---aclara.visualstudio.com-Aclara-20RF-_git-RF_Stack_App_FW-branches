@@ -10,7 +10,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2012-2020 Aclara.  All Rights Reserved.
+   Copyright 2012-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -875,7 +875,7 @@ void ALRM_RealTimeTask ( taskParameter )
                                  if(pEntry->voltagePhB != V_I_ANGLE_MEAS_UNSUPPORTED )
                                  {
                                     *( uint16_t * )keyVal[ NVPIndex ].Key   = ( uint16_t )maxIndVRMSB;    /*lint !e2445 cast increases alignment req.  */
-                                    *( uint16_t * )keyVal[ NVPIndex ].Value = ( pEntry->voltagePhB + 5 ) / 10; /*lint !e2445 cast increases alignment req.  */                                   *( uint16_t * )keyVal[ 4 ].Value = ( pEntry->voltagePhB + 5 ) / 10; /*lint !e2445 cast increases alignment req.  */
+                                    *( uint16_t * )keyVal[ NVPIndex ].Value = ( pEntry->voltagePhB + 5 ) / 10; /*lint !e2445 cast increases alignment req.  */
                                     NVPIndex++;
                                  }
                                  if(pEntry->voltagePhC != V_I_ANGLE_MEAS_UNSUPPORTED )

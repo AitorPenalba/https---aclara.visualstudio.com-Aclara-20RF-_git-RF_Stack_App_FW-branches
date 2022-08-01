@@ -176,11 +176,8 @@ uint16_t MAC_Codec_Encode ( const mac_frame_t *p, uint8_t *pDst, uint32_t *RxTim
 
             uint32_t primask = __get_PRIMASK();
             __disable_interrupt(); // Disable all interrupts. This section is time critical but fast fortunatly.
-#if ( MCU_SELECTED == NXP_K24 )
+
             time = DWT_CYCCNT; // Get time in CPU cycles
-#elif ( MCU_SELECTED == RA6E1 )
-            time = DWT->CYCCNT;
-#endif
             fracTime = TIME_UTIL_GetTimeInQSecFracFormat();
             __set_PRIMASK(primask); // Restore interrupts
 
