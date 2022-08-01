@@ -517,14 +517,14 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDeviceType( char *devTypeBuff, uint8_t 
 enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBuff, uint8_t devPartNumberBuffSize, uint8_t *devPartNumberLeng )
 {
    char const *pDevPartNumber;
-   int index = 0;
-
+   uint8_t index = 0;
+   
    pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
    while( index < devPartNumberBuffSize )
    {
       if(*( pDevPartNumber + index ) == '\0' )
       {
-         while( index <devPartNumberBuffSize - 1)
+         while( index < devPartNumberBuffSize - 1)
          {
             *( devPartNumberBuff + index )  = *(char *)" ";
             index++;
@@ -538,9 +538,8 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBu
       }
       index++;
    }
-//   (void)strncpy (devPartNumberBuff, pDevPartNumber, devPartNumberBuffSize);
    devPartNumberBuff[devPartNumberBuffSize - 1] = '\0';   // ensure the buffer is null-terminated
-   *devPartNumberLeng = (uint8_t)strlen(devPartNumberBuff);
+   *devPartNumberLeng = (uint8_t)strlen(devPartNumberBuff) + 1;
    return CIM_QUALCODE_SUCCESS;
 }
 
@@ -930,38 +929,7 @@ returnStatus_t ENDPT_CIM_CMD_OR_PM_Handler( enum_MessageMethod action, meterRead
                }
             }
             break;
-/*            char partNumber[17];
-            int index = 0;
-            char *pDevPartNumber;
-            pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
-            while( index < 17 )
-            {
-               if(*( pDevPartNumber + index ) == '\0' )
-               {
-                  while( index < 17 )
-                  {
-                     partNumber[ index ]= ' ';
-                     index++;
-                  }
-               }
-               else
-               {
-                  partNumber[ index ] = *( pDevPartNumber + index );
-               }
-               index++;
-            }
-            partNumber[ index - 1 ] = '\0';
-            (void)strncpy ((char *)value, partNumber, 17);
-
-            if (attr != NULL)
-            {
-                attr->rValLen = 17;
-                attr->rValTypecast = (uint8_t)ASCIIStringValue;
-            }
-            break;
-*/
          }
-
          default :
          {
             retVal = eAPP_NOT_HANDLED;
