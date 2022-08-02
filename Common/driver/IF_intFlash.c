@@ -919,7 +919,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          }
          else
          {
-            retVal = ( fsp_err_t ) eFAILURE;
+            eRetVal = eFAILURE;
          }
       }
       else if( dest < FLASH_HP_CODEFLASH_BLOCK8_START_ADDRESS )
@@ -932,7 +932,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          }
          else
          {
-            retVal = ( fsp_err_t ) eFAILURE;
+            eRetVal = eFAILURE;
          }
       }
       else
@@ -944,7 +944,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          }
          else
          {
-            retVal = ( fsp_err_t ) eFAILURE;
+            eRetVal = eFAILURE;
          }
       }
    }
@@ -967,15 +967,18 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
       }
       else
       {
-         retVal = ( fsp_err_t ) eFAILURE;
+         eRetVal = eFAILURE;
       }
    }
    else
    {
-      retVal = ( fsp_err_t ) eFAILURE;
+      eRetVal = eFAILURE;
    }
 
-   eRetVal = ( returnStatus_t ) retVal;
+   if(FSP_SUCCESS == retVal)
+   {
+      eRetVal = eSUCCESS;
+   }
 #endif
 
    return(eRetVal);
@@ -1000,6 +1003,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const *pSrc )
 {
    returnStatus_t retVal = eFAILURE;
+   fsp_err_t      err;
 #if ( MCU_SELECTED == NXP_K24 )
    /* Erased state are all 8 bytes of 0xFF */
    static const uint8_t erasedState_[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -1039,26 +1043,26 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        /* Write supports when it is a multiply of 128 bytes - If not handle it accordingly */
        if( ( cnt % BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE ) == 0 )
        {
-          retVal = (returnStatus_t) R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
+          err = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
        }
        else
        {
           uint32_t localDstAddr, remainingByte;
           uint32_t localCnt = BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE * ( cnt / BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
-          retVal =(returnStatus_t) R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
+          err = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, localCnt );
           remainingByte = cnt - localCnt;
           if ( ( address + localCnt + BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE ) < FLASH_HP_CODEFLASH_END_ADDRESS )
           {
              memcpy( localVar, ( uint8_t * )srcAddr + localCnt, remainingByte );
              memcpy( &localVar[remainingByte], ( uint8_t * )( address + cnt ), ( BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE - remainingByte ) );
-             retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( address + localCnt ), BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
+             err |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( address + localCnt ), BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
           }
           else
           {
              localDstAddr = ( address + localCnt ) - ( BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE - remainingByte );
              memcpy( localVar, ( uint8_t * )localDstAddr, ( BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE - remainingByte ) );
              memcpy( &localVar[BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE - remainingByte], ( uint8_t * )( srcAddr + localCnt ), remainingByte);
-             retVal |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( uint32_t )localDstAddr, BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
+             err |= R_FLASH_HP_Write( &g_flash0_ctrl, ( uint32_t )localVar, ( uint32_t )localDstAddr, BSP_FEATURE_FLASH_HP_CF_WRITE_SIZE );
           }
        }
     }
@@ -1066,9 +1070,9 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
     {
        if( ( cnt % BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE ) == 0 )
        {
-          retVal =(returnStatus_t) R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
+          err = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
           /* Error Handle */
-          if (FSP_SUCCESS == ( fsp_err_t )retVal)
+          if (FSP_SUCCESS == err)
           {
              /* Wait for the write complete event flag, if BGO is SET  */
              if ( true == g_flash0_cfg.data_flash_bgo )
@@ -1080,14 +1084,17 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        }
        else
        {
-          retVal = ( returnStatus_t ) eFAILURE;
+          retVal = eFAILURE;
        }
     }
     else
     {
-       retVal = ( returnStatus_t ) eFAILURE;
+       retVal = eFAILURE;
     }
-
+   if(FSP_SUCCESS == err)
+   {
+      retVal = eSUCCESS;
+   }
 #endif
    return(retVal);
 }
