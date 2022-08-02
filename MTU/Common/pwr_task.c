@@ -66,6 +66,9 @@
 #include "ID_intervaltask.h"
 #endif
 #include "historyd.h"
+#if ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
+#endif
 
 /* MACRO DEFINITIONS */
 #define POWER_DOWN_SIGNATURE ((uint64_t)0x01020304abcdef7A)
@@ -1178,7 +1181,8 @@ static void PowerGoodDebounce( void )
 #if ( RTOS_SELECTION == MQX_RTOS )
       delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-      R_BSP_SoftwareDelay( DEBOUNCE_DELAY_VAL * 10 , BSP_DELAY_UNITS_MICROSECONDS );
+      delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
+//      R_BSP_SoftwareDelay( DEBOUNCE_DELAY_VAL * 10 , BSP_DELAY_UNITS_MICROSECONDS );
 #endif
       CLRWDT();
       if ( BRN_OUT() )
@@ -1218,9 +1222,9 @@ static returnStatus_t PowerFailDebounce( void )
    while ( ( eSUCCESS == brownOut ) && ( debounceCount < DEBOUNCE_CNT_RST_VAL ) )
    {
 #if ( RTOS_SELECTION == MQX_RTOS )
-      delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
+      delay_10us( DEBOUNCE_DELAY_VAL );
 #elif ( RTOS_SELECTION == FREE_RTOS )
-      R_BSP_SoftwareDelay( DEBOUNCE_DELAY_VAL * 10 , BSP_DELAY_UNITS_MICROSECONDS );
+      delay_10us( DEBOUNCE_DELAY_VAL ); 
 #endif
       if ( BRN_OUT() )
       {

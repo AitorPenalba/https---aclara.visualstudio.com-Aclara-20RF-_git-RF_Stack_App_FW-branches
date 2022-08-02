@@ -510,9 +510,7 @@ enum HMC_APP_API_RPLY
    The exception is specialized modules like buffer management */
 typedef struct
 {
-#if 0 // TODO: RA6E1 - Queue handling
    OS_QUEUE_Element  QueueElement;  /* QueueElement as defined by MQX */
-#endif
    uint8_t           msgType;       // Type of message
    void              *pData;
 } sysQueueEntry_t;
@@ -550,9 +548,7 @@ typedef enum
 /* Data format to pass to the Any Application - This is the 'Standard' Queue Format */
 typedef struct
 {
-#if 0 // TODO: RA6E1 - Queue handling
    OS_QUEUE_Element  QueueElement;   /* QueueElement as defined by MQX */
-#endif
    uint8_t ucPacketFormat; /* Pointer style or Structure, 0 = Pointers, 1 = Structure */
    uint8_t ucMsgType; /* Type of message */
 
