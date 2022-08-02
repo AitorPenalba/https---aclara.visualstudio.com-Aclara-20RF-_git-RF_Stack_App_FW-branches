@@ -58,7 +58,7 @@
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 #define STRING_BUFFER_SIZE 32
-#define PARTNUMBER_BUFFER_SIZE 17
+#define PARTNUMBER_BUFFER_SIZE 13
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -517,29 +517,10 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDeviceType( char *devTypeBuff, uint8_t 
 enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBuff, uint8_t devPartNumberBuffSize, uint8_t *devPartNumberLeng )
 {
    char const *pDevPartNumber;
-   uint8_t index = 0;
-   
    pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
-   while( index < devPartNumberBuffSize )
-   {
-      if(*( pDevPartNumber + index ) == '\0' )
-      {
-         while( index < devPartNumberBuffSize - 1)
-         {
-            *( devPartNumberBuff + index )  = *(char *)" ";
-            index++;
-         }
-          
-         break;
-      }
-      else
-      {
-         *( devPartNumberBuff + index ) = *( pDevPartNumber + index );
-      }
-      index++;
-   }
+   (void)strncpy (devPartNumberBuff, pDevPartNumber, devPartNumberBuffSize);
    devPartNumberBuff[devPartNumberBuffSize - 1] = '\0';   // ensure the buffer is null-terminated
-   *devPartNumberLeng = (uint8_t)strlen(devPartNumberBuff) + 1;
+   *devPartNumberLeng = (uint8_t)strlen(devPartNumberBuff);
    return CIM_QUALCODE_SUCCESS;
 }
 
