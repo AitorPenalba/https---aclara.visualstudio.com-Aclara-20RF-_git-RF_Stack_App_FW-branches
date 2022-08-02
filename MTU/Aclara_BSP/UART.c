@@ -1004,19 +1004,11 @@ void UART_RX_flush ( enum_UART_ID UartId )
    uartRingBuf       [ (uint32_t)UartId ].head = 0;
    uartRingBuf       [ (uint32_t)UartId ].tail = 0;
    
-   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
+   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) || ( UartId == UART_HOST_COMM_PORT ) )
    {
       OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
    }
-   else if( UartId == UART_HOST_COMM_PORT )
-   {
-      /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
-      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
-   }
-   else
-   {
-      //do nothing
-   }
+
    OS_INT_enable();
 #endif
 }

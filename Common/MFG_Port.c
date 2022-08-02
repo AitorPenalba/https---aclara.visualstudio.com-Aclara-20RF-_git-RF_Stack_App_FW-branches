@@ -1723,7 +1723,7 @@ static void mfgpReadByte( uint8_t rxByte )
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
-#if 0
+#if 0 // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
             (void)UART_flush ( mfgUart  );
 #endif
 #else
