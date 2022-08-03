@@ -1823,13 +1823,13 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
       err = NV_SPI_PORT_WRITE( &g_qspi0_ctrl, ( uint8_t * ) & sIA, sizeof ( sIA ), true); /* WR the Instr to the chip */
 #endif
 
-      if ( 
+         if ( 
 #if ( MCU_SELECTED == NXP_K24 )
-      eSUCCESS == eRetVal 
+         eSUCCESS == eRetVal 
 #elif ( MCU_SELECTED == RA6E1 )
-      FSP_SUCCESS == err 
-      )
+         FSP_SUCCESS == err 
 #endif
+         )
       {
          /* Read from the SPI port */
 #if ( MCU_SELECTED == NXP_K24 )
@@ -1837,13 +1837,13 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
 #elif ( MCU_SELECTED == RA6E1 )
          err = NV_SPI_PORT_READ( &g_qspi0_ctrl, pDest, (uint16_t)Cnt, false ); /* Read the data back */
 #endif
-      if ( 
+         if ( 
 #if ( MCU_SELECTED == NXP_K24 )
-      eSUCCESS == eRetVal 
+         eSUCCESS == eRetVal 
 #elif ( MCU_SELECTED == RA6E1 )
-      FSP_SUCCESS == err 
-      )
+         FSP_SUCCESS == err 
 #endif
+         )
          {
             INVB_invertBits( pDest, (uint16_t)Cnt ); /* Invert Every Byte Read */
          }
@@ -1914,8 +1914,9 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
          eSUCCESS == eRetVal 
 #elif ( MCU_SELECTED == RA6E1 )
          FSP_SUCCESS == err 
-         )
 #endif
+         )
+
          {
             uint8_t mfgId[3]; /* Will contain the manufacturing ID from the device */
             uint8_t index;    /* Used to index through the sDeviceId table to find a match */
@@ -1926,13 +1927,13 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 #elif ( MCU_SELECTED == RA6E1 )
             err = NV_SPI_PORT_READ( &g_qspi0_ctrl, &mfgId[0], sizeof(mfgId), false ); /* Read the data back */
 #endif
-            if ( 
+         if ( 
 #if ( MCU_SELECTED == NXP_K24 )
-            eSUCCESS == eRetVal 
+         eSUCCESS == eRetVal 
 #elif ( MCU_SELECTED == RA6E1 )
-            FSP_SUCCESS == err 
-            )
+         FSP_SUCCESS == err 
 #endif
+         )
             {
                /* Search for the device ID in the table. */
                for ( index = 0; index < ARRAY_IDX_CNT( sDeviceId ); index++ )
