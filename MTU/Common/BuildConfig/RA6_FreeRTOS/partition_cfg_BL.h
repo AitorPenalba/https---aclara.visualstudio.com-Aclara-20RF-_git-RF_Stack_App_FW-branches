@@ -217,7 +217,7 @@ If we do move the Encrypt Key partition and remove the swap indicator sector:
 #define BL_VECTOR_TABLE_SIZE    ((lCnt)0x00000400)
 
 #define BL_CODE_START           BL_VECTOR_TABLE_START
-#define BL_CODE_SIZE            ((lCnt)0x00004000)
+#define BL_CODE_SIZE            ((lCnt)0x00002000)
 
 #if ( MCU_SELECTED == NXP_K24 )
 #define APP_VECTOR_TABLE_START  (BL_CODE_START + BL_CODE_SIZE)
@@ -261,7 +261,7 @@ If we do move the Encrypt Key partition and remove the swap indicator sector:
 #define BL_BACKUP_SIZE          BL_CODE_SIZE                             /* MUST be same size as BL */
 
 /* Starts App code after BL backup */
-#define APP_CODE_START          ( BL_BACKUP_START + BL_CODE_SIZE )       /* 0x00008000 */
+#define APP_CODE_START          ( BL_BACKUP_START + BL_CODE_SIZE )       /* 0x00004000 */
 #define APP_CODE_SIZE           ( INTERNAL_FLASH_SIZE - APP_CODE_START )
 
 /* This is an absolute/fixed address - Start from the DataFlash region - 0x08000000 */

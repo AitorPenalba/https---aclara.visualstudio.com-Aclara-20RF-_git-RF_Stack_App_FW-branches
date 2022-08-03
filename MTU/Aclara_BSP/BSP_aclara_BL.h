@@ -75,6 +75,17 @@
 #define STACK_HYSTERISIS   5 /* Stack enable/disable temperature hysteresis */
 #endif
 
+#if ( MCU_SELECTED == RA6E1 )
+#define LWGPIO_VALUE_LOW   BSP_IO_LEVEL_LOW
+#define DEMCR              DCB->DEMCR
+#define DWT_CTRL           DWT->CTRL
+#define DWT_CYCCNT         DWT->CYCCNT
+#endif
+
+#if ( MCU_SELECTED == RA6E1 )
+#define AGT_FREQ_SYNC_TIMER_COUNT_MAX ((uint16_t)32768)
+#endif
+
 #define BSP_IS_GLOBAL_INT_ENABLED()  (bool)(0 == __get_PRIMASK() ? TRUE : FALSE)
 
 #if ( MCU_SELECTED == RA6E1 )
@@ -174,6 +185,7 @@ uint32_t MILLISECONDS;
 
 } TIME_STRUCT, * TIME_STRUCT_PTR;
 #endif
+
 /* CONSTANTS */
 
 /* KTL - 16 byte key: "ultrapassword123" - This is temporary and will change to an external key later */
@@ -201,10 +213,13 @@ extern float       ADC_Get_SC_Voltage        ( void );
 extern float       ADC_Get_4V0_Voltage       ( void );
 extern float       ADC_GetHWRevVoltage       ( void );
 extern uint8_t     ADC_GetHWRevLetter        ( void );
-
+#if ( MCU_SELECTED == NXP_K24 )
 extern char const *BSP_Get_BspRevision       ( void );
 extern char const *BSP_Get_IoRevision        ( void );
 extern char const *BSP_Get_PspRevision       ( void );
+#elif ( MCU_SELECTED == RA6E1 )
+extern char const *BSP_Get_BSPVersion        ( void );
+#endif
 extern uint16_t    BSP_Get_ResetStatus       ( void );
 extern void        BSP_Setup_VREF            ( void );
 
@@ -231,20 +246,27 @@ extern void        RTC_GetDateTime           ( sysTime_dateFormat_t *RT_Clock );
 extern bool        RTC_SetDateTime           ( const sysTime_dateFormat_t *RT_Clock );
 extern bool        RTC_Valid                 ( void );
 extern void        RTC_GetTimeInSecMicroSec  ( uint32_t *sec, uint32_t *microSec );
-#if ( MCU_SELECTED == NXP_K24 )
 extern void        RTC_GetTimeAtRes          ( TIME_STRUCT *ptime, uint16_t fractRes );
-#elif ( MCU_SELECTED == RA6E1 )
+#if ( MCU_SELECTED == RA6E1 )
 extern returnStatus_t RTC_init( void );
-extern void           RTC_ConfigureRTCCalendarAlarm( uint16_t seconds );
-extern bool           RTC_SetAlarmTime ( rtc_alarm_time_t * const p_alarm );
-extern void           RTC_GetAlarmTime ( rtc_alarm_time_t * const p_alarm );
-extern void           RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg );
-extern void           rtc_callback(rtc_callback_args_t *p_args);
-extern bool           RTC_isRunning ( void );
+extern void           RTC_ConfigureAlarm( uint32_t seconds );
+extern void           RTC_DisableAlarm  ( void );
+extern void           RTC_Start         ( void );
+extern void           RTC_Callback      (rtc_callback_args_t *p_args);
+extern bool           RTC_isRunning     ( void );
+#if ( TM_RTC_UNIT_TEST == 1 )
+extern bool           RTC_UnitTest      ( void );
+#endif
 #endif
 
 extern uint32_t    UART_write                ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
+#if ( MCU_SELECTED == NXP_K24 )
 extern uint32_t    UART_read                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength );
+#endif
+#if ( MCU_SELECTED == RA6E1 )
+extern uint32_t    UART_getc                 ( enum_UART_ID UartId,       uint8_t *DataBuffer, uint32_t DataLength, uint32_t TimeoutMs );
+extern uint32_t    UART_echo                 ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
+#endif
 extern void        UART_fgets                ( enum_UART_ID UartId,       char    *DataBuffer, uint32_t DataLength );
 extern uint8_t     UART_flush                ( enum_UART_ID UartId );
 extern void        UART_RX_flush             ( enum_UART_ID UartId );
@@ -275,6 +297,30 @@ extern returnStatus_t UART_reset     ( enum_UART_ID UartId );
 extern returnStatus_t WDOG_Init      ( void );
 extern returnStatus_t IO_init        ( void );
 extern returnStatus_t CRC_Shutdown   ( void );
+#if ( MCU_SELECTED == RA6E1 )
+extern fsp_err_t      AGT_LPM_Timer_Init      ( void );
+extern fsp_err_t      AGT_LPM_Timer_Start     ( void );
+extern fsp_err_t      AGT_LPM_Timer_Stop      ( void );
+extern fsp_err_t      AGT_LPM_Timer_Configure ( uint32_t const period );
+extern void           AGT_LPM_Timer_Wait      ( void );
+extern returnStatus_t AGT_PD_Init             ( void );
+extern void           AGT_PD_Enable           ( void );
+extern returnStatus_t AGT_FreqSyncTimerInit   (void);
+extern returnStatus_t AGT_FreqSyncTimerStart  (void);
+extern returnStatus_t AGT_FreqSyncTimerStop   (void);
+extern returnStatus_t AGT_FreqSyncTimerCount  (uint16_t *count);
+#if ( GENERATE_RUN_TIME_STATS == 1 )
+extern void           AGT_RunTimeStatsStart   ( void );
+extern uint32_t       AGT_RunTimeStatsCount   ( void );
+#endif
+extern returnStatus_t GPT_PD_Init             ( void );
+extern void           GPT_PD_Enable           ( void );
+extern void           GPT_PD_Disable          ( void );
+extern returnStatus_t GPT_Radio0_Init         ( void );
+extern void           GPT_Radio0_Enable       ( void );
+extern void           GPT_Radio0_Disable      ( void );
+#endif
+
 #endif /* ERROR_CODES_H_ */
 
 
