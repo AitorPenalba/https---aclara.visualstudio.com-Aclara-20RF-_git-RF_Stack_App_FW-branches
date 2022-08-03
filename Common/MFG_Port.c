@@ -1666,7 +1666,7 @@ static void mfgpReadByte( uint8_t rxByte )
       MFGP_numBytes = 0;
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-#if 0
+#if 0   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       (void)UART_flush ( mfgUart  );
 #endif
 #else
@@ -9864,7 +9864,7 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
 
 #if 0 // TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
 #if !USE_USB_MFG
-      ( void )UART_flush( mfgUart );
+      ( void )UART_flush( mfgUart );      // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #else
       usb_flush();

@@ -939,7 +939,7 @@ void DBG_CommandLineTask ( taskParameter )
       {
          (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
 #if ( MCU_SELECTED == NXP_K24 )
-#if 0
+#if 0   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
          (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
 #endif
 #endif
