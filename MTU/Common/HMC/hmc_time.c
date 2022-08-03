@@ -165,7 +165,7 @@ static uint8_t                bigEndian_;                      /* Indicator of m
 #if( RTOS_SELECTION == FREE_RTOS )
 #define HMC_TIME_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
 #else
-#define HMC_TIME_QUEUE_SIZE 0 
+#define HMC_TIME_QUEUE_SIZE 0
 #endif
 
 /* ****************************************************************************************************************** */
@@ -452,7 +452,7 @@ uint8_t HMC_TIME_Set_Time( uint8_t ucCmd, void *pData )
             else
             {
                buffer_t *pBuf;  //Buffer used to point to the data in the msg queue
-
+// TODO: RA6E1 Bob: We got to this statement once with a NULL queue handle.  Needs to be root-caused
                pBuf = OS_QUEUE_Dequeue( &hmcTimeQueueHandle ); /* See if there is a message in the queue */
                if ( NULL != pBuf )
                {
