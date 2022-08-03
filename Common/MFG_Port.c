@@ -1666,7 +1666,9 @@ static void mfgpReadByte( uint8_t rxByte )
       MFGP_numBytes = 0;
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+#if 0
       (void)UART_flush ( mfgUart  );
+#endif
 #else
       usb_send( CRLF, sizeof( CRLF ) );
       usb_flush();
@@ -6449,7 +6451,9 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
             stP0LoopbackFailCount++;
          }
       }
+#if 0
       ( void )UART_flush ( UART_HOST_COMM_PORT ); /* Wait until all characters sent before re-enabling HMC!   */
+#endif
    }
    MFG_logPrintf( "%s %d\n", argv[0], stP0LoopbackFailCount );
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
@@ -9860,7 +9864,7 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
 
 #if 0 // TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
 #if !USE_USB_MFG
-      ( void )UART_flush( mfgUart  );
+      ( void )UART_flush( mfgUart );
       ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #else
       usb_flush();

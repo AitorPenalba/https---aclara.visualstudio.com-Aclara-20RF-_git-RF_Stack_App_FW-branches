@@ -939,7 +939,9 @@ void DBG_CommandLineTask ( taskParameter )
       {
          (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
 #if ( MCU_SELECTED == NXP_K24 )
+#if 0
          (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
+#endif
 #endif
       }/* end if() */
    } /* end for() */

@@ -283,7 +283,9 @@ void MFGP_UartWrite( const char *bfr, int len )
 
 #if !USE_USB_MFG
    ( void )UART_write( dtlsUart, ( uint8_t * )sb->data, sb->x.dataLen );
+#if 0
    ( void )UART_flush ( dtlsUart );
+#endif
 #else
    usb_send( (char const *)sb->data, sb->x.dataLen );
 #endif
