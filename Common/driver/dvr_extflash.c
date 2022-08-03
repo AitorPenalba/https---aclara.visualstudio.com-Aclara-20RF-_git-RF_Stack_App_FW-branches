@@ -1029,8 +1029,11 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
                                     uint32_t busyTime_uS,
                                     const SpiFlashDevice_t *pDevice )
 {
-   fsp_err_t      err;
    returnStatus_t eRetVal = eFAILURE;                            /* Return value */
+#if ( MCU_SELECTED == RA6E1 )
+   fsp_err_t      err;
+#endif
+
    uint8_t        retries = EXT_FLASH_BUSY_RETRIES;   /* #of times to test for retries */
 
    /* Make sure the previous operation, if any, has finished.  */
@@ -1097,7 +1100,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
       eRetVal = busyCheck( pDevice, busyTime_uS );
    } while( ( eSUCCESS != eRetVal ) && ( 0 != retries-- ) );
    WRITE_PROTECT_PIN_ON();
-#if ( RTOS_SELECTION == FREE_RTOS )
+#if ( MCU_SELECTED == RA6E1 )
    if(FSP_SUCCESS == err)
    {
       eRetVal = eSUCCESS;
@@ -1793,7 +1796,7 @@ static void disableWrites( uint8_t port )
 static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cnt, const SpiFlashDevice_t *pDevice )
 {
    returnStatus_t eRetVal = eFAILURE;
-#if ( RTOS_SELECTION == FREE_RTOS )
+#if ( MCU_SELECTED == RA6E1 )
    fsp_err_t      err;
 #endif
 #ifndef __BOOTLOADER
@@ -1852,7 +1855,7 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
       OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
    }
-#if ( RTOS_SELECTION == FREE_RTOS )
+#if ( MCU_SELECTED == RA6E1 )
    if(FSP_SUCCESS == err)
    {
       eRetVal = eSUCCESS;
@@ -1880,7 +1883,7 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
 static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 {
    returnStatus_t eRetVal = eFAILURE;
-#if ( RTOS_SELECTION == FREE_RTOS )
+#if ( MCU_SELECTED == RA6E1 )
    fsp_err_t      err;
 #endif
    uint8_t        instr = FL_INSTR_JEDEC_ID_READ; /* Instruction to read the device ID */
