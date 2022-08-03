@@ -1429,7 +1429,7 @@
             <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\cfg_app_BL.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Bootloader\Include\features_BL.h</name>
+            <name>$PROJ_DIR$\..\Bootloader\Include\features.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\partition_cfg_BL.h</name>

@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2012-2015 Aclara.  All Rights Reserved.
+ * Copyright 2012-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -39,11 +39,12 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>  // TODO: Do we need this?
 
 #include "portable_freescale.h"
 #include "portable_aclara.h"
 
-#include "features_BL.h"   /* Need bootloader defined (or not) before cfg_app.h  */
+#include "features.h"   /* Need bootloader defined (or not) before cfg_app.h  */
 #include "cfg_hal.h"
 #include "cfg_app_BL.h"
 

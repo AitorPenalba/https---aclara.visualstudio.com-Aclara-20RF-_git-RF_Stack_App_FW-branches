@@ -23,7 +23,7 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include "project.h"
+#include "project.h"            //Note: the __BOOTLOADER definition is provided by the project-specific features.h within project.h
 #include <string.h>
 #include "version.h"
 #ifndef __BOOTLOADER
