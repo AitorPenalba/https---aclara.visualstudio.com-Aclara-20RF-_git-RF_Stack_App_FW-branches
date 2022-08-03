@@ -715,7 +715,7 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
    if ( ringBufoverflow[UartId] )
    {
       ( void ) UART_polled_printf( "\r\nRing buffer overflow of UART Id - %d", UartId );
-      UART_RX_flush( UartId );
+      ( void ) UART_flush( UartId );
    }
    return DataLength; /* Returning DataLength */
 }
@@ -951,12 +951,14 @@ uint8_t UART_flush( enum_UART_ID UartId )
    if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
    {
       OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
       OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
    }
    else if( UartId == UART_HOST_COMM_PORT )
    {
       /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
       OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
    }
    else
    {
@@ -967,7 +969,7 @@ uint8_t UART_flush( enum_UART_ID UartId )
    return eSUCCESS;
 #endif
 }
-
+#if 0
 /*******************************************************************************
 
   Function name: UART_RX_flush
@@ -1012,6 +1014,7 @@ void UART_RX_flush ( enum_UART_ID UartId )
    OS_INT_enable();
 #endif
 }
+#endif
 #if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
