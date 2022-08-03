@@ -77,6 +77,9 @@
 
 #if ( MCU_SELECTED == RA6E1 )
 #define LWGPIO_VALUE_LOW   BSP_IO_LEVEL_LOW
+#define DEMCR              DCB->DEMCR
+#define DWT_CTRL           DWT->CTRL
+#define DWT_CYCCNT         DWT->CYCCNT
 #endif
 
 #if ( MCU_SELECTED == RA6E1 )
@@ -308,7 +311,7 @@ extern returnStatus_t AGT_FreqSyncTimerStop   (void);
 extern returnStatus_t AGT_FreqSyncTimerCount  (uint16_t *count);
 #if ( GENERATE_RUN_TIME_STATS == 1 )
 extern void           AGT_RunTimeStatsStart   ( void );
-extern uint16_t       AGT_RunTimeStatsCount   ( void );
+extern uint32_t       AGT_RunTimeStatsCount   ( void );
 #endif
 extern returnStatus_t GPT_PD_Init             ( void );
 extern void           GPT_PD_Enable           ( void );

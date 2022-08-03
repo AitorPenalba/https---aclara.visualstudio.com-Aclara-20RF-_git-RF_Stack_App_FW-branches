@@ -450,24 +450,6 @@
       <property id="module.driver.rtc.periodic_ipl" value="_disabled"/>
       <property id="module.driver.rtc.carry_ipl" value="board.icu.common.irq.priority12"/>
     </module>
-    <module id="module.driver.timer_on_agt.1086978184">
-      <property id="module.driver.timer.name" value="AGT5_ZCD_Meter"/>
-      <property id="module.driver.timer.channel" value="5"/>
-      <property id="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
-      <property id="module.driver.timer.period" value="0x10000"/>
-      <property id="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_raw_counts"/>
-      <property id="module.driver.timer.duty_cycle" value="50"/>
-      <property id="module.driver.timer.count_source" value="module.driver.timer.count_source.clock_pclkb"/>
-      <property id="module.driver.timer.agtoa_output_enable" value="module.driver.timer.agtoa_output_enable.false"/>
-      <property id="module.driver.timer.agtob_output_enable" value="module.driver.timer.agtob_output_enable.false"/>
-      <property id="module.driver.timer.agto_output_enable" value="module.driver.timer.agto_output_enable.false"/>
-      <property id="module.driver.timer.measurement_mode" value="module.driver.timer.measurement_mode.measure_pulse_period"/>
-      <property id="module.driver.timer.agtio_filter" value="module.driver.timer.agtio_filter.agtio_filter_none"/>
-      <property id="module.driver.timer.enable_pin" value="module.driver.timer.enable_pin.enable_pin_not_used"/>
-      <property id="module.driver.timer.trigger_edge" value="module.driver.timer.trigger_edge.trigger_edge_rising"/>
-      <property id="module.driver.timer.p_callback" value="NULL"/>
-      <property id="module.driver.timer.ipl" value="board.icu.common.irq.priority10"/>
-    </module>
     <module id="module.driver.timer_on_gpt.443701359">
       <property id="module.driver.timer.name" value="GPT1_Radio0_ICapture"/>
       <property id="module.driver.timer.channel" value="1"/>
@@ -634,7 +616,7 @@
       <property id="module.driver.external_irq.ipl" value="board.icu.common.irq.priority12"/>
     </module>
     <module id="module.driver.timer_on_agt.1395115336">
-      <property id="module.driver.timer.name" value="agt1_timer_cascade_lpm_trigger"/>
+      <property id="module.driver.timer.name" value="AGT1_LPM_Wakeup"/>
       <property id="module.driver.timer.channel" value="1"/>
       <property id="module.driver.timer.mode" value="module.driver.timer.mode.mode_one_shot"/>
       <property id="module.driver.timer.period" value="10"/>
@@ -821,13 +803,31 @@
       <property id="module.driver.timer.ipl" value="_disabled"/>
     </module>
     <module id="module.driver.timer_on_agt.734104789">
-      <property id="module.driver.timer.name" value="AGT3_RunTimeStats"/>
-      <property id="module.driver.timer.channel" value="3"/>
+      <property id="module.driver.timer.name" value="AGT4_RunTimeStats_0"/>
+      <property id="module.driver.timer.channel" value="4"/>
       <property id="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
-      <property id="module.driver.timer.period" value="0x80000"/>
+      <property id="module.driver.timer.period" value="0x10000"/>
       <property id="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_raw_counts"/>
       <property id="module.driver.timer.duty_cycle" value="50"/>
-      <property id="module.driver.timer.count_source" value="module.driver.timer.count_source.clock_pclkb"/>
+      <property id="module.driver.timer.count_source" value="module.driver.timer.count_source.clock_fsub"/>
+      <property id="module.driver.timer.agtoa_output_enable" value="module.driver.timer.agtoa_output_enable.false"/>
+      <property id="module.driver.timer.agtob_output_enable" value="module.driver.timer.agtob_output_enable.false"/>
+      <property id="module.driver.timer.agto_output_enable" value="module.driver.timer.agto_output_enable.false"/>
+      <property id="module.driver.timer.measurement_mode" value="module.driver.timer.measurement_mode.measure_disabled"/>
+      <property id="module.driver.timer.agtio_filter" value="module.driver.timer.agtio_filter.agtio_filter_none"/>
+      <property id="module.driver.timer.enable_pin" value="module.driver.timer.enable_pin.enable_pin_not_used"/>
+      <property id="module.driver.timer.trigger_edge" value="module.driver.timer.trigger_edge.trigger_edge_rising"/>
+      <property id="module.driver.timer.p_callback" value="NULL"/>
+      <property id="module.driver.timer.ipl" value="_disabled"/>
+    </module>
+    <module id="module.driver.timer_on_agt.1889150322">
+      <property id="module.driver.timer.name" value="AGT5_RunTimeStats_1"/>
+      <property id="module.driver.timer.channel" value="5"/>
+      <property id="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
+      <property id="module.driver.timer.period" value="0xFFFF"/>
+      <property id="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_raw_counts"/>
+      <property id="module.driver.timer.duty_cycle" value="50"/>
+      <property id="module.driver.timer.count_source" value="module.driver.timer.count_source.clock_agt_underflow"/>
       <property id="module.driver.timer.agtoa_output_enable" value="module.driver.timer.agtoa_output_enable.false"/>
       <property id="module.driver.timer.agtob_output_enable" value="module.driver.timer.agtob_output_enable.false"/>
       <property id="module.driver.timer.agto_output_enable" value="module.driver.timer.agto_output_enable.false"/>
@@ -850,7 +850,6 @@
       <stack module="module.driver.uart_on_sci_uart.522685831"/>
       <stack module="module.driver.adc_on_adc.200824283"/>
       <stack module="module.driver.rtc_on_rtc.1990843699"/>
-      <stack module="module.driver.timer_on_agt.1086978184"/>
       <stack module="module.driver.timer_on_gpt.443701359"/>
       <stack module="module.driver.spi_on_spi.1255589629">
         <stack module="module.driver.transfer_on_dtc.1045727236" requires="module.driver.spi_on_spi.requires.transfer_tx"/>
@@ -875,6 +874,7 @@
       <stack module="module.driver.elc_on_elc.476475565"/>
       <stack module="module.driver.timer_on_agt.1354150675"/>
       <stack module="module.driver.timer_on_agt.734104789"/>
+      <stack module="module.driver.timer_on_agt.1889150322"/>
     </context>
     <config id="config.driver.wdt">
       <property id="config.driver.wdt.param_checking_enable" value="config.driver.wdt.param_checking_enable.bsp"/>

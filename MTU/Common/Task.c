@@ -849,7 +849,7 @@ uint32_t OS_TASK_Set_Priority ( char const *pTaskName, uint32_t NewPriority )
    {  // specific task requested
       static TaskHandle_t *taskHandlePtr  = NULL;
 
-      if( 0 == strcmp("IDL", pTaskName ))  /* FreeRTOS creates the IDLE Task, hence its not in the list. Use different function */
+      if( 0 == strcmp("IDLE", pTaskName ))  /* FreeRTOS creates the IDLE Task, hence its not in the list. Use different function */
       {
          OldPriority = setIdleTaskPriority( NewPriority );
       }
@@ -1254,7 +1254,14 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
          taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
       }
       vTaskGetInfo( taskHandle, &taskStatusInfo, pdFALSE, eInvalid );  // No need to get the HighWaterMark and Task Stat, which are time consuming
-      Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = taskStatusInfo.ulRunTimeCounter;
+      if( 0 == strcmp( pTaskList->pcName, taskStatusInfo.pcTaskName ) )
+      {
+         Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = taskStatusInfo.ulRunTimeCounter;
+      }
+      else
+      {
+         Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;
+      }
    }
 
    CPUTotal = 0;
@@ -1268,7 +1275,7 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
       // The IDLE task run time is not counted toward the CPU load. Without doing this, the CPU load time would be %100
       if( pTaskList->TASK_TEMPLATE_INDEX != eIDL_TSK_IDX )
       {
-         CPULoad  += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX]; // Compute total CPU load including intterupt time
+         CPULoad  += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX]; // Compute total CPU load
       }
       CPUTotal += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX];    // This is the task run time including any time spent in the interrupt handler
       Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;            // Reset task run time
@@ -1602,6 +1609,10 @@ void OS_TASK_Summary ( bool safePrint )
          taskHandle = xTaskGetIdleTaskHandle();
       }
       vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid );
+      if( 0 != strcmp( pTaskList->pcName, taskStatusInfo.pcTaskName ) )
+      {
+         continue;  // Skip the task that has been deleted
+      }
       OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, CPULoad );
       snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
                ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, ( char* )taskState[ taskStatusInfo.eCurrentState ],
