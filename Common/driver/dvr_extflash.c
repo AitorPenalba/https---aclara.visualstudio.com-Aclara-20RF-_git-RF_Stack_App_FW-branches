@@ -1925,10 +1925,10 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 #endif
             if ( 
 #if ( MCU_SELECTED == NXP_K24 )
-                eSUCCESS == eRetVal 
+            eSUCCESS == eRetVal 
 #elif ( MCU_SELECTED == RA6E1 )
-                FSP_SUCCESS == err 
-               )
+            FSP_SUCCESS == err 
+            )
 #endif
             {
                /* Search for the device ID in the table. */
