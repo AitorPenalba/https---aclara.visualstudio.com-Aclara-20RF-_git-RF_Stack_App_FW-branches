@@ -50,7 +50,6 @@
 #include "SM.h"
 #if ( MCU_SELECTED == RA6E1 )
 #include "lpm_app.h"
-#include "AGT.h"
 #include "bsp_pin_cfg.h"
 #endif
 
@@ -113,7 +112,11 @@ extern const uint8_t uStartUpTblCnt;
 //These MAY become configurable
 static const float fCapacitanceRevB          = ( float )10.0;     /* Rev B HW's Super cap capacitance value in Farads */
 static const float fCapacitanceRevC          = ( float )5.0;      /* Rev C HW's Super cap capacitance value in Farads */
+#if ( MCU_SELECTED == NXP_K24 )
+static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */
+#elif ( MCU_SELECTED == RA6E1 )
 static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */  // TODO: RA6E1: This value needs to be updated
+#endif
 static const float fEnergyCollisionDetection = ( float )0.0;      /* Energy used to detect a collision */
 static const float fEnergyTransmit           = ( float )0.65;     /* Energy used to transmit the message */
 static const float fMinimumRunVoltageRevB    = ( float )1.7;      /* Minimum supercap voltage needed to run micro */
@@ -716,18 +719,20 @@ void PWRLG_TxFailure( void )
 #endif
 //         LG_PRNT_INFO("\nTx-Fail:LLS\n");
          /* The CSMA back-off is long, switch to LLS mode.  */
-#if ( MCU_SELECTED == NXP_K24 )
 #if ( PWRLG_PRINT_ENABLE == 0 )
          EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
 #else
          /* Subtracting the sleep delay added for print*/
-//         EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS );
-         EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
+         if( uMilliseconds > OS_SLEEP_PRINT_DELAY_MS )
+         {
+            EnterLLS( ( uint16_t )( uMilliseconds - OS_SLEEP_PRINT_DELAY_MS ), LPTMR_MILLISECONDS );
+         }
+         else
+         {
+            EnterLLS( ( uint16_t )( uMilliseconds ), LPTMR_MILLISECONDS );
+         }
 #endif
-#elif( MCU_SELECTED == RA6E1 )
-         // TODO: RA6E1: Support SW Standby instead
-         OS_TASK_Sleep( uMilliseconds );
-#endif
+
 #if ( LAST_GASP_SIMULATION == 1 )
       }
       else
@@ -868,7 +873,9 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
                   RESTORATION_TIME_SET ( RTC_TSR );         /* Record RTC seconds at power restored time.   */
 #elif ( MCU_SELECTED == RA6E1 )
-                  RESTORATION_TIME_SET( R_RTC->RSECCNT );   /* Record RTC seconds at power restored time.   */
+                  TIME_STRUCT currentTime = { 0 };
+                  RTC_GetTimeAtRes (&currentTime, 1);
+                  RESTORATION_TIME_SET( currentTime.SECONDS );   /* Record RTC seconds at power restored time.   */
 #endif
                }
                VBATREG_PWR_QUAL_COUNT++;           /* Increment the power quality count.  */
@@ -910,7 +917,7 @@ void PWRLG_Startup( void )
                   R_SYSTEM->DPSIFR2 = 0U;
                   LG_PRNT_INFO("DPSIFR2:%ld", R_SYSTEM->DPSIFR2);
 #endif
-                  RTC_DisableCalendarAlarm();
+                  RTC_DisableAlarm();
                   PWRLG_SOFTWARE_RESET_SET( 1 );   /* Done with LG */
                   LG_PRNT_INFO("Complete");
 #endif
@@ -998,7 +1005,9 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
                   RESTORATION_TIME_SET ( RTC_TSR );         /* Record RTC seconds at power restored time.   */
 #elif ( MCU_SELECTED == RA6E1 )
-                  RESTORATION_TIME_SET( R_RTC->RSECCNT );   /* Record RTC seconds at power restored time.   */
+                  TIME_STRUCT currentTime = { 0 };
+                  RTC_GetTimeAtRes (&currentTime, 1);
+                  RESTORATION_TIME_SET( currentTime.SECONDS );   /* Record RTC seconds at power restored time.   */
 #endif
                }
                VBATREG_PWR_QUAL_COUNT++;              /* Increment the power quality count.  */
@@ -1138,7 +1147,9 @@ void PWRLG_Restoration( uint16_t powerAnomalyCount )
 #if ( MCU_SELECTED == NXP_K24 )
                RESTORATION_TIME_SET ( RTC_TSR );       /* Record RTC seconds at power restored time. */
 #elif ( MCU_SELECTED == RA6E1 )
-               RESTORATION_TIME_SET( R_RTC->RSECCNT ); /* Record RTC seconds at power restored time. */
+               TIME_STRUCT currentTime = { 0 };
+               RTC_GetTimeAtRes (&currentTime, 1);
+               RESTORATION_TIME_SET( currentTime.SECONDS );   /* Record RTC seconds at power restored time.   */
 #endif
             }
             VBATREG_PWR_QUAL_COUNT = powerAnomalyCount + 1;    /* Increment the power quality/anomaly count. */
@@ -1260,8 +1271,8 @@ static void NextSleep( void )
       {
          EnterVLLS( 1, LPTMR_MILLISECONDS, 1 );
 #if ( ( MCU_SELECTED == RA6E1 ) && ( LAST_GASP_USE_2_DEEP_SLEEP == 0 ) )
-         EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */ // TODO: RA6E1: Verify
-         // RESET();  /* Forcing MCU to go through a reset */ // TODO: DG: Verify
+         EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */
+         // RESET();  /* Forcing MCU to go through a reset */
 #endif
       }
    }
@@ -1292,8 +1303,8 @@ static void NextSleep( void )
          EnterVLLS( uCounter, LPTMR_MILLISECONDS, 1 );
 #if ( ( MCU_SELECTED == RA6E1 ) && ( LAST_GASP_USE_2_DEEP_SLEEP == 0 ) )
          /* In K24, above line make the MCU go through a reset, where as for RA6, we need to force it to go through reset to keep the same functionality */
-         EnterVLLS( 0, LPTMR_SECONDS, 1 );  // TODO: RA6E1: Verify
-         //RESET(); // TODO: RA6E1: Verify
+         EnterVLLS( 0, LPTMR_SECONDS, 1 );
+         //RESET();
 #endif
       }
    }
@@ -1615,7 +1626,6 @@ uint8_t PWRLG_LastGasp( void )
       )
 #endif
 #elif ( MCU_SELECTED == RA6E1)
-      /* TODO: RA6: DG: Do we need to further check the wake-up source? */
       if ( ( R_SYSTEM->RSTSR0_b.DPSRSTF )  &&   /* Deep Software Standby Reset Flag */
            ( 0 != PWRLG_LLWU() ) )              /* LLWU cause set in LP RAM   */
 #endif
@@ -1843,7 +1853,9 @@ void PWRLG_CalculateSleep( uint8_t step )
 #if ( MCU_SELECTED == NXP_K24 )
    aclara_srand( RTC_TPR );   /* Use the RTC prescale register as a seed to the random function.   */
 #elif ( MCU_SELECTED == RA6E1 )
-   aclara_srand( R_RTC->R64CNT ); // TODO: RA6: DG: Review this
+   TIME_STRUCT currentTime = { 0 };
+   RTC_GetTimeAtRes (&currentTime, 1);
+   aclara_srand( currentTime.SECONDS );
 #endif
    switch( step )
    {
@@ -1986,6 +1998,13 @@ static uint32_t CalculateSleepWindow( uint8_t uMessagesRemaining )
    fSuperCapEnergyForSleep = fSuperCapEnergy - ( uMessagesRemaining * ( fEnergyCollisionDetection + fEnergyTransmit ) );
    // Tremain = 30sec(Esleep/E30secSleep)
    fSleepSecondsRemaining      = ( float )( 30.0 * fSuperCapEnergyForSleep / fEnergy30SecondSleep );
+#if 1  // TEST CODE : TODO: RA6E1: Remove
+   if ( fSleepSecondsRemaining < 10 )
+   {
+      LG_PRNT_INFO("\fSuperCapVoltage:%ld; fMinimumRunVoltage: %d; fCapacitance: %d; uMessagesRemaining: %d \n\r",
+                     (uint32_t)(fSuperCapVoltage*1000), (uint32_t)(fMinimumRunVoltage*1000), (uint32_t)(fCapacitance*1000), uMessagesRemaining);
+   }
+#endif
    if ( fSleepSecondsRemaining < 0 )
    {
       fSleepSecondsRemaining = 0;
@@ -2586,7 +2605,7 @@ void PWRLG_RestLastGaspFlags( void )
 static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode )
 {
    /* Note: In RA6E1, RTC Alarm is used for LPTMR_SECONDS and Deep Software Standby Mode
-           In RA6E1, AGT Alarm is used for LPTMR_MILLISECONDS and Software Standby Mode */
+            In RA6E1, AGT Alarm is used for LPTMR_MILLISECONDS and Software Standby Mode */
 
    if ( uCounter != 0 ) /* If 0 time requested, resume with existing settings.   */
    {
@@ -2594,7 +2613,11 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
       {
          case LPTMR_SECONDS:
          {
-            RTC_ConfigureCalendarAlarm(uCounter);
+            if( (bool)false == RTC_isRunning() )   //RTC has to be running, but make sure anyway
+            {
+               RTC_Start();
+            }
+            RTC_ConfigureAlarm(uCounter);
             break;
          }
          case LPTMR_MILLISECONDS:
@@ -2605,9 +2628,7 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
          case LPTMR_SLEEP_FOREVER:
          default:
          {
-            /* No need to set the timer */
-            // TODO: RA6: Review: 1. Disable RTC ALARM ? OR Set Timer to max value? OR Reconfigure Deep SW Standby?
-            RTC_DisableCalendarAlarm();
+            RTC_DisableAlarm();
             break;
          }
       }
@@ -2683,14 +2704,13 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
    }
 
    LG_PRNT_INFO( "\nEnter LPM, count: %d, units: %d, mode: %d\n", uCounter, ( uint8_t )eUnits, uMode );
-//   LG_PRNT_INFO("\n HW Rev Letter: %c \n\r", hwRevLetter_);
 
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
    TRACE_D0_LOW();
 #endif
 
 #if ( ( MCU_SELECTED == RA6E1 ) && ( PWRLG_PRINT_ENABLE == 0 ) && ( LAST_GASP_RECONFIGURE_CLK == 1 ) )
-   CGC_Switch_SystemClock_to_MOCO();  /* TODO: RA6E1: DG: Revisit the ()call order */
+   CGC_Switch_SystemClock_to_MOCO();
 #endif
 
    HardwareShutdown();
@@ -2764,7 +2784,7 @@ static void ClearVBATT ( void )
    {
       memset( (void *)&R_SYSTEM->VBTBKR[0], 0, 128 * sizeof( char ) );
    }
-   PWRLG_SOFTWARE_RESET_SET(1); // TODO: RA6E1: Fail safe.
+   PWRLG_SOFTWARE_RESET_SET(1);
 }
 #endif
 #if ( LAST_GASP_USE_2_DEEP_SLEEP == 1 )

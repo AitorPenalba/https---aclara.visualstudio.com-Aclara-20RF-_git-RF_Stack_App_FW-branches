@@ -2,9 +2,9 @@
  *
  * Filename: RTC.c
  *
- * Global Designator:
+ * Global Designator: RTC_
  *
- * Contents:
+ * Contents: RTC abstraction layer
  *
  ******************************************************************************
    A product of
@@ -28,7 +28,8 @@
 #endif
 #include "vbat_reg.h"
 #if ( MCU_SELECTED == RA6E1 )
-#include "time_sys.h"
+  #include "time_sys.h"
+  #include "time_util.h"
 #endif
 /* #DEFINE DEFINITIONS */
 
@@ -36,7 +37,19 @@
 /* Flags used for Alarm Interrupts */
 #define SET_FLAG                             1
 #define RESET_FLAG                           0
+
 /* TYPE DEFINITIONS */
+#if ( MCU_SELECTED == RA6E1 )
+typedef struct
+{
+   union
+   {
+      uint8_t  Byte[4];
+      uint32_t Word;
+   }BCount;
+   uint8_t SubSec;
+}rtc_time_primitive;
+#endif
 
 /* CONSTANTS */
 
@@ -47,11 +60,9 @@ volatile uint32_t g_alarm_irq_flag = RESET_FLAG;       //flag to check occurrenc
 
 /* FUNCTION PROTOTYPES */
 #if ( MCU_SELECTED == RA6E1 )
-#if ( TM_RTC_UNIT_TEST == 1 )
-bool RTC_UnitTest(void);
-#endif
-static void RTC_Start ( void );
-#endif
+static void rtc_time_get( rtc_time_primitive *time);
+static void rtc_time_set( rtc_time_primitive *time);
+#endif   //#if ( MCU_SELECTED == RA6E1 )
 
 /* FUNCTION DEFINITIONS */
 #if ( MCU_SELECTED == RA6E1 )
@@ -68,17 +79,45 @@ static void RTC_Start ( void );
 *******************************************************************************/
 returnStatus_t RTC_init( void )
 {
-   ( void )R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );
+   ( void )R_RTC_Open( &g_rtc0_ctrl, &g_rtc0_cfg );   //Use FSP to setup in calendar mode
 
    if( (bool)false == RTC_isRunning() )
    {
-      VBATREG_RTC_VALID = 0;
+      //1. Select clock (already performed in RTC_Open)
+      //2. Stop and Select Binary Mode (already performed in RTC Open)
+      R_RTC->RCR2 = (R_RTC_RCR2_CNTMD_Msk & ~R_RTC_RCR2_START_Msk);
+      FSP_HARDWARE_REGISTER_WAIT( R_RTC->RCR2, (R_RTC_RCR2_CNTMD_Msk & ~R_RTC_RCR2_START_Msk)); //Wait for RTC to complete
+      //3. Clear RCR1 (already performed in RTC_Open)
+      //4. Disable/configure Interrupts (already performed in RTC_Open)
+      //5. Reset RTC (already performed in RTC_Open)
+      //6. Init all other registers
+      R_RTC->BCNT0 = 0;
+      R_RTC->BCNT1 = 0;
+      R_RTC->BCNT2 = 0;
+      R_RTC->BCNT3 = 0;
+      /* These registers are set to 0 after an RTC software reset:
+            R64CNT
+            RSECAR   RMINAR   RHRAR  RWKAR  RDAYAR  RMONAR RYRAR  RYRAREN
+            RADJ
+            RTCCRn  RSECCPn  RMINCPn  RHRCPn  RDAYCPn  RMONCPn  BCNTnCPm
+            BCNTnAR BCNTnAER
+         These registers are don't care for binary mode:
+            RSECCNT  RMINCNT  RHRCNT  RWKCNT  RDAYCNT  RMONCNT  RYRCNT
+         These registers are don't care when using the subclock clock source
+            RFRL  RFRH
+         Bits in the RCR2 register:
+            ADJ30  AADJE  AADJP are set to 0 after an RTC software reset
+            RTCOE is set to 0 after system reset
+            HR24  is a don't care in binary mode
+      */
       RTC_Start();
+      VBATREG_RTC_VALID = 0;
    }
 
    return( eSUCCESS );
 } /* end RTC_init () */
-#endif
+#endif   //#if ( MCU_SELECTED == RA6E1 )
+
 /*******************************************************************************
 
   Function name: RTC_GetDateTime
@@ -112,19 +151,14 @@ void RTC_GetDateTime ( sysTime_dateFormat_t *RT_Clock )
    RTC_Time.MILLISEC += (int16_t)SYS_TIME_TICK_IN_mS/2;  //Round up
    RT_Clock->msec  = (uint16_t)( ((uint16_t)RTC_Time.MILLISEC / SYS_TIME_TICK_IN_mS) * SYS_TIME_TICK_IN_mS ); //Normalize
 #elif ( MCU_SELECTED == RA6E1 )
-   rtc_time_t pTime;
-   uint32_t sec = 0;
-   uint32_t microSec = 0;
-   (void)R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &pTime );
-   RTC_GetTimeInSecMicroSec ( &sec , &microSec);
-   RT_Clock->month = (uint8_t)pTime.tm_mon + 1;  //In RA6E1, Jan- 0 and Dec- 11
-   RT_Clock->day   = (uint8_t)pTime.tm_mday;
-   RT_Clock->year  = (uint16_t)pTime.tm_year + 1900;  //In RA6E1, Years SINCE 1900 (2021 = 2021-1900 = 121)
-   RT_Clock->hour  = (uint8_t)pTime.tm_hour;
-   RT_Clock->min   = (uint8_t)pTime.tm_min;
-   RT_Clock->sec   = (uint8_t)pTime.tm_sec;
-   RT_Clock->msec  = (uint16_t)(microSec/1000); //Converting Microsecond to Millisecond
-#endif
+   TIME_STRUCT          currentTime = { 0 };
+   sysTime_t            sysTime;
+
+   RTC_GetTimeAtRes (&currentTime, 1);
+   TIME_UTIL_ConvertSecondsToSysFormat(currentTime.SECONDS, 0, &sysTime);
+   TIME_UTIL_ConvertSysFormatToDateFormat(&sysTime, RT_Clock);
+   RT_Clock->msec  = currentTime.MILLISECONDS;
+#endif   //#if ( MCU_SELECTED...
 
 } /* end RTC_GetDateTime () */
 
@@ -191,53 +225,41 @@ bool RTC_SetDateTime ( const sysTime_dateFormat_t *RT_Clock )
    } /* end else() */
 
 #elif ( MCU_SELECTED == RA6E1 )
-   rtc_time_t checkTime;
-   rtc_time_t pTime;
-      /* Validate the input date/time  */
-   if ( (RT_Clock->month >= MIN_RTC_MONTH)
-     && (RT_Clock->month <= MAX_RTC_MONTH)
-     && (RT_Clock->day   >= MIN_RTC_DAY)
-     && (RT_Clock->day   <= MAX_RTC_DAY)
-     && (RT_Clock->year  >= MIN_RTC_YEAR)
-     && (RT_Clock->year  <= MAX_RTC_YEAR)
+   /* Validate the input date/time  */
+   if ( (RT_Clock->month >= MIN_RTC_MONTH) && (RT_Clock->month <= MAX_RTC_MONTH)
+     && (RT_Clock->day   >= MIN_RTC_DAY)   && (RT_Clock->day   <= MAX_RTC_DAY)
+     && (RT_Clock->year  >= MIN_RTC_YEAR)  && (RT_Clock->year  <= MAX_RTC_YEAR)
      && (RT_Clock->hour  <= MAX_RTC_HOUR)
      /*lint -e{123} min element same name as macro elsewhere is OK */
      && (RT_Clock->min   <= MAX_RTC_MINUTE)
      && (RT_Clock->sec   <= MAX_RTC_SECOND) )
    {
-      pTime.tm_sec   = RT_Clock->sec;
-      pTime.tm_mon   = RT_Clock->month - 1;  //In RA6E1, Jan- 0 and Dec- 11
-      pTime.tm_mday  = RT_Clock->day;
-      pTime.tm_year  = (int16_t)RT_Clock->year - 1900; //In RA6E1, Year SINCE 1900 (2021 = 2021-1900 = 121)
-      pTime.tm_hour  = RT_Clock->hour;
-      pTime.tm_min   = RT_Clock->min;
-      /* No Requirement for millisecond */
-      (void)R_RTC_CalendarTimeSet( &g_rtc0_ctrl, &pTime );
-      checkTime = pTime;
+      rtc_time_primitive currentTime;
+      sysTime_t          sysTime;
+
+      //Convert calendar date/time to Seconds (milliseconds not used)
+      TIME_UTIL_ConvertDateFormatToSysFormat(RT_Clock, &sysTime);
+      TIME_UTIL_ConvertSysFormatToSeconds(&sysTime, &currentTime.BCount.Word, 0);
+      rtc_time_set (&currentTime);
       VBATREG_EnableRegisterAccess();
-      /*Validates if the time set is not all zero*/
-      if( (0 == checkTime.tm_sec)
-         && (0 == checkTime.tm_mon )
-         && (0 == checkTime.tm_mday )
-         && (0 == checkTime.tm_year)
-         && (0 == checkTime.tm_hour)
-         && (0 == checkTime.tm_min) )
+      if(0 == currentTime.BCount.Word)
       {
          VBATREG_RTC_VALID = 0; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
-      }/* end if() */
+      }
       else
       {
          VBATREG_RTC_VALID = 1; /*TODO Writing zero to VBTBER Register can happen in LastGasp considering Deep Software Standby Mode*/
-      }/* end else() */
+      }
       VBATREG_DisableRegisterAccess();
-   } /* end if() */
+   } /* end if( (RT_Clock->month >= MIN_RTC_MONTH) && ... */
    else
    {
       /* Invalid Parameter passed in */
       (void)printf ( "ERROR - RTC invalid RT_Clock value passed into Set function\n" );
       FuncStatus = false;
-   } /* end else() */
-#endif
+   }
+#endif   //#if ( MCU_SELECTED ...
+
    return ( FuncStatus );
 } /* end RTC_SetDateTime () */
 
@@ -269,7 +291,6 @@ bool RTC_Valid(void)
    return (bRTCValid);
 } /* end RTC_Valid () */
 
-#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: RTC_GetTimeAtRes
@@ -287,12 +308,13 @@ bool RTC_Valid(void)
 *******************************************************************************/
 void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
 {
-   uint32_t       seconds;
-   uint16_t       fractSeconds;
-   RTC_MemMapPtr  rtc;
-
    if ( ( fractRes != 0 ) && ( 1000 >= fractRes ) )
    {
+#if ( MCU_SELECTED == NXP_K24 )
+      uint32_t       seconds;
+      uint16_t       fractSeconds;
+      RTC_MemMapPtr  rtc;
+
       rtc          = RTC_BASE_PTR;
       seconds      = (uint32_t)rtc->TSR;
       fractSeconds = (uint16_t)rtc->TPR;
@@ -304,12 +326,18 @@ void RTC_GetTimeAtRes ( TIME_STRUCT *ptime, uint16_t fractRes )
          fractSeconds = (uint16_t)rtc->TPR;
       }
       ptime->SECONDS      = seconds;
-      ptime->MILLISECONDS = ( ( (uint32_t)fractSeconds * (uint32_t)1000 / (uint32_t)fractRes ) / 32768 ) * fractRes;
+      ptime->MILLISECONDS = ( ( (uint32_t)fractSeconds   * (uint32_t)1000 / (uint32_t)fractRes ) / 32768 ) * fractRes;
+#elif ( MCU_SELECTED == RA6E1 )
+      rtc_time_primitive rtcTime;
+
+      rtc_time_get(&rtcTime);
+      ptime->SECONDS      = rtcTime.BCount.Word;
+      ptime->MILLISECONDS = ( ( (uint32_t)rtcTime.SubSec * (uint32_t)1000 / (uint32_t)fractRes ) /   128 ) * fractRes;
+#endif
    }
    return;
 
 } /* end RTC_GetDateTime () */
-#endif
 
 /*******************************************************************************
 
@@ -348,109 +376,19 @@ void RTC_GetTimeInSecMicroSec ( uint32_t *sec, uint32_t *microSec )
 
    return;
 #elif ( MCU_SELECTED == RA6E1 )
-   rtc_time_t getSecTime;
-   (void)R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &getSecTime );
-   *sec = getSecTime.tm_sec;
-   rtc_instance_ctrl_t * p_instance_ctrl = ( rtc_instance_ctrl_t * ) &g_rtc0_ctrl;
-   uint8_t milliSecGet;
-   //Disable the NVIC carry interrupt request
-   NVIC_DisableIRQ( p_instance_ctrl->p_cfg->carry_irq );
-   //Enable the RTC carry interrupt request
-   R_BSP_IrqEnable( p_instance_ctrl->p_cfg->carry_irq );
+   rtc_time_primitive rtcTime;
 
-   /* If a carry occurs while the 64-Hz counter and time are being read, the correct time is not obtained,
-    * therefore they must be read again. 23.3.5 "Reading 64-Hz Counter and Time" of the RA6E1 manual R01UH0930EJ0100)*/
-   do
-   {
-       p_instance_ctrl->carry_isr_triggered = false; /** This flag will be set to 'true' in the carry ISR */
-       milliSecGet = (int8_t) R_RTC->R64CNT;
-       *microSec = ( (milliSecGet)*1000000 )/128;
-   } while ( p_instance_ctrl->carry_isr_triggered );
-   //Enable the NVIC carry interrupt request
-   NVIC_EnableIRQ( p_instance_ctrl->p_cfg->carry_irq );
-#endif
+   rtc_time_get(&rtcTime);
+   *sec      = rtcTime.BCount.Word;
+   *microSec = ( (rtcTime.SubSec)*1000000 )/128;
+#endif   //#if ( MCU_SELECTED ...
 
 }/* end RTC_GetTimeInSecMicroSec () */
+
 #if ( MCU_SELECTED == RA6E1 )
 /*******************************************************************************
 
-  Function name: RTC_SetAlarmTime
-
-  Purpose: Sets the Alarm Time
-
-  Arguments: pAlarm - structure that contains the Real Time Clock Alarm
-             configuration
-
-  Returns: None
-
-*******************************************************************************/
-bool RTC_SetAlarmTime ( rtc_alarm_time_t * const pAlarm )
-{
-   bool FuncStatus = true;
-   (void)R_RTC_CalendarAlarmSet( &g_rtc0_ctrl, pAlarm );
-   return ( FuncStatus );
-}/* end RTC_SetAlarmTime () */
-
-/*******************************************************************************
-
-  Function name: RTC_GetAlarmTime
-
-  Purpose: Gets the current Alarm Time
-
-  Arguments: pAlarm - structure that contains the Real Time Clock Alarm
-             configuration
-
-  Returns: None
-
-*******************************************************************************/
-void RTC_GetAlarmTime ( rtc_alarm_time_t * const pAlarm )
-{
-   (void)R_RTC_CalendarAlarmGet( &g_rtc0_ctrl, pAlarm );
-}/* end RTC_GetAlarmTime () */
-
-/*******************************************************************************
-
-  Function name: RTC_ErrorAdjustmentSet
-
-  Purpose: RTC Error adjustment
-
-  Arguments: erradjcfg - structure that contains the Real Time Clock error
-             adjustment configuration
-
-  Returns: None
-
-*******************************************************************************/
-void RTC_ErrorAdjustmentSet( rtc_error_adjustment_cfg_t const * const erradjcfg )
-{
-   (void)R_RTC_ErrorAdjustmentSet( &g_rtc0_ctrl, erradjcfg );
-}/* end RTC_ErrorAdjustmentSet () */
-
-
-/*******************************************************************************
-
-  Function name: rtc_callback
-
-  Purpose: Interrupt Handler for RTC Module
-
-  Arguments: rtc_callback_args_t *p_args
-
-  Returns: None
-
-  Notes: Used for Alarm Interrupt.
-
-*******************************************************************************/
-void rtc_callback( rtc_callback_args_t *p_args )
-{
-   if( RTC_EVENT_ALARM_IRQ == p_args->event )
-   {
-       g_alarm_irq_flag = SET_FLAG; //Alarm Interrupt occurred
-   }/* end if */
-}/* end rtc_callback () */
-
-
-/*******************************************************************************
-
-  Function name: RTC_ConfigureCalendarAlarm
+  Function name: RTC_ConfigureAlarm
 
   Purpose: To Configure the RTC Calendar Alarm
 
@@ -461,74 +399,65 @@ void rtc_callback( rtc_callback_args_t *p_args )
   Notes: Mostly used in Last Gasp
 
 *******************************************************************************/
-void RTC_ConfigureCalendarAlarm( uint16_t seconds )
+void RTC_ConfigureAlarm( uint32_t seconds )
 {
-   uint16_t          alarm_hours, alarm_mins, alarm_secs;
-   rtc_time_t        config_time    = { 0x00 };
-   rtc_alarm_time_t  alarm_time_set = { 0x00 };
+   rtc_time_primitive time;  //Used for convenience on word/byte conversion
 
-   if( seconds > 0 )
-   {
-      alarm_hours = ( seconds/ SECONDS_PER_HOUR );
-      alarm_mins  = ( seconds -( SECONDS_PER_HOUR * alarm_hours))/ SECONDS_PER_MINUTE;
-      alarm_secs  = ( seconds -( SECONDS_PER_HOUR * alarm_hours) - (alarm_mins * SECONDS_PER_MINUTE));
-   }
+   /* Disable the ICU alarm interrupt request */
+   R_BSP_IrqDisable(g_rtc0_ctrl.p_cfg->alarm_irq);
+   /* Compare all bits - exact match required */
+   R_RTC->BCNT0AER_b.ENB  = 0xFF;
+   R_RTC->BCNT1AER_b.ENB  = 0xFF;
+   R_RTC->BCNT2AER_b.ENB  = 0xFF;
+   R_RTC->BCNT3AER_b.ENB  = 0xFF;
 
-   /* RTC should be started to use the Alarm */
-   if( (bool)false == RTC_isRunning() )
-   {
-      RTC_Start();
-   }
+   rtc_time_get( &time );        // Get current value of the Registers
+   time.BCount.Word += seconds;  // Add the time delay
 
-   /* Get the current Calendar time */
-   ( void )R_RTC_CalendarTimeGet( &g_rtc0_ctrl, &config_time);
+   R_RTC->BCNT0AR   = time.BCount.Byte[0];
+   R_RTC->BCNT1AR   = time.BCount.Byte[1];
+   R_RTC->BCNT2AR   = time.BCount.Byte[2];
+   R_RTC->BCNT3AR   = time.BCount.Byte[3];
 
-   if( alarm_secs > 0 )
-   {
-      alarm_time_set.sec_match = true;
-      /* Adjust the desired Alarm time in seconds, so that seconds count rolls over from 60  */
-      if( (config_time.tm_sec + alarm_secs) / SECONDS_PER_MINUTE)
-      {
-         alarm_time_set.time.tm_sec = ((config_time.tm_sec + alarm_secs) % SECONDS_PER_MINUTE);
-         alarm_mins++; // Accommodate rollover
-      }
-      else
-      {
-         alarm_time_set.time.tm_sec = config_time.tm_sec + alarm_secs;
-      }
-   }
-   if( alarm_mins > 0 )
-   {
-      alarm_time_set.min_match = true;
-      /* Adjust the desired Alarm time in minutes, so that seconds count rolls over from 60  */
-      if( (config_time.tm_min + alarm_mins ) / MINUTES_PER_HOUR)
-      {
-         alarm_time_set.time.tm_min = ((config_time.tm_min + alarm_mins) % MINUTES_PER_HOUR);
-         alarm_hours++; // Accommodate rollover
-      }
-      else
-      {
-         alarm_time_set.time.tm_min = config_time.tm_min + alarm_mins;
-      }
-   }
-   if( alarm_hours > 0 )
-   {
-      alarm_time_set.hour_match = true;
-      /* Adjust the desired Alarm time in hours, so that seconds count rolls over from 24  */
-      if( (config_time.tm_hour + alarm_hours ) / HOURS_PER_DAY)
-      {
-         alarm_time_set.time.tm_hour = ((config_time.tm_hour + alarm_hours) % HOURS_PER_DAY);
-         // Accommodate rollover
-         alarm_time_set.dayofweek_match = true;
-         alarm_time_set.time.tm_wday++;  // Add One day to accommodate rollover
-      }
-      else
-      {
-         alarm_time_set.time.tm_hour = config_time.tm_hour + alarm_hours;
-      }
-   }
+   /* Enable the RTC alarm interrupt */
+   R_RTC->RCR1 |= R_RTC_RCR1_AIE_Msk;
+   FSP_HARDWARE_REGISTER_WAIT((R_RTC->RCR1 & R_RTC_RCR1_AIE_Msk), R_RTC_RCR1_AIE_Msk);
 
-   ( void )R_RTC_CalendarAlarmSet( &g_rtc0_ctrl , &alarm_time_set );
+   R_BSP_SoftwareDelay( 200, BSP_DELAY_UNITS_MICROSECONDS );  // As per Datasheet Figure 23.7
+
+   R_BSP_IrqStatusClear(g_rtc0_ctrl.p_cfg->alarm_irq);       // As per Datasheet Figure 23.7
+
+   R_BSP_IrqEnable(g_rtc0_ctrl.p_cfg->alarm_irq);   //Enabled the RTC in the NVIC
+}
+
+/*******************************************************************************
+
+  Function name: RTC_DisableAlarm
+
+  Purpose: Disable the RTC Alarm
+
+  Arguments: None
+
+  Returns: None
+
+*******************************************************************************/
+void RTC_DisableAlarm ( void )
+{
+   /* Enable the RTC alarm interrupt */
+   R_RTC->RCR1 |= R_RTC_RCR1_AIE_Msk;
+   FSP_HARDWARE_REGISTER_WAIT((R_RTC->RCR1 & R_RTC_RCR1_AIE_Msk), R_RTC_RCR1_AIE_Msk);
+
+   R_BSP_IrqDisable(g_rtc0_ctrl.p_cfg->alarm_irq);   //Disable the RTC in the NVIC
+   /* Disable the RTC alarm interrupt */
+   R_RTC->RCR1 &= ~R_RTC_RCR1_AIE_Msk;
+   FSP_HARDWARE_REGISTER_WAIT((R_RTC->RCR1 & R_RTC_RCR1_AIE_Msk), 0U);
+
+   /* Compare none of the bits */
+   R_RTC->BCNT0AER = 0;
+   R_RTC->BCNT1AER = 0;
+   R_RTC->BCNT2AER = 0;
+   R_RTC->BCNT3AER = 0;
+   return;
 }
 
 /*******************************************************************************
@@ -542,23 +471,11 @@ void RTC_ConfigureCalendarAlarm( uint16_t seconds )
   Returns: None
 
 *******************************************************************************/
-
 bool RTC_isRunning ( void )
 {
-   fsp_err_t   rtc_DriverStatus  = FSP_SUCCESS;
-   rtc_info_t  rtc_status;
-   bool        retVal            = (bool)false;
+   bool retVal = (bool)false;
 
-   /* Check if the RTC is running */
-   rtc_DriverStatus = R_RTC_InfoGet( &g_rtc0_ctrl, &rtc_status );
-
-   if( FSP_ERR_NOT_OPEN == rtc_DriverStatus )
-   {
-      /* Open RTC Driver again */
-      (void)RTC_init();
-      rtc_DriverStatus = R_RTC_InfoGet( &g_rtc0_ctrl, &rtc_status );
-   }
-   if( rtc_status.status == RTC_STATUS_RUNNING )
+   if ( 1 == R_RTC->RCR2_b.START )
    {
       retVal = (bool) true;
    }
@@ -578,7 +495,7 @@ bool RTC_isRunning ( void )
 
   Note: RTC should be started to be used as an Alarm
 *******************************************************************************/
-static void RTC_Start ( void )
+void RTC_Start ( void )
 {
    R_RTC->RCR2_b.START = 1U;
 
@@ -589,26 +506,106 @@ static void RTC_Start ( void )
 
 /*******************************************************************************
 
-  Function name: RTC_DisableCalendarAlarm
+  Function name: RTC_Callback
 
-  Purpose: Disable the RTC Calendar Alarm if it was configured
+  Purpose: Interrupt Handler for RTC Module
 
-  Arguments: None
+  Arguments: rtc_callback_args_t *p_args
 
   Returns: None
 
-*******************************************************************************/
-void RTC_DisableCalendarAlarm ( void )
-{
-   R_RTC->RCR1    = 0U;
+  Notes: Used for Alarm Interrupt.
 
-   R_RTC->RSECAR  = 0U;
-   R_RTC->RMINAR  = 0U;
-   R_RTC->RHRAR   = 0U;
-   R_RTC->RWKAR   = 0U;
-   R_RTC->RDAYAR  = 0U;
-   R_RTC->RMONAR  = 0U;
-   R_RTC->RYRAR   = 0U;
+*******************************************************************************/
+void RTC_Callback( rtc_callback_args_t *p_args )
+{
+   if( RTC_EVENT_ALARM_IRQ == p_args->event )
+   {
+       g_alarm_irq_flag = SET_FLAG; //Alarm Interrupt occurred
+   }/* end if */
+}/* end RTC_Callback () */
+
+/*******************************************************************************
+
+  Function name: rtc_time_get
+
+  Purpose: Return the current RTC Time in seconds and sub-seconds
+
+  Arguments: rtc_time_primitive *time - Seconds, sub-seconds
+
+  Returns: None
+
+  Notes: DO NOT try to debug through the loop reading the RTC registers. The RTC
+         keeps running while debugger stopped.
+
+*******************************************************************************/
+static void rtc_time_get( rtc_time_primitive *time)
+{
+   time->BCount.Word = 0;
+   time->SubSec      = 0;
+   while ( ( time->BCount.Byte[0] != R_RTC->BCNT0 ) ||
+           ( time->BCount.Byte[1] != R_RTC->BCNT1 ) ||
+           ( time->BCount.Byte[2] != R_RTC->BCNT2 ) ||
+           ( time->BCount.Byte[3] != R_RTC->BCNT3 ) ||
+           ( time->SubSec         != R_RTC->R64CNT) )
+   {
+      time->BCount.Byte[0] = R_RTC->BCNT0;
+      time->BCount.Byte[1] = R_RTC->BCNT1;
+      time->BCount.Byte[2] = R_RTC->BCNT2;
+      time->BCount.Byte[3] = R_RTC->BCNT3;
+      time->SubSec         = R_RTC->R64CNT;
+   }
+   return;
+}
+
+/*******************************************************************************
+
+  Function name: rtc_time_set
+
+  Purpose: Sets the current RTC Time in seconds and sub-seconds
+
+  Arguments: rtc_time_primitive *time - Seconds, sub-seconds
+
+  Returns: None
+
+  Notes: DO NOT try to debug through the loop reading the RTC registers. The RTC
+         keeps running while debugger stopped.
+
+*******************************************************************************/
+static void rtc_time_set( rtc_time_primitive *time)
+{
+   //1. Stop RTC and ensure in binary mode
+   R_RTC->RCR2 = (R_RTC_RCR2_CNTMD_Msk & ~R_RTC_RCR2_START_Msk);
+   FSP_HARDWARE_REGISTER_WAIT( R_RTC->RCR2, (R_RTC_RCR2_CNTMD_Msk & ~R_RTC_RCR2_START_Msk));   //Wait for RTC to set binary mode
+
+   //2. Reset RTC
+   R_RTC->RCR2_b.RESET = 1U;
+   FSP_HARDWARE_REGISTER_WAIT(R_RTC->RCR2_b.RESET, 0U);
+
+   //3. Set time
+   R_RTC->BCNT0 = time->BCount.Byte[0];
+   R_RTC->BCNT1 = time->BCount.Byte[1];
+   R_RTC->BCNT2 = time->BCount.Byte[2];
+   R_RTC->BCNT3 = time->BCount.Byte[3];
+   //4. Init all other registers
+   /* These registers are set to 0 after an RTC software reset:
+         R64CNT
+         RSECAR   RMINAR   RHRAR  RWKAR  RDAYAR  RMONAR RYRAR  RYRAREN
+         RADJ
+         RTCCRn  RSECCPn  RMINCPn  RHRCPn  RDAYCPn  RMONCPn  BCNTnCPm
+         BCNTnAR BCNTnAER
+      These registers are don't care for binary mode:
+         RSECCNT  RMINCNT  RHRCNT  RWKCNT  RDAYCNT  RMONCNT  RYRCNT
+      These registers are don't care when using the subclock clock source
+         RFRL  RFRH
+      Bits in the RCR2 register:
+         ADJ30  AADJE  AADJP are set to 0 after an RTC software reset
+         RTCOE is set to 0 after system reset
+         HR24  is a don't care in binary mode
+   */
+
+   RTC_Start();
+   return;
 }
 
 #if ( TM_RTC_UNIT_TEST == 1 )
@@ -626,62 +623,161 @@ void RTC_DisableCalendarAlarm ( void )
 // TODO: RA6 [name_Balaji]: Move to SelfTest Task
 bool RTC_UnitTest(void)
 {
-   uint16_t retVal = 0;
-   uint32_t Sec = 0;
-   uint32_t MicroSec = 0;
-   sysTime_dateFormat_t set_time =
+   bool                 retVal   = (bool)true;
+   uint32_t             seconds  = 0;
+   uint32_t             Sec      = 0;
+   uint32_t             MicroSec = 0;
+   sysTime_dateFormat_t get_time = {0};
+   sysTime_dateFormat_t set_time = {0};
+   sysTime_t            sysTime;
+   uint8_t              cnt;
+   uint32_t             result;
+
+   /*These functions are checked:
+      RTC_SetDateTime
+      RTC_GetDateTime
+      RTC_Valid
+      RTC_GetTimeAtRes         - Verified indirectly through RTC_GetDateTime
+      RTC_GetTimeInSecMicroSec
+      RTC_ConfigureAlarm
+      RTC_DisableAlarm
+      RTC_isRunning
+      RTC_Start
+      RTC_Callback
+      rtc_time_set             - Verified indirectly through RTC_SetDateTime
+      rtc_time_get             - Verified indirectly through RTC_GetDateTime
+   */
+   /*These functions are NOT checked:
+      RTC_init  - verified via Startup and by enabling/disabling the RTC and rebooting
+   */
+
+   /* Verify RTC can be stopped and detect if running */
+   R_RTC->RCR2 &= ~R_RTC_RCR2_START_Msk;  // Direct register call to stop RTC
+   FSP_HARDWARE_REGISTER_WAIT( R_RTC->RCR2 & R_RTC_RCR2_START_Msk, 0); //Wait for RTC to complete
+   if ( true == RTC_isRunning() )
    {
-   .sec  = 55,
-   .min  = 59,
-   .hour = 23,       //24-HOUR mode
-   .day = 31,        //RDAYCNT
-   .month  = 11,     //RMONCNT 0-Jan 11 Dec
-   .year = 121       //RYRCNT //Year SINCE 1900 (2021 = 2021-1900 = 121)
-   };
-   sysTime_dateFormat_t get_time;
-   rtc_alarm_time_t alarm_set_time =
-   {
-        .sec_match        =  true,
-        .min_match        =  true,
-        .hour_match       =  false,
-        .mday_match       =  false,
-        .mon_match        =  false,
-        .year_match       =  false,
-        .dayofweek_match  =  false
-   };
-   bool isTimeSetSuccess;
-   bool isAlarmSetSuccess;
-   bool isRTCValid;
-   isTimeSetSuccess = RTC_SetDateTime (&set_time);
-   if(isTimeSetSuccess == 0)
-   {
-     retVal = 1;
+      retVal = false;
    }
-   isRTCValid = RTC_Valid();
-   if(isRTCValid == false)
+   RTC_Start();
+   if ( false == RTC_isRunning() )
    {
-     retVal = 1;
+      retVal = false;
    }
-   RTC_GetDateTime (&get_time);
-   if(get_time.min != 59)
+
+   /* Verify invalid time can be set */
+   memset ((uint8_t *)&sysTime, 0, sizeof(sysTime) );
+   TIME_UTIL_ConvertSysFormatToDateFormat(&sysTime, &set_time);
+   if ( false == RTC_SetDateTime(&set_time) )
    {
-     retVal = 1;
+      retVal = false;
    }
+   if ( true == RTC_Valid() )
+   {
+      retVal = false;
+   }
+   RTC_GetDateTime(&get_time);
+   if ( ( 1970 != get_time.year )  ||
+        (    1 != get_time.month ) ||
+        (    1 != get_time.day )   ||
+        (    0 != get_time.hour )  ||
+        (    0 != get_time.min ) ) /* Seconds are not critical and are run-time dependent, so not tested */
+   {
+      retVal = true;
+   }
+
+   /* Verify time can be set prior to 2000 */
+   set_time.sec   = 55;
+   set_time.min   = 59;
+   set_time.hour  = 23;     //24-HOUR mode
+   set_time.day   = 31;
+   set_time.month = 12;     //1-Jan...12-Dec
+   set_time.year  = 1998;    //Year 1970-2099
+   if( false == RTC_SetDateTime(&set_time) )
+   {
+      retVal = false;
+   }
+   if( false == RTC_Valid() )
+   {
+      retVal = false;
+   }
+   memset( (uint8_t *)&get_time, 0, sizeof(get_time) );
+   RTC_GetDateTime( &get_time );
+   if ( ( 1998 != get_time.year )  ||
+        (   12 != get_time.month ) ||
+        (   31 != get_time.day )   ||
+        (   23 != get_time.hour )  ||
+        (   59 != get_time.min ) ) /* Seconds are not critical and are run-time dependent, so not tested */
+   {
+      retVal = false;
+   }
+
+   /* Verify time can be set after to 2000 */
+   set_time.sec   = 55;
+   set_time.min   = 59;
+   set_time.hour  = 23;     //24-HOUR mode
+   set_time.day   = 31;
+   set_time.month = 12;     //1-Jan...12-Dec
+   set_time.year  = 2022;    //Year 1970-2099
+   if( false == RTC_SetDateTime (&set_time))
+   {
+      retVal = false;
+   }
+   if( false == RTC_Valid() )
+   {
+      retVal = false;
+   }
+   memset ((uint8_t *)&get_time, 0, sizeof(get_time) );
+   RTC_GetDateTime(&get_time);
+   if ( ( 2022 != get_time.year )  ||
+        (   12 != get_time.month ) ||
+        (   31 != get_time.day )   ||
+        (   23 != get_time.hour )  ||
+        (   59 != get_time.min ) ) /* Seconds are not critical and are run-time dependent, so not tested */
+   {
+      retVal = false;
+   }
+
+   /* Do not debug (step through) from here to end of function */
+   /* Verify time in uSec */
+   TIME_UTIL_ConvertDateFormatToSysFormat(&get_time, &sysTime );
+   TIME_UTIL_ConvertSysFormatToSeconds(&sysTime, &seconds, 0 );
    RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-   if(Sec == 0)
+   do
    {
-     retVal = 1;
+      cnt = R_RTC->R64CNT;
+   }while ( cnt != R_RTC->R64CNT );
+   if( seconds != Sec ) // Should not take more than a second from previous time set to here
+   {
+      retVal = false;
    }
-   if(MicroSec == 0)
+   result = (uint64_t)MicroSec * 128 / 1000000;
+   if( ( result > cnt ) || ( result + 1 <= cnt ) )
    {
-     retVal = 1;
+      retVal = false;
    }
-   alarm_set_time.time.tm_sec = 10;
-   alarm_set_time.time.tm_min = 59;
-   isAlarmSetSuccess = RTC_SetAlarmTime (&alarm_set_time);
-   if(isAlarmSetSuccess == 0)
+
+   /* Verify the Alarm can be set and fires */
+   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
+   Sec += 2;
+   g_alarm_irq_flag = RESET_FLAG;
+   RTC_ConfigureAlarm(Sec);
+   OS_TASK_Sleep(3000);
+   if ( RESET_FLAG == g_alarm_irq_flag )
    {
-     retVal = 1;
+      retVal = false;
+   }
+
+   /* Verify the Alarm can be disabled and does not fire */
+   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
+   RTC_GetDateTime(&get_time);
+   Sec += 2;
+   g_alarm_irq_flag = RESET_FLAG;
+   RTC_ConfigureAlarm(Sec);
+   RTC_DisableAlarm();
+   OS_TASK_Sleep(3000);
+   if ( SET_FLAG == g_alarm_irq_flag )
+   {
+      retVal = false;
    }
    return retVal;
 }

@@ -15,9 +15,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-//#include <mqx.h>      /* TODO: RA6: DG: We might not need this as its already included in project.h */
-//#include <mutex.h>    /* TODO: RA6: DG: We might not need this as its already included in project.h */
-//#include "OS_aclara.h"  /* TODO: RA6: DG: We might not need this as its already included in project.h */
 #include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
@@ -56,8 +53,7 @@ bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle )
    if ( MutexHandle == NULL )
    {
       FuncStatus = false;
-//      APP_ERR_PRINT("OS_MUTEX_Create!");
-      /* TODO: DG: Add Print */
+      ERR_printf("Unable to Create Mutex");
       /* There was insufficient heap memory available for the mutex to be
          created. */
    }
@@ -89,35 +85,6 @@ void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
 
    if ( xSemaphoreTake ( *MutexHandle, portMAX_DELAY) != pdPASS ) //TODO: DG Decide on the delay; portMAX_DELAY
    {
-//       APP_ERR_PRINT("OS_MUTEX_Lock!");
-      /* TODO: DG: Print Mutex Could not be obtained */
-
-//      switch (RetStatus) {
-//         case MQX_CANNOT_CALL_FUNCTION_FROM_ISR:
-//              // Dont use ERR_printf here. This function can be called before the logger is active and might never get to run
-//              DBG_LW_printf("Function cannot be called from an ISR.\n");
-//              break;
-//
-//         case MQX_EBUSY:
-//              // Dont use ERR_printf here. This function can be called before the logger is active and might never get to run
-//              DBG_LW_printf( fmtSpec, _task_get_template_ptr(_task_get_id())->TASK_NAME, file, line, "Mutex is already locked.", MutexHandle);
-//              break;
-//
-//         case MQX_EDEADLK:
-//              // Dont use ERR_printf here. This function can be called before the logger is active and might never get to run
-//              DBG_LW_printf( fmtSpec, _task_get_template_ptr(_task_get_id())->TASK_NAME, file, line, "Task already has the mutex locked.",
-//                             MutexHandle);
-//              break;
-//
-//         case MQX_EINVAL:
-//              // Dont use ERR_printf here. This function can be called before the logger is active and might never get to run
-//              DBG_LW_printf( fmtSpec, _task_get_template_ptr(_task_get_id())->TASK_NAME, file, line,
-//                             "One of the following: mutex_ptr is NULL or mutex was destroyed.", MutexHandle);
-//              break;
-//
-//         default:
-//              break;
-//      }
       EVL_FirmwareError( "OS_MUTEX_Lock" , file, line );
    } /* end if() */
 } /* end OS_MUTEX_Lock () */

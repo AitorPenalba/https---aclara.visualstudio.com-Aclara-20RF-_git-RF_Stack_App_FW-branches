@@ -1141,7 +1141,7 @@ static const struct_CmdLineEntry MFGP_HiddenCmdTable[] =
    {  "appSecurityAuthMode",        MFG_appSecAuthMode,              "Set system security mode" },
    {  "debugPortEnabled",           MFG_enableDebug,                 "Enable debug port" },
    {  "enableOTATest",              MFGP_enableOTATest,              "Temporarily allows over the air testing of certain tests" },
-//   {  "flashSecurityEnabled",       MFGP_FlashSecurity,              "Lock/Unlock Flash and JTAG Security" }, TODO: RA6E1: Support this feature later
+   {  "flashSecurityEnabled",       MFGP_FlashSecurity,              "Lock/Unlock Flash and JTAG Security" },
 #if ( EP == 1 )
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    {  "logoff",                     MFG_logoff,                      "Reset port for mfg commands" },
@@ -1727,7 +1727,11 @@ static void mfgpReadByte( uint8_t rxByte )
 #endif
    else
    {
+#if ( MCU_SELECTED == NXP_K24 )
       if( (rxByte == LINE_FEED_CHAR) || (rxByte == CARRIAGE_RETURN_CHAR) )
+#elif ( MCU_SELECTED == RA6E1 )
+      if( rxByte == CARRIAGE_RETURN_CHAR )
+#endif
       {
 #if (USE_DTLS == 1)
          if ( !MFGP_AllowDtlsConnect() )
@@ -1775,6 +1779,12 @@ static void mfgpReadByte( uint8_t rxByte )
          }
 
       }
+#if ( MCU_SELECTED == RA6E1 )
+      else if ( rxByte == LINE_FEED_CHAR )
+      {
+         rxByte = 0x0;
+      }
+#endif
       else if( ( MFGP_numBytes ) >= MFGP_MAX_MFG_COMMAND_CHARS )
       {
          /* buffer is full */
@@ -5920,7 +5930,7 @@ static void MFGP_FlashSecurity( uint32_t argc, char *argv[] )
    /* At end of process, report the results as 1 or 0, based on the registers matching the Lock or Unlock mask.   */
    (void)memcpy( fprot, (uint8_t *)destAddr, sizeof( fprot ) );
    MFG_printf( "%s %d\n", argv[0], (  memcmp( fprot, LockMask, sizeof( fprot ) ) == 0 ? 1 : 0 ) );
-#else //K24 target
+#elif ( MCU_SELECTED == NXP_K24 ) //K24 target
    PartitionData_t const   *pImagePTbl;            // Image partition for PGM memory
    dSize                   destAddr = 0x40Cu;      // Destination address of the FSEC field
    uint8_t                 fprot;                  // Values read
@@ -6016,6 +6026,10 @@ static void MFGP_FlashSecurity( uint32_t argc, char *argv[] )
    /* At end of process, report the results as 1 or 0, based on the registers matching the Lock or Unlock mask.   */
    (void)memcpy( &fprot, (uint8_t *)destAddr, sizeof( fprot ) );  //This directly reads from internal Flash
    MFG_printf( "%s %d\n", argv[0], ( flashSecEnabled == fprot ? 1 : 0 ) );
+#elif ( MCU_SELECTED == RA6E1 )
+   uint32_t dlmmon = ( R_PSCU->DLMMON & R_PSCU_DLMMON_DLMMON_Msk ); /* Get the Device Lifecycle Monitor value */
+   #define DLM_DPL 4 /* Device Lifecycle Monitor state = Deployed (unable to find a #define in renesas.h */
+   MFG_printf( "%s %d\n", argv[0], ( dlmmon == DLM_DPL ? 1 : 0 ) );
 #endif // endif to #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( DCU == 1 ) )
 }
 

@@ -102,9 +102,9 @@
 #ifndef BSP_TZ_CFG_PSARD
 #define BSP_TZ_CFG_PSARD (\
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 0) /* AGT3 */ | \
-            (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 1) /* AGT2 */ | \
+            (((1 > 0) ? 0U : 1U) << 1) /* AGT2 */ | \
             (((1 > 0) ? 0U : 1U) << 2) /* AGT1 */ | \
-            (((2 > 0) ? 0U : 1U) << 3) /* AGT0 */ | \
+            (((1 > 0) ? 0U : 1U) << 3) /* AGT0 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 11) /* POEG3 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 12) /* POEG2 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 13) /* POEG1 */ | \
@@ -121,7 +121,7 @@
             (((1 > 0) ? 0U : 1U) << 1) /* IWDT */ | \
             (((1 > 0) ? 0U : 1U) << 2) /* RTC */ | \
             (((1 > 0) ? 0U : 1U) << 14) /* AGT5 */ | \
-            (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 15) /* AGT4 */ | \
+            (((1 > 0) ? 0U : 1U) << 15) /* AGT4 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 22) /* GPT9 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 23) /* GPT8 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 24) /* GPT7 */ | \

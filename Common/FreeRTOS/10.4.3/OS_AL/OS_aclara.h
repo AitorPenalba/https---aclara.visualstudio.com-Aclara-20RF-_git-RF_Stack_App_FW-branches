@@ -214,8 +214,6 @@ typedef struct
 } OS_TICK_Struct, * OS_TICK_Struct_Ptr;
 
 
-#define OS_TASK_Summary  /* TODO: RA6E1: Add Support for this function */
-
 #if ( RTOS_SELECTION == MQX_RTOS )
 #define taskParameter         uint32_t Arg0
 #define OS_TASK_Template_t    TASK_TEMPLATE_STRUCT
@@ -468,15 +466,10 @@ OS_TASK_id              OS_TASK_GetId (void);
 OS_TASK_id              OS_TASK_GetID_fromName ( const char *taskName );
 bool                    OS_TASK_IsCurrentTask ( char const *pTaskName );
 char *                  OS_TASK_GetTaskName ( void );
-#if 0  //TODO: RA6E1: need to still get updated to RA6
-uint32_t OS_TASK_UpdateCpuLoad ( void );
-void OS_TASK_GetCpuLoad ( uint32_t taskIdx, uint32_t * CPULoad );
-void OS_TASK_Summary ( bool safePrint );
-#endif
+uint32_t                OS_TASK_UpdateCpuLoad ( void );
+void                    OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint32_t * CPULoad );
+void                    OS_TASK_Summary ( bool safePrint );
 
-#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
-void OS_TASK_SummaryFreeRTOS(void);
-#endif
 
 void     OS_TICK_Get_CurrentElapsedTicks ( OS_TICK_Struct *TickValue );
 uint32_t OS_TICK_Get_ElapsedMilliseconds ( void );

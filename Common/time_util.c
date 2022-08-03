@@ -914,9 +914,9 @@ uint64_t TIME_UTIL_GetTimeInQSecFracFormat(void)
 
       msInFracSeconds =  ((uint64_t)(currentSysTime.time % TIME_TICKS_PER_SEC) << 32) / 1000; // Convert msec in fractional second
 
-#if (RTOS_SELECTION == MQX_RTOS)
+#if ( MCU_SELECTED == NXP_K24 )
       syst_rvr = SYST_RVR+1;
-#elif (RTOS_SELECTION == FREE_RTOS)
+#elif ( MCU_SELECTED == RA6E1 )
       syst_rvr = SysTick->LOAD+1;
 #endif
       // Sanity check in case RVR changed after elapsed time was computed.
@@ -924,13 +924,9 @@ uint64_t TIME_UTIL_GetTimeInQSecFracFormat(void)
       if ( currentSysTime.elapsedCycle > syst_rvr ) {
          currentSysTime.elapsedCycle = syst_rvr;
       }
-#if (RTOS_SELECTION == MQX_RTOS)
       elapsedCycle = ((((uint64_t)currentSysTime.tictoc * (uint64_t)syst_rvr) + (uint64_t)currentSysTime.elapsedCycle) << 32) /
                        (uint64_t)((uint64_t)syst_rvr * (uint64_t)BSP_ALARM_FREQUENCY); // Convert the time spend between Systick in fractional second
-#elif (RTOS_SELECTION == FREE_RTOS)
-      elapsedCycle = ((((uint64_t)currentSysTime.tictoc * (uint64_t)syst_rvr) + (uint64_t)currentSysTime.elapsedCycle) << 32) /
-                       (uint64_t)((uint64_t)syst_rvr * (uint64_t) BSP_ALARM_FREQUENCY); // Convert the time spend between Systick in fractional second
-#endif
+
       // Avoid overflow. That should not happen but better be safe.
       // If it does, saturate.
       if ( ((uint64_t)msInFracSeconds + (uint64_t)elapsedCycle) > 0xFFFFFFFF ) {

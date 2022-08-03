@@ -919,7 +919,7 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       }
       capturedValue      = (uint32_t)(period * iCapture_overflows) + p_args->capture;
       iCapture_overflows = 0;
-      cycleCounter       = DWT->CYCCNT;
+      cycleCounter       = DWT_CYCCNT;
       currentFTM         = R_GPT2->GTCNT;
 #endif
       __set_PRIMASK(primask); // Restore interrupts

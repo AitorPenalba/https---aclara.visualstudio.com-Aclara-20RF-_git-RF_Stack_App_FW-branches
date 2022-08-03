@@ -9,7 +9,7 @@
  ***********************************************************************************************************************
  * A product of Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2018-2021 Aclara.  All Rights Reserved.
+ * Copyright 2018-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -25,6 +25,8 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "OS_aclara.h"
 #endif
 #include "compileswitch.h"
 #include "compiler_types.h"
@@ -818,11 +820,7 @@ void RADIO_TX_Watchdog(void)
 void RADIO_RX_WatchdogService(uint8_t radioNum)
 {
    OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
-#if ( MCU_SELECTED == NXP_K24 )
    radio[radioNum].lastFIFOFullTimeStamp = DWT_CYCCNT;
-#elif ( MCU_SELECTED == RA6E1 )
-   radio[radioNum].lastFIFOFullTimeStamp = DWT->CYCCNT;
-#endif
    OS_INT_enable( ); // Enable interrupts.
 }
 
@@ -830,7 +828,7 @@ void RADIO_RX_WatchdogService(uint8_t radioNum)
 
    Function Name: RADIO_RX_Watchdog
 
-   Purpose: This function makes sure that soft-demodulators are stil generating interrupts
+   Purpose: This function makes sure that soft-demodulators are still generating interrupts
 
    Arguments: none
 
@@ -851,11 +849,8 @@ void RADIO_RX_Watchdog(void)
       OS_INT_disable( ); // Disable all interrupts. Variable shared between 2 tasks
       timeStamp = radio[(uint8_t)RADIO_0].lastFIFOFullTimeStamp;
       OS_INT_enable( ); // Enable interrupts.
-    #if ( MCU_SELECTED == NXP_K24 )
+
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-    #elif ( MCU_SELECTED == RA6E1 )
-      if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
-    #endif
          INFO_printf("Soft-Demod FIFO purged");
          // Read through the buffer
          si446x_read_rx_fifo((uint8_t)RADIO_0, 128, temp);
@@ -879,7 +874,7 @@ void RADIO_RX_Watchdog(void)
    Notes:   The watchdog is necessary because of a few conditions that would stop DMA_Complete_IRQ_ISR() from being called.
             1) We could have been in the middle of computing frequency from radio 1 to 8 and the PHY is set to DEAF.
             2) The RX channels configuration changes such that there are no RX radios anymore.
-            In both case, we reset the triming which in turn will use radio 0 which should always be available.
+            In both case, we reset the trimming which in turn will use radio 0 which should always be available.
 
 ******************************************************************************/
 void RADIO_Update_Freq_Watchdog(void)
@@ -892,12 +887,7 @@ void RADIO_Update_Freq_Watchdog(void)
       timeStamp = DMA_Complete_IRQ_ISR_Timestamp;
       OS_INT_enable( ); // Enable interrupts.
 
-#if ( MCU_SELECTED == NXP_K24 )
       if ( ((DWT_CYCCNT - timeStamp)/getCoreClock()) >= 2) {
-#elif ( MCU_SELECTED == RA6E1 )
-      if ( ((DWT->CYCCNT - timeStamp)/SystemCoreClock) >= 2) {
-
-#endif
          RADIO_Update_Freq();
       }
    }
@@ -1037,7 +1027,7 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    period         = R_GPT1->GTPR + 1;   // Duplicating the FSP function R_GPT_InfoGet()
    capturedFTM    = (uint32_t)(period * iCapture_overflows) + R_GPT1->GTCCR[0]; // Captured counter when radio interrupt happened; 0 = GPT_PRV_CAPTURE_EVENT_A
    iCapture_overflows = 0;
-   cycleCounter   = DWT->CYCCNT;
+   cycleCounter   = DWT_CYCCNT;
    currentFTM     = R_GPT1->GTCNT;    // Connected to radio interrupt
 #endif
    __set_PRIMASK(primask); // Restore interrupts
@@ -3752,7 +3742,7 @@ void RadioEvent_Int(uint8_t radioNum)
    do {
       processRadioInt(radioNum);
       keepServicing = 0;
-	  // Check if IRQ is still asserted
+      // Check if IRQ is still asserted
       switch (radioNum) {
          case RADIO_0: keepServicing = RDO_0_IRQ(); break;
          case RADIO_1: keepServicing = RDO_1_IRQ(); break;
@@ -4713,7 +4703,6 @@ static void wait_us(uint32_t time)
    }
    while (TimeDiff < time);
 #elif ( MCU_SELECTED == RA6E1 )
-   #if 0 // TODO: RA6E1 Bob: This does not appear to be working properly
    OS_TICK_Struct time1,time2;
    uint32_t       TimeDiff;
    OS_TICK_Get_CurrentElapsedTicks(&time1);
@@ -4724,10 +4713,6 @@ static void wait_us(uint32_t time)
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMicroseconds ( &time1, &time2 );
    }
    while (TimeDiff < time);
-   #else
-   #warning "Using the Renesas R_BSP_SoftwareDelay instead of OS_TICK_Get_Diff_InMicroseconds!"
-   R_BSP_SoftwareDelay ((time+1), BSP_DELAY_UNITS_MICROSECONDS);
-   #endif
 #endif
 
 }

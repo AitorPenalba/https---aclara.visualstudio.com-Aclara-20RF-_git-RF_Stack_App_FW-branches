@@ -9,7 +9,7 @@
  ***********************************************************************************************************************
  * A product of Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2018-2021 Aclara.  All Rights Reserved.
+ * Copyright 2018-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include "project.h"
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <bsp.h>
 #include <mqx_prv.h>
 #endif
@@ -125,10 +125,9 @@ static const GPIO0_CONFIG_t radioGpioConfig[] = { // Radio GPIO 0 with DMA enabl
 ******************************************************************************/
 static void Disable_DMA_Reset_Filter( void )
 {
-   uint32_t i; // Loop counter
-
 #if ( MCU_SELECTED == NXP_K24 ) //TODO Melvin: need to find am equivalent
    // Disable all DMA configuration
+   uint32_t i; // Loop counter
    for ( i=0; i<(sizeof(radioGpioConfig)/sizeof(GPIO0_CONFIG_t)); i++) {
       PORT_PCR_REG( radioGpioConfig[i].portAddr, radioGpioConfig[i].pin ) &= ~PORT_PCR_IRQC_MASK; // Interrupt/DMA request disabled
    }
@@ -138,6 +137,7 @@ static void Disable_DMA_Reset_Filter( void )
    (void)memset( FTM,     0, sizeof(FTM) );
 }
 
+#if ( MCU_SELECTED == NXP_K24 )
 /******************************************************************************
 
  Function Name: DMA_Complete_IRQ_ISR
@@ -312,11 +312,11 @@ static void DMA_Complete_IRQ_ISR( void )
    }
    DMAcntr++;
 
-#if ( MCU_SELECTED == NXP_K24 )  //TODO Melvin: DMA interrupts has to be replaced
+#if ( MCU_SELECTED == NXP_K24 )  //TODO: RA6E1: Melvin: DMA interrupts has to be replaced
    DMA_Complete_IRQ_ISR_Timestamp = DWT_CYCCNT;
 #endif
 }
-
+#endif
 /******************************************************************************
 
  Function Name: RADIO_Update_Freq

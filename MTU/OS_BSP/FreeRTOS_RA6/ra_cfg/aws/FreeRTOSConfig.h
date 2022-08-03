@@ -27,7 +27,7 @@
             #define configUSE_IDLE_HOOK (1)
             #endif
             #ifndef configUSE_MALLOC_FAILED_HOOK
-            #define configUSE_MALLOC_FAILED_HOOK (0)
+            #define configUSE_MALLOC_FAILED_HOOK (1) // RA6E1 Bob: created handler in DBG_CommandLine.c
             #endif
             #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
             #define configUSE_DAEMON_TASK_STARTUP_HOOK (0)
@@ -81,7 +81,7 @@
             #define configUSE_ALTERNATIVE_API (0U)
             #endif
             #ifndef configCHECK_FOR_STACK_OVERFLOW
-            #define configCHECK_FOR_STACK_OVERFLOW (0)
+            #define configCHECK_FOR_STACK_OVERFLOW (1)
             #endif
             #ifndef configQUEUE_REGISTRY_SIZE
             #define configQUEUE_REGISTRY_SIZE (100)
@@ -120,7 +120,7 @@
             #define configAPPLICATION_ALLOCATED_HEAP (0)
             #endif
             #ifndef configGENERATE_RUN_TIME_STATS
-            #define configGENERATE_RUN_TIME_STATS (0)
+            #define configGENERATE_RUN_TIME_STATS (1)
             #endif
             #ifndef configUSE_CO_ROUTINES
             #define configUSE_CO_ROUTINES (0)
@@ -218,4 +218,12 @@
             #ifndef configLOGGING_MAX_MESSAGE_LENGTH
             #define configLOGGING_MAX_MESSAGE_LENGTH           (192)
             #endif
+            /* Aclara Added -- Start */
+            #if ( configGENERATE_RUN_TIME_STATS == 1 )
+            extern void       AGT_RunTimeStatsStart( void );
+            extern uint32_t   AGT_RunTimeStatsCount( void );
+            #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() AGT_RunTimeStatsStart()
+            #define portGET_RUN_TIME_COUNTER_VALUE()         AGT_RunTimeStatsCount()
+            #endif
+            /* Aclara Added -- End */
 #endif /* FREERTOSCONFIG_H_ */
