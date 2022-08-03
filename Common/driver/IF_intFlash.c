@@ -1003,7 +1003,6 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const *pSrc )
 {
    returnStatus_t retVal = eFAILURE;
-   fsp_err_t      err;
 #if ( MCU_SELECTED == NXP_K24 )
    /* Erased state are all 8 bytes of 0xFF */
    static const uint8_t erasedState_[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -1037,6 +1036,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
 #endif   /* BOOTLOADER  */
    }
 #elif ( MCU_SELECTED == RA6E1 )
+    fsp_err_t      err;
     uint32_t srcAddr = ( uint32_t ) pSrc;
     if( address < FLASH_HP_CODEFLASH_END_ADDRESS )
     {
