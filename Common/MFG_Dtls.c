@@ -75,8 +75,8 @@
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 #if !USE_USB_MFG
-static void          *dtlsUART_isr_data;        /* MQX isr data pointer */
 #if ( RTOS_SELECTION == MQX_RTOS )
+static void          *dtlsUART_isr_data;        /* MQX isr data pointer */
 static INT_ISR_FPTR  mqxUART_isr = NULL;        /* MQX UART error handler entry  */
 #endif
 #endif
