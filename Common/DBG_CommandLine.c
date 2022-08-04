@@ -2575,18 +2575,43 @@ uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
    returnStatus_t eStatus;
-   if ( argc == 1 )
+   uint8_t parSelection;
+   parSelection = ( uint8_t ) atoi( argv[1] );
+   if ( argc == 2 )
    {
-      /* The number of arguments must be 1 */
-      if ( eSUCCESS == PAR_partitionFptr.parOpen( &pTM_IntFlashPart_, ePART_TM_INT_FLASH, 0L ) )
+      /* The number of arguments must be 2 */
+      if ( parSelection == 0 )
       {
-         DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
-         retVal = eSUCCESS;
+         if ( eSUCCESS == PAR_partitionFptr.parOpen( &pTM_IntFlashPart_, ePART_ENCRYPT_KEY, 0L ) )
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'E', "InternalFlash_Failure Test Failure" );
+         }
+      }
+      else if( parSelection == 1 )
+      {
+         if ( eSUCCESS == PAR_partitionFptr.parOpen( &pTM_IntFlashPart_, ePART_DFW_BL_INFO, 0L ) )
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'E', "InternalFlash_Failure Test Failure" );
+         }
       }
       else
       {
-         DBG_logPrintf( 'E', "InternalFlash_Failure Test Failure" );
+         DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
       }
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestopen ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
    }
    else
    {
@@ -2623,9 +2648,9 @@ uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] )
       {
          /* Getting the Last address to read */
          sizeofData = ( addressOffset + sizeToRead ) - 1;
-         if ( ( addressOffset < TM_INT_FLASH_SIZE ) )
+         if ( ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE ) )
          {
-            if( sizeofData < TM_INT_FLASH_SIZE ) 
+            if( sizeofData < INTERNAL_FLASH_SECTOR_SIZE ) 
             {
                /* Clearing the Previous read data */
                memset( userDataRead, '\0', sizeof(userDataRead) );
@@ -2692,10 +2717,10 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
       /* The number of arguments must be 2 */
       addressOffset = ( lAddr )strtol( argv[1], NULL, 16 );
       userDataWrite = argv[2];
-      if ( addressOffset < TM_INT_FLASH_SIZE )
+      if ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE )
       {
          /* Getting the Last address to write */
-         if( ( ( addressOffset + strlen( userDataWrite ) ) -1 ) < TM_INT_FLASH_SIZE )
+         if( ( ( addressOffset + strlen( userDataWrite ) ) -1 ) < INTERNAL_FLASH_SECTOR_SIZE )
          {
             if ( eSUCCESS == PAR_partitionFptr.parWrite( addressOffset,
                                                    userDataWrite,

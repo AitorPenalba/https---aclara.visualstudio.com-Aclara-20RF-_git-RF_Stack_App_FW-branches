@@ -151,9 +151,6 @@
 #endif
 #define PART_BL_BACKUP_SIZE         BL_BACKUP_SIZE       /* Bootloader Backup Size from linker script */
 #define PART_DFW_BL_INFO_SIZE       DFW_BL_INFO_SIZE     /* DFW Bootloader Info Size from linker script */
-#if ( TM_INTERNAL_FLASH_TEST == 1 )
-#define PART_TM_INT_FLASH_SIZE       TM_INT_FLASH_SIZE
-#endif
 #if 0
 /* If we do move the Encrypt Key partition and remove the swap indicator sector only need these definitions */
    /* Sections in low bank */
@@ -180,9 +177,6 @@ If we do not move the Encrypt Key partition and keep the swap indicator sector *
 #endif
 #define PART_BL_BACKUP_OFFSET       BL_BACKUP_START
 #define PART_DFW_BL_INFO_OFFSET     DFW_BL_INFO_START
-#if ( TM_INTERNAL_FLASH_TEST == 1 )
-#define PART_TM_INT_FLASH_OFFSET    TM_INT_FLASH_START
-#endif
 /* MUST keep this reserved. If swap ever used, cannot write until this offset */
 #define PART_DFW_BL_INFO_DATA_OFFSET  ((lCnt)16)
 /*****************************************************************************************/
@@ -277,10 +271,6 @@ If we do move the Encrypt Key partition and remove the swap indicator sector:
 #define DFW_BL_INFO_START       ( ENCRYPT_KEY_START + ENCRYPT_KEY_SIZE )   /* 0x08001000 */
 #define DFW_BL_INFO_SIZE        INTERNAL_FLASH_SECTOR_SIZE
 
-#if ( TM_INTERNAL_FLASH_TEST == 1 )
-#define TM_INT_FLASH_START       ENCRYPT_KEY_START    /* 0x08000000 */
-#define TM_INT_FLASH_SIZE        ( ENCRYPT_KEY_SIZE + DFW_BL_INFO_SIZE )   /* 0x00002000 */
-#endif
 #endif
 
 /***************************************************************************
@@ -1556,33 +1546,6 @@ partitions_EXTERN const PartitionData_t sPartitionData[]
          0                                   /* Number of banks (Must have at least 1 bank!) */
       }
    }
-#if ( TM_INTERNAL_FLASH_TEST == 1 )
-   ,{
-      ePART_TM_INT_FLASH,                     /* Partition Name */
-      PART_TM_INT_FLASH_OFFSET,               /* Start Offset */
-      PART_TM_INT_FLASH_SIZE,                 /* Size of partition */
-      PART_TM_INT_FLASH_SIZE,                 /* Size of partition */
-      pIntFlashDriver,                        /* Driver access table */
-      (void *)NULL,                           /* Driver Config (Port, Address, etc...) */
-      {                                       /* Partition Description */
-         _sIntFlash,                          /* Describes the Bus being used */
-         _sIntFlashType,                      /* Describes the chip being accessed */
-         partCodeDesc_,                       /* Describes the partition */
-         !PAR_BANKED,                         /* Banked? */
-         !PAR_CACHED,                         /* Cached? */
-         !PAR_AUTO_ERASE_BANK,                /* Automatically erase the 'old' bank of memory? */
-         !DFW_MANIP,                          /* Updateable during DFW? */
-         !FILE_SYS                            /* partition does NOT use the file system */
-      },                                    
-      {                                       /* Attributes: */
-         (PartitionMetaData_t *)NULL,         /* Location to store meta data */
-         INT_FLASH_ERASE_SIZE,                /* External NV memory erase block size */
-         (uint8_t *)NULL,                     /* Location of the cached area */
-         0,                                   /* Maximum write frequency to any one cell */
-         0                                    /* Number of banks (Must have at least 1 bank!) */
-      }
-   }// </editor-fold>
-#endif   // end of TM_INTERNAL_FLASH_TEST
 };
 
 #endif
