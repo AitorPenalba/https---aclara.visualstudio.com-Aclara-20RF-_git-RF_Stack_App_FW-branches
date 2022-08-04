@@ -95,7 +95,7 @@ fsp_err_t LPM_APP_mode_enter( app_lpm_states_t lpm_mode )
          case APP_LPM_DEEP_SW_STANDBY_STATE:
          case APP_LPM_DEEP_SW_STANDBY_STATE_AGT:
          {
-            StopModules(); // TODO: RA6E1: DG: Do we need to stop for SW Standby?
+            StopModules();
             /* Enter Deep SW standby mode */
             err = R_LPM_LowPowerModeEnter(&g_lpm_ctrl_instance_ctrls[lpm_mode]);
             break;
@@ -135,18 +135,18 @@ static void StopModules ( void )
 
    /* Module Stop Control Register B */
    R_BSP_MODULE_STOP( FSP_IP_CAN, 0 );
-   R_BSP_MODULE_STOP( FSP_IP_QSPI, 0 ); // QSPI
+   R_BSP_MODULE_STOP( FSP_IP_QSPI, 0 );
    R_BSP_MODULE_STOP( FSP_IP_IIC, 1 );
    R_BSP_MODULE_STOP( FSP_IP_IIC, 0 );
    R_BSP_MODULE_STOP( FSP_IP_USBFS, 0 );
 
    R_BSP_MODULE_STOP( FSP_IP_SPI, 1 );
    R_BSP_MODULE_STOP( FSP_IP_SPI, 0 );
-   R_BSP_MODULE_STOP( FSP_IP_SCI, 9 );  // Used - ??
+   R_BSP_MODULE_STOP( FSP_IP_SCI, 9 );  // Optical Port
 
-   R_BSP_MODULE_STOP( FSP_IP_SCI, 4 );  // DBG Serial
-   R_BSP_MODULE_STOP( FSP_IP_SCI, 3 );  // Used - ??
-   R_BSP_MODULE_STOP( FSP_IP_SCI, 2 );
+   R_BSP_MODULE_STOP( FSP_IP_SCI, 4 );  // DBG Serial Port
+   R_BSP_MODULE_STOP( FSP_IP_SCI, 3 );  // MFG Serial Port
+   R_BSP_MODULE_STOP( FSP_IP_SCI, 2 );  // Host Meter Port
    R_BSP_MODULE_STOP( FSP_IP_SCI, 1 );
    R_BSP_MODULE_STOP( FSP_IP_SCI, 0 );
 
@@ -162,13 +162,15 @@ static void StopModules ( void )
    /* Module Stop Control Register D */
    R_BSP_MODULE_STOP( FSP_IP_AGT, 3 );
    R_BSP_MODULE_STOP( FSP_IP_AGT, 2 );
-   R_BSP_MODULE_STOP( FSP_IP_AGT, 1 );   // Need for SW Standby Mode
-   R_BSP_MODULE_STOP( FSP_IP_POEG, 0 );  // FSP_IP_POEGD
-   R_BSP_MODULE_STOP( FSP_IP_POEG, 0 );  // C
-   R_BSP_MODULE_STOP( FSP_IP_POEG, 0 );  // B
-   R_BSP_MODULE_STOP( FSP_IP_POEG, 0 );  // A
+   R_BSP_MODULE_STOP( FSP_IP_AGT, 1 );
+   R_BSP_MODULE_STOP( FSP_IP_POEG, 1 );
+   R_BSP_MODULE_STOP( FSP_IP_POEG, 2 );
+   R_BSP_MODULE_STOP( FSP_IP_POEG, 4 );
+   R_BSP_MODULE_STOP( FSP_IP_POEG, 5 );
+   R_BSP_MODULE_STOP( FSP_IP_POEG, 6 );
+   R_BSP_MODULE_STOP( FSP_IP_POEG, 7 );
    R_BSP_MODULE_STOP( FSP_IP_ADC, 0 );
-   R_BSP_MODULE_STOP( FSP_IP_DAC, 0 );   // TODO: RA6E1: Review this for Uplink Power Control
+   R_BSP_MODULE_STOP( FSP_IP_DAC, 0 );
 
    /* Module Stop Control Register E */
    R_BSP_MODULE_STOP( FSP_IP_AGT, 5 );

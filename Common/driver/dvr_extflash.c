@@ -271,11 +271,11 @@ static void           setBusyTimer( uint32_t busyTimer_uS );
 static void           enableWrites( uint8_t port );
 #if ( MCU_SELECTED == NXP_K24 )
 static void           isr_busy( void );
+static void           isr_tmr( void );
 #endif
 #if ( MCU_SELECTED == RA6E1 )
-static fsp_err_t MisoBusy_isr_init( void );
+static fsp_err_t      MisoBusy_isr_init( void );
 #endif
-static void           isr_tmr( void );
 #endif
 
 static OS_MUTEX_Obj qspiMutex_;        /* Mutex Lock for QSPI channel */
@@ -349,6 +349,7 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
 #endif
 };
 
+#if ( MCU_SELECTED == NXP_K24 )
 /* Spi port configuration for use with the external flash devices.  The #defines are located in the cfg_app.h. */
 static const spiCfg_t _NV_spiCfg =
 {
@@ -356,17 +357,18 @@ static const spiCfg_t _NV_spiCfg =
    EXT_FLASH_TX_BYTE_WHEN_RX,    /* SPI TX Byte when Receiving*/
    EXT_FLASH_SPI_MODE            /* SPI Mode */
 };
+#endif
 
-#if ( RTOS_SELECTION == MQX_RTOS )
 #ifndef __BOOTLOADER
+#if ( MCU_SELECTED == NXP_K24 )
 #define NV_SPI_ChkSharedPortCfg(...)   SPI_ChkSharedPortCfg(__VA_ARGS__, &_NV_spiCfg)
 #define NV_SPI_MutexLock(...)          SPI_MutexLock(__VA_ARGS__)
 #define NV_SPI_MutexUnlock(...)        SPI_MutexUnlock(__VA_ARGS__)
+#endif
 #else
 #define NV_SPI_ChkSharedPortCfg(...)
 #define NV_SPI_MutexLock(...)
 #define NV_SPI_MutexUnlock(...)
-#endif
 #endif
 
 /* ****************************************************************************************************************** */

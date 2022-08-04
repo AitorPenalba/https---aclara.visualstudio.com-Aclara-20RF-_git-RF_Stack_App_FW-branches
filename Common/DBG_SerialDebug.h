@@ -67,9 +67,6 @@
 /* FUNCTION PROTOTYPES */
 
 returnStatus_t DBG_init( void );
-#if ( MCU_SELECTED == RA6E1 )
-void           DBG_printfDirect( const char *fmt, ... );
-#endif
 void           DBG_lockPrintResource( void );
 void           DBG_releasePrintResource( void );
 void           DBG_TxTask( taskParameter );
@@ -83,9 +80,7 @@ void           DBG_processMfgPortCmd(uint8_t const *pSrc, uint16_t len);
 char          *DBG_printFloat(char *str, float f, uint32_t precision);
 void           DBG_SetTaskFilter( OS_TASK_id tid );
 OS_TASK_id     DBG_GetTaskFilter(  void );
-#if 1 /* TODO: RA6E1: Add Support*/
 void           DBG_LW_printf( char const *fmt, ... );
-#endif
 #if ( PORTABLE_DCU == 1)
 void           DBG_DfwMonitorMode ( bool enable );
 bool           DBG_GetDfwMonitorMode( void );

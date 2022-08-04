@@ -110,7 +110,9 @@
 #include "SM.h"
 #include "PHY_Protocol.h"
 #include "PHY.h"
-//#include "stack_check.h"
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include "stack_check.h"
+#endif
 #include "SoftDemodulator.h"
 #include "SELF_test.h"
 #include "dtls.h"
@@ -920,6 +922,7 @@ static uint32_t setIdleTaskPriority ( uint32_t NewPriority )
 #if (RTOS_SELECTION == FREE_RTOS)
 static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName )
 {
+   /* DG: 08/04/22: We can use the FreeRTOS function instead of inventing our own */
    TaskHandle_t *retTaskHandlePtr = NULL; // return value, initialize to NULL and will get updated later
 
    uint8_t loopCtr;
@@ -1659,11 +1662,9 @@ void OS_TASK_Create_STRT( void )
 {
    // initialize the task handle lookup table, this table will be updated as we create each task
    (void)memset( (uint8_t *)&taskHandleTable, 0, sizeof(taskHandleTable) );
-
    if ( pdPASS != OS_TASK_Create( &Task_template_list[0] ) )
    {
-      /* TODO: RA6: Print Error */
-//      printf("Unable to create STRT"); // Note: printf doesn't work here yet. TODO: RA6: Initialize UART prior to this?
+      printf("Unable to create STRT");
    }
 }
 
@@ -1687,8 +1688,7 @@ void OS_TASK_Create_PWRLG( void )
 
    if ( pdPASS != OS_TASK_Create( &OS_template_list_last_gasp[0] ) )
    {
-      /* TODO: RA6: Print Error */
-//      printf("Unable to create PWRLG_Task"); // Note: printf doesn't work here yet. TODO: RA6: Initialize UART prior to this?
+      printf("Unable to create PWRLG_Task");
    }
 }
 

@@ -138,8 +138,6 @@ static bool              transmitUARTEnable[MAX_UART_ID];
 static const char        CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
 #endif
 /* FUNCTION PROTOTYPES */
-static void             polled_putc( char c );
-static void             polled_init_uart( void );
 
 /* FUNCTION DEFINITIONS */
 
@@ -946,7 +944,7 @@ uint8_t UART_flush( enum_UART_ID UartId )
    ringBufoverflow   [ (uint32_t)UartId ] = false;
    uartRingBuf       [ (uint32_t)UartId ].head = 0;
    uartRingBuf       [ (uint32_t)UartId ].tail = 0;
-   
+
    if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
    {
       OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
@@ -986,7 +984,7 @@ void UART_RX_flush ( enum_UART_ID UartId )
 #if ( RTOS_SELECTION == MQX_RTOS )
    bool     charsAvailable;
    uint8_t  trash;
-   /* user canceled the in progress command */  
+   /* user canceled the in progress command */
    do
    {
       ( void )UART_ioctl ( UartId, IO_IOCTL_CHAR_AVAIL, &charsAvailable );
@@ -1003,7 +1001,7 @@ void UART_RX_flush ( enum_UART_ID UartId )
    ringBufoverflow   [ (uint32_t)UartId ] = false;
    uartRingBuf       [ (uint32_t)UartId ].head = 0;
    uartRingBuf       [ (uint32_t)UartId ].tail = 0;
-   
+
    if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) || ( UartId == UART_HOST_COMM_PORT ) )
    {
       OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
@@ -1072,7 +1070,7 @@ uint8_t UART_ioctl ( enum_UART_ID UartId, int32_t op, void *addr )
 {
    return (uint8_t)( ioctl( UartHandle[ UartId ], (uint32_t)op, ( void *)addr ) );
 }
-
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_SetEcho
@@ -1089,6 +1087,7 @@ uint8_t UART_ioctl ( enum_UART_ID UartId, int32_t op, void *addr )
 *******************************************************************************/
 uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
 {
+ #if ( MCU_SELECTED == NXP_K24 )
    uint32_t flags;
 
    (void)UART_ioctl ( UartId, IO_IOCTL_SERIAL_GET_FLAGS, &flags ); // Get current settings
@@ -1098,8 +1097,23 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
       flags &= ~IO_SERIAL_ECHO; // Disable ECHO
    }
    return UART_ioctl ( UartId, IO_IOCTL_SERIAL_SET_FLAGS, &flags ); // Update settings
+#elif ( MCU_SELECTED == RA6E1 )
+   if( UART_DEBUG_PORT == UartId )
+   {
+      if( val )
+      {
+         R_SCI4->SCR_b.RIE = 0x01; /* Enable RX Interrupts */
+      }
+      else
+      {
+         R_SCI4->SCR_b.RIE = 0x00; /* Disable RX Interrupts */
+      }
+   }
+   /* TODO: RA6E1: Do we need to support this feature for other ports? */
+   return val;
+#endif
 }
-#endif // #if ( MCU_SELECTED == NXP_K24 )
+
 
 /* No function calls for UART_close */
 /*******************************************************************************

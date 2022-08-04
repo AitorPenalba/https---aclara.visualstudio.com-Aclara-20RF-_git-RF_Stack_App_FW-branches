@@ -315,8 +315,8 @@
 #define TM_OS_EVENT_TEST                  1 /* Test the time compound functions */
 #define TM_BSP_SW_DELAY                   1 /* Tests the Renesas R_BSP_SoftwareDelay function */
 #define TM_ENHANCE_NOISEBAND_FOR_RA6E1    1 /* Enhancements to Noiseband: 1MHz clock test, list frequencies, control GPIO pins, extra HMC traffic */
-#define TM_DELAY_FOR_TACKED_ON_LED        1 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
-#define TM_MEASURE_SLEEP_TIMES            1 /* Adds a debug command to measure the actual sleep times based on the CYCCNT */
+#define TM_DELAY_FOR_TACKED_ON_LED        0 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
+#define TM_MEASURE_SLEEP_TIMES            0 /* Adds a debug command to measure the actual sleep times based on the CYCCNT */
 #define TM_BYPASS_SI4467_GPIP0_WAIT       0 /* Bypass signal SI4467_GPIO0 after resetting the radio.  Used to test cutting this trace */
 #define TM_UART_ECHO_COMMAND              1 /* Adds an echo command to the debug port for testing UART echoing */
 #define TM_INSTRUMENT_NOISEBAND_TIMING    0 /* Adds instrumentation of noiseband timing to determine if there are bugs */
