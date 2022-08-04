@@ -1507,7 +1507,9 @@ void PHY_Task( taskParameter )
                }
             }
          }
+#if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) ) /* TODO: K24: DG: TCXO Trimming is not currently used in EPs remove the call  */
          RADIO_Update_Freq_Watchdog(); // Make sure TCXO trimming is active
+#endif
          PHY_FlushShadowAttr();        // Take this opportunity to save shadow attributes to flash (if needed)
 
          OS_MUTEX_Unlock( &PHY_Mutex_ ); // Function will not return if it fails
