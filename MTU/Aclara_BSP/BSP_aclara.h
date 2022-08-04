@@ -89,7 +89,7 @@
 #define BSP_IS_GLOBAL_INT_ENABLED()  (bool)(0 == __get_PRIMASK() ? TRUE : FALSE)
 
 #if ( MCU_SELECTED == RA6E1 )
-#define printf( fmt, ... )         DBG_printfDirect( fmt, ##__VA_ARGS__ )
+#define printf( fmt, ... )         DBG_LW_printf( fmt, ##__VA_ARGS__ )
 #endif
 
 #if ( MCU_SELECTED == RA6E1 )

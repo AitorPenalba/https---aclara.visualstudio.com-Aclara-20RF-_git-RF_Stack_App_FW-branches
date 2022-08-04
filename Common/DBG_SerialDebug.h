@@ -51,10 +51,6 @@
 // Print 'I', string (and HEX payload), adds \n and time stamp
 #define INFO_printHex(str, data, len)       DBG_logPrintHex ( 'I', str, data, len)
 
-#if 1 /* TODO: RA6E1: This is temporary routing; Add DBG_LW_printf support in RA6 */
-#define DBG_LW_printf( fmt, ... )           DBG_log( 'I', ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__)
-#endif
-
 #define APP_PRINT(fmt, ...)                 DBG_log( 0, ADD_LF, fmt, ##__VA_ARGS__);
 #define APP_ERR_PRINT(fmt, ...)             DBG_log( 'E', ADD_LF|PRINT_DATE_TIME, fmt, ##__VA_ARGS__ )
 
@@ -71,9 +67,6 @@
 /* FUNCTION PROTOTYPES */
 
 returnStatus_t DBG_init( void );
-#if ( MCU_SELECTED == RA6E1 )
-void           DBG_printfDirect( const char *fmt, ... );
-#endif
 void           DBG_lockPrintResource( void );
 void           DBG_releasePrintResource( void );
 void           DBG_TxTask( taskParameter );
@@ -87,9 +80,7 @@ void           DBG_processMfgPortCmd(uint8_t const *pSrc, uint16_t len);
 char          *DBG_printFloat(char *str, float f, uint32_t precision);
 void           DBG_SetTaskFilter( OS_TASK_id tid );
 OS_TASK_id     DBG_GetTaskFilter(  void );
-#if 0 /* TODO: RA6E1: Add Support*/
 void           DBG_LW_printf( char const *fmt, ... );
-#endif
 #if ( PORTABLE_DCU == 1)
 void           DBG_DfwMonitorMode ( bool enable );
 bool           DBG_GetDfwMonitorMode( void );

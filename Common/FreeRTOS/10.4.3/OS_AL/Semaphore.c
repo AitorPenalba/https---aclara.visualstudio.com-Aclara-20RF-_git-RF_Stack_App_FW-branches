@@ -21,7 +21,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-//#include <mqx.h>
 #include "EVL_event_log.h"
 
 /* #DEFINE DEFINITIONS */
@@ -261,7 +260,7 @@ void OS_SEM_TestCreate ( void )
    else
    {
       counter++;
-//      APP_ERR_PRINT("Unable to Create the Mutex!");
+      APP_ERR_PRINT("Unable to Create the Mutex!");
    }
 
 }
@@ -276,11 +275,11 @@ bool OS_SEM_TestPend( void )
 
    if( 0 == counter )
    {
-//      APP_PRINT("Success");
+      APP_PRINT("Success");
    }
    else
    {
-//      APP_ERR_PRINT("Fail");
+      APP_ERR_PRINT("Fail");
    }
    return(retVal);
 }

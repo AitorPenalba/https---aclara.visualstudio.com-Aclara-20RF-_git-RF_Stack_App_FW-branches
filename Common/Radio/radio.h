@@ -217,7 +217,9 @@ bool     RADIO_Build_Noise_Floor(uint16_t const *Channels_list, uint8_t radioNum
 #if ( DCU == 1 )
 void     RADIO_SetPower( uint32_t frequency, float powerOutput );
 #endif
+#if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) )
 void     RADIO_Update_Freq( void );
+#endif
 #ifdef TIME_SYS_H
 bool     RADIO_TCXO_Set ( uint8_t radioNum, uint32_t TCXOfreq, TIME_SYS_SOURCE_e source, bool reset );
 bool     RADIO_TCXO_Get ( uint8_t radioNum, uint32_t *TCXOfreq, TIME_SYS_SOURCE_e *source, uint32_t *seconds );

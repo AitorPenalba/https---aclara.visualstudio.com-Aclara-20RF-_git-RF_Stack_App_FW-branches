@@ -219,8 +219,6 @@
 static uint16_t         MFGP_CmdLen;
 static char             MFGP_CommandBuffer[MFGP_MAX_MFG_COMMAND_CHARS + 1];
 static uint16_t         MFGP_numBytes = 0;               /* Number of bytes currently in the command buffer */
-static char             MFGP_PrintCmdBuffer[MFGP_MAX_MFG_COMMAND_CHARS + 1];
-static uint16_t         MFGP_numPrintBytes = 0;               /* Number of bytes currently in the command buffer */
 static char           * argvar[MFGP_MAX_CMDLINE_ARGS + 1];
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 static enum_UART_ID mfgUart = UART_MANUF_TEST;           /* UART used for MFG port operations   */
@@ -1635,8 +1633,8 @@ returnStatus_t MFGP_cmdInit( void )
    if ( OS_EVNT_Create(&_MfgpUartEvent) &&
 #if ( MCU_SELECTED == NXP_K24 )
       OS_MSGQ_Create(&_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS) )
-#elif ( MCU_SELECTED == RA6E1 )     
-      OS_MSGQ_Create( &_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS, "MFGP" ) 
+#elif ( MCU_SELECTED == RA6E1 )
+      OS_MSGQ_Create( &_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS, "MFGP" )
 #endif
    )
    {
