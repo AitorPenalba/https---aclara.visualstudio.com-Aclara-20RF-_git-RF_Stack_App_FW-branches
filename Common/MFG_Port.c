@@ -1666,7 +1666,7 @@ static void mfgpReadByte( uint8_t rxByte )
       MFGP_numBytes = 0;
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-#if 0   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
+#if ( MCU_SELECTED == NXP_K24 )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       (void)UART_flush ( mfgUart  );
 #endif
 #else
@@ -1725,7 +1725,7 @@ static void mfgpReadByte( uint8_t rxByte )
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
-#if 0 // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
+#if ( MCU_SELECTED == NXP_K24 )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
             (void)UART_flush ( mfgUart  );
 #endif
 #else
@@ -6451,9 +6451,7 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
             stP0LoopbackFailCount++;
          }
       }
-#if 0
       ( void )UART_flush ( UART_HOST_COMM_PORT ); /* Wait until all characters sent before re-enabling HMC!   */
-#endif
    }
    MFG_logPrintf( "%s %d\n", argv[0], stP0LoopbackFailCount );
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
@@ -9854,7 +9852,7 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
 {
    if ( _MfgPortState == DTLS_SERIAL_IO_e )
    {
-#if 0 // TODO: RA6E1 Enable UART ioctl (check if required)
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6E1 Enable UART ioctl (check if required)
       int32_t flags = IO_SERIAL_TRANSLATION | IO_SERIAL_ECHO; /* Settings for the UART */
 #endif
       /* This could be caused by the user closing the connection, or the time out value exceeded. If timing out, there's
@@ -9862,9 +9860,9 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
          entire message, before flusing the UART.  */
       OS_TASK_Sleep( 30 );       /* Wait for close notify message to be received.   */
 
-#if 0 // TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
 #if !USE_USB_MFG
-      ( void )UART_flush( mfgUart );      // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
+      UART_RX_flush( mfgUart );      // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #else
       usb_flush();
