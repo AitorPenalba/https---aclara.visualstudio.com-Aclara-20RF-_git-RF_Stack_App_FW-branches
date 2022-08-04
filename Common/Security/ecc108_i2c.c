@@ -98,7 +98,7 @@ enum i2c_read_write_flag {
 };
 
 //! I2C address is set when calling #ecc108p_init or #ecc108p_set_device_id.
-static uint8_t device_address;
+static uint8_t device_address = 0;
 
 /** \brief This function sets the I2C address.
  *         Communication functions will use this address.
