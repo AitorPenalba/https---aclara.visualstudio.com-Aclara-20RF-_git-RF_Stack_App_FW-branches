@@ -753,8 +753,12 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #elif ( RTOS_SELECTION == FREE_RTOS )
+#if ( TM_BSP_SW_DELAY == 1 )
    { "testBSPSWDelay", DBG_CommandLine_TestSWDelay,   "Test Renesas BSP R_BSP_SoftwareDelay function" },
+#endif
+#if ( TM_MEASURE_SLEEP_TIMES == 1 )
    { "testOsTaskSleep", DBG_CommandLine_TestOsTaskSleep, "Test OS_TASK_Sleep function" },
+#endif
    { "time",         DBG_CommandLine_time,            "RTC and SYS time.\r\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #endif // ( RTOS_SELECTION )

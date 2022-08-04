@@ -192,10 +192,13 @@ static bool             powerStable( bool curState );
 static void             Process_SecondDeepSleep ( void );
 #endif
 #if ( PWRLG_PRINT_ENABLE != 0 )
-#define LG_PRNT_INFO( fmt, ... ) UART_polled_printf( fmt, ##__VA_ARGS__ )
+static uint32_t         polled_printf( char *fmt, ... );
+static void             lg_putc( char c );
+static void             lg_init_uart( void );
+#define LG_PRNT_INFO( fmt, ... ) polled_printf( fmt, ##__VA_ARGS__ )
 #else
 #define LG_PRNT_INFO( fmt, ... )
-#endif // #if ( PWRLG_PRINT_ENABLE != 0 )
+#endif
 
 #if ( MCU_SELECTED == RA6E1 )
 static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint8_t uMode );
@@ -240,12 +243,12 @@ void PWRLG_LLWU_ISR( void )
 
     if(LLWU_FILT1 & LLWU_FILT1_FILTF_MASK)
     {
-        LLWU_FILT1 |= LLWU_FILT1_FILTF_MASK;
+       LLWU_FILT1 |= LLWU_FILT1_FILTF_MASK;
     }
 
     if(LLWU_FILT2 & LLWU_FILT2_FILTF_MASK)
     {
-        LLWU_FILT2 |= LLWU_FILT2_FILTF_MASK;
+       LLWU_FILT2 |= LLWU_FILT2_FILTF_MASK;
     }
 }
 #endif // #if ( MCU_SELECTED == NXP_K24 )
@@ -797,11 +800,11 @@ void PWRLG_Startup( void )
    }
 #endif
 #if ( MCU_SELECTED == RA6E1 ) /* TEST Code */
-   LG_PRNT_INFO( "RSTSR0 0x%02X",  R_SYSTEM->RSTSR0 );
-   LG_PRNT_INFO( "RSTSR1 0x%02X",  R_SYSTEM->RSTSR1 );
-   LG_PRNT_INFO( "RSTSR2 0x%02X",  R_SYSTEM->RSTSR2 );
-   LG_PRNT_INFO( "RTC_INT 0x%02X", R_SYSTEM->DPSIFR2_b.DRTCAIF );
-   LG_PRNT_INFO( "PF_INT 0x%02X",  R_SYSTEM->DPSIFR1_b.DIRQ11F );
+   LG_PRNT_INFO( "RSTSR0 0x%02X\n",  R_SYSTEM->RSTSR0 );
+   LG_PRNT_INFO( "RSTSR1 0x%02X\n",  R_SYSTEM->RSTSR1 );
+   LG_PRNT_INFO( "RSTSR2 0x%02X\n",  R_SYSTEM->RSTSR2 );
+   LG_PRNT_INFO( "RTC_INT 0x%02X\n", R_SYSTEM->DPSIFR2_b.DRTCAIF );
+   LG_PRNT_INFO( "PF_INT 0x%02X\n",  R_SYSTEM->DPSIFR1_b.DIRQ11F );
 #endif
    VBATREG_EnableRegisterAccess();
 
@@ -919,7 +922,7 @@ void PWRLG_Startup( void )
 #endif
                   RTC_DisableAlarm();
                   PWRLG_SOFTWARE_RESET_SET( 1 );   /* Done with LG */
-                  LG_PRNT_INFO("Complete");
+                  LG_PRNT_INFO("Complete\n");
 #endif
                   RESET(); /* Power restored, reset to restart MTU.  PWR_SafeReset() not necessary */
                }
@@ -970,7 +973,7 @@ void PWRLG_Startup( void )
             with next step of last gasp.  */
          PWRLG_OUTAGE_SET( 1 );     /* Outage declared.  */
          VBATREG_SHORT_OUTAGE = 0;  /* No longer a short outage!  */
-         LG_PRNT_INFO("Long_Outage");
+         LG_PRNT_INFO("Long_Outage\n");
          NextSleep();
          /* If next sleep returns, either the current state is SLEEP, and the initial declaration delay has just expired,
             or all the messages have been sent.  */
@@ -1089,7 +1092,7 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == RA6E1 )
       else
       {
-         LG_PRNT_INFO("Not LPM Wake-up");
+         LG_PRNT_INFO("Not LPM Wake-up\n");
       }
 #endif
    }
@@ -1370,11 +1373,7 @@ void PWRLG_Begin( uint16_t anomalyCount )
    // Display current recorded outage time on debug port
    TIME_UTIL_ConvertSysCombinedToSysFormat( &currentTime, &now );
    ( void )TIME_UTIL_ConvertSysFormatToDateFormat( &now, &dt );
-#if ( MCU_SELECTED == NXP_K24 )
    DBG_LW_printf( "Outage time: %04u/%02u/%02u %02u:%02u:%02u\n", dt.year, dt.month, dt.day, dt.hour, dt.min,   dt.sec );
-#elif ( MCU_SELECTED == RA6E1 )
-   printf( "Outage time: %04u/%02u/%02u %02u:%02u:%02u\n", dt.year, dt.month, dt.day, dt.hour, dt.min, dt.sec );
-#endif
 
    // Save the MAC Configuration for later recovery
    MAC_SaveConfig_To_BkupRAM();
@@ -1384,13 +1383,10 @@ void PWRLG_Begin( uint16_t anomalyCount )
    // Get HW Revision letter
    ( void )VER_getHardwareVersion ( &hwVerString[0], sizeof(hwVerString) );
    hwRevLetter_ = hwVerString[0];
-#if ( MCU_SELECTED == NXP_K24 )
+
    DBG_LW_printf( "Vcap: %-6s\n", DBG_printFloat( floatStr, Vcap, 3 ) );
    DBG_logPrintf( 'I', "HW Rev Letter: %c ", hwRevLetter_);
-#elif ( MCU_SELECTED == RA6E1 )
-   printf( "Vcap: %-6s\n", DBG_printFloat( floatStr, Vcap, 3 ) );
-//   printf( "HW Rev Letter: %c ", hwRevLetter_ );
-#endif
+
    R_BSP_SoftwareDelay( 1, BSP_DELAY_UNITS_SECONDS );
 #if ( LG_WORST_CASE_TEST == 1 )
    DBG_LW_printf(" \n !!!! This is Last Gasp Worst Case Test Code( Revision: 12) !!!! \n");
@@ -1399,15 +1395,8 @@ void PWRLG_Begin( uint16_t anomalyCount )
    PWRLG_SetupLastGasp();
    if( Vcap > fMinimumStartVoltage )
    {
-#if ( MCU_SELECTED == NXP_K24 )
       DBG_LW_printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
                      uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
-#elif ( MCU_SELECTED == RA6E1 )
-   /* TODO: RA6E1: Remove later */
-//   printf( "Sleep First: %d, Window 0 seconds: %d, milliseconds: %d\n",
-//                  uFirstSleepMilliseconds, PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
-//   printf( "seconds: %d, milliseconds: %d\n", PWRLG_SLEEP_SECONDS(), PWRLG_SLEEP_MILLISECONDS() );
-#endif
    }
    else
    {
@@ -2546,6 +2535,159 @@ static bool powerStable( bool curState )
    return ( powerGoodCount != 0 );
 }
 
+#if ( PWRLG_PRINT_ENABLE != 0 )
+/***********************************************************************************************************************
+
+   Function name: polled_printf
+
+   Purpose: Low level printf suitable for use in last gasp mode.
+
+   Arguments: variable
+
+   Returns: Same as printf
+
+ **********************************************************************************************************************/
+#if ( MCU_SELECTED == NXP_K24 )
+static const UART_MemMapPtr   uart = UART2_BASE_PTR;
+#endif
+static bool                   uartInitDone = ( bool ) false;
+uint32_t polled_printf( char *fmt, ... )
+{
+   char     pBuf[ 192 ];   /* Local buffer for printout  */
+   uint32_t pOff;          /* offset into pBuf/length    */
+   va_list  ap;
+
+   (void)memset(&pBuf[0], 0, sizeof(pBuf));
+   va_start( ap, fmt );
+   if ( !uartInitDone  )
+   {
+      lg_init_uart();
+      lg_putc( '\n' );
+      lg_putc( '\n' );
+   }
+   pOff =  vsnprintf( pBuf, sizeof( pBuf ), fmt, ap );  /* "print" to the buffer.  */
+   va_end( ap );
+
+   for ( pOff = 0; pBuf[ pOff ] != 0; pOff++ )  /* Loop through the buffer, sending each to the UART. */
+   {
+      lg_putc( pBuf[ pOff ] );
+      if ( pBuf[ pOff ] == '\n' )
+      {
+         lg_putc( '\r' );  /* \n should include a \r, also. */
+      }
+   }
+#if ( MCU_SELECTED == NXP_K24 )
+   while( ( uart->S1 & UART_S1_TC_MASK ) == 0 );   /* Wait for last character to be fully transmitted.   */
+#elif ( MCU_SELECTED == RA6E1 )
+   /* Wait for last character to be fully transmitted.   */
+#if ( SCI_UART_CFG_FIFO_SUPPORT == 0 )
+   while( R_SCI4->SSR_b.TDRE != 1 )
+   { }
+#else
+   while ( R_SCI4->SSR_FIFO_b.TDFE != 1 )
+   { }
+#endif
+   R_SCI4->SCR_b.TIE = 0x01; /* Enable TX Interrupts */
+#endif // MCU_SELECTED
+
+   return( pOff );
+}
+
+/***********************************************************************************************************************
+
+   Function name: lg_putc
+
+   Purpose: Low level putc suitable for use in last gasp mode.
+
+   Arguments: char c
+
+   Returns: none
+
+ **********************************************************************************************************************/
+#define SCI_UART_FIFO_DAT_MASK                  (0x1FFU)
+static void lg_putc( char c )
+{
+#if ( MCU_SELECTED == NXP_K24 )
+   const UART_MemMapPtr luart = uart;
+   while( ( luart->S1 & UART_S1_TDRE_MASK ) == 0 )  /* Wait for Transmit Data Register Empty  */
+   {}
+   luart->D = c;
+#elif ( MCU_SELECTED == RA6E1 )
+
+#if ( SCI_UART_CFG_FIFO_SUPPORT == 0 )
+   R_SCI4->SSR_b.TDRE   = 0x00; /* Clear the Transmit Data Empty Flag */
+   while ( R_SCI4->SSR_b.TDRE != 1 )
+   { }
+   R_SCI4->TDR = c;
+#else
+   R_SCI4->SSR_FIFO_b.TDFE = 0x00; /* Clear the Transmit FIFO Data Empty Flag */
+   while ( R_SCI4->SSR_FIFO_b.TDFE != 1 )
+   { }
+   R_SCI4->FTDRL = c;
+#endif
+#endif
+}
+
+/***********************************************************************************************************************
+
+   Function name: lg_init_uart
+
+   Purpose: Low level UART init suitable for use in last gasp mode.
+
+   Arguments: variable
+
+   Returns: none
+
+ **********************************************************************************************************************/
+static void lg_init_uart( void )
+{
+#if ( MCU_SELECTED == NXP_K24 )
+   const UART_MemMapPtr luart = uart;
+   SIM_SCGC4 &= !( uint16_t )SIM_SCGC4_UART2_MASK;    /* Disable the clock to UART2  */
+   SIM_SCGC4 |= ( uint16_t )SIM_SCGC4_UART2_MASK;     /* Enable the clock to UART2  */
+   luart->C2 = 0;                                     /* Temporarily disable the UART. */
+    /* Set to 115200 baud */
+   luart->BDH = 0;
+   luart->BDL = 0x20;
+   luart->C4 = 0x12;
+   luart->C2 = UART_C2_TE_MASK;                       /* Enable only the transmitter.  */
+   PORTD_PCR3 = PORT_PCR_MUX(3);                      /* Make PTD3 be the UART TX pin. */
+   uartInitDone = ( bool )true;
+#elif ( MCU_SELECTED == RA6E1 )
+
+   fsp_err_t err = FSP_SUCCESS;
+   uartInitDone = ( bool )true;
+   err = R_SCI_UART_Open(&g_uart_lpm_dbg_ctrl, &g_uart_lpm_dbg_cfg);
+   assert(FSP_SUCCESS == err);
+#if ( SCI_UART_CFG_FIFO_SUPPORT == 0 )
+   R_SCI4->SCR_b.RIE       = 0x00; /* Disable RX Interrupts */
+   R_SCI4->SCR_b.TIE       = 0x00; /* Disable TX Interrupts */
+   R_SCI4->SSR_b.TDRE      = 0x00; /* Clear the Transmit Data Empty Flag */
+#else
+   R_SCI4->SCR_b.RIE       = 0x00; /* Disable RX Interrupts */
+   R_SCI4->SCR_b.TIE       = 0x00; /* Disable TX Interrupts */
+   R_SCI4->SSR_FIFO_b.TDFE = 0x00; /* Clear the Transmit FIFO Data Empty Flag */
+#endif
+#endif
+}
+
+/*******************************************************************************
+
+  Function name: lpm_dbg_uart_callback
+
+  Purpose: Interrupt Handler for UART Module
+
+  Returns: None
+
+*******************************************************************************/
+void lpm_dbg_uart_callback( uart_callback_args_t *p_args )
+{
+   /* Handle the UART event */
+   /* NOT Used */
+//   uart_event = (uint8_t)p_args->event;
+}
+#endif // #if ( PWRLG_PRINT_ENABLE != 0 )
+
 /***********************************************************************************************************************
 
    Function name: PWRLG_RestLastGaspFlags
@@ -2676,7 +2818,7 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
       secs = uCounter / 1000;  /* Convert to secs */
       mSecs = uCounter % 1000;  /* Remaining msecs */
 
-      LG_PRNT_INFO("LPM - Secs: %d, mSecs: %d", secs, mSecs);
+      LG_PRNT_INFO("LPM - Secs: %d, mSecs: %d\n", secs, mSecs);
 
       if( mSecs == 0 )
       {
@@ -2695,7 +2837,7 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
 #if ( LAST_GASP_USE_2_DEEP_SLEEP == 0 )
          uMode    = APP_LPM_SW_STANDBY_STATE;
 #else
-         LG_PRNT_INFO("Sn-2");
+         LG_PRNT_INFO("Sn-2\n");
          uMode    = APP_LPM_DEEP_SW_STANDBY_STATE_AGT;
          PWRLG_SECOND_SLEEP_REQUIRED_SET( 1 );
          PWRLG_SECOND_SLEEP_COUNTER_SET( secs );  // Next Sleep counter in Secs
@@ -2760,7 +2902,7 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
       uMode    = APP_LPM_DEEP_SW_STANDBY_STATE;
       uCounter = secs;
 
-      LG_PRNT_INFO("LPM - DEEP SW STDBY; Secs:%d",uCounter);
+      LG_PRNT_INFO("LPM - DEEP SW STDBY; Secs:%d\n",uCounter);
       LptmrStart( uCounter, eUnits, LPTMR_MODE_PROGRAM_ONLY );
       (void)LPM_APP_mode_enter( (app_lpm_states_t)uMode );
    }
@@ -2808,7 +2950,7 @@ static void Process_SecondDeepSleep ( void )
 
    if( (PWRLG_SECOND_SLEEP_REQUIRED() == 1) && ( counter != 0 ) )
    {
-      LG_PRNT_INFO("2nd Deep Sleep: %d", counter);
+      LG_PRNT_INFO("2nd Deep Sleep: %d\n", counter);
       PWRLG_SECOND_SLEEP_REQUIRED_SET( 0 );
       PWRLG_SECOND_SLEEP_COUNTER_SET( 0 );
       EnterVLLS( counter, LPTMR_SECONDS, 1 );

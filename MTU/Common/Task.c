@@ -587,8 +587,8 @@ static void expt_frm_dump(void const * ext_frm_ptr)
       pOff = (uint16_t)snprintf( pBuf, (int32_t)sizeof( pBuf ), "External interrupt %u occured with no handler to serve it.", excpt_num );
    }
 
-   //need Exclusion of rtos to print
-    UART_polled_printf( "%s", pBuf );
+   // need Exclusion of RTOS to print
+    printf( "%s", pBuf );
 }
 /*lint +esym(818, ext_frm_ptr)   */
 
@@ -1706,8 +1706,7 @@ void OS_TASK_Create_PWRLG( void )
  **********************************************************************************************************************/
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char * pcTaskName )
 {
-   ERR_printf("!!STACK OVERFLOW!!");
-   DBG_logPrintf('E',"Task: %s ", pcTaskName );
+   printf("!!STACK OVERFLOW!! Task: %s ", pcTaskName );
 }
 
 #endif /* FREE_RTOS */
