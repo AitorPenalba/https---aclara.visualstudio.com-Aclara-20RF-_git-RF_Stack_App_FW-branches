@@ -861,6 +861,7 @@ void RADIO_RX_Watchdog(void)
 #endif
 }
 
+#if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) ) /* TODO: K24: DG: TCXO Trimming is not currently used in EPs remove the call  */
 /******************************************************************************
 
    Function Name: RADIO_Update_Freq_Watchdog
@@ -892,6 +893,7 @@ void RADIO_Update_Freq_Watchdog(void)
       }
    }
 }
+#endif
 
 /*!
  *  Call the event handler
@@ -2561,7 +2563,9 @@ void vRadio_Init(RADIO_MODE_t radioMode)
    // Be nice to other tasks.
    OS_TASK_Sleep( FIFTY_MSEC );
 #endif
-   RADIO_Update_Freq();
+#if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) )
+   RADIO_Update_Freq(); /* TODO: K24: DG: TCXO Trimming is not currently used in EPs remove the call  */
+#endif
 }
 
 #if 0 // Not RA6E1.  This was already removed in the K24 baseline code

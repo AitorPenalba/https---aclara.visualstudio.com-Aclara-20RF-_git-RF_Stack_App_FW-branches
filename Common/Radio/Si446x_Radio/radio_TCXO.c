@@ -25,7 +25,7 @@
 #include <mqx_prv.h>
 #endif
 #include "PHY_Protocol.h"
-#include "phy.h"
+#include "PHY.h"
 #include "time_sys.h"
 #include "radio.h"
 #include "radio_hal.h"
@@ -63,7 +63,7 @@
 /*****************************************************************************
  *  Local Variables
  *****************************************************************************/
-
+#if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) ) /* TODO: K24: DG: TCXO Trimming is not currently used in EPs remove the call  */
 static uint16_t FTMcount[RADIO_CLK_BUFFER_SIZE+1]; // Buffer holding an array of captured FTM values
                                                    // We add one because of a strange observation made while debugging.
                                                    // Read the note in DMA_Complete_IRQ_ISR() to know more
@@ -78,7 +78,6 @@ static uint32_t freqFilter[FREQUENCY_MOVING_WINDOW] = {0}; // Initialize with ba
 static uint64_t coreToBusClockRatio;
        uint32_t DMAint;                            // When the DMA interrupt happened in CYCCNT units
 
-#if ( MCU_SELECTED == NXP_K24 ) // GPIO configuration is done in RASC configurator for RA6E1
 typedef struct{
    PORT_MemMapPtr portAddr;           /* PORTA_BASE_PTR PORTB_BASE_PTR etc. */
    uint32_t       pin;                /* GPIO_PIN1   GPIO_PIN2 ....  GPIO_PIN31 */
@@ -104,12 +103,12 @@ static const GPIO0_CONFIG_t radioGpioConfig[] = { // Radio GPIO 0 with DMA enabl
 #error "unsuported hardware in radio_TCXO.c"
 #endif
 };
-#endif
+#endif // #if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) )
 
 /*****************************************************************************
  *  Local Function Declarations
  *****************************************************************************/
-
+#if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) ) /* TODO: K24: DG: TCXO Trimming is not currently used in EPs remove the call  */
 /******************************************************************************
 
  Function Name: Disable_DMA_Reset_Filter
@@ -125,19 +124,16 @@ static const GPIO0_CONFIG_t radioGpioConfig[] = { // Radio GPIO 0 with DMA enabl
 ******************************************************************************/
 static void Disable_DMA_Reset_Filter( void )
 {
-#if ( MCU_SELECTED == NXP_K24 ) //TODO Melvin: need to find am equivalent
    // Disable all DMA configuration
    uint32_t i; // Loop counter
    for ( i=0; i<(sizeof(radioGpioConfig)/sizeof(GPIO0_CONFIG_t)); i++) {
       PORT_PCR_REG( radioGpioConfig[i].portAddr, radioGpioConfig[i].pin ) &= ~PORT_PCR_IRQC_MASK; // Interrupt/DMA request disabled
    }
-#endif
    // Reset all filters
    (void)memset( freqFilter, 0, sizeof(freqFilter) );
    (void)memset( FTM,     0, sizeof(FTM) );
 }
 
-#if ( MCU_SELECTED == NXP_K24 )
 /******************************************************************************
 
  Function Name: DMA_Complete_IRQ_ISR
@@ -312,11 +308,9 @@ static void DMA_Complete_IRQ_ISR( void )
    }
    DMAcntr++;
 
-#if ( MCU_SELECTED == NXP_K24 )  //TODO: RA6E1: Melvin: DMA interrupts has to be replaced
    DMA_Complete_IRQ_ISR_Timestamp = DWT_CYCCNT;
-#endif
 }
-#endif
+
 /******************************************************************************
 
  Function Name: RADIO_Update_Freq
@@ -336,7 +330,7 @@ void RADIO_Update_Freq( void )
 
    DMAcntr  = 0; // Reset DMA Major loop counter
 
-#if ( MCU_SELECTED == NXP_K24 ) // TODO Melvin: need to find an equivalent
+
    // Disable DMA channel before configuration
    DMA_CERQ = RADIO_CLK_DMA_CH; // Disable DMA channel before programming
    DMA_CINT = RADIO_CLK_DMA_CH; // Clear any pending interrupts
@@ -384,6 +378,5 @@ void RADIO_Update_Freq( void )
 
    // Enable DMA transfer
    DMA_SERQ = RADIO_CLK_DMA_CH;
-#endif
 }
-
+#endif // #if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) )

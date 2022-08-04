@@ -753,8 +753,12 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "time",         DBG_CommandLine_time,            "RTC and SYS time.\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #elif ( RTOS_SELECTION == FREE_RTOS )
+#if ( TM_BSP_SW_DELAY == 1 )
    { "testBSPSWDelay", DBG_CommandLine_TestSWDelay,   "Test Renesas BSP R_BSP_SoftwareDelay function" },
+#endif
+#if ( TM_MEASURE_SLEEP_TIMES == 1 )
    { "testOsTaskSleep", DBG_CommandLine_TestOsTaskSleep, "Test OS_TASK_Sleep function" },
+#endif
    { "time",         DBG_CommandLine_time,            "RTC and SYS time.\r\n"
                    "                                   Read: No Params, Set: Params - yy mm dd hh mm ss" },
 #endif // ( RTOS_SELECTION )
@@ -937,7 +941,7 @@ void DBG_CommandLineTask ( taskParameter )
       else
       {
          (void)DBG_CommandLine_DebugDisable ( 0, NULL ); /*lint !e413 NULL OK; not used   */
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( MCU_SELECTED == NXP_K24 )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
          (void)UART_flush( UART_DEBUG_PORT );                   /* Drop any input queued up while debug disabled   */
 #endif
       }/* end if() */
@@ -7093,6 +7097,8 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    uint8_t                    string[VER_HW_STR_LEN];
    firmwareVersion_u          ver;
    const firmwareVersionDT_s *dt;
+   uint8_t                    index = 0;
+   const uint8_t             *mcuVersion = ( uint8_t * )MCUVERSION_ADDR;
 
    ver = VER_getFirmwareVersion(eFWT_APP);
    dt  = VER_getFirmwareVersionDT();
@@ -7111,6 +7117,18 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
                   BSP_Get_BspRevision(), BSP_Get_IoRevision(), BSP_Get_PspRevision(), __VER__ );
 #endif
+
+#if ( MCU_SELECTED == RA6E1 )
+   const bsp_unique_id_t *uniqueId = R_BSP_UniqueIdGet();
+   while( index < 4 )
+   {
+      DBG_logPrintf( 'R',"Unique ID %d - %x", index, uniqueId->unique_id_words[index] );
+      index++;
+   }
+   DBG_logPrintf( 'R', "Part Numbering Info %s",VER_getComDeviceMicroMPN() );
+   DBG_logPrintf( 'R', "MCU Version Register %d",*(mcuVersion));
+#endif
+
 #if ( RTOS_SELECTION == MQX_RTOS )
    DBG_logPrintf( 'R', "MQX=%s MQXgen=%s MQXLibraryDate=%s",
                   OS_Get_OsVersion(), OS_Get_OsGenRevision(), OS_Get_OsLibDate() );

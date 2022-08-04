@@ -125,8 +125,10 @@
 /* ------------------------------------------------------------------------------------------------------------------ */
 /* Power Outage Definitions */
 
+#define HAL_IGNORE_BROWN_OUT_SIGNAL    0 /* 1 = Ignore brown-out signal, 0 = Use Brown Out Signal */
 #if HAL_IGNORE_BROWN_OUT_SIGNAL == 1
 #define BRN_OUT()                   0 /* Ignores the brown out signal  */
+#warning "You have built the project so that it ignores the meter's /PF_METER signal!"
 /* Disable this interrupt if ignoring the signal! */
 #define BRN_OUT_IRQ_EI()            BRN_OUT_IRQ_DI()
 #else

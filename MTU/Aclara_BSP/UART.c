@@ -138,8 +138,6 @@ static bool              transmitUARTEnable[MAX_UART_ID];
 static const char        CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
 #endif
 /* FUNCTION PROTOTYPES */
-static void             polled_putc( char c );
-static void             polled_init_uart( void );
 
 /* FUNCTION DEFINITIONS */
 
@@ -482,7 +480,6 @@ returnStatus_t UART_init ( void )
       }
    }
 #endif
-
    return ( retVal );
 }
 
@@ -609,7 +606,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    if ( UartId == UART_OPTICAL_PORT )
    {
-      ( void )UART_flush( UartId );
+      ( void )UART_flush( UartId );   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       ( void )UART_ioctl( UartId, IO_IOCTL_SERIAL_WAIT_FOR_TC, NULL );
       ( void )UART_ioctl( UartId, IO_IOCTL_SERIAL_DISABLE_TX, NULL );
    }
@@ -714,7 +711,7 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 
    if ( ringBufoverflow[UartId] )
    {
-      ( void ) UART_polled_printf( "\r\nRing buffer overflow of UART Id - %d", UartId );
+      ( void ) DBG_LW_printf( "\r\nRing buffer overflow of UART Id - %d", UartId );
       UART_RX_flush( UartId );
    }
    return DataLength; /* Returning DataLength */
@@ -922,7 +919,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 #endif
 }
 
-#if ( MCU_SELECTED == NXP_K24 )
+
 /*******************************************************************************
 
   Function name: UART_flush
@@ -931,16 +928,44 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 
   Arguments: UartId - Identifier of the particular UART to receive data in
 
-  Returns: ???
+  Returns: uint8_t - UART_flush status
 
   Notes:
 
 *******************************************************************************/
 uint8_t UART_flush( enum_UART_ID UartId )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    return ( (uint8_t)fflush(UartHandle[UartId]) );
-}
+#elif ( RTOS_SELECTION == FREE_RTOS )
 
+   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
+   // Setting bool values to false at init
+   ringBufoverflow   [ (uint32_t)UartId ] = false;
+   uartRingBuf       [ (uint32_t)UartId ].head = 0;
+   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
+
+   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
+   {
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
+   }
+   else if( UartId == UART_HOST_COMM_PORT )
+   {
+      /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+   }
+   else
+   {
+      //do nothing
+   }
+
+   OS_INT_enable();
+   return eSUCCESS;
+#endif
+}
 /*******************************************************************************
 
   Function name: UART_RX_flush
@@ -956,6 +981,7 @@ uint8_t UART_flush( enum_UART_ID UartId )
 *******************************************************************************/
 void UART_RX_flush ( enum_UART_ID UartId )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    bool     charsAvailable;
    uint8_t  trash;
    /* user canceled the in progress command */
@@ -968,8 +994,23 @@ void UART_RX_flush ( enum_UART_ID UartId )
       }
    }
    while ( charsAvailable );/* Loop while bytes in queue  */
-}
+#elif ( RTOS_SELECTION == FREE_RTOS )
 
+   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
+   // Setting bool values to false at init
+   ringBufoverflow   [ (uint32_t)UartId ] = false;
+   uartRingBuf       [ (uint32_t)UartId ].head = 0;
+   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
+
+   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) || ( UartId == UART_HOST_COMM_PORT ) )
+   {
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+   }
+
+   OS_INT_enable();
+#endif
+}
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_gotChar
@@ -1029,7 +1070,7 @@ uint8_t UART_ioctl ( enum_UART_ID UartId, int32_t op, void *addr )
 {
    return (uint8_t)( ioctl( UartHandle[ UartId ], (uint32_t)op, ( void *)addr ) );
 }
-
+#endif // #if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_SetEcho
@@ -1046,6 +1087,7 @@ uint8_t UART_ioctl ( enum_UART_ID UartId, int32_t op, void *addr )
 *******************************************************************************/
 uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
 {
+ #if ( MCU_SELECTED == NXP_K24 )
    uint32_t flags;
 
    (void)UART_ioctl ( UartId, IO_IOCTL_SERIAL_GET_FLAGS, &flags ); // Get current settings
@@ -1055,47 +1097,23 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
       flags &= ~IO_SERIAL_ECHO; // Disable ECHO
    }
    return UART_ioctl ( UartId, IO_IOCTL_SERIAL_SET_FLAGS, &flags ); // Update settings
-}
 #elif ( MCU_SELECTED == RA6E1 )
-
-/*******************************************************************************
-
-  Function name: UART_RX_flush
-
-  Purpose: This function flushes the uart RX buffers. This is not native to the OS.
-
-  Arguments: UartId - Identifier of the particular UART to receive data in
-
-  Returns: none
-
-  Notes:
-
-*******************************************************************************/
-void UART_RX_flush ( enum_UART_ID UartId )
-{
-   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
+   if( UART_DEBUG_PORT == UartId )
    {
-      uint32_t remainingBytes;
-      ( void )R_SCI_UART_ReadStop( (void *)UartCtrl[ (uint32_t)UartId ], &remainingBytes );
-      ( void )R_SCI_UART_Close   ( (void *)UartCtrl[ (uint32_t)UartId ] );
+      if( val )
+      {
+         R_SCI4->SCR_b.RIE = 0x01; /* Enable RX Interrupts */
+      }
+      else
+      {
+         R_SCI4->SCR_b.RIE = 0x00; /* Disable RX Interrupts */
+      }
    }
-
-   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
-   // Setting bool values to false at init
-   ringBufoverflow   [ (uint32_t)UartId ] = false;
-   uartRingBuf       [ (uint32_t)UartId ].head = 0;
-   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
-
-   OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
-
-   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
-   {
-      ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );
-   }
-   OS_INT_enable();
+   /* TODO: RA6E1: Do we need to support this feature for other ports? */
+   return val;
+#endif
 }
 
-#endif // #if ( MCU_SELECTED == NXP_K24 )
 
 /* No function calls for UART_close */
 /*******************************************************************************
@@ -1183,8 +1201,7 @@ uint8_t UART_open ( enum_UART_ID UartId )
       {
          /* Set options as in the table.  */
          Flags = UartSetup[UartId].UART_Options;
-         retVal = (uint8_t)ioctl(UartHandle[UartId], IO_IOCTL_SERIAL_SET_FLAGS,
-                                    (void *)&Flags); /*lint !e835 !e845 !e64 */
+         retVal = (uint8_t)ioctl(UartHandle[UartId], IO_IOCTL_SERIAL_SET_FLAGS, (void *)&Flags); /*lint !e835 !e845 !e64 */
       }
    }
    return retVal;
@@ -1192,150 +1209,4 @@ uint8_t UART_open ( enum_UART_ID UartId )
    /*Uart Open for RA6E1 is done in Uart Init*/
    return ( uint8_t )eSUCCESS;
 #endif
-}
-
-/***********************************************************************************************************************
-
-   Function name: UART_polled_printf
-
-   Purpose: Low level printf suitable for use in last gasp mode.
-
-   Arguments: variable
-
-   Returns: Same as printf
-
-   Re-entrant Code: No
-
-   Notes:
-
- **********************************************************************************************************************/
-#if ( MCU_SELECTED == NXP_K24 )
-static const UART_MemMapPtr   uart = UART2_BASE_PTR;
-#endif
-static bool                   uartInitDone = ( bool ) false;
-#if ( MCU_SELECTED == RA6E1 )
-static volatile uint8_t       uart_event = 0;
-#endif
-uint32_t UART_polled_printf( char *fmt, ... )
-{
-   char     pBuf[ 192 ];   /* Local buffer for printout  */
-   uint32_t pOff;          /* offset into pBuf/length    */
-   va_list  ap;
-
-   (void)memset(&pBuf[0], 0, sizeof(pBuf));
-   va_start( ap, fmt );
-   if ( !uartInitDone  )
-   {
-      polled_init_uart();
-      polled_putc( '\n' );
-      polled_putc( '\n' );
-   }
-   pOff =  vsnprintf( pBuf, sizeof( pBuf ), fmt, ap );  /* "print" to the buffer.  */
-   va_end( ap );
-#if ( MCU_SELECTED == NXP_K24 )
-   for ( pOff = 0; pBuf[ pOff ] != 0; pOff++ )  /* Loop through the buffer, sending each to the UART. */
-   {
-      lg_putc( pBuf[ pOff ] );
-      if ( pBuf[ pOff ] == '\n' )
-      {
-         lg_putc( '\r' );  /* \n should include a \r, also. */
-      }
-   }
-   while( ( uart->S1 & UART_S1_TC_MASK ) == 0 );   /* Wait for last character to be fully transmitted.   */
-#elif ( MCU_SELECTED == RA6E1 )
-   uart_event = 0;
-
-   pOff +=  snprintf( &pBuf[pOff], (sizeof( pBuf ) - pOff), "\r\n" );  /* Add CR and New Line  */
-   fsp_err_t err = R_SCI_UART_Write( &g_uart_lpm_dbg_ctrl, (uint8_t *)&pBuf[0], pOff );
-   assert(FSP_SUCCESS == err);
-   while ( UART_EVENT_TX_COMPLETE != uart_event )  /* Wait for last character to be fully transmitted.   */
-   {
-   }
-#endif
-   return( pOff );
-}
-
-/***********************************************************************************************************************
-
-   Function name: polled_putc
-
-   Purpose: Low level putc suitable for use in last gasp mode.
-
-   Arguments: variable
-
-   Returns: none
-
-   Re-entrant Code: No
-
-   Notes:
-
- **********************************************************************************************************************/
-static void polled_putc( char c )
-{
-#if ( MCU_SELECTED == NXP_K24 )
-   const UART_MemMapPtr luart = uart;
-   while( ( luart->S1 & UART_S1_TDRE_MASK ) == 0 )  /* Wait for Transmit Data Register Empty  */
-   {}
-   luart->D = c;
-#elif ( MCU_SELECTED == RA6E1 )
-   uart_event = 0;
-
-   (void)R_SCI_UART_Write( &g_uart_lpm_dbg_ctrl, (uint8_t*)&c, sizeof( char ) );
-   /* Check for event transfer complete */
-   while ( UART_EVENT_TX_COMPLETE != uart_event )
-   {
-   }
-#endif
-}
-
-/***********************************************************************************************************************
-
-   Function name: polled_init_uart
-
-   Purpose: Low level UART init suitable for use in last gasp mode.
-
-   Arguments: variable
-
-   Returns: none
-
-   Re-entrant Code: No
-
-   Notes:
-
- **********************************************************************************************************************/
-static void polled_init_uart( void )
-{
-#if ( MCU_SELECTED == NXP_K24 )
-   const UART_MemMapPtr luart = uart;
-   SIM_SCGC4 &= !( uint16_t )SIM_SCGC4_UART2_MASK;    /* Disable the clock to UART2  */
-   SIM_SCGC4 |= ( uint16_t )SIM_SCGC4_UART2_MASK;     /* Enable the clock to UART2  */
-   luart->C2 = 0;                                     /* Temporarily disable the UART. */
-    /* Set to 115200 baud */
-   luart->BDH = 0;
-   luart->BDL = 0x20;
-   luart->C4 = 0x12;
-   luart->C2 = UART_C2_TE_MASK;                       /* Enable only the transmitter.  */
-   PORTD_PCR3 = PORT_PCR_MUX(3);                      /* Make PTD3 be the UART TX pin. */
-   uartInitDone = ( bool )true;
-#elif ( MCU_SELECTED == RA6E1 )
-   fsp_err_t err = FSP_SUCCESS;
-
-   err = R_SCI_UART_Open(&g_uart_lpm_dbg_ctrl, &g_uart_lpm_dbg_cfg);
-   assert(FSP_SUCCESS == err);
-#endif
-}
-
-/*******************************************************************************
-
-  Function name: lpm_dbg_uart_callback
-
-  Purpose: Interrupt Handler for UART Module
-
-  Returns: None
-
-*******************************************************************************/
-void lpm_dbg_uart_callback( uart_callback_args_t *p_args )
-{
-   /* Handle the UART event */
-   uart_event = (uint8_t)p_args->event;
 }

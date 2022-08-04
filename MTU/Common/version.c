@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)99)    /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)102)   /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -431,5 +431,21 @@ returnStatus_t VER_setHardwareVersion ( uint8_t const *string )
 char const * VER_getComDeviceType ( void )
 {
    return comDeviceType_;
+}
+
+/*******************************************************************************
+
+   Function name: VER_getComDeviceMicroMPN
+
+   Purpose: This function get MPart Number
+
+   Arguments:  None
+
+   Returns: Pointer for the Part Number
+
+*******************************************************************************/
+uint8_t* VER_getComDeviceMicroMPN ( void )
+{
+   return ( uint8_t* )MPARTNUMBER_ADDR;
 }
 #endif      /* __BOOTLOADER   */

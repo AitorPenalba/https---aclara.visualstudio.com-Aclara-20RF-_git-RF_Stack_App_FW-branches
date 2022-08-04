@@ -72,15 +72,12 @@ returnStatus_t CRC_initialize ( void )
 #endif
    if ( OS_MUTEX_Create(&CRC_Mutex) == false )
    {
-#if ( RTOS_SELECTION == MQX_RTOS )
       (void)printf ( "ERROR - OS_MUTEX_Create(&CRC_Mutex) failed" );
-#elif ( RTOS_SELECTION == FREE_RTOS )
-      (void)UART_polled_printf ( "ERROR - OS_MUTEX_Create(&CRC_Mutex) failed" );
-#endif
+
       return(eFAILURE);
-   } /* end if() */
+   }
    return(eSUCCESS);
-} /* end CRC_initialize () */
+}
 
 #ifndef __BOOTLOADER
 /*******************************************************************************

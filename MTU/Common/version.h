@@ -77,5 +77,6 @@ returnStatus_t    VER_setHardwareVersion ( uint8_t const *string );
 firmwareVersion_u VER_getFirmwareVersion ( eFwTarget_t target );
 const firmwareVersionDT_s * VER_getFirmwareVersionDT ( void );
 char const *      VER_getComDeviceType ( void );
+uint8_t *         VER_getComDeviceMicroMPN( void );
 
 #endif /* this must be the last line of the file */

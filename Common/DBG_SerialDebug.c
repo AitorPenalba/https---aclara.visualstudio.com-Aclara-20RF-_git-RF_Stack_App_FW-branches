@@ -123,42 +123,6 @@ static void PortTimer_CallBack( uint8_t cmd, const void *pData );
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 
-#if ( MCU_SELECTED == RA6E1 )
-
-/***********************************************************************************************************************
-
-   Function name: DBG_printfDirect()
-
-   Purpose: Directs printf to debug port and prints without using any buffer, task and Queues
-
-   Arguments: const char *fmt, ...  - The print string
-
-   Returns: None
-
-**********************************************************************************************************************/
-void DBG_printfDirect( const char *fmt, ... )
-{
-   uint32_t         dbgCmdLen;
-   char             dbgCommandBuffer[192]; /* TODO: RA6: 1062 is a quite a lot for this purpose */
-   const enum_UART_ID dbgUart = UART_DEBUG_PORT;     /* UART used for DBG port prints   */
-   /* Assigns the Command Length to zero */
-   dbgCmdLen = 0;
-   /* Declaring Variable Argument list of type va_list */
-   va_list  args;
-   /* Initializing arguments to store all values after fmt */
-   va_start( args, fmt );
-   /* Assigns data to the buffer from the Variable argument list and updates the dbgCmdLen */
-   dbgCmdLen = vsnprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), fmt, args );
-   /* Cleans up the Variable Argument list */
-   va_end( args );
-   /* Adds Carriage Return and New Line to the each line of prints */
-   dbgCmdLen += snprintf( &dbgCommandBuffer[ dbgCmdLen ], ( int32_t )( sizeof( dbgCommandBuffer ) - dbgCmdLen ), "\r\n" );
-   /* Writes the print to Debug terminal */
-   UART_write( dbgUart, (uint8_t *)dbgCommandBuffer, dbgCmdLen );
-} /* end of DBG_printfDirect() */
-
-#endif
-
 /***********************************************************************************************************************
 
    Function name: DBG_init()
@@ -573,7 +537,7 @@ void DBG_PortEcho_Set ( bool val )
    ConfigAttr.echoState = val;
 
    (void)FIO_fwrite( &dbgFileHndl_, 0, (uint8_t const *)&ConfigAttr, (lCnt)sizeof(DBG_ConfigAttr_t));
-//   (void)UART_SetEcho( UART_DEBUG_PORT, val );
+   (void)UART_SetEcho( UART_DEBUG_PORT, val );
 }
 /*******************************************************************************
 
@@ -694,7 +658,35 @@ bool DBG_IsPortEnabled ( void )
    return EnableDebugPrint_ ;
 }
 
-#if 0  // TODO: RA6E1: Support this printf for RA6
+#if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
+
+   Function name: lw_putc
+
+   Purpose:  Helper function to write char to the DBG TX
+
+   Arguments: char c
+
+   Returns: none
+
+*******************************************************************************/
+static void lw_putc( char c )
+{
+#if ( SCI_UART_CFG_FIFO_SUPPORT == 0 )
+   R_SCI4->SSR_b.TDRE   = 0x00; /* Clear the Transmit Data Empty Flag */
+   while ( R_SCI4->SSR_b.TDRE != 1 )
+   { }
+   R_SCI4->TDR = c;
+#else
+   R_SCI4->SSR_FIFO_b.TDFE = 0x00; /* Clear the Transmit FIFO Data Empty Flag */
+   while ( R_SCI4->SSR_FIFO_b.TDFE != 1 )
+   { }
+//   R_SCI4->FTDRHL = (c | (uint16_t) ~(SCI_UART_FIFO_DAT_MASK));
+   R_SCI4->FTDRL = c;
+#endif
+}
+#endif
+
 /*******************************************************************************
 
    Function name: DBG_LW_printf
@@ -715,19 +707,30 @@ bool DBG_IsPortEnabled ( void )
 *******************************************************************************/
 void DBG_LW_printf( char const *fmt, ... )
 {
-
    static char    LW_printf_str[DEBUG_MSG_SIZE];
    static int32_t len;
    static int32_t i;
+#if (MCU_SELECTED == NXP_K24 )
    static IO_SERIAL_INT_DEVICE_STRUCT_PTR ioptr = NULL;  /* Needed to get proper UART interface */
+#elif ( MCU_SELECTED == RA6E1 )
+#if ( SCI_UART_CFG_FIFO_SUPPORT == 0 )
+   R_SCI4->SCR_b.RIE       = 0x00; /* Disable RX Interrupts */
+   R_SCI4->SCR_b.TIE       = 0x00; /* Disable TX Interrupts */
+   R_SCI4->SSR_b.TDRE      = 0x00; /* Clear the Transmit Data Empty Flag */
+#else
+   R_SCI4->SCR_b.RIE       = 0x00; /* Disable RX Interrupts */
+   R_SCI4->SCR_b.TIE       = 0x00; /* Disable TX Interrupts */
+   R_SCI4->SSR_FIFO_b.TDFE = 0x00; /* Clear the Transmit FIFO Data Empty Flag */
+#endif
+#endif
 
    OS_INT_disable( );
-
+#if (MCU_SELECTED == NXP_K24 )
    if ( ioptr == NULL )
    {
       ioptr = (IO_SERIAL_INT_DEVICE_STRUCT_PTR)((void *)((FILE_DEVICE_STRUCT_PTR)UART_getHandle( UART_DEBUG_PORT ))->DEV_PTR->DRIVER_INIT_PTR);
    }
-
+#endif
    // Format rest of the string
    va_list  ap;
    va_start( ap, fmt );
@@ -740,15 +743,26 @@ void DBG_LW_printf( char const *fmt, ... )
       // Add \r before \n
       if ( LW_printf_str[ i ] == '\n' )
       {
+#if (MCU_SELECTED == NXP_K24 )
          (*ioptr->DEV_PUTC)(ioptr, '\r');
+#elif ( MCU_SELECTED == RA6E1 )
+         lw_putc( '\r' );  /* \n should include a \r, also. */
+#endif
       }
+#if (MCU_SELECTED == NXP_K24 )
       (*ioptr->DEV_PUTC)(ioptr, LW_printf_str[ i ]);
+#elif ( MCU_SELECTED == RA6E1 )
+      lw_putc( LW_printf_str[ i ] );
+#endif
    }
 
    OS_INT_enable( );
 
+#if ( MCU_SELECTED == RA6E1 )
+   R_SCI4->SCR_b.RIE = 0x01; /* Enable RX Interrupts */
+   R_SCI4->SCR_b.TIE = 0x01; /* Enable TX Interrupts */
+#endif
 }
-#endif // #if 0
 
 #if ( PORTABLE_DCU == 1)
 /*******************************************************************************

@@ -48,6 +48,7 @@ struct CS_BIT_INFO
                *        L O C A L     V A R I A B L E S   *
                *  ======================================= */
 
+#if ( MCU_SELECTED == NXP_K24 )
 /* Port and Bit shifts needed for SELA, SELB, SELC, G2A  */
 /* Spi port configuration for use with the radio.  The #defines are located in the HALxxx.h. */
 static spiCfg_t _spiCfg =
@@ -56,6 +57,7 @@ static spiCfg_t _spiCfg =
    RADIO_0_TX_BYTE_WHEN_RX,    /* SPI TX Byte when Receiving*/
    RADIO_0_SPI_MODE            /* SPI Mode */
 };
+#endif
 
 #if (RTOS_SELECTION == FREE_RTOS)
 static OS_SEM_Obj    radioSpiSem_;           /* Semaphore used when waiting for busy signal for external flash ISR */
@@ -205,7 +207,7 @@ static void RadioSDN( uint8_t radioNum, uint8_t state )
 
  Function Name: radio_hal_RadioImmediateSDN
 
- Purpose: This function is to shutdown the radio immeadiately for Last Gasp to save energy
+ Purpose: This function is to shutdown the radio immediately for Last Gasp to save energy
 
  Arguments: none
 
