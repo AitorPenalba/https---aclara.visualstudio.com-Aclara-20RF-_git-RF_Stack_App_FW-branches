@@ -378,7 +378,11 @@ const OS_TASK_Template_t  Task_template_list[] =
 
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
 #if ENABLE_ALRM_TASKS
+#if ( MCU_SELECTED == NXP_K24 )
    { eALRM_TSK_IDX,             ALRM_RealTimeTask,            1100,  30, (char *)pTskName_Alrm,   DEFAULT_ATTR, 0, 0 },
+#elif ( MCU_SELECTED == RA6E1 ) /* The RA6E1 does not have temperature in the chip so we must get it from the radio whihc uses more stack */
+   { eALRM_TSK_IDX,             ALRM_RealTimeTask,            2000,  30, (char *)pTskName_Alrm,   DEFAULT_ATTR, 0, 0 },
+#endif // MCU_SELECTED
 #endif
 #endif
 

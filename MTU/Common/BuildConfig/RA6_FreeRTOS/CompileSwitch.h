@@ -105,8 +105,6 @@
 #error Invalid Application device - Select ony one of EP, PORTABLE_DCU or MFG_MODE_DCU
 #endif
 
-#define HAL_IGNORE_BROWN_OUT_SIGNAL    0 /* 1 = Ignore brown-out signal, 0 = Use Brown Out Signal */
-
 #define DFW_TEST_KEY                   0  /* 1=Use DFW test key, 0=Used default DFW Key */
 #define DFW_XZCOMPRESS_BSPATCHING      1  /* Update firmware patching technique - Uses XZ for decompression and minibs for patching */
 /* Note:  All of the following DFW tests must be disabled "0" before releasing code! */
@@ -321,6 +319,12 @@
 #define TM_UART_ECHO_COMMAND              1 /* Adds an echo command to the debug port for testing UART echoing */
 #define TM_INSTRUMENT_NOISEBAND_TIMING    0 /* Adds instrumentation of noiseband timing to determine if there are bugs */
 #define TM_TEST_SECURITY_CHIP             0 /* More extensieve test code for security chip that was disabled in the K24 starting point DOES NOT COMPILE! */
+#define TM_UART_EVENT_COUNTERS            1 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
+#if ( TM_UART_EVENT_COUNTERS == 1 )
+#define TM_UART_COUNTER_INC(x) (x)++
+#else
+#define TM_UART_COUNTER_INC(x)
+#endif
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */
