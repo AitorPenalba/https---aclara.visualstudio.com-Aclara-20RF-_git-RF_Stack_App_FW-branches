@@ -283,7 +283,7 @@ void MFGP_UartWrite( const char *bfr, int len )
 
 #if !USE_USB_MFG
    ( void )UART_write( dtlsUart, ( uint8_t * )sb->data, sb->x.dataLen );
-#if 0 // TODO: RA6E1 Enable UART flush
+#if ( MCU_SELECTED == NXP_K24 )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
    ( void )UART_flush ( dtlsUart );
 #endif
 #else

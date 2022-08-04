@@ -192,36 +192,27 @@
 #endif
 
 /* Temporary definition of MFG_logPrintf()   */
-// TODO: RA6 [name_Balaji]: Add DTLS support for RA6E1
 #if (USE_DTLS == 1)
 #define MFG_logPrintf MFG_printf
-// TODO: RA6 [name_Balaji]: Need to be reevaluate for code efficiency
 #define MFG_printf(fmt, args...) \
 { \
    if ((_MfgPortState == DTLS_SERIAL_IO_e) && (DTLS_GetSessionState() == DTLS_SESSION_CONNECTED_e)) \
    { \
       (void)memset(MFGP_CommandBuffer, 0, sizeof(MFGP_CommandBuffer)); \
-      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (_mqx_int)sizeof(MFGP_CommandBuffer), fmt, ##args); \
+      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (int32_t)sizeof(MFGP_CommandBuffer), fmt, ##args); \
       MFGP_EncryptBuffer(MFGP_CommandBuffer, MFGP_CmdLen); \
    } \
    else \
    { \
-      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (_mqx_int)sizeof(MFGP_CommandBuffer), fmt, ##args); \
+      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (int32_t)sizeof(MFGP_CommandBuffer), fmt, ##args); \
       MFG_puts( mfgUart, (uint8_t *)MFGP_CommandBuffer, MFGP_CmdLen ); \
    } \
 }
 #else
-/* TODO: RA6: Revisit and Add later */
-//#define MFG_logPrintf MFG_printf
-//#define MFG_printf (void)DBG_printfNoCr
-#endif
-// TODO: RA6 [name_Balaji]:Check for _mqx_int once integrated
 #define MFG_logPrintf MFG_printf
-#define MFG_printf(fmt, args...) \
-{ \
-      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (int32_t)sizeof(MFGP_CommandBuffer), fmt, ##args); \
-      MFG_puts( mfgUart, (uint8_t *)MFGP_CommandBuffer, MFGP_CmdLen ); \
-}
+#define MFG_printf (void)DBG_printfNoCr
+#endif  // USE_DTLS
+
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
@@ -1641,20 +1632,16 @@ returnStatus_t MFGP_init( void )
 returnStatus_t MFGP_cmdInit( void )
 {
    returnStatus_t retVal = eFAILURE;
+   if ( OS_EVNT_Create(&_MfgpUartEvent) &&
 #if ( MCU_SELECTED == NXP_K24 )
-   if ( OS_EVNT_Create(&_MfgpUartEvent) && OS_MSGQ_Create(&_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS) )
-   {
-      retVal = eSUCCESS;
-   }
-#elif ( MCU_SELECTED == RA6E1 )
-   // TODO: RA6 [name_Balaji]:Add OS_EVNT_Create once integrated
-   // TODO: RA6 [name_Balaji]: Check the number of messages
-   // TODO RA6: NRJ: determine if semaphores need to be counting
-   if ( OS_MSGQ_Create( &_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS, "MFGP" ) )
-   {
-      retVal = eSUCCESS;
-   }
+      OS_MSGQ_Create(&_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS) )
+#elif ( MCU_SELECTED == RA6E1 )     
+      OS_MSGQ_Create( &_CommandReceived_MSGQ, MFG_NUM_MSGQ_ITEMS, "MFGP" ) 
 #endif
+   )
+   {
+      retVal = eSUCCESS;
+   }
    return(retVal);
 }
 
@@ -1679,7 +1666,7 @@ static void mfgpReadByte( uint8_t rxByte )
       MFGP_numBytes = 0;
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-#if 0 // TODO: RA6E1 Implement UART flush functionality
+#if ( MCU_SELECTED == NXP_K24 )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       (void)UART_flush ( mfgUart  );
 #endif
 #else
@@ -1738,7 +1725,7 @@ static void mfgpReadByte( uint8_t rxByte )
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
-#if 0 // TODO: RA6E1 Implement UART flush functionality
+#if ( MCU_SELECTED == NXP_K24 )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
             (void)UART_flush ( mfgUart  );
 #endif
 #else
@@ -6443,7 +6430,17 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
 #if ( MCU_SELECTED == NXP_K24 )
       bytesReceived = UART_read( UART_HOST_COMM_PORT, rx_string, sizeof( rx_string ) );
 #elif ( MCU_SELECTED == RA6E1 )
-      // TODO: RA6E1 Can be implemented by using fgets (as this receives multiple bytes and the last byte is \n)
+      bytesReceived = 0;
+      while( TRUE )
+      {
+         ( void ) UART_getc ( UART_HOST_COMM_PORT, &rx_string[ bytesReceived ], 1, 10 );
+         if( rx_string[ bytesReceived ] == '\n')
+         {
+            break;
+         }
+         bytesReceived++;
+      }
+
 #endif
 #endif
 
@@ -6454,9 +6451,7 @@ static void MFGP_stP0LoopbackFailTest( uint32_t argc, char *argv[] )
             stP0LoopbackFailCount++;
          }
       }
-#if 0 // TODO: RA6E1 Implement UART flush functionality
       ( void )UART_flush ( UART_HOST_COMM_PORT ); /* Wait until all characters sent before re-enabling HMC!   */
-#endif
    }
    MFG_logPrintf( "%s %d\n", argv[0], stP0LoopbackFailCount );
 #if ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
@@ -9857,7 +9852,7 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
 {
    if ( _MfgPortState == DTLS_SERIAL_IO_e )
    {
-#if 0 // TODO: RA6E1 Enable UART ioctl (check if required)
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6E1 Enable UART ioctl (check if required)
       int32_t flags = IO_SERIAL_TRANSLATION | IO_SERIAL_ECHO; /* Settings for the UART */
 #endif
       /* This could be caused by the user closing the connection, or the time out value exceeded. If timing out, there's
@@ -9865,9 +9860,9 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
          entire message, before flusing the UART.  */
       OS_TASK_Sleep( 30 );       /* Wait for close notify message to be received.   */
 
-#if 0 // TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
+#if ( MCU_SELECTED == NXP_K24 )// TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
 #if !USE_USB_MFG
-      UART_RX_flush( mfgUart  );
+      UART_RX_flush( mfgUart );      // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #else
       usb_flush();

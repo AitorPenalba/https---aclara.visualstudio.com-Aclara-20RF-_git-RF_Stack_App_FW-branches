@@ -609,7 +609,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    if ( UartId == UART_OPTICAL_PORT )
    {
-      ( void )UART_flush( UartId );
+      ( void )UART_flush( UartId );   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       ( void )UART_ioctl( UartId, IO_IOCTL_SERIAL_WAIT_FOR_TC, NULL );
       ( void )UART_ioctl( UartId, IO_IOCTL_SERIAL_DISABLE_TX, NULL );
    }
@@ -715,7 +715,7 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
    if ( ringBufoverflow[UartId] )
    {
       ( void ) UART_polled_printf( "\r\nRing buffer overflow of UART Id - %d", UartId );
-      UART_RX_flush( UartId );
+      ( void ) UART_flush( UartId );
    }
    return DataLength; /* Returning DataLength */
 }
@@ -922,7 +922,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 #endif
 }
 
-#if ( MCU_SELECTED == NXP_K24 )
+
 /*******************************************************************************
 
   Function name: UART_flush
@@ -931,16 +931,44 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
 
   Arguments: UartId - Identifier of the particular UART to receive data in
 
-  Returns: ???
+  Returns: uint8_t - UART_flush status
 
   Notes:
 
 *******************************************************************************/
 uint8_t UART_flush( enum_UART_ID UartId )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    return ( (uint8_t)fflush(UartHandle[UartId]) );
-}
+#elif ( RTOS_SELECTION == FREE_RTOS )
 
+   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
+   // Setting bool values to false at init
+   ringBufoverflow   [ (uint32_t)UartId ] = false;
+   uartRingBuf       [ (uint32_t)UartId ].head = 0;
+   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
+   
+   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) )
+   {
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
+   }
+   else if( UartId == UART_HOST_COMM_PORT )
+   {
+      /* HMC does not have the echoUART_sem, So that we need not to reset the echoUART_sem */
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+   }
+   else
+   {
+      //do nothing
+   }
+
+   OS_INT_enable();
+   return eSUCCESS;
+#endif
+}
 /*******************************************************************************
 
   Function name: UART_RX_flush
@@ -956,9 +984,10 @@ uint8_t UART_flush( enum_UART_ID UartId )
 *******************************************************************************/
 void UART_RX_flush ( enum_UART_ID UartId )
 {
+#if ( RTOS_SELECTION == MQX_RTOS )
    bool     charsAvailable;
    uint8_t  trash;
-   /* user canceled the in progress command */
+   /* user canceled the in progress command */  
    do
    {
       ( void )UART_ioctl ( UartId, IO_IOCTL_CHAR_AVAIL, &charsAvailable );
@@ -968,8 +997,23 @@ void UART_RX_flush ( enum_UART_ID UartId )
       }
    }
    while ( charsAvailable );/* Loop while bytes in queue  */
-}
+#elif ( RTOS_SELECTION == FREE_RTOS )
 
+   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
+   // Setting bool values to false at init
+   ringBufoverflow   [ (uint32_t)UartId ] = false;
+   uartRingBuf       [ (uint32_t)UartId ].head = 0;
+   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
+   
+   if (( UartId == UART_MANUF_TEST ) ||  ( UartId == UART_DEBUG_PORT ) || ( UartId == UART_HOST_COMM_PORT ) )
+   {
+      OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+   }
+
+   OS_INT_enable();
+#endif
+}
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function name: UART_gotChar
@@ -1056,45 +1100,6 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
    }
    return UART_ioctl ( UartId, IO_IOCTL_SERIAL_SET_FLAGS, &flags ); // Update settings
 }
-#elif ( MCU_SELECTED == RA6E1 )
-
-/*******************************************************************************
-
-  Function name: UART_RX_flush
-
-  Purpose: This function flushes the uart RX buffers. This is not native to the OS.
-
-  Arguments: UartId - Identifier of the particular UART to receive data in
-
-  Returns: none
-
-  Notes:
-
-*******************************************************************************/
-void UART_RX_flush ( enum_UART_ID UartId )
-{
-   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
-   {
-      uint32_t remainingBytes;
-      ( void )R_SCI_UART_ReadStop( (void *)UartCtrl[ (uint32_t)UartId ], &remainingBytes );
-      ( void )R_SCI_UART_Close   ( (void *)UartCtrl[ (uint32_t)UartId ] );
-   }
-
-   OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
-   // Setting bool values to false at init
-   ringBufoverflow   [ (uint32_t)UartId ] = false;
-   uartRingBuf       [ (uint32_t)UartId ].head = 0;
-   uartRingBuf       [ (uint32_t)UartId ].tail = 0;
-
-   OS_SEM_Reset ( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
-
-   if( ( PWRLG_LastGasp() == 0 ) || ( UART_DEBUG_PORT == (enum_UART_ID)UartId ) ) // Only open DEBUG port in last gasp mode */
-   {
-      ( void )R_SCI_UART_Open ( (void *)UartCtrl[ (uint32_t)UartId ], (void *)UartCfg[ (uint32_t)UartId ] );
-   }
-   OS_INT_enable();
-}
-
 #endif // #if ( MCU_SELECTED == NXP_K24 )
 
 /* No function calls for UART_close */
