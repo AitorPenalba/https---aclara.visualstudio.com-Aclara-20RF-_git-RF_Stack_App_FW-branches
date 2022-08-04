@@ -125,10 +125,9 @@ static const GPIO0_CONFIG_t radioGpioConfig[] = { // Radio GPIO 0 with DMA enabl
 ******************************************************************************/
 static void Disable_DMA_Reset_Filter( void )
 {
-   uint32_t i; // Loop counter
-
 #if ( MCU_SELECTED == NXP_K24 ) //TODO Melvin: need to find am equivalent
    // Disable all DMA configuration
+   uint32_t i; // Loop counter
    for ( i=0; i<(sizeof(radioGpioConfig)/sizeof(GPIO0_CONFIG_t)); i++) {
       PORT_PCR_REG( radioGpioConfig[i].portAddr, radioGpioConfig[i].pin ) &= ~PORT_PCR_IRQC_MASK; // Interrupt/DMA request disabled
    }
@@ -138,6 +137,7 @@ static void Disable_DMA_Reset_Filter( void )
    (void)memset( FTM,     0, sizeof(FTM) );
 }
 
+#if ( MCU_SELECTED == NXP_K24 )
 /******************************************************************************
 
  Function Name: DMA_Complete_IRQ_ISR
@@ -316,7 +316,7 @@ static void DMA_Complete_IRQ_ISR( void )
    DMA_Complete_IRQ_ISR_Timestamp = DWT_CYCCNT;
 #endif
 }
-
+#endif
 /******************************************************************************
 
  Function Name: RADIO_Update_Freq

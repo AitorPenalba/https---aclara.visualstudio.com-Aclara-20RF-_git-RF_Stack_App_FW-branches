@@ -205,10 +205,10 @@ static returnStatus_t TransmitDruRequest ( uint8_t *pDataBuffer_u8, uint32_t Dat
 
    /* Flush the uart TX buffers */
    ( void )UART_flush ( UART_HOST_COMM_PORT );
-
+   
    /* Flush the uart RX buffers */
    UART_RX_flush ( UART_HOST_COMM_PORT );
-
+   
    INFO_printHex( "DRU command : ", pDataBuffer_u8, ( uint16_t )DataLength_u32 );
    /* Non-blocking transmition */
    ( void )UART_write( UART_HOST_COMM_PORT, pDataBuffer_u8, DataLength_u32 );

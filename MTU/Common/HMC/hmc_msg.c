@@ -263,9 +263,9 @@ uint16_t HMC_MSG_Processor(uint8_t ucCommand, HMC_COM_INFO *pData)
          eMode_ = HMC_MSG_MODE_TX;                                   /* Now in TX mode */
          bDoData_ = false;
          pTxRx_ = &pData->TxPacket.ucSTP;                            /* Set up the pointer */
-#if 0 // TODO: RA6E1 Implement UART flush command
+
          (void)UART_flush(UART_HOST_COMM_PORT);
-#endif
+
          HMC_MSG_PRNT_HEX_INFO( 'H', "Send:", pTxRx_, offsetof(sMtrTxPacket,uTxData) +
                            BIG_ENDIAN_16BIT( pData->TxPacket.uiPacketLength.n16 ) );
          break;

@@ -432,4 +432,20 @@ char const * VER_getComDeviceType ( void )
 {
    return comDeviceType_;
 }
+
+/*******************************************************************************
+
+   Function name: VER_getComDeviceMicroMPN
+
+   Purpose: This function get MPart Number
+
+   Arguments:  None
+
+   Returns: Pointer for the Part Number
+
+*******************************************************************************/
+uint8_t* VER_getComDeviceMicroMPN ( void )
+{
+   return ( uint8_t* )MPARTNUMBER_ADDR;
+}
 #endif      /* __BOOTLOADER   */

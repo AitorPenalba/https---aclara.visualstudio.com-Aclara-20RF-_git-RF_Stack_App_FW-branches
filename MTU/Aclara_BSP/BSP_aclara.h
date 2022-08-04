@@ -92,6 +92,11 @@
 #define printf( fmt, ... )         DBG_LW_printf( fmt, ##__VA_ARGS__ )
 #endif
 
+#if ( MCU_SELECTED == RA6E1 )
+#define MPARTNUMBER_ADDR              0x010080f0
+#define MCUVERSION_ADDR               0x010081B0
+#endif
+
 /* TYPE DEFINITIONS */
 typedef enum
 {
