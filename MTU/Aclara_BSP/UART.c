@@ -772,7 +772,9 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
          TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendBefore );
          ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
          TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendAfter  );
+         OS_TASK_Sleep( (uint32_t) 10 );  // It requires a sleep of 10 ms for this write to process/transmit the data completely
       }
+
       transmitUARTEnable[UartId] = true;
       TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendBefore );
       ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], (uint8_t *)&CRLF, sizeof(CRLF) );
