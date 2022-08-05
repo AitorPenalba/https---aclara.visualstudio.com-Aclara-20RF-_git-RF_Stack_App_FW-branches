@@ -320,6 +320,7 @@
 #define TM_INSTRUMENT_NOISEBAND_TIMING    0 /* Adds instrumentation of noiseband timing to determine if there are bugs */
 #define TM_TEST_SECURITY_CHIP             0 /* More extensieve test code for security chip that was disabled in the K24 starting point DOES NOT COMPILE! */
 #define TM_UART_EVENT_COUNTERS            1 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
+#define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  1 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
 #if ( TM_UART_EVENT_COUNTERS == 1 )
 #define TM_UART_COUNTER_INC(x) (x)++
 #else

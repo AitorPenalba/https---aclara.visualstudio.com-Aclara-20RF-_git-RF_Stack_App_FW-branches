@@ -161,6 +161,9 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #if( ( RTOS_SELECTION == FREE_RTOS ) && ( TM_OS_EVENT_TEST == 1) )
 #include "event_groups.h"
 #endif
+#if ( TM_UART_EVENT_COUNTERS == 1 )
+#include "UART.h"
+#endif
 
 /* #DEFINE DEFINITIONS */
 #if ( ( EP == 1 ) || ( PORTABLE_DCU == 0 ) )
@@ -382,6 +385,11 @@ static bool waitForAll;
 static OS_List_Obj osLinkedListTestObj;
 static OS_List_Handle osLinkedListTestHandle = &osLinkedListTestObj;
 static OS_Linked_List_Element LinkedListdata[MAX_LINKEDLIST_DATA];
+#endif
+
+#if ( TM_UART_EVENT_COUNTERS == 1 )
+static uint32_t DBG_CommandLine_UARTcounters     ( uint32_t argc, char *argv[] );
+static uint32_t DBG_CommandLine_UARTclearCounters( uint32_t argc, char *argv[] );
 #endif
 
 static const struct_CmdLineEntry DBG_CmdTable[] =
@@ -853,6 +861,10 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "oslinkedlisthead",     DBG_CommandLine_OS_LinkedList_Head,        "Returns the Head element from test LinkedList" },
    { "oslinkedlistnumele",   DBG_CommandLine_OS_LinkedList_NumElements, "Adds LinkedList element and checks for the count" },
 #endif
+   #if ( TM_UART_EVENT_COUNTERS == 1 )
+   { "UARTcounters",         DBG_CommandLine_UARTcounters,              "Dumps RA6E1 UART driver counters" },
+   { "UARTclearCounters",    DBG_CommandLine_UARTclearCounters,         "Clears RA6E1 UART driver counters" },
+#endif
    { 0, 0, 0 }
 };
 
@@ -948,6 +960,38 @@ void DBG_CommandLineTask ( taskParameter )
    } /* end for() */
 } /* end DBG_CommandLineTask () */
 
+#if ( TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG == 1 )
+#warning "You are building a version that allows access to debug commands from the manufacturing port!"
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_InvokeDebugCommandFromManufacturingPort
+
+   Purpose: This function allows access to debug port commands from the manufacturing
+            port.  There is no interlock between the calls made to this function from
+            the MFG port task and the DBG task.  Therefore, this feature must be used
+            with great care.
+
+   Arguments: Command string that was entered on the MFG port
+
+   Returns: Void
+
+   Notes:   All output still goes to the debug port.  The MFG port still echoes
+            the command as typed but does not provide the actual response.
+
+*******************************************************************************/
+void DBG_CommandLine_InvokeDebugCommandFromManufacturingPort ( char * pString )
+{
+   if ( *pString )
+   {
+      if ( strlen(pString) < sizeof(DbgCommandBuffer) )
+      {
+         strcpy( DbgCommandBuffer, pString );
+         DBG_CommandLine_Process();
+      }
+   }
+}
+#endif // ( TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG == 1 )
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_Process
@@ -964,6 +1008,7 @@ void DBG_CommandLineTask ( taskParameter )
 
 *******************************************************************************/
 static void DBG_CommandLine_Process ( void )
+
 {
    char     *CmdString;
    uint32_t commandLen = 0;
@@ -15140,3 +15185,106 @@ static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] )
 }
 #endif // ( TM_MEASURE_SLEEP_TIMES == 1 )
 ///*lint +esym(818, argc, argv) argc, argv could be const */
+
+#if ( TM_UART_EVENT_COUNTERS == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_UARTcounters ( uint32_t argc, char *argv[] )
+
+   Purpose: This function displays the values in the UART counter structure on
+            the debug port.
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: always 0 (success)
+
+   Notes:
+
+******************************************************************************/
+static uint32_t DBG_CommandLine_UARTcounters ( uint32_t argc, char *argv[] )
+{
+   #define FIELD_NAME_WIDTH 25
+   const char *fieldFormat   = "%25s";
+   #define ELEMENT_WIDTH ( 9 + 1 + 1 + 1 )
+   const char *headerFormat  = "%9s(%1d)";
+   const char *elementFormat = "%12lu";
+   union
+   {
+      Uart_Events_t uartCounters   [MAX_UART_ID];
+      uint32_t      uartCountersU32[MAX_UART_ID][UART_NUM_FIELDS];
+   };
+   const char *pHeaders[UART_NUM_FIELDS] = /* The following srings must match the order of elements in Uart_events_t */
+   {
+      "eventRxComplete",     "eventTxComplete",    "eventRxChar",        "eventErrParity",           "eventErrFraming",
+      "eventErrOverflow",    "eventBreakDetect",   "eventDataEmpty",     "eventUnknownType",         "basicUARTWriteVar",
+      "uartWritePendBefore", "uartWritePendAfter", "uartGetcPendBefore", "uartGetcPendAfter",        "ringOverFlowVar",
+      "uartEchoPendBefore",  "uartEchoPendAfter",  "receiveRxChar",      "missingPacketsCozRingBuf", "isrRingBufferOverflow",
+      "UARTechoVar",         "ZeroLengthEcho"
+   };
+   /* This vector allows for skipping the display of some of the counters.  It is in the same order as pHeaders */
+   const uint8_t display[UART_NUM_FIELDS] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+   char buffer[FIELD_NAME_WIDTH + ( MAX_UART_ID * ELEMENT_WIDTH ) + 2];
+   if ( argc == 1 )
+   {
+      memset( buffer, ' ', sizeof(buffer) );
+      char *pPtr = (char *)&buffer[FIELD_NAME_WIDTH];
+      /* Loop through UART ports, collecting their data from UART.c and also building the header line for display */
+      for ( uint32_t i = 0; i < MAX_UART_ID; i++ )
+      {
+         (void)UART_GetCounters( (enum_UART_ID)i, &uartCounters[i] );
+         pPtr += snprintf( pPtr, ELEMENT_WIDTH+1, headerFormat, UART_getName( (enum_UART_ID)i), i );
+      }
+      *pPtr = '\0'; /* Terminate the string */
+      DBG_printf( "%s", buffer );
+
+      /* Loop through the fields (printed rows) and then UART ports (printed columns) to display the table */
+      for ( uint32_t j = 0; j < UART_NUM_FIELDS; j++ )
+      {
+         if ( display[j] )
+         {
+            char *pPtr = (char *)&buffer;
+            pPtr += snprintf( pPtr, FIELD_NAME_WIDTH+1, fieldFormat, pHeaders[j] );
+            for ( uint32_t i = 0; i < MAX_UART_ID; i++ )
+            {
+               pPtr += snprintf( pPtr, ELEMENT_WIDTH+1, elementFormat, uartCountersU32[i][j] );
+            }
+            *pPtr = '\0'; /* Terminate the string */
+            DBG_printf( "%s", buffer );
+         }
+      }
+   }
+   else
+   {
+      DBG_printf( "Too many arguments" );
+   }
+   return ( 0 );
+}
+
+
+static uint32_t DBG_CommandLine_UARTclearCounters ( uint32_t argc, char *argv[] )
+{
+   if ( argc == 2 )
+   {
+      if ( strcasecmp( argv[1], "all" ) == 0 )
+      {
+         for ( uint32_t i = 0; i < MAX_UART_ID; i++ )
+         {
+            (void)UART_ClearCounters( (enum_UART_ID)i );
+         }
+      }
+      else
+      {
+         enum_UART_ID UartId = (enum_UART_ID)atoi( argv[1] );
+         if ( UartId < MAX_UART_ID )
+         {
+            (void)UART_ClearCounters( UartId );
+         }
+      }
+   }
+   else
+   {
+      DBG_printf( "%s: all or UartId between 0 and %d", argv[0], MAX_UART_ID-1 );
+   }
+   return ( 0 );
+}
+#endif // ( TM_UART_EVENT_COUNTERS == 1 )

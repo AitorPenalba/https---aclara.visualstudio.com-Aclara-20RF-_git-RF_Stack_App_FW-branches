@@ -23,7 +23,7 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include "project.h"            //Note: the __BOOTLOADER definition is provided by the project-specific features.h within project.h
+#include "project.h"
 #include <string.h>
 #include "version.h"
 #ifndef __BOOTLOADER
@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)103)   /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)104)   /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER

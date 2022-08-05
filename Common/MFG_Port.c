@@ -152,7 +152,9 @@
 #if (PHASE_DETECTION == 1)
 #include "PhaseDetect.h"
 #endif
-
+#if ( ( !USE_USB_MFG && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) ) || ( TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG == 1 ) )
+#include "DBG_CommandLine.h"
+#endif
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 /*lint -esym(750,ESCAPE_CHAR,LINE_FEED_CHAR,CARRIAGE_RETURN_CHAR,BACKSPACE_CHAR,TILDA_CHAR,WHITE_SPACE_CHAR)   */
@@ -1732,6 +1734,9 @@ static void mfgpReadByte( uint8_t rxByte )
             return;
          }
 #endif
+#if ( RTOS_SELECTION == FREE_RTOS )
+         OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task.
+#endif
          commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
          if ( commandBuf != NULL )
          {
@@ -2216,7 +2221,9 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
    uint16_t             i;
    menuType             table;
    bool                 NextArg = ( bool )true;
-
+#if  ( TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG == 1 )
+   char                 tempBuffer[50];
+#endif
    /* sanitize input - should be null terminated string of numBytes */
    if ( strnlen( command, MFGP_MAX_MFG_COMMAND_CHARS ) <= numBytes )
    {
@@ -2224,6 +2231,15 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
 #if ( !USE_USB_MFG && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) )
       // Copy of the original command for later
       strcpy( DbgCommandBuffer, command );
+#elif  ( TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG == 1 )
+      if ( strlen( command ) < sizeof( tempBuffer ) )
+      {
+         strcpy( tempBuffer, command );
+      }
+      else
+      {
+         tempBuffer[0] = 0;
+      }
 #endif
       while ( *CmdString != 0 )
       {
@@ -2358,6 +2374,12 @@ _Pragma ( "calls = \
 #if ( !USE_USB_MFG && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) )
                // Send unknown Mfg commands to debug command line interpreter instead
                DBG_CommandLine_Process ();
+#elif ( TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG == 1 )
+                /* This makes DBG commands accessible from MFG port */
+               if ( tempBuffer[0] )
+               {
+                  DBG_CommandLine_InvokeDebugCommandFromManufacturingPort ( tempBuffer );
+               }
 #else
 #if ( MCU_SELECTED == NXP_K24 )
                MFG_logPrintf( "%s is not a valid command!\n", argvar[0] );
@@ -10339,7 +10361,7 @@ static void MFGP_edProgramId( uint32_t argc, char *argv[] )
 {
    ValueInfo_t readingInfo;
    (void)INTF_CIM_CMD_getMeterReading( edProgramID, &readingInfo);
-   MFG_logPrintf( "%s %u\n", argv[ 0 ], readingInfo.Value.uintValue );
+   MFG_logPrintf( "%s %llu\n", argv[ 0 ], readingInfo.Value.uintValue );
 }
 /*******************************************************************************
  *
@@ -10358,7 +10380,7 @@ static void MFGP_edProgrammedDateTime( uint32_t argc, char *argv[] )
 {
    ValueInfo_t readingInfo;
    (void)INTF_CIM_CMD_getMeterReading( edProgrammedDateTime, &readingInfo );
-   MFG_logPrintf( "%s %d\n", argv[ 0 ], readingInfo.Value.uintValue );
+   MFG_logPrintf( "%s %llu\n", argv[ 0 ], readingInfo.Value.uintValue );
 }
 #endif   /* endif of ( HMC_KV == 1 ) || ( HMC_I210_PLUS_C == 1 )  */
 
@@ -10380,7 +10402,7 @@ static void MFGP_meterDateTime( uint32_t argc, char *argv[] )
    ValueInfo_t readingInfo;
 
    (void)INTF_CIM_CMD_getMeterReading( meterDateTime, &readingInfo );
-   MFG_logPrintf( "%s %d\n", argv[ 0 ], readingInfo.Value.uintValue );
+   MFG_logPrintf( "%s %llu\n", argv[ 0 ], readingInfo.Value.uintValue );
 }
 #endif // endif for (CLOCK_IN_METER == 1)
 
@@ -10401,7 +10423,7 @@ static void MFGP_switchPosition( uint32_t argc, char *argv[] )
 {
    ValueInfo_t readingInfo;
    INTF_CIM_CMD_getMeterReading( switchPositionStatus, &readingInfo );
-   MFG_logPrintf( "%s %d\n", argv[ 0 ], readingInfo.Value.uintValue );
+   MFG_logPrintf( "%s %llu\n", argv[ 0 ], readingInfo.Value.uintValue );
 }
 /*******************************************************************************
  *
@@ -10419,7 +10441,7 @@ static void MFGP_disconnectCapable( uint32_t argc, char *argv[] )
 {
    ValueInfo_t readingInfo;
    (void)INTF_CIM_CMD_getMeterReading( disconnectCapable, &readingInfo );
-   MFG_logPrintf( "%s %d\n", argv[ 0 ], readingInfo.Value.intValue );
+   MFG_logPrintf( "%s %llu\n", argv[ 0 ], readingInfo.Value.intValue );
 
 }
 #endif // endif for (REMOTE_DISCONNECT == 1)
@@ -11572,7 +11594,7 @@ static void MFGP_powerQuality ( uint32_t argc, char *argv[] )
 {
    ValueInfo_t  reading;
    (void)INTF_CIM_CMD_getMeterReading( powerQuality, &reading );
-   MFG_printf( "%s %u\n", argv[ 0 ], reading.Value.uintValue );
+   MFG_printf( "%s %llu\n", argv[ 0 ], reading.Value.uintValue );
 } /*lint !e818 !e715 pData could be pointer to const, args not used; required by API */
 #endif
 
