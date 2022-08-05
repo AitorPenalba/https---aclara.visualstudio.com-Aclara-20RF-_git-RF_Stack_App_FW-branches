@@ -114,6 +114,17 @@ static DBG_ConfigAttr_t ConfigAttr;                         /* Debug Configurati
 static char logPrintf_buf[DEBUG_MSG_SIZE];
 static char DBG_logPrintHex_buf[DEBUG_MSG_SIZE];
 
+#if ( TM_UART_EVENT_COUNTERS == 1) /* Used to diagnose the UART port lockup issue using the TM_UART_COUNTER_INC macro */
+static volatile uint32_t   dbgLog_testMutexLockBefore  = 0;
+static volatile uint32_t   dbgLog_testMutexLockAfter   = 0;
+static volatile uint32_t   dbgLog_testMutexUnlockAfter = 0;
+static volatile uint32_t   dbgLog_testPostQueueBefore  = 0;
+static volatile uint32_t   dbgLog_testPostQueueAfter   = 0;
+static volatile uint32_t   dbgLog_testBufferAllocFails = 0;
+static volatile OS_TASK_id dbgLog_testTaskIdBeforeMutex= 0;
+static volatile OS_TASK_id dbgLog_testTaskIdBeforePost = 0;
+#endif
+
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
 
@@ -253,8 +264,13 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
             taskPrintFilter_ == OS_TASK_GetId() ||                /* Filter match?  */
             OS_TASK_GetId() == OS_TASK_GetID_fromName( "DBG" ) )  /* DBG task */
       {
+//         OS_TASK_Sleep( (uint32_t)5 );
+         TM_UART_COUNTER_INC( dbgLog_testMutexLockBefore );
+#if ( TM_UART_EVENT_COUNTERS == 1)
+         dbgLog_testTaskIdBeforeMutex = OS_TASK_GetId();
+#endif
          OS_MUTEX_Lock( &logPrintf_mutex_ ); // Function will not return if it fails
-
+         TM_UART_COUNTER_INC( dbgLog_testMutexLockAfter );
          // Reset length
          len = 0;
          logPrintf_buf[0] = 0;
@@ -315,9 +331,19 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
          if ( NULL != pBuf )
          {
             ( void )memcpy( pBuf->data, logPrintf_buf, len );
+            TM_UART_COUNTER_INC( dbgLog_testPostQueueBefore );
+#if ( TM_UART_EVENT_COUNTERS == 1)
+            dbgLog_testTaskIdBeforePost = OS_TASK_GetId();
+#endif
             OS_MSGQ_Post ( &mQueueHandle_, pBuf );
+            TM_UART_COUNTER_INC( dbgLog_testPostQueueAfter  );
+         }
+         else
+         {
+            TM_UART_COUNTER_INC( dbgLog_testBufferAllocFails );
          }
          OS_MUTEX_Unlock( &logPrintf_mutex_ ); // Function will not return if it fails
+         TM_UART_COUNTER_INC( dbgLog_testMutexUnlockAfter );
       }
    }
 }  /*lint !e818 fmt could be ptr to const   */
