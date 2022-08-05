@@ -64,18 +64,23 @@
  *  Local Variables
  *****************************************************************************/
 #if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) ) /* TODO: K24: DG: TCXO Trimming is not currently used in EPs remove the call  */
+
+
+static uint32_t FTM[FREQUENCY_MOVING_WINDOW];      // FTM values of the TXCO frequency counting
+#if ( MCU_SELECTED == NXP_K24 )
 static uint16_t FTMcount[RADIO_CLK_BUFFER_SIZE+1]; // Buffer holding an array of captured FTM values
                                                    // We add one because of a strange observation made while debugging.
                                                    // Read the note in DMA_Complete_IRQ_ISR() to know more
-
-static uint32_t FTM[FREQUENCY_MOVING_WINDOW];      // FTM values of the TXCO frequency counting
 static uint32_t extend = 0;                        // Extend FTM clock range to compensate for clock rollover
 static uint16_t prevTime;                          // Previous FTM capture
-static uint32_t DMAcntr = 0;                       // DMA Major loop counter
 static uint8_t  radioNum = 0;                      // Radio being used for DMA/TCXO measurement
+static uint64_t coreToBusClockRatio;
+static uint32_t DMAcntr = 0;                       // DMA Major loop counter
+#endif
+
+
 static uint32_t freqFilter[FREQUENCY_MOVING_WINDOW] = {0}; // Initialize with bad values
        uint32_t DMA_Complete_IRQ_ISR_Timestamp = 0; // Used for a watchdog to make sure we are always doing TCXO triming
-static uint64_t coreToBusClockRatio;
        uint32_t DMAint;                            // When the DMA interrupt happened in CYCCNT units
 
 typedef struct{
@@ -328,9 +333,10 @@ void RADIO_Update_Freq( void )
 {
    Disable_DMA_Reset_Filter();
 
+
+#if ( MCU_SELECTED == NXP_K24 ) // TODO Melvin: need to find an equivalent
+#if ( MCU_SELECTED == NXP_K24 ) // TODO Melvin: need to find an equivalent
    DMAcntr  = 0; // Reset DMA Major loop counter
-
-
    // Disable DMA channel before configuration
    DMA_CERQ = RADIO_CLK_DMA_CH; // Disable DMA channel before programming
    DMA_CINT = RADIO_CLK_DMA_CH; // Clear any pending interrupts
