@@ -384,5 +384,6 @@ void RADIO_Update_Freq( void )
 
    // Enable DMA transfer
    DMA_SERQ = RADIO_CLK_DMA_CH;
+#endif
 }
 #endif // #if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) )
