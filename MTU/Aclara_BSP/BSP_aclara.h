@@ -278,7 +278,7 @@ extern uint32_t    UART_getc                 ( enum_UART_ID UartId,       uint8_
 extern uint32_t    UART_echo                 ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength );
 #endif
 extern void        UART_fgets                ( enum_UART_ID UartId,       char    *DataBuffer, uint32_t DataLength );
-extern void        UART_flush                ( enum_UART_ID UartId );
+extern uint8_t        UART_flush                ( enum_UART_ID UartId );
 extern void        UART_RX_flush             ( enum_UART_ID UartId );
 extern uint8_t     UART_isTxEmpty            ( enum_UART_ID UartId );
 extern uint8_t     UART_ioctl                ( enum_UART_ID UartId, int op, void *addr );
