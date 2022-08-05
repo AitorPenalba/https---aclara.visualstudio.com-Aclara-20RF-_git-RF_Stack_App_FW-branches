@@ -1,4 +1,4 @@
-include "memory_regions_bootloader.icf";
+include "memory_regions_bootloader.icf";			/*Aclara modified: use adjusted bootloader memory regions */
 
 if (isdefinedsymbol(FLASH_BOOTLOADER_LENGTH))
 {
