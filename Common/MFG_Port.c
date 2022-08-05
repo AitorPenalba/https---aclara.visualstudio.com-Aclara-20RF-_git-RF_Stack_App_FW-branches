@@ -2552,7 +2552,11 @@ static void MFGP_DeviceType( uint32_t argc, char *argv[] )
 static void MFGP_DevicePartNumber( uint32_t argc, char *argv[] )
 {
    ( void )argc;
-
+   char*                      pDevPartNumber;
+   char                       devPartNumberBuff[PARTNUMBER_BUFFER_SIZE];
+   pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
+   (void)strncpy (devPartNumberBuff, pDevPartNumber, 14);
+   devPartNumberBuff[PARTNUMBER_BUFFER_SIZE - 1] = '\0';      // ensure the buffer is null-terminated
    MFG_printf( "%s %s\n", argv[ 0 ], VER_getComDeviceMicroMPN() );
 }
 /***********************************************************************************************************************
