@@ -2555,9 +2555,9 @@ static void MFGP_DevicePartNumber( uint32_t argc, char *argv[] )
    char*                      pDevPartNumber;
    char                       devPartNumberBuff[PARTNUMBER_BUFFER_SIZE + 1];
    pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
-   (void)strncpy (devPartNumberBuff, pDevPartNumber, 14);
+   (void)strncpy (devPartNumberBuff, pDevPartNumber, PARTNUMBER_BUFFER_SIZE);
    devPartNumberBuff[PARTNUMBER_BUFFER_SIZE] = '\0';      // ensure the buffer is null-terminated
-   MFG_printf( "%s %s\n", argv[ 0 ], VER_getComDeviceMicroMPN() );
+   MFG_printf( "%s %s\n", argv[ 0 ], devPartNumberBuff );
 }
 /***********************************************************************************************************************
    Function Name: MFGP_ipHEContext

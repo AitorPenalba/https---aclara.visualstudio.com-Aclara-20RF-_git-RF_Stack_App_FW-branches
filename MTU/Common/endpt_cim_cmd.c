@@ -499,12 +499,12 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDeviceType( char *devTypeBuff, uint8_t 
  *
  * Function name: ENDPT_CIM_CMD_getComDevicePartNumber
  *
- * Purpose: Gets the Communication device MACID
+ * Purpose: Gets the Communication device PartNumber
  *
- * Arguments: char *devTypeBuff: Comm device type (includes the trailing null)
- *            uint8_t devTypeBuffSize: The size of devTypeBuff, into which the value will be copied, including the
+ * Arguments: char *devPartNumberBuff: Comm device PartNumber (includes the trailing null)
+ *            uint8_t devPartNumberBuffSize: The size of devPartNumberBuff, into which the value will be copied, including the
  *                                     trailing null
- *            uint8_t *devTypeLeng: The number of bytes in the returned device type, not including the trailing null
+ *            uint8_t *devPartNumberLeng: The number of bytes in the returned device PartNumber, not including the trailing null
  *
  * Returns: enum_CIM_QualityCode SUCCESS/FAIL indication
  *
