@@ -151,6 +151,7 @@
 #endif
 #define PART_BL_BACKUP_SIZE         BL_BACKUP_SIZE       /* Bootloader Backup Size from linker script */
 #define PART_DFW_BL_INFO_SIZE       DFW_BL_INFO_SIZE     /* DFW Bootloader Info Size from linker script */
+
 #if 0
 /* If we do move the Encrypt Key partition and remove the swap indicator sector only need these definitions */
    /* Sections in low bank */

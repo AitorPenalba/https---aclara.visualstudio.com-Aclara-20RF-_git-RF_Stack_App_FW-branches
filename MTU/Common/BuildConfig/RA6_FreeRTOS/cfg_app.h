@@ -32,7 +32,6 @@
 #ifndef __BOOTLOADER
 #include "os_aclara.h"
 #include "portable_freescale.h"
-#include "CompileSwitch.h"
 #endif   /* __BOOTLOADER   */
 
 #ifndef __BOOTLOADER
@@ -436,7 +435,6 @@ typedef enum /* Note:  The enum is filled with examples, actual code may differ 
    ePART_SWAP_STATE,
    ePART_BL_BACKUP,
    ePART_DFW_BL_INFO,
-
    ePART_LAST_PARTITION                /* This marker MUST be here, it indicates we're past the last partition. */
 } ePartitionName;
 #ifndef __BOOTLOADER
