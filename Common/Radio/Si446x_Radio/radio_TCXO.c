@@ -335,7 +335,7 @@ void RADIO_Update_Freq( void )
 
 
 #if ( MCU_SELECTED == NXP_K24 ) // TODO Melvin: need to find an equivalent
-#if ( MCU_SELECTED == NXP_K24 ) // TODO Melvin: need to find an equivalent
+
    DMAcntr  = 0; // Reset DMA Major loop counter
    // Disable DMA channel before configuration
    DMA_CERQ = RADIO_CLK_DMA_CH; // Disable DMA channel before programming

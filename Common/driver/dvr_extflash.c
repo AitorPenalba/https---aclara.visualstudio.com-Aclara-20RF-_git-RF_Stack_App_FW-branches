@@ -360,7 +360,6 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
 
 #if ( MCU_SELECTED == NXP_K24 )
 /* Spi port configuration for use with the external flash devices.  The #defines are located in the cfg_app.h. */
-#if ( RTOS_SELECTION == MQX_RTOS )
 static const spiCfg_t _NV_spiCfg =
 {
    EXT_FLASH_SPEED_KHZ,          /* SPI Clock Rate */

@@ -51,7 +51,6 @@ struct CS_BIT_INFO
 #if ( MCU_SELECTED == NXP_K24 )
 /* Port and Bit shifts needed for SELA, SELB, SELC, G2A  */
 /* Spi port configuration for use with the radio.  The #defines are located in the HALxxx.h. */
-#if ( MCU_SELECTED == NXP_K24 )
 static spiCfg_t _spiCfg =
 {
    RADIO_0_SLOW_SPEED_KHZ,     /* SPI Clock Rate */
