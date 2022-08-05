@@ -25,31 +25,13 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include "project.h"
-#if ( MCU_SELECTED == RA6E1 )
-#include "hal_data.h"
-#endif
-#include "meter.h"
+/* include common hal definitions */
+#include "cfg_hal_defs.h"
 
-/* Define all supported target hardware here. */
-#define HAL_TARGET_Y84001_REV_A        1  /* Using Y84001-1-SCH Rev A Board (I210+, KV2c K22)   */
-#define HAL_TARGET_Y84020_1_REV_A     10  /* Using Y84020-1-SCH Rev A Board (I210+ K24)         */
-#define HAL_TARGET_Y84030_1_REV_A     15  /* Using Y84030-1-SCH Rev A Board (KV2c K24)          */
-#define HAL_TARGET_Y84580_x_REV_A     20  /* Using Y84580-1 or Y84580-2 Assembly (I210+c RA6E1) */
-
-/* It was decided to create a gap between metering end-points and ILC end-points */
-#define HAL_TARGET_Y99852_1_REV_A     300 /* Using Y99852-1-SCH Rev A board (ILC) */
-
-// This is the NIC board for SRFN DA.  The hardware acts like a network card to allow devices to talk on the SRFN network.
-#define HAL_TARGET_Y84114_1_REV_A 500
-
-// It was decided to create a gap between end-point and DCU
-#define HAL_TARGET_Y84050_1_REV_A     1000   /* Using Y84050-1-SCH Rev A Board ( should be 9975_XCVR    */
-#define HAL_TARGET_XCVR_9985_REV_A    1010   /* DCU 3 Transceiver Board with the 2MBx16 NOR and 2MBx16 SRAM.*/
-
+/* include project specific HAL definitions */
 #include "hal.h"
 
-// Now include the hardware specific HAL
+// check for valid target hardware choice from hardware specific HAL
 #if ( ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84001_REV_A )    && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84020_1_REV_A )  && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84114_1_REV_A )  && \
@@ -58,6 +40,29 @@
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84580_x_REV_A )  )
 
 #error "Invalid HAL_TARGET_HARDWARE setting"
+#endif
+
+// check for valid processor choice from hardware specific HAL
+#if ( ( MCU_SELECTED != RA6E1 )    && \
+      ( MCU_SELECTED != NXP_K24 ))
+
+#error "Invalid MCU_SELECTED setting"
+#endif
+
+// check for valid RTOS choice from hardware specific HAL
+#if ( ( RTOS_SELECTION != MQX_RTOS )    && \
+      ( RTOS_SELECTION != FREE_RTOS ))
+
+#error "Invalid RTOS_SELECTION setting"
+#endif
+
+/* ****************************************************************************************************************** */
+/* HARDWARE SPECIFIC INCLUDES */
+#if ( MCU_SELECTED == NXP_K24 )
+#include <intrinsics.h>
+#include <MK24F12.h>
+#elif ( MCU_SELECTED == RA6E1 )
+#include "hal_data.h"
 #endif
 
 // Include HAL common to all End Point hardware
