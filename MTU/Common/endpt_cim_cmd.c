@@ -894,7 +894,7 @@ returnStatus_t ENDPT_CIM_CMD_OR_PM_Handler( enum_MessageMethod action, meterRead
          case comDeviceMicroMPN :
          {
             uint8_t numberOfBytes = 0; //store length of string returned
-            uint8_t strBuffer[PARTNUMBER_BUFFER_SIZE]; //store string returned
+            uint8_t strBuffer[PARTNUMBER_BUFFER_SIZE + 1]; //store string returned
             (void) memset( strBuffer, 0, PARTNUMBER_BUFFER_SIZE );
 
             if ( PARTNUMBER_BUFFER_SIZE <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774

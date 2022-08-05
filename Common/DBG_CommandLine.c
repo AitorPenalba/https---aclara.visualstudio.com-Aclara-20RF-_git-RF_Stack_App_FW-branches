@@ -7146,7 +7146,7 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    uint8_t                    index = 0;
    const uint8_t             *mcuVersion = ( uint8_t * )MCUVERSION_ADDR;
    char*                      pDevPartNumber;
-   char                       devPartNumberBuff[PARTNUMBER_BUFFER_SIZE];
+   char                       devPartNumberBuff[PARTNUMBER_BUFFER_SIZE + 1];
 
    ver = VER_getFirmwareVersion(eFWT_APP);
    dt  = VER_getFirmwareVersionDT();
@@ -7175,7 +7175,7 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    }
    pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
    (void)strncpy (devPartNumberBuff, pDevPartNumber, PARTNUMBER_BUFFER_SIZE);
-   devPartNumberBuff[PARTNUMBER_BUFFER_SIZE - 1] = '\0';      // ensure the buffer is null-terminated
+   devPartNumberBuff[PARTNUMBER_BUFFER_SIZE] = '\0';      // ensure the buffer is null-terminated
    DBG_logPrintf( 'R', "Part Numbering Info %s",devPartNumberBuff );
    DBG_logPrintf( 'R', "MCU Version Register %d",*(mcuVersion));
 #endif
