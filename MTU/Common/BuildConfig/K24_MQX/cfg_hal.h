@@ -8,7 +8,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2011-2021 Aclara.  All Rights Reserved.
+ * Copyright 2011-2022 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -25,26 +25,13 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include "meter.h"
+/* include common hal definitions */
+#include "cfg_hal_defs.h"
 
-/* Define all supported target hardware here. */
-#define HAL_TARGET_Y84001_REV_A        1  /* Using Y84001-1-SCH Rev A Board (I210+, KV2c K22)   */
-#define HAL_TARGET_Y84020_1_REV_A     10  /* Using Y84020-1-SCH Rev A Board (I210+ K24)         */
-#define HAL_TARGET_Y84030_1_REV_A     15  /* Using Y84030-1-SCH Rev A Board (KV2c K24)          */
-
-/* It was decided to create a gap between metering end-points and ILC end-points */
-#define HAL_TARGET_Y99852_1_REV_A     300 /* Using Y99852-1-SCH Rev A board (ILC) */
-
-// This is the NIC board for SRFN DA.  The hardware acts like a network card to allow devices to talk on the SRFN network.
-#define HAL_TARGET_Y84114_1_REV_A 500
-
-// It was decided to create a gap between end-point and DCU
-#define HAL_TARGET_Y84050_1_REV_A     1000   /* Using Y84050-1-SCH Rev A Board ( should be 9975_XCVR    */
-#define HAL_TARGET_XCVR_9985_REV_A    1010   /* DCU 3 Transceiver Board with the 2MBx16 NOR and 2MBx16 SRAM.*/
-
+/* include project specific HAL definitions */
 #include "hal.h"
 
-// Now include the hardware specific HAL
+// check for valid target hardware choice from hardware specific HAL
 #if ( ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84001_REV_A )    && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84020_1_REV_A )  && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84114_1_REV_A )  && \
@@ -54,6 +41,22 @@
 #error "Invalid HAL_TARGET_HARDWARE setting"
 #endif
 
+// check for valid processor choice from hardware specific HAL
+#if ( ( MCU_SELECTED != RA6E1 )    && \
+      ( MCU_SELECTED != NXP_K24 ))
+
+#error "Invalid MCU_SELECTED setting"
+#endif
+
+// check for valid RTOS choice from hardware specific HAL
+#if ( ( RTOS_SELECTION != MQX_RTOS )    && \
+      ( RTOS_SELECTION != FREE_RTOS ))
+
+#error "Invalid RTOS_SELECTION setting"
+#endif
+
+#include <intrinsics.h>
+#include <MK24F12.h>
 // Include HAL common to all End Point hardware
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTION */
@@ -92,7 +95,7 @@
 #define  TRIS_OUTPUT             0           /* Set data I/O Pin as an Output */
 
 #define  ANALOG                  1           /* Set data I/O Pin as an Analog Input */
-#define  DIGITAL                 0           /* Set data I/O Pin as a Digial I/O */
+#define  DIGITAL                 0           /* Set data I/O Pin as a Digital I/O */
 
 #define  OPEN_DRAIN_ON           1           /* Set data output pin as open drain output */
 #define  OPEN_DRAIN_OFF          0           /* Set data output pin to drive output high/low */
@@ -112,6 +115,7 @@
 
 #if HAL_IGNORE_BROWN_OUT_SIGNAL == 1
 #define BRN_OUT()                   0 /* Ignores the brown out signal  */
+#warning "You have built the project so that it ignores the meter's /PF_METER signal!"
 /* Disable this interrupt if ignoring the signal! */
 #define BRN_OUT_IRQ_EI()            BRN_OUT_IRQ_DI()
 #else

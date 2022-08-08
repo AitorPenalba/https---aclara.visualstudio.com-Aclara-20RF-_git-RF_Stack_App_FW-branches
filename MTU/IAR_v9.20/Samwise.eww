@@ -4,6 +4,9 @@
         <path>$WS_DIR$\bootLoader_K24.ewp</path>
     </project>
     <project>
+        <path>$WS_DIR$\..\Bootloader\R7FA6E1\IAR\bootLoader_RA6E1.ewp</path>
+    </project>
+    <project>
         <path>$WS_DIR$\..\OS_BSP\MQX_Kinetis\mqx\build\iar\bsp_ep_k24f120m\bsp_ep_k24f120m.ewp</path>
     </project>
     <project>

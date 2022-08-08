@@ -278,7 +278,9 @@ static fsp_err_t      MisoBusy_isr_init( void );
 #endif
 #endif
 
+#if (( RTOS == 1 ) && ( MCU_SELECTED == RA6E1 ) )
 static OS_MUTEX_Obj qspiMutex_;        /* Mutex Lock for QSPI channel */
+#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */

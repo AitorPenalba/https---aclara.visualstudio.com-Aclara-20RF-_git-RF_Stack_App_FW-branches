@@ -35,7 +35,6 @@
 
 #endif // ( RTOS_SELECTION )
 #endif   /* BOOTLOADER  */
-#include "project.h"
 #include "sys_clock.h"
 
 // </editor-fold>
