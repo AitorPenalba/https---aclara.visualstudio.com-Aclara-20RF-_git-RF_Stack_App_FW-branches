@@ -268,7 +268,9 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
             taskPrintFilter_ == OS_TASK_GetId() ||                /* Filter match?  */
             OS_TASK_GetId() == OS_TASK_GetID_fromName( "DBG" ) )  /* DBG task */
       {
-//         OS_TASK_Sleep( (uint32_t)5 );
+#if ( RTOS_SELECTION == FREE_RTOS )
+         OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task. Also making sure it does not locks up in an mutex due to queue posting by different tasks.
+#endif
          TM_UART_COUNTER_INC( dbgLog_testMutexLockBefore );
 #if ( TM_UART_EVENT_COUNTERS == 1)
          if ( 0 == dbgLog_testTaskIdBeforeMutex )

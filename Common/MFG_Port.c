@@ -1734,6 +1734,9 @@ static void mfgpReadByte( uint8_t rxByte )
             return;
          }
 #endif
+#if ( RTOS_SELECTION == FREE_RTOS )
+         OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task.
+#endif
          commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
          if ( commandBuf != NULL )
          {
