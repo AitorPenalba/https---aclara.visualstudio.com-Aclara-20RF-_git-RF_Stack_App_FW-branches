@@ -64,7 +64,7 @@
 #include <wolfssl/wolfcrypt/logging.h>
 #include "App_Msg_Handler.h"
 #include "sys_busy.h"
-//#include "ecc.h"
+
 
 #if ( DCU == 1 )
 #include "version.h"
