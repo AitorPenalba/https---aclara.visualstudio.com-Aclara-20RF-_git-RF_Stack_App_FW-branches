@@ -47,8 +47,6 @@
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
-// #define BM_USE_KERNEL_AWARE_DEBUGGING  0  // TODO: RA6E1 Bob: Moved this to features.h so that allocator's name can be passed
-
 /** Number of buffer pools (based on the number of pool definitions) */
 #define BUFFER_N_POOLS        ((uint16_t)(sizeof(BM_bufferPoolParams) / sizeof(BM_bufferPoolParams[0])))
 

@@ -40,7 +40,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>  // TODO: Do we need this?
-
+#include "error_codes.h"
 #include "portable_freescale.h"
 #include "portable_aclara.h"
 
@@ -52,7 +52,7 @@
 #ifndef __BOOTLOADER
 #include "OS_aclara.h"
 #endif
-#include "error_codes.h"
+
 #include "heep.h"
 #include "BSP_aclara.h"
 

@@ -478,8 +478,13 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
          if ( pBuf->x.flag.inQueue )
          {
             // The buffer is in use.
+#if 1
+            DBG_LW_printf( "\nERROR: BM_alloc got a buffer marked as in used (pending on a queue). Size: %u, pool = %u, addr=0x%p\n"
+                        "ERROR: BM_alloc called from %s:%d", minSize, pool, pBuf, file, line );
+#else
             DBG_printf( "\nERROR: BM_alloc got a buffer marked as in used (pending on a queue). Size: %u, pool = %u, addr=0x%p\n"
                         "ERROR: BM_alloc called from %s:%d", minSize, pool, pBuf, file, line );
+#endif
          }
 #if (BM_DEBUG==1)
          if ( strcasecmp( file, "dbg_serialdebug.c" ) != 0 )
@@ -516,7 +521,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
    }
    if ( NULL == pBuf )
    {
-         OS_INT_disable( );
+      OS_INT_disable( );
       // Buffer watchdog
       if ( ( eBM_APP == type ) || ( eBM_STACK == type ) )
       {

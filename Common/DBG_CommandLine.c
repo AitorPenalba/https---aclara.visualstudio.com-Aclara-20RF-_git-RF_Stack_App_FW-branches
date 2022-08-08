@@ -15224,6 +15224,9 @@ static uint32_t DBG_CommandLine_UARTcounters ( uint32_t argc, char *argv[] )
    /* This vector allows for skipping the display of some of the counters.  It is in the same order as pHeaders */
    const uint8_t display[UART_NUM_FIELDS] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
    char buffer[FIELD_NAME_WIDTH + ( MAX_UART_ID * ELEMENT_WIDTH ) + 2];
+   bool calledFromMfgPort = ( OS_TASK_GetId() == OS_TASK_GetID_fromName( "DBG" ) ) ? (bool)false : (bool)true;
+#define DBG_PRINTF(fmt, ... ) if ( calledFromMfgPort ) { DBG_LW_printf(fmt, ##__VA_ARGS__); } else { DBG_printf   (fmt, ##__VA_ARGS__); }
+
    if ( argc == 1 )
    {
       memset( buffer, ' ', sizeof(buffer) );
@@ -15234,8 +15237,9 @@ static uint32_t DBG_CommandLine_UARTcounters ( uint32_t argc, char *argv[] )
          (void)UART_GetCounters( (enum_UART_ID)i, &uartCounters[i] );
          pPtr += snprintf( pPtr, ELEMENT_WIDTH+1, headerFormat, UART_getName( (enum_UART_ID)i), i );
       }
+      if ( calledFromMfgPort ) *pPtr++ = '\n';
       *pPtr = '\0'; /* Terminate the string */
-      DBG_printf( "%s", buffer );
+      DBG_PRINTF( "%s", buffer );
 
       /* Loop through the fields (printed rows) and then UART ports (printed columns) to display the table */
       for ( uint32_t j = 0; j < UART_NUM_FIELDS; j++ )
@@ -15248,8 +15252,9 @@ static uint32_t DBG_CommandLine_UARTcounters ( uint32_t argc, char *argv[] )
             {
                pPtr += snprintf( pPtr, ELEMENT_WIDTH+1, elementFormat, uartCountersU32[i][j] );
             }
+            if ( calledFromMfgPort ) *pPtr++ = '\n';
             *pPtr = '\0'; /* Terminate the string */
-            DBG_printf( "%s", buffer );
+            DBG_PRINTF( "%s", buffer );
          }
       }
    }

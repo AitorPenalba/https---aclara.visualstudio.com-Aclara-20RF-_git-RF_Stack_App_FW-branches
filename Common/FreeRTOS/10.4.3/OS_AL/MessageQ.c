@@ -121,6 +121,57 @@ void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorChec
 
 /*******************************************************************************
 
+  Function name: OS_MSGQ_POST_RetStatus
+
+  Purpose: This function is used to Post a message into a MessageQ structure giving the caller
+           the opportunity to ignore failures due to a full queue
+
+  Arguments: MsgqHandle - pointer to the MessageQ object
+             MessageData - pointer to the pointer of the Message data to post (see Notes below)
+             ErrorCheck - flag to check some errors or not. This is need when BM post a free buffer.
+
+  Returns: eSUCCESS if the element was successfully queued
+           eFAILURE if the element is either free or already in a queue
+           eOS_QUE_FULL_ERR if the queue is full
+
+  Notes: See notes for OS_MSGQ_POST
+
+         Function will not return if it fails
+
+*******************************************************************************/
+returnStatus_t OS_MSGQ_POST_RetStatus ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line )
+{
+   OS_QUEUE_Element *ptr = MessageData;
+   returnStatus_t eRetVal = eFAILURE;
+   // Sanity check
+   if (ErrorCheck && ptr->flag.isFree) {
+      // The buffer was freed
+      return ( eRetVal );
+   }
+   if (ptr->flag.inQueue) {
+      // The buffer is already in use.
+      return ( eRetVal );
+   }
+
+   // Mark as on queue
+   ptr->flag.inQueue++;
+
+   returnStatus_t err = OS_QUEUE_ENQUEUE_RetStatus( &(MsgqHandle->MSGQ_QueueObj), MessageData, file, line );
+   if ( eSUCCESS == err )
+   {
+      eRetVal = OS_SEM_POST_RetStatus ( &(MsgqHandle->MSGQ_SemObj), file, line );
+   }
+   else
+   {
+      eRetVal = err;
+   }
+
+   return ( eRetVal );
+
+} /* end OS_MSGQ_POST_RetStatus () */
+
+/*******************************************************************************
+
   Function name: OS_MSGQ_PEND
 
   Purpose: This function is used to Pend on a message from a MessageQ structure

@@ -869,7 +869,7 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
    if ( ringBufoverflow[UartId] )
    {
       TM_UART_COUNTER_INC( uart_events[UartId].ringOverFlowVar );
-      ( void ) DBG_LW_printf( "\r\nRing buffer overflow of UART Id - %d", UartId );
+      ( void ) DBG_LW_printf( "\r\nRing buffer overflow of UART Id - %d\n", UartId );
       UART_RX_flush( UartId );
    }
    return DataLength; /* Returning DataLength */

@@ -100,6 +100,31 @@ void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 
 /*******************************************************************************
 
+  Function name: OS_SEM_POST_RetStatus
+
+  Purpose: This function will post to the passed in Semaphore
+
+  Arguments: SemHandle - pointer to the Handle structure of the Semaphore
+
+  Returns: If the Semaphore has been posted, then eSUCCESS otherwise eFAILURE
+
+  Notes: FreeRTOS has a limit to the the number of posts to a Semaphore whereas
+         MQX just used heap memory until it is exhaused.  Therefore, this version
+         of the function is needed for FreeRTOS but not for MQX.
+
+*******************************************************************************/
+returnStatus_t OS_SEM_POST_RetStatus ( OS_SEM_Handle SemHandle, char *file, int line )
+{
+   returnStatus_t eRetVal = eSUCCESS;
+   if( pdFAIL == xSemaphoreGive(*SemHandle) )
+   {
+      eRetVal = eFAILURE;
+   }
+   return ( eRetVal );
+} /* end OS_SEM_POST_RetStatus () */
+
+/*******************************************************************************
+
   Function name: OS_SEM_Pend
 
   Purpose: This function will wait for the passed in Semaphore until it has been
