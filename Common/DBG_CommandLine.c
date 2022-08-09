@@ -2578,10 +2578,10 @@ uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] )
    returnStatus_t retVal = eFAILURE;
    returnStatus_t eStatus;
    uint8_t parSelection;
-   parSelection = ( uint8_t ) atoi( argv[1] );
    if ( argc == 2 )
    {
       /* The number of arguments must be 1 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
       if ( parSelection == 0 )
       {
          if ( eSUCCESS == PAR_partitionFptr.parOpen( &pTM_IntFlashEncryptKeyPart_, ePART_ENCRYPT_KEY, 0L ) )
