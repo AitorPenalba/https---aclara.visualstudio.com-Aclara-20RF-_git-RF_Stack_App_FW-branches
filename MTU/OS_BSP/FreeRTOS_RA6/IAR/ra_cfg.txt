@@ -14,14 +14,14 @@ FSP Configuration
   RA6E1 Family
     Security: Exceptions: Exception Response: Non-Maskable Interrupt
     Security: Exceptions: BusFault, HardFault, and NMI Target: Non-Secure State
-    Security: System Reset Request Accessibility: Secure State
+    Security: System Reset Request Accessibility: Both Secure and Non-Secure State
     Security: Exceptions: Prioritize Secure Exceptions: Disabled
     Security: Cache Accessibility: Both Secure and Non-Secure State
     Security: System Reset Status Accessibility: Both Secure and Non-Secure State
     Security: Battery Backup Accessibility: Both Secure and Non-Secure State
     Security: SRAM Accessibility: SRAM Protection: Both Secure and Non-Secure State
     Security: SRAM Accessibility: SRAM ECC: Both Secure and Non-Secure State
-    Security: SRAM Accessibility: Standby RAM: Regions 7-0 are all Secure.
+    Security: SRAM Accessibility: Standby RAM: Regions 7-0 are all Non-secure.
     Security: BUS Accessibility: Bus Security Attribution Register A: Both Secure and Non-Secure State
     Security: BUS Accessibility: Bus Security Attribution Register B: Both Secure and Non-Secure State
     Startup C-Cache Line Size: 32 Bytes

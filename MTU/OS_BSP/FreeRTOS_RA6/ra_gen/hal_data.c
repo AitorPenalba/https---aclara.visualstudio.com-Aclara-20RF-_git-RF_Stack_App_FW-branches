@@ -983,7 +983,7 @@ adc_instance_ctrl_t g_adc0_ctrl;
 /* ADC_ADD_AVERAGE_SIXTEEN can't be found in RASC, found in r_adc.h */
 const adc_extended_cfg_t g_adc0_cfg_extend =
 {
-    .add_average_count   = ADC_ADD_AVERAGE_SIXTEEN,
+    .add_average_count   = ADC_ADD_AVERAGE_SIXTEEN,  /* Aclara modified */
     .clearing            = ADC_CLEAR_AFTER_READ_ON,
     .trigger_group_b     = ADC_TRIGGER_SYNC_ELC,
     .double_trigger_mode = ADC_DOUBLE_TRIGGER_DISABLED,

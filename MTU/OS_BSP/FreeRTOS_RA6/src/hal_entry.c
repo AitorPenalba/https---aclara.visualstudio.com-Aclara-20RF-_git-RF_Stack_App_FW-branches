@@ -2,7 +2,8 @@
 
 FSP_CPP_HEADER
 void R_BSP_WarmStart(bsp_warm_start_event_t event);
-extern void PWRLG_BSP_Setup(void); /* Aclara Added */
+extern void    PWRLG_BSP_Setup(void); /* Aclara Added */
+extern uint8_t PWRLG_LastGasp( void ); /* Aclara Added */
 FSP_CPP_FOOTER
 
 /*******************************************************************************************************************//**
@@ -41,16 +42,16 @@ void R_BSP_WarmStart (bsp_warm_start_event_t event)
 
     if (BSP_WARM_START_POST_C == event)
     {
-        /* C runtime environment and system clocks are setup. */
+       /* C runtime environment and system clocks are setup. */
 
+       /* Aclara Added  -- Start */
        /* Clear the IOKEEP bit after deep software standby */
-       (void)R_LPM_IoKeepClear(NULL);   // Input parameter is unused  /* Aclara Added */
+       (void)R_LPM_IoKeepClear(NULL);   // Input parameter is unused
 
-       /* TODO: Add the following
-         2. If Last Gasp Then use different pin config??? */
-        R_IOPORT_Open(&g_ioport_ctrl, g_ioport.p_cfg);
+       R_IOPORT_Open(&g_ioport_ctrl, g_ioport.p_cfg);
 
-        //PWRLG_BSP_Setup(); /* Aclara Added */  // TODO: RA6: Enable later
+       PWRLG_BSP_Setup();
+       /* Aclara Added  -- End */
     }
 }
 

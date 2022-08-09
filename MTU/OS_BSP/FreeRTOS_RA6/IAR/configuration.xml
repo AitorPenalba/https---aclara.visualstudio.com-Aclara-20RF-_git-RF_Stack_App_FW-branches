@@ -27,14 +27,14 @@
     <config id="config.bsp.ra6e1.fsp">
       <property id="config.bsp.fsp.tz.exception_response" value="config.bsp.fsp.tz.exception_response.nmi"/>
       <property id="config.bsp.fsp.tz.cmsis.bfhfnmins" value="config.bsp.fsp.tz.cmsis.bfhfnmins.nonsecure"/>
-      <property id="config.bsp.fsp.tz.cmsis.sysresetreqs" value="config.bsp.fsp.tz.cmsis.sysresetreqs.secure_only"/>
+      <property id="config.bsp.fsp.tz.cmsis.sysresetreqs" value="config.bsp.fsp.tz.cmsis.sysresetreqs.both"/>
       <property id="config.bsp.fsp.tz.cmsis.s_priority_boost" value="config.bsp.fsp.tz.cmsis.s_priority_boost.disabled"/>
       <property id="config.bsp.fsp.tz.csar" value="config.bsp.fsp.tz.csar.both"/>
       <property id="config.bsp.fsp.tz.rstsar" value="config.bsp.fsp.tz.rstsar.both"/>
       <property id="config.bsp.fsp.tz.bbfsar" value="config.bsp.fsp.tz.bbfsar.both"/>
       <property id="config.bsp.fsp.tz.sramsar.sramprcr" value="config.bsp.fsp.tz.sramsar.sramprcr.both"/>
       <property id="config.bsp.fsp.tz.sramsar.sramecc" value="config.bsp.fsp.tz.sramsar.sramecc.both"/>
-      <property id="config.bsp.fsp.tz.stbramsar" value="config.bsp.fsp.tz.stbramsar.both"/>
+      <property id="config.bsp.fsp.tz.stbramsar" value="config.bsp.fsp.tz.sramsar.stbramsar.NS7_0"/>
       <property id="config.bsp.fsp.tz.bussara" value="config.bsp.fsp.tz.bussara.both"/>
       <property id="config.bsp.fsp.tz.bussarb" value="config.bsp.fsp.tz.bussarb.both"/>
       <property id="config.bsp.fsp.cache_line_size" value="config.bsp.fsp.cache_line_size.32"/>

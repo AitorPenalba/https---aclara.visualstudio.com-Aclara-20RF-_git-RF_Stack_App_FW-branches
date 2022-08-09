@@ -33,7 +33,7 @@
 #include <bsp.h>
 #endif
 #include "compiler_types.h"
-#include "App_Msg_Handler.h"
+#include "APP_MSG_Handler.h"
 #include "DBG_SerialDebug.h"
 #include "STRT_Startup.h"
 #include "pack.h"
@@ -64,6 +64,9 @@
 #include "version.h"
 #if ( LAST_GASP_SIMULATION == 1 )
 #include "EVL_event_log.h"
+#endif
+#if ( LG_WORST_CASE_TEST == 1 )
+#include "PHY.h"
 #endif
 
 
@@ -105,9 +108,10 @@ extern const uint8_t uStartUpTblCnt;
 #if ( PWRLG_PRINT_ENABLE != 0 )
 #if ( LG_WORST_CASE_TEST == 1 )
 #define OS_SLEEP_PRINT_DELAY_MS   ((uint32_t)150)  /* Print sleep delay */
-#endif
-#endif
+#else
 #define OS_SLEEP_PRINT_DELAY_MS   ((uint32_t)100)  /* Print sleep delay */
+#endif
+#endif
 
 //These MAY become configurable
 static const float fCapacitanceRevB          = ( float )10.0;     /* Rev B HW's Super cap capacitance value in Farads */
@@ -115,7 +119,7 @@ static const float fCapacitanceRevC          = ( float )5.0;      /* Rev C HW's 
 #if ( MCU_SELECTED == NXP_K24 )
 static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */
 #elif ( MCU_SELECTED == RA6E1 )
-static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */  // TODO: RA6E1: This value needs to be updated
+static const float fEnergy30SecondSleep      = ( float )0.10;     /* Energy used to sleep 30 seconds */  // TODO: RA6E1: This value needs to be updated
 #endif
 static const float fEnergyCollisionDetection = ( float )0.0;      /* Energy used to detect a collision */
 static const float fEnergyTransmit           = ( float )0.65;     /* Energy used to transmit the message */
@@ -202,10 +206,14 @@ static void             lg_init_uart( void );
 
 #if ( MCU_SELECTED == RA6E1 )
 static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint8_t uMode );
-//static void ClearVBATT ( void );
 
+#if ( DEBUG_LAST_GASP_TASK == 0 )
 #define EnterVLLS(counter, eUnits, uMode)    EnterLowPowerMode(counter, eUnits, uMode)
 #define EnterLLS(counter, eUnits)            EnterLowPowerMode(counter, eUnits, 0)
+#else
+#define EnterVLLS(counter, eUnits, uMode)    OS_TASK_Sleep(counter)
+#define EnterLLS(counter, eUnits)            OS_TASK_Sleep(counter)
+#endif
 #endif
 
 #if ( MCU_SELECTED == NXP_K24 )
@@ -354,6 +362,12 @@ void PWRLG_Task( taskParameter )
    // Get HW revision letter
    ( void )VER_getHardwareVersion ( &hwVerString[0], sizeof(hwVerString) );
    hwRevLetter_ = hwVerString[0];
+#if ( DEBUG_LAST_GASP_TASK == 1 )
+   PWRLG_STATE_SET( PWRLG_STATE_TRANSMIT ); // Force it to TX
+   PWRLG_OUTAGE_SET(1);
+   PWRLG_MESSAGE_NUM_SET(0);
+   VBATREG_CURR_TX_ATTEMPT = 0;
+#endif
    DBG_logPrintf( 'I', "\n" );
    DBG_logPrintf( 'I', "Running: %u of %u", pSysMem->uMessageCounts.sent + 1, pSysMem->uMessageCounts.total  );
    DBG_logPrintf( 'I', "PWRLG_STATE: %d", PWRLG_STATE() );
@@ -369,8 +383,6 @@ void PWRLG_Task( taskParameter )
    DBG_logPrintf( 'I', "Remaining time:  %ums", PWRLG_MILLISECONDS() );
    DBG_logPrintf( 'I', "CSMA Total/Last: %ums/%ums, TxFail: %u",
                      TOTAL_BACK_OFF_TIME(), CUR_BACK_OFF_TIME(), TX_FAILURES() );
-
-   OS_TASK_Sleep( OS_SLEEP_PRINT_DELAY_MS ); // TODO: RA6E1: DG: Remove
 
    if ( PWRLG_STATE_TRANSMIT == PWRLG_STATE() )   /* This should ALWAYS be the case.  */
    {
@@ -424,7 +436,6 @@ void PWRLG_Task( taskParameter )
 #if ( PWRLG_PRINT_ENABLE != 0 )
             OS_TASK_Sleep( OS_SLEEP_PRINT_DELAY_MS ); // Adding for Print
 #endif
-            OS_TASK_Sleep( OS_SLEEP_PRINT_DELAY_MS ); // Adding for Print /* TODO: Remove */
             if ( !TxSuccessful )
             {
                RDO_PA_EN_OFF();  /* Disable the Radio PA  */
@@ -439,6 +450,7 @@ void PWRLG_Task( taskParameter )
             else
             {
                DBG_logPrintf('I', "TxSuccesss ");
+               //LG_PRNT_INFO("\n\rTxSuccesss\n");
             }
          }
 
@@ -669,21 +681,28 @@ returnStatus_t PWRLG_TxMessage( uint32_t timeOutage )
  **********************************************************************************************************************/
 void PWRLG_TxFailure( void )
 {
-   static const uint32_t uCsmaSleepThreshold = 30;
+   static const uint32_t uCsmaSleepThreshold = 200;  /* TODO: RA6E1: Set it back to 30 when the LLS works */
    uint32_t uMilliseconds;
 #if ( LG_WORST_CASE_TEST == 1 )
    MAC_GetConf_t GetConf;
    int16_t       ccaThreshold  = PHY_CCA_THRESHOLD_MAX;
    uint8_t       ccaOffset     = PHY_CCA_OFFSET_MAX;
+   char          floatStr[2][PRINT_FLOAT_SIZE];
    /* Update the P-persist value for last CCA TX attempt */
    if ( VBATREG_CURR_TX_ATTEMPT == ( VBATREG_MAX_TX_ATTEMPTS - 1 ) )
    {
-      LG_PRNT_INFO("\nTxFail():Update P-Persist value\n ");
-
+      LG_PRNT_INFO("\nTxFail():Update P-Persist\n ");
       ( void )MAC_SetRequest( eMacAttr_CsmaPValue, &fMaxCsmaPValue );
       ( void )PHY_SetRequest( ePhyAttr_CcaThreshold, &ccaThreshold );
       ( void )PHY_SetRequest( ePhyAttr_CcaOffset, &ccaOffset );
       /* No need to worry about the resetting the parameters, as in this mode, we are only making the changes to the RAM copy. */
+#if 0  /* TODO: Remove; TEST CODE  */
+      GetConf = MAC_GetRequest( eMacAttr_CsmaPValue );
+      if ( GetConf.eStatus == eMAC_GET_SUCCESS )
+      {
+         LG_PRNT_INFO("\nP-VALUE: %s\n",DBG_printFloat(floatStr[1], GetConf.val.CsmaPValue, 1));
+      }
+#endif
    }
 #endif
 
@@ -1389,7 +1408,7 @@ void PWRLG_Begin( uint16_t anomalyCount )
 
    R_BSP_SoftwareDelay( 1, BSP_DELAY_UNITS_SECONDS );
 #if ( LG_WORST_CASE_TEST == 1 )
-   DBG_LW_printf(" \n !!!! This is Last Gasp Worst Case Test Code( Revision: 12) !!!! \n");
+   DBG_LW_printf(" \n !!!! This is Last Gasp Worst Case Test Code( Revision: 1) !!!! \n");
 #warning "Update the Revision"
 #endif
    PWRLG_SetupLastGasp();
@@ -1624,7 +1643,6 @@ uint8_t PWRLG_LastGasp( void )
    }
    return ( retVal );
 }
-
 
 /***********************************************************************************************************************
 
@@ -2809,13 +2827,14 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
  **********************************************************************************************************************/
 static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint8_t uMode )
 {
-   static uint16_t secs, mSecs;
+   static uint16_t secs = 0, mSecs = 0;
+   uint8_t tempMode = uMode;
 
-   if ( ( LPTMR_MILLISECONDS == eUnits ) && ( uCounter > 1000 ) )
+   if ( ( LPTMR_MILLISECONDS == eUnits ) && ( uCounter > 1000 ) && ( uMode != 0 ) )
    {
       /* In RA6E1, if we would like to achieve milliseconds precision, we need to use SW Standby Mode,
          for anything greater than a second we will use Deep SW Standby mode */
-      secs = uCounter / 1000;  /* Convert to secs */
+      secs = uCounter / 1000;   /* Convert to secs */
       mSecs = uCounter % 1000;  /* Remaining msecs */
 
       LG_PRNT_INFO("LPM - Secs: %d, mSecs: %d\n", secs, mSecs);
@@ -2870,25 +2889,35 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
       }
       else  /* Restart delay. */
       {
-         if ( PWRLG_SLEEP_SECONDS() != 0 )   /* Using seconds? */
+         if( APP_LPM_SW_STANDBY_STATE != tempMode )
          {
-            LptmrStart( PWRLG_SLEEP_SECONDS(), LPTMR_SECONDS, LPTMR_MODE_PROGRAM_ONLY );
-            eUnits = LPTMR_SECONDS;
-            uMode  = APP_LPM_DEEP_SW_STANDBY_STATE;
-         }
-         else  /* Using milliseconds   */
-         {
-            LptmrStart( max( PWRLG_SLEEP_MILLISECONDS(), 1 ), LPTMR_MILLISECONDS, LPTMR_MODE_PROGRAM_ONLY );
-            eUnits = LPTMR_MILLISECONDS;
+            if ( PWRLG_SLEEP_SECONDS() != 0 )   /* Using seconds? */
+            {
+               LptmrStart( PWRLG_SLEEP_SECONDS(), LPTMR_SECONDS, LPTMR_MODE_PROGRAM_ONLY );
+               eUnits = LPTMR_SECONDS;
+               uMode  = APP_LPM_DEEP_SW_STANDBY_STATE;
+            }
+            else  /* Using milliseconds   */
+            {
+               LptmrStart( max( PWRLG_SLEEP_MILLISECONDS(), 1 ), LPTMR_MILLISECONDS, LPTMR_MODE_PROGRAM_ONLY );
+               eUnits = LPTMR_MILLISECONDS;
 #if ( LAST_GASP_USE_2_DEEP_SLEEP == 0 )
-            uMode  = APP_LPM_SW_STANDBY_STATE;
+               uMode  = APP_LPM_SW_STANDBY_STATE;
 #else
-            uMode  = APP_LPM_DEEP_SW_STANDBY_STATE_AGT;
+               uMode  = APP_LPM_DEEP_SW_STANDBY_STATE_AGT;
 #endif
+            }
+         }
+         else /* LLS --- CSMA Backoff */
+         {
+            LG_PRNT_INFO("\nERROR:%ld\n",PWRLG_SLEEP_MILLISECONDS());
+            LptmrStart( 1, LPTMR_MILLISECONDS, LPTMR_MODE_PROGRAM_ONLY );
+            eUnits = LPTMR_MILLISECONDS;
+            uMode  = tempMode;
          }
       }
    }
-   if( ( LPTMR_MILLISECONDS == eUnits ) || ( APP_LPM_SW_STANDBY_STATE == uMode ) )
+   if( ( LPTMR_MILLISECONDS == eUnits ) || ( APP_LPM_SW_STANDBY_STATE == uMode ) || ( APP_LPM_DEEP_SW_STANDBY_STATE_AGT == uMode ) )
    {
       /* Start the AGT only when we use the AGT */
       LptmrEnable( ( bool )true );

@@ -25,9 +25,6 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#elif (RTOS_SELECTION == FREE_RTOS)
-#include "BSP_aclara.h"
-#include "hal_data.h"
 #endif
 #include "pwr_last_gasp.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -136,6 +133,7 @@ static UART_Sem          UART_semHandle[MAX_UART_ID];
 static bool              ringBufoverflow[MAX_UART_ID];
 static bool              transmitUARTEnable[MAX_UART_ID];
 static const char        CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
+static bool              dbgUartEchoEnable_ = (bool)true;
 #endif
 /* FUNCTION PROTOTYPES */
 
@@ -733,7 +731,16 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 *******************************************************************************/
 extern uint32_t UART_echo ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength )
 {
-   if ( UartId != UART_HOST_COMM_PORT )   // Echo not required for HMC - If required enable the semaphore to perform write
+
+   if ( UartId == UART_DEBUG_PORT )
+   {
+      if( dbgUartEchoEnable_ )
+      {
+         ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+         ( void )OS_SEM_Pend( &UART_semHandle[UartId].echoUART_sem, OS_WAIT_FOREVER );
+      }
+   }
+   else if ( UartId != UART_HOST_COMM_PORT ) // Echo not required for HMC - If required enable the semaphore to perform write
    {
       ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
       ( void )OS_SEM_Pend( &UART_semHandle[UartId].echoUART_sem, OS_WAIT_FOREVER );
@@ -1098,18 +1105,9 @@ uint8_t UART_SetEcho( enum_UART_ID UartId, bool val )
    }
    return UART_ioctl ( UartId, IO_IOCTL_SERIAL_SET_FLAGS, &flags ); // Update settings
 #elif ( MCU_SELECTED == RA6E1 )
-   if( UART_DEBUG_PORT == UartId )
-   {
-      if( val )
-      {
-         R_SCI4->SCR_b.RIE = 0x01; /* Enable RX Interrupts */
-      }
-      else
-      {
-         R_SCI4->SCR_b.RIE = 0x00; /* Disable RX Interrupts */
-      }
-   }
-   /* TODO: RA6E1: Do we need to support this feature for other ports? */
+
+   dbgUartEchoEnable_ = val;
+
    return val;
 #endif
 }

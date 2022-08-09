@@ -204,8 +204,9 @@ uint16_t BSP_Get_ResetStatus ( void )
 
 #else
    /* NOTE: Review Figure 5.4 Pg. No 108 of the RA6E1 HRM */
-   if ( ( R_SYSTEM->RSTSR0 == 0 ) && ( R_SYSTEM->RSTSR1 == 0 ) && ( R_SYSTEM->RSTSR2 == 0 ) )
+   if ( ( ( R_SYSTEM->RSTSR0 == 0 ) && ( R_SYSTEM->RSTSR1 == 0 ) && ( R_SYSTEM->RSTSR2 == 0 ) ) || ( R_SYSTEM->RSTSR2_b.CWSF == 1 ) )
    {
+      /* CWSF = 1 -> Warm Start: A reset signal input during operation caused the reset processing */
       ResetStatus |= RESET_SOURCE_EXTERNAL_RESET_PIN;
    }
    else
