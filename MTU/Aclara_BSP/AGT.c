@@ -267,6 +267,7 @@ returnStatus_t AGT_FreqSyncTimerStop(void)
 			}
 		}
 	}
+   (void)R_AGT_Close(&agt2_Freq_Sync_ctrl);
 	if(FSP_SUCCESS == err)
 	{
       rtnVal = eSUCCESS;
@@ -341,9 +342,9 @@ void AGT_RunTimeStatsStart(void)
 /*******************************************************************************************************************//**
  * @brief       This function stops AGT4 and AGT5 Timers
  * @param[IN]   None
- * @retval      None
+ * @retval      returnStatus_t
  **********************************************************************************************************************/
-void AGT_RunTimeStatsStop(void)
+returnStatus_t AGT_RunTimeStatsStop(void)
 {
 	fsp_err_t      err;
    timer_status_t agt_status = {0};
@@ -371,8 +372,10 @@ void AGT_RunTimeStatsStop(void)
 			}
 		}
 	}
+   (void)R_AGT_Close(&AGT4_RunTimeStats_0_ctrl);
+   (void)R_AGT_Close(&AGT5_RunTimeStats_1_ctrl);
    assert(FSP_SUCCESS == err);
-
+   return eSUCCESS;
 }
 
 /*******************************************************************************************************************//**

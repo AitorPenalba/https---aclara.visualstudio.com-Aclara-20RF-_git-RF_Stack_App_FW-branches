@@ -52,7 +52,7 @@
 /* ****************************************************************************************************************** */
 
 /* FUNCTION DEFINITIONS */
-
+#if ( PHASE_DETECTION == 1 )
 /*********************************************************************************************************************
 
    Function name: GPT_PD_Init
@@ -103,15 +103,18 @@ void GPT_PD_Enable( void )
 
    Arguments: None
 
-   Returns: None
+   Returns: eSUCCESS
 
 **********************************************************************************************************************/
-void GPT_PD_Disable( void )
+returnStatus_t GPT_PD_Disable( void )
 {
    /* Disables captures. */
    (void) R_GPT_Disable(&GPT2_ZCD_Meter_ctrl);
-}
+   (void)R_GPT_Close(&GPT1_Radio0_ICapture_ctrl);
 
+   return eSUCCESS;
+}
+#endif
 
 /*********************************************************************************************************************
 
@@ -163,13 +166,16 @@ void GPT_Radio0_Enable( void )
 
    Arguments: None
 
-   Returns: None
+   Returns: returnStatus_t
 
 **********************************************************************************************************************/
-void GPT_Radio0_Disable( void )
+returnStatus_t GPT_Radio0_Disable( void )
 {
    /* Disables captures. */
    (void) R_GPT_Disable(&GPT1_Radio0_ICapture_ctrl);
+   (void)R_GPT_Close(&GPT1_Radio0_ICapture_ctrl);
+
+   return eSUCCESS;
 }
 
 #endif

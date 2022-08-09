@@ -317,13 +317,14 @@ extern returnStatus_t AGT_FreqSyncTimerCount  (uint16_t *count);
 #if ( GENERATE_RUN_TIME_STATS == 1 )
 extern void           AGT_RunTimeStatsStart   ( void );
 extern uint32_t       AGT_RunTimeStatsCount   ( void );
+extern returnStatus_t AGT_RunTimeStatsStop    ( void );
 #endif
 extern returnStatus_t GPT_PD_Init             ( void );
 extern void           GPT_PD_Enable           ( void );
-extern void           GPT_PD_Disable          ( void );
+extern returnStatus_t GPT_PD_Disable          ( void );
 extern returnStatus_t GPT_Radio0_Init         ( void );
 extern void           GPT_Radio0_Enable       ( void );
-extern void           GPT_Radio0_Disable      ( void );
+extern returnStatus_t GPT_Radio0_Disable      ( void );
 #endif
 
 #endif /* ERROR_CODES_H_ */
