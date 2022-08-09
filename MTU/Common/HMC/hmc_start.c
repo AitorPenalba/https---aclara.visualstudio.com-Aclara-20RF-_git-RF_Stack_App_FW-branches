@@ -432,7 +432,7 @@ static void startTimer( uint32_t tmr_mS );
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
-#if 0
+
 /***********************************************************************************************************************
 
    Function name: encryptBuffer
@@ -455,7 +455,7 @@ static void encryptBuffer( uint8_t *dest, uint8_t *src, int32_t size, uint8_t ke
    (void)wc_AesSetKey( &aes, key, (uint32_t)ECC108_KEY_SIZE, iv, AES_ENCRYPTION );
    (void)wc_AesCbcEncrypt( &aes, dest, src, (uint32_t)size );
 }
-#endif
+
 /***********************************************************************************************************************
 
    Function name: decryptBuffer

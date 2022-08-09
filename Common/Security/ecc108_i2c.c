@@ -96,9 +96,9 @@ enum i2c_read_write_flag {
    I2C_WRITE = (uint8_t) 0x00,  //!< write command flag
    I2C_READ  = (uint8_t) 0x01   //!< read command flag
 };
-#if 0
+#if ( MCU_SELECTED == NXP_K24 )
 //! I2C address is set when calling #ecc108p_init or #ecc108p_set_device_id.
-static uint8_t device_address = 0;
+static uint8_t device_address;
 
 /** \brief This function sets the I2C address.
  *         Communication functions will use this address.

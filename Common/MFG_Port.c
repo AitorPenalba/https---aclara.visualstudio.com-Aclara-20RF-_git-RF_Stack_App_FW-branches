@@ -221,8 +221,6 @@
 static uint16_t         MFGP_CmdLen;
 static char             MFGP_CommandBuffer[MFGP_MAX_MFG_COMMAND_CHARS + 1];
 static uint16_t         MFGP_numBytes = 0;               /* Number of bytes currently in the command buffer */
-//static char             MFGP_PrintCmdBuffer[MFGP_MAX_MFG_COMMAND_CHARS + 1];
-//static uint16_t         MFGP_numPrintBytes = 0;               /* Number of bytes currently in the command buffer */
 static char           * argvar[MFGP_MAX_CMDLINE_ARGS + 1];
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
 static enum_UART_ID mfgUart = UART_MANUF_TEST;           /* UART used for MFG port operations   */
