@@ -114,7 +114,6 @@ static const req_handler_t GetHandlers[] =
    { ENDPT_CIM_CMD_OR_PM_Handler, comDeviceFirmwareVersion },
    { ENDPT_CIM_CMD_OR_PM_Handler, comDeviceHardwareVersion },
    { ENDPT_CIM_CMD_OR_PM_Handler, comDeviceMACAddress },
-   { ENDPT_CIM_CMD_OR_PM_Handler, comDeviceMicroMPN },
    { NULL , invalidReadingType }
 };
 
