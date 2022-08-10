@@ -478,10 +478,10 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
          if ( pBuf->x.flag.inQueue )
          {
             // The buffer is in use.
-#if 1
+#if ( MCU_SELECTED == RA6E1 )
             DBG_LW_printf( "\nERROR: BM_alloc got a buffer marked as in used (pending on a queue). Size: %u, pool = %u, addr=0x%p\n"
                         "ERROR: BM_alloc called from %s:%d", minSize, pool, pBuf, file, line );
-#else
+#elif  ( MCU_SELECTED == NXP_K24 ) || ( DCU == 1 ) )
             DBG_printf( "\nERROR: BM_alloc got a buffer marked as in used (pending on a queue). Size: %u, pool = %u, addr=0x%p\n"
                         "ERROR: BM_alloc called from %s:%d", minSize, pool, pBuf, file, line );
 #endif
