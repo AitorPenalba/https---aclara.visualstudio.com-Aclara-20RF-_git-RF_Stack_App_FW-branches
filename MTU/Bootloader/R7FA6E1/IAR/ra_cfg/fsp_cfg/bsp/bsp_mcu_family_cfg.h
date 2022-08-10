@@ -43,7 +43,7 @@
 
             /* CMSIS TrustZone Settings */
             #define SCB_CSR_AIRCR_INIT                (1)
-            #define SCB_AIRCR_BFHFNMINS_VAL           (0)
+            #define SCB_AIRCR_BFHFNMINS_VAL           (1)
             #define SCB_AIRCR_SYSRESETREQS_VAL        (1)
             #define SCB_AIRCR_PRIS_VAL                (0)
             #define TZ_FPU_NS_USAGE                   (1)
@@ -118,7 +118,7 @@
 #ifndef BSP_TZ_CFG_PSARE
 #define BSP_TZ_CFG_PSARE (\
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 0) /* WDT */ | \
-            (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 1) /* IWDT */ | \
+            (((1 > 0) ? 0U : 1U) << 1) /* IWDT */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 2) /* RTC */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 14) /* AGT5 */ | \
             (((RA_NOT_DEFINED > 0) ? 0U : 1U) << 15) /* AGT4 */ | \
@@ -210,7 +210,7 @@
 
             /* Security attribution for NMI registers. */
 #ifndef BSP_TZ_CFG_ICUSARB
-#define BSP_TZ_CFG_ICUSARB (0 | 0xFFFFFFFEU) /* Should match AIRCR.BFHFNMINS. */
+#define BSP_TZ_CFG_ICUSARB (1 | 0xFFFFFFFEU) /* Should match AIRCR.BFHFNMINS. */
 #endif
 
             /* Security attribution for registers for DMAC channels */
@@ -294,8 +294,8 @@
 #endif
 
 
-            #define OFS_SEQ1 0xA001A001 | (1 << 1) | (3 << 2)
-            #define OFS_SEQ2 (15 << 4) | (3 << 8) | (3 << 10)
+            #define OFS_SEQ1 0xA001A001 | (0 << 1) | (3 << 2)
+            #define OFS_SEQ2 (5 << 4) | (3 << 8) | (3 << 10)
             #define OFS_SEQ3 (1 << 12) | (1 << 14) | (1 << 17)
             #define OFS_SEQ4 (3 << 18) |(15 << 20) | (3 << 24) | (3 << 26)
             #define OFS_SEQ5 (1 << 28) | (1 << 30)

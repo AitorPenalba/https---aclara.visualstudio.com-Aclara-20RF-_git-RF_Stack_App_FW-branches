@@ -343,6 +343,14 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$\..\..\..\..\Common</state>
+                    <state>$PROJ_DIR$\..\..\..\..\Common\driver</state>
+                    <state>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\OS_AL</state>
+                    <state>$PROJ_DIR$\..\..\Include</state>
+                    <state>$PROJ_DIR$\..</state>
+                    <state>$PROJ_DIR$\..\..\..\Common\BuildConfig\RA6_FreeRTOS</state>
+                    <state>$PROJ_DIR$\..\..\..\Aclara_BSP</state>
+                    <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -614,6 +622,7 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
@@ -678,7 +687,7 @@
             <archiveVersion>1</archiveVersion>
             <data>
                 <prebuild></prebuild>
-                <postbuild></postbuild>
+                <postbuild>cmd /c ""$RASC_EXE_PATH$" --gensecurebundle --compiler IAR "$PROJ_DIR$\configuration.xml" "$TARGET_PATH$" 2&gt; "%TEMP%\rasc_stderr.out""</postbuild>
             </data>
         </settings>
         <settings>
@@ -1412,6 +1421,7 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1683,6 +1693,7 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
@@ -2161,7 +2172,16 @@
                 <name>$PROJ_DIR$\ra_cfg\fsp_cfg\bsp\bsp_pin_cfg.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\r_flash_hp_cfg.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\ra_cfg\fsp_cfg\r_ioport_cfg.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\r_iwdt_cfg.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra_cfg\driver\r_qspi_cfg.h</name>
             </file>
         </group>
         <group>
@@ -2347,6 +2367,18 @@
                 <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\pmu_armv8.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\api\r_cgc_api.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\api\r_flash_api.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\src\r_flash_hp\r_flash_hp.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\instances\r_flash_hp.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\ra\fsp\src\r_ioport\r_ioport.c</name>
             </file>
             <file>
@@ -2354,6 +2386,24 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\ra\fsp\inc\api\r_ioport_api.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\src\r_iwdt\r_iwdt.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\instances\r_iwdt.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\src\r_qspi\r_qspi.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\instances\r_qspi.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\api\r_spi_flash_api.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\api\r_wdt_api.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include\renesas.h</name>
@@ -2407,6 +2457,81 @@
                 <name>$PROJ_DIR$\src\hal_entry.c</name>
             </file>
         </group>
+    </group>
+    <group>
+        <name>Include</name>
+        <file>
+            <name>$PROJ_DIR$\..\..\Include\features.h</name>
+        </file>
+    </group>
+    <group>
+        <name>R7FA6E1</name>
+        <file>
+            <name>$PROJ_DIR$\..\hal.h</name>
+        </file>
+    </group>
+    <group>
+        <name>Source</name>
+        <file>
+            <name>$PROJ_DIR$\..\..\bootloader_main_BL.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\Aclara_BSP\BSP_aclara_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\byteswap.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\byteswap.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\crc32.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\crc32.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\driver\dvr_extflash_BL.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\driver\dvr_extflash_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\driver\dvr_sharedMem_BL.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\driver\dvr_sharedMem_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\driver\IF_intFlash_BL.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\driver\IF_intFlash_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\invert_bits.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\invert_bits.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\partitions_BL.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\partitions_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\Common\project_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\Aclara_BSP\sys_clock_BL.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\Aclara_BSP\sys_clock_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\Aclara_BSP\WDOG_BL.c</name>
+        </file>
     </group>
     <file>
         <name>$PROJ_DIR$\buildinfo.ipcf</name>

@@ -26,7 +26,7 @@
     </config>
     <config id="config.bsp.ra6e1.fsp">
       <property id="config.bsp.fsp.tz.exception_response" value="config.bsp.fsp.tz.exception_response.nmi"/>
-      <property id="config.bsp.fsp.tz.cmsis.bfhfnmins" value="config.bsp.fsp.tz.cmsis.bfhfnmins.secure"/>
+      <property id="config.bsp.fsp.tz.cmsis.bfhfnmins" value="config.bsp.fsp.tz.cmsis.bfhfnmins.nonsecure"/>
       <property id="config.bsp.fsp.tz.cmsis.sysresetreqs" value="config.bsp.fsp.tz.cmsis.sysresetreqs.secure_only"/>
       <property id="config.bsp.fsp.tz.cmsis.s_priority_boost" value="config.bsp.fsp.tz.cmsis.s_priority_boost.disabled"/>
       <property id="config.bsp.fsp.tz.csar" value="config.bsp.fsp.tz.csar.both"/>
@@ -38,9 +38,9 @@
       <property id="config.bsp.fsp.tz.bussara" value="config.bsp.fsp.tz.bussara.both"/>
       <property id="config.bsp.fsp.tz.bussarb" value="config.bsp.fsp.tz.bussarb.both"/>
       <property id="config.bsp.fsp.cache_line_size" value="config.bsp.fsp.cache_line_size.32"/>
-      <property id="config.bsp.fsp.OFS0.iwdt_start_mode" value="config.bsp.fsp.OFS0.iwdt_start_mode.disabled"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_start_mode" value="config.bsp.fsp.OFS0.iwdt_start_mode.enabled"/>
       <property id="config.bsp.fsp.OFS0.iwdt_timeout" value="config.bsp.fsp.OFS0.iwdt_timeout.2048"/>
-      <property id="config.bsp.fsp.OFS0.iwdt_divisor" value="config.bsp.fsp.OFS0.iwdt_divisor.128"/>
+      <property id="config.bsp.fsp.OFS0.iwdt_divisor" value="config.bsp.fsp.OFS0.iwdt_divisor.256"/>
       <property id="config.bsp.fsp.OFS0.iwdt_window_end" value="config.bsp.fsp.OFS0.iwdt_window_end.0"/>
       <property id="config.bsp.fsp.OFS0.iwdt_window_start" value="config.bsp.fsp.OFS0.iwdt_window_start.100"/>
       <property id="config.bsp.fsp.OFS0.iwdt_reset_interrupt" value="config.bsp.fsp.OFS0.iwdt_reset_interrupt.Reset"/>
@@ -154,6 +154,18 @@
       <description>Custom Board Support Files</description>
       <originalPack>Renesas.RA_board_custom.3.5.0.pack</originalPack>
     </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_flash_hp" variant="" vendor="Renesas" version="3.5.0">
+      <description>Flash Memory High Performance</description>
+      <originalPack>Renesas.RA.3.5.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_iwdt" variant="" vendor="Renesas" version="3.5.0">
+      <description>Independent Watchdog Timer</description>
+      <originalPack>Renesas.RA.3.5.0.pack</originalPack>
+    </component>
+    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_qspi" variant="" vendor="Renesas" version="3.5.0">
+      <description>Quad Serial Peripheral Interface Flash</description>
+      <originalPack>Renesas.RA.3.5.0.pack</originalPack>
+    </component>
   </raComponentSelection>
   <raElcConfiguration/>
   <raIcuConfiguration/>
@@ -170,11 +182,61 @@
       <property id="module.driver.ioport.elc_trigger_ioporte" value="_disabled"/>
       <property id="module.driver.ioport.pincfg" value="g_bsp_pin_cfg"/>
     </module>
+    <module id="module.driver.flash_on_flash_hp.460768562">
+      <property id="module.driver.flash.name" value="g_flash0"/>
+      <property id="module.driver.flash.data_flash_bgo" value="module.driver.flash.data_flash_bgo.disabled"/>
+      <property id="module.driver.flash.p_callback" value="NULL"/>
+      <property id="module.driver.flash.ipl" value="_disabled"/>
+      <property id="module.driver.flash.err_ipl" value="_disabled"/>
+    </module>
+    <module id="module.driver.watchdog_on_iwdt.1331542804">
+      <property id="module.driver.watchdog.name" value="g_wdt0"/>
+      <property id="module.driver.watchdog.nmi_callback" value="NULL"/>
+    </module>
+    <module id="module.driver.qspi_on_qspi.1182982543">
+      <property id="module.driver.qspi.name" value="g_qspi0"/>
+      <property id="module.driver.qspi.spi_protocol" value="module.driver.qspi.spi_protocol.protocol_extended_spi"/>
+      <property id="module.driver.qspi.address_bytes" value="module.driver.qspi.address_bytes.address_bytes_3"/>
+      <property id="module.driver.qspi.read_mode" value="module.driver.qspi.read_mode.read_mode_standard"/>
+      <property id="module.driver.qspi.dummy_clocks" value="module.driver.qspi.dummy_clocks.dummy_clocks_default"/>
+      <property id="module.driver.qspi.page_size_bytes" value="256"/>
+      <property id="module.driver.qspi.page_program_command" value="0x02"/>
+      <property id="module.driver.qspi.page_program_address_lines" value="module.driver.qspi.page_program_address_lines.data_lines_1"/>
+      <property id="module.driver.qspi.write_enable_command" value="0x06"/>
+      <property id="module.driver.qspi.status_command" value="0x05"/>
+      <property id="module.driver.qspi.write_status_bit" value="0"/>
+      <property id="module.driver.qspi.sector_erase_command" value="0x20"/>
+      <property id="module.driver.qspi.sector_erase_size" value="4096"/>
+      <property id="module.driver.qspi.block_erase_command" value="0xD8"/>
+      <property id="module.driver.qspi.block_erase_size" value="65536"/>
+      <property id="module.driver.qspi.block_erase_32kb_command" value="0x52"/>
+      <property id="module.driver.qspi.block_erase_32kb_size" value="32768"/>
+      <property id="module.driver.qspi.chip_erase_command" value="0xC7"/>
+      <property id="module.driver.qspi.xip_enter_command" value="0x20"/>
+      <property id="module.driver.qspi.xip_exit_command" value="0xFF"/>
+      <property id="module.driver.qspi.qspclk_div" value="module.driver.qspi.qspclk_div.qspclk_div_2"/>
+      <property id="module.driver.qspi.min_qssl_deselect_cycles" value="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_4_qspclk"/>
+    </module>
     <context id="_hal.0">
       <stack module="module.driver.ioport_on_ioport.0"/>
+      <stack module="module.driver.flash_on_flash_hp.460768562"/>
+      <stack module="module.driver.watchdog_on_iwdt.1331542804"/>
+      <stack module="module.driver.qspi_on_qspi.1182982543"/>
     </context>
+    <config id="config.driver.iwdt">
+      <property id="config.driver.iwdt.param_checking_enable" value="config.driver.iwdt.param_checking_enable.bsp"/>
+    </config>
+    <config id="config.driver.flash_hp">
+      <property id="config.driver.flash_hp.param_checking_enable" value="config.flash_hp.param_checking_enable.bsp"/>
+      <property id="config.driver.flash_hp.param_code_flash_programming_enable" value="config.driver.flash_hp.param_code_flash_programming_enable.enabled"/>
+      <property id="config.driver.flash_hp.param_data_flash_programming_enable" value="config.driver.flash_hp.param_data_flash_programming_enable.disabled"/>
+    </config>
     <config id="config.driver.ioport">
       <property id="config.driver.ioport.checking" value="config.driver.ioport.checking.system"/>
+    </config>
+    <config id="config.driver.qspi">
+      <property id="config.driver.qspi.param_checking_enable" value="config.driver.qspi.param_checking_enable.bsp"/>
+      <property id="config.driver.qspi.extended_spi_multi_line_program" value="config.driver.qspi.extended_spi_multi_line_program.disabled"/>
     </config>
   </raModuleConfiguration>
   <raPinConfiguration>
