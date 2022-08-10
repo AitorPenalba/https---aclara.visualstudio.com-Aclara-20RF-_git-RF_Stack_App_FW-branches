@@ -65,7 +65,7 @@
 #if ( LAST_GASP_SIMULATION == 1 )
 #include "EVL_event_log.h"
 #endif
-#if ( LG_WORST_CASE_TEST == 1 )
+#if ( MCU_SELECTED == RA6E1 )
 #include "PHY.h"
 #endif
 
@@ -439,6 +439,10 @@ void PWRLG_Task( taskParameter )
             if ( !TxSuccessful )
             {
                RDO_PA_EN_OFF();  /* Disable the Radio PA  */
+#if ( MCU_SELECTED == RA6E1 )    /* TODO: K24: Add this change to the K24 units */
+               /* Change the radio mode to STANDBY which results in lower power */
+               (void)PHY_StartRequest( ( PHY_START_e )ePHY_START_STANDBY, NULL );
+#endif
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
                // Option 2
                TRACE_D1_LOW();
@@ -450,7 +454,6 @@ void PWRLG_Task( taskParameter )
             else
             {
                DBG_logPrintf('I', "TxSuccesss ");
-               //LG_PRNT_INFO("\n\rTxSuccesss\n");
             }
          }
 
@@ -1591,7 +1594,6 @@ static void HardwareShutdown( void )
 #if ( PWRLG_PRINT_ENABLE == 1 )
    /* Enable the DBG UART pins for Printing */
    ( void )R_IOPORT_PinCfg(&g_ioport_ctrl, UART4_TX_DBG, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_SCI0_2_4_6_8));
-   ( void )R_IOPORT_PinCfg(&g_ioport_ctrl, UART4_RX_DBG, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_SCI0_2_4_6_8));
 #endif
 
 #endif  //#if ( MCU_SELECTED == NXP_K24 )

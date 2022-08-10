@@ -19,21 +19,18 @@
  **********************************************************************************************************************/
 
 #include "project.h"
-#include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#elif ( RTOS_SELECTION == FREE_RTOS )
-#include "OS_aclara.h"
 #endif
-#include "compileswitch.h"
+#include "CompileSwitch.h"
 #include "compiler_types.h"
 #include "buffer.h"
 #include "PHY_Protocol.h"
-#include "phy.h"
-#include "mac.h"
+#include "PHY.h"
+#include "MAC.h"
 #include "time_sys.h"
 #include "radio.h"
 #include "radio_hal.h"
@@ -44,7 +41,7 @@
 #include "DBG_SerialDebug.h"
 #include "time_util.h"
 #include "ascii.h"
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
 #include "gpio.h"
 #endif
 #include "rs.h"
@@ -54,7 +51,9 @@
 #if ( EP == 1 )
 #include "spi_mstr.h"
 #include "SoftDemodulator.h"
+#if ( MCU_SELECTED == NXP_K24 )
 #include "FTM.h"
+#endif
 #if ( PHASE_DETECTION == 1 )
 #include "PhaseDetect.h"
 #endif
@@ -70,6 +69,7 @@
 #include "SM_Protocol.h"
 #include "SM.h"
 #endif
+
 
 /*****************************************************************************
  *  Local Macros & Definitions
@@ -181,6 +181,7 @@ static uint32_t iCapture_overflows = 0U;
 static void Radio0_IRQ_ISR(void);
 #elif ( MCU_SELECTED == RA6E1 )
 void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
+extern uint8_t PWRLG_LastGasp(void);
 #endif
 
 #if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
@@ -5967,6 +5968,12 @@ static void StandbyRx(void)
    // On the samwise board, the first radio (0) is configured with the RX Channel ( outbound channel )
    // On the frodo board, the first radio (0) is configured with the TX Channel
    // The remaining radios (1-8) are configured with the RX Channels
+#if ( EP == 1 )
+#if ( MCU_SELECTED == RA6E1 )  /* TODO: Remove this conditional. Only here to make the Hex compare happy */
+   if( PWRLG_LastGasp() == false )
+#endif
+#endif
+   {
    for(radioNum = (uint8_t)RADIO_FIRST_RX; radioNum < PHY_RCVR_COUNT; radioNum++)
    {
       // Is radio configured?
@@ -5985,6 +5992,15 @@ static void StandbyRx(void)
          }
       }
    }
+   }
+#if ( EP == 1 )
+#if ( MCU_SELECTED == RA6E1 ) /* TODO: Remove this conditional. Only here to make the Hex compare happy */
+   else
+   {
+      (void)si446x_change_state(radioNum, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_SLEEP);  // Force standby state
+   }
+#endif
+#endif
 }
 
 /*!
