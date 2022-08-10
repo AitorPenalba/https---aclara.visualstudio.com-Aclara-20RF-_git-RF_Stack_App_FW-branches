@@ -66,6 +66,9 @@ uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_IntFlash_ErasePartition( uint32_t argc, char *argv[] );
+#if ( MCU_SELECTED == RA6E1 )
+uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv[] );
+#endif
 uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] );
 #endif
 

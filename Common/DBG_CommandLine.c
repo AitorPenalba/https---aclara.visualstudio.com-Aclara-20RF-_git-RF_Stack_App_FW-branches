@@ -866,6 +866,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "intflashtestread",  DBG_CommandLine_IntFlash_ReadPartition,     "Reads Partition for Test in Internal Flash" },
    { "intflashtestwrite",  DBG_CommandLine_IntFlash_WritePartition,     "Writes Partition for Test in Internal Flash" },
    { "intflashtesterase",  DBG_CommandLine_IntFlash_ErasePartition,     "Erases Partition for Test in Internal Flash" },
+#if ( MCU_SELECTED == RA6E1 )
+   { "intflashtestblankcheck",  DBG_CommandLine_IntFlash_BlankCheckPartition,     "Blank check Partition for Test in Internal Flash" },
+#endif
    { "intflashtestclose",  DBG_CommandLine_IntFlash_ClosePartition,     "Close Partition for Test in Internal Flash" },
 #endif
 #if ( TM_LINKED_LIST == 1)
@@ -2655,7 +2658,7 @@ uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] )
          sizeofData = ( addressOffset + sizeToRead ) - 1;
          if ( ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE ) )
          {
-            if( sizeofData < INTERNAL_FLASH_SECTOR_SIZE ) 
+            if( sizeofData < INTERNAL_FLASH_SECTOR_SIZE )
             {
                /* Clearing the Previous read data */
                memset( userDataRead, '\0', sizeof(userDataRead) );
@@ -2892,6 +2895,101 @@ uint32_t DBG_CommandLine_IntFlash_ErasePartition( uint32_t argc, char *argv[] )
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_IntFlash_ErasePartition() */
+
+#if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_BlankCheckPartition
+
+   Purpose: This function blank checks the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   lAddr addressOffset;
+   lCnt sizeToBlankCheck;
+   uint32_t sizeofData;
+   uint8_t parSelection;
+   PartitionData_t const *partitionHandle;
+   if ( argc == 4 )
+   {
+      /* The number of arguments must be 3 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
+      addressOffset = ( lAddr )strtol( argv[2], NULL, 16 );
+      sizeToBlankCheck = ( lCnt )atoi ( argv[3] );
+      if( sizeToBlankCheck < MAX_INTERNAL_FLASH_READ_SIZE )
+      {
+         /* Getting the Last address to read */
+         sizeofData = ( addressOffset + sizeToBlankCheck ) - 1;
+         if ( ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE ) )
+         {
+            if( sizeofData < INTERNAL_FLASH_SECTOR_SIZE )
+            {
+               if ( parSelection == 0 )
+               {
+                  partitionHandle = pTM_IntFlashEncryptKeyPart_;
+               }
+               else if ( parSelection == 1 )
+               {
+                  partitionHandle = pTM_IntFlashDfwBlInfoPart_;
+               }
+               else
+               {
+                  DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+                  return ( uint32_t )retVal;
+               }
+               if( partitionHandle != NULL )
+               {
+                  if ( eSUCCESS == PAR_partitionFptr.parBlankCheck( addressOffset,
+                                                                    sizeToBlankCheck,
+                                                                    partitionHandle ) )
+                  {
+                     DBG_logPrintf( 'R', "InternalFlash_Success Blank check Test Success" );
+                     retVal = eSUCCESS;
+                  }
+                  else
+                  {
+                     DBG_logPrintf( 'E', "InternalFlash_Failure Blank check Test Failure" );
+                  }
+               }
+               else
+               {
+                  DBG_logPrintf( 'R', "Invalid_Argument partition is not opened" );
+               }
+            }
+            else
+            {
+               DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+            }
+         }
+         else
+         {
+            DBG_logPrintf( 'E', "ERROR - Invalid_Argument Size to Read should be less than 0x2000" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "ERROR - Invalid_Argument Address to Read should be less than 0x2000" );
+      }
+   }
+   else if ( argc < 4 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestread <partition> <offset> <SizeToRead>" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestread <partition> <offset> <SizeToRead>" );
+   }
+
+   return ( uint32_t )retVal;
+}
+#endif
 
 /*******************************************************************************
 

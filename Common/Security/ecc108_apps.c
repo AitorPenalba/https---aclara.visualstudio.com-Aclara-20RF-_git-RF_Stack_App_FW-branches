@@ -1040,6 +1040,7 @@ void ecc108e_InitKeys( void )
 #if ( EP == 1 )
    /* Now check the host password key and generate, if necessary. */
    key = (uint8_t *)secROM.hostPasswordKey.key;
+#if ( MCU_SELECTED == NXP_K24 )
    for ( keyID = 0; keyID < sizeof( intROM.hostPasswordKey.key ); keyID++ )
    {
       if ( *( key + keyID ) != 0xff )  /* Found non-blank byte in key; key is considered valid. */
@@ -1047,6 +1048,13 @@ void ecc108e_InitKeys( void )
          hpkValid = (bool)true;
       }
    }
+#elif ( MCU_SELECTED == RA6E1 )
+   if ( eSUCCESS != PAR_partitionFptr.parBlankCheck( ( uint32_t ) key, sizeof( intROM.hostPasswordKey.key ), pPart) )
+   {
+      hpkValid = true;
+   }
+#endif
+
    if ( !hpkValid )
    {  /* The hostPasswordKey is invalid; generate a new one.   */
       (void)random( (bool)false, hpk );
