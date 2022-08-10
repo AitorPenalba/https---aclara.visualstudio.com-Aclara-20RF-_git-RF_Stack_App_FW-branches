@@ -117,6 +117,9 @@ ReadingsValueTypecast ENDPT_CIM_CMD_getDataType( meterReadingType RdgType )
       case comDeviceType:   // Official Field Equipment Type
          rdgTypeDataType = ASCIIStringValue;
          break;
+      case comDeviceMicroMPN:   // Official Field Equipment Type
+         rdgTypeDataType = ASCIIStringValue;
+         break;
       case demandPresentConfiguration:   // Demand Present Configuration
          rdgTypeDataType = uintValue;
          break;
@@ -255,6 +258,9 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getStrValue( meterReadingType RdgType,
          break;
       case comDeviceType:   // Official Field Equipment Type
          retVal = ENDPT_CIM_CMD_getComDeviceType((char *)valBuff, valBuffSize, readingLeng);
+         break;
+      case comDeviceMicroMPN:   // Official Field Equipment Type
+         retVal = ENDPT_CIM_CMD_getComDevicePartNumber((char *)valBuff, valBuffSize, readingLeng);
          break;
       default:
          retVal = CIM_QUALCODE_KNOWN_MISSING_READ;
@@ -462,7 +468,7 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getCommMACID( uint64_t *fullMacAddr )
 
 /***********************************************************************************************************************
  *
- * Function name: ENDPT_CIM_CMD_comDeviceType
+ * Function name: ENDPT_CIM_CMD_getComDeviceType
  *
  * Purpose: Gets the Communication device MACID
  *
@@ -486,6 +492,34 @@ enum_CIM_QualityCode ENDPT_CIM_CMD_getComDeviceType( char *devTypeBuff, uint8_t 
    (void)strncpy (devTypeBuff, pDevType, devTypeBuffSize);
    devTypeBuff[devTypeBuffSize-1] = '\0';   // ensure the buffer is null-terminated
    *devTypeLeng = (uint8_t)strlen(devTypeBuff);
+   return CIM_QUALCODE_SUCCESS;
+}
+
+/***********************************************************************************************************************
+ *
+ * Function name: ENDPT_CIM_CMD_getComDevicePartNumber
+ *
+ * Purpose: Gets the Communication device PartNumber
+ *
+ * Arguments: char *devPartNumberBuff: Comm device PartNumber (includes the trailing null)
+ *            uint8_t devPartNumberBuffSize: The size of devPartNumberBuff, into which the value will be copied, including the
+ *                                     trailing null
+ *            uint8_t *devPartNumberLeng: The number of bytes in the returned device PartNumber, not including the trailing null
+ *
+ * Returns: enum_CIM_QualityCode SUCCESS/FAIL indication
+ *
+ * Side effects: N/A
+ *
+ * Reentrant: Yes
+ *
+ **********************************************************************************************************************/
+enum_CIM_QualityCode ENDPT_CIM_CMD_getComDevicePartNumber( char *devPartNumberBuff, uint8_t devPartNumberBuffSize, uint8_t *devPartNumberLeng )
+{
+   char const *pDevPartNumber;
+   pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
+   (void)strncpy (devPartNumberBuff, pDevPartNumber, devPartNumberBuffSize);
+   devPartNumberBuff[devPartNumberBuffSize - 1] = '\0';   // ensure the buffer is null-terminated
+   *devPartNumberLeng = (uint8_t)strlen(devPartNumberBuff);
    return CIM_QUALCODE_SUCCESS;
 }
 
@@ -854,6 +888,25 @@ returnStatus_t ENDPT_CIM_CMD_OR_PM_Handler( enum_MessageMethod action, meterRead
                   attr->rValLen = (uint16_t)sizeof(RegistrationInfo.registrationStatus);
                   attr->rValTypecast = (uint8_t)Boolean;
                }
+            }
+            break;
+         }
+         case comDeviceMicroMPN :
+         {
+            uint8_t numberOfBytes = 0; //store length of string returned
+            uint8_t strBuffer[PARTNUMBER_BUFFER_SIZE + 1]; //store string returned
+            (void) memset( strBuffer, 0, PARTNUMBER_BUFFER_SIZE );
+
+            if ( PARTNUMBER_BUFFER_SIZE <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
+            {   //The reading will fit in the buffer
+                (void)ENDPT_CIM_CMD_getStrValue( id, strBuffer, sizeof( strBuffer ), &numberOfBytes );
+                (void)memcpy( (char *)value, strBuffer, numberOfBytes );
+                retVal = eSUCCESS;
+                if ( attr != NULL )
+                {
+                   attr->rValLen = numberOfBytes;
+                   attr->rValTypecast = (uint8_t)ASCIIStringValue;
+                }
             }
             break;
          }

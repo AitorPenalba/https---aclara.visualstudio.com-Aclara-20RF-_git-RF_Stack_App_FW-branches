@@ -311,6 +311,7 @@
 #define TM_CRC_UNIT_TEST                  1
 #define TM_TIME_COMPOUND_TEST             1
 #define TM_OS_EVENT_TEST                  1 /* Test the time compound functions */
+#define TM_INTERNAL_FLASH_TEST            1
 #define TM_BSP_SW_DELAY                   1 /* Tests the Renesas R_BSP_SoftwareDelay function */
 #define TM_ENHANCE_NOISEBAND_FOR_RA6E1    1 /* Enhancements to Noiseband: 1MHz clock test, list frequencies, control GPIO pins, extra HMC traffic */
 #define TM_DELAY_FOR_TACKED_ON_LED        0 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
@@ -320,6 +321,7 @@
 #define TM_INSTRUMENT_NOISEBAND_TIMING    0 /* Adds instrumentation of noiseband timing to determine if there are bugs */
 #define TM_TEST_SECURITY_CHIP             0 /* More extensieve test code for security chip that was disabled in the K24 starting point DOES NOT COMPILE! */
 #define TM_UART_EVENT_COUNTERS            1 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
+#define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  1 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
 #if ( TM_UART_EVENT_COUNTERS == 1 )
 #define TM_UART_COUNTER_INC(x) (x)++
 #else

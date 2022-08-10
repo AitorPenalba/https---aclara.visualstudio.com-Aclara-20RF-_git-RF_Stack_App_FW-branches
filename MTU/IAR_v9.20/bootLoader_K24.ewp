@@ -337,7 +337,7 @@
                 <option>
                     <name>CCIncludePath2</name>
                     <state>$TOOLKIT_DIR$\inc\NXP</state>
-                    <state>$PROJ_DIR$\..\BootLoader\BuildConfig</state>
+                    <state>$PROJ_DIR$\..\Bootloader\Include</state>
                     <state>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX</state>
                     <state>$PROJ_DIR$\..\TargetBuildConfigs\I210+C</state>
                     <state>$PROJ_DIR$\..\TargetBuildConfigs\I210+C\K24</state>
@@ -796,7 +796,7 @@
                 </option>
                 <option>
                     <name>IlinkExtraOptions</name>
-                    <state>--config_search $PROJ_DIR$\..\Bootloader\BuildConfig</state>
+                    <state>--config_search $PROJ_DIR$\..\Bootloader\MK24F12</state>
                 </option>
                 <option>
                     <name>IlinkLowLevelInterfaceSlave</name>
@@ -1068,76 +1068,82 @@
         </settings>
     </configuration>
     <group>
-        <name>BuildConfig</name>
+        <name>Include</name>
         <file>
-            <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara.h</name>
+            <name>$PROJ_DIR$\..\Aclara_BSP\BSP_aclara_BL.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\cfg_app.h</name>
+            <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\cfg_app_BL.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\BootLoader\Include\meter.h</name>
+            <name>$PROJ_DIR$\..\Bootloader\Include\features.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\partition_cfg.h</name>
+            <name>$PROJ_DIR$\..\Common\BuildConfig\K24_MQX\partition_cfg_BL.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Common\project.h</name>
+            <name>$PROJ_DIR$\..\..\Common\project_BL.h</name>
+        </file>
+    </group>
+    <group>
+        <name>MK24F12</name>
+        <file>
+            <name>$PROJ_DIR$\..\Bootloader\MK24F12\boot_BL.S</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Bootloader\MK24F12\vectors_BL.c</name>
         </file>
     </group>
     <file>
-        <name>$PROJ_DIR$\..\BootLoader\boot.S</name>
+        <name>$PROJ_DIR$\..\Bootloader\bootloader_main_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\BootLoader\bootloader_main.c</name>
+        <name>$PROJ_DIR$\..\..\Common\byteswap_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\byteswap.c</name>
+        <name>$PROJ_DIR$\..\..\Common\byteswap_BL.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\byteswap.h</name>
+        <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.c</name>
+        <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash_BL.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\driver\dvr_extflash.h</name>
+        <name>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.c</name>
+        <name>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem_BL.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\driver\dvr_sharedMem.h</name>
+        <name>$PROJ_DIR$\..\..\Common\driver\IF_intFlash_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.c</name>
+        <name>$PROJ_DIR$\..\..\Common\driver\IF_intFlash_BL.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\driver\IF_intFlash.h</name>
+        <name>$PROJ_DIR$\..\..\Common\invert_bits_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>
+        <name>$PROJ_DIR$\..\..\Common\invert_bits_BL.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\invert_bits.h</name>
+        <name>$PROJ_DIR$\..\..\Common\partitions_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\partitions.c</name>
+        <name>$PROJ_DIR$\..\..\Common\partitions_BL.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\driver\spi_mstr.c</name>
+        <name>$PROJ_DIR$\..\..\Common\driver\spi_mstr_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\..\Common\driver\spi_mstr.h</name>
+        <name>$PROJ_DIR$\..\..\Common\driver\spi_mstr_BL.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock.c</name>
+        <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock_BL.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock.h</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\..\BootLoader\vectors.c</name>
+        <name>$PROJ_DIR$\..\Aclara_BSP\sys_clock_BL.h</name>
     </file>
     <file>
         <name>$PROJ_DIR$\..\Common\version.c</name>
@@ -1146,6 +1152,6 @@
         <name>$PROJ_DIR$\..\Common\version.h</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\..\Aclara_BSP\WDOG.c</name>
+        <name>$PROJ_DIR$\..\Aclara_BSP\WDOG_BL.c</name>
     </file>
 </project>

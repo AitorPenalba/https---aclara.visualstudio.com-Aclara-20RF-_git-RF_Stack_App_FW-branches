@@ -84,19 +84,6 @@
                                                1 - RADIO_Temperature_Get : This function will only be used in the K24 implementation.
                                                                            It will therefore call ADC_Get_uP_Temperature if the soft demodulator is active*/
 
-
-/* TODO: RA6: Move the following to Appropriate module */
-#define BARE_METAL                        0
-#ifdef __mqx_h__
-   #define MQX_RTOS                       1
-#endif
-#define FREE_RTOS                         2
-
-#define RTOS_SELECTION                    FREE_RTOS /* 0 = Bare Metal, 1 = MQX , 2 = FreeRTOS */
-// TODO: RA6 [name_Balaji]: Move to Appropriate location
-#define NXP_K24                           1
-#define RA6E1                             2
-#define MCU_SELECTED                      RA6E1
 // TODO: RA6 [name_Balaji]: Move to appropriate place
 #define DAC_CODE_CONFIG                   1  /* Supports DAC0 for TX Power Control */
 #define LAST_GASP_RECONFIGURE_CLK         0  /* If enabled, the System Clock will be re-configured to use MOCO instead of Main Clock */

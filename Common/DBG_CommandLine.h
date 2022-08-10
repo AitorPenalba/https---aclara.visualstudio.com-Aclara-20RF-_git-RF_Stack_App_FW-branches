@@ -61,6 +61,17 @@ uint32_t DBG_CommandLine_OS_EventCreateWait( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] );
 #endif
 
+#if ( TM_INTERNAL_FLASH_TEST == 1)
+uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_IntFlash_ErasePartition( uint32_t argc, char *argv[] );
+#if ( MCU_SELECTED == RA6E1 )
+uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv[] );
+#endif
+uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] );
+#endif
+
 #if ( TM_LINKED_LIST == 1)
 uint32_t DBG_CommandLine_OS_LinkedList_Create( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] );
@@ -297,6 +308,9 @@ uint32_t DBG_CommandLine_mtlsStats ( uint32_t argc, char *argv[] );
 #endif
 #if  ( ( MAC_LINK_PARAMETERS == 1 ) && ( DCU == 1 ) )
 uint32_t DBG_CommandLine_MAC_LinkParameters ( uint32_t argc, char *argv[] );
+#endif
+#if ( TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG == 1 ) /* This makes DBG commands accessible from MFG port */
+void DBG_CommandLine_InvokeDebugCommandFromManufacturingPort ( char * pString );
 #endif
 
 #endif /* CompileSwitch_H */

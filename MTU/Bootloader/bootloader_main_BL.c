@@ -21,17 +21,17 @@
 
 /* ****************************************************************************************************************** */
 /* Include Files */
-#include "project.h"
+#include "project_BL.h"
 #include <intrinsics.h>
 #include <MK24F12.h>
 #include <cfg_hal.h>
 #include <cfg_app.h>
 #include "portable_freescale.h"
 #include "partitions.h"
-#include "partition_cfg.h"
+#include "partition_cfg_BL.h"
 #include "dvr_intFlash_cfg.h"
 #include "crc32.h"
-#include "BSP_aclara.h"
+#include "BSP_aclara_BL.h"
 
 /*lint -esym(526, app_vector, __set_SP) defined at time of link */
 /*lint -esym(628, __set_SP) no protoype available */

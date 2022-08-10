@@ -248,6 +248,10 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt
                                  DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *pPartitionData,
                              DeviceDriverMem_t const * const * pNextDvr );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
+                                 DeviceDriverMem_t const * const * pNxtDvr );
+#endif
 static returnStatus_t flush( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionData,
                                  DeviceDriverMem_t const * const * pNextDvr );
@@ -278,7 +282,9 @@ static fsp_err_t      MisoBusy_isr_init( void );
 #endif
 #endif
 
+#if (( RTOS == 1 ) && ( MCU_SELECTED == RA6E1 ) )
 static OS_MUTEX_Obj qspiMutex_;        /* Mutex Lock for QSPI channel */
+#endif
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
@@ -342,6 +348,9 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
    dvr_read,   // Read Command
    dvr_write,  // Write Command
    erase,      // Erases a portion (or all) of the banked memory.
+#if ( MCU_SELECTED == RA6E1 )
+   blankCheck, // Blank check a memory in the partition
+#endif
    flush,      // Write the cache content to the lower layer driver
    dvr_ioctl,  // ioctl function - Does Nothing for this implementation
    restore,    // Not supported - API support only
@@ -945,6 +954,34 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
    return ( eRetVal );
 }
 #endif
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: blankCheck
+
+   Purpose: Blank check a portion of the current partition of memory.
+
+   Arguments:
+      dSize destOffset - Offset into the partition to blank check
+      lCnt cnt - number of bytes to blank check
+      PartitionData_t const *pParData Points to a partition table entry.  This contains all information to access the
+                               partition to initialize.
+      DeviceDriverMem_t const * const *pNextDriver Points to the next driver's table.
+
+   Returns: As defined by error_codes.h
+
+   Side Effects: None
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr )
+{
+   return (eSUCCESS);
+}
+#endif
+
 /***********************************************************************************************************************
 
    Function Name: flush

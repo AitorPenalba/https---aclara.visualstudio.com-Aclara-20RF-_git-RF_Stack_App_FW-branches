@@ -85,6 +85,9 @@ static returnStatus_t pwrMode( const ePowerMode powerMode );
 static returnStatus_t read( uint8_t *pDest, const dSize dSrc, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t write( const dSize dDest, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t erase( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t blankCheck( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
+#endif
 static returnStatus_t flush( PartitionData_t const * );
 static returnStatus_t restore( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionTbl );
@@ -110,6 +113,9 @@ const PartitionTbl_t PAR_partitionFptr =
    read,       /* Reads data from the desired partition */
    write,      /* writes data from the desired partition */
    erase,      /* erases an entire partition */
+#if ( MCU_SELECTED == RA6E1 )
+   blankCheck, /* blank check the partition address */
+#endif
    flush,      /* flushes the desired partition */
    restore,    /* Restores the desired partition */
    ioctl,      /* IOCTL commands to send to a partition */
@@ -603,6 +609,36 @@ static returnStatus_t erase( lAddr lDest, lCnt cnt, PartitionData_t const *pPTbl
    }
    return (eRetVal);
 }
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: blankCheck
+
+   Purpose: Blank check the memory in a partition.
+
+   Arguments:
+      lAddr lDest: Start offset of the bytes to blank check in the partition.
+      lCnt Cnt:    Number of bytes to blank check
+      *pPTbl:      Points to entry in the partition table for driver/partition information.
+
+   Returns: returnStatus_t - defined by error_codes.h
+
+   Side Effects: N/A
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t blankCheck( lAddr lDest, lCnt cnt, PartitionData_t const *pPTbl )
+{
+   returnStatus_t eRetVal = eFAILURE;
+   if ( ( PartitionData_t const * )NULL != pPTbl )
+   {
+      eRetVal = (*pPTbl->pDriverTbl)->devBlankCheck(lDest, cnt, pPTbl, pPTbl->pDriverTbl + 1);
+   }
+   return (eRetVal);
+}
+#endif
 
 /***********************************************************************************************************************
 
