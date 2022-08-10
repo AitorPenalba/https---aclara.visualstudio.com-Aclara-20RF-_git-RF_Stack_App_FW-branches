@@ -37,7 +37,7 @@
 
 #include "project.h"
 #ifndef __BOOTLOADER
-#if ( RTOS_SELECTION == MQX_RTOS ) 
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #endif
 #else
@@ -107,6 +107,10 @@ static returnStatus_t bnk_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
 static returnStatus_t bnk_flush( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver );
 static returnStatus_t bnk_erase( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
                              DeviceDriverMem_t const * const *pNextDriver );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t bnk_blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
+                             DeviceDriverMem_t const * const *pNextDriver );
+#endif
 static returnStatus_t bnk_setPowerMode( const ePowerMode, PartitionData_t const *pParData, DeviceDriverMem_t const
                            * const *pNextDriver );
 static returnStatus_t bnk_ioctl( const void *pCmd, void *pData, PartitionData_t const *pParData,
@@ -130,6 +134,9 @@ const DeviceDriverMem_t sDeviceDriver_eBanked ={
    bnk_read,          // Read Command
    bnk_write,         // Write Command
    bnk_erase,         // Erases all of the banked memory partition.
+#if ( MCU_SELECTED == RA6E1 )
+   bnk_blankCheck,    // Blank check a memory in the partition
+#endif
    bnk_flush,         // Not used, calls the next driver.
    bnk_ioctl,         // ioctl function - Does Nothing for this implementation
    bnk_restore,       // Restore function not used for this module, but calls the next layer of code.
@@ -516,6 +523,35 @@ static returnStatus_t bnk_erase( dSize destOffset, lCnt cnt, PartitionData_t con
    }
    return (eRetVal);
 }
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: bnk_blankCheck
+
+   Purpose: Blank check a portion of the current partition of memory.
+
+   Arguments:
+      dSize destOffset - Offset into the partition to blank check
+      lCnt cnt - number of bytes to blank check
+      PartitionData_t const *pParData Points to a partition table entry.  This contains all information to access the
+                               partition to initialize.
+      DeviceDriverMem_t const * const *pNextDriver Points to the next driver's table.
+
+   Returns: As defined by error_codes.h
+
+   Side Effects: None
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t bnk_blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
+                                      DeviceDriverMem_t const * const *pNextDriver )
+{
+   return (eSUCCESS);
+}
+#endif
+
 /***********************************************************************************************************************
 
    Function Name: setPowerMode

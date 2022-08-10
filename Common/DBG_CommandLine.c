@@ -213,6 +213,10 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define MAX_LINKEDLIST_DATA      5
 #endif
 
+#if ( TM_INTERNAL_FLASH_TEST == 1 )
+#define MAX_INTERNAL_FLASH_READ_SIZE   100                      /* Maximum size of internal flash read's buffer */
+#endif // TM_INTERNAL_FLASH_TEST
+
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -380,6 +384,11 @@ static bool osEventCreated = FALSE;
 static uint32_t waitBit;
 static bool waitForAll;
 #endif
+
+#if ( TM_INTERNAL_FLASH_TEST == 1 )
+static PartitionData_t const *pTM_IntFlashEncryptKeyPart_;                   /* Test Mode code's Encrypt Key partition */
+static PartitionData_t const *pTM_IntFlashDfwBlInfoPart_;                   /* Test Mode code's DFW BL Info partition */
+#endif // TM_INTERNAL_FLASH_TEST
 
 #if ( TM_LINKED_LIST == 1)
 static OS_List_Obj osLinkedListTestObj;
@@ -850,6 +859,17 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "createtesteventandwait",  DBG_CommandLine_OS_EventCreateWait,     "Create and Wait for Event Set Bits argument\r\n"
                                      "                                   are WaitBit (hex) and WaitForAll (bool)" },
    { "deleteeventtesttask",  DBG_CommandLine_OS_EventTaskDelete,        "Deletes the Event Test Task" },
+#endif
+#if ( TM_INTERNAL_FLASH_TEST == 1 )
+   { "intflashtestopen",  DBG_CommandLine_IntFlash_OpenPartition,     "Opens Partition for Test in Internal Flash\r\n"
+                                     "                                   ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" },
+   { "intflashtestread",  DBG_CommandLine_IntFlash_ReadPartition,     "Reads Partition for Test in Internal Flash" },
+   { "intflashtestwrite",  DBG_CommandLine_IntFlash_WritePartition,     "Writes Partition for Test in Internal Flash" },
+   { "intflashtesterase",  DBG_CommandLine_IntFlash_ErasePartition,     "Erases Partition for Test in Internal Flash" },
+#if ( MCU_SELECTED == RA6E1 )
+   { "intflashtestblankcheck",  DBG_CommandLine_IntFlash_BlankCheckPartition,     "Blank check Partition for Test in Internal Flash" },
+#endif
+   { "intflashtestclose",  DBG_CommandLine_IntFlash_ClosePartition,     "Close Partition for Test in Internal Flash" },
 #endif
 #if ( TM_LINKED_LIST == 1)
    { "oslinkedlistcreate",   DBG_CommandLine_OS_LinkedList_Create,      "Creates test LinkedList" },
@@ -2541,6 +2561,499 @@ uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] )
    }
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_EventTaskDelete() */
+#endif
+
+#if ( TM_INTERNAL_FLASH_TEST == 1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_OpenPartition
+
+   Purpose: This function open the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   returnStatus_t eStatus;
+   uint8_t parSelection;
+   if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
+      if ( parSelection == 0 )
+      {
+         if ( eSUCCESS == PAR_partitionFptr.parOpen( &pTM_IntFlashEncryptKeyPart_, ePART_ENCRYPT_KEY, 0L ) )
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'E', "InternalFlash_Failure Test Failure" );
+         }
+      }
+      else if( parSelection == 1 )
+      {
+         if ( eSUCCESS == PAR_partitionFptr.parOpen( &pTM_IntFlashDfwBlInfoPart_, ePART_DFW_BL_INFO, 0L ) )
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'E', "InternalFlash_Failure Test Failure" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+      }
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestopen <partition>" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestopen <partition>" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_IntFlash_OpenPartition() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_ReadPartition
+
+   Purpose: This function reads the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t userDataRead[ MAX_INTERNAL_FLASH_READ_SIZE ];
+   lAddr addressOffset;
+   lCnt sizeToRead;
+   uint32_t sizeofData;
+   uint8_t parSelection;
+   PartitionData_t const *partitionHandle;
+   if ( argc == 4 )
+   {
+      /* The number of arguments must be 3 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
+      addressOffset = ( lAddr )strtol( argv[2], NULL, 16 );
+      sizeToRead = ( lCnt )atoi ( argv[3] );
+      if( sizeToRead < MAX_INTERNAL_FLASH_READ_SIZE )
+      {
+         /* Getting the Last address to read */
+         sizeofData = ( addressOffset + sizeToRead ) - 1;
+         if ( ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE ) )
+         {
+            if( sizeofData < INTERNAL_FLASH_SECTOR_SIZE )
+            {
+               /* Clearing the Previous read data */
+               memset( userDataRead, '\0', sizeof(userDataRead) );
+               if ( parSelection == 0 )
+               {
+                  partitionHandle = pTM_IntFlashEncryptKeyPart_;
+               }
+               else if ( parSelection == 1 )
+               {
+                  partitionHandle = pTM_IntFlashDfwBlInfoPart_;
+               }
+               else
+               {
+                  DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+                  return ( uint32_t )retVal;
+               }
+               if( partitionHandle != NULL )
+               {
+                  if ( eSUCCESS == PAR_partitionFptr.parRead( userDataRead,
+                                                      addressOffset,
+                                                      sizeToRead,
+                                                      partitionHandle ) )
+                  {
+                     DBG_logPrintf( 'R', "InternalFlash_Success Test Success %s", userDataRead );
+                     retVal = eSUCCESS;
+                  }
+                  else
+                  {
+                     DBG_logPrintf( 'E', "InternalFlash_Failure Test Failure" );
+                  }
+               }
+               else
+               {
+                  DBG_logPrintf( 'R', "Invalid_Argument partition is not opened" );
+               }
+            }
+            else
+            {
+               DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+            }
+         }
+         else
+         {
+            DBG_logPrintf( 'E', "ERROR - Invalid_Argument Size to Read should be less than 0x2000" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "ERROR - Invalid_Argument Address to Read should be less than 0x2000" );
+      }
+   }
+   else if ( argc < 4 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestread <partition> <offset> <SizeToRead>" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestread <partition> <offset> <SizeToRead>" );
+   }
+
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_IntFlash_ReadPartition() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_WritePartition
+
+   Purpose: This function Write the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
+{
+/* TODO: RA6E1: We shouldn't we writing to the actual security partition, instead we can verify writing to some other unused location in Data Flash */
+   returnStatus_t retVal = eFAILURE;
+   uint8_t *userDataWrite;
+   lAddr addressOffset;
+   int32_t isBothStringSame;
+   uint8_t parSelection;
+   PartitionData_t const *partitionHandle;
+   if ( argc == 4 )
+   {
+      /* The number of arguments must be 3 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
+      addressOffset = ( lAddr )strtol( argv[2], NULL, 16 );
+      userDataWrite = argv[3];
+      if ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE )
+      {
+         /* Getting the Last address to write */
+         if( ( ( addressOffset + strlen( userDataWrite ) ) -1 ) < INTERNAL_FLASH_SECTOR_SIZE )
+         {
+            if ( parSelection == 0 )
+            {
+               partitionHandle = pTM_IntFlashEncryptKeyPart_;
+            }
+            else if ( parSelection == 1 )
+            {
+               partitionHandle = pTM_IntFlashDfwBlInfoPart_;
+            }
+            else
+            {
+               DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+               return ( uint32_t )retVal;
+            }
+            if( partitionHandle != NULL )
+            {
+               if ( eSUCCESS == PAR_partitionFptr.parWrite( addressOffset,
+                                                      userDataWrite,
+                                                      ( lCnt )strlen(userDataWrite),
+                                                      partitionHandle ) )
+               {
+                  /* Clears the userDataWrite */
+                  memset( userDataWrite, '0', strlen(userDataWrite) );
+                  /* Reads the data */
+                  if ( eSUCCESS == PAR_partitionFptr.parRead( userDataWrite,
+                                                   addressOffset,
+                                                   ( lCnt )strlen(userDataWrite),
+                                                   partitionHandle ) )
+                  {
+                     /* comparing strings userData and userDataWrite */
+                     isBothStringSame = strcmp( argv[3], userDataWrite );
+                     if(isBothStringSame == 0)
+                     {
+                        /* Both strings are same */
+                        DBG_logPrintf( 'R', "InternalFlash_Success Test Success %s",userDataWrite );
+                        retVal = eSUCCESS;
+                     }
+                     else
+                     {
+                        DBG_logPrintf( 'E', "InternalFlash_Failure String Compare Failed, Data Read and Write are different" );
+                     }
+                  }
+                  else
+                  {
+                     DBG_logPrintf( 'E', "InternalFlash_Failure String Compare Failed, Data Read and Write are different" );
+                  }
+               }
+               else
+               {
+                  DBG_logPrintf( 'R', "InternalFlash_Failure Test Failure" );
+               }
+            }
+            else
+            {
+               DBG_logPrintf( 'R', "Invalid_Argument partition is not opened" );
+            }
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "ERROR - Invalid_Argument Size to Write should be less than 0x2000" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "ERROR - Invalid_Argument Address to Write should be less than 0x2000" );
+      }
+   }
+   else if ( argc < 4 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestwrite <partition> <offset> <data>" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestwrite <partition> <offset> <data>" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_IntFlash_WritePartition() */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_ErasePartition
+
+   Purpose: This function Erase the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_IntFlash_ErasePartition( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   lAddr addressOffset;
+   lCnt sizeToErase;
+   uint8_t parSelection;
+   PartitionData_t const *partitionHandle;
+   if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
+      if ( parSelection == 0 )
+      {
+         partitionHandle = pTM_IntFlashEncryptKeyPart_;
+      }
+      else if ( parSelection == 1 )
+      {
+         partitionHandle = pTM_IntFlashDfwBlInfoPart_;
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+         return ( uint32_t )retVal;
+      }
+      if( partitionHandle != NULL )
+      {
+         if ( eSUCCESS == PAR_partitionFptr.parErase( ( lAddr )0x0,
+                                                   INT_FLASH_ERASE_SIZE,
+                                                   partitionHandle ) )
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Failure Test Failure" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Invalid_Argument partition is not opened" );
+      }
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtesterase <partition>" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtesterase <partition>" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_IntFlash_ErasePartition() */
+
+#if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_BlankCheckPartition
+
+   Purpose: This function blank checks the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   lAddr addressOffset;
+   lCnt sizeToBlankCheck;
+   uint32_t sizeofData;
+   uint8_t parSelection;
+   PartitionData_t const *partitionHandle;
+   if ( argc == 4 )
+   {
+      /* The number of arguments must be 3 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
+      addressOffset = ( lAddr )strtol( argv[2], NULL, 16 );
+      sizeToBlankCheck = ( lCnt )atoi ( argv[3] );
+      if( sizeToBlankCheck < MAX_INTERNAL_FLASH_READ_SIZE )
+      {
+         /* Getting the Last address to read */
+         sizeofData = ( addressOffset + sizeToBlankCheck ) - 1;
+         if ( ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE ) )
+         {
+            if( sizeofData < INTERNAL_FLASH_SECTOR_SIZE )
+            {
+               if ( parSelection == 0 )
+               {
+                  partitionHandle = pTM_IntFlashEncryptKeyPart_;
+               }
+               else if ( parSelection == 1 )
+               {
+                  partitionHandle = pTM_IntFlashDfwBlInfoPart_;
+               }
+               else
+               {
+                  DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+                  return ( uint32_t )retVal;
+               }
+               if( partitionHandle != NULL )
+               {
+                  if ( eSUCCESS == PAR_partitionFptr.parBlankCheck( addressOffset,
+                                                                    sizeToBlankCheck,
+                                                                    partitionHandle ) )
+                  {
+                     DBG_logPrintf( 'R', "InternalFlash_Success Blank check Test Success" );
+                     retVal = eSUCCESS;
+                  }
+                  else
+                  {
+                     DBG_logPrintf( 'E', "InternalFlash_Failure Blank check Test Failure" );
+                  }
+               }
+               else
+               {
+                  DBG_logPrintf( 'R', "Invalid_Argument partition is not opened" );
+               }
+            }
+            else
+            {
+               DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+            }
+         }
+         else
+         {
+            DBG_logPrintf( 'E', "ERROR - Invalid_Argument Size to Read should be less than 0x2000" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "ERROR - Invalid_Argument Address to Read should be less than 0x2000" );
+      }
+   }
+   else if ( argc < 4 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestread <partition> <offset> <SizeToRead>" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestread <partition> <offset> <SizeToRead>" );
+   }
+
+   return ( uint32_t )retVal;
+}
+#endif
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_ClosePartition
+
+   Purpose: This function Close the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t parSelection;
+   PartitionData_t const *partitionHandle;
+   if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
+      if ( parSelection == 0 )
+      {
+         partitionHandle = pTM_IntFlashEncryptKeyPart_;
+      }
+      else if ( parSelection == 1 )
+      {
+         partitionHandle = pTM_IntFlashDfwBlInfoPart_;
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+         return ( uint32_t )retVal;
+      }
+      if( partitionHandle != NULL )
+      {
+         if ( eSUCCESS == PAR_partitionFptr.parClose( partitionHandle ) )
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Failure Test Failure" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Invalid_Argument partition is not opened" );
+      }
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestclose <partition>" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestclose <partition>" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_IntFlash_ClosePartition() */
+
 #endif
 
 #if ( TM_LINKED_LIST == 1)

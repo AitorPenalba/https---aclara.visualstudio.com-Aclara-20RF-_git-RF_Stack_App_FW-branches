@@ -109,6 +109,9 @@ typedef returnStatus_t (*dev_pwrMode_fptr)  (const ePowerMode, PartitionData_t c
 typedef returnStatus_t (*dev_read_fptr)     (uint8_t *, const dSize, const lCnt, PartitionData_t const *, struct tagDeviceDriverMem const * const *);
 typedef returnStatus_t (*dev_write_fptr)    (const dSize, uint8_t const *, const lCnt, PartitionData_t const *, struct tagDeviceDriverMem const * const *);
 typedef returnStatus_t (*dev_erase_fptr)    (phAddr, lCnt, PartitionData_t const *, struct tagDeviceDriverMem const * const *);
+#if ( MCU_SELECTED == RA6E1 )
+typedef returnStatus_t (*dev_blank_fptr)    (phAddr, lCnt, PartitionData_t const *, struct tagDeviceDriverMem const * const *);
+#endif
 typedef returnStatus_t (*dev_flush_fptr)    (PartitionData_t const *, struct tagDeviceDriverMem const * const *);
 typedef returnStatus_t (*dev_ioctl_fptr)    (const void *, void *, PartitionData_t const *, struct tagDeviceDriverMem const * const *);
 typedef returnStatus_t (*dev_restore_fptr)  (lAddr lDest, lCnt Cnt, PartitionData_t const *, struct tagDeviceDriverMem const * const *);
@@ -124,6 +127,9 @@ struct tagDeviceDriverMem
    dev_read_fptr        devRead;       /* Read  Function Ptr */
    dev_write_fptr       devWrite;      /* Write Function Ptr */
    dev_erase_fptr       devErase;      /* Erase Function Ptr */
+#if ( MCU_SELECTED == RA6E1 )
+   dev_blank_fptr       devBlankCheck; /* Black check function Ptr */
+#endif
    dev_flush_fptr       devFlush;      /* Flush Function Ptr */
    dev_ioctl_fptr       devIoctl;      /* Ioctl Function Ptr */
    dev_restore_fptr     devRestore;    /* restore Function Ptr */
@@ -143,6 +149,9 @@ typedef returnStatus_t (*par_pwr_fptr)       (const ePowerMode);
 typedef returnStatus_t (*par_read_fptr)      (uint8_t *, const dSize, lCnt, PartitionData_t const *);
 typedef returnStatus_t (*par_write_fptr)     (const dSize , uint8_t const *pSrc, lCnt, PartitionData_t const *);
 typedef returnStatus_t (*par_erase_fptr)     (lAddr, lCnt, PartitionData_t const *);
+#if ( MCU_SELECTED == RA6E1 )
+typedef returnStatus_t (*par_blank_fptr)     (lAddr, lCnt, PartitionData_t const *);
+#endif
 typedef returnStatus_t (*par_flush_fptr)     (PartitionData_t const *);
 typedef returnStatus_t (*par_restore_fptr)   (lAddr, lCnt, PartitionData_t const *);
 typedef returnStatus_t (*par_ioctl_fptr)     (const void *, void *, PartitionData_t const *);
@@ -159,6 +168,9 @@ typedef struct
    par_read_fptr        parRead;       /* Read Function Ptr */
    par_write_fptr       parWrite;      /* Write Function Ptr */
    par_erase_fptr       parErase;      /* Erase Function Ptr */
+#if ( MCU_SELECTED == RA6E1 )
+   par_blank_fptr       parBlankCheck; /* Blank check Function Ptr */
+#endif
    par_flush_fptr       parFlush;      /* Flush Function Ptr */
    par_restore_fptr     parRestore;    /* Restore Function Ptr */
    par_ioctl_fptr       parIoctl;      /* ioctl commands */
