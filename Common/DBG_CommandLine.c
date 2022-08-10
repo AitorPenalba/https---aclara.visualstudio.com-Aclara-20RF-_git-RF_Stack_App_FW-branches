@@ -217,6 +217,7 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define MAX_INTERNAL_FLASH_READ_SIZE   100                      /* Maximum size of internal flash read's buffer */
 #endif // TM_INTERNAL_FLASH_TEST
 
+
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -7657,6 +7658,8 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
    const firmwareVersionDT_s *dt;
    uint8_t                    index = 0;
    const uint8_t             *mcuVersion = ( uint8_t * )MCUVERSION_ADDR;
+   char*                      pDevPartNumber;
+   char                       devPartNumberBuff[PARTNUMBER_BUFFER_SIZE + 1];
 
    ver = VER_getFirmwareVersion(eFWT_APP);
    dt  = VER_getFirmwareVersionDT();
@@ -7683,7 +7686,10 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
       DBG_logPrintf( 'R',"Unique ID %d - %x", index, uniqueId->unique_id_words[index] );
       index++;
    }
-   DBG_logPrintf( 'R', "Part Numbering Info %s",VER_getComDeviceMicroMPN() );
+   pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
+   (void)strncpy (devPartNumberBuff, pDevPartNumber, PARTNUMBER_BUFFER_SIZE);
+   devPartNumberBuff[PARTNUMBER_BUFFER_SIZE] = '\0';      // ensure the buffer is null-terminated
+   DBG_logPrintf( 'R', "Part Numbering Info %s",devPartNumberBuff );
    DBG_logPrintf( 'R', "MCU Version Register %d",*(mcuVersion));
 #endif
 

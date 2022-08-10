@@ -372,6 +372,7 @@ static const OR_PM_HandlersDef OR_PM_Handlers[] =
   { ENDPT_CIM_CMD_OR_PM_Handler,                comDeviceHardwareVersion },
   { ENDPT_CIM_CMD_OR_PM_Handler,                comDeviceType },
   { ENDPT_CIM_CMD_OR_PM_Handler,                comDeviceMACAddress },
+  { ENDPT_CIM_CMD_OR_PM_Handler,                comDeviceMicroMPN },
 #if ( ANSI_SECURITY == 1 )
   { HEEP_util_passordPort0_Handler,             passwordPort0 },
   { HEEP_util_passordPort0Master_Handler,       passwordPort0Master },

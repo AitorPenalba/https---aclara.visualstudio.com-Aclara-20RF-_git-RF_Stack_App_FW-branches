@@ -501,6 +501,7 @@ static void MFGP_MacChannelSetsSTAR          ( uint32_t argc, char *argv[] );
 
 static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
 static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
+static void MFGP_DevicePartNumber            ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsMfgSubject2             ( uint32_t argc, char *argv[] );
@@ -719,6 +720,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
    {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
    {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
+   {  "comDeviceMicroMPN",          MFGP_DevicePartNumber,           "Get Device PartNumber" },
 #if ( DCU == 1 )
    {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
 #endif
@@ -2536,6 +2538,27 @@ static void MFGP_DeviceType( uint32_t argc, char *argv[] )
    MFG_printf( "%s %s\n", argv[ 0 ], VER_getComDeviceType() );
 }
 
+/***********************************************************************************************************************
+   Function Name: MFGP_DevicePartNumber
+
+   Purpose: Print the MTU PartNumber
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: none
+***********************************************************************************************************************/
+static void MFGP_DevicePartNumber( uint32_t argc, char *argv[] )
+{
+   ( void )argc;
+   char*                      pDevPartNumber;
+   char                       devPartNumberBuff[PARTNUMBER_BUFFER_SIZE + 1];
+   pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
+   (void)strncpy (devPartNumberBuff, pDevPartNumber, PARTNUMBER_BUFFER_SIZE);
+   devPartNumberBuff[PARTNUMBER_BUFFER_SIZE] = '\0';      // ensure the buffer is null-terminated
+   MFG_printf( "%s %s\n", argv[ 0 ], devPartNumberBuff );
+}
 /***********************************************************************************************************************
    Function Name: MFGP_ipHEContext
 

@@ -557,7 +557,7 @@ returnStatus_t ADC_ShutDown ( void )
 #endif   //#if ENABLE_ADC1
 #elif ( MCU_SELECTED == RA6E1 )
    //Closes the ADC driver, disables the interrupts and Stops the ADC
-   //   (void)R_ADC_Close( &g_adc0_ctrl );  // TODO: RA6E1: Do We need this?
+//   (void)R_ADC_Close( &g_adc0_ctrl );  We can't close ADC for RA6 we need to measure SC voltage in LG
 #endif
    return ( eSUCCESS );
 } /* end ADC_ShutDown () */
@@ -709,9 +709,9 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
     *   and application note "Temperature Sensor for the HCS08 Microcontroller Family", AN3031
     * Convert voltage to degC: 25 - ((Voltage - Vtemp25) / m)
     *  VTEMP   - voltage of the temperature sensor channel at the ambient temperature (value read from ADC).
-    *  VTEMP25 - voltage of the temperature sensor channel at 25 °C.
+    *  VTEMP25 - voltage of the temperature sensor channel at 25 Â°C.
     *  m       - is referred as temperature sensor slope in the device data sheet. It is the hot or cold
-    *            voltage versus temperature slope in V/°C.
+    *            voltage versus temperature slope in V/Â°C.
     * According to both K644 and K66 datasheets, Vtemp25=0.716 and m=0.00162
     */
    Temperature = 25.0f - ( ( voltage - 0.716f ) / 0.00162f );

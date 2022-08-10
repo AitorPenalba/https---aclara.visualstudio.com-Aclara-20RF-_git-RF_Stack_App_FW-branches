@@ -32,6 +32,7 @@
 /* For "A.401-XAxx.84001x". Defined in HEEP as: Rev.Dash.BasePN (and NULL) */
 #define VER_HW_STR_LEN     ((uint8_t)18)
 
+#define PARTNUMBER_BUFFER_SIZE ((uint8_t)13)
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
