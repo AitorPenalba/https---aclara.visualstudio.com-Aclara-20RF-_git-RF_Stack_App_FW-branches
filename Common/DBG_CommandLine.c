@@ -2736,6 +2736,7 @@ uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
 {
+/* TODO: RA6E1: We shouldn't we writing to the actual security partition, instead we can verify writing to some other unused location in Data Flash */
    returnStatus_t retVal = eFAILURE;
    uint8_t *userDataWrite;
    lAddr addressOffset;
