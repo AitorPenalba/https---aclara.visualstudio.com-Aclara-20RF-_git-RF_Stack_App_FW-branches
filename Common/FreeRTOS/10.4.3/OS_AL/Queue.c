@@ -126,6 +126,36 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
 
 } /* end OS_QUEUE_Enqueue () */
 
+#if( RTOS_SELECTION == FREE_RTOS )
+/*******************************************************************************
+
+  Function name: OS_QUEUE_ENQUEUE_RetStatus
+
+  Purpose: This function will add a new Queue element to the end of the existing
+           Queue Handle structure giving the caller an opportunity to ignore failures
+           due to a full queue
+
+  Arguments: QueueHandle - pointer to the handle structure of the queue
+             QueueElement - pointer to the element that is being added to the queue
+
+  Returns: eSUCCESS if the element was successfully queued else eOS_QUE_FULL_ERR
+
+  Notes: see Notes for OS_QUEUE_ENQUEUE
+
+*******************************************************************************/
+returnStatus_t OS_QUEUE_ENQUEUE_RetStatus ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line )
+{
+   returnStatus_t eRetVal = eSUCCESS;
+
+   OS_QUEUE_Element_Handle ptr = ( OS_QUEUE_Element_Handle )QueueElement;
+   if (pdPASS != xQueueSend ( *QueueHandle, (void *)&ptr, 0 ) )
+   {
+      eRetVal = eOS_QUE_FULL_ERR;
+   }
+   return ( eRetVal );
+} /* end OS_QUEUE_ENQUEUE_RetStatus () */
+#endif
+
 /*******************************************************************************
 
   Function name: OS_QUEUE_Dequeue

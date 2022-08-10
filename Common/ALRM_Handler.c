@@ -476,6 +476,7 @@ void ALRM_RealTimeTask ( taskParameter )
 
 #if ( ENABLE_PRNT_ALRM_INFO == 1 )  /* Poll more often when debugging   */
    #define ALRM_POLL_RATE           (ONE_SEC * 15)
+   #warning "Alarm polling rate is set to 15 seconds; do not release code this way!"
 #if ( LOG_IN_METER == 1 )
    #define ALRM_RESET_GRACE_PERIOD  (ONE_SEC * 13) //Allow a little less than poll rate
 #endif

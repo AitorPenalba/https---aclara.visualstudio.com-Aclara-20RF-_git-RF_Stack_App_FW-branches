@@ -121,8 +121,12 @@ static volatile uint32_t   dbgLog_testMutexUnlockAfter = 0;
 static volatile uint32_t   dbgLog_testPostQueueBefore  = 0;
 static volatile uint32_t   dbgLog_testPostQueueAfter   = 0;
 static volatile uint32_t   dbgLog_testBufferAllocFails = 0;
+static volatile uint32_t   dbgLog_testEnqueueFailures  = 0;
+static volatile uint32_t   dbgLog_testOtherPostFailures= 0;
 static volatile OS_TASK_id dbgLog_testTaskIdBeforeMutex= 0;
+static volatile OS_TASK_id dbgLog_testTaskIdAfterMutex = 0;
 static volatile OS_TASK_id dbgLog_testTaskIdBeforePost = 0;
+static volatile OS_TASK_id dbgLog_testTaskIdAfterPost  = 0;
 #endif
 
 /* ****************************************************************************************************************** */
@@ -269,10 +273,17 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
 #endif
          TM_UART_COUNTER_INC( dbgLog_testMutexLockBefore );
 #if ( TM_UART_EVENT_COUNTERS == 1)
-         dbgLog_testTaskIdBeforeMutex = OS_TASK_GetId();
+         if ( 0 == dbgLog_testTaskIdBeforeMutex )
+         {
+            dbgLog_testTaskIdBeforeMutex = OS_TASK_GetId();
+         }
 #endif
          OS_MUTEX_Lock( &logPrintf_mutex_ ); // Function will not return if it fails
          TM_UART_COUNTER_INC( dbgLog_testMutexLockAfter );
+#if ( TM_UART_EVENT_COUNTERS == 1)
+         dbgLog_testTaskIdAfterMutex  = OS_TASK_GetId();
+         dbgLog_testTaskIdBeforeMutex = 0;
+#endif
          // Reset length
          len = 0;
          logPrintf_buf[0] = 0;
@@ -335,10 +346,29 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
             ( void )memcpy( pBuf->data, logPrintf_buf, len );
             TM_UART_COUNTER_INC( dbgLog_testPostQueueBefore );
 #if ( TM_UART_EVENT_COUNTERS == 1)
-            dbgLog_testTaskIdBeforePost = OS_TASK_GetId();
+            if ( 0 == dbgLog_testTaskIdBeforePost )
+            {
+               dbgLog_testTaskIdBeforePost = OS_TASK_GetId();
+            }
 #endif
-            OS_MSGQ_Post ( &mQueueHandle_, pBuf );
+#if ( RTOS_SELECTION == MQX_RTOS )
+            OS_MSGQ_Post ( &mQueueHandle_, pBuf )
+#elif ( RTOS_SELECTION == FREE_RTOS )
+            returnStatus_t err = OS_MSGQ_Post_RetStatus ( &mQueueHandle_, pBuf );
+            if ( eOS_QUE_FULL_ERR == err )
+            {
+               (void) BM_free( pBuf ); /* Buffer never made it into a queue, we need to free it */
+               TM_UART_COUNTER_INC( dbgLog_testEnqueueFailures );
+            } else if ( eSUCCESS != err )
+            {
+               TM_UART_COUNTER_INC( dbgLog_testOtherPostFailures );
+            }
+#endif
             TM_UART_COUNTER_INC( dbgLog_testPostQueueAfter  );
+#if ( TM_UART_EVENT_COUNTERS == 1)
+            dbgLog_testTaskIdAfterPost = OS_TASK_GetId();
+            dbgLog_testTaskIdBeforePost = 0;
+#endif
          }
          else
          {
