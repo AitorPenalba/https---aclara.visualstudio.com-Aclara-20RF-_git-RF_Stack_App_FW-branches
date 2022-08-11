@@ -106,17 +106,23 @@ static OS_TICK_Struct   PWR_endTick_    = {0};
 /* Power Down Table - Define all modules that require a call-back for powering down below. */
 static exeTable_t powerDownTbl[] =
 {
+#if ( MCU_SELECTED == NXP_K24 )
    ADC_ShutDown,
+#endif
 #if ( MCU_SELECTED == RA6E1 )
    CRC_Shutdown,
+#if ( PHASE_DETECTION == 1 )
+   GPT_PD_Disable,
 #endif
-#if 1  /* TODO: RA6E1: Remove */
-   NULL
-#else
+   GPT_Radio0_Disable,
+   AGT_FreqSyncTimerStop,
+#if ( GENERATE_RUN_TIME_STATS == 1 )
+   AGT_RunTimeStatsStop,
+#endif
+#endif
 #if ( ENABLE_HMC_TASKS == 1 )
    HMC_APP_TaskPowerDown   /* Shut down the HMC application */
 #endif   /* end of ENABLE_HMC_TASKS  == 1 */
-#endif
 };
 
 #define PWR_COMMON_CALLS ADC_ShutDown

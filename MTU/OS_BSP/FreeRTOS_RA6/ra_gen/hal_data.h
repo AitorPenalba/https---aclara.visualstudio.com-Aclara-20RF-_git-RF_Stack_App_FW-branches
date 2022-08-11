@@ -181,8 +181,8 @@ extern const timer_instance_t AGT0_ExtFlashBusy;
 extern agt_instance_ctrl_t AGT0_ExtFlashBusy_ctrl;
 extern const timer_cfg_t AGT0_ExtFlashBusy_cfg;
 
-#ifndef g_timer0_callback
-void g_timer0_callback(timer_callback_args_t * p_args);
+#ifndef AGT0_ExtFlashBusy_Callback
+void AGT0_ExtFlashBusy_Callback(timer_callback_args_t * p_args);
 #endif
 /* Flash on Flash HP Instance */
 extern const flash_instance_t g_flash0;

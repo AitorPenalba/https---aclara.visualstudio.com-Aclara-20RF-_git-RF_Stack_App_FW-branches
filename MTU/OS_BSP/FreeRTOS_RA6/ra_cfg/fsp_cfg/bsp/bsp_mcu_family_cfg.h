@@ -44,7 +44,7 @@
             /* CMSIS TrustZone Settings */
             #define SCB_CSR_AIRCR_INIT                (1)
             #define SCB_AIRCR_BFHFNMINS_VAL           (1)
-            #define SCB_AIRCR_SYSRESETREQS_VAL        (1)
+            #define SCB_AIRCR_SYSRESETREQS_VAL        (0)
             #define SCB_AIRCR_PRIS_VAL                (0)
             #define TZ_FPU_NS_USAGE                   (1)
 #ifndef SCB_NSACR_CP10_11_VAL
@@ -275,7 +275,7 @@
 
             /* Security attribution for Standby RAM registers. */
 #ifndef BSP_TZ_CFG_STBRAMSAR
-    #define BSP_TZ_CFG_STBRAMSAR (0 | 0xFFFFFFF0U)
+    #define BSP_TZ_CFG_STBRAMSAR (8 | 0xFFFFFFF0U)
 #endif
 
             /* Security attribution for the DMAC Bus Master MPU settings. */
