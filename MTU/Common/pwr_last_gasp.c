@@ -597,7 +597,7 @@ static void TxCallback( MAC_DATA_STATUS_e status, uint16_t Req_Resp_ID )
 /***********************************************************************************************************************
 Function Name: phy_confirm_cb
 
-Purpose: Called by PHY layer to return a confirmation to the stack manager
+Purpose: Called by PHY layer to return a confirmation
 
 Arguments: buffer_t - pointer to a buffer that contains a confirm
 

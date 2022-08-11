@@ -298,27 +298,27 @@ static const DeviceId_t sDeviceId[] =
    /* Erase uS       uS        uS       uS        uS         WR       ID     Type    ID   Busy        */
 #if 0
    /* Disallow a "default" configuration. Require a device ID that is recognizable.                         */
-   {  8000000,   3000000,     200000,   12,       5000,         1,    0x00,  0x00,  0x00,   0,    0 },  /* Default */
+   {  8000000,   3000000,     200000,   12,       5000,         1,    0x00,  0x00,  0x00,   0,    0 },                                /* Not qualified */
 #endif
-   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */
-   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */
-   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x41,   0,    0 },  /* SST 16Mb 26VF016B */
-   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x42,   0,    0 },  /* SST 32Mb 26VF032B */
-   { 15000000,   1000000,     300000,   25,       1000,       256,    0x9D,  0x40,  0x15,   0,    0 },  /* ISSI 16Mb 25LQ080B */
-   { 25000000,   3000000,     300000,  100,       2500,       256,    0x1F,  0x86,  0x01,   0,    0 },  /* Adesto 16Mb AT25SF161 */
-   { 25000000,   2000000,     400000,  100,       3000,       256,    0xEF,  0x40,  0x15,   0,    0 },  /* Windbond 16Mb W25Q16JV */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */                 /* Not qualified */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */       /* Default */
+   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x41,   0,    0 },  /* SST 16Mb 26VF016B */       /* Not qualified */
+   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x42,   0,    0 },  /* SST 32Mb 26VF032B */       /* Not qualified */
+   { 15000000,   1000000,     300000,   25,       1000,       256,    0x9D,  0x40,  0x15,   0,    0 },  /* ISSI 16Mb 25LQ080B */      /* Not qualified */
+   { 25000000,   3000000,     300000,  100,       2500,       256,    0x1F,  0x86,  0x01,   0,    0 },  /* Adesto 16Mb AT25SF161 */   /* Not qualified */
+   { 25000000,   2000000,     400000,  100,       3000,       256,    0xEF,  0x40,  0x15,   0,    0 },  /* Windbond 16Mb W25Q16JV */  /* Not qualified */
 #if 0
    /* Temporarily removed. If this JEDEC id is returned (errantly) with the SST device installed, writes fail. Found
       that even reducing the Max Bytes WR to 1 still resulted in failed writes. */
-   { 80000000,   3000000,     150000, 5000,       5000,       256,    0x20,  0x00,  0x00,   0,    0 },  /* Numonyx */
+   { 80000000,   3000000,     150000, 5000,       5000,       256,    0x20,  0x00,  0x00,   0,    0 },  /* Numonyx */                 /* Not qualified */
 #endif
-   {  8000000,    950000,     200000,    7,       3000,         1,    0x1F,  0x00,  0x00,   0,    0 },  /* Atmel */
+   {  8000000,    950000,     200000,    7,       3000,         1,    0x1F,  0x00,  0x00,   0,    0 },  /* Atmel */                   /* Not qualified */
 #if 0
-   {    10000,     10000,      10000,    7,       5000,       256,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */
+   {    10000,     10000,      10000,    7,       5000,       256,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */                    /* Not qualified */
 #else
    /* Temporarily modify the Max Bytes WR so that if this JEDED id is returned (errantly) with the SST device installed,
       writes still pass.   */
-   {    10000,     10000,      10000,    7,       5000,         1,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */
+   {    10000,     10000,      10000,    7,       5000,         1,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */                    /* Not qualified */
 #endif
 };
 #endif
