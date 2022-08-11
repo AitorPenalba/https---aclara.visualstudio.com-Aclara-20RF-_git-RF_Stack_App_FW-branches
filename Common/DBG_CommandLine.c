@@ -2580,7 +2580,6 @@ uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   returnStatus_t eStatus;
    uint8_t parSelection;
    if ( argc == 2 )
    {
@@ -2749,11 +2748,11 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
       /* The number of arguments must be 3 */
       parSelection = ( uint8_t ) atoi( argv[1] );
       addressOffset = ( lAddr )strtol( argv[2], NULL, 16 );
-      userDataWrite = argv[3];
+      userDataWrite = ( uint8_t * )argv[3];
       if ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE )
       {
          /* Getting the Last address to write */
-         if( ( ( addressOffset + strlen( userDataWrite ) ) -1 ) < INTERNAL_FLASH_SECTOR_SIZE )
+         if( ( ( addressOffset + strlen( ( char const *) userDataWrite ) ) -1 ) < INTERNAL_FLASH_SECTOR_SIZE )
          {
             if ( parSelection == 0 )
             {
@@ -2772,19 +2771,19 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
             {
                if ( eSUCCESS == PAR_partitionFptr.parWrite( addressOffset,
                                                       userDataWrite,
-                                                      ( lCnt )strlen(userDataWrite),
+                                                      ( lCnt )strlen( ( char const *) userDataWrite),
                                                       partitionHandle ) )
                {
                   /* Clears the userDataWrite */
-                  memset( userDataWrite, '0', strlen(userDataWrite) );
+                  memset( userDataWrite, '0', strlen( ( char const *) userDataWrite) );
                   /* Reads the data */
                   if ( eSUCCESS == PAR_partitionFptr.parRead( userDataWrite,
                                                    addressOffset,
-                                                   ( lCnt )strlen(userDataWrite),
+                                                   ( lCnt )strlen( ( char const *) userDataWrite),
                                                    partitionHandle ) )
                   {
                      /* comparing strings userData and userDataWrite */
-                     isBothStringSame = strcmp( argv[3], userDataWrite );
+                     isBothStringSame = strcmp( argv[3], ( char const *) userDataWrite );
                      if(isBothStringSame == 0)
                      {
                         /* Both strings are same */
@@ -2847,8 +2846,6 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_IntFlash_ErasePartition( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   lAddr addressOffset;
-   lCnt sizeToErase;
    uint8_t parSelection;
    PartitionData_t const *partitionHandle;
    if ( argc == 2 )
