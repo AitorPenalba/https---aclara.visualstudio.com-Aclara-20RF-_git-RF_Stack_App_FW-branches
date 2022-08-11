@@ -1,4 +1,4 @@
-echo off
+@echo off
 rem To fill multiple ranges and produce a .hex file
 rem General command format as used in IAR Project\Options...\Build actions\Post-build command line: $TOOLKIT_DIR$\bin\ielftool.exe "$TARGET_BPATH$.out" "$TARGET_BPATH$.hex" --fill 0xFF;0x4000-0x7DFFF;0x80000-0xFFFFF --ihex
 

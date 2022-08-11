@@ -214,7 +214,7 @@
                 <debug>1</debug>
                 <option>
                     <name>CCDefines</name>
-                    <state></state>
+                    <state>WOLFSSL_USER_SETTINGS</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>

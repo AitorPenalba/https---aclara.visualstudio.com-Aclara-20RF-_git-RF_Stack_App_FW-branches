@@ -2310,7 +2310,7 @@
         <group>
             <name>TargetBuildConfig</name>
             <file>
-                <name>$PROJ_DIR$\..\TargetBuildConfigs\EdgeGateway\hal.h</name>
+                <name>$PROJ_DIR$\..\TargetBuildConfigs\EdgeGateway\K24\hal.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\TargetBuildConfigs\EdgeGateway\meter.h</name>
