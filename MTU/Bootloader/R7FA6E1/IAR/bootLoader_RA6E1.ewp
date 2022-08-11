@@ -687,7 +687,7 @@
             <archiveVersion>1</archiveVersion>
             <data>
                 <prebuild></prebuild>
-                <postbuild>cmd /c ""$RASC_EXE_PATH$" --gensecurebundle --compiler IAR "$PROJ_DIR$\configuration.xml" "$TARGET_PATH$" 2&gt; "%TEMP%\rasc_stderr.out""</postbuild>
+                <postbuild></postbuild>
             </data>
         </settings>
         <settings>

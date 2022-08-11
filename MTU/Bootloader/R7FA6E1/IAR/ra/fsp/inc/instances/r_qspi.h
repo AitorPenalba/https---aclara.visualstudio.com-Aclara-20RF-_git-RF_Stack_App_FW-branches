@@ -137,7 +137,11 @@ fsp_err_t R_QSPI_DirectWrite(spi_flash_ctrl_t    * p_ctrl,
                              uint8_t const * const p_src,
                              uint32_t const        bytes,
                              bool const            read_after_write);
-fsp_err_t R_QSPI_DirectRead(spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes);
+
+/* Aclara Modified: the Read API was modified witha new parameter to indictate
+   the read is a polling read. */
+fsp_err_t R_QSPI_DirectRead(spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead);
+
 fsp_err_t R_QSPI_SpiProtocolSet(spi_flash_ctrl_t * p_ctrl, spi_flash_protocol_t spi_protocol);
 fsp_err_t R_QSPI_XipEnter(spi_flash_ctrl_t * p_ctrl);
 fsp_err_t R_QSPI_XipExit(spi_flash_ctrl_t * p_ctrl);
