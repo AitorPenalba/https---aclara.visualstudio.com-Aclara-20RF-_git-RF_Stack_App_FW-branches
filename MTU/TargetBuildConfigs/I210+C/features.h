@@ -95,4 +95,5 @@
 #define GENERATE_RUN_TIME_STATS           0
 #endif
 #endif
+#define LG_UPDATE_RADIO_MODE              1 /* Change the Radio mode to Standby during CSMA back-off time in LastGasp. This is in development not verified yet */
 

@@ -45,7 +45,8 @@
 
 /* FILE VARIABLE DEFINITIONS */
 
-static volatile uint8_t agt_event_ = AGT_EVENT_INVALID;
+static volatile uint8_t agt_event_     = AGT_EVENT_INVALID;
+static bool             agt_lpm_open_  = (bool)false;
 
 /* ******************************************************************************************************************* */
 /* FUNCTION PROTOTYPES */
@@ -64,8 +65,10 @@ static volatile uint8_t agt_event_ = AGT_EVENT_INVALID;
 fsp_err_t AGT_LPM_Timer_Init( void )
 {
    fsp_err_t err = FSP_SUCCESS;
-
-   err = R_AGT_Open(&AGT1_LPM_Wakeup_ctrl, &AGT1_LPM_Wakeup_cfg);
+   if( !agt_lpm_open_ )
+   {
+      err = R_AGT_Open(&AGT1_LPM_Wakeup_ctrl, &AGT1_LPM_Wakeup_cfg);
+   }
 
    return err;
 }

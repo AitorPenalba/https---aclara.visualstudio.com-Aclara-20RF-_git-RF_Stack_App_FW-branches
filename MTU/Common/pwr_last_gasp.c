@@ -166,6 +166,9 @@ typedef enum
 /* FILE VARIABLE DEFINITIONS */
 
 static OS_SEM_Obj       TxDoneSem;            /* Used to signal message transmit completed. */
+#if ( LG_UPDATE_RADIO_MODE == 1 )
+static OS_SEM_Obj       PhyConfirm_;          /* Used to signal phy state change completed. */
+#endif
 static volatile uint8_t TxSuccessful;
 #if ( DEBUG_PWRLG != 0 )
 #define uLLWU_F3     ( VBATREG_RFSYS_BASE_PTR->uLLWU_F3 )
@@ -192,6 +195,9 @@ static void             TxCallback( MAC_DATA_STATUS_e status, uint16_t Req_Resp_
 static void             LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode );
 static void             LptmrEnable( bool bEnableInterrupt );
 static bool             powerStable( bool curState );
+#if ( LG_UPDATE_RADIO_MODE == 1 )
+static void             phy_confirm_cb(PHY_Confirm_t const *confirm, buffer_t const *pReqBuf);
+#endif
 #if ( ( MCU_SELECTED == RA6E1 ) && ( LAST_GASP_USE_2_DEEP_SLEEP == 1 ) )
 static void             Process_SecondDeepSleep ( void );
 #endif
@@ -295,6 +301,9 @@ void PWRLG_Task( taskParameter )
    // Create the semaphore used to signal TX complete.
    //TODO NRJ: determine if semaphores need to be counting
    ( void )OS_SEM_Create( &TxDoneSem, 0 );
+#if ( LG_UPDATE_RADIO_MODE == 1 )
+   ( void )OS_SEM_Create( &PhyConfirm_, 0 );
+#endif
 
    // Seed the random number generator for P persistence test in the MAC.
    aclara_srand( PWRLG_MILLISECONDS() );
@@ -422,10 +431,9 @@ void PWRLG_Task( taskParameter )
          while ( !TxSuccessful && ( VBATREG_CURR_TX_ATTEMPT < VBATREG_MAX_TX_ATTEMPTS ) )
          {
             RDO_PA_EN_ON();  /* Enable the Radio PA  */
-#if 0  /* TODO: The below code doesn't work need to look into it */
-#if ( MCU_SELECTED == RA6E1 )    /* TODO: K24: Add this change to the K24 units */
-            (void)PHY_StartRequest( ( PHY_START_e )ePHY_START_READY, NULL );
-#endif
+#if ( LG_UPDATE_RADIO_MODE == 1 )
+            (void)PHY_StartRequest( ( PHY_START_e )ePHY_START_READY, phy_confirm_cb );
+            (void)OS_SEM_Pend( &PhyConfirm_, 500 ); /* Wait up to 500ms */
 #endif
 
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
@@ -444,11 +452,9 @@ void PWRLG_Task( taskParameter )
             if ( !TxSuccessful )
             {
                RDO_PA_EN_OFF();  /* Disable the Radio PA  */
-#if 0  /* TODO: The below code doesn't work need to look into it */
-#if ( MCU_SELECTED == RA6E1 )    /* TODO: K24: Add this change to the K24 units */
+#if ( LG_UPDATE_RADIO_MODE == 1 )
                /* Change the radio mode to STANDBY which results in lower power */
                (void)PHY_StartRequest( ( PHY_START_e )ePHY_START_STANDBY, NULL );
-#endif
 #endif
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
                // Option 2
@@ -457,6 +463,11 @@ void PWRLG_Task( taskParameter )
 
                DBG_logPrintf('I',"Failed TX!!");
                PWRLG_TxFailure();
+#if ( LG_WORST_CASE_TEST == 1 )
+#if ( PWRLG_PRINT_ENABLE != 0 )
+               OS_TASK_Sleep( OS_SLEEP_PRINT_DELAY_MS ); // Adding for Print
+#endif
+#endif
             }
             else
             {
@@ -582,6 +593,21 @@ static void TxCallback( MAC_DATA_STATUS_e status, uint16_t Req_Resp_ID )
    return;
 }
 
+#if ( LG_UPDATE_RADIO_MODE == 1 )
+/***********************************************************************************************************************
+Function Name: phy_confirm_cb
+
+Purpose: Called by PHY layer to return a confirmation to the stack manager
+
+Arguments: buffer_t - pointer to a buffer that contains a confirm
+
+Returns: none
+***********************************************************************************************************************/
+static void phy_confirm_cb(PHY_Confirm_t const *confirm, buffer_t const *pReqBuf)
+{
+   OS_SEM_Post( &PhyConfirm_ );   /* Post the semaphore */
+}
+#endif
 /***********************************************************************************************************************
 
    Function name: PWRLG_TxMessage

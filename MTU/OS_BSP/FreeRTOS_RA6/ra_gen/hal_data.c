@@ -982,7 +982,7 @@ const rtc_instance_t g_rtc0 =
 adc_instance_ctrl_t g_adc0_ctrl;
 const adc_extended_cfg_t g_adc0_cfg_extend =
 {
-    .add_average_count   = ADC_ADD_SIXTEEN,
+    .add_average_count   = ADC_ADD_AVERAGE_FOUR,
     .clearing            = ADC_CLEAR_AFTER_READ_ON,
     .trigger_group_b     = ADC_TRIGGER_SYNC_ELC,
     .double_trigger_mode = ADC_DOUBLE_TRIGGER_DISABLED,

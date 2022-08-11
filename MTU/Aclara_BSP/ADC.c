@@ -643,7 +643,7 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
    voltage = ( ( ( float )result / 65535.0f ) * 3.3f );
 #elif ( MCU_SELECTED == RA6E1 )
    /* ADC's resolution is 12bit */
-   voltage = ( ( ( float )result / 65520.0f ) * 3.3f );  // 4095 * 16: Divide by sixteen to get the average
+   voltage = ( ( ( float )result / 4095.0f ) * 3.3f );  // 4095 * 16: Divide by sixteen to get the average
 #endif
    return ( voltage );
 }/* end ADC_Get_Ch_Voltage () */

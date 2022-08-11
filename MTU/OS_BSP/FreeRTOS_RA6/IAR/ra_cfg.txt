@@ -579,7 +579,7 @@ FSP Configuration
       Interrupts: Normal/Group A Trigger: Software
       Interrupts: Group B Trigger: Disabled
       Interrupts: Group Priority (Valid only in Group Scan Mode): Group A cannot interrupt Group B
-      Input: Add/Average Count: Add sixteen samples
+      Input: Add/Average Count: Average four samples
       Input: Reference Voltage control: VREFH0/VREFH
       Input: Addition/Averaging Mask (channel availability varies by MCU and unit): Channel 5, Channel 7, Channel 8
       Input: Sample and Hold: Sample and Hold Channels (Available only on selected MCUs): 

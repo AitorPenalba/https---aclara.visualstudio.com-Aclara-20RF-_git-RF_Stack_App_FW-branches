@@ -413,7 +413,7 @@
       <property id="module.driver.adc.trigger" value="enum.driver.adc.trigger.trigger_software"/>
       <property id="module.driver.adc.trigger_group_b" value="_disabled"/>
       <property id="module.driver.adc.priority_group_a" value="module.driver.adc.priority_group_a.group_a_priority_off"/>
-      <property id="module.driver.adc.add_average_count" value="module.driver.adc.add_average_count.add_sixteen"/>
+      <property id="module.driver.adc.add_average_count" value="module.driver.adc.add_average_count.add_average_four"/>
       <property id="module.driver.adc.adc_vref_control" value="module.driver.adc.adc_vref_control.vrefh"/>
       <property id="module.driver.adc.add_mask" value="module.driver.adc.add_mask.channel_5,module.driver.adc.add_mask.channel_7,module.driver.adc.add_mask.channel_8"/>
       <property id="module.driver.adc.sample_hold_mask" value=""/>
