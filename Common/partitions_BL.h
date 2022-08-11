@@ -19,6 +19,9 @@
 #ifndef PARTITIONS_H_
 #define PARTITIONS_H_
 
+#include "error_codes.h"
+#include "portable_freescale.h"
+
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 

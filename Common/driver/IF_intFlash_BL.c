@@ -39,19 +39,21 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#endif
-#include "DBG_SerialDebug.h"
-#else
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-#include <MK66F18.h>
-#else
-#include <MK24F12.h>
-#endif
-#include <string.h>
-#endif   /* BOOTLOADER  */
-#if ( MCU_SELECTED == RA6E1 )
+#elif ( RTOS_SELECTION == FREE_RTOS)
 #include "hal_data.h"
 #endif
+#include "DBG_SerialDebug.h"
+#else   /* BOOTLOADER */
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+#include <MK66F18.h>
+#elif (MCU_SELECTED == NXP_K24)
+#include <MK24F12.h>
+#elif (MCU_SELECTED == RA6E1)
+#include "hal_data.h"
+#endif
+#include <string.h>
+#endif  /* NOT BOOTLOADER  */
+
 #include "IF_intFlash_BL.h"
 #include "partition_cfg_BL.h"
 #include "dvr_sharedMem_BL.h"
@@ -201,7 +203,8 @@ uint8_t localVar[FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE]; // TODO: RA6E1 Currentl
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
-#if ( MCU_SELECTED == RA6E1 )
+/* dataflash BGO is configured in the FSP for RA6E1 application only */
+#if ( MCU_SELECTED == RA6E1 ) && (!defined(__BOOTLOADER))
 /***********************************************************************************************************************
 
    Function Name: dataBgoCallback
@@ -339,17 +342,17 @@ static returnStatus_t init( PartitionData_t const *pParData, DeviceDriverMem_t c
 static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver ) /*lint !e715 !e818  Parameters passed in may not be used */
 {
 #if ( MCU_SELECTED == RA6E1 )
-   fsp_err_t retVal = FSP_SUCCESS;
+   fsp_err_t err = FSP_SUCCESS;
    if( !bInternalFlashOpened )
    {
-      retVal = R_FLASH_HP_Open( &g_flash0_ctrl, &g_flash0_cfg );
-      if( FSP_SUCCESS == retVal )
+      err = R_FLASH_HP_Open( &g_flash0_ctrl, &g_flash0_cfg );
+      if( FSP_SUCCESS == err )
       {
          bInternalFlashOpened = true;
       }
    }
 
-   return (returnStatus_t)retVal;
+   return (FSP_SUCCESS == err) ? eSUCCESS : eFAILURE;
 #else
    return (eSUCCESS);
 #endif
@@ -376,17 +379,17 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
 static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver ) /*lint !e715 !e818  Parameters passed in may not be used */
 {
 #if ( MCU_SELECTED == RA6E1 )
-   fsp_err_t retVal = FSP_SUCCESS;
+   fsp_err_t err = FSP_SUCCESS;
    if( bInternalFlashOpened )
    {
-      retVal = R_FLASH_HP_Close(&g_flash0_ctrl);
-      if( FSP_SUCCESS == retVal )
+      err = R_FLASH_HP_Close(&g_flash0_ctrl);
+      if( FSP_SUCCESS == err )
       {
          bInternalFlashOpened = false;
       }
    }
 
-   return (returnStatus_t) retVal;
+   return (FSP_SUCCESS == err) ? eSUCCESS : eFAILURE;
 #else
    return (eSUCCESS);
 #endif
@@ -519,6 +522,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
    }
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err = FSP_ERR_INVALID_ARGUMENT;
    uint32_t startAddr, eraseBytes, destAddrLocal;
    uint32_t initialBytes = 0, finalBytes = 0;
    if ( 0 != memcmp( ( uint8_t * ) destAddr, pSrc, cnt ) ) /* Does flash need to be updated? */
@@ -576,13 +580,23 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
 
             destAddrLocal = destAddrLocal + ( eraseBytes - initialBytes );
 
-            retVal = ( returnStatus_t ) R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );  // Erase 1 Block
-             /* Wait for the erase complete event flag, if BGO is SET  */
-             if ( true == g_flash0_cfg.data_flash_bgo )
-             {
-                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-                g_b_flash_event_erase_complete = false;
-             }
+            err = R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );  // Erase 1 Block
+            /* Error Handle */
+            if ( FSP_SUCCESS == err )
+            {
+#ifndef __BOOTLOADER
+               /* Wait for the erase complete event flag, if BGO is SET  */
+               if ( true == g_flash0_cfg.data_flash_bgo )
+               {
+                  (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+                  g_b_flash_event_erase_complete = false;
+               }
+#else
+               /* do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
+#endif
+            }
+            /* translate FSP error into an error similar to what would be returned by flashErase */
+            retVal = ( FSP_SUCCESS == err ) ? eSUCCESS : eFAILURE;
 
             if ( eSUCCESS == retVal )
             {
@@ -906,7 +920,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
    }
 #elif ( MCU_SELECTED == RA6E1 )
    lCnt blockCount;
-   fsp_err_t retVal;
+   fsp_err_t err = FSP_ERR_INVALID_ARGUMENT;
    if( dest < FLASH_HP_CODEFLASH_END_ADDRESS )
    {
       /* Destination address for erasing below block 8. Hence block size will be in the state of 8Kb */
@@ -915,7 +929,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          if ( ( numBytes % FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE ) == 0 )
          {
             blockCount = numBytes / FLASH_HP_CODEFLASH_SIZE_BELOW_BLOCK8;
-            retVal = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
+            err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
          }
          else
          {
@@ -928,7 +942,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          {
             blockCount = ( FLASH_HP_CODEFLASH_BLOCK8_START_ADDRESS - dest ) / FLASH_HP_CODEFLASH_SIZE_BELOW_BLOCK8;
             blockCount += ( dest + numBytes - FLASH_HP_CODEFLASH_BLOCK8_START_ADDRESS ) / FLASH_HP_CODEFLASH_SIZE_FROM_BLOCK8;
-            retVal = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
+            err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
          }
          else
          {
@@ -940,7 +954,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          if ( ( numBytes % FLASH_HP_CODEFLASH_SIZE_FROM_BLOCK8 ) == 0 )
          {
             blockCount = numBytes / FLASH_HP_CODEFLASH_SIZE_FROM_BLOCK8;
-            retVal = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
+            err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
          }
          else
          {
@@ -953,16 +967,20 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
       if( ( numBytes % FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE ) == 0 )
       {
          blockCount = numBytes / FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE;
-         retVal = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
+         err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
          /* Error Handle */
-         if ( FSP_SUCCESS == retVal )
+         if ( FSP_SUCCESS == err )
          {
+#ifndef __BOOTLOADER
             /* Wait for the write complete event flag, if BGO is SET  */
             if (true == g_flash0_cfg.data_flash_bgo)
             {
                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                g_b_flash_event_erase_complete = false;
             }
+#else
+            /* do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
+#endif
          }
       }
       else
@@ -975,7 +993,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
       eRetVal = eFAILURE;
    }
 
-   if(FSP_SUCCESS == retVal)
+   if(FSP_SUCCESS == err)
    {
       eRetVal = eSUCCESS;
    }
@@ -1036,7 +1054,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
 #endif   /* BOOTLOADER  */
    }
 #elif ( MCU_SELECTED == RA6E1 )
-    fsp_err_t      err;
+    fsp_err_t err = FSP_ERR_INVALID_ARGUMENT;
     uint32_t srcAddr = ( uint32_t ) pSrc;
     if( address < FLASH_HP_CODEFLASH_END_ADDRESS )
     {
@@ -1074,12 +1092,16 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
           /* Error Handle */
           if (FSP_SUCCESS == err)
           {
+#ifndef __BOOTLOADER
              /* Wait for the write complete event flag, if BGO is SET  */
              if ( true == g_flash0_cfg.data_flash_bgo )
              {
                 (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                 g_b_flash_event_write_complete = false;
              }
+#else
+             /* do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
+#endif
           }
        }
        else
