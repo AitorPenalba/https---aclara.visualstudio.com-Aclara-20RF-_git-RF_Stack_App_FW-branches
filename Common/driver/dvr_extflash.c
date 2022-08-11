@@ -1229,13 +1229,13 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
          else
          {
 #if ( DVR_EFL_BUSY_EDGE_TRIGGERED != 0 ) /* Edge triggered */
-         DVR_EFL_BUSY_IRQ_EI();                             /* Enable the ISR on MISO. */
-         SPI_MutexLock(pDevice->port);
-         NV_CS_ACTIVE();                                    /* Activate the chip select  */
+            DVR_EFL_BUSY_IRQ_EI();                             /* Enable the ISR on MISO. */
+            SPI_MutexLock(pDevice->port);
+            NV_CS_ACTIVE();                                    /* Activate the chip select  */
 #else /* Level triggered   */
-         SPI_MutexLock(pDevice->port);
-         NV_CS_ACTIVE();                                    /* Activate the chip select  */
-         DVR_EFL_BUSY_IRQ_EI();                             /* Enable the ISR on MISO. */
+            SPI_MutexLock(pDevice->port);
+            NV_CS_ACTIVE();                                    /* Activate the chip select  */
+            DVR_EFL_BUSY_IRQ_EI();                             /* Enable the ISR on MISO. */
 #endif
             while( !bBusyIsr_ )                             /* Wait for ISR completion */
             {}
@@ -1679,7 +1679,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 static void setBusyTimer( uint32_t busyTimer_uS )
 {
    busyTime_uS_ = busyTimer_uS;
-#if 0 // TODO: RA6E1: Melvin: revisit with a OS Timer
+#if ( MCU_SELECTED == NXP_K24 ) // TODO: RA6E1: Melvin: revisit with a OS Timer
    EXT_FLASH_TIMER_DIS();
    EXT_FLASH_TIMER_COMPARE = busyTimer_uS / 1000;  /* 1mS timer, so convert to mS */
    EXT_FLASH_TIMER_RST();               /* Reset the timer */
@@ -1687,7 +1687,8 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
    EXT_FLASH_TIMER_EN();                /* Enable Interrupt & Start the timer. */
-#endif  // if 0
+
+#elif ( MCU_SELECTED == RA6E1 )
 
 #if USE_POWER_MODE  // TODO: RA6E1: Remove if the above TODO is resolved
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
@@ -1695,17 +1696,18 @@ static void setBusyTimer( uint32_t busyTimer_uS )
 
    timer_info_t   info;
    uint32_t       timer_freq_hz;
-
+   uint32_t       period_counts = 0;
    (void) R_AGT_InfoGet(&AGT0_ExtFlashBusy_ctrl, &info);
 
    timer_freq_hz = info.clock_frequency;
-   uint32_t period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000);
+   period_counts = (uint16_t)(uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000); // TODO: RA6E1: This calculation overflows
 
    R_AGT_PeriodSet( &AGT0_ExtFlashBusy_ctrl, period_counts );
 
    /* Start the timer. */
    (void) R_AGT_Start(&AGT0_ExtFlashBusy_ctrl);
 }
+#endif  // #if ( MCU_SELECTED == NXP_K24 )
 #endif
 /***********************************************************************************************************************
 
@@ -1966,27 +1968,27 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 #elif ( MCU_SELECTED == RA6E1 )
             err = NV_SPI_PORT_READ( &g_qspi0_ctrl, &mfgId[0], sizeof(mfgId), false ); /* Read the data back */
 #endif
-         if (
+            if (
 #if ( MCU_SELECTED == NXP_K24 )
-         eSUCCESS == eRetVal
+                eSUCCESS == eRetVal
 #elif ( MCU_SELECTED == RA6E1 )
-         FSP_SUCCESS == err
+                FSP_SUCCESS == err
 #endif
-         )
-         {
-               /* Search for the device ID in the table. */
-            for ( index = 0; index < ARRAY_IDX_CNT( sDeviceId ); index++ )
+                )
             {
-               if (  ( sDeviceId[index].u8MfgId       == mfgId[0] )     &&
-                     ( sDeviceId[index].u8DeviceType  == mfgId[1] )     &&
-                     ( sDeviceId[index].u8DeviceID    == mfgId[2] ) )
+               /* Search for the device ID in the table. */
+               for ( index = 0; index < ARRAY_IDX_CNT( sDeviceId ); index++ )
                {
-                  pChipId_ = &sDeviceId[index]; /* Set the pointer to the Chip */
-                  found = (bool)true;
-                  break;
+                  if (  ( sDeviceId[index].u8MfgId       == mfgId[0] )     &&
+                      ( sDeviceId[index].u8DeviceType  == mfgId[1] )     &&
+                         ( sDeviceId[index].u8DeviceID    == mfgId[2] ) )
+                  {
+                     pChipId_ = &sDeviceId[index]; /* Set the pointer to the Chip */
+                     found = (bool)true;
+                     break;
+                  }
                }
             }
-         }
          }
          NV_CS_INACTIVE(); /* Activate the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -2151,11 +2153,11 @@ static void isr_tmr( void )
 #elif ( MCU_SELECTED == RA6E1 )
 /***********************************************************************************************************************
 
-   Function Name: g_timer0_callback
+   Function Name: AGT0_ExtFlashBusy_Callback
 
    Purpose: Timer ISR callback for AGT timer 0
 
-   Arguments:  None
+   Arguments:  timer_callback_args_t *
 
    Returns: None
 
@@ -2164,12 +2166,12 @@ static void isr_tmr( void )
    Reentrant Code: No
 
  **********************************************************************************************************************/
-void g_timer0_callback (timer_callback_args_t * p_args)
+void AGT0_ExtFlashBusy_Callback (timer_callback_args_t * p_args)
 {
-    if (TIMER_EVENT_CYCLE_END == p_args->event)
-    {
-        bTmrIsrTriggered_ = 1;
-    }
+   if (TIMER_EVENT_CYCLE_END == p_args->event)
+   {
+      bTmrIsrTriggered_ = 1;
+   }
 }
 #endif
 /* ****************************************************************************************************************** */
@@ -2216,11 +2218,8 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
    PartitionData_t const * partitionData;    /* Pointer to partition information   */
    uint8_t                 startPattern;
 
-#if 0 //TODO Melvin: random number generator to be implemented
    startPattern = ( uint8_t )aclara_rand();
-#else
-   startPattern = 0x00;
-#endif
+
    /* Find the NV test partition - don't care about update rate   */
    retVal = PAR_partitionFptr.parOpen( &partitionData, ePART_NV_TEST, 0xffffffff );
    if ( eSUCCESS == retVal )

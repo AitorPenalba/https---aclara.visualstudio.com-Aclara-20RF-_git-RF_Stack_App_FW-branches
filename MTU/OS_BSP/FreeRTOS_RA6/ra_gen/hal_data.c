@@ -586,7 +586,7 @@ const crc_instance_t g_crc1 =
 agt_instance_ctrl_t AGT0_ExtFlashBusy_ctrl;
 const agt_extended_cfg_t AGT0_ExtFlashBusy_extend =
 {
-    .count_source     = AGT_CLOCK_PCLKB,
+    .count_source     = AGT_CLOCK_SUBCLOCK,
     .agto             = AGT_PIN_CFG_DISABLED,
     .agtoa            = AGT_PIN_CFG_DISABLED,
     .agtob            = AGT_PIN_CFG_DISABLED,
@@ -598,9 +598,9 @@ const agt_extended_cfg_t AGT0_ExtFlashBusy_extend =
 const timer_cfg_t AGT0_ExtFlashBusy_cfg =
 {
     .mode                = TIMER_MODE_ONE_SHOT,
-    /* Actual period: 0.00001 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x12c, .duty_cycle_counts = 0x96, .source_div = (timer_source_div_t)0,
+    /* Actual period: 0.0009765625 seconds. Actual duty: 50%. */ .period_counts = (uint32_t) 0x20, .duty_cycle_counts = 0x10, .source_div = (timer_source_div_t)0,
     .channel             = 0,
-    .p_callback          = g_timer0_callback,
+    .p_callback          = AGT0_ExtFlashBusy_Callback,
     /** If NULL then do not add & */
 #if defined(NULL)
     .p_context           = NULL,
@@ -980,10 +980,9 @@ const rtc_instance_t g_rtc0 =
     .p_api         = &g_rtc_on_rtc
 };
 adc_instance_ctrl_t g_adc0_ctrl;
-/* ADC_ADD_AVERAGE_SIXTEEN can't be found in RASC, found in r_adc.h */
 const adc_extended_cfg_t g_adc0_cfg_extend =
 {
-    .add_average_count   = ADC_ADD_AVERAGE_SIXTEEN,  /* Aclara modified */
+    .add_average_count   = ADC_ADD_SIXTEEN,
     .clearing            = ADC_CLEAR_AFTER_READ_ON,
     .trigger_group_b     = ADC_TRIGGER_SYNC_ELC,
     .double_trigger_mode = ADC_DOUBLE_TRIGGER_DISABLED,

@@ -96,5 +96,3 @@
 #endif
 #endif
 
-#define DEBUG_LAST_GASP_TASK              0  /* This is dev test code to debug the LastGasp Task while the Power is still On */
-

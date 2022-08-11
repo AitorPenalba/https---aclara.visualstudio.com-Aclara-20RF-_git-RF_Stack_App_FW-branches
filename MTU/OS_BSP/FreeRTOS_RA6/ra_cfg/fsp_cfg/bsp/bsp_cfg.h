@@ -22,7 +22,7 @@
             #define BSP_CFG_STACK_MAIN_BYTES (0x400)
             #define BSP_CFG_HEAP_BYTES (0)
             #define BSP_CFG_PARAM_CHECKING_ENABLE (1)
-            #define BSP_CFG_ASSERT (0)
+            #define BSP_CFG_ASSERT (2)
             #define BSP_CFG_ERROR_LOG (0)
 
             #define BSP_CFG_PFS_PROTECT ((1))

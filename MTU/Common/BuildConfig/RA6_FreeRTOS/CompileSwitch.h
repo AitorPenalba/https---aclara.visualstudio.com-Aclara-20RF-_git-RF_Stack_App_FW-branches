@@ -293,6 +293,7 @@
                                                    NOTE: Be sure to clear VBAT memory and RFSYS memory prior to operation! */
 #define LG_QUICK_TEST                     0     /* For quick testing - makes all windows the same as the outage declaration delay
                                                    Only available when DEBUG_PWR_LG is 0 */
+#define DEBUG_LAST_GASP_TASK              0     /* This is dev test code to debug the LastGasp Task while the Power is still On */
 #define TEST_TDMA                         0     /* Basic TDMA test */
 #define TEST_DEVIATION                    0     /* Test 600Hz, 700Hz and 800Hz deviation */
 #define OVERRIDE_TEMPERATURE              0     /* 0=Do not include temperature override, 1=Do inlcude temperature override */

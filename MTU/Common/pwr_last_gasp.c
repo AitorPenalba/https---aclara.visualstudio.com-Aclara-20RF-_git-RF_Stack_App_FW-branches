@@ -422,6 +422,11 @@ void PWRLG_Task( taskParameter )
          while ( !TxSuccessful && ( VBATREG_CURR_TX_ATTEMPT < VBATREG_MAX_TX_ATTEMPTS ) )
          {
             RDO_PA_EN_ON();  /* Enable the Radio PA  */
+#if 0  /* TODO: The below code doesn't work need to look into it */
+#if ( MCU_SELECTED == RA6E1 )    /* TODO: K24: Add this change to the K24 units */
+            (void)PHY_StartRequest( ( PHY_START_e )ePHY_START_READY, NULL );
+#endif
+#endif
 
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
             // Option 2
@@ -439,9 +444,11 @@ void PWRLG_Task( taskParameter )
             if ( !TxSuccessful )
             {
                RDO_PA_EN_OFF();  /* Disable the Radio PA  */
+#if 0  /* TODO: The below code doesn't work need to look into it */
 #if ( MCU_SELECTED == RA6E1 )    /* TODO: K24: Add this change to the K24 units */
                /* Change the radio mode to STANDBY which results in lower power */
                (void)PHY_StartRequest( ( PHY_START_e )ePHY_START_STANDBY, NULL );
+#endif
 #endif
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
                // Option 2

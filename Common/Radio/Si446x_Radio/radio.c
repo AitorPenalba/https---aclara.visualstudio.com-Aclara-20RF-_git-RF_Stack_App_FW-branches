@@ -5997,7 +5997,7 @@ static void StandbyRx(void)
 #if ( MCU_SELECTED == RA6E1 ) /* TODO: Remove this conditional. Only here to make the Hex compare happy */
    else
    {
-      (void)si446x_change_state(radioNum, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_SLEEP);  // Force standby state
+      (void)si446x_change_state((uint8_t)RADIO_0, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_SLEEP);  // Force standby state
    }
 #endif
 #endif

@@ -302,10 +302,13 @@ static bool setup_ADC0 ( void )
    }
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err;
    /* Initializes the module. */
-   (void)R_ADC_Open( &g_adc0_ctrl, &g_adc0_cfg );  /* Renesas's FSP function returns are removed */
+   err = R_ADC_Open( &g_adc0_ctrl, &g_adc0_cfg );  /* Renesas's FSP function returns are removed */
+   assert(FSP_SUCCESS == err);
    /* Enable channels. */
-   (void)R_ADC_ScanCfg( &g_adc0_ctrl, &g_adc0_channel_cfg );
+   err = R_ADC_ScanCfg( &g_adc0_ctrl, &g_adc0_channel_cfg );
+   assert(FSP_SUCCESS == err);
 #endif
    return ( InitSuccessful );
 } /* end ADC_Setup_ADC0 () */
@@ -621,16 +624,17 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
    }
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
+   adc_status_t status;
+
    (void)R_ADC_ScanStart( &g_adc0_ctrl );
    /* Wait for conversion to complete. */
-   adc_status_t status;
    status.state = ADC_STATE_SCAN_IN_PROGRESS;
    while ( ADC_STATE_SCAN_IN_PROGRESS == status.state )
    {
-       (void)R_ADC_StatusGet( &g_adc0_ctrl, &status );
+      (void)R_ADC_StatusGet( &g_adc0_ctrl, &status );
    }
    /* Read converted data. */
-   (void)R_ADC_Read( &g_adc0_ctrl, adc_source_adx, &result );
+   (void)R_ADC_Read( &g_adc0_ctrl, (adc_channel_t)adc_source_adx, &result );
 #endif
    OS_MUTEX_Unlock(&intAdcMutex_);
 
@@ -639,7 +643,7 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
    voltage = ( ( ( float )result / 65535.0f ) * 3.3f );
 #elif ( MCU_SELECTED == RA6E1 )
    /* ADC's resolution is 12bit */
-   voltage = ( ( ( float )result / 4095.0f ) * 3.3f );
+   voltage = ( ( ( float )result / 65520.0f ) * 3.3f );  // 4095 * 16: Divide by sixteen to get the average
 #endif
    return ( voltage );
 }/* end ADC_Get_Ch_Voltage () */
@@ -802,7 +806,7 @@ float ADC_Get_4V0_Voltage ( void )
 #if ( ( USE_LWADC == 1 ) || ( ENABLE_ADC1 == 0 ) || ( MCU_SELECTED == RA6E1 ) )
    voltage = ADC_Get_Ch_Voltage( ADC0_4V0_VOLTAGE_CH ) ;
 #else // LWDAC==0 && USE_ADC1==1
-   voltage =  ADC_Get_Ch_Voltage( ADC1_4V0_VOLTAGE_CH ) ;
+   voltage = ADC_Get_Ch_Voltage( ADC1_4V0_VOLTAGE_CH ) ;
 #endif
    /* Adjust for circuit voltage divider */
    voltage *= UN_RDIV_4V0;
