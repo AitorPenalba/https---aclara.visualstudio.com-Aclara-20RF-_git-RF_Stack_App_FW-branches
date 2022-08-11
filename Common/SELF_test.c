@@ -89,7 +89,7 @@ uint8_t checkFlashBuffer[512];
 #if ( MCU_SELECTED == RA6E1 )
 static const enum_UART_ID mfgPortUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
 #endif
-
+const char pTskName_semTest[]      = "SEMTEST";
 /* TYPE DEFINITIONS */
 
 /* ****************************************************************************************************************** */
@@ -99,6 +99,8 @@ static const enum_UART_ID mfgPortUart = UART_MANUF_TEST;     /* UART used for MF
 /* FUNCTION DEFINITIONS */
 
 static uint16_t RunSelfTest( void );
+static void OS_SEMTestTask ( taskParameter );
+
 
 /***********************************************************************************************************************
    Function Name: SELF_init
@@ -111,6 +113,15 @@ static uint16_t RunSelfTest( void );
 ***********************************************************************************************************************/
 returnStatus_t SELF_init( void )
 {
+#if (TM_SEMAPHORE == 1)
+   OS_SEM_TestCreate();
+#endif
+#if (TM_MSGQ == 1)
+   OS_MSGQ_TestCreate();
+#endif
+#if( TM_EVENTS == 1 )
+   OS_EVENT_TestCreate();
+#endif
    returnStatus_t retVal = eFAILURE;
    FileStatus_t   fileStatus;
    SELF_file_t    *pFile = &SELF_testFile;
@@ -183,6 +194,9 @@ void SELF_setEventNotify( OS_EVNT_Obj *handle )
 ***********************************************************************************************************************/
 void SELF_testTask( taskParameter )
 {
+#if (TM_SEMAPHORE == 1)
+   OS_testSem();
+#endif
 #if ( RTOS_SELECTION == MQX_RTOS )
    (void)Arg0;    /* Not used - avoids lint warning   */
 #endif
@@ -201,6 +215,8 @@ void SELF_testTask( taskParameter )
    }
 #endif
 #endif // if MQX_RTOS
+   
+
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
 #if ( RTOS_SELECTION == MQX_RTOS )
 #if ( USE_USB_MFG == 0 )
@@ -944,3 +960,66 @@ void SELF_testIWDT( void )
       R_IWDT_CounterGet( &g_wdt0_ctrl, &iwdt_counter );
    }
 }
+
+#if (TM_SEMAPHORE == 1)
+void OS_testSem( void )
+{
+               const OS_TASK_Template_t  semTaskTemplate[1] =
+               {
+                  /* Task Index, Function,   Stack, Pri, Name,           tributes, Param, Time Slice */
+                  { 1,      OS_SEMTestTask, 500, 38, (char *)pTskName_semTest, 0, 0, 0 },
+               };
+               OS_TASK_Template_t const *semTestTask;
+               semTestTask = &semTaskTemplate[0];
+               if ( pdPASS != OS_TASK_Create(semTestTask) )
+               {
+                  DBG_logPrintf( 'R', "ERROR - Test Event Task Creation Failed" );
+               }
+}
+
+static void OS_SEMTestTask ( taskParameter )
+{
+//      /* TODO: RA6: Move these TM_xxx code to appropriate location */
+//#if (TM_SEMAPHORE == 1)
+//   OS_SEM_TestPost();
+//#endif
+//#if (TM_MSGQ == 1)
+//   OS_MSGQ_TestPost();
+//#endif
+//#if( TM_EVENTS == 1 )
+//   OS_EVENT_TestSet();
+//#endif
+for ( ; ; )
+{
+#if (TM_SEMAPHORE == 1)
+      if( OS_SEM_TestPend() )
+      {
+         vTaskDelay(pdMS_TO_TICKS(1000));
+         vTaskSuspend(NULL);
+//         break; /* Exit */
+      }
+      DBG_logPrintf( 'R', "Sem posted" );
+#endif
+}
+//
+//#endif
+//#if (TM_MSGQ == 1)
+//      if( OS_MSGQ_TestPend() )
+//      {
+//         vTaskDelay(pdMS_TO_TICKS(1000));
+//         vTaskSuspend(NULL);
+////         break; /* Exit */
+//      }
+//
+//#endif
+//#if( TM_EVENTS == 1 )
+//      if( OS_EVENT_TestWait() )
+//      {
+//         vTaskDelay(pdMS_TO_TICKS(1000));
+//         vTaskSuspend(NULL);
+////         break; /* Exit */
+//      }
+//#endif
+//   OS_TASK_Exit();
+}
+#endif

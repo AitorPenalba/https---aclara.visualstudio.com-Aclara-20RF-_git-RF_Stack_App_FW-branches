@@ -50,6 +50,7 @@
 //#include "ascii.h"
 #include "time_util.h"
 #include "buffer.h"
+#include "SELF_test.h"
 //#ifndef BSP_DEFAULT_IO_CHANNEL_DEFINED
 //#error This application requires BSP_DEFAULT_IO_CHANNEL to be not NULL. Please set corresponding BSPCFG_ENABLE_TTYx to non-zero in user_config.h and recompile BSP with this option.
 //#endif
@@ -129,6 +130,8 @@ static volatile OS_TASK_id dbgLog_testTaskIdBeforePost = 0;
 static volatile OS_TASK_id dbgLog_testTaskIdAfterPost  = 0;
 #endif
 
+
+
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
 
@@ -181,6 +184,7 @@ returnStatus_t DBG_init( void )
          }
       }
    }
+/*
 #if (TM_SEMAPHORE == 1)
 OS_SEM_TestCreate();
 #endif
@@ -190,7 +194,7 @@ OS_MSGQ_TestCreate();
 #if( TM_EVENTS == 1 )
 OS_EVENT_TestCreate();
 #endif
-
+*/
    DBG_PortTimer_Manage ( );
    DBG_PortEcho_Set( DBG_PortEcho_Get() ); // Get the echo setting and update the current UART setting
    return( retVal );
@@ -208,19 +212,9 @@ OS_EVENT_TestCreate();
  **********************************************************************************************************************/
 void DBG_TxTask( taskParameter )
 {
-   /* TODO: RA6: Move these TM_xxx code to appropriate location */
-#if (TM_SEMAPHORE == 1)
-   OS_SEM_TestPost();
-#endif
-#if (TM_MSGQ == 1)
-   OS_MSGQ_TestPost();
-#endif
-#if( TM_EVENTS == 1 )
-   OS_EVENT_TestSet();
-#endif
+//   OS_SEM_TestPost();
    for ( ; ; )
    {
-
       buffer_t *pBuf;
       (void)OS_MSGQ_Pend( &mQueueHandle_, ( void * )&pBuf, OS_WAIT_FOREVER );  /* Check for message in the queue */
       OS_MUTEX_Lock( &mutex_ ); // Function will not return if it fails
