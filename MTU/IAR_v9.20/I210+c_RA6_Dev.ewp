@@ -736,23 +736,23 @@
                 </option>
                 <option>
                     <name>IlinkKeepSymbols</name>
-                    <state></state>
+                    <state>BOOT</state>
                 </option>
                 <option>
                     <name>IlinkRawBinaryFile</name>
-                    <state></state>
+                    <state>$PROJ_DIR$\..\Bootloader\R7FA6E1\IAR\Debug\Exe\bootLoader_RA6E1.bin</state>
                 </option>
                 <option>
                     <name>IlinkRawBinarySymbol</name>
-                    <state></state>
+                    <state>BOOT</state>
                 </option>
                 <option>
                     <name>IlinkRawBinarySegment</name>
-                    <state></state>
+                    <state>.boot</state>
                 </option>
                 <option>
                     <name>IlinkRawBinaryAlign</name>
-                    <state></state>
+                    <state>8</state>
                 </option>
                 <option>
                     <name>IlinkDefines</name>
