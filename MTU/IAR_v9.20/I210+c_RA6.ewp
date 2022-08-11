@@ -2423,7 +2423,7 @@
         <group>
             <name>TargetBuildConfig</name>
             <file>
-                <name>$PROJ_DIR$\..\TargetBuildConfigs\I210+C\hal.h</name>
+                <name>$PROJ_DIR$\..\TargetBuildConfigs\I210+C\RA6\hal.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\TargetBuildConfigs\I210+C\meter.h</name>
