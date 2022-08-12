@@ -245,7 +245,7 @@ static volatile uint8_t counter = 0;
 
 void OS_MSGQ_TestCreate ( void )
 {
-   if( OS_MSGQ_Create(&testMsgQueue_, 10) )
+   if( OS_MSGQ_Create(&testMsgQueue_, 10, "testqueue") )
    {
       counter++;
    }
@@ -262,7 +262,7 @@ bool OS_MSGQ_TestPend( void )
 {
    bool retVal = false;
 
-   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, OS_WAIT_FOREVER ) )
+   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, HALF_SEC ) )
    {
       counter--;
       retVal = true;

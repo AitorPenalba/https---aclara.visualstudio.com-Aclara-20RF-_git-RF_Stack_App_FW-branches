@@ -20,7 +20,8 @@
 #include <lwevent.h>
 #include "EVL_event_log.h"
 #endif
-
+#include "DBG_SerialDebug.h"
+#include "buffer.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -264,7 +265,7 @@ void OS_EVENT_TestCreate(void)
 bool OS_EVENT_TestWait(void)
 {
   EventBits_t recv;
-  recv = OS_EVNT_Wait(eventHandle, BIT_4 | BIT_0 , false, OS_WAIT_FOREVER);
+  recv = OS_EVNT_Wait(eventHandle, BIT_4 | BIT_0 , false, HALF_SEC);
   if( recv & BIT_4 )
   {
     APP_PRINT("Received Event 4" );

@@ -292,7 +292,7 @@ void OS_SEM_TestCreate ( void )
 bool OS_SEM_TestPend( void )
 {
    bool retVal = false;
-   if( OS_SEM_Pend(&testSem_, OS_WAIT_FOREVER) )
+   if( OS_SEM_Pend(&testSem_, HALF_SEC) )
    {
       counter--;
       retVal = true;
@@ -300,7 +300,7 @@ bool OS_SEM_TestPend( void )
 
    if( 0 == counter )
    {
-      APP_PRINT("Success");
+      APP_PRINT("Sem Post Success");
    }
    else
    {
