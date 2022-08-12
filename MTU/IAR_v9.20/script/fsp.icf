@@ -82,7 +82,17 @@ if ((OPTION_SETTING_LENGTH == 0) && (FLASH_ORIGIN == FLASH_START))
 }
 else
 {
-  define region FLASH_region      = mem:[from FLASH_ORIGIN   to FLASH_END];
+  /* Aclara Modified: separate flash into bootloader and application regions */
+  if (!isdefinedsymbol(BOOTLOADER_START))
+  {
+    define region FLASH_region      = mem:[from FLASH_ORIGIN to FLASH_END];
+  }
+  else
+  {
+    /* re-define Flash region for shifted application */
+    define region FLASH_region      = mem:[from APPLICATION_START to FLASH_END];
+  }
+  /* Aclara Modified End */
 }
 
 define region RAM_region        = mem:[from RAM_START         to RAM_END];
@@ -120,6 +130,14 @@ if ((OPTION_SETTING_LENGTH == 0) && (FLASH_ORIGIN == FLASH_START))
 }
 else
 {
+  /* Aclara Added: include bootloader a application image */
+  if (isdefinedsymbol(BOOTLOADER_START))
+  {
+    keep { section .boot };
+    "BOOT": place at address mem: BOOTLOADER_START { readonly section .boot };
+  }
+  /* Aclara Added End */
+
   place at start of FLASH_region  { ro section .fixed_vectors* };
   place in FLASH_region           { ro section .application_vectors* };
 }
@@ -159,6 +177,7 @@ place in RAM_region     { last section FREE_MEM };
 
 place in DF_region      { ro section .data_flash,
                           ro section .noinit };
+						  
 /* Aclara Added/Modified end */
 
 define exported symbol __tz_SDRAM_S = SDRAM_START;

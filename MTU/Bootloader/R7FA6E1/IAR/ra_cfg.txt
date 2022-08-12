@@ -25,9 +25,9 @@ FSP Configuration
     Security: BUS Accessibility: Bus Security Attribution Register A: Both Secure and Non-Secure State
     Security: BUS Accessibility: Bus Security Attribution Register B: Both Secure and Non-Secure State
     Startup C-Cache Line Size: 32 Bytes
-    OFS0 register settings: Independent WDT: Start Mode: IWDT is Disabled
+    OFS0 register settings: Independent WDT: Start Mode: IWDT is automatically activated after a reset (Autostart mode)
     OFS0 register settings: Independent WDT: Timeout Period: 2048 cycles
-    OFS0 register settings: Independent WDT: Dedicated Clock Frequency Divisor: 128
+    OFS0 register settings: Independent WDT: Dedicated Clock Frequency Divisor: 256
     OFS0 register settings: Independent WDT: Window End Position:  0% (no window end position)
     OFS0 register settings: Independent WDT: Window Start Position: 100% (no window start position)
     OFS0 register settings: Independent WDT: Reset Interrupt Request Select: Reset is enabled
@@ -200,6 +200,9 @@ FSP Configuration
   Module "I/O Port (r_ioport)"
     Parameter Checking: Default (BSP)
     
+  Module "Independent Watchdog (r_iwdt)"
+    Parameter Checking: Default (BSP)
+    
   HAL
     Instance "g_ioport I/O Port (r_ioport)"
       Name: g_ioport
@@ -212,4 +215,8 @@ FSP Configuration
       Port D ELC Trigger Source: Disabled
       Port E ELC Trigger Source: Disabled
       Pin Configuration Name: g_bsp_pin_cfg
+      
+    Instance "g_wdt0 Independent Watchdog (r_iwdt)"
+      Name: g_wdt0
+      NMI callback: NULL
       

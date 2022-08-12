@@ -343,6 +343,7 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -614,6 +615,7 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
@@ -643,7 +645,7 @@
                 <option>
                     <name>OOCOutputFormat</name>
                     <version>3</version>
-                    <state>1</state>
+                    <state>3</state>
                 </option>
                 <option>
                     <name>OCOutputOverride</name>
@@ -651,7 +653,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>bootLoader_RA6E1.hex</state>
+                    <state>bootLoader_RA6E1.bin</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -826,7 +828,7 @@
                 </option>
                 <option>
                     <name>DoFill</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>FillerByte</name>
@@ -838,7 +840,7 @@
                 </option>
                 <option>
                     <name>FillerEnd</name>
-                    <state>0x0</state>
+                    <state>0x03FFF</state>
                 </option>
                 <option>
                     <name>CrcSize</name>
@@ -1412,6 +1414,7 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1683,6 +1686,7 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
@@ -2163,6 +2167,9 @@
             <file>
                 <name>$PROJ_DIR$\ra_cfg\fsp_cfg\r_ioport_cfg.h</name>
             </file>
+            <file>
+                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\r_iwdt_cfg.h</name>
+            </file>
         </group>
         <group>
             <name>Components</name>
@@ -2354,6 +2361,15 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\ra\fsp\inc\api\r_ioport_api.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\src\r_iwdt\r_iwdt.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\instances\r_iwdt.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\ra\fsp\inc\api\r_wdt_api.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include\renesas.h</name>
