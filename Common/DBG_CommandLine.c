@@ -372,7 +372,9 @@ static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] );
 #endif
 #if ( MCU_SELECTED == RA6E1 )
 static uint32_t DBG_CommandLine_CoreClocks( uint32_t argc, char *argv[] );
+#if ( TM_BSP_SW_DELAY == 1 )
 static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] );
+#endif
 static uint32_t DBG_CommandLine_FlashSecurity( uint32_t argc, char *argv[] );
 #endif
 
@@ -4966,15 +4968,22 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_EchoComment( uint32_t argc, char *argv[] )
 {
-   DBG_printfNoCr( "ECHO" );
+   char buffer[200] = { 0 };
+   char * echoStr = "ECHO";
+   uint32_t bufIndex = 0;
+   bufIndex += snprintf( &buffer[bufIndex], 5, "%s", echoStr );
    if ( argc > 1 )
    {
       for ( uint32_t i = 1; i < argc; i++ )
       {
-         DBG_printfNoCr( " %s", argv[i] );
+         uint32_t stringLen = strlen( argv[i] );
+         if ( stringLen < ( sizeof(buffer) - bufIndex - 2 ) )
+         {
+            bufIndex += snprintf( &buffer[bufIndex], stringLen + 2, " %s", argv[i] );
+         }
       }
    }
-   DBG_printf( " " );
+   DBG_printf( "%s", buffer );
    return 0;
 }
 #endif // TM_UART_ECHO_COMMAND
