@@ -165,7 +165,7 @@
                 <configuration>Debug</configuration>
             </member>
             <member>
-                <project>I210+c_RA6</project>
+                <project>I210+c_RA6_Dev</project>
                 <configuration>Debug</configuration>
             </member>
         </batchDefinition>

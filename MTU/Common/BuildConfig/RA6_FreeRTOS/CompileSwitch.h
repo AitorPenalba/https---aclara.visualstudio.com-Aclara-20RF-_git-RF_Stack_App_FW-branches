@@ -293,6 +293,7 @@
                                                    NOTE: Be sure to clear VBAT memory and RFSYS memory prior to operation! */
 #define LG_QUICK_TEST                     0     /* For quick testing - makes all windows the same as the outage declaration delay
                                                    Only available when DEBUG_PWR_LG is 0 */
+#define DEBUG_LAST_GASP_TASK              0     /* This is dev test code to debug the LastGasp Task while the Power is still On */
 #define TEST_TDMA                         0     /* Basic TDMA test */
 #define TEST_DEVIATION                    0     /* Test 600Hz, 700Hz and 800Hz deviation */
 #define OVERRIDE_TEMPERATURE              0     /* 0=Do not include temperature override, 1=Do inlcude temperature override */
@@ -312,21 +313,22 @@
 #define TM_TIME_COMPOUND_TEST             1
 #define TM_OS_EVENT_TEST                  1 /* Test the time compound functions */
 #define TM_INTERNAL_FLASH_TEST            1
-#define TM_BSP_SW_DELAY                   1 /* Tests the Renesas R_BSP_SoftwareDelay function */
+#define TM_BSP_SW_DELAY                   0 /* Tests the Renesas R_BSP_SoftwareDelay function */
 #define TM_ENHANCE_NOISEBAND_FOR_RA6E1    1 /* Enhancements to Noiseband: 1MHz clock test, list frequencies, control GPIO pins, extra HMC traffic */
 #define TM_DELAY_FOR_TACKED_ON_LED        0 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
 #define TM_MEASURE_SLEEP_TIMES            0 /* Adds a debug command to measure the actual sleep times based on the CYCCNT */
 #define TM_BYPASS_SI4467_GPIP0_WAIT       0 /* Bypass signal SI4467_GPIO0 after resetting the radio.  Used to test cutting this trace */
-#define TM_UART_ECHO_COMMAND              1 /* Adds an echo command to the debug port for testing UART echoing */
+#define TM_UART_ECHO_COMMAND              0 /* Adds an echo command to the debug port for testing UART echoing */
 #define TM_INSTRUMENT_NOISEBAND_TIMING    0 /* Adds instrumentation of noiseband timing to determine if there are bugs */
 #define TM_TEST_SECURITY_CHIP             0 /* More extensieve test code for security chip that was disabled in the K24 starting point DOES NOT COMPILE! */
-#define TM_UART_EVENT_COUNTERS            1 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
-#define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  1 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
+#define TM_UART_EVENT_COUNTERS            0 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
+#define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  0 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
 #if ( TM_UART_EVENT_COUNTERS == 1 )
 #define TM_UART_COUNTER_INC(x) (x)++
 #else
 #define TM_UART_COUNTER_INC(x)
 #endif
+#define TM_RANDOM_NUMBER_GEN              0 /* Enable commands to test aclara random number generator */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

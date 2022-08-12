@@ -401,6 +401,10 @@ static OS_Linked_List_Element LinkedListdata[MAX_LINKEDLIST_DATA];
 static uint32_t DBG_CommandLine_UARTcounters     ( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_UARTclearCounters( uint32_t argc, char *argv[] );
 #endif
+#if ( TM_RANDOM_NUMBER_GEN == 1 )
+static uint32_t DBG_CommandLine_RandomNumberHist  ( uint32_t argc, char *argv[] );
+static uint32_t DBG_CommandLine_RandomNumberGen   ( uint32_t argc, char *argv[] );
+#endif
 
 static const struct_CmdLineEntry DBG_CmdTable[] =
 {
@@ -683,6 +687,10 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
 #endif
    { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
+#if ( TM_RANDOM_NUMBER_GEN == 1 )
+   { "randomNumGen",  DBG_CommandLine_RandomNumberGen,  "Generate a series of random numbers: randomNumGen <samples>" },
+   { "randomNumHist", DBG_CommandLine_RandomNumberHist, "Generate histogram of aclara_randf(0f,1f): randomNumHist <samples> <seed> <histSlots> <optional: steps>" },
+#endif
    { "reboot",       DBG_CommandLine_Reboot,          "Reboot device" },
 #if ( EP == 1 )
    { "regstate",     DBG_CommandLine_RegState,        "Get or Set the Registration State" },
@@ -2580,7 +2588,6 @@ uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   returnStatus_t eStatus;
    uint8_t parSelection;
    if ( argc == 2 )
    {
@@ -2749,11 +2756,11 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
       /* The number of arguments must be 3 */
       parSelection = ( uint8_t ) atoi( argv[1] );
       addressOffset = ( lAddr )strtol( argv[2], NULL, 16 );
-      userDataWrite = argv[3];
+      userDataWrite = ( uint8_t * )argv[3];
       if ( addressOffset < INTERNAL_FLASH_SECTOR_SIZE )
       {
          /* Getting the Last address to write */
-         if( ( ( addressOffset + strlen( userDataWrite ) ) -1 ) < INTERNAL_FLASH_SECTOR_SIZE )
+         if( ( ( addressOffset + strlen( ( char const *) userDataWrite ) ) -1 ) < INTERNAL_FLASH_SECTOR_SIZE )
          {
             if ( parSelection == 0 )
             {
@@ -2772,19 +2779,19 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
             {
                if ( eSUCCESS == PAR_partitionFptr.parWrite( addressOffset,
                                                       userDataWrite,
-                                                      ( lCnt )strlen(userDataWrite),
+                                                      ( lCnt )strlen( ( char const *) userDataWrite),
                                                       partitionHandle ) )
                {
                   /* Clears the userDataWrite */
-                  memset( userDataWrite, '0', strlen(userDataWrite) );
+                  memset( userDataWrite, '0', strlen( ( char const *) userDataWrite) );
                   /* Reads the data */
                   if ( eSUCCESS == PAR_partitionFptr.parRead( userDataWrite,
                                                    addressOffset,
-                                                   ( lCnt )strlen(userDataWrite),
+                                                   ( lCnt )strlen( ( char const *) userDataWrite),
                                                    partitionHandle ) )
                   {
                      /* comparing strings userData and userDataWrite */
-                     isBothStringSame = strcmp( argv[3], userDataWrite );
+                     isBothStringSame = strcmp( argv[3], ( char const *) userDataWrite );
                      if(isBothStringSame == 0)
                      {
                         /* Both strings are same */
@@ -2847,8 +2854,6 @@ uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_IntFlash_ErasePartition( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   lAddr addressOffset;
-   lCnt sizeToErase;
    uint8_t parSelection;
    PartitionData_t const *partitionHandle;
    if ( argc == 2 )
@@ -15812,3 +15817,124 @@ static uint32_t DBG_CommandLine_UARTclearCounters ( uint32_t argc, char *argv[] 
    return ( 0 );
 }
 #endif // ( TM_UART_EVENT_COUNTERS == 1 )
+
+#if ( TM_RANDOM_NUMBER_GEN == 1 )
+static uint32_t DBG_CommandLine_RandomNumberGen  ( uint32_t argc, char *argv[] )
+{
+   uint32_t * pHistogram = NULL;
+   if ( argc < 3 )
+   {
+      DBG_printf( "Usage: randomNumHist <samples> <seed>" );
+      return ( 0 );
+   }
+   uint32_t samples   = atol( argv[1] );
+   uint32_t seed      = atol( argv[2] );
+   uint32_t bytesToAllocate = samples * sizeof(uint32_t);
+   pHistogram = malloc( bytesToAllocate );
+   if ( NULL == pHistogram )
+   {
+      DBG_printf( "Unable to allocate %u bytes from heap!", bytesToAllocate );
+   }
+   else
+   {
+      memset ( (void *)pHistogram, 0, bytesToAllocate );
+      uint32_t oldTaskPriorityDBG, oldTaskPriorityPRN, oldTaskPriorityHMC, oldTaskPriorityPHY, oldTaskPriorityIDL;
+      oldTaskPriorityDBG = OS_TASK_Set_Priority( pTskName_Dbg,   19 );
+      oldTaskPriorityPRN = OS_TASK_Set_Priority( pTskName_Print, 19 );
+      oldTaskPriorityHMC = OS_TASK_Set_Priority( pTskName_Hmc,   17 );
+      oldTaskPriorityPHY = OS_TASK_Set_Priority( pTskName_Phy,   18 );
+      oldTaskPriorityIDL = OS_TASK_Set_Priority( pTskName_Idle,  24 );
+      aclara_srand( seed );
+      for ( uint32_t i = 0; i < samples; i++ )
+      {
+         pHistogram[ i ] = (uint32_t)aclara_rand( );
+      }
+      OS_TASK_Sleep ( (uint32_t) 1000 );
+      for ( uint32_t i = 0; i < samples; i++ )
+      {
+         DBG_printf("%10lu", pHistogram[ i ] );
+      }
+      free( pHistogram );
+      (void)OS_TASK_Set_Priority( pTskName_Idle,  oldTaskPriorityIDL ); /* Put the task priorities back to normal */
+      (void)OS_TASK_Set_Priority( pTskName_Phy,   oldTaskPriorityPHY );
+      (void)OS_TASK_Set_Priority( pTskName_Hmc,   oldTaskPriorityHMC );
+      (void)OS_TASK_Set_Priority( pTskName_Print, oldTaskPriorityPRN );
+      (void)OS_TASK_Set_Priority( pTskName_Dbg,   oldTaskPriorityDBG );
+   }
+   return ( 0 );
+}
+static uint32_t DBG_CommandLine_RandomNumberHist ( uint32_t argc, char *argv[] )
+{
+   uint16_t * pHistogram = NULL;
+   char       buffer[80];
+   if ( argc < 4 )
+   {
+      DBG_printf( "Usage: randomNumHist <samples> <seed> <histSlots> <optional: steps>" );
+      return ( 0 );
+   }
+   uint32_t samples   = atol( argv[1] );
+   uint32_t seed      = atol( argv[2] );
+   uint32_t histSlots = atol( argv[3] );
+   uint32_t steps     = 1;
+   if ( argc == 5 ) steps = atol( argv[4] );
+
+   uint32_t bytesToAllocate = steps * ( histSlots + 2 ) * sizeof(uint16_t); /* Should only need histSlots + 1 but add extra to be safe */
+
+   pHistogram = malloc( bytesToAllocate );
+   if ( NULL == pHistogram )
+   {
+      DBG_printf( "Unable to allocate %u bytes from heap!", bytesToAllocate );
+   }
+   else
+   {
+      memset ( (void *)pHistogram, 0, bytesToAllocate );
+      uint32_t oldTaskPriorityDBG, oldTaskPriorityPRN, oldTaskPriorityHMC, oldTaskPriorityPHY, oldTaskPriorityIDL;
+      oldTaskPriorityDBG = OS_TASK_Set_Priority( pTskName_Dbg,   19 );
+      oldTaskPriorityPRN = OS_TASK_Set_Priority( pTskName_Print, 19 );
+      oldTaskPriorityHMC = OS_TASK_Set_Priority( pTskName_Hmc,   17 );
+      oldTaskPriorityPHY = OS_TASK_Set_Priority( pTskName_Phy,   18 );
+      oldTaskPriorityIDL = OS_TASK_Set_Priority( pTskName_Idle,  24 );
+      uint32_t outOfRangeErrors = 0;
+      aclara_srand( seed );
+      for ( uint32_t i = 0; i < samples; i++ )
+      {
+         for ( uint32_t j = 0; j < steps; j++ )
+         {
+            uint32_t offset = j * ( histSlots + 1);
+            float randValue = aclara_randf( 0.0f, 1.0f );
+            int32_t histSlot = (int32_t)( randValue * histSlots );
+            if ( ( histSlot < 0 ) || ( histSlot > histSlots ) )
+            {
+               outOfRangeErrors++;
+            }
+            else
+            {
+               pHistogram[ offset + histSlot]++;
+            }
+         }
+      }
+      OS_TASK_Sleep ( (uint32_t) 1000 );
+
+      DBG_printf( "Number of random numbers outside of range = %lu; Historgram(s):", outOfRangeErrors );
+
+      for ( uint32_t i = 0; i < histSlots; i++ )
+      {
+         char * pPtr = &buffer[0];
+         for ( uint32_t j = 0; j < steps; j++ )
+         {
+            uint32_t offset = j * ( histSlots + 1);
+            pPtr += snprintf( pPtr, 10, "%8u", pHistogram[ offset + i ] );
+         }
+         *pPtr = '\0'; /* NUL terminate the string */
+         DBG_printf( "%s", buffer );
+      }
+      free( pHistogram );
+      (void)OS_TASK_Set_Priority( pTskName_Idle,  oldTaskPriorityIDL ); /* Put the task priorities back to normal */
+      (void)OS_TASK_Set_Priority( pTskName_Phy,   oldTaskPriorityPHY );
+      (void)OS_TASK_Set_Priority( pTskName_Hmc,   oldTaskPriorityHMC );
+      (void)OS_TASK_Set_Priority( pTskName_Print, oldTaskPriorityPRN );
+      (void)OS_TASK_Set_Priority( pTskName_Dbg,   oldTaskPriorityDBG );
+   }
+   return ( 0 );
+}
+#endif // ( TM_RANDOM_NUMBER_GEN == 1 )

@@ -1070,6 +1070,9 @@
             <name>$PROJ_DIR$\..\..\..\..\wolfssl\wolfcrypt\settings.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\..\..\wolfssl\wolfcrypt\settings_MQX.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\..\..\..\..\MTU\Common\BuildConfig\K24_MQX\user_settings.h</name>
         </file>
     </group>
