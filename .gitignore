@@ -120,7 +120,7 @@ mtu/iar_v9.20/*debug
 *.pbd
 
 # RA Smart Configurator files
-#!/MTU/BootLoader/R7FA6E1/IAR/ra_cfg.txt
-!ra_cfg.txt
+!/MTU/BootLoader/R7FA6E1/IAR/ra_cfg.txt
+!/MTU/BootLoader/R7FA6E1/IAR/buildinfo.ipcf
 /MTU/BootLoader/R7FA6E1/IAR/.settings/standalone.prefs
 /MTU/Bootloader/~$ReadMe.docx
