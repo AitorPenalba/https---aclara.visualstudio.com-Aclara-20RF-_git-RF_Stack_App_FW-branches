@@ -1506,6 +1506,18 @@ BaseType_t xQueueGiveMutexRecursive( QueueHandle_t xMutex ) PRIVILEGED_FUNCTION;
 #endif
 
 /*
+ * vQueueFindInRegistry finds a queue handle given a registered queue name string.
+ *
+ * @param pcName The name to be associated with the handle.  This is the
+ * name that the kernel aware debugger will display.  The queue registry only
+ * stores a pointer to the string - so the string must be persistent (global or
+ * preferably in ROM/Flash), not on the stack.
+ */
+#if ( configQUEUE_REGISTRY_SIZE > 0 )
+    QueueHandle_t vQueueFindInRegistry( const char * pcQueueName ) PRIVILEGED_FUNCTION;
+#endif
+
+/*
  * The registry is provided as a means for kernel aware debuggers to
  * locate queues, semaphores and mutexes.  Call vQueueAddToRegistry() add
  * a queue, semaphore or mutex handle to the registry if you want the handle

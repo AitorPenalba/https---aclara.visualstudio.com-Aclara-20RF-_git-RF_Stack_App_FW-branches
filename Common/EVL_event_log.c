@@ -2375,6 +2375,12 @@ void EVL_FirmwareError( char *function, char *file, int line )
 //   EventData_s          progEvent;     /* Event info  */
 
    DBG_LW_printf("\nERROR: %s call failed %s %d\n", function, file, line);
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
+   (void)OS_QUEUE_DumpQueues( (bool)false );
+#endif
+#if ( RTOS_SELECTION == FREE_RTOS )
+   BM_showAlloc((bool)true);
+#endif
 
    // MKD 2019-08-30 13:19 The next section was commented out because the code is recursive
    // Calling EVL_LogEvent calls many OS function that if they fail, will call EVL_FirmwareError

@@ -512,4 +512,7 @@ void OS_EVENT_TestSet(void);
 #if( TM_LINKED_LIST == 2)
 void OS_LINKEDLIST_Test(void);
 #endif
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
+void OS_QUEUE_DumpQueues( bool safePrint );
+#endif
 #endif /* this must be the last line of the file */
