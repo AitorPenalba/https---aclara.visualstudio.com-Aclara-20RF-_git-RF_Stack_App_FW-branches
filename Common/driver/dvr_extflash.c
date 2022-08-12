@@ -1700,7 +1700,11 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    (void) R_AGT_InfoGet(&AGT0_ExtFlashBusy_ctrl, &info);
 
    timer_freq_hz = info.clock_frequency;
-   period_counts = (uint16_t)(uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000); // TODO: RA6E1: This calculation overflows
+   period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000); // TODO: RA6E1: This calculation overflows
+   if( period_counts >= UINT16_MAX )
+   {
+      period_counts = UINT16_MAX - 1;  /* period count cannot be more than or equal to UINT16_MAX */
+   }
 
    R_AGT_PeriodSet( &AGT0_ExtFlashBusy_ctrl, period_counts );
 
