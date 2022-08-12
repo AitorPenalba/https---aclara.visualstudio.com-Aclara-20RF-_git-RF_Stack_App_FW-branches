@@ -100,7 +100,35 @@ const char pTskName_semTest[]      = "TEST_MODE";
 /* FUNCTION DEFINITIONS */
 
 static uint16_t RunSelfTest( void );
-static void OS_SEMTestTask ( taskParameter );
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) || (TM_QUEUE == 1) ) )
+static void SELF_testModules( void );
+static void SELF_testModulesTask ( taskParameter );
+#endif
+
+#if ( TM_SEMAPHORE == 1 )
+static void SELF_testSemPost( void );
+static void SELF_testSemCreate( void );
+static bool SELF_testSemPend( void );
+#endif
+#if (TM_MSGQ == 1)
+static void SELF_testMsgqPost( void );
+static void SELF_testMsgqCreate( void );
+static bool SELF_testMsgqPend( void );
+#endif
+
+#if( TM_EVENTS == 1)
+static void SELF_testEventCreate( void );
+static bool SELF_testEventWait( void );;
+static void SELF_testEventSet( void );
+#endif
+
+#if (TM_MUTEX == 1)
+static bool SELF_testMutex( void );
+#endif
+
+#if( TM_QUEUE == 1)
+static bool SELF_testQueue( void );
+#endif
 
 
 /***********************************************************************************************************************
@@ -115,7 +143,7 @@ static void OS_SEMTestTask ( taskParameter );
 returnStatus_t SELF_init( void )
 {
 #if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) ) )
-  OS_testSem();
+  SELF_testModules();
 #endif
 
    returnStatus_t retVal = eFAILURE;
@@ -954,30 +982,30 @@ void SELF_testIWDT( void )
    }
 }
 /***********************************************************************************************************************
-   Function Name: 
+   Function Name: SELF_testModules
 
-   Purpose: 
+   Purpose: Test modules
 
    Arguments: none
 
    Returns: none
 ***********************************************************************************************************************/
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) ) )
-void OS_testSem( void )
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) || (TM_QUEUE == 1) ) )
+void SELF_testModules( void )
 {
 #if ( TM_SEMAPHORE == 1 )
-   OS_SEM_TestCreate();
+   SELF_testSemCreate();
 #endif
 #if ( TM_MSGQ == 1 )
-   OS_MSGQ_TestCreate();
+   SELF_testMsgqCreate();
 #endif
 #if ( TM_EVENTS == 1 )
-   OS_EVENT_TestCreate();
+   SELF_testEventCreate();
 #endif
    const OS_TASK_Template_t  semTaskTemplate[1] =
    {
       /* Task Index, Function,   Stack, Pri, Name,           tributes, Param, Time Slice */
-      { 1,      OS_SEMTestTask, 500, 38, (char *)pTskName_semTest, 0, 0, 0 },
+      { 1,      SELF_testModulesTask, 500, 38, (char *)pTskName_semTest, 0, 0, 0 },
    };
    OS_TASK_Template_t const *semTestTask;
    semTestTask = &semTaskTemplate[0];
@@ -986,52 +1014,64 @@ void OS_testSem( void )
       DBG_logPrintf( 'R', "ERROR - Test mode Task Creation Failed" );
    }
 #if (TM_SEMAPHORE == 1)
-   OS_SEM_TestPost();
+   SELF_testSemPost();
 #endif
 #if (TM_MSGQ == 1)
-//   OS_MSGQ_TestPost();
+   SELF_testMsgqPost();
 #endif
 #if (TM_EVENTS == 1)
-   OS_EVENT_TestSet();
+   SELF_testEventSet();
 #endif
 }
 
 /***********************************************************************************************************************
-   Function Name: 
+   Function Name: SELF_testModulesTask
 
    Purpose: 
 
-   Arguments: none
+   Arguments: taskParameter
 
    Returns: none
 ***********************************************************************************************************************/
-static void OS_SEMTestTask ( taskParameter )
+static void SELF_testModulesTask ( taskParameter )
 {
 static uint8_t testModeCount = 0;
    for ( ; ; )
    {
 #if (TM_SEMAPHORE == 1)
-   if( OS_SEM_TestPend() )
+   if( SELF_testSemPend() )
    {
       testModeCount++;
       vTaskDelay(pdMS_TO_TICKS(1000));
    }
 #endif
 #if (TM_MSGQ == 1)
-   if( OS_MSGQ_TestPend() )
+   if( SELF_testMsgqPend() )
    {
       testModeCount++;
       vTaskDelay(pdMS_TO_TICKS(1000));
    }
 #endif
 #if (TM_EVENTS == 1)
-   if( OS_EVENT_TestWait() )
+   if( SELF_testEventWait() )
    {
       testModeCount++;
       vTaskDelay(pdMS_TO_TICKS(1000));
    }
 #endif
-   if(testModeCount == ( TM_SEMAPHORE + TM_MSGQ + TM_EVENTS ) )
+#if (TM_MUTEX == 1)
+   if ( SELF_testMutex() )
+   {
+      testModeCount++;
+   }
+#endif
+#if (TM_QUEUE == 1)
+   if ( SELF_testQueue() )
+   {
+      testModeCount++;
+   }
+#endif
+   if(testModeCount == ( TM_SEMAPHORE + TM_MSGQ + TM_EVENTS + TM_MUTEX + TM_QUEUE ) )
    {
       DBG_logPrintf( 'R', "TEST MODE SUCCESS" );
    }
@@ -1040,6 +1080,350 @@ static uint8_t testModeCount = 0;
       DBG_logPrintf( 'R', "TEST MODE FAIL" );
    }
    vTaskSuspend(NULL);
+   }
+}
+#endif
+
+#if (TM_SEMAPHORE == 1)
+
+static OS_SEM_Obj       testSem_ = NULL;
+static volatile uint8_t counter = 0;
+/***********************************************************************************************************************
+   Function Name: SELF_testSemCreate
+
+   Purpose: Create semaphore
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static void SELF_testSemCreate ( void )
+{
+   if( OS_SEM_Create(&testSem_, 0) )
+   {
+      counter++;
+   }
+   else
+   {
+      counter++;
+      APP_ERR_PRINT("Unable to Create the Mutex!");
+   }
+
+}
+
+/***********************************************************************************************************************
+   Function Name: SELF_testSemPend
+
+   Purpose: Pend semaphore
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static bool SELF_testSemPend( void )
+{
+   bool retVal = false;
+   if( OS_SEM_Pend(&testSem_, HALF_SEC) )
+   {
+      counter--;
+      retVal = true;
+   }
+
+   if( 0 == counter )
+   {
+      DBG_logPrintf( 'R', "Sem Test Success" );
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Sem Test Fail" );
+   }
+   return(retVal);
+}
+
+/***********************************************************************************************************************
+   Function Name: SELF_testSemPost
+
+   Purpose: Post semaphore
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static void SELF_testSemPost( void )
+{
+   OS_SEM_Post(&testSem_);
+}
+
+#endif
+
+#if (TM_MSGQ ==1 )
+static OS_MSGQ_Obj             testMsgQueue_;
+bool retVal = false;
+static uint8_t value = 94;
+static buffer_t payload1;
+static buffer_t *ptr1 = &payload1;
+static buffer_t *rx_msg;
+
+static volatile uint8_t counter;
+/***********************************************************************************************************************
+   Function Name: SELF_testMsgqCreate
+
+   Purpose: Create msg queue
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static void SELF_testMsgqCreate ( void )
+{
+   if( OS_MSGQ_Create(&testMsgQueue_, 10, "testqueue") )
+   {
+      counter++;
+   }
+   else
+   {
+      counter++;
+      DBG_logPrintf( 'R', "Unable to Create the Message Queue!" );
+   }
+   /*initialize static message*/
+   payload1.data = &value;
+
+}
+/***********************************************************************************************************************
+   Function Name: SELF_testMsgqPend
+
+   Purpose: Pend msg queue
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static bool SELF_testMsgqPend( void )
+{
+   bool retVal = false;
+
+   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, HALF_SEC ) )
+   {
+      counter--;
+      retVal = true;
+   }
+
+   if( 94 ==  *(rx_msg->data))
+   {
+      DBG_logPrintf( 'R', "Success MSGQ Test" );
+   }
+   else if( 0 != counter )
+   {
+      DBG_logPrintf( 'R', "Fail MSGQ Test" );
+   }
+   DBG_logPrintf( 'R', "Complete MSGQ Test" );
+   return(retVal);
+}
+/***********************************************************************************************************************
+   Function Name: SELF_testMsgqPost
+
+   Purpose: Post msg queue
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static void SELF_testMsgqPost( void )
+{
+   //post address of the txMsg to the Queue
+   OS_MSGQ_Post(&testMsgQueue_, (void *)ptr1);
+}
+#endif
+
+#if( TM_EVENTS == 1 )
+static OS_EVNT_Obj eventObj;
+static OS_EVNT_Handle eventHandle = &eventObj;
+#define BIT_0 ( 1 << 0 )
+#define BIT_4 ( 1 << 4 )
+/***********************************************************************************************************************
+   Function Name: SELF_testEventCreate
+
+   Purpose: Create Event
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static void SELF_testEventCreate(void)
+{
+  bool status;
+  status = OS_EVNT_Create(eventHandle);
+  if( status )
+  {
+    DBG_logPrintf( 'R', "Created Event Object" );
+  }
+  else
+  {
+    DBG_logPrintf( 'R', "Failed to create Event Object" );
+  }
+  return;
+}
+/***********************************************************************************************************************
+   Function Name: SELF_testEventWait
+
+   Purpose: Event Wait
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static bool SELF_testEventWait(void)
+{
+  EventBits_t recv;
+  recv = OS_EVNT_Wait(eventHandle, BIT_4 | BIT_0 , false, HALF_SEC);
+  if( recv & BIT_4 )
+  {
+    DBG_logPrintf( 'R', "Received Event 4" );
+  }
+  else if( recv & BIT_0 )
+  {
+    DBG_logPrintf( 'R', "Received Event 0" );
+  }
+  else if( ( recv & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 ) )
+  {
+     DBG_logPrintf( 'R', "Received both Event 0 and Event 4" );
+  }
+  else
+  {
+    DBG_logPrintf( 'R', "Timeout" );
+  }
+  return true;
+}
+/***********************************************************************************************************************
+   Function Name: SELF_testEventSet
+
+   Purpose: Set Event
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+static void SELF_testEventSet(void)
+{
+  OS_EVNT_Set(eventHandle, BIT_4 );
+  return;
+}
+#endif
+
+#if (TM_MUTEX == 1)
+/***********************************************************************************************************************
+   Function Name: SELF_testMutex
+
+   Purpose: Test the Mutex
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+bool SELF_testMutex( void )
+{
+   volatile uint8_t     counter = 0;
+   static OS_MUTEX_Obj  testMutex_ = NULL;
+
+   if( OS_MUTEX_Create(&testMutex_) )
+   {
+      counter++;
+      OS_MUTEX_Lock(&testMutex_);
+      /* Critical Section */
+      counter--;
+      OS_MUTEX_Unlock(&testMutex_);
+   }
+   else
+   {
+      counter++;
+      DBG_logPrintf( 'R', "Unable to Create the Mutex!" );
+      return FALSE;
+
+   }
+   if( 0 == counter )
+   {
+      DBG_logPrintf( 'R', "Mutex test Success" );
+      return TRUE;
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "Mutex test Fail" );
+      return FALSE;
+   }
+
+}
+#endif
+
+#if( TM_QUEUE == 1)
+#define NUM_ITEMS 10
+bool retValStatus = false;
+static buffer_t payload1;
+static buffer_t *ptr = &payload1;
+static OS_QUEUE_Obj msgQueueObj;
+static OS_QUEUE_Handle msgQueueHandle = &msgQueueObj;
+static buffer_t *rxMsg;
+/***********************************************************************************************************************
+   Function Name: SELF_testQueue
+
+   Purpose: Test the Queue
+
+   Arguments: none
+
+   Returns: none
+***********************************************************************************************************************/
+bool SELF_testQueue( void )
+{
+   payload1.bufMaxSize = 250;
+   retValStatus = OS_QUEUE_Create( (void *) msgQueueHandle, NUM_ITEMS, "OS_QUEUE_TEST");
+   if(true == retValStatus)
+   {
+      OS_QUEUE_Enqueue( msgQueueHandle, (void *)ptr);
+      rxMsg = (buffer_t * )OS_QUEUE_Dequeue(msgQueueHandle);
+      if( rxMsg->bufMaxSize == 250 )
+      {
+         DBG_logPrintf( 'R', "OS_QUEUE Test Success" );
+         return TRUE;
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "OS_QUEUE Test Fail" );
+         return FALSE;
+      }
+
+
+      //queue the pointer to the element
+      //     for(int i = 0; i< NUM_ITEMS; i++)
+      //     {
+      //       //enqueue elements one greater than the total length
+      //       OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg);
+      //     }
+      //     OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg); //this should fail
+      //     OS_QUEUE_Dequeue( msgQueueHandle );
+      //     txMsg = &payload2;
+      //     OS_QUEUE_Enqueue( msgQueueHandle, (void *) txMsg); // this should succeed
+      //     length = OS_QUEUE_NumElements(msgQueueHandle);
+      //     //dequeue all elements and print there msg length as ID
+      //     for(int i = 0; i<length; i++)
+      //     {
+      //       rxMsg = (OS_QUEUE_Element*) OS_QUEUE_Dequeue( msgQueueHandle );
+      //       if(rxMsg->dataLen == 200)
+      //       {
+      //         APP_PRINT("Message 1");
+      //       }
+      //       else if (rxMsg->dataLen == 100)
+      //       {
+      //         APP_PRINT("Message 2");
+      //       }
+      //       else
+      //       {
+      //         APP_PRINT("Unknown Message");
+      //       }
+      //     }
+   }
+   else
+   {
+      DBG_logPrintf( 'R', "OS_QUEUE Create Fail" );
+      return FALSE;
    }
 }
 #endif

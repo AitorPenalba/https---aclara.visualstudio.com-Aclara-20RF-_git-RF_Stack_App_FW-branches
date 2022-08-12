@@ -341,68 +341,6 @@ void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement )
 
 } /* end OS_QUEUE_Next () */
 
-#if( TM_QUEUE == 1)
-#define NUM_ITEMS 10
-bool retVal = false;
-static buffer_t payload1;
-static buffer_t payload2;
-static buffer_t *ptr1 = &payload1;
-static buffer_t *ptr2 = &payload2;
-static OS_QUEUE_Obj msgQueueObj;
-static OS_QUEUE_Handle msgQueueHandle = &msgQueueObj;
-static buffer_t *rxMsg;
-
-void OS_QUEUE_Test( void )
-{
-   uint32_t length;
-   payload1.bufMaxSize = 250;
-   payload2.bufMaxSize = 100;
-
-   retVal = OS_QUEUE_Create( (void *) msgQueueHandle, NUM_ITEMS);
-   if(true == retVal)
-   {
-      OS_QUEUE_Enqueue( msgQueueHandle, (void *)ptr1);
-      rxMsg = (buffer_t * )OS_QUEUE_Dequeue(msgQueueHandle);
-      if( rxMsg->bufMaxSize == 250 )
-      {
-         APP_PRINT(" Success");
-      }
-      else
-      {
-         APP_PRINT(" Fail");
-      }
-      //queue the pointer to the element
-      //     for(int i = 0; i< NUM_ITEMS; i++)
-      //     {
-      //       //enqueue elements one greater than the total length
-      //       OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg);
-      //     }
-      //     OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg); //this should fail
-      //     OS_QUEUE_Dequeue( msgQueueHandle );
-      //     txMsg = &payload2;
-      //     OS_QUEUE_Enqueue( msgQueueHandle, (void *) txMsg); // this should succeed
-      //     length = OS_QUEUE_NumElements(msgQueueHandle);
-      //     //dequeue all elements and print there msg length as ID
-      //     for(int i = 0; i<length; i++)
-      //     {
-      //       rxMsg = (OS_QUEUE_Element*) OS_QUEUE_Dequeue( msgQueueHandle );
-      //       if(rxMsg->dataLen == 200)
-      //       {
-      //         APP_PRINT("Message 1");
-      //       }
-      //       else if (rxMsg->dataLen == 100)
-      //       {
-      //         APP_PRINT("Message 2");
-      //       }
-      //       else
-      //       {
-      //         APP_PRINT("Unknown Message");
-      //       }
-      //     }
-   }
-   return;
-}
-#endif
 
 #if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
 /*******************************************************************************

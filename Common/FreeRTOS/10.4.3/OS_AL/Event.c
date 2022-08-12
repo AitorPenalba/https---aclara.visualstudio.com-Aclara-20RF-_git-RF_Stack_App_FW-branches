@@ -239,58 +239,6 @@ void OS_EVNT_CLEAR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file,
    ( void )xEventGroupClearBits( *EventHandle, EventMask );
 }
 
-
-/*******************************************************************************
-                                 TEST CODE
-*******************************************************************************/
-#if( TM_EVENTS == 1 )
-static OS_EVNT_Obj eventObj;
-static OS_EVNT_Handle eventHandle = &eventObj;
-#define BIT_0 ( 1 << 0 )
-#define BIT_4 ( 1 << 4 )
-void OS_EVENT_TestCreate(void)
-{
-  bool status;
-  status = OS_EVNT_Create(eventHandle);
-  if( status )
-  {
-    APP_PRINT("Created Event Object");
-  }
-  else
-  {
-    APP_PRINT("Failed to create Event Object");
-  }
-  return;
-}
-bool OS_EVENT_TestWait(void)
-{
-  EventBits_t recv;
-  recv = OS_EVNT_Wait(eventHandle, BIT_4 | BIT_0 , false, HALF_SEC);
-  if( recv & BIT_4 )
-  {
-    APP_PRINT("Received Event 4" );
-  }
-  else if( recv & BIT_0 )
-  {
-    APP_PRINT("Received Event 0" );
-  }
-  else if( ( recv & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 ) )
-  {
-     APP_PRINT("Received both Event 0 and Event 4");
-  }
-  else
-  {
-    APP_PRINT("Timeout");
-  }
-  return true;
-}
-void OS_EVENT_TestSet(void)
-{
-  OS_EVNT_Set(eventHandle, BIT_4 );
-  return;
-}
-#endif
-
 #if( RTOS_SELECTION == FREE_RTOS )
 /*******************************************************************************
 

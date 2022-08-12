@@ -488,27 +488,6 @@ OS_TICK_Struct_Ptr OS_TICK_Add_msec_to_ticks ( OS_TICK_Struct *TickValue, uint32
 void OS_TICK_Sleep ( OS_TICK_Struct *TickValue, uint32_t TimeDelay );
 /* FUNCTION DEFINITIONS */
 #endif   /* __BOOTLOADER */
-#if (TM_MUTEX == 1)
-void OS_MUTEX_Test( void );
-#endif
-#if( TM_QUEUE == 1)
-void OS_QUEUE_Test( void );
-#endif
-#if (TM_SEMAPHORE == 1)
-void OS_SEM_TestPost( void );
-void OS_SEM_TestCreate ( void );
-bool OS_SEM_TestPend( void );
-#endif
-#if (TM_MSGQ == 1)
-void OS_MSGQ_TestPost( void );
-void OS_MSGQ_TestCreate ( void );
-bool OS_MSGQ_TestPend( void );
-#endif
-#if( TM_EVENTS == 1)
-void OS_EVENT_TestCreate(void);
-bool OS_EVENT_TestWait(void);;
-void OS_EVENT_TestSet(void);
-#endif
 #if( TM_LINKED_LIST == 2)
 void OS_LINKEDLIST_Test(void);
 #endif
