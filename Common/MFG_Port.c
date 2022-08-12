@@ -11240,18 +11240,22 @@ static void MFGP_timeState( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static void MFGP_CommandLine_EchoComment( uint32_t argc, char *argv[] )
 {
-   if ( argc == 1 )
+   char buffer[200] = { 0 };
+   char * echoStr = "ECHO";
+   uint32_t bufIndex = 0;
+   bufIndex += snprintf( &buffer[bufIndex], 5, "%s", echoStr );
+   if ( argc > 1 )
    {
-      MFG_printf( "ECHO\r\n" );
+      for ( uint32_t i = 1; i < argc; i++ )
+      {
+         uint32_t stringLen = strlen( argv[i] );
+         if ( stringLen < ( sizeof(buffer) - bufIndex - 2 ) )
+         {
+            bufIndex += snprintf( &buffer[bufIndex], stringLen + 2, " %s", argv[i] );
+         }
+      }
    }
-   else if ( argc == 2 )
-   {
-      MFG_printf( "ECHO %s\r\n", argv[1] );
-   }
-   else if ( argc == 3 )
-   {
-      MFG_printf( "ECHO %s %s\r\n", argv[1], argv[2] );
-   }
+   MFG_printf( "%s\n", buffer );
 }
 #endif // TM_UART_ECHO_COMMAND
 

@@ -372,7 +372,9 @@ static uint32_t DBG_CommandLine_TestOsTaskSleep( uint32_t argc, char *argv[] );
 #endif
 #if ( MCU_SELECTED == RA6E1 )
 static uint32_t DBG_CommandLine_CoreClocks( uint32_t argc, char *argv[] );
+#if ( TM_BSP_SW_DELAY == 1 )
 static uint32_t DBG_CommandLine_TestSWDelay( uint32_t argc, char *argv[] );
+#endif
 static uint32_t DBG_CommandLine_FlashSecurity( uint32_t argc, char *argv[] );
 #endif
 
@@ -405,7 +407,9 @@ static uint32_t DBG_CommandLine_UARTclearCounters( uint32_t argc, char *argv[] )
 static uint32_t DBG_CommandLine_RandomNumberHist  ( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_RandomNumberGen   ( uint32_t argc, char *argv[] );
 #endif
-
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
+static uint32_t DBG_CommandLine_Queues ( uint32_t argc, char *argv[] );
+#endif
 static const struct_CmdLineEntry DBG_CmdTable[] =
 {
    /*lint --e{786}    String concatenation within initializer OK   */
@@ -686,6 +690,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( EP == 1 )
    { "printdst",     DBG_CommandLine_getDstParams,    "Prints the DST params" },
 #endif
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
+   { "queues",       DBG_CommandLine_Queues,          "Dump all task queues" },
+#endif // ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
    { "radiostatus",  DBG_CommandLine_RadioStatus,     "Get radio status" },
 #if ( TM_RANDOM_NUMBER_GEN == 1 )
    { "randomNumGen",  DBG_CommandLine_RandomNumberGen,  "Generate a series of random numbers: randomNumGen <samples>" },
@@ -4966,15 +4973,22 @@ static uint32_t DBG_CommandLine_Comment( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static uint32_t DBG_CommandLine_EchoComment( uint32_t argc, char *argv[] )
 {
-   DBG_printfNoCr( "ECHO" );
+   char buffer[200] = { 0 };
+   char * echoStr = "ECHO";
+   uint32_t bufIndex = 0;
+   bufIndex += snprintf( &buffer[bufIndex], 5, "%s", echoStr );
    if ( argc > 1 )
    {
       for ( uint32_t i = 1; i < argc; i++ )
       {
-         DBG_printfNoCr( " %s", argv[i] );
+         uint32_t stringLen = strlen( argv[i] );
+         if ( stringLen < ( sizeof(buffer) - bufIndex - 2 ) )
+         {
+            bufIndex += snprintf( &buffer[bufIndex], stringLen + 2, " %s", argv[i] );
+         }
       }
    }
-   DBG_printf( " " );
+   DBG_printf( "%s", buffer );
    return 0;
 }
 #endif // TM_UART_ECHO_COMMAND
@@ -15789,7 +15803,19 @@ static uint32_t DBG_CommandLine_UARTcounters ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 
+/******************************************************************************
 
+   Function Name: DBG_CommandLine_UARTclearCounters ( uint32_t argc, char *argv[] )
+
+   Purpose: This function clears the UART counters
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: always 0 (success)
+
+   Notes:
+
+******************************************************************************/
 static uint32_t DBG_CommandLine_UARTclearCounters ( uint32_t argc, char *argv[] )
 {
    if ( argc == 2 )
@@ -15819,12 +15845,28 @@ static uint32_t DBG_CommandLine_UARTclearCounters ( uint32_t argc, char *argv[] 
 #endif // ( TM_UART_EVENT_COUNTERS == 1 )
 
 #if ( TM_RANDOM_NUMBER_GEN == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RandomNumberGen ( uint32_t argc, char *argv[] )
+
+   Purpose: This function generates and displays a sequence of random numbers
+            between 0 and 0xFFFFFFFF using the aclara_rand() function
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: always 0 (success)
+
+   Notes: This command temporarily lowers priorities of several tasks and restores
+          them after the command is done printing.  This tends to keep the prints
+          of the data consecutive for easy processing by Excel.
+
+******************************************************************************/
 static uint32_t DBG_CommandLine_RandomNumberGen  ( uint32_t argc, char *argv[] )
 {
    uint32_t * pHistogram = NULL;
    if ( argc < 3 )
    {
-      DBG_printf( "Usage: randomNumHist <samples> <seed>" );
+      DBG_printf( "Usage: randomNumGen <samples> <seed>" );
       return ( 0 );
    }
    uint32_t samples   = atol( argv[1] );
@@ -15863,6 +15905,25 @@ static uint32_t DBG_CommandLine_RandomNumberGen  ( uint32_t argc, char *argv[] )
    }
    return ( 0 );
 }
+
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RandomNumberHist ( uint32_t argc, char *argv[] )
+
+   Purpose: This function generates a series of random numbers between 0f and 1f
+            using aclara_randf.  It then puts them into a histogram to allow an
+            analysis of whether they approximate a uniform random distribution
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: always 0 (success)
+
+   Notes: This command temporarily lowers priorities of several tasks and restores
+          them after the command is done printing.  This tends to keep the prints
+          of the data consecutive for easy processing by Excel.
+
+******************************************************************************/
 static uint32_t DBG_CommandLine_RandomNumberHist ( uint32_t argc, char *argv[] )
 {
    uint16_t * pHistogram = NULL;
@@ -15938,3 +15999,28 @@ static uint32_t DBG_CommandLine_RandomNumberHist ( uint32_t argc, char *argv[] )
    return ( 0 );
 }
 #endif // ( TM_RANDOM_NUMBER_GEN == 1 )
+
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_Queues ( uint32_t argc, char *argv[] )
+
+   Purpose: This function looks up and displays queue information for a list of
+            named queues that are used by the application.
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: always 0 (success)
+
+   Notes: The list of queue names must be manually updated when new queues are
+          added to the appliction
+
+******************************************************************************/
+static uint32_t DBG_CommandLine_Queues ( uint32_t argc, char *argv[] )
+{
+   (void)OS_QUEUE_DumpQueues( (bool)true );
+   return ( 0 );
+}
+
+#endif

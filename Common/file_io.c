@@ -1109,7 +1109,9 @@ void FIO_fileDump( void )
                uint16_t dataAddr;
                uint16_t index;
                uint8_t  fileData[16];
+#if ( RTOS_SELECTION == MQX_RTOS )
                char     hexString[(sizeof(fileData) * 2) + 1];
+#endif
                uint16_t cnt;
                uint8_t  i;
                FileStatus_t fileStatus;
@@ -1117,6 +1119,7 @@ void FIO_fileDump( void )
                if ( eSUCCESS == FIO_fopen( &fHandle, pPartitionData->ePartition, sHeader.Id, sHeader.dataSize,
                                            sHeader.Attr, 0, &fileStatus ) )
                {
+#if ( RTOS_SELECTION == MQX_RTOS )
                   DBG_printfNoCr( "%2u, %-22s, %4u,   %u, ", sHeader.Id, getFileName( sHeader.Id ), sHeader.dataSize, ( uint32_t )pPartitionData->ePartition );
                   pHdrBytes = ( uint8_t * )&sHeader;
                   for ( i = 0; i < sizeof( sHeader ); i++ )
@@ -1125,6 +1128,17 @@ void FIO_fileDump( void )
                   }
                   DBG_printfNoCr( "%s ", hexString );
                   OS_TASK_Sleep( 5 ); // give time to the debug task to print
+#elif ( RTOS_SELECTION == FREE_RTOS )
+                  char buffer[ 40 + 16 + 232 + 100 ] = { 0 }; /* Largest file is eFN_PHY_CACHED = 232 bytes so leaving 100 bytes spare */
+                  uint32_t bufIndex = 0;
+                  pHdrBytes = ( uint8_t * )&sHeader;
+                  bufIndex += snprintf( &buffer[bufIndex], 40, "%2u, %-22s, %4u,   %u, ", sHeader.Id, getFileName( sHeader.Id ), sHeader.dataSize, ( uint32_t )pPartitionData->ePartition );
+                  for ( i = 0; i < sizeof( sHeader ); i++ )
+                  {  // convert file header hexs data into hex value string
+                     bufIndex += snprintf( &buffer[bufIndex], 3, "%02X", *pHdrBytes++ );
+                  }
+                  buffer[ bufIndex++ ] = ' ';
+#endif
                   cnt = sizeof( fileData ); // set count to data storage buffer size
                   for ( dataAddr = 0, index = 0; index < sHeader.dataSize; index += cnt )
                   {
@@ -1136,13 +1150,26 @@ void FIO_fileDump( void )
                      {
                         for ( i = 0; i < cnt; i++ )
                         {  // convert file data contained in byte array into hex value string
+#if ( RTOS_SELECTION == MQX_RTOS )
                            (void)snprintf(&hexString[i * 2], ( sizeof(hexString) - (i * 2) ), "%02X", fileData[i] );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+                           if ( bufIndex < sizeof(buffer) - 4 ) /* Make sure there is still space in the buffer, including a final NUL byte */
+                           {
+                              bufIndex += snprintf( &buffer[bufIndex], 3, "%02X", fileData[i] );
+                           }
+#endif
                         }
+#if ( RTOS_SELECTION == MQX_RTOS )
                         DBG_printfNoCr( "%s", hexString );
+#endif
                         OS_TASK_Sleep( 5 ); //give time to the debug task to print
                      }
                   }
+#if ( RTOS_SELECTION == MQX_RTOS )
                   DBG_printf( "" );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+                  DBG_printf( "%s", buffer );
+#endif
                }
             }
 
