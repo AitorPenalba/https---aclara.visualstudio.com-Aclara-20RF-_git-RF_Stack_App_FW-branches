@@ -20,3 +20,4 @@
                 define symbol OSPI_DEVICE_0_LENGTH   = 0x0;
                 define symbol OSPI_DEVICE_1_START = 0x70000000;
                 define symbol OSPI_DEVICE_1_LENGTH   = 0x0;
+                define symbol OPTION_SETTINGS_EXCLUDE = 1;				/*Aclara modified: exclude option settings in .bin */
