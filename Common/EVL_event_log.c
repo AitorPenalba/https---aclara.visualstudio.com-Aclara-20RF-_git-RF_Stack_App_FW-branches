@@ -2379,7 +2379,7 @@ void EVL_FirmwareError( char *function, char *file, int line )
    (void)OS_QUEUE_DumpQueues( (bool)false );
 #endif
 #if ( RTOS_SELECTION == FREE_RTOS )
-   BM_showAlloc((bool)true);
+   BM_showAlloc((bool)false);
 #endif
 
    // MKD 2019-08-30 13:19 The next section was commented out because the code is recursive

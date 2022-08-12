@@ -15866,7 +15866,7 @@ static uint32_t DBG_CommandLine_RandomNumberGen  ( uint32_t argc, char *argv[] )
    uint32_t * pHistogram = NULL;
    if ( argc < 3 )
    {
-      DBG_printf( "Usage: randomNumHist <samples> <seed>" );
+      DBG_printf( "Usage: randomNumGen <samples> <seed>" );
       return ( 0 );
    }
    uint32_t samples   = atol( argv[1] );
