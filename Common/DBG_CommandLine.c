@@ -412,10 +412,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "help",         DBG_CommandLine_Help,            "Display list of commands" },
    { "h",            DBG_CommandLine_Help,            "help" },
    { "?",            DBG_CommandLine_Help,            "help" },
-   { "watchDogTest", DBG_CommandLine_wdTest,          "1 for refreshing the watchdog timer 2 for validating the watchdog timer" },
 #if ( DAC_CODE_CONFIG == 1 )
-   { "setdac0step",               DBG_CommandLine_DAC_SetDacStep,      "Set the DAC Step, range for steps is 0 - 4096 eg.) setdac0step 2200" },
-   { "pwrsel",                    DBG_CommandLine_setPwrSel,           "Set/reset pwrsel pin" },
+   { "setdac0step",  DBG_CommandLine_DAC_SetDacStep,  "Set the DAC Step, range for steps is 0 - 4096 eg.) setdac0step 2200" },
+   { "pwrsel",       DBG_CommandLine_setPwrSel,       "Set/reset pwrsel pin" },
 #endif
 #if ( FAKE_TRAFFIC == 1 )
    { "bhgencount",   DBG_CommandLine_ipBhaulGenCount, "get (no args) or set (arg1) backhaul fake record gen count" },
@@ -864,21 +863,22 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "ticktestfuture",       DBG_CommandLine_TimeFuture,     "Displays Time compound's difference between two tick struct results" },
 #endif
 #if ( TM_OS_EVENT_TEST == 1)
+   { "watchDogTest",         DBG_CommandLine_wdTest,          "1 for refreshing the watchdog timer 2 for validating the watchdog timer" },
    { "eventtestset",         DBG_CommandLine_OS_EventSet,    "Sets the Event Bits argument is SetBit (hex) " },
    { "createtesteventandwait",  DBG_CommandLine_OS_EventCreateWait,     "Create and Wait for Event Set Bits argument\r\n"
                                      "                                   are WaitBit (hex) and WaitForAll (bool)" },
    { "deleteeventtesttask",  DBG_CommandLine_OS_EventTaskDelete,        "Deletes the Event Test Task" },
 #endif
 #if ( TM_INTERNAL_FLASH_TEST == 1 )
-   { "intflashtestopen",  DBG_CommandLine_IntFlash_OpenPartition,     "Opens Partition for Test in Internal Flash\r\n"
+   { "intflashtestopen",     DBG_CommandLine_IntFlash_OpenPartition,     "Opens Partition for Test in Internal Flash\r\n"
                                      "                                   ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" },
-   { "intflashtestread",  DBG_CommandLine_IntFlash_ReadPartition,     "Reads Partition for Test in Internal Flash" },
-   { "intflashtestwrite",  DBG_CommandLine_IntFlash_WritePartition,     "Writes Partition for Test in Internal Flash" },
-   { "intflashtesterase",  DBG_CommandLine_IntFlash_ErasePartition,     "Erases Partition for Test in Internal Flash" },
+   { "intflashtestread",     DBG_CommandLine_IntFlash_ReadPartition,     "Reads Partition for Test in Internal Flash" },
+   { "intflashtestwrite",    DBG_CommandLine_IntFlash_WritePartition,     "Writes Partition for Test in Internal Flash" },
+   { "intflashtesterase",    DBG_CommandLine_IntFlash_ErasePartition,     "Erases Partition for Test in Internal Flash" },
 #if ( MCU_SELECTED == RA6E1 )
    { "intflashtestblankcheck",  DBG_CommandLine_IntFlash_BlankCheckPartition,     "Blank check Partition for Test in Internal Flash" },
 #endif
-   { "intflashtestclose",  DBG_CommandLine_IntFlash_ClosePartition,     "Close Partition for Test in Internal Flash" },
+   { "intflashtestclose",    DBG_CommandLine_IntFlash_ClosePartition,     "Close Partition for Test in Internal Flash" },
 #endif
 #if ( TM_LINKED_LIST == 1)
    { "oslinkedlistcreate",   DBG_CommandLine_OS_LinkedList_Create,      "Creates test LinkedList" },
@@ -1360,7 +1360,7 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_Help () */
 
-
+#if ( TM_OS_EVENT_TEST == 1)
 /***********************************************************************************************************************
    Function Name: DBG_CommandLine_wdTest
 
@@ -1394,6 +1394,7 @@ uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] )
    }
    return 0;
 }
+#endif
 
 #if ( DAC_CODE_CONFIG == 1 )
 /******************************************************************************
