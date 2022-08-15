@@ -208,6 +208,10 @@ typedef enum
 #if (SIGNAL_NW_STATUS == 1)
    eNW_CON_TSK_IDX,
 #endif
+#if ( TM_CREATE_TWO_BLABBER_TASKS == 1 )
+   eDBG_BLABBER1_IDX,
+   eDBG_BLABBER2_IDX,
+#endif
    eIDL_TSK_IDX,
 #if ( RTOS_SELECTION == MQX_RTOS )
    eINT_TSK_IDX, // Keep that next to last. This is not really a task index. This is a place holder to keep track of CPU load for interrupt
@@ -305,6 +309,10 @@ const char pTskName_LcTimeSync[]    = "LC_TS";
 #if (ENABLE_SRFN_DA_TASKS == 1)
 const char pTskName_B2BRead[]       = "B2BRD";
 const char pTskName_HostReset[]     = "HSTRST";
+#endif
+#if ( TM_CREATE_TWO_BLABBER_TASKS == 1 )
+const char pTskName_DbgBalbber1[]    = "BLAB1";
+const char pTskName_DbgBalbber2[]    = "BLAB2";
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )
 const char pTskName_Idle[]          = "IDL";
@@ -427,6 +435,10 @@ const OS_TASK_Template_t  Task_template_list[] =
 #endif
 #if ( ENABLE_ALRM_TASKS == 1 )
    { eBuALRM_TSK_IDX,           EVL_AlarmHandlerTask,         1500,  38, (char *)pTskName_BuAm,   DEFAULT_ATTR, 0, 0 },
+#endif
+#if ( TM_CREATE_TWO_BLABBER_TASKS == 1 )
+   { eDBG_BLABBER1_IDX,         DBG_BlabberTask1,             1000,  38, (char *)pTskName_DbgBalbber1, DEFAULT_ATTR, 0, 0 },
+   { eDBG_BLABBER2_IDX,         DBG_BlabberTask2,             1000,  38, (char *)pTskName_DbgBalbber2, DEFAULT_ATTR, 0, 0 },
 #endif
    /* should be the lowest priority tasks */
    // NOTE: MQX enforce a minimum stack size of 336 bytes even though less bytes are needed

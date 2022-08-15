@@ -323,6 +323,7 @@
 #define TM_TEST_SECURITY_CHIP             0 /* More extensieve test code for security chip that was disabled in the K24 starting point DOES NOT COMPILE! */
 #define TM_UART_EVENT_COUNTERS            0 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
 #define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  0 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
+#define TM_CREATE_TWO_BLABBER_TASKS       0 /* Create two tasks that output random numbers of messages on DBG port with random timing */
 #if ( TM_UART_EVENT_COUNTERS == 1 )
 #define TM_UART_COUNTER_INC(x) (x)++
 #else
