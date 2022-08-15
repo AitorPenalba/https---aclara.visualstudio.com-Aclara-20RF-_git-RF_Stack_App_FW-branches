@@ -303,22 +303,27 @@ if(OPTION_SETTING_LENGTH > 0)
 {
   if (!isdefinedsymbol(PROJECT_NONSECURE))
   {
-    place at address OPTION_SETTING_START { ro section .option_setting_ofs0 };
-    place at address OPTION_SETTING_START+0x10 { ro section .option_setting_dualsel };
-    place at address OPTION_SETTING_START+0x34 { ro section .option_setting_sas };
-    place at address OPTION_SETTING_S_START+0x00 { ro section .option_setting_ofs1_sec };
-    place at address OPTION_SETTING_S_START+0x10 { ro section .option_setting_banksel_sec };
-    place at address OPTION_SETTING_S_START+0x40 { ro section .option_setting_bps_sec0 };
-    place at address OPTION_SETTING_S_START+0x44 { ro section .option_setting_bps_sec1 };
-    place at address OPTION_SETTING_S_START+0x48 { ro section .option_setting_bps_sec2 };
-    place at address OPTION_SETTING_S_START+0x60 { ro section .option_setting_pbps_sec0 };
-    place at address OPTION_SETTING_S_START+0x64 { ro section .option_setting_pbps_sec1 };
-    place at address OPTION_SETTING_S_START+0x68 { ro section .option_setting_pbps_sec2 };
-    place at address OPTION_SETTING_S_START+0x80 { ro section .option_setting_ofs1_sel };
-    place at address OPTION_SETTING_S_START+0x90 { ro section .option_setting_banksel_sel };
-    place at address OPTION_SETTING_S_START+0xC0 { ro section .option_setting_bps_sel0 };
-    place at address OPTION_SETTING_S_START+0xC4 { ro section .option_setting_bps_sel1 };
-    place at address OPTION_SETTING_S_START+0xC8 { ro section .option_setting_bps_sel2 };
+    /* Aclara: modified - don't include option settings in bootloader.bin - use settings from application */
+	if (!isdefinedsymbol(OPTION_SETTINGS_EXCLUDE))
+	{
+      place at address OPTION_SETTING_START { ro section .option_setting_ofs0 };
+      place at address OPTION_SETTING_START+0x10 { ro section .option_setting_dualsel };
+      place at address OPTION_SETTING_START+0x34 { ro section .option_setting_sas };
+      place at address OPTION_SETTING_S_START+0x00 { ro section .option_setting_ofs1_sec };
+      place at address OPTION_SETTING_S_START+0x10 { ro section .option_setting_banksel_sec };
+      place at address OPTION_SETTING_S_START+0x40 { ro section .option_setting_bps_sec0 };
+      place at address OPTION_SETTING_S_START+0x44 { ro section .option_setting_bps_sec1 };
+      place at address OPTION_SETTING_S_START+0x48 { ro section .option_setting_bps_sec2 };
+      place at address OPTION_SETTING_S_START+0x60 { ro section .option_setting_pbps_sec0 };
+      place at address OPTION_SETTING_S_START+0x64 { ro section .option_setting_pbps_sec1 };
+      place at address OPTION_SETTING_S_START+0x68 { ro section .option_setting_pbps_sec2 };
+      place at address OPTION_SETTING_S_START+0x80 { ro section .option_setting_ofs1_sel };
+      place at address OPTION_SETTING_S_START+0x90 { ro section .option_setting_banksel_sel };
+      place at address OPTION_SETTING_S_START+0xC0 { ro section .option_setting_bps_sel0 };
+      place at address OPTION_SETTING_S_START+0xC4 { ro section .option_setting_bps_sel1 };
+      place at address OPTION_SETTING_S_START+0xC8 { ro section .option_setting_bps_sel2 };
+	}
+	/* Aclara: modified END */
   }
   else
   {

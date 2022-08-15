@@ -652,7 +652,7 @@
                 <option>
                     <name>OOCOutputFormat</name>
                     <version>3</version>
-                    <state>1</state>
+                    <state>3</state>
                 </option>
                 <option>
                     <name>OCOutputOverride</name>
@@ -660,7 +660,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>bootLoader_RA6E1.hex</state>
+                    <state>bootLoader_RA6E1.bin</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -835,7 +835,7 @@
                 </option>
                 <option>
                     <name>DoFill</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>FillerByte</name>
@@ -847,7 +847,7 @@
                 </option>
                 <option>
                     <name>FillerEnd</name>
-                    <state>0x0</state>
+                    <state>0x03FFF</state>
                 </option>
                 <option>
                     <name>CrcSize</name>
@@ -2528,6 +2528,12 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\Aclara_BSP\sys_clock_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\Common\version.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\Common\version.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\Aclara_BSP\WDOG_BL.c</name>
