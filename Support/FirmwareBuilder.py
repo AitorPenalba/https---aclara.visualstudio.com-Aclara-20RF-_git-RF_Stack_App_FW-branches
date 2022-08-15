@@ -67,6 +67,7 @@ class FirmwareBuilder:
             # TODO MRH RA6 ewp's
             self.application_free_RTOS_RA6_ewp = "EP_FreeRTOS_RA6.ewp"
             self.application_wolf_RA6_ewp = "wolfSSL-Lib_RA6_FreeRTOS.ewp"
+            self.application_bootloader_RA6_ewp = "bootLoader_RA6E1.ewp"
             self.application_IplusC_RA6_ewp = "I210+c_RA6_Dev.ewp"
 
 
@@ -283,7 +284,6 @@ class FirmwareBuilder:
 
     def build_SRFN_RA6_firmware(self):
 
-        print("No build yet Reece hasn't written it Yet!!!!!  :D")
 
         # self.clean_release_folders()
         self.clean_SRFN_release_folders
@@ -366,6 +366,36 @@ class FirmwareBuilder:
             set_file_global(name='RA6_Wolf_warnings', value=warning_count)
         else:
             set_file_global(name='RA6_Wolf_warnings', value=warning_count)
+
+
+        # Build RA6 Bootloader
+        warning_count, error_count, path_to_iar_output = self.build_SRFN_RA6_fw_image(ewp_name = self.application_bootloader_RA6_ewp,
+                                                                                  target_name = self.iar_app_target_name)
+
+        set_file_global(name = "RA6_bootloader_output_path", value = path_to_iar_output)
+
+        # try and except here or if os.path.exists
+
+        # Checking for errors
+        if error_count > 0:
+            print(f"Building the RA6 Bootloader image failed with {error_count} errors and {warning_count} warnings ")
+            set_file_global(name = 'RA6_Bootloader_Status', value = 'Build Failed')
+            set_file_global(name = 'RA6_Bootloader_Errors', value = error_count)
+            set_file_global(name = 'RA6_Bootloader_Warnings', value = warning_count)
+            if str(get_file_global(name = "firmware_type_ep")) == 'RA6':
+                create_N_zip_up_artifacts(enviro_file_path)
+                print('##vso[task.complete result=Failed;]')
+                return
+            else:
+                pass
+        else:
+            set_file_global(name = 'RA6_Bootloader_Status', value = 'Build Passed')
+            set_file_global(name = 'RA6_Bootloader_Errors', value = error_count)
+        if warning_count > 0:
+            print(f"Building the RA6 Bootloader image created {warning_count} warnings ")
+            set_file_global(name = 'RA6_Bootloader_warnings', value = warning_count)
+        else:
+            set_file_global(name = 'RA6_Bootloader_warnings', value = warning_count)
 
 
         # Build RA6 I210 +c Dev
@@ -1128,6 +1158,10 @@ class FirmwareBuilder:
             exe_output_dir = os.path.join(os.path.abspath(self.project_path), "MTU", "IAR_v9.20","Debug")
         elif ewp_name == "wolfSSL-Lib_RA6_FreeRTOS.ewp":
             ewp_path = os.path.join(self.project_path, "Common", "wolfssl", "IDE", "IAR-EWARM", "Projects", "MTU","wolfSSL-Lib_RA6_FreeRTOS.ewp")
+            make_archive = False
+            exe_output_dir = os.path.join(os.path.abspath(self.project_path), "MTU", "IAR_v9.20","Debug")
+        elif ewp_name == "bootLoader_RA6E1.ewp":
+            ewp_path = os.path.join(self.project_path, "MTU", "Bootloader", "R7FA6E1", "IAR", "bootLoader_RA6E1.ewp")
             make_archive = False
             exe_output_dir = os.path.join(os.path.abspath(self.project_path), "MTU", "IAR_v9.20","Debug")
         elif ewp_name == "I210+c_RA6_Dev.ewp":
