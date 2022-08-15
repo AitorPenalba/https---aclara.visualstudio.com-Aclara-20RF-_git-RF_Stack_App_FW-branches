@@ -268,9 +268,6 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
             taskPrintFilter_ == OS_TASK_GetId() ||                /* Filter match?  */
             OS_TASK_GetId() == OS_TASK_GetID_fromName( "DBG" ) )  /* DBG task */
       {
-#if ( RTOS_SELECTION == FREE_RTOS )
-         OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task. Also making sure it does not locks up in an mutex due to queue posting by different tasks.
-#endif
          TM_UART_COUNTER_INC( dbgLog_testMutexLockBefore );
 #if ( TM_UART_EVENT_COUNTERS == 1)
          if ( 0 == dbgLog_testTaskIdBeforeMutex )
@@ -283,6 +280,14 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
 #if ( TM_UART_EVENT_COUNTERS == 1)
          dbgLog_testTaskIdAfterMutex  = OS_TASK_GetId();
          dbgLog_testTaskIdBeforeMutex = 0;
+#endif
+#if ( RTOS_SELECTION == FREE_RTOS )
+      if ( uxQueueSpacesAvailable( mQueueHandle_.MSGQ_QueueObj ) < 2 )
+      {
+         if ( category ) ++line_num_; /* make it clear to log reader that a line was lost */
+         OS_MUTEX_Unlock( &logPrintf_mutex_ ); // Function will not return if it fails
+         return;
+      }
 #endif
          // Reset length
          len = 0;
@@ -871,3 +876,55 @@ bool DBG_GetDfwMonitorMode( void )
    return EnableDfwMonMode;
 }
 #endif /* end PORTABLE_DCU section */
+
+#if ( TM_CREATE_TWO_BLABBER_TASKS == 1 )
+/***********************************************************************************************************************
+
+   Function name: DBG_BlabberTask1( taskParameter )
+
+   Purpose: A task that prints randomlyl to the debug port
+
+   Arguments: taskParameter
+
+   Returns: None
+
+ **********************************************************************************************************************/
+void DBG_BlabberTask1( taskParameter )
+{
+  uint32_t counter = 0;
+   OS_TASK_Sleep( (uint32_t) 20000 ); /* Don't start blabbering for 20 seconds */
+   for ( ; ; )
+   {
+      OS_TASK_Sleep( (uint32_t)( aclara_randf(0.0f, 2000.0f) ) );
+      do
+      {
+        DBG_logPrintf( 'I', "This is message number %lu from the DBG_BlabberTask #1", counter++ );
+      } while ( aclara_randf( 0.0f, 1.0f ) < 0.95f );
+   }
+}
+
+/***********************************************************************************************************************
+
+   Function name: DBG_BlabberTask1( taskParameter )
+
+   Purpose: Another task that prints randomlyl to the debug port
+
+   Arguments: taskParameter
+
+   Returns: None
+
+ **********************************************************************************************************************/
+void DBG_BlabberTask2( taskParameter )
+{
+  uint32_t counter = 0;
+   OS_TASK_Sleep( (uint32_t) 21000 ); /* Don't start blabbering for 21 seconds */
+   for ( ; ; )
+   {
+      OS_TASK_Sleep( (uint32_t)( aclara_randf(0.0f, 2000.0f) ) );
+      do
+      {
+        DBG_logPrintf( 'I', "This is message number %lu from the DBG_BlabberTask #2", counter++ );
+      } while ( aclara_randf( 0.0f, 1.0f ) < 0.95f );
+   }
+}
+#endif // ( TM_CREATE_TWO_BLABBER_TASKS == 1 )
