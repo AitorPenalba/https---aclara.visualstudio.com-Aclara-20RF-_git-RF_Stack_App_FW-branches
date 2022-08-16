@@ -236,8 +236,6 @@ void SELF_testTask( taskParameter )
    }
 #endif
 #endif // if MQX_RTOS
-   
-
    selfTestResults = RunSelfTest();       /* Run once during the init phase   */
 #if ( RTOS_SELECTION == MQX_RTOS )
 #if ( USE_USB_MFG == 0 )

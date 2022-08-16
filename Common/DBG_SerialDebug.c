@@ -50,7 +50,6 @@
 //#include "ascii.h"
 #include "time_util.h"
 #include "buffer.h"
-#include "SELF_test.h"
 //#ifndef BSP_DEFAULT_IO_CHANNEL_DEFINED
 //#error This application requires BSP_DEFAULT_IO_CHANNEL to be not NULL. Please set corresponding BSPCFG_ENABLE_TTYx to non-zero in user_config.h and recompile BSP with this option.
 //#endif
@@ -129,8 +128,6 @@ static volatile OS_TASK_id dbgLog_testTaskIdAfterMutex = 0;
 static volatile OS_TASK_id dbgLog_testTaskIdBeforePost = 0;
 static volatile OS_TASK_id dbgLog_testTaskIdAfterPost  = 0;
 #endif
-
-
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */

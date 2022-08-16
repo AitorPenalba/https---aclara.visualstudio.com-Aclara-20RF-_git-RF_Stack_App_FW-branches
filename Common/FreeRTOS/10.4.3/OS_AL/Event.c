@@ -20,8 +20,6 @@
 #include <lwevent.h>
 #include "EVL_event_log.h"
 #endif
-#include "DBG_SerialDebug.h"
-#include "buffer.h"
 
 /* #DEFINE DEFINITIONS */
 
