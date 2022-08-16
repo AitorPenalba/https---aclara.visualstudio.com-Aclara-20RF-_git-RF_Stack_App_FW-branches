@@ -988,6 +988,10 @@ void ecc108e_InitKeys( void )
    uint8_t                 keySize;
    returnStatus_t          retVal;
 #if ( EP == 1 )
+#if ( MCU_SELECTED == RA6E1)
+   uint16_t                hostPswdKeyCRC;
+   uint16_t                romHostPswdKeyCRC;
+#endif
    bool                    hpkValid = (bool)false; /* hostPasswordKey is valid   */
 #endif
 
@@ -1049,10 +1053,30 @@ void ecc108e_InitKeys( void )
       }
    }
 #elif ( MCU_SELECTED == RA6E1 )
-   if ( eSUCCESS != PAR_partitionFptr.parBlankCheck( ( uint32_t ) key, sizeof( intROM.hostPasswordKey.key ), pPart) )
+   keySize = sizeof( secROM.hostPasswordKey.key );
+   buffer_t *hostPasswordKey = BM_alloc( keySize );
+   if ( ( eSUCCESS == PAR_partitionFptr.parRead( hostPasswordKey->data, (dSize)( offsetof( intFlashNvMap_t, hostPasswordKey.key ) ),
+                                                 keySize, pPart ) ) )
    {
-      hpkValid = true;
+      /* Compute CRC on host password key (secROM) */
+      CRC_ecc108_crc( keySize,                    /* Number of bytes   */
+                      hostPasswordKey->data,      /* Source data       */
+                      (uint8_t *)&hostPswdKeyCRC, /* Resulting crc     */
+                      0,                          /* Seed value        */
+                      (bool)false );              /* Don't hold the CRC engine  */
+      /* Now read the stored CRC to compare to the calculated CRC.   */
+      /* If CRC doesn't match, host password key in secROM has to be updated */
+      if ( ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t *)&romHostPswdKeyCRC, (dSize)( offsetof( intFlashNvMap_t, hostPasswordKeyCRC ) ),
+                                                    sizeof( romHostPswdKeyCRC ), pPart ) ) )
+      {
+        if( romHostPswdKeyCRC == hostPswdKeyCRC )
+        {
+           hpkValid = ( bool ) true;
+        }
+      }
    }
+
+   BM_free( hostPasswordKey );
 #endif
 
    if ( !hpkValid )
@@ -1063,6 +1087,19 @@ void ecc108e_InitKeys( void )
       {
          retVal =  PAR_partitionFptr.parWrite( (dSize)offsetof( intFlashNvMap_t, hostPasswordKey.key ), hpk, (lCnt)sizeof( hpk ), pPart );
       } while ( retVal != eSUCCESS );
+#if ( MCU_SELECTED == RA6E1 )
+      CRC_ecc108_crc( sizeof( hpk ),              /* Number of bytes   */
+                      hpk,                        /* Source data       */
+                      (uint8_t *)&hostPswdKeyCRC, /* Resulting crc     */
+                      0,                          /* Seed value        */
+                      (bool)false );              /* Don't hold the CRC engine  */
+      do
+      {
+         retVal =  PAR_partitionFptr.parWrite( (dSize)offsetof( intFlashNvMap_t, hostPasswordKeyCRC ), ( uint8_t *)&hostPswdKeyCRC, (lCnt)sizeof( hostPswdKeyCRC ), pPart );
+      } while ( retVal != eSUCCESS );
+#endif
+      DBG_logPrintf( 'I', "New host password key and its CRC has been written into offset of %u and %u respectively\n",
+                     (dSize)offsetof( intFlashNvMap_t, hostPasswordKey.key ), (dSize)offsetof( intFlashNvMap_t, hostPasswordKeyCRC ) );
       PWR_unlockMutex( PWR_MUTEX_ONLY ); /* Function will not return if it fails  */
    }
 #endif
