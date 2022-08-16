@@ -413,7 +413,7 @@ const OS_TASK_Template_t  Task_template_list[] =
    { eDFW_TSK_IDX,              DFWA_task,                    5400,  37, (char *)pTskName_Dfw,    DEFAULT_ATTR, 0, 0 },
 #endif
 #if ( USE_DTLS == 1 )
-//   { eDTLS_TSK_IDX,             DTLS_Task,                    5500,  38, (char *)pTskName_Dtls,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eDTLS_TSK_IDX,             DTLS_Task,                    5500,  38, (char *)pTskName_Dtls,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
 #if ( USE_MTLS == 1 )
    { eMTLS_TSK_IDX,             MTLS_Task,                    1100,  38, (char *)pTskName_Mtls,   DEFAULT_ATTR|RFTEST_MODE_ATTR, 0, 0 },

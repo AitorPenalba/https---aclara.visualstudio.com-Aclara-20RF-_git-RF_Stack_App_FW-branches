@@ -601,8 +601,6 @@ uint32_t MFGP_AllowDtlsConnect( void )
 void MFGP_DtlsInit( enum_UART_ID uartId )
 {
 #if !USE_USB_MFG
-
-
    _AuthenticationAttempts = 0;
    _TimeForAuthentication = MFGP_15_MINUTES_IN_SECONDS;
    _FailedAuthenticationCounter = 0;
