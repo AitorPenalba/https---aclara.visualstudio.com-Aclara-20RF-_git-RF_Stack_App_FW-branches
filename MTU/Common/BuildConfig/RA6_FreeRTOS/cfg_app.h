@@ -334,7 +334,11 @@ typedef enum
 #define HMC_TROUBLE()               (((GPIOC_PDIR & (1<<11))>>11)) /* TROUBLE signal from the host meter */
 #define HMC_TROUBLE_TRIS()          { PORTC_PCR11= 0x100;   GPIOC_PDDR &= ~(1<<11); } /* Set for GPIO, Make Input */
 #elif ( MCU_SELECTED == RA6E1 )
-#define HMC_TROUBLE()               R_BSP_PinRead(BSP_IO_PORT_05_PIN_05) /* Signal T_I-210+C_METER */
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
+#define HMC_TROUBLE()               R_BSP_PinRead(BSP_IO_PORT_05_PIN_05) /* Signal T_I-210+C_METER on Rev A board */
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
+#define HMC_TROUBLE()               R_BSP_PinRead(BSP_IO_PORT_01_PIN_11) /* Signal T_I-210+C_METER on Rev B board*/
+#endif
 #define HMC_TROUBLE_TRIS()                                               /* Pin already set as input in pin_data */
 #endif // MCU SELECTED
 #endif // ( HMC_KV || HMC_I210_PLUS_C )

@@ -7693,7 +7693,11 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
                   ver.field.version, ver.field.revision, ver.field.build);
 #endif
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
-   DBG_logPrintf( 'R', "%s %s", VER_getComDeviceType(), &string[0] );
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) // TODO: RA6E1 Bob: simplify once everyone has Rev B equivalent HW
+   DBG_logPrintf( 'R', "%s %s built for Rev A circuit board", VER_getComDeviceType(), &string[0] );
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
+   DBG_logPrintf( 'R', "%s %s built for Rev B circuit board", VER_getComDeviceType(), &string[0] );
+#endif
 #if ( ( MCU_SELECTED == NXP_K24 ) || ( DCU == 1 ) )
    DBG_logPrintf( 'R', "BSP=%s BSPIO=%s PSP=%s IAR=%d",
                   BSP_Get_BspRevision(), BSP_Get_IoRevision(), BSP_Get_PspRevision(), __VER__ );

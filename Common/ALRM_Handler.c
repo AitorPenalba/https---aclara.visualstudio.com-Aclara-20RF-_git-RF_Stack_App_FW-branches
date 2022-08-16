@@ -501,7 +501,14 @@ void ALRM_RealTimeTask ( taskParameter )
       {
 #if (  METER_TROUBLE_SIGNAL == 1 )
          ALRM_PRNT_INFO( 'A', "HMC_TROUBLE = %d", HMC_TROUBLE() );
-#warning "HMC_TROUBLE is defined as P505, Pin 81 in this build.  It will be moving to P111, Pin 54 in the Rev B layout"
+         // TODO: RA6E1 Bob: Once the whole team is converted to Rev B equivalent hardware, this can be removed
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
+         #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
+         #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev B (P1B) hardware"
+#else
+         #error "Invalid value for HAL_TARGET_HARDWARE"
+#endif
          /* Run if IRQ occurred, previous check had events set, or trouble signal is active. */
 #endif
          if ( clearEventLogs_ )
