@@ -4177,7 +4177,6 @@ static void MFGP_dstOffset( uint32_t argc, char *argv[] )
    DST_getDstOffset( (int16_t *) &nDstOffset );
    MFG_printf( "%s %d\n", argv[ 0 ], nDstOffset );
 #elif ( MCU_SELECTED == RA6E1 )
-   getDstOffset = ( int16_t ) nDstOffset;
    DST_getDstOffset( &getDstOffset );
    MFG_printf( "%s %d\n", argv[ 0 ], getDstOffset );
 #endif
