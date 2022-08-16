@@ -1182,7 +1182,6 @@ static void PowerGoodDebounce( void )
       delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
 #elif ( RTOS_SELECTION == FREE_RTOS )
       delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
-//      R_BSP_SoftwareDelay( DEBOUNCE_DELAY_VAL * 10 , BSP_DELAY_UNITS_MICROSECONDS );
 #endif
       CLRWDT();
       if ( BRN_OUT() )

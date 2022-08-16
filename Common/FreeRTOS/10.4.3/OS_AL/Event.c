@@ -21,6 +21,7 @@
 #include "EVL_event_log.h"
 #endif
 
+
 /* #DEFINE DEFINITIONS */
 
 /* MACRO DEFINITIONS */
