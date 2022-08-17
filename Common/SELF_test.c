@@ -90,6 +90,7 @@ uint8_t checkFlashBuffer[512];
 static const enum_UART_ID mfgPortUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
 #endif
 const char pTskName_semTest[]      = "TEST_MODE";
+static uint8_t testModeCount = 0;
 /* TYPE DEFINITIONS */
 
 /* ****************************************************************************************************************** */
@@ -100,7 +101,7 @@ const char pTskName_semTest[]      = "TEST_MODE";
 
 static uint16_t RunSelfTest( void );
 #if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) || (TM_QUEUE == 1) ) )
-static void SELF_testModules( void );
+static returnStatus_t SELF_testModules( void );
 static void SELF_testModulesTask ( taskParameter );
 #endif
 
@@ -141,10 +142,6 @@ static bool SELF_testQueue( void );
 ***********************************************************************************************************************/
 returnStatus_t SELF_init( void )
 {
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) ) )
-  SELF_testModules();
-#endif
-
    returnStatus_t retVal = eFAILURE;
    FileStatus_t   fileStatus;
    SELF_file_t    *pFile = &SELF_testFile;
@@ -445,6 +442,13 @@ static uint16_t RunSelfTest()
    }
 #endif
 
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) ) )
+   SELF_TestData.lastResults.uAllResults.Bits.testModulesFail = 0;  //Clear to avoid carbage
+   if( eSUCCESS != SELF_testModules() )
+   {
+      SELF_TestData.lastResults.uAllResults.Bits.testModulesFail = 1;
+   }
+#endif
 
    /* Execute the RTC Test last (to allow sufficient time for VBAT to come up and the OSC to start?)
       otherwise if the RTC SuperCap is completely discharged on the T-board the RTC test may fail on
@@ -988,8 +992,11 @@ void SELF_testIWDT( void )
    Returns: none
 ***********************************************************************************************************************/
 #if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) || (TM_QUEUE == 1) ) )
-void SELF_testModules( void )
+static returnStatus_t SELF_testModules( void )
 {
+   testModeCount = 0;
+//Step 1 : Create the modules for testing
+   returnStatus_t  retVal;
 #if ( TM_SEMAPHORE == 1 )
    SELF_testSemCreate();
 #endif
@@ -999,6 +1006,8 @@ void SELF_testModules( void )
 #if ( TM_EVENTS == 1 )
    SELF_testEventCreate();
 #endif
+
+//Step 2: Create task for test the modules
    const OS_TASK_Template_t  semTaskTemplate[1] =
    {
       /* Task Index, Function,   Stack, Pri, Name,           tributes, Param, Time Slice */
@@ -1010,6 +1019,7 @@ void SELF_testModules( void )
    {
       DBG_logPrintf( 'R', "ERROR - Test mode Task Creation Failed" );
    }
+//Step 3 : Test the modules
 #if (TM_SEMAPHORE == 1)
    SELF_testSemPost();
 #endif
@@ -1019,6 +1029,16 @@ void SELF_testModules( void )
 #if (TM_EVENTS == 1)
    SELF_testEventSet();
 #endif
+   OS_TASK_Sleep( (uint32_t) 2000 );
+   if(testModeCount == ( TM_SEMAPHORE + TM_MSGQ + TM_EVENTS + TM_MUTEX + TM_QUEUE ) )
+   {
+      retVal = eSUCCESS;
+   }
+   else
+   {
+      retVal = eFAILURE;
+   }
+   return retVal;
 }
 
 /***********************************************************************************************************************
@@ -1032,28 +1052,24 @@ void SELF_testModules( void )
 ***********************************************************************************************************************/
 static void SELF_testModulesTask ( taskParameter )
 {
-static uint8_t testModeCount = 0;
    for ( ; ; )
    {
 #if (TM_SEMAPHORE == 1)
    if( SELF_testSemPend() )
    {
       testModeCount++;
-      vTaskDelay(pdMS_TO_TICKS(1000));
    }
 #endif
 #if (TM_MSGQ == 1)
    if( SELF_testMsgqPend() )
    {
       testModeCount++;
-      vTaskDelay(pdMS_TO_TICKS(1000));
    }
 #endif
 #if (TM_EVENTS == 1)
    if( SELF_testEventWait() )
    {
       testModeCount++;
-      vTaskDelay(pdMS_TO_TICKS(1000));
    }
 #endif
 #if (TM_MUTEX == 1)
@@ -1068,15 +1084,7 @@ static uint8_t testModeCount = 0;
       testModeCount++;
    }
 #endif
-   if(testModeCount == ( TM_SEMAPHORE + TM_MSGQ + TM_EVENTS + TM_MUTEX + TM_QUEUE ) )
-   {
-      DBG_logPrintf( 'R', "TEST MODE SUCCESS" );
-   }
-   else
-   {
-      DBG_logPrintf( 'R', "TEST MODE FAIL" );
-   }
-   vTaskSuspend(NULL);
+   vTaskDelete(NULL);
    }
 }
 #endif
@@ -1084,7 +1092,7 @@ static uint8_t testModeCount = 0;
 #if (TM_SEMAPHORE == 1)
 
 static OS_SEM_Obj       testSem_ = NULL;
-static volatile uint8_t counter = 0;
+static volatile uint8_t semCounter = 0;
 /***********************************************************************************************************************
    Function Name: SELF_testSemCreate
 
@@ -1098,11 +1106,11 @@ static void SELF_testSemCreate ( void )
 {
    if( OS_SEM_Create(&testSem_, 0) )
    {
-      counter++;
+      semCounter++;
    }
    else
    {
-      counter++;
+      semCounter++;
       APP_ERR_PRINT("Unable to Create the Mutex!");
    }
 
@@ -1122,11 +1130,11 @@ static bool SELF_testSemPend( void )
    bool retVal = false;
    if( OS_SEM_Pend(&testSem_, HALF_SEC) )
    {
-      counter--;
+      semCounter--;
       retVal = true;
    }
 
-   if( 0 == counter )
+   if( 0 == semCounter )
    {
       DBG_logPrintf( 'R', "Sem Test Success" );
    }
@@ -1161,7 +1169,7 @@ static buffer_t payload1;
 static buffer_t *ptr1 = &payload1;
 static buffer_t *rx_msg;
 
-static volatile uint8_t counter;
+static volatile uint8_t msgqCounter;
 /***********************************************************************************************************************
    Function Name: SELF_testMsgqCreate
 
@@ -1175,11 +1183,11 @@ static void SELF_testMsgqCreate ( void )
 {
    if( OS_MSGQ_Create(&testMsgQueue_, 10, "testqueue") )
    {
-      counter++;
+      msgqCounter++;
    }
    else
    {
-      counter++;
+      msgqCounter++;
       DBG_logPrintf( 'R', "Unable to Create the Message Queue!" );
    }
    /*initialize static message*/
@@ -1201,7 +1209,7 @@ static bool SELF_testMsgqPend( void )
 
    if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, HALF_SEC ) )
    {
-      counter--;
+      msgqCounter--;
       retVal = true;
    }
 
@@ -1209,7 +1217,7 @@ static bool SELF_testMsgqPend( void )
    {
       DBG_logPrintf( 'R', "Success MSGQ Test" );
    }
-   else if( 0 != counter )
+   else if( 0 != msgqCounter )
    {
       DBG_logPrintf( 'R', "Fail MSGQ Test" );
    }
@@ -1288,6 +1296,7 @@ static bool SELF_testEventWait(void)
   else
   {
     DBG_logPrintf( 'R', "Timeout" );
+    return false;
   }
   return true;
 }
@@ -1319,25 +1328,25 @@ static void SELF_testEventSet(void)
 ***********************************************************************************************************************/
 bool SELF_testMutex( void )
 {
-   volatile uint8_t     counter = 0;
+   volatile uint8_t     mutexCounter = 0;
    static OS_MUTEX_Obj  testMutex_ = NULL;
 
    if( OS_MUTEX_Create(&testMutex_) )
    {
-      counter++;
+      mutexCounter++;
       OS_MUTEX_Lock(&testMutex_);
       /* Critical Section */
-      counter--;
+      mutexCounter--;
       OS_MUTEX_Unlock(&testMutex_);
    }
    else
    {
-      counter++;
+      mutexCounter++;
       DBG_logPrintf( 'R', "Unable to Create the Mutex!" );
       return FALSE;
 
    }
-   if( 0 == counter )
+   if( 0 == mutexCounter )
    {
       DBG_logPrintf( 'R', "Mutex test Success" );
       return TRUE;
