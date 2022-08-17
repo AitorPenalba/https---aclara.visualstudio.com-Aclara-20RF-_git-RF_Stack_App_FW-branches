@@ -89,8 +89,9 @@ uint8_t checkFlashBuffer[512];
 #if ( MCU_SELECTED == RA6E1 )
 static const enum_UART_ID mfgPortUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
 #endif
-const char pTskName_semTest[]      = "TEST_MODE";
-static uint8_t testModeCount = 0;
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
+const char pTskName_semTest[]      = "TEST_MODULE";
+#endif
 /* TYPE DEFINITIONS */
 
 /* ****************************************************************************************************************** */
@@ -100,7 +101,7 @@ static uint8_t testModeCount = 0;
 /* FUNCTION DEFINITIONS */
 
 static uint16_t RunSelfTest( void );
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) || (TM_QUEUE == 1) ) )
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
 static returnStatus_t SELF_testModules( void );
 static void SELF_testModulesTask ( taskParameter );
 #endif
@@ -441,9 +442,8 @@ static uint16_t RunSelfTest()
       // TODO: Error handling
    }
 #endif
-
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) ) )
-   SELF_TestData.lastResults.uAllResults.Bits.testModulesFail = 0;  //Clear to avoid carbage
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
+   SELF_TestData.lastResults.uAllResults.Bits.testModulesFail = 0;  //Clear to avoid garbage
    if( eSUCCESS != SELF_testModules() )
    {
       SELF_TestData.lastResults.uAllResults.Bits.testModulesFail = 1;
@@ -991,10 +991,10 @@ void SELF_testIWDT( void )
 
    Returns: none
 ***********************************************************************************************************************/
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) || (TM_QUEUE == 1) ) )
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
 static returnStatus_t SELF_testModules( void )
 {
-   testModeCount = 0;
+static uint8_t testModeCount = 0;
 //Step 1 : Create the modules for testing
    returnStatus_t  retVal;
 #if ( TM_SEMAPHORE == 1 )
@@ -1020,40 +1020,6 @@ static returnStatus_t SELF_testModules( void )
       DBG_logPrintf( 'R', "ERROR - Test mode Task Creation Failed" );
    }
 //Step 3 : Test the modules
-#if (TM_SEMAPHORE == 1)
-   SELF_testSemPost();
-#endif
-#if (TM_MSGQ == 1)
-   SELF_testMsgqPost();
-#endif
-#if (TM_EVENTS == 1)
-   SELF_testEventSet();
-#endif
-   OS_TASK_Sleep( (uint32_t) 2000 );
-   if(testModeCount == ( TM_SEMAPHORE + TM_MSGQ + TM_EVENTS + TM_MUTEX + TM_QUEUE ) )
-   {
-      retVal = eSUCCESS;
-   }
-   else
-   {
-      retVal = eFAILURE;
-   }
-   return retVal;
-}
-
-/***********************************************************************************************************************
-   Function Name: SELF_testModulesTask
-
-   Purpose: 
-
-   Arguments: taskParameter
-
-   Returns: none
-***********************************************************************************************************************/
-static void SELF_testModulesTask ( taskParameter )
-{
-   for ( ; ; )
-   {
 #if (TM_SEMAPHORE == 1)
    if( SELF_testSemPend() )
    {
@@ -1083,6 +1049,39 @@ static void SELF_testModulesTask ( taskParameter )
    {
       testModeCount++;
    }
+#endif
+   if(testModeCount == ( TM_SEMAPHORE + TM_MSGQ + TM_EVENTS + TM_MUTEX + TM_QUEUE ) )
+   {
+      retVal = eSUCCESS;
+   }
+   else
+   {
+      retVal = eFAILURE;
+   }
+   return retVal;
+}
+
+/***********************************************************************************************************************
+   Function Name: SELF_testModulesTask
+
+   Purpose: 
+
+   Arguments: taskParameter
+
+   Returns: none
+***********************************************************************************************************************/
+static void SELF_testModulesTask ( taskParameter )
+{
+   for ( ; ; )
+   {
+#if (TM_SEMAPHORE == 1)
+   SELF_testSemPost();
+#endif
+#if (TM_MSGQ == 1)
+   SELF_testMsgqPost();
+#endif
+#if (TM_EVENTS == 1)
+   SELF_testEventSet();
 #endif
    vTaskDelete(NULL);
    }

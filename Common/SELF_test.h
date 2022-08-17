@@ -58,7 +58,7 @@ typedef struct
          uint16_t    securityBFCFail :   1;
          uint16_t    securityFail    :   1;
          uint16_t    sdRAMFail       :   1;
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) ) )
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
          uint16_t    testModulesFail :   1;
          uint16_t    RSVD            :   10;
 #else
@@ -78,9 +78,6 @@ typedef struct
 #if ( ( DCU == 1 ) || ( MQX_CPU == PSP_CPU_MK22FN512 ) )  /* DCU will always support externam RAM */
    uint16_t SDRAMFail;        /* Number of times SD RAM has failed   */
 #endif
-//#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) ) )
-//   uint16_t    testModulesFail;
-//#endif
    LatestSelfTestResults_t lastResults;  /* Last test results - used to determine when Failed and Cleared events occur */
 } SELF_TestData_t;
 
