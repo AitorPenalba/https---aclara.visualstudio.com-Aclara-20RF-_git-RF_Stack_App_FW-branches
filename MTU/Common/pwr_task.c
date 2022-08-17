@@ -1178,11 +1178,7 @@ static void PowerGoodDebounce( void )
    // Make sure PF_METER deasserted for 1ms.
    while ( debounceCount < DEBOUNCE_CNT_RST_VAL )
    {
-#if ( RTOS_SELECTION == MQX_RTOS )
-      delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
-#elif ( RTOS_SELECTION == FREE_RTOS )
-      delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
-#endif
+      delay_10us( DEBOUNCE_DELAY_VAL );
       CLRWDT();
       if ( BRN_OUT() )
       {
@@ -1220,11 +1216,7 @@ static returnStatus_t PowerFailDebounce( void )
    // Make sure BRN_OUT asserted for 1ms.
    while ( ( eSUCCESS == brownOut ) && ( debounceCount < DEBOUNCE_CNT_RST_VAL ) )
    {
-#if ( RTOS_SELECTION == MQX_RTOS )
       delay_10us( DEBOUNCE_DELAY_VAL );
-#elif ( RTOS_SELECTION == FREE_RTOS )
-      delay_10us( DEBOUNCE_DELAY_VAL ); 
-#endif
       if ( BRN_OUT() )
       {
          ++debounceCount;

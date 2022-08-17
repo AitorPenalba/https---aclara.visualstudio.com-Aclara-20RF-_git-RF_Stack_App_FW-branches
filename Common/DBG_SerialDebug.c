@@ -198,7 +198,6 @@ returnStatus_t DBG_init( void )
  **********************************************************************************************************************/
 void DBG_TxTask( taskParameter )
 {
-//   OS_SEM_TestPost();
    for ( ; ; )
    {
       buffer_t *pBuf;
