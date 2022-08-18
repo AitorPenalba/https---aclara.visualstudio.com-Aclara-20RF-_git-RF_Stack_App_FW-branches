@@ -61,6 +61,13 @@
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #define SELF_TEST_EVENT_MASK             0x0000000F
 #endif
+#if ( TM_EVENTS == 1 )
+#define BIT_0 ( 1 << 0 )
+#define BIT_4 ( 1 << 4 )
+#endif
+#if( TM_QUEUE == 1)
+#define NUM_ITEMS 10
+#endif
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 #if ( DCU == 1 )  /* DCU will always support external RAM */
@@ -89,8 +96,33 @@ uint8_t checkFlashBuffer[512];
 #if ( MCU_SELECTED == RA6E1 )
 static const enum_UART_ID mfgPortUart = UART_MANUF_TEST;     /* UART used for MFG port operations   */
 #endif
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
-const char pTskName_semTest[]      = "TEST_MODULE";
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1 ) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1 ) ) )
+const char pTskName_osTestModule[]      = "OS_TEST_MODULE";
+#endif
+#if ( TM_SEMAPHORE == 1 )
+static OS_SEM_Obj       testSem_ = NULL;
+static volatile uint8_t semCounter = 0;
+#endif
+#if (TM_MSGQ ==1 )
+static OS_MSGQ_Obj             testMsgQueue_;
+bool retVal = false;
+static uint8_t value = 94;
+static buffer_t payload1;
+static buffer_t *ptr1 = &payload1;
+static buffer_t *rx_msg;
+static volatile uint8_t msgqCounter;
+#endif
+#if ( TM_EVENTS == 1 )
+static OS_EVNT_Obj eventObj;
+static OS_EVNT_Handle eventHandle = &eventObj;
+#endif
+#if( TM_QUEUE == 1)
+bool retValStatus = false;
+static buffer_t payload1;
+static buffer_t *ptr = &payload1;
+static OS_QUEUE_Obj msgQueueObj;
+static OS_QUEUE_Handle msgQueueHandle = &msgQueueObj;
+static buffer_t *rxMsg;
 #endif
 /* TYPE DEFINITIONS */
 
@@ -102,7 +134,7 @@ const char pTskName_semTest[]      = "TEST_MODULE";
 
 static uint16_t RunSelfTest( void );
 #if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
-static returnStatus_t SELF_testModules( void );
+static returnStatus_t OS_testModules( void );
 static void SELF_testModulesTask ( taskParameter );
 #endif
 
@@ -442,9 +474,9 @@ static uint16_t RunSelfTest()
       // TODO: Error handling
    }
 #endif
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1 ) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
    SELF_TestData.lastResults.uAllResults.Bits.testModulesFail = 0;  //Clear to avoid garbage
-   if( eSUCCESS != SELF_testModules() )
+   if( eSUCCESS != OS_testModules() )
    {
       SELF_TestData.lastResults.uAllResults.Bits.testModulesFail = 1;
    }
@@ -983,7 +1015,7 @@ void SELF_testIWDT( void )
    }
 }
 /***********************************************************************************************************************
-   Function Name: SELF_testModules
+   Function Name: OS_testModules
 
    Purpose: Test modules
 
@@ -991,8 +1023,8 @@ void SELF_testIWDT( void )
 
    Returns: none
 ***********************************************************************************************************************/
-#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
-static returnStatus_t SELF_testModules( void )
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1 ) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
+static returnStatus_t OS_testModules( void )
 {
 static uint8_t testModeCount = 0;
 //Step 1 : Create the modules for testing
@@ -1011,7 +1043,7 @@ static uint8_t testModeCount = 0;
    const OS_TASK_Template_t  semTaskTemplate[1] =
    {
       /* Task Index, Function,   Stack, Pri, Name,           tributes, Param, Time Slice */
-      { 1,      SELF_testModulesTask, 500, 38, (char *)pTskName_semTest, 0, 0, 0 },
+      { 1,      SELF_testModulesTask, 500, 38, (char *)pTskName_osTestModule, 0, 0, 0 },
    };
    OS_TASK_Template_t const *semTestTask;
    semTestTask = &semTaskTemplate[0];
@@ -1072,8 +1104,6 @@ static uint8_t testModeCount = 0;
 ***********************************************************************************************************************/
 static void SELF_testModulesTask ( taskParameter )
 {
-   for ( ; ; )
-   {
 #if (TM_SEMAPHORE == 1)
    SELF_testSemPost();
 #endif
@@ -1084,14 +1114,11 @@ static void SELF_testModulesTask ( taskParameter )
    SELF_testEventSet();
 #endif
    vTaskDelete(NULL);
-   }
 }
 #endif
 
 #if (TM_SEMAPHORE == 1)
 
-static OS_SEM_Obj       testSem_ = NULL;
-static volatile uint8_t semCounter = 0;
 /***********************************************************************************************************************
    Function Name: SELF_testSemCreate
 
@@ -1161,14 +1188,7 @@ static void SELF_testSemPost( void )
 #endif
 
 #if (TM_MSGQ ==1 )
-static OS_MSGQ_Obj             testMsgQueue_;
-bool retVal = false;
-static uint8_t value = 94;
-static buffer_t payload1;
-static buffer_t *ptr1 = &payload1;
-static buffer_t *rx_msg;
 
-static volatile uint8_t msgqCounter;
 /***********************************************************************************************************************
    Function Name: SELF_testMsgqCreate
 
@@ -1240,10 +1260,6 @@ static void SELF_testMsgqPost( void )
 #endif
 
 #if( TM_EVENTS == 1 )
-static OS_EVNT_Obj eventObj;
-static OS_EVNT_Handle eventHandle = &eventObj;
-#define BIT_0 ( 1 << 0 )
-#define BIT_4 ( 1 << 4 )
 /***********************************************************************************************************************
    Function Name: SELF_testEventCreate
 
@@ -1360,13 +1376,6 @@ bool SELF_testMutex( void )
 #endif
 
 #if( TM_QUEUE == 1)
-#define NUM_ITEMS 10
-bool retValStatus = false;
-static buffer_t payload1;
-static buffer_t *ptr = &payload1;
-static OS_QUEUE_Obj msgQueueObj;
-static OS_QUEUE_Handle msgQueueHandle = &msgQueueObj;
-static buffer_t *rxMsg;
 /***********************************************************************************************************************
    Function Name: SELF_testQueue
 
@@ -1394,36 +1403,6 @@ bool SELF_testQueue( void )
          DBG_logPrintf( 'R', "OS_QUEUE Test Fail" );
          return FALSE;
       }
-
-
-      //queue the pointer to the element
-      //     for(int i = 0; i< NUM_ITEMS; i++)
-      //     {
-      //       //enqueue elements one greater than the total length
-      //       OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg);
-      //     }
-      //     OS_QUEUE_Enqueue( msgQueueHandle, (void *)txMsg); //this should fail
-      //     OS_QUEUE_Dequeue( msgQueueHandle );
-      //     txMsg = &payload2;
-      //     OS_QUEUE_Enqueue( msgQueueHandle, (void *) txMsg); // this should succeed
-      //     length = OS_QUEUE_NumElements(msgQueueHandle);
-      //     //dequeue all elements and print there msg length as ID
-      //     for(int i = 0; i<length; i++)
-      //     {
-      //       rxMsg = (OS_QUEUE_Element*) OS_QUEUE_Dequeue( msgQueueHandle );
-      //       if(rxMsg->dataLen == 200)
-      //       {
-      //         APP_PRINT("Message 1");
-      //       }
-      //       else if (rxMsg->dataLen == 100)
-      //       {
-      //         APP_PRINT("Message 2");
-      //       }
-      //       else
-      //       {
-      //         APP_PRINT("Unknown Message");
-      //       }
-      //     }
    }
    else
    {

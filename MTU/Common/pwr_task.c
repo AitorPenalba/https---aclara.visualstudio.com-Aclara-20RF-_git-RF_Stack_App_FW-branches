@@ -54,10 +54,6 @@
 #include "buffer.h"
 
 #include "vbat_reg.h"
-#if ( MCU_SELECTED == NXP_K24 )  /* TODO: RA6E1: Add includes for RA6 */
-#include "fio.h"           /* For ecc108_mqx.h" */
-#include "ecc108_mqx.h"    /* For the delay_xx functions */
-#endif
 #include "EVL_event_log.h"
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
 #include "ALRM_Handler.h"    /* For the delay_xx functions */
@@ -66,7 +62,10 @@
 #include "ID_intervaltask.h"
 #endif
 #include "historyd.h"
-#if ( RTOS_SELECTION == FREE_RTOS )
+#if ( RTOS_SELECTION == MQX_RTOS )
+#include "fio.h"           /* For ecc108_mqx.h" */
+#include "ecc108_mqx.h"    /* For the delay_xx functions */
+#elif ( RTOS_SELECTION == FREE_RTOS )
 #include "ecc108_freertos.h"
 #endif
 
