@@ -2509,10 +2509,13 @@
             <name>$PROJ_DIR$\..\..\..\..\Common\driver\IF_intFlash_BL.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Common\invert_bits.c</name>
+            <name>$PROJ_DIR$\..\..\..\..\Common\invert_bits_BL.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Common\invert_bits.h</name>
+            <name>$PROJ_DIR$\..\..\..\..\Common\invert_bits_BL.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\Common\BuildConfig\RA6_FreeRTOS\partition_cfg_BL.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\Common\partitions_BL.c</name>
