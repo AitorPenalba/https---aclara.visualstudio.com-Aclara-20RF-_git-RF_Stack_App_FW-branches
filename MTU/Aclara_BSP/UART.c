@@ -99,12 +99,19 @@ const uart_cfg_t *UartCfg[MAX_UART_ID] =
 
 
 #if (RTOS_SELECTION == FREE_RTOS)
+#if 0 // TODO: RA6E1 Bob: these defines should no longer be necessary, remove later
 #define MAX_RING_BUFFER_SIZE   256
 #define RING_BUFFER_MASK       255
+#endif
 
 typedef struct
 {
+#if 0 /* TODO: RA6E1 Bob: Remove the buffers from this structure so that different UARTs can have different buffer sizes */
    uint8_t   buffer[MAX_RING_BUFFER_SIZE];
+#else
+   uint8_t * pBuffer; /* Pointer to the ring buffer for this UART */
+   uint16_t  size;    /* Size of the ring buffer, does not need to be 2^k size */
+#endif
    uint16_t  head;
    uint16_t  tail;
 } UART_ringBuffer_t;
@@ -131,15 +138,41 @@ static MQX_FILE_PTR UartHandle[MAX_UART_ID];
 #endif
 
 #if ( MCU_SELECTED == RA6E1 )
-static UART_ringBuffer_t uartRingBuf[MAX_UART_ID];
-static UART_Sem          UART_semHandle[MAX_UART_ID];
-static bool              ringBufoverflow[MAX_UART_ID];
-static bool              transmitUARTEnable[MAX_UART_ID];
+/* The following are the input ring buffers used to handle UART input data */
+static uint8_t           ringBufferMfgPort[1024];
+#if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
+static uint8_t           ringBufferOptPort[1024];
+#endif
+static uint8_t           ringBufferDbgPort[256];
+static uint8_t           ringBufferHMCPort[128];
+/* The following structure contains the ring buffer control structures for each UART */
+static UART_ringBuffer_t uartRingBuf[MAX_UART_ID] =
+{
+   {
+      .pBuffer = &ringBufferMfgPort[0], .size = sizeof(ringBufferMfgPort), .head = 0, .tail = 0
+   },
+#if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
+   {
+      .pBuffer = &ringBufferOptPort[0], .size = sizeof(ringBufferOptPort), .head = 0, .tail = 0
+   },
+#endif
+   {
+      .pBuffer = &ringBufferDbgPort[0], .size = sizeof(ringBufferDbgPort), .head = 0, .tail = 0
+   },
+   {
+      .pBuffer = &ringBufferHMCPort[0], .size = sizeof(ringBufferHMCPort), .head = 0, .tail = 0
+   }
+};
+static UART_Sem          UART_semHandle [MAX_UART_ID]    = { NULL };
+static bool              ringBufoverflow[MAX_UART_ID]    = { (bool)false };
+static bool              transmitUARTEnable[MAX_UART_ID] = { (bool)false };
 static const char        CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
 static bool              dbgUartEchoEnable_ = (bool)true;
-#endif
+
+#endif // ( MCU_SELECTED == RA6E1 )
 
 #if ( TM_UART_EVENT_COUNTERS == 1 )
+/* This structure creates counters on a per-UART basis for various events that can occur in this module */
 static Uart_Events_t uart_events[MAX_UART_ID] = { 0 };
 #endif // TM_UART_EVENT_COUNTERS
 
@@ -148,6 +181,97 @@ static Uart_Events_t uart_events[MAX_UART_ID] = { 0 };
 /* FUNCTION DEFINITIONS */
 
 #if ( MCU_SELECTED == RA6E1 )
+/*******************************************************************************
+
+  Function name: UART_CallbackHandler
+
+  Purpose: Common Interrupt Callback Handler for all UART ports
+
+  Returns: None
+
+*******************************************************************************/
+static void UART_CallbackHandler( enum_UART_ID UartId, bool echoRequired, uart_callback_args_t *p_args )
+{
+   /* Handle the UART event */
+   switch (p_args->event)
+   {
+      /* Receive complete */
+      case UART_EVENT_RX_COMPLETE:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventRxComplete );
+         break;
+      }
+      /* Transmit complete */
+      case UART_EVENT_TX_COMPLETE:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventTxComplete );
+         if ( ( echoRequired ) && ( UART_semHandle[ (uint32_t)UartId ].echoUART_sem != NULL ) )
+         {
+            OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
+         }
+         if ( transmitUARTEnable[ (uint32_t)UartId ] )
+         {
+            OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+            transmitUARTEnable[ (uint32_t)UartId ] = false;
+         }
+         break;
+      }
+      /* Received single byte */
+      case UART_EVENT_RX_CHAR:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventRxChar );
+         if( ! ( ringBufoverflow[ (uint32_t)UartId ] ) )
+         {
+            uint16_t nextHead = ( uartRingBuf[ (uint32_t)UartId ].head + 1 ) % uartRingBuf[ (uint32_t)UartId ].size;
+            if ( nextHead == uartRingBuf[ (uint32_t)UartId ].tail )
+            {
+               TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].isrRingBufferOverflow );
+               ringBufoverflow[ (uint32_t)UartId ] = true;
+            }
+            uartRingBuf[ (uint32_t)UartId ].pBuffer[ uartRingBuf[ (uint32_t)UartId ].head ] = ( uint8_t )p_args->data;
+            uartRingBuf[ (uint32_t)UartId ].head = nextHead;
+            OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+         }
+         else
+         {
+            TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].missingPacketsCozRingBuf );
+            OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+         }
+         break;
+      }
+      case UART_EVENT_ERR_PARITY:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventErrParity );
+         break;
+      }
+      case UART_EVENT_ERR_FRAMING:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventErrFraming );
+         break;
+      }
+      case UART_EVENT_ERR_OVERFLOW:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventErrOverflow );
+         break;
+      }
+      case UART_EVENT_BREAK_DETECT:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventBreakDetect );
+         break;
+      }
+      case UART_EVENT_TX_DATA_EMPTY:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventDataEmpty );
+         break;
+      }
+      default:
+      {
+         TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventUnknownType );
+         break;
+      }
+   }/* end switch () */
+}/* end UART_CallbackHandler () */
+
 /*******************************************************************************
 
   Function name: mfg_uart_callback
@@ -160,6 +284,9 @@ static Uart_Events_t uart_events[MAX_UART_ID] = { 0 };
 *******************************************************************************/
 void mfg_uart_callback( uart_callback_args_t *p_args )
 {
+#if 1
+   UART_CallbackHandler( UART_MANUF_TEST, (bool)true, p_args );
+#else
    /* Handle the UART event */
    switch ( p_args->event )
    {
@@ -185,6 +312,7 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
       case UART_EVENT_RX_CHAR:
       {
          TM_UART_COUNTER_INC( uart_events[UART_MANUF_TEST].eventRxChar );
+#if 0
          uartRingBuf[UART_MANUF_TEST].head &= RING_BUFFER_MASK;
          if ( ( ( uartRingBuf[UART_MANUF_TEST].head + 1 ) & RING_BUFFER_MASK ) ==
                 ( uartRingBuf[UART_MANUF_TEST].tail ) )
@@ -201,7 +329,17 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
             uartRingBuf[UART_MANUF_TEST].head &= RING_BUFFER_MASK;
             OS_SEM_Post_fromISR( &UART_semHandle[UART_MANUF_TEST].receiveUART_sem );
          }
-
+#else
+         uint16_t nextHead = ( uartRingBuf[UART_MANUF_TEST].head + 1 ) % uartRingBuf[UART_MANUF_TEST].size;
+         if ( nextHead == uartRingBuf[UART_MANUF_TEST].tail )
+         {
+            TM_UART_COUNTER_INC( uart_events[UART_MANUF_TEST].isrRingBufferOverflow );
+            ringBufoverflow[UART_MANUF_TEST] = true;
+         }
+         uartRingBuf[UART_MANUF_TEST].pBuffer[ uartRingBuf[UART_MANUF_TEST].head ] = ( uint8_t )p_args->data;
+         uartRingBuf[UART_MANUF_TEST].head = nextHead;
+         OS_SEM_Post_fromISR( &UART_semHandle[UART_MANUF_TEST].receiveUART_sem );
+#endif
          break;
       }
       case UART_EVENT_ERR_PARITY:
@@ -235,6 +373,7 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
          break;
       }
    }/* end switch () */
+#endif // 0
 }/* end mfg_uart_callback () */
 
 #if 0 // TODO: Optical port for RA6E1
@@ -250,6 +389,9 @@ void mfg_uart_callback( uart_callback_args_t *p_args )
 *******************************************************************************/
 void optical_uart_callback( uart_callback_args_t *p_args )
 {
+#if 1
+   UART_CallbackHandler( UART_OPTICAL_PORT, (bool)false, p_args );
+#else
    /* Handle the UART event */
    switch (p_args->event)
    {
@@ -273,6 +415,7 @@ void optical_uart_callback( uart_callback_args_t *p_args )
       /* Received single byte */
       case UART_EVENT_RX_CHAR:
       {
+#if 0
          TM_UART_COUNTER_INC( uart_events[UART_OPTICAL_PORT].eventRxChar );
          uartRingBuf[UART_OPTICAL_PORT].head &= RING_BUFFER_MASK;
          if ( ( ( uartRingBuf[UART_OPTICAL_PORT].head + 1 ) & RING_BUFFER_MASK ) ==
@@ -287,7 +430,17 @@ void optical_uart_callback( uart_callback_args_t *p_args )
             uartRingBuf[UART_OPTICAL_PORT].head &= RING_BUFFER_MASK;
             OS_SEM_Post_fromISR( &UART_semHandle[UART_OPTICAL_PORT].receiveUART_sem );
          }
-
+#else
+         uint16_t nextHead = ( uartRingBuf[UART_OPTICAL_PORT].head + 1 ) % uartRingBuf[UART_OPTICAL_PORT].size;
+         if ( nextHead == uartRingBuf[UART_OPTICAL_PORT].tail )
+         {
+            TM_UART_COUNTER_INC( uart_events[UART_OPTICAL_PORT].isrRingBufferOverflow );
+            ringBufoverflow[UART_OPTICAL_PORT] = true;
+         }
+         uartRingBuf[UART_OPTICAL_PORT].pBuffer[ uartRingBuf[UART_OPTICAL_PORT].head ] = ( uint8_t )p_args->data;
+         uartRingBuf[UART_OPTICAL_PORT].head = nextHead;
+         OS_SEM_Post_fromISR( &UART_semHandle[UART_OPTICAL_PORT].receiveUART_sem );
+#endif
          break;
       }
       case UART_EVENT_ERR_PARITY:
@@ -321,6 +474,7 @@ void optical_uart_callback( uart_callback_args_t *p_args )
          break;
       }
    }
+#endif // 0
 }/* end optical_uart_callback () */
 #endif
 
@@ -335,6 +489,9 @@ void optical_uart_callback( uart_callback_args_t *p_args )
 *******************************************************************************/
 void hmc_uart_callback( uart_callback_args_t *p_args )
 {
+#if 1
+   UART_CallbackHandler( UART_HOST_COMM_PORT, (bool)false, p_args );
+#else
    /* Handle the UART event */
    switch ( p_args->event )
    {
@@ -358,6 +515,7 @@ void hmc_uart_callback( uart_callback_args_t *p_args )
       /* Received single byte */
       case UART_EVENT_RX_CHAR:
       {
+#if 0
          TM_UART_COUNTER_INC( uart_events[UART_HOST_COMM_PORT].eventRxChar );
          uartRingBuf[UART_HOST_COMM_PORT].head &= RING_BUFFER_MASK;
          if ( ( ( uartRingBuf[UART_HOST_COMM_PORT].head + 1 ) & RING_BUFFER_MASK ) ==
@@ -372,7 +530,17 @@ void hmc_uart_callback( uart_callback_args_t *p_args )
             uartRingBuf[UART_HOST_COMM_PORT].head &= RING_BUFFER_MASK;
             OS_SEM_Post_fromISR( &UART_semHandle[UART_HOST_COMM_PORT].receiveUART_sem );
          }
-
+#else
+         uint16_t nextHead = ( uartRingBuf[UART_HOST_COMM_PORT].head + 1 ) % uartRingBuf[UART_HOST_COMM_PORT].size;
+         if ( nextHead == uartRingBuf[UART_HOST_COMM_PORT].tail )
+         {
+            TM_UART_COUNTER_INC( uart_events[UART_HOST_COMM_PORT].isrRingBufferOverflow );
+            ringBufoverflow[UART_HOST_COMM_PORT] = true;
+         }
+         uartRingBuf[UART_HOST_COMM_PORT].pBuffer[ uartRingBuf[UART_HOST_COMM_PORT].head ] = ( uint8_t )p_args->data;
+         uartRingBuf[UART_HOST_COMM_PORT].head = nextHead;
+         OS_SEM_Post_fromISR( &UART_semHandle[UART_HOST_COMM_PORT].receiveUART_sem );
+#endif
          break;
       }
       case UART_EVENT_ERR_PARITY:
@@ -406,6 +574,7 @@ void hmc_uart_callback( uart_callback_args_t *p_args )
          break;
       }
    }/* end switch () */
+#endif // 0
 }/* end hmc_uart_callback () */
 
 /*******************************************************************************
@@ -420,6 +589,9 @@ void hmc_uart_callback( uart_callback_args_t *p_args )
 *******************************************************************************/
 void dbg_uart_callback( uart_callback_args_t *p_args )
 {
+#if 1
+   UART_CallbackHandler( UART_DEBUG_PORT, (bool)true, p_args );
+#else
    /* Handle the UART event */
    switch (p_args->event)
    {
@@ -448,6 +620,7 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
          TM_UART_COUNTER_INC( uart_events[UART_DEBUG_PORT].eventRxChar );
          if( !( ringBufoverflow[UART_DEBUG_PORT] ) )
          {
+#if 0
             uartRingBuf[UART_DEBUG_PORT].head &= RING_BUFFER_MASK;
             if ( ( ( uartRingBuf[UART_DEBUG_PORT].head + 1 ) & RING_BUFFER_MASK ) ==
                    ( uartRingBuf[UART_DEBUG_PORT].tail ) )
@@ -455,16 +628,10 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
                /* Ring buffer has overflowed, dump what we have and start over */
                TM_UART_COUNTER_INC( uart_events[UART_DEBUG_PORT].isrRingBufferOverflow );
                ringBufoverflow[UART_DEBUG_PORT] = true;
-#if 0 // TODO: RA6E1 Bob: This was an idea to have a ring buffer overflow result in an "echo Ring Buf Overflow DBG" command
-               memcpy( (void *)&uartRingBuf[UART_DEBUG_PORT].buffer[0], overflowString, sizeof(overflowString)-1 );
-               uartRingBuf[UART_DEBUG_PORT].head = sizeof(overflowString)-2;
-               uartRingBuf[UART_DEBUG_PORT].tail = 0;
-#else
                uartRingBuf[UART_DEBUG_PORT].head = 0; // Suriya commented these two lines out
                uartRingBuf[UART_DEBUG_PORT].tail = 0; // Suriya commented these two lines out
                uartRingBuf[UART_DEBUG_PORT].buffer[uartRingBuf[UART_DEBUG_PORT].head++] = ( uint8_t )p_args->data;
                uartRingBuf[UART_DEBUG_PORT].head &= RING_BUFFER_MASK;
-#endif
             }
             else
             {
@@ -473,6 +640,17 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
                uartRingBuf[UART_DEBUG_PORT].head &= RING_BUFFER_MASK;
             }
             OS_SEM_Post_fromISR( &UART_semHandle[UART_DEBUG_PORT].receiveUART_sem );
+#else
+            uint16_t nextHead = ( uartRingBuf[UART_DEBUG_PORT].head + 1 ) % uartRingBuf[UART_DEBUG_PORT].size;
+            if ( nextHead == uartRingBuf[UART_DEBUG_PORT].tail )
+            {
+               TM_UART_COUNTER_INC( uart_events[UART_DEBUG_PORT].isrRingBufferOverflow );
+               ringBufoverflow[UART_DEBUG_PORT] = true;
+            }
+            uartRingBuf[UART_DEBUG_PORT].pBuffer[ uartRingBuf[UART_DEBUG_PORT].head ] = ( uint8_t )p_args->data;
+            uartRingBuf[UART_DEBUG_PORT].head = nextHead;
+            OS_SEM_Post_fromISR( &UART_semHandle[UART_DEBUG_PORT].receiveUART_sem );
+#endif
          }
          else
          {
@@ -512,6 +690,7 @@ void dbg_uart_callback( uart_callback_args_t *p_args )
          break;
       }
    }/* end switch () */
+#endif // 0
 }/* end dbg_uart_callback () */
 #endif
 
@@ -584,6 +763,7 @@ returnStatus_t UART_init ( void )
       }
    }
 #elif (RTOS_SELECTION == FREE_RTOS)
+
    OS_INT_disable();    // Enable critical section as we are creating ring buffers and initializing them
 
    for( i = 0; i < ( uint8_t ) MAX_UART_ID; i++ )
@@ -599,7 +779,11 @@ returnStatus_t UART_init ( void )
 
       if ( ( i == UART_MANUF_TEST ) || ( i == UART_DEBUG_PORT ) ) // TODO: check optical port needed counting semaphore
       {
+#if 0
          semReceiveCount = MAX_RING_BUFFER_SIZE;
+#else
+         semReceiveCount = uartRingBuf[i].size;
+#endif
       }
 
       if( 0 == ( ( OS_SEM_Create( &UART_semHandle[i].receiveUART_sem, semReceiveCount ) ) &&
@@ -668,7 +852,7 @@ returnStatus_t UART_setBaud ( enum_UART_ID uartId, baud_setting_t *baudSetting )
    fsp_err_t err = R_SCI_UART_BaudSet( (void *)UartCtrl[ (uint32_t)uartId ], baudSetting );
    return ( (returnStatus_t)err );
 }
-#endif
+#endif // ( DEBUG_PORT_BAUD_RATE == 1 )
 
 /* No function calls for UART_reset */
 #if ( MCU_SELECTED == NXP_K24 )
@@ -770,7 +954,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
          TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendBefore );
          ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
          TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendAfter  );
-         OS_TASK_Sleep( (uint32_t) 10 );  // It requires a sleep of 10 ms for this write to process/transmit the data completely
+//         OS_TASK_Sleep( (uint32_t) 10 );  // It requires a sleep of 10 ms for this write to process/transmit the data completely
       }
 
       transmitUARTEnable[UartId] = true;
@@ -779,7 +963,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
       ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
       TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendAfter  );
    }
-   else
+   else if ( DataLength > 0 ) /* Avoid potential problems with a zero-length write */
    {
       TM_UART_COUNTER_INC( uart_events[UartId].basicUARTWriteVar );
       transmitUARTEnable[UartId] = true;
@@ -851,12 +1035,21 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 
    OS_INT_disable(); // Enter critical section
    {
+#if 0
       uartRingBuf[UartId].tail &= RING_BUFFER_MASK;
       if( ( uartRingBuf[UartId].head ) !=
           ( uartRingBuf[UartId].tail & RING_BUFFER_MASK ) )
       {
          *DataBuffer = uartRingBuf[UartId].buffer[uartRingBuf[UartId].tail++];
          uartRingBuf[UartId].tail &= RING_BUFFER_MASK;
+#else
+      uint16_t tail = ( uartRingBuf[UartId].tail ) % uartRingBuf[UartId].size;
+      if ( uartRingBuf[UartId].head != tail )
+      {
+         *DataBuffer = uartRingBuf[UartId].pBuffer[ uartRingBuf[UartId].tail ];
+         uartRingBuf[UartId].tail = ( tail + 1 ) % uartRingBuf[UartId].size;
+#endif
+
          DataLength = 1;
       }
       else
@@ -891,18 +1084,17 @@ uint32_t UART_getc ( enum_UART_ID UartId, uint8_t *DataBuffer, uint32_t DataLeng
 *******************************************************************************/
 extern uint32_t UART_echo ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t DataLength )
 {
-
-   if ( UartId == UART_DEBUG_PORT )
+   if ( DataLength > 0 ) // RA6E1 Bob: prevent the possibility of writing zero length
    {
-      if( dbgUartEchoEnable_ )
+      if ( UartId == UART_DEBUG_PORT )
       {
-         ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-         ( void )OS_SEM_Pend( &UART_semHandle[UartId].echoUART_sem, OS_WAIT_FOREVER );
+         if( dbgUartEchoEnable_ )
+         {
+            ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
+            ( void )OS_SEM_Pend( &UART_semHandle[UartId].echoUART_sem, OS_WAIT_FOREVER );
+         }
       }
-   }
-   else if ( UartId != UART_HOST_COMM_PORT ) // Echo not required for HMC - If required enable the semaphore to perform write
-   {
-      if ( DataLength > 0 ) // TODO: RA6E1 Bob: we seem to be dumping all of memory, try to stop it by preventing zero length
+      else if ( UartId != UART_HOST_COMM_PORT ) // Echo not required for HMC - If required enable the semaphore to perform write
       {
          TM_UART_COUNTER_INC( uart_events[UartId].UARTechoVar );
          ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
@@ -912,18 +1104,17 @@ extern uint32_t UART_echo ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint
       }
       else
       {
-         TM_UART_COUNTER_INC( uart_events[UartId].ZeroLengthEcho );
+         printf( "Echo of UART - HMC is not supported." );
       }
    }
    else
    {
-      printf( "Echo of UART - HMC is not supported." );
+      TM_UART_COUNTER_INC( uart_events[UartId].ZeroLengthEcho );
    }
-
    return DataLength; /* R_SCI_UART_Write does not return the no. of valid read bytes, returning DataLength */
 }
 
-#endif
+#endif // RTOS_SELECTION
 /*******************************************************************************
 
   Function name: UART_fgets
@@ -1049,19 +1240,19 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
       }/* end else if () */
       else if ( rxByte == CARRIAGE_RETURN_CHAR )
       {
-            if( DBGP_numBytes == 0 )
-            {
-               ( void )UART_echo( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
-            }
-            else
-            {
-               ( void )UART_echo( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
-               DBGP_numPrintBytes = 0;
-               DBGP_printIndex = 0;
-               rxByte = 0x0;
-            }
+         if( DBGP_numBytes == 0 )
+         {
+            ( void )UART_echo( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
+         }
+         else
+         {
+            ( void )UART_echo( UART_DEBUG_PORT, (uint8_t*)CRLF, sizeof( CRLF ) );
+            DBGP_numPrintBytes = 0;
+            DBGP_printIndex = 0;
+            rxByte = 0x0;
+         }
 
-            lineComplete = true;
+         lineComplete = true;
       }
       /* Fix for issue from Regression Test Tool Version 1.1.0 */
       else if ( rxByte == LINE_FEED_CHAR )
@@ -1093,7 +1284,7 @@ void UART_fgets( enum_UART_ID UartId, char *DataBuffer, uint32_t DataLength )
          break;
       }
    }
-#endif
+#endif // RTOS_SELECTION
 }
 
 
@@ -1185,7 +1376,7 @@ void UART_RX_flush ( enum_UART_ID UartId )
    }
 
    OS_INT_enable();
-#endif
+#endif // RTOS_SELECTION
 }
 #if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
