@@ -1,5 +1,8 @@
 #include "hal_data.h"
 
+/* uncomment to enable jump-to-app-only bootloader */
+//#define INCLUDE_JUMP_TO_APP_ONLY
+
 FSP_CPP_HEADER
 void R_BSP_WarmStart(bsp_warm_start_event_t event);
 
@@ -62,12 +65,13 @@ void hal_boot_app (void)
 void hal_entry(void)
 {
    /* TODO: add your own code here */
-   //BL_MAIN_Main();
-
-   /* add K24 bootloader functionality */
-
+#ifndef INCLUDE_JUMP_TO_APP_ONLY
+   /* jump to common bootloader */
+   BL_MAIN_Main();
+#else
    /* jump to the application */
    hal_boot_app();
+#endif
 
 #if BSP_TZ_SECURE_BUILD
    /* Enter non-secure code */
