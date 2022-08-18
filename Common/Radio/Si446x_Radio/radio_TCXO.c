@@ -64,8 +64,6 @@
  *  Local Variables
  *****************************************************************************/
 #if ( ( MCU_SELECTED == NXP_K24 ) ||  ( DCU == 1 ) ) /* TODO: K24: DG: TCXO Trimming is not currently used in EPs remove the call  */
-
-
 static uint16_t FTMcount[RADIO_CLK_BUFFER_SIZE+1]; // Buffer holding an array of captured FTM values
                                                    // We add one because of a strange observation made while debugging.
                                                    // Read the note in DMA_Complete_IRQ_ISR() to know more

@@ -334,6 +334,10 @@ uint8_t i2c_receive_response( uint8_t size, uint8_t *response )
          status = ECC108_RX_NO_RESPONSE;
       }
    }
+   else
+   {
+      status = (uint8_t)err;
+   }
 
    return status;
 }

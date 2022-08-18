@@ -477,6 +477,7 @@ static void decryptBuffer( uint8_t *dest, uint8_t *src, int32_t size, uint8_t ke
    (void)wc_AesSetKey( &aes, key, (uint32_t)ECC108_KEY_SIZE, iv, AES_DECRYPTION );
    (void)wc_AesCbcDecrypt( &aes, dest, src, (uint32_t)size );
 }
+
 /***********************************************************************************************************************
 
    Function name: generateMD5
