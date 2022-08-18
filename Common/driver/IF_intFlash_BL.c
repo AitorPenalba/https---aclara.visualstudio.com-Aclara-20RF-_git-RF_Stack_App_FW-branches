@@ -126,14 +126,16 @@ static returnStatus_t   dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cn
                                  DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
-static returnStatus_t   setPowerMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pParData,
                                     DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   erase( dSize destOffset, lCnt Cnt, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
+#ifndef __BOOTLOADER
+static returnStatus_t   setPowerMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   flush( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   restore( lAddr lDest, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver );
 static bool             timeSlice(PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver);
+#endif   /* NOT BOOTLOADER */
 /* END - Functions accessed via a table entry (indirect call) */
 
 /* ****************************************************************************************************************** */
@@ -167,6 +169,19 @@ static returnStatus_t   flashSwap( eFS_command_t cmd, flashSwapStatus_t *pStatus
  * driver. */
 const DeviceDriverMem_t IF_deviceDriver =
 {
+#ifdef __BOOTLOADER
+   .devInit       = init,           // Init function - Creates mutex & calls lower drivers
+   .devOpen       = dvr_open,       // Open Command - For this implementation it only calls the lower level drivers.
+   .devClose      = close,          // Close Command - For this implementation it only calls the lower level drivers.
+   .devSetPwrMode = NULL,           // SetPowerMode - not used in bootloader
+   .devRead       = dvr_read,       // Read Command
+   .devWrite      = dvr_write,      // Write Command
+   .devErase      = erase,          // Erases a portion (or all) of the banked memory.
+   .devFlush      = NULL,           // Flush - not used in bootloader
+   .devIoctl      = NULL,           // ioctl - not used in bootloader
+   .devRestore    = NULL,           // Restore - not used in bootloader
+   .devTimeSlice  = NULL            // Timeslice - not used in bootloader
+#else
    init,          // Init function - Creates mutex & calls lower drivers
    dvr_open,      // Open Command - For this implementation it only calls the lower level drivers.
    close,         // Close Command - For this implementation it only calls the lower level drivers.
@@ -178,6 +193,7 @@ const DeviceDriverMem_t IF_deviceDriver =
    dvr_ioctl,     // ioctl function - Does Nothing for this implementation
    restore,       // Not supported - API support only
    timeSlice      // Not supported - API support only
+#endif
 };
 
 /* ****************************************************************************************************************** */
@@ -617,6 +633,8 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
 
    return(retVal);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: flush
@@ -639,6 +657,8 @@ static returnStatus_t flush( PartitionData_t const *pParData, DeviceDriverMem_t 
 {
    return (eSUCCESS);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
+
 /***********************************************************************************************************************
 
    Function Name: erase
@@ -743,6 +763,8 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
 
    return (eRetVal);
 }
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: setPowerMode
@@ -767,6 +789,9 @@ static returnStatus_t setPowerMode( const ePowerMode ePwrMode, PartitionData_t c
 {
    return(eSUCCESS);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: dvr_ioctl
@@ -812,6 +837,9 @@ static returnStatus_t dvr_ioctl( const void *pCmd, void *pData, PartitionData_t 
 #endif   // __BOOTLOADER
    return(retVal);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: restore
@@ -837,6 +865,9 @@ static returnStatus_t restore( lAddr lDest, lCnt cnt, PartitionData_t const *pPa
 
    return ((*pNextDriver)->devRestore(lDest, cnt, pParData, pNextDriver + 1));
 }
+#endif
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: timeSlice
@@ -856,6 +887,7 @@ static bool timeSlice(PartitionData_t const *pParData, DeviceDriverMem_t const *
 {
    return((bool)false);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
 
 /* ****************************************************************************************************************** */
 /* Local Function Definitions */
@@ -1001,6 +1033,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 
    return(eRetVal);
 }
+
 /***********************************************************************************************************************
 
    Function Name: flashWrite
@@ -1190,6 +1223,7 @@ static returnStatus_t flashSwap( eFS_command_t cmd, flashSwapStatus_t *pStatus )
    } /* if (eSUCCESS == retVal) */
    return(retVal);
 }
+
 /***********************************************************************************************************************
 
    Function Name: exeSwapSeq
@@ -1231,6 +1265,7 @@ static returnStatus_t exeSwapSeq( eFS_command_t cmd, flashSwapStatus_t *pStatus 
 }
 #endif
 #endif   /* BOOTLOADER  */
+
 /***********************************************************************************************************************
 
    Function Name: exeFlashCmdSeq
@@ -1267,6 +1302,7 @@ static returnStatus_t exeFlashCmdSeq( uint32_t dest )
    }
    return(retVal);
 }
+
 #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( ( DCU == 1 ) && ( HAL_TARGET_HARDWARE != HAL_TARGET_XCVR_9985_REV_A ) ) )
 /***********************************************************************************************************************
 
@@ -1312,6 +1348,7 @@ static returnStatus_t exeFlashCmdSeqDifBank( void )
    return (retVal);
 }
 #endif
+
 /***********************************************************************************************************************
 
    Function Name: exeFlashCmdSeqSameBank
@@ -1370,6 +1407,7 @@ __ramfunc static returnStatus_t exeFlashCmdSeqSameBank( void ) /*lint !e129   __
    }
    return (retVal);/*lint !e454 */
 }/*lint !e454 */
+
 /***********************************************************************************************************************
 
    Function Name: setFlashAddr
@@ -1394,6 +1432,7 @@ static void setFlashAddr( uint32_t addr )
    FTFE_BASE_PTR->FCCOB2 = (uint8_t)((addr >> 8) & 0xFF);     /* Set destination address */
    FTFE_BASE_PTR->FCCOB3 = (uint8_t)(addr & 0xFF);            /* Set destination address - LSB */
 }
+
 /***********************************************************************************************************************
 
    Function Name: setFlashData
@@ -1422,6 +1461,7 @@ static void setFlashData( uint8_t const *pData )
    FTFE_BASE_PTR->FCCOB6 = pData[1];
    FTFE_BASE_PTR->FCCOB7 = pData[0];
 }
+
 /***********************************************************************************************************************
 
    Function Name: ISR_InternalFlash
