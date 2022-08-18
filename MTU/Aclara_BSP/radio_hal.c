@@ -58,6 +58,7 @@ static spiCfg_t _spiCfg =
    RADIO_0_SPI_MODE            /* SPI Mode */
 };
 #endif
+
 #if (RTOS_SELECTION == FREE_RTOS)
 static OS_SEM_Obj    radioSpiSem_;           /* Semaphore used when waiting for busy signal for external flash ISR */
 #endif

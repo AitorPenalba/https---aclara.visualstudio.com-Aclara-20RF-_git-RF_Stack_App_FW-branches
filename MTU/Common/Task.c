@@ -322,12 +322,10 @@ const char pTskName_Idle[]          = "IDLE";
 #if (SIGNAL_NW_STATUS == 1)
 const char pTskName_NwConn[]        = "NWCON";
 #endif
-
 static const char pTskName_SdPsListener[]        = "PSLSNR";
 static const char pTskName_SdPreambleDetector[]  = "PREDET";
 static const char pTskName_SdSyncPayloadDemod1[] = "DEMOD1";
 static const char pTskName_SdSyncPayloadDemod2[] = "DEMOD2";
-
 //static const char pTskName_TimeSys[]             = "TIMESYS"; // TODO: RA6E1 Bob: Not referenced.  Is this replaced by pTskName_Time[] = "TIME" ?
 
 /* NOTE: The Highest Priority we should use is 9.  This excerpt was taken from AN3905.pdf on freesclale.com

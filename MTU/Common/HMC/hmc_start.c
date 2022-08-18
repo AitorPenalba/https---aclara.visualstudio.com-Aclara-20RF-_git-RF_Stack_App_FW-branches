@@ -432,7 +432,6 @@ static void startTimer( uint32_t tmr_mS );
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
-
 /***********************************************************************************************************************
 
    Function name: encryptBuffer
@@ -478,7 +477,6 @@ static void decryptBuffer( uint8_t *dest, uint8_t *src, int32_t size, uint8_t ke
    (void)wc_AesSetKey( &aes, key, (uint32_t)ECC108_KEY_SIZE, iv, AES_DECRYPTION );
    (void)wc_AesCbcDecrypt( &aes, dest, src, (uint32_t)size );
 }
-#if 0
 /***********************************************************************************************************************
 
    Function name: generateMD5
@@ -496,7 +494,7 @@ static void generateMD5( uint8_t *buffer, int32_t size )
    int32_t  dataSize = size - MD5_DIGEST_SIZE;
    (void)wc_Md5Hash( buffer, (uint32_t)dataSize, buffer + dataSize );
 }
-#endif
+
 /***********************************************************************************************************************
 
    Function name: validateMD5

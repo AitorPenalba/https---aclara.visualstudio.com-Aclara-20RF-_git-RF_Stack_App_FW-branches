@@ -74,11 +74,10 @@ static uint32_t FTM[FREQUENCY_MOVING_WINDOW];      // FTM values of the TXCO fre
 static uint32_t extend = 0;                        // Extend FTM clock range to compensate for clock rollover
 static uint16_t prevTime;                          // Previous FTM capture
 static uint32_t DMAcntr = 0;                       // DMA Major loop counter
-static uint8_t  radioNum = 0;       
-
-
+static uint8_t  radioNum = 0;                      // Radio being used for DMA/TCXO measurement
 static uint32_t freqFilter[FREQUENCY_MOVING_WINDOW] = {0}; // Initialize with bad values
        uint32_t DMA_Complete_IRQ_ISR_Timestamp = 0; // Used for a watchdog to make sure we are always doing TCXO triming
+static uint64_t coreToBusClockRatio;
        uint32_t DMAint;                            // When the DMA interrupt happened in CYCCNT units
 
 typedef struct{

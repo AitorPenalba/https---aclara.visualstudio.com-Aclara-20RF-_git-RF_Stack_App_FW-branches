@@ -65,7 +65,6 @@
 #include "App_Msg_Handler.h"
 #include "sys_busy.h"
 
-
 #if ( DCU == 1 )
 #include "version.h"
 #endif

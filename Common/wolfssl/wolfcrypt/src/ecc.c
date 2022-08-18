@@ -6089,6 +6089,7 @@ done:
     return ret;
 }
 
+
 /* export public ECC key in ANSI X9.63 format */
 int wc_ecc_export_x963(ecc_key* key, byte* out, word32* outLen)
 {
