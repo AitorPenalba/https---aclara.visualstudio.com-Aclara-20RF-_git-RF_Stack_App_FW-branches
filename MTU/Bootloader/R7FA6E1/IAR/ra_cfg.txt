@@ -203,7 +203,7 @@ FSP Configuration
   Module "Flash (r_flash_hp)"
     Parameter Checking: Default (BSP)
     Code Flash Programming Enable: Enabled
-    Data Flash Programming Enable: Disabled
+    Data Flash Programming Enable: Enabled
     
   Module "Independent Watchdog (r_iwdt)"
     Parameter Checking: Default (BSP)
