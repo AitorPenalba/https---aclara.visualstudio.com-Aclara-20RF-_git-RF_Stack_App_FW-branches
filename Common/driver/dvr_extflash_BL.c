@@ -67,8 +67,8 @@
 
 #include "partitions_BL.h"
 #include "spi_mstr_BL.h"
-#include "invert_bits.h"
-#include "byteswap.h"
+#include "invert_bits_BL.h"
+#include "byteswap_BL.h"
 #ifndef __BOOTLOADER
 #include "DBG_SerialDebug.h"
 #endif   /* BOOTLOADER  */
@@ -351,7 +351,7 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
    dvr_ioctl,  // ioctl function - Does Nothing for this implementation
    restore,    // Not supported - API support only
    timeSlice   // Not supported - API support only
-#endif  /* NOT BOOTLOADER */
+#endif   /* NOT BOOTLOADER */
 };
 
 #if ( MCU_SELECTED == NXP_K24 )

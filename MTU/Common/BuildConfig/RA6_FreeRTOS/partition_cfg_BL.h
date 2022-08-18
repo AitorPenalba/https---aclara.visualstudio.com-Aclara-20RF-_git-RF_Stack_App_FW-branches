@@ -36,12 +36,12 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 
-#include "dvr_extflash.h"
+#include "dvr_extflash_BL.h"
 #include "dvr_banked.h"
 #include "dvr_cache.h"
 #include "dvr_encryption.h"
 #include "dvr_sectPreErase.h"
-#include "IF_intFlash.h"
+#include "IF_intFlash_BL.h"
 
 /* ****************************************************************************************************************** */
 /* partitions_EXTERN DEFINTION */
