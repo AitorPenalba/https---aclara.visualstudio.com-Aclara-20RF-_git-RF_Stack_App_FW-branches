@@ -99,11 +99,10 @@ static void       mfgpBufferInit( buffer_t *bfr );
 static buffer_t   *mfgpCreateBuffer( uint16_t size );
 static buffer_t   *mfgpGrowBuffer( buffer_t *bfr, uint16_t newsize );
 static void       mfgpSlipAddCharacter( buffer_t **bfr_ptr, char c );
-#if ( RTOS_SELECTION == MQX_RTOS )
 #if !USE_USB_MFG
 static void       dtlsUART_isr( void *user_isr_ptr );
 #endif
-#endif  //RTOS_SELECTION == MQX_RTOS
+
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
@@ -634,7 +633,6 @@ void MFGP_DtlsInit( enum_UART_ID uartId )
 #endif
 }
 /*lint +esym(715,uartId) not used in all projects. */
-#if ( RTOS_SELECTION == MQX_RTOS )
 /*******************************************************************************
 
    Function name: dtlsUART_isr
@@ -677,4 +675,4 @@ static void dtlsUART_isr( void *user_isr_ptr )
 }
 #endif
 #endif
-#endif  //RTOS_SELECTION == MQX_RTOS
+
