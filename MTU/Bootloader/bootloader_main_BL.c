@@ -703,70 +703,76 @@ int BL_MAIN_Main( void )
    /* Read the DFW Info partition to determine if there is an application or bootloader update pending.  */
    ( void ) PAR_init();
 
+   /* Verify DFW Bootloader partition is accessible.  */ 
    if ( eSUCCESS == PAR_partitionFptr.parOpen( &pDFWinfo, ePART_DFW_BL_INFO, 0 ) )
    {
       /* Verify both external NV and internal NV are accessible.  */
       if ( eSUCCESS == PAR_partitionFptr.parOpen( &pNVinfo, ePART_DFW_PGM_IMAGE, 0 )  &&
          ( eSUCCESS == PAR_partitionFptr.parOpen( &pCodeInfo, ePART_APP_CODE, 0 ) ) )
       {
+         /* check for possible bootloader info */
          while ( ( DFWInfoIdx < ARRAY_IDX_CNT( DFWinfo ) ) )  /* Loop while in valid DFWinfo[] range and */
          {
             /* Read a DFWInfo_t from the DFW info partition.   */
-            ( void )PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
+            if ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
                                                 PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
-                                                sizeof( DfwBlInfo_t ), pDFWinfo );
-
-            if ( DFWinfo[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
+                                                sizeof( DfwBlInfo_t ), pDFWinfo ))
             {
-               CRCAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
-               CRCLength   = DFWinfo[ DFWInfoIdx ].Length;
-               expectedCRC = DFWinfo[ DFWInfoIdx ].CRC;
-
-               SrcAddr     =  DFWinfo[ DFWInfoIdx ].SrcAddr;   /* Save src addr, dst addr and length for loop. */
-               DstAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
-               Length      =  DFWinfo[ DFWInfoIdx ].Length;    /* Save CRC start addr, length and expected value. */
-               if ( DFWinfo[ DFWInfoIdx ].FailCount == 0xffffffff )   /* If errCount is "erased", set to 0.  */
+               /* update info indicates an image is available? */
+               if ( DFWinfo[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
                {
-                  DFWinfo[ DFWInfoIdx ].FailCount = 0;
-               }
+                  /* collect update info and begin update */
+                  CRCAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
+                  CRCLength   =  DFWinfo[ DFWInfoIdx ].Length;
+                  expectedCRC =  DFWinfo[ DFWInfoIdx ].CRC;
 
-               while ( Length != 0 )    /* Loop until all bytes in the range have been copied.  */
-               {
-                  /* Calculate data to be copied per pass.  */
-                  bytesCopied = min( EXT_FLASH_ERASE_SIZE, Length );
-                  ( void )PAR_partitionFptr.parRead( ( uint8_t * )&sectorData[0], SrcAddr, bytesCopied, pNVinfo  );
-                  ( void )PAR_partitionFptr.parWrite( DstAddr, ( uint8_t * )&sectorData[0], bytesCopied, pCodeInfo );
-                  Length  -= bytesCopied;
-                  SrcAddr += bytesCopied;
-                  DstAddr += bytesCopied;
-                  copyAttempted = ( bool )true;
-                  WDOG_Kick();
-               }
+                  SrcAddr     =  DFWinfo[ DFWInfoIdx ].SrcAddr;   /* Save src addr, dst addr and length for loop. */
+                  DstAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
+                  Length      =  DFWinfo[ DFWInfoIdx ].Length;    /* Save CRC start addr, length and expected value. */
+                  if ( DFWinfo[ DFWInfoIdx ].FailCount == 0xffffffff )   /* If errCount is "erased", set to 0.  */
+                  {
+                     DFWinfo[ DFWInfoIdx ].FailCount = 0;
+                  }
+
+                  while ( Length != 0 )    /* Loop until all bytes in the range have been copied.  */
+                  {
+                     /* Calculate data to be copied per pass.  */
+                     bytesCopied = min( EXT_FLASH_ERASE_SIZE, Length );
+                     ( void )PAR_partitionFptr.parRead( ( uint8_t * )&sectorData[0], SrcAddr, bytesCopied, pNVinfo  );
+                     ( void )PAR_partitionFptr.parWrite( DstAddr, ( uint8_t * )&sectorData[0], bytesCopied, pCodeInfo );
+                     Length  -= bytesCopied;
+                     SrcAddr += bytesCopied;
+                     DstAddr += bytesCopied;
+                     copyAttempted = ( bool )true;
+                     WDOG_Kick();
+                  }
 
 #if 0
-               calculatedCRC = ( uint32_t )compareNVtoCode( pCodeInfo->PhyStartingAddress + CRCAddr, pNVinfo, CRCLength );
-               calcCRC(  CRCAddr, CRCLength, true, &calculatedCRC, pCodeInfo );
+                  calculatedCRC = ( uint32_t )compareNVtoCode( pCodeInfo->PhyStartingAddress + CRCAddr, pNVinfo, CRCLength );
+                  calcCRC(  CRCAddr, CRCLength, true, &calculatedCRC, pCodeInfo );
 #endif
-               /* Validate CRC.
-                  Src, Dst values from DFWinfo are offsets into their respective partitions. Translate for use in CRC
-                  validation. Physical code address is partition starting address + value from DFWinfo struct.
-               */
-               calculatedCRC = bl_crc32(  CRC32_DFW_START_VALUE,                                /* Seed  */
-                                          /* Polynomial - CRC engine requires this to be bit reversed */
-                                          bitReverse( CRC32_DFW_POLY ), /* TODO: define bit reversed value to remove bitReverse routine */
-                                          (uint8_t *)(pCodeInfo->PhyStartingAddress + CRCAddr), /* Starting addr. */
-                                          CRCLength );                                          /* Length   */
+                  /* Validate CRC.
+                     Src, Dst values from DFWinfo are offsets into their respective partitions. Translate for use in CRC
+                     validation. Physical code address is partition starting address + value from DFWinfo struct.
+                  */
+                  calculatedCRC = bl_crc32(  CRC32_DFW_START_VALUE,                                /* Seed  */
+                                             /* Polynomial - CRC engine requires this to be bit reversed */
+                                             bitReverse( CRC32_DFW_POLY ), /* TODO: define bit reversed value to remove bitReverse routine */
+                                             (uint8_t *)(pCodeInfo->PhyStartingAddress + CRCAddr), /* Starting addr. */
+                                             CRCLength );                                          /* Length   */
 
-               if ( calculatedCRC != expectedCRC )
-               {
-                  DFWinfo[ DFWInfoIdx ].FailCount++;
-                  success = ( bool )false;
+                  if ( calculatedCRC != expectedCRC )
+                  {
+                     DFWinfo[ DFWInfoIdx ].FailCount++;
+                     success = ( bool )false;
+                  }
                }
             }
             DFWInfoIdx++;  /* Bump to next segment.   */
          }
       }
    }
+   
    /* Update the DFWinfo in ROM. */
    if ( copyAttempted )
    {
