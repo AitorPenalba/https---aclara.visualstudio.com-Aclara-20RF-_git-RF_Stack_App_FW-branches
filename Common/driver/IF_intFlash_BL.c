@@ -434,12 +434,22 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
 static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, const lCnt cnt, PartitionData_t const *pParData,
                                 DeviceDriverMem_t const * const *pNextDriver ) /*lint !e715 !e818  Parameters passed in may not be used */
 {
+   returnStatus_t eRetVal = eNV_PGM_MEM_RD_ERROR;
    ASSERT(Cnt <= INTERNAL_FLASH_SIZE); /* Count must be <= the sector size. */
    dvr_shm_lock();
-   (void)memcpy(pDest, (uint8_t *)pParData->PhyStartingAddress + srcOffset, cnt);
+#if ( MCU_SELECTED == RA6E1 )
+   /* check to see if flash is blank (which will return undefined data and should be considered an error) */
+   flash_result_t blank_check_result;
+   fsp_err_t err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, pParData->PhyStartingAddress + srcOffset, cnt, &blank_check_result);
+   if ((FSP_SUCCESS == err) && (FLASH_RESULT_NOT_BLANK == blank_check_result))
+#endif
+   {
+      (void)memcpy(pDest, (uint8_t *)pParData->PhyStartingAddress + srcOffset, cnt);
+       eRetVal =  eSUCCESS;
+   }
    dvr_shm_unlock();
 
-   return (eSUCCESS);
+   return (eRetVal);
 } /*lint !e715 !e818  Parameters passed in may not be used */
 /***********************************************************************************************************************
 
