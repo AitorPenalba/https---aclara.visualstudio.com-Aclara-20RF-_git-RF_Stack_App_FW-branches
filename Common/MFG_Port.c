@@ -4151,10 +4151,8 @@ static void MFGP_dstEnabled( uint32_t argc, char *argv[] )
 ***********************************************************************************************************************/
 static void MFGP_dstOffset( uint32_t argc, char *argv[] )
 {
-   int32_t nDstOffset; //for convience actual parameter is int16_T
-#if ( MCU_SELECTED == RA6E1 )
-   int16_t getDstOffset;
-#endif
+   int32_t nDstOffset = 0; //for convience actual parameter is int16_T
+
    if ( argc <= 2 )
    {
       if ( 2 == argc )
@@ -4173,12 +4171,11 @@ static void MFGP_dstOffset( uint32_t argc, char *argv[] )
    }
 
    /* Always print read back value */
-#if ( MCU_SELECTED == NXP_K24 )
    DST_getDstOffset( (int16_t *) &nDstOffset );
+#if ( MCU_SELECTED == NXP_K24 )
    MFG_printf( "%s %d\n", argv[ 0 ], nDstOffset );
 #elif ( MCU_SELECTED == RA6E1 )
-   DST_getDstOffset( &getDstOffset );
-   MFG_printf( "%s %d\n", argv[ 0 ], getDstOffset );
+   MFG_printf( "%s %d\n", argv[ 0 ], ( int16_t )nDstOffset );
 #endif
 }
 
