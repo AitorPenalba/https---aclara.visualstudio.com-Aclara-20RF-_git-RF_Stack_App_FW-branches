@@ -200,14 +200,14 @@
 { \
    if ((_MfgPortState == DTLS_SERIAL_IO_e) && (DTLS_GetSessionState() == DTLS_SESSION_CONNECTED_e)) \
    { \
-      (void)memset(MFGP_CommandBuffer, 0, sizeof(MFGP_CommandBuffer)); \
-      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (int32_t)sizeof(MFGP_CommandBuffer), fmt, ##args); \
-      MFGP_EncryptBuffer(MFGP_CommandBuffer, MFGP_CmdLen); \
+      (void)memset(MFGP_OutputBuffer, 0, sizeof(MFGP_OutputBuffer)); \
+      MFGP_CmdLen = (uint16_t)snprintf(MFGP_OutputBuffer, (int32_t)sizeof(MFGP_OutputBuffer), fmt, ##args); \
+      MFGP_EncryptBuffer(MFGP_OutputBuffer, MFGP_CmdLen); \
    } \
    else \
    { \
-      MFGP_CmdLen = (uint16_t)snprintf(MFGP_CommandBuffer, (int32_t)sizeof(MFGP_CommandBuffer), fmt, ##args); \
-      MFG_puts( mfgUart, (uint8_t *)MFGP_CommandBuffer, MFGP_CmdLen ); \
+      MFGP_CmdLen = (uint16_t)snprintf(MFGP_OutputBuffer, (int32_t)sizeof(MFGP_OutputBuffer), fmt, ##args); \
+      MFG_puts( mfgUart, (uint8_t *)MFGP_OutputBuffer, MFGP_CmdLen ); \
    } \
 }
 #else
@@ -220,6 +220,7 @@
 
 static uint16_t         MFGP_CmdLen;
 static char             MFGP_CommandBuffer[MFGP_MAX_MFG_COMMAND_CHARS + 1];
+static char             MFGP_OutputBuffer [MFGP_MAX_MFG_COMMAND_CHARS + 1];
 static uint16_t         MFGP_numBytes = 0;               /* Number of bytes currently in the command buffer */
 static char           * argvar[MFGP_MAX_CMDLINE_ARGS + 1];
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -1666,9 +1667,10 @@ static void mfgpReadByte( uint8_t rxByte )
    {
       /* user canceled the in progress command */
       MFGP_numBytes = 0;
+      MFGP_CommandBuffer[ 0 ] = 0;
 #if !USE_USB_MFG
       (void)UART_write( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
-#if ( MCU_SELECTED == NXP_K24 )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
+#if ( RTOS_SELECTION == MQX_RTOS ) // RA6E1: No need to flush buffers under FreeRTOS due to ring buffer in UART.c module
       (void)UART_flush ( mfgUart  );
 #endif
 #else
@@ -1682,9 +1684,10 @@ static void mfgpReadByte( uint8_t rxByte )
       {
          /* buffer contains at least one character, remove the last one entered */
          MFGP_numBytes -= 1;
-#if ( MCU_SELECTED == RA6E1 )
+#if ( RTOS_SELECTION == FREE_RTOS )
          /* Gives GUI effect in Terminal for Backspace */
          ( void )UART_echo( mfgUart, (uint8_t*)"\b\x20\b" , 3 );
+         MFGP_CommandBuffer[ MFGP_numBytes ] = 0;
 #endif
       }
    }
@@ -1713,21 +1716,21 @@ static void mfgpReadByte( uint8_t rxByte )
          OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
       }
    }
-#endif
+#endif // ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    else
    {
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( RTOS_SELECTION == MQX_RTOS )
       if( (rxByte == LINE_FEED_CHAR) || (rxByte == CARRIAGE_RETURN_CHAR) )
-#elif ( MCU_SELECTED == RA6E1 )
+#elif ( RTOS_SELECTION == FREE_RTOS )
       if( rxByte == CARRIAGE_RETURN_CHAR )
 #endif
       {
 #if (USE_DTLS == 1)
-         if ( !MFGP_AllowDtlsConnect() )
+         if ( !MFGP_AllowDtlsConnect() ) // TODO: RA6E1 Bob: remember to remove
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
-#if ( MCU_SELECTED == NXP_K24 )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
+#if ( RTOS_SELECTION == MQX_RTOS )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
             (void)UART_flush ( mfgUart  );
 #endif
 #else
@@ -1743,17 +1746,28 @@ static void mfgpReadByte( uint8_t rxByte )
          if ( commandBuf != NULL )
          {
             commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
-
 #if ( DTLS_DEBUG == 1 )
             INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
             OS_TASK_Sleep( 50U );
 #endif
-#if ( MCU_SELECTED == RA6E1 )
-            ( void )UART_echo( mfgUart, (uint8_t*)CRLF, sizeof( CRLF ) );
+#if ( RTOS_SELECTION == FREE_RTOS )
+            ( void )UART_echo( mfgUart, (const uint8_t *)CRLF, sizeof( CRLF ) );
 #endif
             ( void )memcpy( commandBuf->data, MFGP_CommandBuffer, MFGP_numBytes );
+#if ( RTOS_SELECTION == MQX_RTOS )
             /* Call the command */
             OS_MSGQ_Post( &_CommandReceived_MSGQ, commandBuf ); // Function will not return if it fails
+#elif ( RTOS_SELECTION == FREE_RTOS )
+            /* Check first whether there are any spaces left in the message queue */
+            if ( uxQueueSpacesAvailable( _CommandReceived_MSGQ.MSGQ_QueueObj ) >= 2 )
+            {
+               /* Attempt to add to the queue for the MFGP command processor */
+               if ( eOS_QUE_FULL_ERR == OS_MSGQ_Post_RetStatus( &_CommandReceived_MSGQ, commandBuf ) )
+               {
+                  BM_free( commandBuf ); /* The queue was full so recipient will not get it so we must free buffer */
+               }
+            }
+#endif
 #if ( USE_USB_MFG != 0 )
             event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );
             if ( event_flags == 0 )    /* Check for time-out.  */
@@ -1763,11 +1777,13 @@ static void mfgpReadByte( uint8_t rxByte )
             }
 #endif
             MFGP_numBytes = 0;
+            MFGP_CommandBuffer[ 0 ] = 0;
          }
          else
          {
             ERR_printf( "mfgpReadByte failed to create command buffer, ignoring command" );
             MFGP_numBytes = 0;
+            MFGP_CommandBuffer[ 0 ] = 0;
          }
 
       }
@@ -1781,6 +1797,7 @@ static void mfgpReadByte( uint8_t rxByte )
       {
          /* buffer is full */
          MFGP_numBytes = 0;
+         MFGP_CommandBuffer[ 0 ] = 0;
       }
       else
       {
@@ -1923,14 +1940,14 @@ void MFGP_uartRecvTask( taskParameter )
             {
                mfgpReadByte( rxByte );
             }/* end of else() */
-#else
+#else  // ( ENABLE_B2B_COMM == 0 )
             mfgpReadByte( rxByte );
-#endif   // ENABLE_B2B_COMM
+#endif // ENABLE_B2B_COMM
 
          }/* end of else() */
       }/* end of while() */
    }/* end of for () */
-#else
+#else // ( USE_DTLS == 0 )
    for( ;; )
    {
 #if ( MCU_SELECTED == NXP_K24 )

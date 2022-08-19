@@ -208,11 +208,13 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
   Notes:
 
 *******************************************************************************/
+static uint32_t OS_SEM_PostFromIsrFailures = 0;
 void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
 {
    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
    if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
+      OS_SEM_PostFromIsrFailures++;
       /* TODO: */
       //      APP_ERR_PRINT("OS_SEM_POST!");
       //      EVL_FirmwareError( "OS_SEM_Post" , file, line );
