@@ -2479,10 +2479,10 @@
             <name>$PROJ_DIR$\..\..\..\Aclara_BSP\BSP_aclara_BL.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Common\byteswap.c</name>
+            <name>$PROJ_DIR$\..\..\..\..\Common\byteswap_BL.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Common\byteswap.h</name>
+            <name>$PROJ_DIR$\..\..\..\..\Common\byteswap_BL.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\Common\crc32.c</name>
