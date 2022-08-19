@@ -287,6 +287,9 @@ void MFGP_ProcessDecryptedCommand(buffer_t *bfr);
 
 #endif
 
+#if ( MCU_SELECTED == RA6E1 )
+void MFG_UpdatePortState ( mfgPortState_e state );
+#endif
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 

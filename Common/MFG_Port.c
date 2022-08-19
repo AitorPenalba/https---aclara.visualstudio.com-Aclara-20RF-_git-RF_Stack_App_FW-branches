@@ -4168,7 +4168,7 @@ static void MFGP_dstEnabled( uint32_t argc, char *argv[] )
 ***********************************************************************************************************************/
 static void MFGP_dstOffset( uint32_t argc, char *argv[] )
 {
-   int32_t nDstOffset; //for convience actual parameter is int16_T
+   int32_t nDstOffset = 0; //for convience actual parameter is int16_T
 
    if ( argc <= 2 )
    {
@@ -4187,9 +4187,13 @@ static void MFGP_dstOffset( uint32_t argc, char *argv[] )
       DBG_logPrintf( 'R', "Invalid number of parameters" );
    }
 
-   /* Always print read back value  */
+   /* Always print read back value */
    DST_getDstOffset( (int16_t *) &nDstOffset );
+#if ( MCU_SELECTED == NXP_K24 )
    MFG_printf( "%s %d\n", argv[ 0 ], nDstOffset );
+#elif ( MCU_SELECTED == RA6E1 )
+   MFG_printf( "%s %d\n", argv[ 0 ], ( int16_t )nDstOffset );
+#endif
 }
 
 /***********************************************************************************************************************
@@ -9963,7 +9967,7 @@ static void MFG_startDTLSsession ( uint32_t argc, char *argv[] )
    {
 //      uint32_t flags = 0;
 #if !USE_USB_MFG
-#if 0 // TODO: RA6E1 Enable UART ioctl (check if required)
+#if ( MCU_SELECTED == NXP_K24 ) // TODO: RA6E1 Enable UART ioctl (check if required)
       (void)UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #endif
 #else
@@ -9979,6 +9983,13 @@ static void MFG_startDTLSsession ( uint32_t argc, char *argv[] )
       ERR_printf( "DTLS Already connected ignoring request" );
    }
 }
+
+#if ( MCU_SELECTED == RA6E1 ) /* TODO: RA6E1: Remove this once the DTLS is working */
+void MFG_UpdatePortState ( mfgPortState_e state )
+{
+   _MfgPortState = state;
+}
+#endif
 
 /*******************************************************************************
 
