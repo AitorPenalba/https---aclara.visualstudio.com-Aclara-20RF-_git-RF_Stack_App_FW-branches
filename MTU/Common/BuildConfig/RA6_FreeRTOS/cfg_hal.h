@@ -37,7 +37,8 @@
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84114_1_REV_A )  && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y99852_1_REV_A )  && \
       ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84030_1_REV_A )  && \
-      ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84580_x_REV_A )  )
+      ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84580_x_REV_A )  && \
+      ( HAL_TARGET_HARDWARE != HAL_TARGET_Y84580_x_REV_B )  )
 
 #error "Invalid HAL_TARGET_HARDWARE setting"
 #endif
@@ -504,7 +505,7 @@
 #else
 #if ( MCU_SELECTED == NXP_K24 ) // IRQ not available for QSPI on RA6E1
 #define DVR_EFL_BUSY_IRQ_EI()          { PORTA_ISFR = (1 << 17); PORTA_PCR17 |= PORT_PCR_IRQC(0xc); } /* IRQ on high level  */
-#else
+#elif ( MCU_SELECTED == RA6E1 )
 #define DVR_EFL_BUSY_IRQ_EI()          R_ICU_ExternalIrqEnable( &miso_busy_ctrl );
 #endif
 
@@ -512,7 +513,7 @@
 /* Disable flash busy IRQ and reset IRQ flag */
 #if ( MCU_SELECTED == NXP_K24 )
 #define DVR_EFL_BUSY_IRQ_DI()          { PORTA_PCR17 &= ~PORT_PCR_IRQC(0xf); PORTA_ISFR = ( 1 << 17 ); }
-#else
+#elif ( MCU_SELECTED == RA6E1 )
 #define DVR_EFL_BUSY_IRQ_DI()          R_ICU_ExternalIrqDisable( &miso_busy_ctrl )
 #endif
 #define DVR_EFL_BUSY_TRIG              (PORTA_ISFR & (1 << 17)   /* ISF Triggered? */

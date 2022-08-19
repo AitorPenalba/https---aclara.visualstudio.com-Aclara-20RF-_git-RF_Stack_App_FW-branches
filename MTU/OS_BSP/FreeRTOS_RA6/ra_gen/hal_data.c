@@ -1,5 +1,7 @@
 /* generated HAL source file - do not edit */
 #include "hal_data.h"
+#include "cfg_hal_defs.h" /* Aclara modification to know which board is being used */
+#include "hal.h" /* Aclara modification to know which board is being used */
 
 /* Macros to tie dynamic ELC links to ADC_TRIGGER_SYNC_ELC option in adc_trigger_t. */
 #define ADC_TRIGGER_ADC0        ADC_TRIGGER_SYNC_ELC
@@ -269,7 +271,16 @@ const wdt_instance_t g_wdt0 =
 icu_instance_ctrl_t miso_busy_ctrl;
 const external_irq_cfg_t miso_busy_cfg =
 {
-    .channel             = 4,
+    // TODO: RA6E1 Bob: Once the whole team is converted to Rev B equivalent hardware, this can be simplified
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )    /* Modification to generated file by Aclara */
+    #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
+    .channel             = 4,                               /* Modification to generated file by Aclara */
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
+    #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev B (P1B) hardware"
+    .channel             = 14,                              /* Modification to generated file by Aclara */
+#else                                                       /* Modification to generated file by Aclara */
+   #error "Invalid value for HAL_TARGET_HARDWARE"           /* Modification to generated file by Aclara */
+#endif                                                      /* Modification to generated file by Aclara */
     .trigger             = EXTERNAL_IRQ_TRIG_RISING,
     .filter_enable       = false,
     .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
@@ -282,11 +293,19 @@ const external_irq_cfg_t miso_busy_cfg =
 #endif
     .p_extend            = NULL,
     .ipl                 = (12),
-#if defined(VECTOR_NUMBER_ICU_IRQ4)
-    .irq                 = VECTOR_NUMBER_ICU_IRQ4,
-#else
-    .irq                 = FSP_INVALID_VECTOR,
-#endif
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )    /* Modification to generated file by Aclara */
+  #if defined(VECTOR_NUMBER_ICU_IRQ4)                       /* Modification to generated file by Aclara */
+    .irq                 = VECTOR_NUMBER_ICU_IRQ4,          /* Modification to generated file by Aclara */
+  #else                                                     /* Modification to generated file by Aclara */
+    .irq                 = FSP_INVALID_VECTOR,              /* Modification to generated file by Aclara */
+  #endif                                                    /* Modification to generated file by Aclara */
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
+  #if defined(VECTOR_NUMBER_ICU_IRQ14)                      /* Modification to generated file by Aclara */
+    .irq                 = VECTOR_NUMBER_ICU_IRQ14,         /* Modification to generated file by Aclara */
+  #else                                                     /* Modification to generated file by Aclara */
+    .irq                 = FSP_INVALID_VECTOR,              /* Modification to generated file by Aclara */
+  #endif                                                    /* Modification to generated file by Aclara */
+#endif                                                      /* Modification to generated file by Aclara */
 };
 /* Instance structure to use this module. */
 const external_irq_instance_t miso_busy =
@@ -300,7 +319,16 @@ const external_irq_instance_t miso_busy =
 icu_instance_ctrl_t hmc_trouble_busy_ctrl;
 const external_irq_cfg_t hmc_trouble_busy_cfg =
 {
-    .channel             = 14,
+    // TODO: RA6E1 Bob: Once the whole team is converted to Rev B equivalent hardware, this can be simplified
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )    /* Modification to generated file by Aclara */
+    .channel             = 14,                              /* Modification to generated file by Aclara */
+    #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
+    #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev B (P1B) hardware"
+    .channel             =  4,                              /* Modification to generated file by Aclara */
+#else                                                       /* Modification to generated file by Aclara */
+   #error "Invalid value for HAL_TARGET_HARDWARE"           /* Modification to generated file by Aclara */
+#endif                                                      /* Modification to generated file by Aclara */
     .trigger             = EXTERNAL_IRQ_TRIG_BOTH_EDGE,
     .filter_enable       = false,
     .pclk_div            = EXTERNAL_IRQ_PCLK_DIV_BY_64,
@@ -313,10 +341,18 @@ const external_irq_cfg_t hmc_trouble_busy_cfg =
 #endif
     .p_extend            = NULL,
     .ipl                 = (12),
-#if defined(VECTOR_NUMBER_ICU_IRQ14)
-    .irq                 = VECTOR_NUMBER_ICU_IRQ14,
-#else
-    .irq                 = FSP_INVALID_VECTOR,
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )    /* Modification to generated file by Aclara */
+  #if defined(VECTOR_NUMBER_ICU_IRQ14)                      /* Modification to generated file by Aclara */
+    .irq                 = VECTOR_NUMBER_ICU_IRQ14,         /* Modification to generated file by Aclara */
+  #else                                                     /* Modification to generated file by Aclara */
+    .irq                 = FSP_INVALID_VECTOR,              /* Modification to generated file by Aclara */
+  #endif                                                    /* Modification to generated file by Aclara */
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
+  #if defined(VECTOR_NUMBER_ICU_IRQ4)                       /* Modification to generated file by Aclara */
+    .irq                 = VECTOR_NUMBER_ICU_IRQ4,          /* Modification to generated file by Aclara */
+  #else                                                     /* Modification to generated file by Aclara */
+    .irq                 = FSP_INVALID_VECTOR,              /* Modification to generated file by Aclara */
+  #endif                                                    /* Modification to generated file by Aclara */
 #endif
 };
 /* Instance structure to use this module. */

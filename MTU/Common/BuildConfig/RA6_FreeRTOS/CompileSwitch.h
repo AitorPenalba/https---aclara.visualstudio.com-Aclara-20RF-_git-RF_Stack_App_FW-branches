@@ -318,10 +318,10 @@
 #define TM_DELAY_FOR_TACKED_ON_LED        0 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
 #define TM_MEASURE_SLEEP_TIMES            0 /* Adds a debug command to measure the actual sleep times based on the CYCCNT */
 #define TM_BYPASS_SI4467_GPIP0_WAIT       0 /* Bypass signal SI4467_GPIO0 after resetting the radio.  Used to test cutting this trace */
-#define TM_UART_ECHO_COMMAND              0 /* Adds an echo command to the debug port for testing UART echoing */
+#define TM_UART_ECHO_COMMAND              1 /* Adds an echo command to the debug port for testing UART echoing */
 #define TM_INSTRUMENT_NOISEBAND_TIMING    0 /* Adds instrumentation of noiseband timing to determine if there are bugs */
 #define TM_TEST_SECURITY_CHIP             0 /* More extensieve test code for security chip that was disabled in the K24 starting point DOES NOT COMPILE! */
-#define TM_UART_EVENT_COUNTERS            0 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
+#define TM_UART_EVENT_COUNTERS            1 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
 #define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  0 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
 #define TM_CREATE_TWO_BLABBER_TASKS       0 /* Create two tasks that output random numbers of messages on DBG port with random timing */
 #if ( TM_UART_EVENT_COUNTERS == 1 )

@@ -1737,7 +1737,7 @@ static void mfgpReadByte( uint8_t rxByte )
          }
 #endif
 #if ( RTOS_SELECTION == FREE_RTOS )
-         OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task.
+//        OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task.
 #endif
          commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
          if ( commandBuf != NULL )
@@ -11247,20 +11247,23 @@ static void MFGP_timeState( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static void MFGP_CommandLine_EchoComment( uint32_t argc, char *argv[] )
 {
-   char buffer[200] = { 0 };
+   char buffer[1200] = { 0 }; /* Buffer made large enough to handle equivalent of DTLS setup commands */
    char * echoStr = "ECHO";
-   uint32_t bufIndex = 0;
-   bufIndex += snprintf( &buffer[bufIndex], 5, "%s", echoStr );
+   uint32_t bufIndex = 0, totalParamSize = strlen( argv[0] ) + 1;
+   bufIndex += snprintf( &buffer[bufIndex], 12, "%s (    )", echoStr );
    if ( argc > 1 )
    {
       for ( uint32_t i = 1; i < argc; i++ )
       {
          uint32_t stringLen = strlen( argv[i] );
+         totalParamSize += ( stringLen + 1);
          if ( stringLen < ( sizeof(buffer) - bufIndex - 2 ) )
          {
             bufIndex += snprintf( &buffer[bufIndex], stringLen + 2, " %s", argv[i] );
          }
       }
+      (void) snprintf( &buffer[6], 5, "%4u", totalParamSize );
+      buffer[10] = ')';
    }
    MFG_printf( "%s\n", buffer );
 }
