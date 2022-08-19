@@ -476,6 +476,7 @@ void ALRM_RealTimeTask ( taskParameter )
 
 #if ( ENABLE_PRNT_ALRM_INFO == 1 )  /* Poll more often when debugging   */
    #define ALRM_POLL_RATE           (ONE_SEC * 15)
+   #warning "Alarm polling rate is set to 15 seconds; do not release code this way!"
 #if ( LOG_IN_METER == 1 )
    #define ALRM_RESET_GRACE_PERIOD  (ONE_SEC * 13) //Allow a little less than poll rate
 #endif
@@ -500,7 +501,14 @@ void ALRM_RealTimeTask ( taskParameter )
       {
 #if (  METER_TROUBLE_SIGNAL == 1 )
          ALRM_PRNT_INFO( 'A', "HMC_TROUBLE = %d", HMC_TROUBLE() );
-#warning "HMC_TROUBLE is defined as P505, Pin 81 in this build.  It will be moving to P111, Pin 54 in the Rev B layout"
+         // TODO: RA6E1 Bob: Once the whole team is converted to Rev B equivalent hardware, this can be removed
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
+         #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
+         #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev B (P1B) hardware"
+#else
+         #error "Invalid value for HAL_TARGET_HARDWARE"
+#endif
          /* Run if IRQ occurred, previous check had events set, or trouble signal is active. */
 #endif
          if ( clearEventLogs_ )

@@ -14,14 +14,14 @@ FSP Configuration
   RA6E1 Family
     Security: Exceptions: Exception Response: Non-Maskable Interrupt
     Security: Exceptions: BusFault, HardFault, and NMI Target: Non-Secure State
-    Security: System Reset Request Accessibility: Secure State
+    Security: System Reset Request Accessibility: Both Secure and Non-Secure State
     Security: Exceptions: Prioritize Secure Exceptions: Disabled
     Security: Cache Accessibility: Both Secure and Non-Secure State
     Security: System Reset Status Accessibility: Both Secure and Non-Secure State
     Security: Battery Backup Accessibility: Both Secure and Non-Secure State
     Security: SRAM Accessibility: SRAM Protection: Both Secure and Non-Secure State
     Security: SRAM Accessibility: SRAM ECC: Both Secure and Non-Secure State
-    Security: SRAM Accessibility: Standby RAM: Regions 7-0 are all Secure.
+    Security: SRAM Accessibility: Standby RAM: Regions 7-0 are all Non-secure.
     Security: BUS Accessibility: Bus Security Attribution Register A: Both Secure and Non-Secure State
     Security: BUS Accessibility: Bus Security Attribution Register B: Both Secure and Non-Secure State
     Startup C-Cache Line Size: 32 Bytes
@@ -56,8 +56,8 @@ FSP Configuration
     Main stack size (bytes): 0x400
     Heap size (bytes): 0
     MCU Vcc (mV): 3300
-    Parameter checking: Disabled
-    Assert Failures: Return FSP_ERR_ASSERTION
+    Parameter checking: Enabled
+    Assert Failures: Use assert() to Halt Execution
     Error Log: No Error Log
     Clock Registers not Reset Values during Startup: Disabled
     Main Oscillator Populated: Populated
@@ -579,7 +579,7 @@ FSP Configuration
       Interrupts: Normal/Group A Trigger: Software
       Interrupts: Group B Trigger: Disabled
       Interrupts: Group Priority (Valid only in Group Scan Mode): Group A cannot interrupt Group B
-      Input: Add/Average Count: Add sixteen samples
+      Input: Add/Average Count: Average four samples
       Input: Reference Voltage control: VREFH0/VREFH
       Input: Addition/Averaging Mask (channel availability varies by MCU and unit): Channel 5, Channel 7, Channel 8
       Input: Sample and Hold: Sample and Hold Channels (Available only on selected MCUs): 
@@ -752,10 +752,10 @@ FSP Configuration
       General: Name: AGT0_ExtFlashBusy
       General: Channel: 0
       General: Mode: One-Shot
-      General: Period: 10
-      General: Period Unit: Microseconds
+      General: Period: 1
+      General: Period Unit: Milliseconds
       Output: Duty Cycle Percent (only applicable in PWM mode): 50
-      General: Count Source: PCLKB
+      General: Count Source: SUBCLOCK
       Output: AGTOA Output: Disabled
       Output: AGTOB Output: Disabled
       Output: AGTO Output: Disabled
@@ -763,7 +763,7 @@ FSP Configuration
       Input: Input Filter: No Filter
       Input: Enable Pin: Enable Pin Not Used
       Input: Trigger Edge: Trigger Edge Rising
-      Interrupts: Callback: g_timer0_callback
+      Interrupts: Callback: AGT0_ExtFlashBusy_Callback
       Interrupts: Underflow Interrupt Priority: Priority 10
       
     Instance "g_crc1 CRC (r_crc)"

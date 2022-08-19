@@ -501,6 +501,7 @@ static void MFGP_MacChannelSetsSTAR          ( uint32_t argc, char *argv[] );
 
 static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
 static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
+static void MFGP_DevicePartNumber            ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsDeviceCertificate       ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsMfgSubject1             ( uint32_t argc, char *argv[] );
 static void MFGP_dtlsMfgSubject2             ( uint32_t argc, char *argv[] );
@@ -719,6 +720,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "comdevicehardwareversion",   MFGP_hardwareVersion,            "Get hardware version" },
    {  "comdevicemacaddress",        MFG_CommandLine_MacAddr,         "Read MAC address" },
    {  "comDeviceType",              MFGP_DeviceType,                 "Get Device Type" },
+   {  "comDeviceMicroMPN",          MFGP_DevicePartNumber,           "Get Device PartNumber" },
 #if ( DCU == 1 )
    {  "comDeviceGatewayConfig",     MFGP_DeviceGatewayConfig,        "Get/Set Device Gateway Configuration" },
 #endif
@@ -1735,7 +1737,7 @@ static void mfgpReadByte( uint8_t rxByte )
          }
 #endif
 #if ( RTOS_SELECTION == FREE_RTOS )
-         OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task.
+//        OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task.
 #endif
          commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
          if ( commandBuf != NULL )
@@ -2536,6 +2538,27 @@ static void MFGP_DeviceType( uint32_t argc, char *argv[] )
    MFG_printf( "%s %s\n", argv[ 0 ], VER_getComDeviceType() );
 }
 
+/***********************************************************************************************************************
+   Function Name: MFGP_DevicePartNumber
+
+   Purpose: Print the MTU PartNumber
+
+   Arguments:
+      argc - Number of Arguments passed to this function
+      argv - pointer to the list of arguments passed to this function
+
+   Returns: none
+***********************************************************************************************************************/
+static void MFGP_DevicePartNumber( uint32_t argc, char *argv[] )
+{
+   ( void )argc;
+   char*                      pDevPartNumber;
+   char                       devPartNumberBuff[PARTNUMBER_BUFFER_SIZE + 1];
+   pDevPartNumber = (char *)VER_getComDeviceMicroMPN();
+   (void)strncpy (devPartNumberBuff, pDevPartNumber, PARTNUMBER_BUFFER_SIZE);
+   devPartNumberBuff[PARTNUMBER_BUFFER_SIZE] = '\0';      // ensure the buffer is null-terminated
+   MFG_printf( "%s %s\n", argv[ 0 ], devPartNumberBuff );
+}
 /***********************************************************************************************************************
    Function Name: MFGP_ipHEContext
 
@@ -4129,7 +4152,9 @@ static void MFGP_dstEnabled( uint32_t argc, char *argv[] )
 static void MFGP_dstOffset( uint32_t argc, char *argv[] )
 {
    int32_t nDstOffset; //for convience actual parameter is int16_T
-
+#if ( MCU_SELECTED == RA6E1 )
+   int16_t getDstOffset;
+#endif
    if ( argc <= 2 )
    {
       if ( 2 == argc )
@@ -4147,9 +4172,14 @@ static void MFGP_dstOffset( uint32_t argc, char *argv[] )
       DBG_logPrintf( 'R', "Invalid number of parameters" );
    }
 
-   /* Always print read back value  */
+   /* Always print read back value */
+#if ( MCU_SELECTED == NXP_K24 )
    DST_getDstOffset( (int16_t *) &nDstOffset );
    MFG_printf( "%s %d\n", argv[ 0 ], nDstOffset );
+#elif ( MCU_SELECTED == RA6E1 )
+   DST_getDstOffset( &getDstOffset );
+   MFG_printf( "%s %d\n", argv[ 0 ], getDstOffset );
+#endif
 }
 
 /***********************************************************************************************************************
@@ -9923,7 +9953,7 @@ static void MFG_startDTLSsession ( uint32_t argc, char *argv[] )
    {
 //      uint32_t flags = 0;
 #if !USE_USB_MFG
-#if 0 // TODO: RA6E1 Enable UART ioctl (check if required)
+#if ( MCU_SELECTED == NXP_K24 ) // TODO: RA6E1 Enable UART ioctl (check if required)
       (void)UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #endif
 #else
@@ -9939,6 +9969,13 @@ static void MFG_startDTLSsession ( uint32_t argc, char *argv[] )
       ERR_printf( "DTLS Already connected ignoring request" );
    }
 }
+
+#if ( MCU_SELECTED == RA6E1 ) /* TODO: RA6E1: Remove this once the DTLS is working */
+void MFG_UpdatePortState ( mfgPortState_e state )
+{
+   _MfgPortState = state;
+}
+#endif
 
 /*******************************************************************************
 
@@ -11217,18 +11254,25 @@ static void MFGP_timeState( uint32_t argc, char *argv[] )
 *******************************************************************************/
 static void MFGP_CommandLine_EchoComment( uint32_t argc, char *argv[] )
 {
-   if ( argc == 1 )
+   char buffer[1200] = { 0 }; /* Buffer made large enough to handle equivalent of DTLS setup commands */
+   char * echoStr = "ECHO";
+   uint32_t bufIndex = 0, totalParamSize = strlen( argv[0] ) + 1;
+   bufIndex += snprintf( &buffer[bufIndex], 12, "%s (    )", echoStr );
+   if ( argc > 1 )
    {
-      MFG_printf( "ECHO\r\n" );
+      for ( uint32_t i = 1; i < argc; i++ )
+      {
+         uint32_t stringLen = strlen( argv[i] );
+         totalParamSize += ( stringLen + 1);
+         if ( stringLen < ( sizeof(buffer) - bufIndex - 2 ) )
+         {
+            bufIndex += snprintf( &buffer[bufIndex], stringLen + 2, " %s", argv[i] );
+         }
+      }
+      (void) snprintf( &buffer[6], 5, "%4u", totalParamSize );
+      buffer[10] = ')';
    }
-   else if ( argc == 2 )
-   {
-      MFG_printf( "ECHO %s\r\n", argv[1] );
-   }
-   else if ( argc == 3 )
-   {
-      MFG_printf( "ECHO %s %s\r\n", argv[1], argv[2] );
-   }
+   MFG_printf( "%s\n", buffer );
 }
 #endif // TM_UART_ECHO_COMMAND
 

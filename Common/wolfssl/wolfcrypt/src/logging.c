@@ -267,7 +267,9 @@ static void wolfssl_log(const int logLevel, const char *const logMessage)
 #elif defined(WOLFSSL_TELIT_M2MB)
         M2M_LOG_INFO("%s\n", logMessage);
 #else
+#if 0  /* stderr is not available for FreeRTOS */
         fprintf(stderr, "%s\n", logMessage);
+#endif
 #endif
     }
 }

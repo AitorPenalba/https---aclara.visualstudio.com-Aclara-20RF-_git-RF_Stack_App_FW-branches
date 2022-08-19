@@ -1398,7 +1398,7 @@ void PHY_Task( taskParameter )
                   timeout = FIVE_MSEC; // Play nice with rest of system but complete rest of processing ASAP.
                } else {
                   // The noise floor will be updated through multiple calls since we can't afford to stay in a call for too long or we risk losing interrupts from other radios.
-                  if (!RADIO_Update_Noise_Floor()) {
+                  if (!RADIO_Update_Noise_Floor()) { /* TODO: DG: This should not be executed during LastGasp */
                      // Noise floor update is not done
                      timeout = FIVE_MSEC; // Play nice with rest of system but complete rest of processing ASAP.
                   } else {

@@ -60,7 +60,6 @@
 #include "time_util.h"
 #include "timer_util.h"
 #include "time_sync.h"
-#include "time_sys.h"  // TODO: RA6E1: Do we need this include?
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
 #endif
@@ -994,7 +993,15 @@ returnStatus_t MAC_init ( void )
       FileStatus_t fileStatus;
       uint8_t i;
 #if ( EP == 1 )
+#if ( DEBUG_LAST_GASP_TASK == 0 )
+#if ( MCU_SELECTED == NXP_K24 )
       if(PWRLG_LastGasp() == false)
+#elif ( MCU_SELECTED == RA6E1 )
+      if( !BRN_OUT() )
+#endif
+#else
+      if(0)
+#endif
 #endif
       {  // Normal Mode
          for( i=0; i < (sizeof(Files)/sizeof(*(Files))); i++ )
@@ -1230,7 +1237,15 @@ void MAC_Task ( taskParameter )
    INFO_printf("MAC_Task starting...");
 
 #if ( EP == 1 )
-   if( PWRLG_LastGasp() == true )
+#if ( DEBUG_LAST_GASP_TASK == 0 )
+#if ( MCU_SELECTED == NXP_K24 )
+      if(PWRLG_LastGasp() == true)
+#elif ( MCU_SELECTED == RA6E1 )
+      if( BRN_OUT() )
+#endif
+#else
+   if(1)
+#endif
    {  // Booting in Low Power mode, so set the tx frequency to the value that was saved
       // When booting in normal mode the phy will recover from NV.
       uMessagePend = 100;
@@ -2081,7 +2096,15 @@ static void Process_DataIndication( const PHY_DataInd_t *phy_indication )
    {
 
 #if EP == 1
+#if ( DEBUG_LAST_GASP_TASK == 0 )
+#if ( MCU_SELECTED == NXP_K24 )
       if(PWRLG_LastGasp() == false)
+#elif ( MCU_SELECTED == RA6E1 )
+      if( !BRN_OUT() )
+#endif
+#else
+      if(0)
+#endif
 #endif
       {  // Normal Mode
          mac_frame_t rx_frame;
@@ -3351,7 +3374,7 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
 
    // This function should only be called inside the MAC task
    if ( 0 != strcmp("MAC", OS_TASK_GetTaskName()) ) {
-     ERR_printf("WARNING: MAC_Attribute_Set should only be called inside the MAC task. Please use MAC_Attribute_Set instead.");
+     ERR_printf("WARNING: MAC_Attribute_Set should only be called inside the MAC task. Please use MAC_SetRequest instead.");
    }
 
    switch (pSetReq->eAttribute)  /*lint !e788 not all enums used within switch */
@@ -3448,8 +3471,16 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
    if (eStatus == eMAC_SET_SUCCESS)
    {
 #if EP == 1
+#if ( DEBUG_LAST_GASP_TASK == 0 )
       // Only allow configuration changes if NOT in Last Gasp Mode
-      if( PWRLG_LastGasp() == false )
+#if ( MCU_SELECTED == NXP_K24 )
+      if(PWRLG_LastGasp() == false)
+#elif ( MCU_SELECTED == RA6E1 )
+      if( !BRN_OUT() )
+#endif
+#else
+      if(0)
+#endif
 #endif
       {
          file_t *pFile = (file_t *)Files[0];

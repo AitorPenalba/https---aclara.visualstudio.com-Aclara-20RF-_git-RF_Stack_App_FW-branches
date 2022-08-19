@@ -66,7 +66,7 @@ bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength )
    {
       FuncStatus = false;
    }
-#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
    else
    {
       vQueueAddToRegistry(*QueueHandle, name);
@@ -125,6 +125,36 @@ void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *f
 #endif
 
 } /* end OS_QUEUE_Enqueue () */
+
+#if( RTOS_SELECTION == FREE_RTOS )
+/*******************************************************************************
+
+  Function name: OS_QUEUE_ENQUEUE_RetStatus
+
+  Purpose: This function will add a new Queue element to the end of the existing
+           Queue Handle structure giving the caller an opportunity to ignore failures
+           due to a full queue
+
+  Arguments: QueueHandle - pointer to the handle structure of the queue
+             QueueElement - pointer to the element that is being added to the queue
+
+  Returns: eSUCCESS if the element was successfully queued else eOS_QUE_FULL_ERR
+
+  Notes: see Notes for OS_QUEUE_ENQUEUE
+
+*******************************************************************************/
+returnStatus_t OS_QUEUE_ENQUEUE_RetStatus ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line )
+{
+   returnStatus_t eRetVal = eSUCCESS;
+
+   OS_QUEUE_Element_Handle ptr = ( OS_QUEUE_Element_Handle )QueueElement;
+   if (pdPASS != xQueueSend ( *QueueHandle, (void *)&ptr, 0 ) )
+   {
+      eRetVal = eOS_QUE_FULL_ERR;
+   }
+   return ( eRetVal );
+} /* end OS_QUEUE_ENQUEUE_RetStatus () */
+#endif
 
 /*******************************************************************************
 
@@ -324,7 +354,6 @@ static buffer_t *rxMsg;
 
 void OS_QUEUE_Test( void )
 {
-
    uint32_t length;
    payload1.bufMaxSize = 250;
    payload2.bufMaxSize = 100;
@@ -342,8 +371,6 @@ void OS_QUEUE_Test( void )
       {
          APP_PRINT(" Fail");
       }
-
-
       //queue the pointer to the element
       //     for(int i = 0; i< NUM_ITEMS; i++)
       //     {
@@ -372,13 +399,56 @@ void OS_QUEUE_Test( void )
       //         APP_PRINT("Unknown Message");
       //       }
       //     }
-
-
    }
-
-
-
-    return;
-
+   return;
 }
 #endif
+
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
+/*******************************************************************************
+
+  Function name: OS_QUEUE_DumpQueues
+
+  Purpose: This function dumps information on all named queues to DBG port
+
+  Arguments: safePrint - true to dump to DBG_printf, false to use DBG_LW_printg
+
+  Returns: none
+
+  Notes: Requires a new function (vQueueFineInRegistry) to be added to FreeRTOS
+         in files queue.h, queue.c
+
+*******************************************************************************/
+void OS_QUEUE_DumpQueues( bool safePrint )
+{
+   char * pQueueNames[] = { "HMC_APP", "HMC_DIAGS", "HMC_REQ", "HMC_TIME", "DBG", "DFW", "EVL", "MFGP", "NWK", "DTLS",
+                            "MTLS", "MAC", "PHY", "SM_Ext", "SM_Int", "APP_MSG", "Interval", "Hist", "Demand" };
+
+   QueueHandle_t queueHandle = NULL;
+   if ( safePrint )
+   {
+      DBG_printf( "  Queue Name   Handle  Waiting  Available" );
+   }
+   else
+   {
+      DBG_LW_printf( "  Queue Name   Handle  Waiting  Available\n" );
+   }
+   for ( uint32_t i = 0; i < ARRAY_IDX_CNT(pQueueNames); i++ )
+   {
+      queueHandle = vQueueFindInRegistry( pQueueNames[i] );
+      if ( queueHandle != NULL )
+      {
+         uint32_t waiting   = uxQueueMessagesWaiting( queueHandle );
+         uint32_t available = uxQueueSpacesAvailable( queueHandle );
+         if ( safePrint )
+         {
+            DBG_printf(    "%12s %08x %8lu   %8lu",   pQueueNames[i], queueHandle, waiting, available );
+         }
+         else
+         {
+            DBG_LW_printf( "%12s %08x %8lu   %8lu\n", pQueueNames[i], queueHandle, waiting, available );
+         }
+      }
+   }
+}
+#endif // ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )

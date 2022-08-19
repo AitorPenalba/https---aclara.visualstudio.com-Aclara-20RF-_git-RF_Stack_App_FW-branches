@@ -177,6 +177,7 @@ place in RAM_region     { last section FREE_MEM };
 
 place in DF_region      { ro section .data_flash,
                           ro section .noinit };
+						  
 /* Aclara Added/Modified end */
 
 define exported symbol __tz_SDRAM_S = SDRAM_START;

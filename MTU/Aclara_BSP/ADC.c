@@ -302,10 +302,13 @@ static bool setup_ADC0 ( void )
    }
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err;
    /* Initializes the module. */
-   (void)R_ADC_Open( &g_adc0_ctrl, &g_adc0_cfg );  /* Renesas's FSP function returns are removed */
+   err = R_ADC_Open( &g_adc0_ctrl, &g_adc0_cfg );  /* Renesas's FSP function returns are removed */
+   assert(FSP_SUCCESS == err);
    /* Enable channels. */
-   (void)R_ADC_ScanCfg( &g_adc0_ctrl, &g_adc0_channel_cfg );
+   err = R_ADC_ScanCfg( &g_adc0_ctrl, &g_adc0_channel_cfg );
+   assert(FSP_SUCCESS == err);
 #endif
    return ( InitSuccessful );
 } /* end ADC_Setup_ADC0 () */
@@ -557,7 +560,7 @@ returnStatus_t ADC_ShutDown ( void )
 #endif   //#if ENABLE_ADC1
 #elif ( MCU_SELECTED == RA6E1 )
    //Closes the ADC driver, disables the interrupts and Stops the ADC
-   //   (void)R_ADC_Close( &g_adc0_ctrl );  // TODO: RA6E1: Do We need this?
+//   (void)R_ADC_Close( &g_adc0_ctrl );  We can't close ADC for RA6 we need to measure SC voltage in LG
 #endif
    return ( eSUCCESS );
 } /* end ADC_ShutDown () */
@@ -621,16 +624,17 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
    }
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
+   adc_status_t status;
+
    (void)R_ADC_ScanStart( &g_adc0_ctrl );
    /* Wait for conversion to complete. */
-   adc_status_t status;
    status.state = ADC_STATE_SCAN_IN_PROGRESS;
    while ( ADC_STATE_SCAN_IN_PROGRESS == status.state )
    {
-       (void)R_ADC_StatusGet( &g_adc0_ctrl, &status );
+      (void)R_ADC_StatusGet( &g_adc0_ctrl, &status );
    }
    /* Read converted data. */
-   (void)R_ADC_Read( &g_adc0_ctrl, adc_source_adx, &result );
+   (void)R_ADC_Read( &g_adc0_ctrl, (adc_channel_t)adc_source_adx, &result );
 #endif
    OS_MUTEX_Unlock(&intAdcMutex_);
 
@@ -709,9 +713,9 @@ float ADC_Get_uP_Temperature  (bool bFahrenheit)
     *   and application note "Temperature Sensor for the HCS08 Microcontroller Family", AN3031
     * Convert voltage to degC: 25 - ((Voltage - Vtemp25) / m)
     *  VTEMP   - voltage of the temperature sensor channel at the ambient temperature (value read from ADC).
-    *  VTEMP25 - voltage of the temperature sensor channel at 25 °C.
+    *  VTEMP25 - voltage of the temperature sensor channel at 25 Â°C.
     *  m       - is referred as temperature sensor slope in the device data sheet. It is the hot or cold
-    *            voltage versus temperature slope in V/°C.
+    *            voltage versus temperature slope in V/Â°C.
     * According to both K644 and K66 datasheets, Vtemp25=0.716 and m=0.00162
     */
    Temperature = 25.0f - ( ( voltage - 0.716f ) / 0.00162f );
@@ -802,7 +806,7 @@ float ADC_Get_4V0_Voltage ( void )
 #if ( ( USE_LWADC == 1 ) || ( ENABLE_ADC1 == 0 ) || ( MCU_SELECTED == RA6E1 ) )
    voltage = ADC_Get_Ch_Voltage( ADC0_4V0_VOLTAGE_CH ) ;
 #else // LWDAC==0 && USE_ADC1==1
-   voltage =  ADC_Get_Ch_Voltage( ADC1_4V0_VOLTAGE_CH ) ;
+   voltage = ADC_Get_Ch_Voltage( ADC1_4V0_VOLTAGE_CH ) ;
 #endif
    /* Adjust for circuit voltage divider */
    voltage *= UN_RDIV_4V0;

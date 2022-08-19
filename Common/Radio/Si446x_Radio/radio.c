@@ -19,21 +19,18 @@
  **********************************************************************************************************************/
 
 #include "project.h"
-#include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#elif ( RTOS_SELECTION == FREE_RTOS )
-#include "OS_aclara.h"
 #endif
-#include "compileswitch.h"
+#include "CompileSwitch.h"
 #include "compiler_types.h"
 #include "buffer.h"
 #include "PHY_Protocol.h"
-#include "phy.h"
-#include "mac.h"
+#include "PHY.h"
+#include "MAC.h"
 #include "time_sys.h"
 #include "radio.h"
 #include "radio_hal.h"
@@ -44,7 +41,7 @@
 #include "DBG_SerialDebug.h"
 #include "time_util.h"
 #include "ascii.h"
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
 #include "gpio.h"
 #endif
 #include "rs.h"
@@ -54,7 +51,9 @@
 #if ( EP == 1 )
 #include "spi_mstr.h"
 #include "SoftDemodulator.h"
+#if ( MCU_SELECTED == NXP_K24 )
 #include "FTM.h"
+#endif
 #if ( PHASE_DETECTION == 1 )
 #include "PhaseDetect.h"
 #endif
@@ -70,6 +69,7 @@
 #include "SM_Protocol.h"
 #include "SM.h"
 #endif
+
 
 /*****************************************************************************
  *  Local Macros & Definitions
@@ -181,6 +181,7 @@ static uint32_t iCapture_overflows = 0U;
 static void Radio0_IRQ_ISR(void);
 #elif ( MCU_SELECTED == RA6E1 )
 void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
+extern uint8_t PWRLG_LastGasp(void);
 #endif
 
 #if ( (DCU == 1) && (VSWR_MEASUREMENT == 1) )
@@ -768,7 +769,7 @@ void RADIO_TX_Watchdog(void)
 {
    OS_TICK_Struct time;
    uint32_t       TimeDiff;
-   bool           Overflow;
+   bool           Overflow = (bool)false;
 
    // Only valid if TX is active
 #if ( PORTABLE_DCU == 1)
@@ -777,15 +778,14 @@ void RADIO_TX_Watchdog(void)
    if ((radio[RADIO_0].isDeviceTX) && (currentTxMode == eRADIO_MODE_NORMAL)) {
 #endif
       // Get diff between current time and time that TX started
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( RTOS_SELECTION == MQX_RTOS )
       _time_get_elapsed_ticks(&time);
       TimeDiff = (uint32_t)_time_diff_milliseconds ( &time, &radio[RADIO_0].TxWatchDog, &Overflow );
-#elif ( MCU_SELECTED == RA6E1 )
+#elif ( RTOS_SELECTION == FREE_RTOS )
       OS_TICK_Get_CurrentElapsedTicks(&time);
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &radio[RADIO_0].TxWatchDog, &time );
 #endif
 
-      // TODO: RA6E1 - Overflow usage verify and modify the below statement
       // Check if TX has been ON for more than one seconds
       if ((TimeDiff > ONE_SEC) || Overflow) {
             PHY_CounterInc(ePHY_FailedTransmitCount, 0);
@@ -4741,26 +4741,18 @@ static void wait_us(uint32_t time)
 static float32 wait_for_stable_RSSI(uint8_t radioNum)
 {
    OS_TICK_Struct time1,time2;
-   uint32_t TimeDiff;
-   bool Overflow;
-   uint8_t rawRSSI;
-#if ( MCU_SELECTED == NXP_K24 )
-   _time_get_elapsed_ticks(&time1);
-#elif ( MCU_SELECTED == RA6E1 )
+   uint32_t       TimeDiff;
+   uint8_t        rawRSSI;
+
    OS_TICK_Get_CurrentElapsedTicks(&time1);
-#endif
 
    // Poll RSSI until valid
    do {
       si446x_get_modem_status(radioNum, 0xFF); // Don't clear int.  get_int_status needs those.
       rawRSSI = Si446xCmd.GET_MODEM_STATUS.LATCH_RSSI;
-#if ( MCU_SELECTED == NXP_K24 )
-      _time_get_elapsed_ticks(&time2);
-      TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
-#elif ( MCU_SELECTED == RA6E1 )
+
       OS_TICK_Get_CurrentElapsedTicks(&time2);
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time1, &time2 );
-#endif
 
       // Get out if we have been stuck here more than 10 ms.
       if (TimeDiff > 10) {
@@ -4901,14 +4893,8 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.  get_int_status needs those.
       currentRSSI = Si446xCmd.GET_MODEM_STATUS.LATCH_RSSI;
 
-#if ( MCU_SELECTED == NXP_K24 )
-      bool Overflow;
-      _time_get_elapsed_ticks(&time2);
-      TimeDiff = (uint32_t)_time_diff_milliseconds ( &time2, &time1, &Overflow );
-#elif ( MCU_SELECTED == RA6E1 )
       OS_TICK_Get_CurrentElapsedTicks(&time2);
       TimeDiff = (uint32_t)OS_TICK_Get_Diff_InMilliseconds ( &time1, &time2 );
-#endif
 
       // Get out if we have been stuck here more than 10 ms.
       if (TimeDiff > 10) {
@@ -4917,7 +4903,7 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       OS_TASK_Yield(); // TODO: RA6E1 Bob: this needs to be tested for compatibility
    } while (currentRSSI == 0); // We use the latch value as a way to consume time until RSSI is meaningful.
 
-   // Discard the first 4 samples because the radio internaly averages 4 symbols and the RSSI might not be stable yet.
+   // Discard the first 4 samples because the radio internally averages 4 symbols and the RSSI might not be stable yet.
    wait_us((uint32_t)833); // 4 symbols at 4800 baud is 833 us
    (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.
 
@@ -4935,7 +4921,7 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.
       rssi[i] = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
 
-      // Check if the last RSSI_CLUSTER_SIZE values are close thogether.
+      // Check if the last RSSI_CLUSTER_SIZE values are close together.
       // No more than 1dBm difference between max and min values.
       maxValue = 0;
       minValue = 255;
@@ -5225,7 +5211,7 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
       }
    }
 #endif
-   // Discard the first 4 samples because the radio internaly averages 4 symbols and the RSSI might not be stable yet.
+   // Discard the first 4 samples because the radio internally averages 4 symbols and the RSSI might not be stable yet.
    wait_us((uint32_t)1000); // 4 symbols at 4800 baud is 833 us
 
    // Get RSSI values
@@ -5967,6 +5953,12 @@ static void StandbyRx(void)
    // On the samwise board, the first radio (0) is configured with the RX Channel ( outbound channel )
    // On the frodo board, the first radio (0) is configured with the TX Channel
    // The remaining radios (1-8) are configured with the RX Channels
+#if ( EP == 1 )
+#if ( MCU_SELECTED == RA6E1 )  /* TODO: Remove this conditional. Only here to make the Hex compare happy */
+   if( PWRLG_LastGasp() == false )
+#endif
+#endif
+   {
    for(radioNum = (uint8_t)RADIO_FIRST_RX; radioNum < PHY_RCVR_COUNT; radioNum++)
    {
       // Is radio configured?
@@ -5985,6 +5977,15 @@ static void StandbyRx(void)
          }
       }
    }
+   }
+#if ( EP == 1 )
+#if ( MCU_SELECTED == RA6E1 ) /* TODO: Remove this conditional. Only here to make the Hex compare happy */
+   else
+   {
+      (void)si446x_change_state((uint8_t)RADIO_0, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_SLEEP);  // Force standby state
+   }
+#endif
+#endif
 }
 
 /*!

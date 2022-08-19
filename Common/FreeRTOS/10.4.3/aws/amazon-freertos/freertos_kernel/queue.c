@@ -2743,6 +2743,45 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         }
     }
 
+/* The following function added by Aclara Technologies LLC */
+
+    QueueHandle_t vQueueFindInRegistry( const char * pcQueueName ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    {
+        UBaseType_t ux, uy, uMatch;
+        QueueHandle_t qReturn = NULL;
+
+        /* See if there is an empty space in the registry.  A NULL name denotes
+         * a free slot. */
+        for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
+        {
+            if( xQueueRegistry[ ux ].pcQueueName != NULL )
+            {
+                uMatch = ( UBaseType_t) 0U;
+                for( uy = ( UBaseType_t) 0U; uy < ( UBaseType_t) 20; uy++ )
+                {
+                    if( pcQueueName[ uy ] == xQueueRegistry[ ux ].pcQueueName[ uy ] )
+                    {
+                        if( pcQueueName [ uy ] == 0 )
+                        {
+                            if( uy > 0 ) uMatch = ( UBaseType_t) 1U; /* If length is non-zero and we hit NUL in both strings, we found it */
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        break; /* Non-matching byte in string, try the next entry */
+                    }
+                }
+                if( uMatch == ( UBaseType_t ) 1U )
+                {
+                    qReturn = xQueueRegistry[ ux ].xHandle;
+                    break;
+                }
+            }
+        }
+        return( qReturn );
+    }
+
 #endif /* configQUEUE_REGISTRY_SIZE */
 /*-----------------------------------------------------------*/
 

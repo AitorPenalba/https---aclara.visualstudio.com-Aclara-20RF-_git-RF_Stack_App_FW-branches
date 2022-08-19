@@ -2289,13 +2289,10 @@
         <group>
             <name>TargetBuildConfig</name>
             <file>
-                <name>$PROJ_DIR$\..\TargetBuildConfigs\LoadControl\hal.h</name>
+                <name>$PROJ_DIR$\..\TargetBuildConfigs\LoadControl\K24\hal.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\TargetBuildConfigs\LoadControl\meter.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\TargetBuildConfigs\LoadControl\meter_ansi_sig.h</name>
             </file>
         </group>
     </group>

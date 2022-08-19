@@ -128,6 +128,9 @@ static returnStatus_t   setPowerMode( const ePowerMode ePwrMode, PartitionData_t
 static returnStatus_t   dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pParData,
                                     DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   erase( dSize destOffset, lCnt Cnt, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t   blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr );
+#endif
 static returnStatus_t   flush( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   restore( lAddr lDest, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver );
@@ -172,6 +175,9 @@ const DeviceDriverMem_t IF_deviceDriver =
    dvr_read,      // Read Command
    dvr_write,     // Write Command
    erase,         // Erases a portion (or all) of the banked memory.
+#if ( MCU_SELECTED == RA6E1 )
+   blankCheck,    // Blank check memory in the partition
+#endif
    flush,         // Write the cache content to the lower layer driver
    dvr_ioctl,     // ioctl function - Does Nothing for this implementation
    restore,       // Not supported - API support only
@@ -208,8 +214,7 @@ uint8_t localVar[FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE]; // TODO: RA6E1 Currentl
 
    Purpose: Callback mentioning the flash status - write complete, erase complete, event blank and not blank
 
-   Arguments:
-      flash_callback_args_t *p_args - Mentions the event that happened p_args->event
+   Arguments: flash_callback_args_t *p_args - Mentions the event that happened p_args->event
 
    Returns: Nothing
 
@@ -225,31 +230,26 @@ void dataBgoCallback( flash_callback_args_t *p_args )
    if (FLASH_EVENT_NOT_BLANK == p_args->event)
    {
       g_b_flash_event_not_blank = true;
+      OS_SEM_Post_fromISR( &intFlashSem_ );
    }
    else if (FLASH_EVENT_BLANK == p_args->event)
    {
       g_b_flash_event_blank = true;
+      OS_SEM_Post_fromISR( &intFlashSem_ );
    }
    else if (FLASH_EVENT_ERASE_COMPLETE == p_args->event)
    {
       g_b_flash_event_erase_complete = true;
+      OS_SEM_Post_fromISR( &intFlashSem_ );
    }
    else if (FLASH_EVENT_WRITE_COMPLETE == p_args->event)
    {
       g_b_flash_event_write_complete = true;
+      OS_SEM_Post_fromISR( &intFlashSem_ );
    }
    else
    {
       /*No operation */
-   }
-
-   // Post the semaphore from ISR context
-   if ( g_b_flash_event_write_complete || g_b_flash_event_erase_complete )
-   {
-      if ( bIntSemCreated_ == (bool)true )
-      {
-         OS_SEM_Post_fromISR( &intFlashSem_ );
-      }
    }
 }
 #endif
@@ -729,6 +729,52 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
 
    return (eRetVal);
 }
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: blankCheck
+
+   Purpose: Blank check a portion of the current partition of memory.
+
+   Arguments:
+      dSize destOffset - Offset into the partition to blank check
+      lCnt cnt - number of bytes to blank check
+      PartitionData_t const *pParData Points to a partition table entry.  This contains all information to access the
+                               partition to initialize.
+      DeviceDriverMem_t const * const *pNextDriver Points to the next driver's table.
+
+   Returns: As defined by error_codes.h
+
+   Side Effects: None
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr )
+{
+   returnStatus_t eRetVal = eFAILURE;
+   lCnt destAddr = destOffset + pParData->PhyStartingAddress; /* Get the actual address in NV. */
+   fsp_err_t retVal = R_FLASH_HP_BlankCheck( &g_flash0_ctrl, destAddr, cnt, NULL );
+   if (retVal == FSP_SUCCESS)
+   {
+      ( void )OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+      if( g_b_flash_event_not_blank )
+      {
+         eRetVal = eFAILURE;
+         g_b_flash_event_not_blank = false;
+      }
+      else if (g_b_flash_event_blank)
+      {
+         eRetVal = eSUCCESS;
+         g_b_flash_event_blank = false;
+      }
+   }
+
+   return (eRetVal);
+}
+#endif
+
 /***********************************************************************************************************************
 
    Function Name: setPowerMode

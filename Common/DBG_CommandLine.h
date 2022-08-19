@@ -38,7 +38,6 @@
 
 void DBG_CommandLineTask ( taskParameter );
 uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] );
-uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] );
 #if ( TM_CRC_UNIT_TEST == 1 )
 uint32_t DBG_CommandLine_CrcCalculate( uint32_t argc, char *argv[] );
 #endif
@@ -56,9 +55,21 @@ uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] );
 #endif
 
 #if ( TM_OS_EVENT_TEST == 1)
+uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_EventSet( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_EventCreateWait( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_EventTaskDelete( uint32_t argc, char *argv[] );
+#endif
+
+#if ( TM_INTERNAL_FLASH_TEST == 1)
+uint32_t DBG_CommandLine_IntFlash_OpenPartition( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_IntFlash_ReadPartition( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_IntFlash_WritePartition( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_IntFlash_ErasePartition( uint32_t argc, char *argv[] );
+#if ( MCU_SELECTED == RA6E1 )
+uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv[] );
+#endif
+uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] );
 #endif
 
 #if ( TM_LINKED_LIST == 1)

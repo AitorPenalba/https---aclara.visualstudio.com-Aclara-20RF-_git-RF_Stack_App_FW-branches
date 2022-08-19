@@ -349,6 +349,8 @@
                     <state>$PROJ_DIR$\..\ra\board</state>
                     <state>$PROJ_DIR$\..\ra_cfg\fsp_cfg</state>
                     <state>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp</state>
+                    <state>$PROJ_DIR$\..\..\..\TargetBuildConfigs\I210+C\RA6</state>
+                    <state>$PROJ_DIR$\..\..\..\..\Common</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>

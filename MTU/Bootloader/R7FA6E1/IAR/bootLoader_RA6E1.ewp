@@ -343,13 +343,6 @@
                     <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
                     <state>$PROJ_DIR$/ra_gen</state>
                     <state>$PROJ_DIR$/src</state>
-                    <state>$PROJ_DIR$\..\..\..\..\Common</state>
-                    <state>$PROJ_DIR$\..\..\..\..\Common\driver</state>
-                    <state>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\OS_AL</state>
-                    <state>$PROJ_DIR$\..\..\Include</state>
-                    <state>$PROJ_DIR$\..</state>
-                    <state>$PROJ_DIR$\..\..\..\Common\BuildConfig\RA6_FreeRTOS</state>
-                    <state>$PROJ_DIR$\..\..\..\Aclara_BSP</state>
                     <state>$PROJ_DIR$/ra_cfg/driver</state>
                 </option>
                 <option>

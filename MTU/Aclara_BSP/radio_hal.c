@@ -227,15 +227,15 @@ void radio_hal_RadioImmediateSDN(void)
 
  Purpose: Callback function SPI1 peripheral
 
- Arguments: none
+ Arguments: spi_callback_args_t
 
  Returns:
 
 ******************************************************************************/
 void spi_callback(spi_callback_args_t * p_args)
 {
-    if (SPI_EVENT_TRANSFER_COMPLETE == p_args->event)
-    {
-        OS_SEM_Post_fromISR( &radioSpiSem_ );
-    }
+   if (SPI_EVENT_TRANSFER_COMPLETE == p_args->event)
+   {
+      OS_SEM_Post_fromISR( &radioSpiSem_ );
+   }
 }

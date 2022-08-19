@@ -137,6 +137,7 @@
 #define OS_MSGQ_Create( MsgqHandle, numItems, name )     OS_MSGQ_CREATE( MsgqHandle, numItems)
 #endif
 #define OS_MSGQ_Post(MsgqHandle, MessageData)            OS_MSGQ_POST(MsgqHandle, MessageData, (bool)true, __FILE__, __LINE__)
+#define OS_MSGQ_Post_RetStatus(MsgqHandle, MessageData)  OS_MSGQ_POST_RetStatus(MsgqHandle, MessageData, (bool)true, __FILE__, __LINE__)
 #define OS_MSGQ_Pend(MsgqHandle, MessageData, TimeoutMs) OS_MSGQ_PEND(MsgqHandle, MessageData, TimeoutMs, (bool)true, __FILE__, __LINE__)
 
 #define OS_MUTEX_Lock(MutexHandle)                       OS_MUTEX_LOCK(MutexHandle, __FILE__, __LINE__)
@@ -407,6 +408,7 @@ bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages, char *nam
 bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages);
 #endif
 void OS_MSGQ_POST ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line );
+returnStatus_t OS_MSGQ_POST_RetStatus ( OS_MSGQ_Handle MsgqHandle, void *MessageData, bool ErrorCheck, char *file, int line );
 bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
 
 #if ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 )
@@ -415,6 +417,7 @@ bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, char *
 bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength );
 #endif
 void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );
+returnStatus_t OS_QUEUE_ENQUEUE_RetStatus ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );
 void *OS_QUEUE_Dequeue ( OS_QUEUE_Handle QueueHandle );
 uint16_t OS_QUEUE_NumElements ( OS_QUEUE_Handle QueueHandle );
 void *OS_QUEUE_Head ( OS_QUEUE_Handle QueueHandle );
@@ -437,6 +440,7 @@ void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
 
 bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount );
 void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line );
+returnStatus_t OS_SEM_POST_RetStatus ( OS_SEM_Handle SemHandle, char *file, int line );
 bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t TimeoutMs, char *file, int line );
 void OS_SEM_Reset ( OS_SEM_Handle SemHandle );
 
@@ -507,5 +511,8 @@ void OS_EVENT_TestSet(void);
 #endif
 #if( TM_LINKED_LIST == 2)
 void OS_LINKEDLIST_Test(void);
+#endif
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) && ( configQUEUE_REGISTRY_SIZE > 0 ) )
+void OS_QUEUE_DumpQueues( bool safePrint );
 #endif
 #endif /* this must be the last line of the file */

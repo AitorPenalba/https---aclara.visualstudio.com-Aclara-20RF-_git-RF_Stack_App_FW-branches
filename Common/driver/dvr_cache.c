@@ -74,6 +74,10 @@ static returnStatus_t write( const dSize DestOffset, uint8_t const *pSrc, lCnt c
 static returnStatus_t flush( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr );
 static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
                              DeviceDriverMem_t const * const * pNxtDvr );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
+                                 DeviceDriverMem_t const * const * pNxtDvr );
+#endif
 static returnStatus_t setPowerMode( const ePowerMode esetPowerMode, PartitionData_t const *pParData,
                                     DeviceDriverMem_t const * const * pNxtDvr );
 static returnStatus_t ioctl( const void *pCmd, void *pData, PartitionData_t const *pParData,
@@ -95,6 +99,9 @@ const DeviceDriverMem_t sDeviceDriver_Cache ={
    read,          // Read Command - Reads from cache
    write,         // Write Command - Writes to cache
    erase,         // Erases a portion (or all) of the cache memory and then flushes the memory.
+#if ( MCU_SELECTED == RA6E1 )
+   blankCheck,    // Blank check a memory in the partition
+#endif
    flush,         // Write the cache content to the lower layer driver
    ioctl,         // ioctl function - Does Nothing for this implementation
    restore,       // Restores the RAM content from NV memory
@@ -357,6 +364,34 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
    OS_MUTEX_Unlock(&cacheMutex_);
    return(eRetVal);
 }
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: blankCheck
+
+   Purpose: Blank check a portion of the current partition of memory.
+
+   Arguments:
+      dSize destOffset - Offset into the partition to blank check
+      lCnt cnt - number of bytes to blank check
+      PartitionData_t const *pParData Points to a partition table entry.  This contains all information to access the
+                               partition to initialize.
+      DeviceDriverMem_t const * const *pNextDriver Points to the next driver's table.
+
+   Returns: As defined by error_codes.h
+
+   Side Effects: None
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr )
+{
+   return (eSUCCESS);
+}
+#endif
+
 /***********************************************************************************************************************
 
    Function Name: setPowerMode
