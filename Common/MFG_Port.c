@@ -1747,7 +1747,7 @@ static void mfgpReadByte( uint8_t rxByte )
          {
             commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
 #if ( DTLS_DEBUG == 1 )
-            INFO_printHex( "MFG_buffer: ", MFGP_CommandBuffer, MFGP_numBytes );
+            INFO_printHex( "MFG_buffer: ", (const uint8_t *)MFGP_CommandBuffer, MFGP_numBytes );
             OS_TASK_Sleep( 50U );
 #endif
 #if ( RTOS_SELECTION == FREE_RTOS )
