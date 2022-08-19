@@ -235,10 +235,10 @@
 #define USE_DTLS                       1
 #if ( ACLARA_LC == 1 ) || (ACLARA_DA == 1)
 #define DTLS_FIELD_TRIAL               0     /* Disable feature to allows unsecured comm. until session established   */
-#else // TODO: RA6E1 Enable DTLS_FIELD_TRIAL
-#define DTLS_FIELD_TRIAL               0     /* Allows unsecured comm. until session established   */
+#else
+#define DTLS_FIELD_TRIAL               1     /* Allows unsecured comm. until session established   */
 #endif
-#define DTLS_DEBUG                     (0)   /* Turn DTLS Debug On */
+#define DTLS_DEBUG                     (1)   /* Turn DTLS Debug On */  // TODO: RA6E1: Remove it before releasing for production
 #define DTLS_CHECK_UNENCRYPTED         (1)   /* Check for previous version major file not encrypted   */
 /* ------------------------------------------------------------------------------------------------------------------ */
 #define BM_DEBUG                       0     /* Buffer allocate/free debug printing */

@@ -897,7 +897,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "oslinkedlisthead",     DBG_CommandLine_OS_LinkedList_Head,        "Returns the Head element from test LinkedList" },
    { "oslinkedlistnumele",   DBG_CommandLine_OS_LinkedList_NumElements, "Adds LinkedList element and checks for the count" },
 #endif
-   #if ( TM_UART_EVENT_COUNTERS == 1 )
+#if ( TM_UART_EVENT_COUNTERS == 1 )
    { "UARTcounters",         DBG_CommandLine_UARTcounters,              "Dumps RA6E1 UART driver counters" },
    { "UARTclearCounters",    DBG_CommandLine_UARTclearCounters,         "Clears RA6E1 UART driver counters" },
 #endif
@@ -15493,7 +15493,17 @@ uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
          DBG_logPrintHex ( 'D', "public key ", key, keyLen );
          printUsage = false;
       }
+#if ( MCU_SELECTED == RA6E1 )  /* TODO: RA6E1: Remove this once the DTLS is working */
+      else if ( 0 == strcmp( argv[1], "connect" ) )
+      {
+         if ( eSUCCESS == DTLS_UartConnect( MFGP_DtlsResultsCallback ) )
+         {
+            MFG_UpdatePortState( DTLS_SERIAL_IO_e );
+         }
+         printUsage = false;
+      }
    }
+#endif
 
    if ( printUsage == true )
    {

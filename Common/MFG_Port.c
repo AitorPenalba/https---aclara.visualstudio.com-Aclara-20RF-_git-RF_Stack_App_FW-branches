@@ -9946,7 +9946,7 @@ static void MFG_startDTLSsession ( uint32_t argc, char *argv[] )
    {
 //      uint32_t flags = 0;
 #if !USE_USB_MFG
-#if 0 // TODO: RA6E1 Enable UART ioctl (check if required)
+#if ( MCU_SELECTED == NXP_K24 ) // TODO: RA6E1 Enable UART ioctl (check if required)
       (void)UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #endif
 #else
@@ -9962,6 +9962,13 @@ static void MFG_startDTLSsession ( uint32_t argc, char *argv[] )
       ERR_printf( "DTLS Already connected ignoring request" );
    }
 }
+
+#if ( MCU_SELECTED == RA6E1 ) /* TODO: RA6E1: Remove this once the DTLS is working */
+void MFG_UpdatePortState ( mfgPortState_e state )
+{
+   _MfgPortState = state;
+}
+#endif
 
 /*******************************************************************************
 
