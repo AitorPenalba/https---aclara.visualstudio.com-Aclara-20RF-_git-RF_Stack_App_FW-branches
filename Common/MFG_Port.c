@@ -4151,7 +4151,7 @@ static void MFGP_dstEnabled( uint32_t argc, char *argv[] )
 ***********************************************************************************************************************/
 static void MFGP_dstOffset( uint32_t argc, char *argv[] )
 {
-   int32_t nDstOffset; //for convience actual parameter is int16_T
+   int32_t nDstOffset = 0; //for convience actual parameter is int16_T
 
    if ( argc <= 2 )
    {
