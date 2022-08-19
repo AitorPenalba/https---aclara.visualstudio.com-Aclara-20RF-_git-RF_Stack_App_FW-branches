@@ -936,7 +936,9 @@ static void BL_MAIN_delayForStablePower(void)
  **********************************************************************************************************************/
 static void BL_MAIN__msDelay(uint16_t mSeconds)
 {
-
+#if ( MCU_SELECTED == RA6E1 )
+   R_BSP_SoftwareDelay(mSeconds, BSP_DELAY_UNITS_MILLISECONDS);
+#elif ( MCU_SELECTED == NXP_K24 )
    uint32_t initialSysTick = 0; /* variable to store initial systick value */
    uint32_t currentSystick = 0; /* variable to track change in systick valuet to compare to initial */
    bool msTickOccurred; /* flag used to stop do/while loop */
@@ -988,5 +990,5 @@ static void BL_MAIN__msDelay(uint16_t mSeconds)
       }
 
    }
-
+#endif  /* NXP_K24 */
 }
