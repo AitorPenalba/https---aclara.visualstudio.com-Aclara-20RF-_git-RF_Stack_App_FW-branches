@@ -62,11 +62,14 @@
 #define SELF_TEST_EVENT_MASK             0x0000000F
 #endif
 #if ( TM_EVENTS == 1 )
-#define BIT_0 ( 1 << 0 )
-#define BIT_4 ( 1 << 4 )
+#define OS_TEST_BIT_0 ( 1 << 0 )
+#define OS_TEST_BIT_4 ( 1 << 4 )
 #endif
 #if( TM_QUEUE == 1)
-#define NUM_ITEMS 10
+#define OS_TEST_NUM_ITEMS 10
+#endif
+#if (TM_MSGQ ==1 )
+#define OS_TEST_MSGQ_DATA 94;
 #endif
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
@@ -100,29 +103,29 @@ static const enum_UART_ID mfgPortUart = UART_MANUF_TEST;     /* UART used for MF
 const char pTskName_osTestModule[]      = "OS_TEST_MODULE";
 #endif
 #if ( TM_SEMAPHORE == 1 )
-static OS_SEM_Obj       testSem_ = NULL;
-static volatile uint8_t semCounter = 0;
+static OS_SEM_Obj       OS_TestSem = NULL;
+static volatile uint8_t OS_TestSemCounter = 0;
 #endif
 #if (TM_MSGQ ==1 )
-static OS_MSGQ_Obj             testMsgQueue_;
+static OS_MSGQ_Obj             OS_TestMsgQueue;
 bool retVal = false;
-static uint8_t value = 94;
-static buffer_t payload1;
-static buffer_t *ptr1 = &payload1;
-static buffer_t *rx_msg;
-static volatile uint8_t msgqCounter;
+static buffer_t OS_TestMsgqPayload;
+static buffer_t *OS_TestPtr1 = &OS_TestMsgqPayload;
+static buffer_t *OS_TestRxMsg;
+static volatile uint8_t OS_TestMsgqCounter;
+static uint8_t OS_TestMsgqData = OS_TEST_MSGQ_DATA;
 #endif
 #if ( TM_EVENTS == 1 )
-static OS_EVNT_Obj eventObj;
-static OS_EVNT_Handle eventHandle = &eventObj;
+static OS_EVNT_Obj OS_TestEventObj;
+static OS_EVNT_Handle OS_TestEventHandle = &OS_TestEventObj;
 #endif
 #if( TM_QUEUE == 1)
 bool retValStatus = false;
-static buffer_t payload1;
-static buffer_t *ptr = &payload1;
-static OS_QUEUE_Obj msgQueueObj;
-static OS_QUEUE_Handle msgQueueHandle = &msgQueueObj;
-static buffer_t *rxMsg;
+static buffer_t OS_TestQueuePayload;
+static buffer_t *OS_TestPtr = &OS_TestQueuePayload;
+static OS_QUEUE_Obj OS_TestMsgQueueObj;
+static OS_QUEUE_Handle OS_TestMsgQueueHandle = &OS_TestMsgQueueObj;
+static buffer_t *OS_TestRxMsg;
 #endif
 /* TYPE DEFINITIONS */
 
@@ -1130,13 +1133,13 @@ static void SELF_testModulesTask ( taskParameter )
 ***********************************************************************************************************************/
 static void SELF_testSemCreate ( void )
 {
-   if( OS_SEM_Create(&testSem_, 0) )
+   if( OS_SEM_Create(&OS_TestSem, 0) )
    {
-      semCounter++;
+      OS_TestSemCounter++;
    }
    else
    {
-      semCounter++;
+      OS_TestSemCounter++;
       APP_ERR_PRINT("Unable to Create the Mutex!");
    }
 
@@ -1154,13 +1157,13 @@ static void SELF_testSemCreate ( void )
 static bool SELF_testSemPend( void )
 {
    bool retVal = false;
-   if( OS_SEM_Pend(&testSem_, HALF_SEC) )
+   if( OS_SEM_Pend(&OS_TestSem, HALF_SEC) )
    {
-      semCounter--;
+      OS_TestSemCounter--;
       retVal = true;
    }
 
-   if( 0 == semCounter )
+   if( 0 == OS_TestSemCounter )
    {
       DBG_logPrintf( 'R', "Sem Test Success" );
    }
@@ -1182,7 +1185,7 @@ static bool SELF_testSemPend( void )
 ***********************************************************************************************************************/
 static void SELF_testSemPost( void )
 {
-   OS_SEM_Post(&testSem_);
+   OS_SEM_Post(&OS_TestSem);
 }
 
 #endif
@@ -1200,17 +1203,17 @@ static void SELF_testSemPost( void )
 ***********************************************************************************************************************/
 static void SELF_testMsgqCreate ( void )
 {
-   if( OS_MSGQ_Create(&testMsgQueue_, 10, "testqueue") )
+   if( OS_MSGQ_Create(&OS_TestMsgQueue, 10, "testqueue") )
    {
-      msgqCounter++;
+      OS_TestMsgqCounter++;
    }
    else
    {
-      msgqCounter++;
+      OS_TestMsgqCounter++;
       DBG_logPrintf( 'R', "Unable to Create the Message Queue!" );
    }
    /*initialize static message*/
-   payload1.data = &value;
+   OS_TestMsgqPayload.data = &OS_TestMsgqData;
 
 }
 /***********************************************************************************************************************
@@ -1226,17 +1229,17 @@ static bool SELF_testMsgqPend( void )
 {
    bool retVal = false;
 
-   if( OS_MSGQ_Pend(&testMsgQueue_, (void *)&rx_msg, HALF_SEC ) )
+   if( OS_MSGQ_Pend(&OS_TestMsgQueue, (void *)&OS_TestRxMsg, HALF_SEC ) )
    {
-      msgqCounter--;
+      OS_TestMsgqCounter--;
       retVal = true;
    }
 
-   if( 94 ==  *(rx_msg->data))
+   if( OS_TestMsgqData ==  *(OS_TestRxMsg->data))
    {
       DBG_logPrintf( 'R', "Success MSGQ Test" );
    }
-   else if( 0 != msgqCounter )
+   else if( 0 != OS_TestMsgqCounter )
    {
       DBG_logPrintf( 'R', "Fail MSGQ Test" );
    }
@@ -1255,7 +1258,7 @@ static bool SELF_testMsgqPend( void )
 static void SELF_testMsgqPost( void )
 {
    //post address of the txMsg to the Queue
-   OS_MSGQ_Post(&testMsgQueue_, (void *)ptr1);
+   OS_MSGQ_Post(&OS_TestMsgQueue, (void *)OS_TestPtr1);
 }
 #endif
 
@@ -1272,7 +1275,7 @@ static void SELF_testMsgqPost( void )
 static void SELF_testEventCreate(void)
 {
   bool status;
-  status = OS_EVNT_Create(eventHandle);
+  status = OS_EVNT_Create(OS_TestEventHandle);
   if( status )
   {
     DBG_logPrintf( 'R', "Created Event Object" );
@@ -1295,16 +1298,16 @@ static void SELF_testEventCreate(void)
 static bool SELF_testEventWait(void)
 {
   EventBits_t recv;
-  recv = OS_EVNT_Wait(eventHandle, BIT_4 | BIT_0 , false, HALF_SEC);
-  if( recv & BIT_4 )
+  recv = OS_EVNT_Wait(OS_TestEventHandle, OS_TEST_BIT_4 | OS_TEST_BIT_0 , false, HALF_SEC);
+  if( recv & OS_TEST_BIT_4 )
   {
     DBG_logPrintf( 'R', "Received Event 4" );
   }
-  else if( recv & BIT_0 )
+  else if( recv & OS_TEST_BIT_0 )
   {
     DBG_logPrintf( 'R', "Received Event 0" );
   }
-  else if( ( recv & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 ) )
+  else if( ( recv & ( OS_TEST_BIT_0 | OS_TEST_BIT_4 ) ) == ( OS_TEST_BIT_0 | OS_TEST_BIT_4 ) )
   {
      DBG_logPrintf( 'R', "Received both Event 0 and Event 4" );
   }
@@ -1326,7 +1329,7 @@ static bool SELF_testEventWait(void)
 ***********************************************************************************************************************/
 static void SELF_testEventSet(void)
 {
-  OS_EVNT_Set(eventHandle, BIT_4 );
+  OS_EVNT_Set(OS_TestEventHandle, OS_TEST_BIT_4 );
   return;
 }
 #endif
@@ -1387,13 +1390,13 @@ bool SELF_testMutex( void )
 ***********************************************************************************************************************/
 bool SELF_testQueue( void )
 {
-   payload1.bufMaxSize = 250;
-   retValStatus = OS_QUEUE_Create( (void *) msgQueueHandle, NUM_ITEMS, "OS_QUEUE_TEST");
+   OS_TestQueuePayload.bufMaxSize = 250;
+   retValStatus = OS_QUEUE_Create( (void *) OS_TestMsgQueueHandle, OS_TEST_NUM_ITEMS, "OS_QUEUE_TEST");
    if(true == retValStatus)
    {
-      OS_QUEUE_Enqueue( msgQueueHandle, (void *)ptr);
-      rxMsg = (buffer_t * )OS_QUEUE_Dequeue(msgQueueHandle);
-      if( rxMsg->bufMaxSize == 250 )
+      OS_QUEUE_Enqueue( OS_TestMsgQueueHandle, (void *)OS_TestPtr);
+      OS_TestRxMsg = (buffer_t * )OS_QUEUE_Dequeue(OS_TestMsgQueueHandle);
+      if( OS_TestRxMsg->bufMaxSize == 250 )
       {
          DBG_logPrintf( 'R', "OS_QUEUE Test Success" );
          return TRUE;
