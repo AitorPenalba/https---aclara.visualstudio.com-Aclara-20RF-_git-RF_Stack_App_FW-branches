@@ -103,7 +103,6 @@ static void       mfgpSlipAddCharacter( buffer_t **bfr_ptr, char c );
 static void       dtlsUART_isr( void *user_isr_ptr );
 #endif
 
-
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 /***********************************************************************************************************************
@@ -675,4 +674,3 @@ static void dtlsUART_isr( void *user_isr_ptr )
 }
 #endif
 #endif
-
