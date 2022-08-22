@@ -110,7 +110,7 @@ static volatile uint8_t OS_TestSemCounter = 0;
 static OS_MSGQ_Obj             OS_TestMsgQueue;
 bool retVal = false;
 static buffer_t OS_TestMsgqPayload;
-static buffer_t *OS_TestPtr1 = &OS_TestMsgqPayload;
+static buffer_t *OS_TestMsgqPtr = &OS_TestMsgqPayload;
 static buffer_t *OS_TestRxMsg;
 static volatile uint8_t OS_TestMsgqCounter;
 static uint8_t OS_TestMsgqData = OS_TEST_MSGQ_DATA;
@@ -122,7 +122,7 @@ static OS_EVNT_Handle OS_TestEventHandle = &OS_TestEventObj;
 #if( TM_QUEUE == 1)
 bool retValStatus = false;
 static buffer_t OS_TestQueuePayload;
-static buffer_t *OS_TestPtr = &OS_TestQueuePayload;
+static buffer_t *OS_TestQueuePtr = &OS_TestQueuePayload;
 static OS_QUEUE_Obj OS_TestMsgQueueObj;
 static OS_QUEUE_Handle OS_TestMsgQueueHandle = &OS_TestMsgQueueObj;
 static buffer_t *OS_TestRxMsg;
@@ -1258,7 +1258,7 @@ static bool SELF_testMsgqPend( void )
 static void SELF_testMsgqPost( void )
 {
    //post address of the txMsg to the Queue
-   OS_MSGQ_Post(&OS_TestMsgQueue, (void *)OS_TestPtr1);
+   OS_MSGQ_Post(&OS_TestMsgQueue, (void *)OS_TestMsgqPtr);
 }
 #endif
 
@@ -1394,7 +1394,7 @@ bool SELF_testQueue( void )
    retValStatus = OS_QUEUE_Create( (void *) OS_TestMsgQueueHandle, OS_TEST_NUM_ITEMS, "OS_QUEUE_TEST");
    if(true == retValStatus)
    {
-      OS_QUEUE_Enqueue( OS_TestMsgQueueHandle, (void *)OS_TestPtr);
+      OS_QUEUE_Enqueue( OS_TestMsgQueueHandle, (void *)OS_TestQueuePtr);
       OS_TestRxMsg = (buffer_t * )OS_QUEUE_Dequeue(OS_TestMsgQueueHandle);
       if( OS_TestRxMsg->bufMaxSize == 250 )
       {
