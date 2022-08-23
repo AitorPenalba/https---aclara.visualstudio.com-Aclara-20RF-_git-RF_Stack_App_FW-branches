@@ -64,6 +64,8 @@ static void rtc_time_get( rtc_time_primitive *time);
 static void rtc_time_set( rtc_time_primitive *time);
 #endif   //#if ( MCU_SELECTED == RA6E1 )
 
+uint32_t             SecTemp      = 0;
+
 /* FUNCTION DEFINITIONS */
 #if ( MCU_SELECTED == RA6E1 )
 /*******************************************************************************
@@ -413,7 +415,7 @@ void RTC_ConfigureAlarm( uint32_t seconds )
 
    rtc_time_get( &time );        // Get current value of the Registers
    time.BCount.Word += seconds;  // Add the time delay
-
+   SecTemp = time.BCount.Word;
    R_RTC->BCNT0AR   = time.BCount.Byte[0];
    R_RTC->BCNT1AR   = time.BCount.Byte[1];
    R_RTC->BCNT2AR   = time.BCount.Byte[2];
@@ -633,6 +635,7 @@ bool RTC_UnitTest(void)
    uint8_t              cnt;
    uint32_t             result;
 
+
    /*These functions are checked:
       RTC_SetDateTime
       RTC_GetDateTime
@@ -757,20 +760,34 @@ bool RTC_UnitTest(void)
    }
 
    /* Verify the Alarm can be set and fires */
-   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-   Sec += 2;
+//   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
+//   (void)printf( "seconds before set %d", Sec );
+   Sec = 2;
    g_alarm_irq_flag = RESET_FLAG;
    RTC_ConfigureAlarm(Sec);
+   (void)printf( "seconds after config %d", Sec );
    OS_TASK_Sleep(3000);
    if ( RESET_FLAG == g_alarm_irq_flag )
    {
+      while(1)
+      {
+         RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
+         (void)printf ( "Alarm count : %lu - RTC count : %lu\n",(uint32_t)SecTemp, (uint32_t)Sec );
+         if ( SecTemp == Sec )
+         {
+            (void)printf ( "Alarm count : %lu - RTC count : %lu\n",(uint32_t)SecTemp, (uint32_t)Sec );
+            break;
+         }
+         
+         
+      }
       retVal = false;
    }
 
    /* Verify the Alarm can be disabled and does not fire */
-   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-   RTC_GetDateTime(&get_time);
-   Sec += 2;
+//   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
+//   RTC_GetDateTime(&get_time);
+   Sec = 2;
    g_alarm_irq_flag = RESET_FLAG;
    RTC_ConfigureAlarm(Sec);
    RTC_DisableAlarm();
