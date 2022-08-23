@@ -309,7 +309,7 @@ partitions_EXTERN const uint8_t _sExtNvBus[]
 
 partitions_EXTERN const uint8_t _sIntFlash[]
 #ifdef partitions_GLOBAL
-   = "K24 Flash"
+   = "RA6 Flash"
 #endif
 ;
 
@@ -441,7 +441,7 @@ partitions_EXTERN const uint8_t partDlPatch_[]
    = "DL Patch"
 #endif
 ;
-#endif   /* BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
 
 partitions_EXTERN const uint8_t partDfwImage_[]
 #ifdef partitions_GLOBAL
@@ -455,7 +455,7 @@ partitions_EXTERN const uint8_t partNVtest_[]
    = "NV Test"
 #endif
 ;
-#endif   /* BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
 
 partitions_EXTERN const uint8_t partAppWholeNvDesc_[]
 #ifdef partitions_GLOBAL
@@ -477,14 +477,24 @@ partitions_EXTERN const uint8_t _sPartDfwBtfDesc[]
 ;
 #endif   /* BOOTLOADER  */
 
-partitions_EXTERN const uint8_t partCodeDesc_[]
+partitions_EXTERN const uint8_t partAppCodeDesc_[]
 #ifdef partitions_GLOBAL
-   = "Code Space"
+   = "App Code"
+#endif
+;
+partitions_EXTERN const uint8_t partBlCodeDesc_[]
+#ifdef partitions_GLOBAL
+   = "BL Code"
 #endif
 ;
 partitions_EXTERN const uint8_t partBLbackup_[]
 #ifdef partitions_GLOBAL
-   = "Backup Bootloader Space"
+   = "Backup BL Code"
+#endif
+;
+partitions_EXTERN const uint8_t partBLinfo_[]
+#ifdef partitions_GLOBAL
+   = "DFW BL Info"
 #endif
 ;
 
@@ -1377,7 +1387,7 @@ partitions_EXTERN const PartitionData_t sPartitionData[]
       {                                      /* Partition Description */
          _sIntFlash,                         /* Describes the Bus being used */
          _sIntFlashType,                     /* Describes the chip being accessed */
-         partCodeDesc_,                      /* Describes the partition */
+         partBlCodeDesc_,                    /* Describes the partition */
          !PAR_BANKED,                        /* Banked? */
          !PAR_CACHED,                        /* Cached? */
          !PAR_AUTO_ERASE_BANK,               /* Automatically erase the 'old' bank of memory? */
@@ -1392,7 +1402,7 @@ partitions_EXTERN const PartitionData_t sPartitionData[]
          0                                   /* Number of banks (Must have at least 1 bank!) */
       }
    },// </editor-fold>
-#endif   // end of #ifndef __BOOTLOADER
+#endif   // NOT __BOOTLOADER
    {
       ePART_APP_CODE,                        /* Partition Name */
       PART_APP_CODE_OFFSET,                  /* Start Offset */
@@ -1403,7 +1413,7 @@ partitions_EXTERN const PartitionData_t sPartitionData[]
       {                                      /* Partition Description */
          _sIntFlash,                         /* Describes the Bus being used */
          _sIntFlashType,                     /* Describes the chip being accessed */
-         partCodeDesc_,                      /* Describes the partition */
+         partAppCodeDesc_,                   /* Describes the partition */
          !PAR_BANKED,                        /* Banked? */
          !PAR_CACHED,                        /* Cached? */
          !PAR_AUTO_ERASE_BANK,               /* Automatically erase the 'old' bank of memory? */
@@ -1532,7 +1542,7 @@ partitions_EXTERN const PartitionData_t sPartitionData[]
       {                                      /* Partition Description */
          _sIntFlash,                         /* Describes the Bus being used */
          _sIntFlashType,                     /* Describes the chip being accessed */
-         partCodeDesc_,                      /* Describes the partition */
+         partBLinfo_,                        /* Describes the partition */
          !PAR_BANKED,                        /* Banked? */
          !PAR_CACHED,                        /* Cached? */
          !PAR_AUTO_ERASE_BANK,               /* Automatically erase the 'old' bank of memory? */
