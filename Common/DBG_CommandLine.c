@@ -3112,14 +3112,19 @@ static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length)
    if ( eSUCCESS == retVal)
    {
       /* erase DFW partition */
-      retVal = PAR_partitionFptr.parErase(0L, length,  pTM_BL_Test_Part_ );
+      retVal = PAR_partitionFptr.parErase(0L, INT_FLASH_ERASE_SIZE, pTM_BL_Test_Part_ );
       if ( eSUCCESS == retVal)
       {
+         DBG_logPrintf( 'I', "Erased %d bytes at offset 0x0 in DFW BL INFO partition", INT_FLASH_ERASE_SIZE );
          /* write BL INFO to DFW partition */
-         retVal = PAR_partitionFptr.parWrite(0L, pDFWinfo, length,  pTM_BL_Test_Part_ );
+         retVal = PAR_partitionFptr.parWrite(PART_DFW_BL_INFO_DATA_OFFSET, pDFWinfo, length, pTM_BL_Test_Part_ );
          if ( retVal != eSUCCESS)
          {
             DBG_logPrintf( 'E', "Unable to write %d bytes at offset 0x0 in DFW BL INFO partition [%d]", length, retVal );
+         }
+         else
+         {
+            DBG_logPrintf( 'I', "Wrote %d bytes at offset 0x%X to DFW BL INFO partition", length, PART_DFW_BL_INFO_DATA_OFFSET);
          }
       }
       else
@@ -3161,17 +3166,17 @@ uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
    DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ];
 
    /* setup test data */
-   DFWinfo[0].Length = TEST_DATA_SIZE;
    DFWinfo[0].SrcAddr = 0L;
    DFWinfo[0].DstAddr = UNUSED_APP_OFFSET;
-   DFWinfo[0].FailCount = 0xFFFFFFFF;
+   DFWinfo[0].Length = TEST_DATA_SIZE;
    DFWinfo[0].CRC = 0x0;                    // Fill in after computing CRC in bootloader
+   DFWinfo[0].FailCount = 0xFFFFFFFF;
 
-   DFWinfo[1].Length = 0xFFFFFFFF;
    DFWinfo[1].SrcAddr = 0xFFFFFFFF;
    DFWinfo[1].DstAddr = 0xFFFFFFFF;
-   DFWinfo[1].FailCount = 0xFFFFFFFF;
+   DFWinfo[1].Length = 0xFFFFFFFF;
    DFWinfo[1].CRC = 0xFFFFFFFF;
+   DFWinfo[1].FailCount = 0xFFFFFFFF;
 
    return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo));
 }
