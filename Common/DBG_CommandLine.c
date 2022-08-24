@@ -3908,64 +3908,6 @@ uint32_t DBG_CommandLine_Partition ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_Partition () */
 
-#define PRINT_HEX_ADDRESS_INDEX     0
-#define PRINT_HEX_ADDRESS_LENGTH    10
-#define PRINT_HEX_DATA_INDEX        (PRINT_HEX_ADDRESS_INDEX + PRINT_HEX_ADDRESS_LENGTH)
-#define PRINT_HEX_DATA_LENGTH       16
-#define PRINT_HEX_ASCII_INDEX       (PRINT_HEX_DATA_INDEX + (3 * PRINT_HEX_DATA_LENGTH) + 2)
-#define PRINT_HEX_ASCII_LENGTH      PRINT_HEX_DATA_LENGTH
-/**
-   address - starting address or -1 for no address
-   count - number of bytes to print
-   pSrc - pointer to the bytes to print
-*/
-void _printHex(int32_t address, uint32_t byteCount, uint8_t* pData)
-{
-   /*                   address                         data                          ascii data     */
-   /* printBuf format: XXXXXXXX: XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX | AAAAAAAAAAAAAAAA */
-   char  printBuf[ PRINT_HEX_ADDRESS_LENGTH + 3 * PRINT_HEX_DATA_LENGTH + 2 + PRINT_HEX_DATA_LENGTH + 1 ];
-   
-   uint16_t bytesLeft = byteCount;           /* Running count of bytes printed, decreasing   */
-   uint8_t address_index = PRINT_HEX_ADDRESS_INDEX;
-   uint8_t data_index = (address >= 0) ? PRINT_HEX_DATA_INDEX : (PRINT_HEX_DATA_INDEX - PRINT_HEX_ADDRESS_LENGTH);
-   uint8_t ascii_index = (address >= 0) ? PRINT_HEX_ASCII_INDEX : (PRINT_HEX_ASCII_INDEX - PRINT_HEX_ADDRESS_LENGTH);
-
-   while ( bytesLeft != 0 )
-   {
-      /* clear print buffer */
-      memset(printBuf, 0, sizeof(printBuf));
-
-      /* setup 16-byte aligned address with no null terminator */
-      (void) sprintf(&printBuf[address_index], "%08X: ", address & (~0xF));
-
-      /* print data */
-      do {
-         /* setup hex data with no null terminator*/
-         (void) sprintf(&printBuf[data_index + (3 * (address % 16))], "%02X ", *pData );
-         
-         /* setup ASCII value or . with no null terminator*/
-         (void) sprintf(&printBuf[ascii_index + (address % 16)], "%c", ((*pData >= 0x20) & (*pData <= 0x7F)) ? *pData : '.' );
-      
-         pData++;
-         address++;
-         bytesLeft--;
-      } while (((address % 16) != 0) && (bytesLeft > 0));
-      
-      /* remove null terminators except last one */
-      for (int i = 0; i < (sizeof(printBuf) - 1); i++)
-      {
-         if ('\0' == printBuf[i])
-         {
-            printBuf[i] = ' ';
-         }
-      }
-      
-      DBG_printf( "%s", &printBuf[0] );
-      OS_TASK_Sleep( 10 );
-   }
-   
-}
-
 /*******************************************************************************
 
    Function name: DBG_CommandLine_NvRead
@@ -4014,9 +3956,6 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
                   cnt = min( bytesLeft, sizeof( buffer ) );
                   if ( eSUCCESS == PAR_partitionFptr.parRead( &buffer[0], offset, cnt, pPTbl_ ) )
                   {
-#if 1  // new print
-                     _printHex(offset, cnt, &buffer[0]);
-#else
                      uint8_t i;
                      uint8_t *pPtr;
                      for ( i = 0, pPtr = &respDataHex[ 0 ]; i < cnt; i++ )
@@ -4028,9 +3967,8 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
                         pPtr += sprintf( ( char * )pPtr, "%02X ", buffer[ i ] );
                      }
                      *pPtr = 0;
-                     DBG_logPrintf( 'R', "Partition: %d, Offset: 0x%x\n%s", part, offset, &respDataHex[0] );
-                     OS_TASK_Sleep( 100 );
-#endif
+                     DBG_printf( "%s", &respDataHex[0] );
+                     OS_TASK_Sleep( TEN_MSEC );
                      bytesLeft -= cnt;
                      offset += cnt;
                   }
