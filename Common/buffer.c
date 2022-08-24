@@ -544,8 +544,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
             // Have we been out of buffers for a long time?
             if ( ( _time_diff_minutes( &CurrentTime, &AllocWatchDog[type], &overflow ) > ALLOC_WATCHDOG_TIMEOUT ) || overflow )
 #elif( RTOS_SELECTION == FREE_RTOS )
-               /* TODO: RA6E1: Should we use the Timers instead ? */
-            if ( OS_TICK_Get_Diff_InMinutes( &CurrentTime, &AllocWatchDog[type] ) > ALLOC_WATCHDOG_TIMEOUT )  //  TODO: RA6E1: Handle Overflow condition
+            if ( OS_TICK_Get_Diff_InMinutes( &CurrentTime, &AllocWatchDog[type] ) > ALLOC_WATCHDOG_TIMEOUT )   //  TODO: RA6E1: Handle Overflow condition
 #endif
             {
                // Need to reboot

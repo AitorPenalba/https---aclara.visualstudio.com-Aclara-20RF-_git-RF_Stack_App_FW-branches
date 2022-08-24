@@ -947,32 +947,6 @@ void DBG_CommandLineTask ( taskParameter )
 #endif
    for ( ;; )
    {
-#if (TM_SEMAPHORE == 1)
-      if( OS_SEM_TestPend() )
-      {
-         vTaskDelay(pdMS_TO_TICKS(1000));
-         vTaskSuspend(NULL);
-         break; /* Exit */
-      }
-
-#endif
-#if (TM_MSGQ == 1)
-      if( OS_MSGQ_TestPend() )
-      {
-         vTaskDelay(pdMS_TO_TICKS(1000));
-         vTaskSuspend(NULL);
-         break; /* Exit */
-      }
-
-#endif
-#if( TM_EVENTS == 1 )
-      if( OS_EVENT_TestWait() )
-      {
-         vTaskDelay(pdMS_TO_TICKS(1000));
-         vTaskSuspend(NULL);
-         break; /* Exit */
-      }
-#endif
 #if ( !USE_USB_MFG && ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A ) )
       OS_TASK_Sleep(OS_WAIT_FOREVER);
 #else

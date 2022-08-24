@@ -10492,7 +10492,7 @@ static void MFGP_disconnectCapable( uint32_t argc, char *argv[] )
 {
    ValueInfo_t readingInfo;
    (void)INTF_CIM_CMD_getMeterReading( disconnectCapable, &readingInfo );
-   MFG_logPrintf( "%s %llu\n", argv[ 0 ], readingInfo.Value.intValue );
+   MFG_logPrintf( "%s %lld\n", argv[ 0 ], readingInfo.Value.intValue );
 
 }
 #endif // endif for (REMOTE_DISCONNECT == 1)

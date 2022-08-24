@@ -268,7 +268,7 @@ void delay_10us( uint32_t delay )
    endTime = startTime;
    localDelay = delay * 10;
 
-   while ( ( uint32_t ) OS_TICK_Get_Diff_InMicroseconds( &endTime, &startTime ) < localDelay )
+   while ( ( uint32_t ) OS_TICK_Get_Diff_InMicroseconds(  &startTime , &endTime ) < localDelay )
    {
       OS_TICK_Get_CurrentElapsedTicks( &endTime );
    }

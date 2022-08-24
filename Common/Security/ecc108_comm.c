@@ -52,7 +52,9 @@
 #include "ecc108_mqx.h"                // definitions for delay functions
 #endif
 #include "ecc108_lib_return_codes.h"   // declarations of function return codes
-
+#if ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
+#endif
 /* This is the time to wait between response polling (rounded up to 10us increments) */
 #if (ECC108_RESPONSE_TIMEOUT > 71)
 #   define ECC108_RESPONSE_POLL_DELAY   (uint8_t)(((ECC108_RESPONSE_TIMEOUT - 71) + 5) / 10)
@@ -275,13 +277,7 @@ uint8_t ecc108c_send_and_receive(uint8_t *tx_buffer, uint8_t rx_size, uint8_t *r
             continue;
          }
       }
-
-      // TODO: RA6E1 - Handle with delay_10us API once it is in place
-#if ( ( MCU_SELECTED == NXP_K24 ) && ( RTOS_SELECTION == MQX_RTOS ) )
       delay_10us(execution_delay * 100);  // Wait minimum command execution time and then start polling for a response.
-#elif ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-      R_BSP_SoftwareDelay( execution_delay, BSP_DELAY_UNITS_MILLISECONDS );
-#endif
       // Retry loop for receiving a response.
       n_retries_receive = ECC108_RETRY_COUNT + 1;
       while (n_retries_receive-- > 0)
@@ -297,12 +293,7 @@ uint8_t ecc108c_send_and_receive(uint8_t *tx_buffer, uint8_t rx_size, uint8_t *r
          do
          {
             ret_code = ecc108p_receive_response(rx_size, rx_buffer);
-            // TODO: RA6E1 - Handle with delay_10us API once it is in place
-#if ( ( MCU_SELECTED == NXP_K24 ) && ( RTOS_SELECTION == MQX_RTOS ) )
             delay_10us(ECC108_RESPONSE_POLL_DELAY);  // Wait between polling for a response.
-#elif ( ( MCU_SELECTED == RA6E1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-            R_BSP_SoftwareDelay( ( ECC108_RESPONSE_POLL_DELAY * 10 ), BSP_DELAY_UNITS_MICROSECONDS );
-#endif
             timeout_countdown -= ECC108_RESPONSE_TIMEOUT;
          } while ((timeout_countdown > ECC108_RESPONSE_TIMEOUT) && (ret_code == ECC108_RX_NO_RESPONSE));
 

@@ -301,13 +301,13 @@
 
 /* All unit/integration defines MUST code inside the #if below! */
 #if (TEST_MODE_ENABLE == 1)
-#define TM_MUTEX                          0
-#define TM_SEMAPHORE                      0
+#define TM_MUTEX                          1
+#define TM_SEMAPHORE                      1
 #define TM_RTC_UNIT_TEST                  0
 #define TM_ADC_UNIT_TEST                  0
-#define TM_QUEUE                          0
-#define TM_MSGQ                           0
-#define TM_EVENTS                         0
+#define TM_QUEUE                          1
+#define TM_MSGQ                           1
+#define TM_EVENTS                         1
 #define TM_LINKED_LIST                    1
 #define TM_CRC_UNIT_TEST                  1
 #define TM_TIME_COMPOUND_TEST             1

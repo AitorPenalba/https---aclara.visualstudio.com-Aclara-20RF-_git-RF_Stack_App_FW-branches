@@ -521,17 +521,7 @@ void STRT_StartupTask ( taskParameter )
          }
       }
    }
-
    //vRadio_Init(0);  // This is a test code
-#if (TM_MUTEX == 1)
-   OS_MUTEX_Test();
-#endif
-#if (TM_QUEUE == 1)
-   OS_QUEUE_Test();
-#endif
-#if (TM_LINKED_LIST == 2)
-   OS_LINKEDLIST_Test();
-#endif
 #if 1 // TODO: RA6E1 Bob: this is temporary code to turn on an LED connected to pin P301 using high drive capacity
    if ( initSuccess_ )
    {

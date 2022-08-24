@@ -113,36 +113,3 @@ void OS_MUTEX_UNLOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line )
       EVL_FirmwareError( "OS_MUTEX_Unlock" , file, line );
    }
 } /* end OS_MUTEX_Unlock () */
-
-
-#if (TM_MUTEX == 1)
-void OS_MUTEX_Test( void )
-{
-   volatile uint8_t     counter = 0;
-   static OS_MUTEX_Obj  testMutex_ = NULL;
-
-   if( OS_MUTEX_Create(&testMutex_) )
-   {
-      counter++;
-      OS_MUTEX_Lock(&testMutex_);
-      /* Critical Section */
-      counter--;
-      OS_MUTEX_Unlock(&testMutex_);
-   }
-   else
-   {
-      counter++;
-//      APP_ERR_PRINT("Unable to Create the Mutex!");
-
-   }
-   if( 0 == counter )
-   {
-//      APP_PRINT("Success");
-   }
-   else
-   {
-//      APP_ERR_PRINT("Fail");
-   }
-
-}
-#endif
