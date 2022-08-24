@@ -1726,7 +1726,7 @@ static void mfgpReadByte( uint8_t rxByte )
 #endif
       {
 #if (USE_DTLS == 1)
-         if ( !MFGP_AllowDtlsConnect() ) // TODO: RA6E1 Bob: remember to remove
+         if ( !MFGP_AllowDtlsConnect() )
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
