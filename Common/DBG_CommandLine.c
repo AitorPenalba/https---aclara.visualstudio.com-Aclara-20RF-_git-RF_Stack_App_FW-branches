@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
+#include <string.h>
 #include "DBG_SerialDebug.h"
 #include "DBG_CommandLine.h"
 #if ( MCU_SELECTED == NXP_K24 )
@@ -1367,9 +1368,15 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
    CmdLineEntry = DBG_CmdTable;
    while ( CmdLineEntry->pcCmd )
    {
-      DBG_printf( "[M]%30s: %s", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
+      /* has partial command text been entered and no match? */
+      if ((1 == argc) ||
+          (2 == argc) && (NULL != strstr(CmdLineEntry->pcCmd, argv[1])))
+      {
+         DBG_printf( "[M]%30s: %s", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
+         OS_TASK_Sleep( TEN_MSEC );
+      }
+      
       CmdLineEntry++;
-      OS_TASK_Sleep( TEN_MSEC );
    } /* end while() */
    return ( 0 );
 } /* end DBG_CommandLine_Help () */
