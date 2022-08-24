@@ -121,14 +121,17 @@ typedef enum
 /* GLOBAL FUNCTION PROTOTYPES - Accessed via a table */
 
 /* START - Functions accessed via a table entry (indirect call) */
+static returnStatus_t   init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDvr );
+static returnStatus_t   close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cnt, PartitionData_t const *pParData,
                                  DeviceDriverMem_t const * const *pNextDvr );
-static returnStatus_t   init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
-static returnStatus_t   close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pParData,
                                     DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   erase( dSize destOffset, lCnt Cnt, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t   blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr );
+#endif
 #ifndef __BOOTLOADER
 static returnStatus_t   setPowerMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   flush( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
@@ -177,6 +180,9 @@ const DeviceDriverMem_t IF_deviceDriver =
    .devRead       = dvr_read,       // Read Command
    .devWrite      = dvr_write,      // Write Command
    .devErase      = erase,          // Erases a portion (or all) of the banked memory.
+#if ( MCU_SELECTED == RA6E1 )
+   .devBlankCheck = blankCheck,     // Blank check memory in the partition
+#endif
    .devFlush      = NULL,           // Flush - not used in bootloader
    .devIoctl      = NULL,           // ioctl - not used in bootloader
    .devRestore    = NULL,           // Restore - not used in bootloader
@@ -189,6 +195,9 @@ const DeviceDriverMem_t IF_deviceDriver =
    dvr_read,      // Read Command
    dvr_write,     // Write Command
    erase,         // Erases a portion (or all) of the banked memory.
+#if ( MCU_SELECTED == RA6E1 )
+   blankCheck,    // Blank check memory in the partition
+#endif
    flush,         // Write the cache content to the lower layer driver
    dvr_ioctl,     // ioctl function - Does Nothing for this implementation
    restore,       // Not supported - API support only
@@ -244,31 +253,26 @@ void dataBgoCallback( flash_callback_args_t *p_args )
    if (FLASH_EVENT_NOT_BLANK == p_args->event)
    {
       g_b_flash_event_not_blank = true;
+      OS_SEM_Post_fromISR( &intFlashSem_ );
    }
    else if (FLASH_EVENT_BLANK == p_args->event)
    {
       g_b_flash_event_blank = true;
+      OS_SEM_Post_fromISR( &intFlashSem_ );
    }
    else if (FLASH_EVENT_ERASE_COMPLETE == p_args->event)
    {
       g_b_flash_event_erase_complete = true;
+      OS_SEM_Post_fromISR( &intFlashSem_ );
    }
    else if (FLASH_EVENT_WRITE_COMPLETE == p_args->event)
    {
       g_b_flash_event_write_complete = true;
+      OS_SEM_Post_fromISR( &intFlashSem_ );
    }
    else
    {
       /*No operation */
-   }
-
-   // Post the semaphore from ISR context
-   if ( g_b_flash_event_write_complete || g_b_flash_event_erase_complete )
-   {
-      if ( bIntSemCreated_ == (bool)true )
-      {
-         OS_SEM_Post_fromISR( &intFlashSem_ );
-      }
    }
 }
 #endif
@@ -434,23 +438,14 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
 static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, const lCnt cnt, PartitionData_t const *pParData,
                                 DeviceDriverMem_t const * const *pNextDriver ) /*lint !e715 !e818  Parameters passed in may not be used */
 {
-   returnStatus_t eRetVal = eNV_PGM_MEM_RD_ERROR;
    ASSERT(Cnt <= INTERNAL_FLASH_SIZE); /* Count must be <= the sector size. */
    dvr_shm_lock();
-#if ( MCU_SELECTED == RA6E1 )
-   /* check to see if flash is blank (which will return undefined data and should be considered an error) */
-   flash_result_t blank_check_result;
-   fsp_err_t err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, pParData->PhyStartingAddress + srcOffset, cnt, &blank_check_result);
-   if ((FSP_SUCCESS == err) && (FLASH_RESULT_NOT_BLANK == blank_check_result))
-#endif
-   {
-      (void)memcpy(pDest, (uint8_t *)pParData->PhyStartingAddress + srcOffset, cnt);
-       eRetVal =  eSUCCESS;
-   }
+   (void)memcpy(pDest, (uint8_t *)pParData->PhyStartingAddress + srcOffset, cnt);
    dvr_shm_unlock();
 
-   return (eRetVal);
+   return (eSUCCESS);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+                                
 /***********************************************************************************************************************
 
    Function Name: dvr_write
@@ -607,20 +602,19 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
             destAddrLocal = destAddrLocal + ( eraseBytes - initialBytes );
 
             err = R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );  // Erase 1 Block
-            /* Error Handle */
+#ifndef __BOOTLOADER
+            /* if erase has started, allow other tasks to run while waiting for completion */
             if ( FSP_SUCCESS == err )
             {
-#ifndef __BOOTLOADER
                /* Wait for the erase complete event flag, if BGO is SET  */
                if ( true == g_flash0_cfg.data_flash_bgo )
                {
                   (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                   g_b_flash_event_erase_complete = false;
                }
-#else
-               /* do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
-#endif
             }
+#endif      /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
+      
             /* translate FSP error into an error similar to what would be returned by flashErase */
             retVal = ( FSP_SUCCESS == err ) ? eSUCCESS : eFAILURE;
 
@@ -773,6 +767,72 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
 
    return (eRetVal);
 }
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: blankCheck
+
+   Purpose: Blank check a portion of the current partition of memory.
+
+   Arguments:
+      dSize destOffset - Offset into the partition to blank check
+      lCnt cnt - number of bytes to blank check
+      PartitionData_t const *pParData Points to a partition table entry.  This contains all information to access the
+                               partition to initialize.
+      DeviceDriverMem_t const * const *pNextDriver Points to the next driver's table.
+
+   Returns: As defined by error_codes.h
+
+   Side Effects: None
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr )
+{
+   returnStatus_t eRetVal;
+   fsp_err_t err;
+   flash_result_t blankCheckResult = FLASH_RESULT_NOT_BLANK;
+   lCnt destAddr = destOffset + pParData->PhyStartingAddress; /* Get the actual address in NV. */
+
+   if( destAddr < FLASH_HP_CODEFLASH_END_ADDRESS )
+   {
+      /* check for code flash in erased state (0xFF) (non-BGO operation) */
+      err = R_FLASH_HP_BlankCheck( &g_flash0_ctrl, destAddr, cnt, &blankCheckResult );
+   }
+   else if( ( destAddr >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( destAddr <= FLASH_HP_DATAFLASH_END_ADDRESS ) )
+   {
+      err = R_FLASH_HP_BlankCheck( &g_flash0_ctrl, destAddr, cnt, &blankCheckResult );
+#ifndef __BOOTLOADER
+      if (err == FSP_SUCCESS)
+      {
+         /* Wait for a blank check event flag, if BGO is SET  */
+         if ( true == g_flash0_cfg.data_flash_bgo )
+         {
+            ( void )OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+            if( g_b_flash_event_not_blank )
+            {
+               blankCheckResult = FLASH_RESULT_NOT_BLANK;
+               g_b_flash_event_not_blank = false;
+            }
+            else if (g_b_flash_event_blank)
+            {
+               blankCheckResult = FLASH_RESULT_BLANK;
+               g_b_flash_event_blank = false;
+            }
+         }
+      }
+#endif    /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
+   }
+   /*Note: if R_FLASH_HP_BlankCheck result is not FSP_SUCCESS not successful, default result is NOT_BLANK */
+      
+   /* translate FSP error into an error similar to what would be returned by flashErase */
+   eRetVal = (( FLASH_RESULT_BLANK == blankCheckResult ) && (FSP_SUCCESS == err)) ? eSUCCESS : eFAILURE;
+
+   return (eRetVal);
+}
+#endif
 
 #ifndef __BOOTLOADER
 /***********************************************************************************************************************
@@ -1010,20 +1070,18 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
       {
          blockCount = numBytes / FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE;
          err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
-         /* Error Handle */
+#ifndef __BOOTLOADER
+         /* if erase has started, allow other tasks to run while waiting for completion */
          if ( FSP_SUCCESS == err )
          {
-#ifndef __BOOTLOADER
             /* Wait for the write complete event flag, if BGO is SET  */
             if (true == g_flash0_cfg.data_flash_bgo)
             {
                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                g_b_flash_event_erase_complete = false;
             }
-#else
-            /* do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
-#endif
          }
+#endif   /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
       }
       else
       {
@@ -1132,20 +1190,18 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        if( ( cnt % BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE ) == 0 )
        {
           err = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
-          /* Error Handle */
+#ifndef __BOOTLOADER
+          /* if erase has started, allow other tasks to run while waiting for completion */
           if (FSP_SUCCESS == err)
           {
-#ifndef __BOOTLOADER
              /* Wait for the write complete event flag, if BGO is SET  */
              if ( true == g_flash0_cfg.data_flash_bgo )
              {
                 (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                 g_b_flash_event_write_complete = false;
              }
-#else
-             /* do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
-#endif
           }
+#endif    /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
        }
        else
        {

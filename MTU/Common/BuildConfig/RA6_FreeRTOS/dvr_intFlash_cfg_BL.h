@@ -99,6 +99,9 @@ typedef struct
                                                 signatures. */
    uint8_t           subjectKeyId[ 20 ];     /* sha 1 hash of publicKey; used for MTLS messages.   */
    privateKey        hostPasswordKey;        /* Key used to encrypt/decrypt host password */
+#if ( MCU_SELECTED == RA6E1 )
+   uint16_t          hostPasswordKeyCRC;     /* Used to verify host password key (secROM.hostPasswordKey) on boot up */
+#endif
 }intFlashNvMap_t;
 
 typedef enum

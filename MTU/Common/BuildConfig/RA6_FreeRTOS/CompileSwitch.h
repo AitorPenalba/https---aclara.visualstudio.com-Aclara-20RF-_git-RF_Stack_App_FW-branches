@@ -343,11 +343,15 @@
 //#define TM_ENCRYPT_UNIT_TEST      /* Enable the Encryption Driver Unit Test Code */
 //#define TM_AES_UNIT_TEST          /* Enable the AES Unit Test Code */
 //#define TM_DTLS_UNIT_TEST         /* Enable the DTLS Unit Test Code */
+#define TM_BL_TEST_COMMANDS         /* Enable the Bootloader Test Commands */
 #endif
 /* These are now part of normal build   */
+#ifndef __BOOTLOADER
+//TODO: undefine external flash driver testing for boot
 #define TM_DVR_EXT_FL_UNIT_TEST     /* Enabled - Run unit testing on external flash driver. */
 #define TM_PARTITION_TBL            /* Will validate the partition tables. */
 #define TM_PARTITION_USAGE          /* Enables printing of partition usage */
+#endif  /* NOT BOOTLOADER */
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */

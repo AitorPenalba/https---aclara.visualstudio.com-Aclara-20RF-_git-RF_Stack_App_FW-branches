@@ -33,13 +33,13 @@
 #elif ( RTOS_SELECTION == FREE_RTOS)
 #include "hal_data.h"
 #endif
-#else   /* BOOTLOADER */
+#else   /* __BOOTLOADER */
 #if (MCU_SELECTED == NXP_K24)
 #include <MK24F12.h>
 #elif (MCU_SELECTED == RA6E1)
 #include "hal_data.h"
 #endif
-#endif   /* BOOTLOADER  */
+#endif   /* NOT __BOOTLOADER  */
 #include "sys_clock_BL.h"
 
 // </editor-fold>

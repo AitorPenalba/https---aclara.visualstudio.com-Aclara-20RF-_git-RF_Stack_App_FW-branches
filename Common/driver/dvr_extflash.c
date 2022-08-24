@@ -45,6 +45,7 @@
 #define dvr_eflash_GLOBAL
 #include "dvr_extflash.h"
 #undef  dvr_eflash_GLOBAL
+
 #ifndef __BOOTLOADER
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
@@ -53,14 +54,17 @@
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "hal_data.h"
 #endif
-#else
+#else   /* BOOTLOADER */
 #include <string.h>
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 #include <MK66F18.h>
-#else
+#elif (MCU_SELECTED == NXP_K24)
 #include <MK24F12.h>
+#elif (MCU_SELECTED == RA6E1)
+#include "hal_data.h"
 #endif
-#endif
+#endif  /* NOT BOOTLOADER */
+
 #include "partitions.h"
 #include "spi_mstr.h"
 #include "invert_bits.h"
@@ -236,22 +240,23 @@ PACK_END
 /* FUNCTION PROTOTYPES */
 
 /* Functions accessed via a table entry (indirect call) */
+static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNextDvr );
+static returnStatus_t close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cnt, PartitionData_t const *pParData,
                                 DeviceDriverMem_t const * const * pNextDvr );
-static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
+                                 DeviceDriverMem_t const * const * pNxtDvr );
+#endif
+
 #ifndef __BOOTLOADER
-static returnStatus_t close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData,
                                DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pParData,
                                  DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *pPartitionData,
                              DeviceDriverMem_t const * const * pNextDvr );
-#if ( MCU_SELECTED == RA6E1 )
-static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
-                                 DeviceDriverMem_t const * const * pNxtDvr );
-#endif
 static returnStatus_t flush( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionData,
                                  DeviceDriverMem_t const * const * pNextDvr );
@@ -276,8 +281,7 @@ static void           enableWrites( uint8_t port );
 #if ( MCU_SELECTED == NXP_K24 )
 static void           isr_busy( void );
 static void           isr_tmr( void );
-#endif
-#if ( MCU_SELECTED == RA6E1 )
+#elif ( MCU_SELECTED == RA6E1 )
 static fsp_err_t      MisoBusy_isr_init( void );
 #endif
 #endif
@@ -321,7 +325,7 @@ static const DeviceId_t sDeviceId[] =
    {    10000,     10000,      10000,    7,       5000,         1,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */                    /* Not qualified */
 #endif
 };
-#endif
+#endif  /* NOT BOOTLOADER */
 
 /* The driver table must be defined after the function definitions. The list below are the supported commands for this
    driver. */
@@ -329,17 +333,20 @@ static const DeviceId_t sDeviceId[] =
 DeviceDriverMem_t sDeviceDriver_eFlash =
 {
 #ifdef __BOOTLOADER
-   init,       // Init function - Empty function for BOOTLOADER
-   dvr_open,   // Open Command - For this implementation it only calls the lower level drivers.
-   NULL,       // Close Command - For this implementation it only calls the lower level drivers.
-   NULL,       // Sets the power mode of the lower drivers (the app may set to low power mode when power is lost
-   dvr_read,   // Read Command
-   NULL,       // Write Command
-   NULL,       // Erases a portion (or all) of the banked memory.
-   NULL,       // Write the cache content to the lower layer driver
-   NULL,       // ioctl function - Does Nothing for this implementation
-   NULL,       // Not supported - API support only
-   NULL        // Not supported - API support only
+   .devInit       = init,        // Init function - Empty function for BOOTLOADER
+   .devOpen       = dvr_open,    // Open Command - For this implementation it only calls the lower level drivers.
+   .devClose      = close,       // Close Command - For this implementation it only calls the lower level drivers.
+   .devSetPwrMode = NULL,        // Power Mode - not required by bootloader
+   .devRead       = dvr_read,    // Read Command
+   .devWrite      = NULL,        // Write - not required by bootloader
+   .devErase      = NULL,        // Erase - not required by bootloader
+#if ( MCU_SELECTED == RA6E1 )
+   .devBlankCheck = blankCheck,  // Blank check - not required by bootloader
+#endif
+   .devFlush      = NULL,        // Flush - not required by bootloader
+   .devIoctl      = NULL,        // ioctl function - Does Nothing for this implementation
+   .devRestore    = NULL,        // Not supported - API support only
+   .devTimeSlice  = NULL         // Not supported - API support only
 #else
    init,       // Init function - Creates mutex & calls lower drivers
    dvr_open,   // Open Command - For this implementation it only calls the lower level drivers.
@@ -355,7 +362,7 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
    dvr_ioctl,  // ioctl function - Does Nothing for this implementation
    restore,    // Not supported - API support only
    timeSlice   // Not supported - API support only
-#endif
+#endif   /* NOT BOOTLOADER */
 };
 
 #if ( MCU_SELECTED == NXP_K24 )
@@ -530,7 +537,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
 #elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
       eRetVal = NV_SPI_PORT_OPEN( pDevice->port, &_NV_spiCfg, SPI_MASTER );
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -564,6 +571,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
                   erroneous read of JEDEC ID. */
                eRetVal = busyCheck( pDevice, 1000 );
             } while ( eRetVal != eSUCCESS );
+
 #ifndef __BOOTLOADER
             {
                /* Clear the "current level of block write protection" bits, bits 2-5 and 7.  This allows us to write to
@@ -620,8 +628,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
                OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
             }
-
-#endif
+#endif  /* NOT BOOTLOADER */
          }
       }
       dvr_shm_unlock(); /* End critical section */
@@ -648,7 +655,6 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
    Reentrant Code: No
 
  **********************************************************************************************************************/
-#ifndef __BOOTLOADER
 /*lint -efunc( 715, close ) : pNextDvr is not used.  It is a part of the common API. */
 /*lint -efunc( 818, close ) : pNextDvr is declared correctly.  It is a part of the common API. */
 static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNextDvr )
@@ -665,12 +671,14 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
       NV_SPI_PORT_CLOSE( &g_qspi0_ctrl );
 #endif
 
+#ifndef __BOOTLOADER
       HOLD_PIN_GPIO();
       WRITE_PROTECT_PIN_GPIO();
+#endif
    }
    return ( eSUCCESS );
 }
-#endif
+
 /***********************************************************************************************************************
 
    Function Name: pwrMode
@@ -703,7 +711,7 @@ static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const 
 #endif
    return ( eSUCCESS );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: dvr_write
@@ -786,7 +794,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt
    }
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: dvr_read
@@ -818,13 +826,9 @@ static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, const lCn
    ASSERT( Cnt <= EXT_FLASH_SECTOR_SIZE ); /* Count must be <= the sector size. */
    if ( Cnt )
    {
-#if RTOS == 1
       dvr_shm_lock(); /* Take mutex, critical section */
-#endif
       eRetVal = localRead( pDest, pParData->PhyStartingAddress + srcOffset, Cnt, pParData->pDriverCfg );
-#if RTOS == 1
       dvr_shm_unlock(); /* End critical section */
-#endif
    }
    return ( eRetVal );
 }
@@ -884,10 +888,8 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
    {
       eRetVal = eSUCCESS; /* Assume Seccess - Also checked in while loop below. */
 
-#if RTOS == 1
       /* Take mutex, critical section */
       dvr_shm_lock();
-#endif
 
       while ( Cnt && ( eSUCCESS == eRetVal ) )
       {
@@ -947,13 +949,12 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
          phDestOffset += nBytesOperatedOn;
          Cnt -= nBytesOperatedOn;
       }
-#if RTOS == 1
+
       dvr_shm_unlock(); /* End critical section */
-#endif
    }
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 
 #if ( MCU_SELECTED == RA6E1 )
 /***********************************************************************************************************************
@@ -978,6 +979,7 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
  **********************************************************************************************************************/
 static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr )
 {
+   //TODO: should this check to see if all bytes are 0xFF (erased state)?	
    return (eSUCCESS);
 }
 #endif
@@ -1007,7 +1009,7 @@ static returnStatus_t flush( PartitionData_t const *pPartitionData, DeviceDriver
 {
    return ( eSUCCESS );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: dvr_ioctl
@@ -1046,7 +1048,7 @@ static returnStatus_t dvr_ioctl( const void *pCmd, void *pData, PartitionData_t 
 #endif
    return ( retVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: localErase
@@ -1147,7 +1149,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
 #endif
    return ( eRetVal );  /*lint !e438 last value of retries not used  */
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: busyCheck
@@ -1289,7 +1291,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #endif
    }
    else
-#endif   /* BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
    {
       uint8_t nvStatus;                                       /* Contains the Flash nvStatus. */
       uint8_t instr = FL_INSTR_READ_STATUS_REG;               /* Instruction to send to the flash device. */
@@ -1317,7 +1319,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       /* Calculate sleep time to be 20 percent of busy time, we don't want to sleep entire busyTime */
       OS_TICK_Struct TickTime;
       uint32_t sleepTime = u32BusyTime_uS / ( uint32_t )( 1000 * 5 );
-#endif   /* BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
 
       do /* Spin here until the chip returns a nvStatus of NOT busy. */
       {
@@ -1335,7 +1337,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
          OS_TICK_Sleep ( &TickTime, sleepTime );
 
          OS_TICK_Get_CurrentElapsedTicks(&endTime); /* update endtime to the latest ticktime */
-#endif   /* BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
 #if ( MCU_SELECTED == NXP_K24 )
          (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus) ); /* check nvStatus for busy */
 #elif ( MCU_SELECTED == RA6E1 )
@@ -1358,7 +1360,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
    }
 #ifndef __BOOTLOADER
    busyTime_uS_ = 0;
-#endif   //end of #ifndef __BOOTLOADER
+#endif   /* NOT BOOTLOADER  */
    return ( retVal );
 }
 /***********************************************************************************************************************
@@ -1459,7 +1461,7 @@ static returnStatus_t localWrite( dSize nDest, uint8_t const *pSrc, lCnt Cnt, bo
    }
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: localWriteBytesToSPI
@@ -1659,7 +1661,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
    disableWrites( pDevice->port ); /* Disable writes. */
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: setBusyTimer
@@ -1712,7 +1714,7 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    (void) R_AGT_Start(&AGT0_ExtFlashBusy_ctrl);
 }
 #endif  // #if ( MCU_SELECTED == NXP_K24 )
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: enableWrites
@@ -1756,7 +1758,7 @@ static void enableWrites( uint8_t port )
 #endif
    bWrEnabled_ = 1;
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: disableWrites
@@ -2012,7 +2014,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: restore
@@ -2039,7 +2041,7 @@ static returnStatus_t restore( lAddr lDest, lCnt cnt, PartitionData_t const *pPa
    /*lint -efunc( 818, restore ) : Parameters are not used.  It is a part of the common API. */
    return ( eSUCCESS );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: timeSlice
@@ -2063,7 +2065,7 @@ static bool timeSlice( PartitionData_t const *pParData, DeviceDriverMem_t const 
 {
    return( false );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: isr_busy
@@ -2099,7 +2101,7 @@ void isr_busy( external_irq_callback_args_t * p_args )
    bBusyIsr_ = true;
 #endif
 }
-#endif   /* BOOTLOADER  */
+#endif  /* NOT BOOTLOADER */
 
 #ifndef __BOOTLOADER
 #if ( MCU_SELECTED == RA6E1 )
@@ -2126,8 +2128,9 @@ static fsp_err_t MisoBusy_isr_init( void )
    return err;
 }
 #endif   /* MCU_SELECTED == RA6E1 */
-#endif   /* BOOTLOADER  */
+#endif  /* NOT BOOTLOADER */
 
+#ifndef __BOOTLOADER
 #if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
 
@@ -2144,7 +2147,6 @@ static fsp_err_t MisoBusy_isr_init( void )
    Reentrant Code: No
 
  **********************************************************************************************************************/
-#ifndef __BOOTLOADER
 static void isr_tmr( void )
 {
    EXT_FLASH_TIMER_DIS();
@@ -2153,7 +2155,6 @@ static void isr_tmr( void )
 #endif
    LPTMR0_CSR &= ~( LPTMR_CSR_TEN_MASK | LPTMR_CSR_TIE_MASK );
 }
-#endif
 #elif ( MCU_SELECTED == RA6E1 )
 /***********************************************************************************************************************
 
@@ -2178,6 +2179,8 @@ void AGT0_ExtFlashBusy_Callback (timer_callback_args_t * p_args)
    }
 }
 #endif
+#endif  /* NOT BOOTLOADER */
+
 /* ****************************************************************************************************************** */
 /* Unit Test Code */
 
@@ -2290,4 +2293,4 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
    return failCount;
 }
 #endif
-#endif
+#endif  /* NOT BOOTLOADER */

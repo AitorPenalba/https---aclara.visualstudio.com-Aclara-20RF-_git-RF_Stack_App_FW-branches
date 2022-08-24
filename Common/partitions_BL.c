@@ -87,6 +87,9 @@ static returnStatus_t close( PartitionData_t const *pPartitionTbl );
 static returnStatus_t read( uint8_t *pDest, const dSize dSrc, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t write( const dSize dDest, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t erase( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t blankCheck( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
+#endif
 static returnStatus_t size(const ePartitionName ePName, lCnt *pPartitionSize);
 #ifndef __BOOTLOADER
 static returnStatus_t pwrMode( const ePowerMode powerMode );
@@ -101,24 +104,26 @@ static void           flushPartitions_CB(uint8_t cmd, void *pData);
 #endif
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
-
 /* The following are the access functions for the partition module. */
 #ifndef TM_FILE_IO_UNIT_TEST
 const PartitionTbl_t PAR_partitionFptr =
 {
 #ifdef __BOOTLOADER
-   init,       /* Initialize each partition in the partition list */
-   open,       /* Opens each partition in the partition list*/
-   close,      /* Closes the desired partition */
-   NULL,       /* Sets the power mode in the drivers.  Used for system power down and normal run modes. */
-   read,       /* Reads data from the desired partition */
-   write,      /* writes data from the desired partition */
-   erase,      /* erases an entire partition */
-   NULL,       /* flush - not needed for bootloader */
-   NULL,       /* Restore - not needed for bootloader */
-   NULL,       /* IOCTL - not needed for bootloader */
-   size,       /* returns the size of the partition requested. */
-   NULL        /* Time Slice  - not needed for bootloader */
+   .parInit       = init,        /* Initialize each partition in the partition list */
+   .parOpen       = open,        /* Opens each partition in the partition list*/
+   .parClose      = close,       /* Closes the desired partition */
+   .parMode       = NULL,        /* Sets the power mode in the drivers.  Used for system power down and normal run modes. */
+   .parRead       = read,        /* Reads data from the desired partition */
+   .parWrite      = write,       /* writes data from the desired partition */
+   .parErase      = erase,       /* erases an entire partition */
+#if ( MCU_SELECTED == RA6E1 )
+   .parBlankCheck = blankCheck,  /* blank check the partition address */
+#endif
+   .parFlush      = NULL,        /* flush - not needed for bootloader */
+   .parRestore    = NULL,        /* Restore - not needed for bootloader */
+   .parIoctl      = NULL,        /* IOCTL - not needed for bootloader */
+   .parSize       = size,        /* returns the size of the partition requested. */
+   .parTimeSlice  = NULL         /* Time Slice  - not needed for bootloader */
 #else
    init,       /* Initialize each partition in the partition list */
    open,       /* Opens each partition in the partition list*/
@@ -127,6 +132,9 @@ const PartitionTbl_t PAR_partitionFptr =
    read,       /* Reads data from the desired partition */
    write,      /* writes data from the desired partition */
    erase,      /* erases an entire partition */
+#if ( MCU_SELECTED == RA6E1 )
+   blankCheck, /* blank check the partition address */
+#endif
    flush,      /* flushes the desired partition */
    restore,    /* Restores the desired partition */
    ioctl,      /* IOCTL commands to send to a partition */
@@ -202,7 +210,7 @@ returnStatus_t PAR_init( void )
 }  /*lint !e715 !e818  pvParameters is not used */
 #endif
 
-#if 0 //TODO: no references - REMOVE?
+#if RTOS == 1
 /***********************************************************************************************************************
 
    Function Name: PAR_initRtos
@@ -233,7 +241,7 @@ returnStatus_t PAR_initRtos( void )
    }
    return (retVal);
 }
-#endif   /* NOT BOOTLOADER   */
+#endif
 
 /***********************************************************************************************************************
 
@@ -625,6 +633,36 @@ static returnStatus_t erase( lAddr lDest, lCnt cnt, PartitionData_t const *pPTbl
    }
    return (eRetVal);
 }
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: blankCheck
+
+   Purpose: Blank check the memory in a partition.
+
+   Arguments:
+      lAddr lDest: Start offset of the bytes to blank check in the partition.
+      lCnt Cnt:    Number of bytes to blank check
+      *pPTbl:      Points to entry in the partition table for driver/partition information.
+
+   Returns: returnStatus_t - defined by error_codes.h
+
+   Side Effects: N/A
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t blankCheck( lAddr lDest, lCnt cnt, PartitionData_t const *pPTbl )
+{
+   returnStatus_t eRetVal = eFAILURE;
+   if ( ( PartitionData_t const * )NULL != pPTbl )
+   {
+      eRetVal = (*pPTbl->pDriverTbl)->devBlankCheck(lDest, cnt, pPTbl, pPTbl->pDriverTbl + 1);
+   }
+   return (eRetVal);
+}
+#endif
 
 #ifndef __BOOTLOADER
 /***********************************************************************************************************************
@@ -1085,7 +1123,7 @@ returnStatus_t PAR_ValidatePartitionTable( void )
          }
       }
       CLRWDT();
-      DBG_printf( "%3u,%17s,%7s,%7s,%9s,%11s, %14s, 0x%06lX, 0x%06lX, 0x%06lX, %10lu,%6s, %-15s",
+      DBG_printf( "%3u,%17s,%7s,%7s,%9s,%11s, %14s, 0x%07lX, 0x%07lX, 0x%06lX, %10lu,%6s, %-15s",
                   (uint32_t)pEntryUnderTest->ePartition,
                   pEntryUnderTest->PartitionType.pPartType,
                   pCached,

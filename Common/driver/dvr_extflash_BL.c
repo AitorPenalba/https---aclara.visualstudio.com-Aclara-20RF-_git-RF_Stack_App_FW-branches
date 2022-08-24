@@ -240,12 +240,17 @@ PACK_END
 /* FUNCTION PROTOTYPES */
 
 /* Functions accessed via a table entry (indirect call) */
+static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNextDvr );
+static returnStatus_t close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cnt, PartitionData_t const *pParData,
                                 DeviceDriverMem_t const * const * pNextDvr );
-static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
+                                 DeviceDriverMem_t const * const * pNxtDvr );
+#endif
+
 #ifndef __BOOTLOADER
-static returnStatus_t close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData,
                                DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pParData,
@@ -297,27 +302,27 @@ static const DeviceId_t sDeviceId[] =
    /* Erase uS       uS        uS       uS        uS         WR       ID     Type    ID   Busy        */
 #if 0
    /* Disallow a "default" configuration. Require a device ID that is recognizable.                         */
-   {  8000000,   3000000,     200000,   12,       5000,         1,    0x00,  0x00,  0x00,   0,    0 },  /* Default */
+   {  8000000,   3000000,     200000,   12,       5000,         1,    0x00,  0x00,  0x00,   0,    0 },                                /* Not qualified */
 #endif
-   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */
-   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */
-   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x41,   0,    0 },  /* SST 16Mb 26VF016B */
-   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x42,   0,    0 },  /* SST 32Mb 26VF032B */
-   { 15000000,   1000000,     300000,   25,       1000,       256,    0x9D,  0x40,  0x15,   0,    0 },  /* ISSI 16Mb 25LQ080B */
-   { 25000000,   3000000,     300000,  100,       2500,       256,    0x1F,  0x86,  0x01,   0,    0 },  /* Adesto 16Mb AT25SF161 */
-   { 25000000,   2000000,     400000,  100,       3000,       256,    0xEF,  0x40,  0x15,   0,    0 },  /* Windbond 16Mb W25Q16JV */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */                 /* Not qualified */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */       /* Default */
+   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x41,   0,    0 },  /* SST 16Mb 26VF016B */       /* Not qualified */
+   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x42,   0,    0 },  /* SST 32Mb 26VF032B */       /* Not qualified */
+   { 15000000,   1000000,     300000,   25,       1000,       256,    0x9D,  0x40,  0x15,   0,    0 },  /* ISSI 16Mb 25LQ080B */      /* Not qualified */
+   { 25000000,   3000000,     300000,  100,       2500,       256,    0x1F,  0x86,  0x01,   0,    0 },  /* Adesto 16Mb AT25SF161 */   /* Not qualified */
+   { 25000000,   2000000,     400000,  100,       3000,       256,    0xEF,  0x40,  0x15,   0,    0 },  /* Windbond 16Mb W25Q16JV */  /* Not qualified */
 #if 0
    /* Temporarily removed. If this JEDEC id is returned (errantly) with the SST device installed, writes fail. Found
       that even reducing the Max Bytes WR to 1 still resulted in failed writes. */
-   { 80000000,   3000000,     150000, 5000,       5000,       256,    0x20,  0x00,  0x00,   0,    0 },  /* Numonyx */
+   { 80000000,   3000000,     150000, 5000,       5000,       256,    0x20,  0x00,  0x00,   0,    0 },  /* Numonyx */                 /* Not qualified */
 #endif
-   {  8000000,    950000,     200000,    7,       3000,         1,    0x1F,  0x00,  0x00,   0,    0 },  /* Atmel */
+   {  8000000,    950000,     200000,    7,       3000,         1,    0x1F,  0x00,  0x00,   0,    0 },  /* Atmel */                   /* Not qualified */
 #if 0
-   {    10000,     10000,      10000,    7,       5000,       256,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */
+   {    10000,     10000,      10000,    7,       5000,       256,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */                    /* Not qualified */
 #else
    /* Temporarily modify the Max Bytes WR so that if this JEDED id is returned (errantly) with the SST device installed,
       writes still pass.   */
-   {    10000,     10000,      10000,    7,       5000,         1,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */
+   {    10000,     10000,      10000,    7,       5000,         1,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */                    /* Not qualified */
 #endif
 };
 #endif  /* NOT BOOTLOADER */
@@ -328,17 +333,20 @@ static const DeviceId_t sDeviceId[] =
 DeviceDriverMem_t sDeviceDriver_eFlash =
 {
 #ifdef __BOOTLOADER
-   init,       // Init function - Empty function for BOOTLOADER
-   dvr_open,   // Open Command - For this implementation it only calls the lower level drivers.
-   NULL,       // Close Command - For this implementation it only calls the lower level drivers.
-   NULL,       // Sets the power mode of the lower drivers (the app may set to low power mode when power is lost
-   dvr_read,   // Read Command
-   NULL,       // Write Command
-   NULL,       // Erases a portion (or all) of the banked memory.
-   NULL,       // Write the cache content to the lower layer driver
-   NULL,       // ioctl function - Does Nothing for this implementation
-   NULL,       // Not supported - API support only
-   NULL        // Not supported - API support only
+   .devInit       = init,        // Init function - Empty function for BOOTLOADER
+   .devOpen       = dvr_open,    // Open Command - For this implementation it only calls the lower level drivers.
+   .devClose      = close,       // Close Command - For this implementation it only calls the lower level drivers.
+   .devSetPwrMode = NULL,        // Power Mode - not required by bootloader
+   .devRead       = dvr_read,    // Read Command
+   .devWrite      = NULL,        // Write - not required by bootloader
+   .devErase      = NULL,        // Erase - not required by bootloader
+#if ( MCU_SELECTED == RA6E1 )
+   .devBlankCheck = blankCheck,  // Blank check - not required by bootloader
+#endif
+   .devFlush      = NULL,        // Flush - not required by bootloader
+   .devIoctl      = NULL,        // ioctl function - Does Nothing for this implementation
+   .devRestore    = NULL,        // Not supported - API support only
+   .devTimeSlice  = NULL         // Not supported - API support only
 #else
    init,       // Init function - Creates mutex & calls lower drivers
    dvr_open,   // Open Command - For this implementation it only calls the lower level drivers.
@@ -347,6 +355,9 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
    dvr_read,   // Read Command
    dvr_write,  // Write Command
    erase,      // Erases a portion (or all) of the banked memory.
+#if ( MCU_SELECTED == RA6E1 )
+   blankCheck, // Blank check a memory in the partition
+#endif
    flush,      // Write the cache content to the lower layer driver
    dvr_ioctl,  // ioctl function - Does Nothing for this implementation
    restore,    // Not supported - API support only
@@ -644,7 +655,6 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
    Reentrant Code: No
 
  **********************************************************************************************************************/
-#ifndef __BOOTLOADER
 /*lint -efunc( 715, close ) : pNextDvr is not used.  It is a part of the common API. */
 /*lint -efunc( 818, close ) : pNextDvr is declared correctly.  It is a part of the common API. */
 static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNextDvr )
@@ -661,12 +671,14 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
       NV_SPI_PORT_CLOSE( &g_qspi0_ctrl );
 #endif
 
+#ifndef __BOOTLOADER
       HOLD_PIN_GPIO();
       WRITE_PROTECT_PIN_GPIO();
+#endif
    }
    return ( eSUCCESS );
 }
-#endif  /* NOT BOOTLOADER */
+
 /***********************************************************************************************************************
 
    Function Name: pwrMode
@@ -814,13 +826,9 @@ static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, const lCn
    ASSERT( Cnt <= EXT_FLASH_SECTOR_SIZE ); /* Count must be <= the sector size. */
    if ( Cnt )
    {
-#if RTOS == 1
       dvr_shm_lock(); /* Take mutex, critical section */
-#endif
       eRetVal = localRead( pDest, pParData->PhyStartingAddress + srcOffset, Cnt, pParData->pDriverCfg );
-#if RTOS == 1
       dvr_shm_unlock(); /* End critical section */
-#endif
    }
    return ( eRetVal );
 }
@@ -880,10 +888,8 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
    {
       eRetVal = eSUCCESS; /* Assume Seccess - Also checked in while loop below. */
 
-#if RTOS == 1
       /* Take mutex, critical section */
       dvr_shm_lock();
-#endif
 
       while ( Cnt && ( eSUCCESS == eRetVal ) )
       {
@@ -943,13 +949,41 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
          phDestOffset += nBytesOperatedOn;
          Cnt -= nBytesOperatedOn;
       }
-#if RTOS == 1
+
       dvr_shm_unlock(); /* End critical section */
-#endif
    }
    return ( eRetVal );
 }
 #endif  /* NOT BOOTLOADER */
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: blankCheck
+
+   Purpose: Blank check a portion of the current partition of memory.
+
+   Arguments:
+      dSize destOffset - Offset into the partition to blank check
+      lCnt cnt - number of bytes to blank check
+      PartitionData_t const *pParData Points to a partition table entry.  This contains all information to access the
+                               partition to initialize.
+      DeviceDriverMem_t const * const *pNextDriver Points to the next driver's table.
+
+   Returns: As defined by error_codes.h
+
+   Side Effects: None
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr )
+{
+   //TODO: should this check to see if all bytes are 0xFF (erased state)?	
+   return (eSUCCESS);
+}
+#endif
+
 /***********************************************************************************************************************
 
    Function Name: flush
@@ -1647,7 +1681,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 static void setBusyTimer( uint32_t busyTimer_uS )
 {
    busyTime_uS_ = busyTimer_uS;
-#if 0 // TODO: RA6E1: Melvin: revisit with a OS Timer
+#if ( MCU_SELECTED == NXP_K24 ) // TODO: RA6E1: Melvin: revisit with a OS Timer
    EXT_FLASH_TIMER_DIS();
    EXT_FLASH_TIMER_COMPARE = busyTimer_uS / 1000;  /* 1mS timer, so convert to mS */
    EXT_FLASH_TIMER_RST();               /* Reset the timer */
@@ -1655,7 +1689,8 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
    EXT_FLASH_TIMER_EN();                /* Enable Interrupt & Start the timer. */
-#endif  // if 0
+
+#elif ( MCU_SELECTED == RA6E1 )
 
 #if USE_POWER_MODE  // TODO: RA6E1: Remove if the above TODO is resolved
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
@@ -1663,17 +1698,22 @@ static void setBusyTimer( uint32_t busyTimer_uS )
 
    timer_info_t   info;
    uint32_t       timer_freq_hz;
-
+   uint32_t       period_counts = 0;
    (void) R_AGT_InfoGet(&AGT0_ExtFlashBusy_ctrl, &info);
 
    timer_freq_hz = info.clock_frequency;
-   uint32_t period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000);
+   period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000); // TODO: RA6E1: This calculation overflows
+   if( period_counts >= UINT16_MAX )
+   {
+      period_counts = UINT16_MAX - 1;  /* period count cannot be more than or equal to UINT16_MAX */
+   }
 
    R_AGT_PeriodSet( &AGT0_ExtFlashBusy_ctrl, period_counts );
 
    /* Start the timer. */
    (void) R_AGT_Start(&AGT0_ExtFlashBusy_ctrl);
 }
+#endif  // #if ( MCU_SELECTED == NXP_K24 )
 #endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
@@ -2118,11 +2158,11 @@ static void isr_tmr( void )
 #elif ( MCU_SELECTED == RA6E1 )
 /***********************************************************************************************************************
 
-   Function Name: g_timer0_callback
+   Function Name: AGT0_ExtFlashBusy_Callback
 
    Purpose: Timer ISR callback for AGT timer 0
 
-   Arguments:  None
+   Arguments:  timer_callback_args_t *
 
    Returns: None
 
@@ -2131,7 +2171,7 @@ static void isr_tmr( void )
    Reentrant Code: No
 
  **********************************************************************************************************************/
-void g_timer0_callback (timer_callback_args_t * p_args)
+void AGT0_ExtFlashBusy_Callback (timer_callback_args_t * p_args)
 {
     if (TIMER_EVENT_CYCLE_END == p_args->event)
     {
@@ -2140,6 +2180,7 @@ void g_timer0_callback (timer_callback_args_t * p_args)
 }
 #endif
 #endif  /* NOT BOOTLOADER */
+
 /* ****************************************************************************************************************** */
 /* Unit Test Code */
 
@@ -2184,11 +2225,8 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
    PartitionData_t const * partitionData;    /* Pointer to partition information   */
    uint8_t                 startPattern;
 
-#if 0 //TODO Melvin: random number generator to be implemented
    startPattern = ( uint8_t )aclara_rand();
-#else
-   startPattern = 0x00;
-#endif
+
    /* Find the NV test partition - don't care about update rate   */
    retVal = PAR_partitionFptr.parOpen( &partitionData, ePART_NV_TEST, 0xffffffff );
    if ( eSUCCESS == retVal )

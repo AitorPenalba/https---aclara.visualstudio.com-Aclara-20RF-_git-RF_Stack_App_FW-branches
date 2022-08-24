@@ -39,19 +39,21 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
-#endif
-#include "DBG_SerialDebug.h"
-#else
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
-#include <MK66F18.h>
-#else
-#include <MK24F12.h>
-#endif
-#include <string.h>
-#endif   /* BOOTLOADER  */
-#if ( MCU_SELECTED == RA6E1 )
+#elif ( RTOS_SELECTION == FREE_RTOS)
 #include "hal_data.h"
 #endif
+#include "DBG_SerialDebug.h"
+#else   /* BOOTLOADER */
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
+#include <MK66F18.h>
+#elif (MCU_SELECTED == NXP_K24)
+#include <MK24F12.h>
+#elif (MCU_SELECTED == RA6E1)
+#include "hal_data.h"
+#endif
+#include <string.h>
+#endif  /* NOT BOOTLOADER  */
+
 #include "IF_intFlash.h"
 #include "partition_cfg.h"
 #include "dvr_sharedMem.h"
@@ -119,22 +121,24 @@ typedef enum
 /* GLOBAL FUNCTION PROTOTYPES - Accessed via a table */
 
 /* START - Functions accessed via a table entry (indirect call) */
+static returnStatus_t   init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDvr );
+static returnStatus_t   close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cnt, PartitionData_t const *pParData,
                                  DeviceDriverMem_t const * const *pNextDvr );
-static returnStatus_t   init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
-static returnStatus_t   close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
-static returnStatus_t   setPowerMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pParData,
                                     DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   erase( dSize destOffset, lCnt Cnt, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 #if ( MCU_SELECTED == RA6E1 )
 static returnStatus_t   blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr );
 #endif
+#ifndef __BOOTLOADER
+static returnStatus_t   setPowerMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   flush( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   restore( lAddr lDest, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver );
 static bool             timeSlice(PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver);
+#endif   /* NOT BOOTLOADER */
 /* END - Functions accessed via a table entry (indirect call) */
 
 /* ****************************************************************************************************************** */
@@ -168,6 +172,22 @@ static returnStatus_t   flashSwap( eFS_command_t cmd, flashSwapStatus_t *pStatus
  * driver. */
 const DeviceDriverMem_t IF_deviceDriver =
 {
+#ifdef __BOOTLOADER
+   .devInit       = init,           // Init function - Creates mutex & calls lower drivers
+   .devOpen       = dvr_open,       // Open Command - For this implementation it only calls the lower level drivers.
+   .devClose      = close,          // Close Command - For this implementation it only calls the lower level drivers.
+   .devSetPwrMode = NULL,           // SetPowerMode - not used in bootloader
+   .devRead       = dvr_read,       // Read Command
+   .devWrite      = dvr_write,      // Write Command
+   .devErase      = erase,          // Erases a portion (or all) of the banked memory.
+#if ( MCU_SELECTED == RA6E1 )
+   .devBlankCheck = blankCheck,     // Blank check memory in the partition
+#endif
+   .devFlush      = NULL,           // Flush - not used in bootloader
+   .devIoctl      = NULL,           // ioctl - not used in bootloader
+   .devRestore    = NULL,           // Restore - not used in bootloader
+   .devTimeSlice  = NULL            // Timeslice - not used in bootloader
+#else
    init,          // Init function - Creates mutex & calls lower drivers
    dvr_open,      // Open Command - For this implementation it only calls the lower level drivers.
    close,         // Close Command - For this implementation it only calls the lower level drivers.
@@ -182,6 +202,7 @@ const DeviceDriverMem_t IF_deviceDriver =
    dvr_ioctl,     // ioctl function - Does Nothing for this implementation
    restore,       // Not supported - API support only
    timeSlice      // Not supported - API support only
+#endif
 };
 
 /* ****************************************************************************************************************** */
@@ -207,14 +228,16 @@ uint8_t localVar[FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE]; // TODO: RA6E1 Currentl
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
-#if ( MCU_SELECTED == RA6E1 )
+/* dataflash BGO is configured in the FSP for RA6E1 application only */
+#if ( MCU_SELECTED == RA6E1 ) && (!defined(__BOOTLOADER))
 /***********************************************************************************************************************
 
    Function Name: dataBgoCallback
 
    Purpose: Callback mentioning the flash status - write complete, erase complete, event blank and not blank
 
-   Arguments: flash_callback_args_t *p_args - Mentions the event that happened p_args->event
+   Arguments:
+      flash_callback_args_t *p_args - Mentions the event that happened p_args->event
 
    Returns: Nothing
 
@@ -339,17 +362,17 @@ static returnStatus_t init( PartitionData_t const *pParData, DeviceDriverMem_t c
 static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver ) /*lint !e715 !e818  Parameters passed in may not be used */
 {
 #if ( MCU_SELECTED == RA6E1 )
-   fsp_err_t retVal = FSP_SUCCESS;
+   fsp_err_t err = FSP_SUCCESS;
    if( !bInternalFlashOpened )
    {
-      retVal = R_FLASH_HP_Open( &g_flash0_ctrl, &g_flash0_cfg );
-      if( FSP_SUCCESS == retVal )
+      err = R_FLASH_HP_Open( &g_flash0_ctrl, &g_flash0_cfg );
+      if( FSP_SUCCESS == err )
       {
          bInternalFlashOpened = true;
       }
    }
 
-   return (returnStatus_t)retVal;
+   return (FSP_SUCCESS == err) ? eSUCCESS : eFAILURE;
 #else
    return (eSUCCESS);
 #endif
@@ -376,17 +399,17 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
 static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDriver ) /*lint !e715 !e818  Parameters passed in may not be used */
 {
 #if ( MCU_SELECTED == RA6E1 )
-   fsp_err_t retVal = FSP_SUCCESS;
+   fsp_err_t err = FSP_SUCCESS;
    if( bInternalFlashOpened )
    {
-      retVal = R_FLASH_HP_Close(&g_flash0_ctrl);
-      if( FSP_SUCCESS == retVal )
+      err = R_FLASH_HP_Close(&g_flash0_ctrl);
+      if( FSP_SUCCESS == err )
       {
          bInternalFlashOpened = false;
       }
    }
 
-   return (returnStatus_t) retVal;
+   return (FSP_SUCCESS == err) ? eSUCCESS : eFAILURE;
 #else
    return (eSUCCESS);
 #endif
@@ -422,6 +445,7 @@ static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, const lCn
 
    return (eSUCCESS);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+                                
 /***********************************************************************************************************************
 
    Function Name: dvr_write
@@ -519,6 +543,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
    }
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
+   fsp_err_t err = FSP_ERR_INVALID_ARGUMENT;
    uint32_t startAddr, eraseBytes, destAddrLocal;
    uint32_t initialBytes = 0, finalBytes = 0;
    if ( 0 != memcmp( ( uint8_t * ) destAddr, pSrc, cnt ) ) /* Does flash need to be updated? */
@@ -576,13 +601,22 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
 
             destAddrLocal = destAddrLocal + ( eraseBytes - initialBytes );
 
-            retVal = ( returnStatus_t ) R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );  // Erase 1 Block
+            err = R_FLASH_HP_Erase( &g_flash0_ctrl, startAddr, 1 );  // Erase 1 Block
+#ifndef __BOOTLOADER
+            /* if erase has started, allow other tasks to run while waiting for completion */
+            if ( FSP_SUCCESS == err )
+            {
              /* Wait for the erase complete event flag, if BGO is SET  */
              if ( true == g_flash0_cfg.data_flash_bgo )
              {
                 (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
                 g_b_flash_event_erase_complete = false;
              }
+            }
+#endif      /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
+      
+            /* translate FSP error into an error similar to what would be returned by flashErase */
+            retVal = ( FSP_SUCCESS == err ) ? eSUCCESS : eFAILURE;
 
             if ( eSUCCESS == retVal )
             {
@@ -603,6 +637,8 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
 
    return(retVal);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: flush
@@ -625,6 +661,8 @@ static returnStatus_t flush( PartitionData_t const *pParData, DeviceDriverMem_t 
 {
    return (eSUCCESS);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
+
 /***********************************************************************************************************************
 
    Function Name: erase
@@ -753,28 +791,50 @@ static returnStatus_t erase( dSize destOffset, lCnt cnt, PartitionData_t const *
  **********************************************************************************************************************/
 static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr )
 {
-   returnStatus_t eRetVal = eFAILURE;
+   returnStatus_t eRetVal;
+   fsp_err_t err;
+   flash_result_t blankCheckResult = FLASH_RESULT_NOT_BLANK;
    lCnt destAddr = destOffset + pParData->PhyStartingAddress; /* Get the actual address in NV. */
-   fsp_err_t retVal = R_FLASH_HP_BlankCheck( &g_flash0_ctrl, destAddr, cnt, NULL );
-   if (retVal == FSP_SUCCESS)
+
+   if( destAddr < FLASH_HP_CODEFLASH_END_ADDRESS )
+   {
+      /* check for code flash in erased state (0xFF) (non-BGO operation) */
+      err = R_FLASH_HP_BlankCheck( &g_flash0_ctrl, destAddr, cnt, &blankCheckResult );
+   }
+   else if( ( destAddr >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( destAddr <= FLASH_HP_DATAFLASH_END_ADDRESS ) )
+   {
+      err = R_FLASH_HP_BlankCheck( &g_flash0_ctrl, destAddr, cnt, &blankCheckResult );
+#ifndef __BOOTLOADER
+      if (err == FSP_SUCCESS)
+      {
+         /* Wait for a blank check event flag, if BGO is SET  */
+         if ( true == g_flash0_cfg.data_flash_bgo )
    {
       ( void )OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
       if( g_b_flash_event_not_blank )
       {
-         eRetVal = eFAILURE;
+               blankCheckResult = FLASH_RESULT_NOT_BLANK;
          g_b_flash_event_not_blank = false;
       }
       else if (g_b_flash_event_blank)
       {
-         eRetVal = eSUCCESS;
+               blankCheckResult = FLASH_RESULT_BLANK;
          g_b_flash_event_blank = false;
       }
    }
+      }
+#endif    /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
+   }
+   /*Note: if R_FLASH_HP_BlankCheck result is not FSP_SUCCESS not successful, default result is NOT_BLANK */
+      
+   /* translate FSP error into an error similar to what would be returned by flashErase */
+   eRetVal = (( FLASH_RESULT_BLANK == blankCheckResult ) && (FSP_SUCCESS == err)) ? eSUCCESS : eFAILURE;
 
    return (eRetVal);
 }
 #endif
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: setPowerMode
@@ -799,6 +859,9 @@ static returnStatus_t setPowerMode( const ePowerMode ePwrMode, PartitionData_t c
 {
    return(eSUCCESS);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: dvr_ioctl
@@ -844,6 +907,9 @@ static returnStatus_t dvr_ioctl( const void *pCmd, void *pData, PartitionData_t 
 #endif   // __BOOTLOADER
    return(retVal);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: restore
@@ -869,6 +935,9 @@ static returnStatus_t restore( lAddr lDest, lCnt cnt, PartitionData_t const *pPa
 
    return ((*pNextDriver)->devRestore(lDest, cnt, pParData, pNextDriver + 1));
 }
+#endif
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: timeSlice
@@ -888,6 +957,7 @@ static bool timeSlice(PartitionData_t const *pParData, DeviceDriverMem_t const *
 {
    return((bool)false);
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
 
 /* ****************************************************************************************************************** */
 /* Local Function Definitions */
@@ -952,7 +1022,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
    }
 #elif ( MCU_SELECTED == RA6E1 )
    lCnt blockCount;
-   fsp_err_t retVal;
+   fsp_err_t err = FSP_ERR_INVALID_ARGUMENT;
    if( dest < FLASH_HP_CODEFLASH_END_ADDRESS )
    {
       /* Destination address for erasing below block 8. Hence block size will be in the state of 8Kb */
@@ -961,7 +1031,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          if ( ( numBytes % FLASH_HP_CODEFLASH_MINIMAL_ERASE_SIZE ) == 0 )
          {
             blockCount = numBytes / FLASH_HP_CODEFLASH_SIZE_BELOW_BLOCK8;
-            retVal = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
+            err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
          }
          else
          {
@@ -974,7 +1044,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          {
             blockCount = ( FLASH_HP_CODEFLASH_BLOCK8_START_ADDRESS - dest ) / FLASH_HP_CODEFLASH_SIZE_BELOW_BLOCK8;
             blockCount += ( dest + numBytes - FLASH_HP_CODEFLASH_BLOCK8_START_ADDRESS ) / FLASH_HP_CODEFLASH_SIZE_FROM_BLOCK8;
-            retVal = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
+            err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
          }
          else
          {
@@ -986,7 +1056,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
          if ( ( numBytes % FLASH_HP_CODEFLASH_SIZE_FROM_BLOCK8 ) == 0 )
          {
             blockCount = numBytes / FLASH_HP_CODEFLASH_SIZE_FROM_BLOCK8;
-            retVal = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
+            err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
          }
          else
          {
@@ -999,9 +1069,10 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
       if( ( numBytes % FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE ) == 0 )
       {
          blockCount = numBytes / FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE;
-         retVal = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
-         /* Error Handle */
-         if ( FSP_SUCCESS == retVal )
+         err = R_FLASH_HP_Erase( &g_flash0_ctrl, dest, blockCount );
+#ifndef __BOOTLOADER
+         /* if erase has started, allow other tasks to run while waiting for completion */
+         if ( FSP_SUCCESS == err )
          {
             /* Wait for the write complete event flag, if BGO is SET  */
             if (true == g_flash0_cfg.data_flash_bgo)
@@ -1010,6 +1081,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
                g_b_flash_event_erase_complete = false;
             }
          }
+#endif   /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
       }
       else
       {
@@ -1021,7 +1093,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
       eRetVal = eFAILURE;
    }
 
-   if(FSP_SUCCESS == retVal)
+   if(FSP_SUCCESS == err)
    {
       eRetVal = eSUCCESS;
    }
@@ -1029,6 +1101,7 @@ static returnStatus_t flashErase( uint32_t dest, uint32_t numBytes )
 
    return(eRetVal);
 }
+
 /***********************************************************************************************************************
 
    Function Name: flashWrite
@@ -1082,7 +1155,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
 #endif   /* BOOTLOADER  */
    }
 #elif ( MCU_SELECTED == RA6E1 )
-    fsp_err_t      err;
+    fsp_err_t err = FSP_ERR_INVALID_ARGUMENT;
     uint32_t srcAddr = ( uint32_t ) pSrc;
     if( address < FLASH_HP_CODEFLASH_END_ADDRESS )
     {
@@ -1117,7 +1190,8 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        if( ( cnt % BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE ) == 0 )
        {
           err = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
-          /* Error Handle */
+#ifndef __BOOTLOADER
+          /* if erase has started, allow other tasks to run while waiting for completion */
           if (FSP_SUCCESS == err)
           {
              /* Wait for the write complete event flag, if BGO is SET  */
@@ -1127,6 +1201,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
                 g_b_flash_event_write_complete = false;
              }
           }
+#endif    /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
        }
        else
        {
@@ -1214,6 +1289,7 @@ static returnStatus_t flashSwap( eFS_command_t cmd, flashSwapStatus_t *pStatus )
    } /* if (eSUCCESS == retVal) */
    return(retVal);
 }
+
 /***********************************************************************************************************************
 
    Function Name: exeSwapSeq
@@ -1255,6 +1331,7 @@ static returnStatus_t exeSwapSeq( eFS_command_t cmd, flashSwapStatus_t *pStatus 
 }
 #endif
 #endif   /* BOOTLOADER  */
+
 /***********************************************************************************************************************
 
    Function Name: exeFlashCmdSeq
@@ -1291,6 +1368,7 @@ static returnStatus_t exeFlashCmdSeq( uint32_t dest )
    }
    return(retVal);
 }
+
 #if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A ) || ( ( DCU == 1 ) && ( HAL_TARGET_HARDWARE != HAL_TARGET_XCVR_9985_REV_A ) ) )
 /***********************************************************************************************************************
 
@@ -1336,6 +1414,7 @@ static returnStatus_t exeFlashCmdSeqDifBank( void )
    return (retVal);
 }
 #endif
+
 /***********************************************************************************************************************
 
    Function Name: exeFlashCmdSeqSameBank
@@ -1394,6 +1473,7 @@ __ramfunc static returnStatus_t exeFlashCmdSeqSameBank( void ) /*lint !e129   __
    }
    return (retVal);/*lint !e454 */
 }/*lint !e454 */
+
 /***********************************************************************************************************************
 
    Function Name: setFlashAddr
@@ -1418,6 +1498,7 @@ static void setFlashAddr( uint32_t addr )
    FTFE_BASE_PTR->FCCOB2 = (uint8_t)((addr >> 8) & 0xFF);     /* Set destination address */
    FTFE_BASE_PTR->FCCOB3 = (uint8_t)(addr & 0xFF);            /* Set destination address - LSB */
 }
+
 /***********************************************************************************************************************
 
    Function Name: setFlashData
@@ -1446,6 +1527,7 @@ static void setFlashData( uint8_t const *pData )
    FTFE_BASE_PTR->FCCOB6 = pData[1];
    FTFE_BASE_PTR->FCCOB7 = pData[0];
 }
+
 /***********************************************************************************************************************
 
    Function Name: ISR_InternalFlash

@@ -43,6 +43,7 @@
 
 #include "portable_freescale.h"
 #include "portable_aclara.h"
+#include "error_codes.h"
 
 #include "features.h"   /* Need bootloader defined (or not) before cfg_app.h  */
 #include "cfg_hal.h"
@@ -52,7 +53,6 @@
 #ifndef __BOOTLOADER
 #include "OS_aclara.h"
 #endif
-#include "error_codes.h"
 #include "heep.h"
 #include "BSP_aclara_BL.h"
 

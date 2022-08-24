@@ -21,8 +21,10 @@
 #ifndef OS_aclara_H
 #define OS_aclara_H
 
-#ifndef features_H
-#warning "Requires features.h"
+#include "error_codes.h"
+
+#ifndef CFG_HAL_H
+#warning "Requires cfg_hal.h configuration!!!"
 #endif
 
 #if ( RTOS_SELECTION == MQX_RTOS )
