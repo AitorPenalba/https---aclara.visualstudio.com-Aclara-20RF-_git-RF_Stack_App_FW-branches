@@ -2083,6 +2083,7 @@ static bool timeSlice( PartitionData_t const *pParData, DeviceDriverMem_t const 
 #if ( MCU_SELECTED == NXP_K24 )
 static void isr_busy( void )
 #elif ( MCU_SELECTED == RA6E1 )
+static uint32_t DVR_interruptCounter = 0;
 void isr_busy( external_irq_callback_args_t * p_args )
 #endif
 {
@@ -2092,6 +2093,7 @@ void isr_busy( external_irq_callback_args_t * p_args )
 #if ( MCU_SELECTED == NXP_K24 )
       OS_SEM_Post( &extFlashSem_ );  /* Post the semaphore */
 #elif ( MCU_SELECTED == RA6E1 )
+      DVR_interruptCounter++;
       OS_SEM_Post_fromISR( &extFlashSem_ );  /* Post the semaphore */
 #endif
    }

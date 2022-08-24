@@ -230,8 +230,8 @@ void SELF_testTask( taskParameter )
 #endif //USE_USB_MFG
 #elif ( RTOS_SELECTION == FREE_RTOS )
    char resBuff[18];
-   ( void )snprintf( resBuff, sizeof( resBuff ), "\r\n%s %04X\r\n", "SelfTest", selfTestResults );
-   ( void )UART_write( mfgPortUart, (uint8_t*)resBuff, sizeof( resBuff ) );
+   uint32_t len = snprintf( resBuff, sizeof( resBuff ), "%s %04X\r\n", "SelfTest", selfTestResults );
+   ( void )UART_write( mfgPortUart, (uint8_t*)resBuff, len );
    if ( SELF_notify != NULL )
    {
       OS_EVNT_Set ( SELF_notify, 1U );

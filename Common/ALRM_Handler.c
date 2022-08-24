@@ -136,7 +136,9 @@ static void       meter_trouble_isr_busy( void );
 #endif
 #endif
 #endif
-
+#if ( MCU_SELECTED == RA6E1 )
+static uint32_t ALRM_TroubleRisingEdgeCounter = 0, ALRM_TroubleFallingEdgeCounter = 0;
+#endif
 /* CONSTANTS */
 
 /* FUNCTION DEFINITIONS */
@@ -1220,6 +1222,14 @@ void meter_trouble_isr_busy(external_irq_callback_args_t * p_args)
 #if ( RTOS_SELECTION == MQX_RTOS )
    OS_SEM_Post( &MeterTroubleSem ); /* Post the semaphore */
 #elif ( RTOS_SELECTION == FREE_RTOS )
+   if ( HMC_TROUBLE() )
+   {
+      ALRM_TroubleRisingEdgeCounter++;
+   }
+   else
+   {
+      ALRM_TroubleFallingEdgeCounter++;
+   }
    OS_SEM_Post_fromISR( &MeterTroubleSem ); /* Post the semaphore */
 #endif
    ( void )HMC_DIAGS_DoDiags( ( uint8_t )HMC_APP_API_CMD_ACTIVATE, NULL );
