@@ -892,7 +892,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
    { "intflashtestclose",    DBG_CommandLine_IntFlash_ClosePartition,     "Close Partition for Test in Internal Flash" },
 #ifdef TM_BL_TEST_COMMANDS
-   { "intflashtestbill",     DBG_CommandLine_IntFlash_TestBill,         "Test erase, read, write, and blank checking in Internal Flash" },
+   { "blwritetestimage",     DBG_CommandLine_BL_Test_Write_DFW_Image,   "Write known data (increasing 32-bit values) to external Flash DFW partition" },
+   { "blwriteblinfo",        DBG_CommandLine_BL_Test_Write_BL_Info,     "Write test BL_INFO to data flash" },
+   { "bleraseblinfo",        DBG_CommandLine_BL_Test_Clear_BL_Info,     "Erase test BL_INFO to data flash" },
 #endif
 #endif
 #if ( TM_LINKED_LIST == 1)
@@ -3023,9 +3025,9 @@ uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv
 #ifdef TM_BL_TEST_COMMANDS
 /*******************************************************************************
 
-   Function name: DBG_CommandLine_IntFlash_BlankCheckPartition
+   Function name: DBG_CommandLine_BL_Test_Write_DFW_Image
 
-   Purpose: This function blank checks the partition for Testing Internal Flash
+   Purpose: Writes known data to the DFW partition for testing
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -3033,177 +3035,180 @@ uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv
    Returns: retVal - Successful status of this function
 
 *******************************************************************************/
-extern volatile bool g_b_flash_event_not_blank;
-extern volatile bool g_b_flash_event_blank;
-extern volatile bool g_b_flash_event_erase_complete;
-extern volatile bool g_b_flash_event_write_complete;
-extern OS_SEM_Obj intFlashSem_;
-uint32_t DBG_CommandLine_IntFlash_TestBill( uint32_t argc, char *argv[] )
+#define TEST_DATA_BLOCK_SIZE    (1024)
+#define TEST_DATA_SIZE          (10  * TEST_DATA_BLOCK_SIZE)  /* 10K Bytes */
+uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   lAddr address;
-   uint32_t offset;
-   lCnt sizeToBlankCheck;
-   uint32_t sizeofData;
-   fsp_err_t err;
-   flash_result_t blank_check_result;
-   uint8_t writeData[] = {0,1,2,3, 4,5,6,7, 8,9,10,11, 12,13,14,15, 16,17,18,19};
-   
-   if ( argc == 1 )
+   uint32_t writeData[TEST_DATA_BLOCK_SIZE / sizeof(uint32_t)];
+   uint32_t dfwOffset;
+   uint32_t dataIndex;
+
+   /* open DFW partition */
+   retVal = PAR_partitionFptr.parOpen( &pTM_BL_Test_Part_, ePART_DFW_PGM_IMAGE, 0L );
+   if ( eSUCCESS == retVal)
    {
-      /* setup to perform test in BL_INFO partition */
-      address = 0x8001000;
-      
-      //err = R_FLASH_HP_Open( &g_flash0_ctrl, &g_flash0_cfg );
-      //DBG_logPrintf( 'I', "opening flash driver - %s[%d]", (FSP_SUCCESS == err) ? "SUCCESS" : "FAILURE", err);
-
-      err = R_FLASH_HP_Erase( &g_flash0_ctrl, address, 1 );
-      if (FSP_SUCCESS == err)
+      DBG_logPrintf( 'I', "DFW_PGM_IMAGE partition opened" );
+      /* erase DFW partition */
+      retVal = PAR_partitionFptr.parErase(0L, TEST_DATA_SIZE,  pTM_BL_Test_Part_ );
+      if ( eSUCCESS == retVal)
       {
-         /* Wait for the erase complete event flag, if BGO is SET  */
-         if ( true == g_flash0_cfg.data_flash_bgo )
-         {
-            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-            DBG_logPrintf( 'I', "erasing block at 0x%08X - %s", address, (true == g_b_flash_event_erase_complete) ? "SUCCESS" : "FAILURE");
-            g_b_flash_event_erase_complete = false;
-         }
-      }
-      else
-      {
-          DBG_logPrintf( 'E', "R_FLASH_HP_Erase FAILED [%d]", err);
-      }
-
-      sizeToBlankCheck = 64;
-      err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, address, sizeToBlankCheck, &blank_check_result);
-      if (FSP_SUCCESS == err)
-      {
-         /* Wait for the blank check complete event flag, if BGO is SET  */
-         if ( true == g_flash0_cfg.data_flash_bgo )
-         {
-            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-            DBG_logPrintf( 'I', "blank check %d bytes @ 0x%08X - %s", sizeToBlankCheck, address, 
-                (true == g_b_flash_event_blank) ? "BLANK" : (true == g_b_flash_event_not_blank) ? "NOT BLANK" : "ERROR");
-            g_b_flash_event_blank = false;
-            g_b_flash_event_not_blank = false;
-         }
-      }
-      else
-      {
-          DBG_logPrintf( 'E', "R_FLASH_HP_BlankCheck FAILED [%d]", err);
-      }
-
-      offset = 16;
-      sizeofData = sizeof(writeData);
-      err = R_FLASH_HP_Write( &g_flash0_ctrl, (uint32_t) &writeData[0], address + offset, sizeofData );
-      if (FSP_SUCCESS == err)
-      {
-         /* Wait for the write complete event flag, if BGO is SET  */
-         if ( true == g_flash0_cfg.data_flash_bgo )
-         {
-            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-            DBG_logPrintf( 'I', "writing %d bytes @ 0x%08X - %s", sizeofData, address + offset, (true == g_b_flash_event_write_complete) ? "SUCCESS" : "FAILURE");
-            g_b_flash_event_write_complete = false;
-            
-            for (int i = 0; i < sizeofData; i++)
+         DBG_logPrintf( 'I', "Erased %d bytes at offset 0x%08X in DFW partition", TEST_DATA_SIZE, 0L );
+         /* write known data */
+         dataIndex = 0;
+         dfwOffset = 0;
+         while (dfwOffset < TEST_DATA_SIZE) {
+            /* create known data block (increasing 32-bit values) */
+            uint32_t* puint32Data = (uint32_t*) writeData;
+            for (int i = 0; i < (TEST_DATA_BLOCK_SIZE / sizeof(uint32_t)); i++)
             {
-              DBG_printfNoCr("%02X ", writeData[i]);
-              if ((i % 16) == 15)
-              {
-                  DBG_printf("");
-              }
+               *puint32Data = dataIndex;
+               puint32Data++;
+               dataIndex++;
             }
-            DBG_printf("");
-         }
+         
+            /* write test data to DFW partition */
+            retVal = PAR_partitionFptr.parWrite(dfwOffset, (uint8_t*) writeData, TEST_DATA_BLOCK_SIZE,  pTM_BL_Test_Part_ );
+            if ( retVal != eSUCCESS)
+            {
+               DBG_logPrintf( 'E', "Unable to write %d bytes at offset 0x%08X in DFW partition [%d]", TEST_DATA_BLOCK_SIZE, dfwOffset, retVal );
+               break;
+            }
+            DBG_logPrintf( 'I', "Wrote %d bytes at offset 0x%08X in DFW partition", TEST_DATA_BLOCK_SIZE, dfwOffset );
+         
+            dfwOffset += TEST_DATA_BLOCK_SIZE;
+         };
       }
       else
       {
-          DBG_logPrintf( 'E', "R_FLASH_HP_Write FAILED [%d]", err);
+          DBG_logPrintf( 'E', "Unable to erase %d bytes at offset 0x0 in DFW partition [%d]", TEST_DATA_SIZE, retVal );
       }
 
-      sizeofData = 64;
-      uint8_t readData[64] = {0};
-      (void)memcpy(readData, (uint8_t *)address, sizeofData);
-      DBG_logPrintf( 'I', "reading %d bytes @ 0x%08X", sizeofData, address);
-      for (int i = 0; i < sizeofData; i++)
+      /* close DFW partition */
+       retVal = PAR_partitionFptr.parClose( pTM_BL_Test_Part_ );
+      if ( retVal != eSUCCESS)
       {
-        DBG_printfNoCr("%02X ", readData[i]);
-        if ((i % 16) == 15)
-        {
-            DBG_printf("");
-        }
-      }
-      DBG_printf("");
-      
-      sizeToBlankCheck = 5;
-      offset = 5;
-      err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, address + offset, sizeToBlankCheck, &blank_check_result);
-      if (FSP_SUCCESS == err)
-      {
-         /* Wait for the blank check complete event flag, if BGO is SET  */
-         if ( true == g_flash0_cfg.data_flash_bgo )
-         {
-            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-            DBG_logPrintf( 'I', "blank check %d bytes @ 0x%08X (outside range) - %s", sizeToBlankCheck, address + offset, 
-                (true == g_b_flash_event_blank) ? "BLANK" : (true == g_b_flash_event_not_blank) ? "NOT BLANK" : "ERROR");
-            g_b_flash_event_blank = false;
-            g_b_flash_event_not_blank = false;
-         }
-      }
-      else
-      {
-          DBG_logPrintf( 'E', "R_FLASH_HP_BlankCheck FAILED [%d]", err);
-      }
-      
-      sizeToBlankCheck = 5;
-      offset = 14;
-      err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, address + offset, sizeToBlankCheck, &blank_check_result);
-      if (FSP_SUCCESS == err)
-      {
-         /* Wait for the blank check complete event flag, if BGO is SET  */
-         if ( true == g_flash0_cfg.data_flash_bgo )
-         {
-            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-            DBG_logPrintf( 'I', "blank check %d bytes @ 0x%08X (overlap blank/write write range) - %s", sizeToBlankCheck, address + offset, 
-                (true == g_b_flash_event_blank) ? "BLANK" : (true == g_b_flash_event_not_blank) ? "NOT BLANK" : "ERROR");
-            g_b_flash_event_blank = false;
-            g_b_flash_event_not_blank = false;
-         }
-      }
-      else
-      {
-          DBG_logPrintf( 'E', "R_FLASH_HP_BlankCheck FAILED [%d]", err);
-      }
-      
-      sizeToBlankCheck = 2;
-      offset = 16;
-      err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, address + offset, sizeToBlankCheck, &blank_check_result);
-      if (FSP_SUCCESS == err)
-      {
-         /* Wait for the blank check complete event flag, if BGO is SET  */
-         if ( true == g_flash0_cfg.data_flash_bgo )
-         {
-            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-            DBG_logPrintf( 'I', "blank check %d bytes @ 0x%08X (inside write range) - %s", sizeToBlankCheck, address + offset, 
-                (true == g_b_flash_event_blank) ? "BLANK" : (true == g_b_flash_event_not_blank) ? "NOT BLANK" : "ERROR");
-            g_b_flash_event_blank = false;
-            g_b_flash_event_not_blank = false;
-         }
-      }
-      else
-      {
-          DBG_logPrintf( 'E', "R_FLASH_HP_BlankCheck FAILED [%d]", err);
-      }
-
-      //err = R_FLASH_HP_Close(&g_flash0_ctrl);
-      //DBG_logPrintf( 'I', "closing flash driver - %s[%d]", (FSP_SUCCESS == err) ? "SUCCESS" : "FAILURE", err);
-
-      DBG_logPrintf( 'I', "Test complete");
-      retVal = eSUCCESS;
+         DBG_logPrintf( 'E', "Unable to close DFW partition [%d]", retVal );
+      } 
    }
-   
-   return ( uint32_t )retVal;
+   else
+   {
+       DBG_logPrintf( 'E', "Unable to open DFW partition [%d]", retVal );
+   }
+
+
+
+   return retVal;
 }
 #endif
+
+#ifdef TM_BL_TEST_COMMANDS
+static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length)
+{
+   returnStatus_t retVal;
+   
+   /* open DFW partition */
+   retVal = PAR_partitionFptr.parOpen( &pTM_BL_Test_Part_, ePART_DFW_BL_INFO, 0L );
+   if ( eSUCCESS == retVal)
+   {
+      /* erase DFW partition */
+      retVal = PAR_partitionFptr.parErase(0L, length,  pTM_BL_Test_Part_ );
+      if ( eSUCCESS == retVal)
+      {
+         /* write BL INFO to DFW partition */
+         retVal = PAR_partitionFptr.parWrite(0L, pDFWinfo, length,  pTM_BL_Test_Part_ );
+         if ( retVal != eSUCCESS)
+         {
+            DBG_logPrintf( 'E', "Unable to write %d bytes at offset 0x0 in DFW BL INFO partition [%d]", length, retVal );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Unable to erase %d bytes at offset 0x0 in DFW partition [%d]", length, retVal );
+      }
+      
+      /* close DFW partition */
+      retVal = PAR_partitionFptr.parClose( pTM_BL_Test_Part_ );
+      if ( retVal != eSUCCESS)
+      {
+         DBG_logPrintf( 'E', "Unable to close DFW partition [%d]", retVal );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "Unable to open DFW BL INFO partition [%d]", retVal );
+   }
+   
+   return retVal;
+}
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_BL_Test_Write_BL_Info
+
+   Purpose: Writes known data to the DFW partition for testing
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+#define MAX_COPY_RANGES          2          /* Maximum number of ranges to copy from NV to ROM.   */
+#define UNUSED_APP_OFFSET       0xD0000     /* unused section of APP Code space */
+uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
+{
+   DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ];
+
+   /* setup test data */
+   DFWinfo[0].Length = TEST_DATA_SIZE;
+   DFWinfo[0].SrcAddr = 0L;
+   DFWinfo[0].DstAddr = UNUSED_APP_OFFSET;
+   DFWinfo[0].FailCount = 0xFFFFFFFF;
+   DFWinfo[0].CRC = 0x0;                    // Fill in after computing CRC in bootloader
+
+   DFWinfo[1].Length = 0xFFFFFFFF;
+   DFWinfo[1].SrcAddr = 0xFFFFFFFF;
+   DFWinfo[1].DstAddr = 0xFFFFFFFF;
+   DFWinfo[1].FailCount = 0xFFFFFFFF;
+   DFWinfo[1].CRC = 0xFFFFFFFF;
+
+   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo));
+}
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_BL_Test_Clear_BL_Info
+
+   Purpose: Writes known data to the DFW partition for testing
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_BL_Test_Clear_BL_Info( uint32_t argc, char *argv[] )
+{
+   DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ];
+
+   /* clear test data to 0xFFs */
+   DFWinfo[0].Length = 0xFFFFFFFF;
+   DFWinfo[0].SrcAddr = 0xFFFFFFFF;
+   DFWinfo[0].DstAddr = 0xFFFFFFFF;
+   DFWinfo[0].FailCount = 0xFFFFFFFF;
+   DFWinfo[0].CRC = 0xFFFFFFFF;
+
+   DFWinfo[1].Length = 0xFFFFFFFF;
+   DFWinfo[1].SrcAddr = 0xFFFFFFFF;
+   DFWinfo[1].DstAddr = 0xFFFFFFFF;
+   DFWinfo[1].FailCount = 0xFFFFFFFF;
+   DFWinfo[1].CRC = 0xFFFFFFFF;
+
+   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo));
+}
+#endif
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_IntFlash_ClosePartition
@@ -3903,6 +3908,64 @@ uint32_t DBG_CommandLine_Partition ( uint32_t argc, char *argv[] )
    return ( 0 );
 } /* end DBG_CommandLine_Partition () */
 
+#define PRINT_HEX_ADDRESS_INDEX     0
+#define PRINT_HEX_ADDRESS_LENGTH    10
+#define PRINT_HEX_DATA_INDEX        (PRINT_HEX_ADDRESS_INDEX + PRINT_HEX_ADDRESS_LENGTH)
+#define PRINT_HEX_DATA_LENGTH       16
+#define PRINT_HEX_ASCII_INDEX       (PRINT_HEX_DATA_INDEX + (3 * PRINT_HEX_DATA_LENGTH) + 2)
+#define PRINT_HEX_ASCII_LENGTH      PRINT_HEX_DATA_LENGTH
+/**
+   address - starting address or -1 for no address
+   count - number of bytes to print
+   pSrc - pointer to the bytes to print
+*/
+void _printHex(int32_t address, uint32_t byteCount, uint8_t* pData)
+{
+   /*                   address                         data                          ascii data     */
+   /* printBuf format: XXXXXXXX: XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX | AAAAAAAAAAAAAAAA */
+   char  printBuf[ PRINT_HEX_ADDRESS_LENGTH + 3 * PRINT_HEX_DATA_LENGTH + 2 + PRINT_HEX_DATA_LENGTH + 1 ];
+   
+   uint16_t bytesLeft = byteCount;           /* Running count of bytes printed, decreasing   */
+   uint8_t address_index = PRINT_HEX_ADDRESS_INDEX;
+   uint8_t data_index = (address >= 0) ? PRINT_HEX_DATA_INDEX : (PRINT_HEX_DATA_INDEX - PRINT_HEX_ADDRESS_LENGTH);
+   uint8_t ascii_index = (address >= 0) ? PRINT_HEX_ASCII_INDEX : (PRINT_HEX_ASCII_INDEX - PRINT_HEX_ADDRESS_LENGTH);
+
+   while ( bytesLeft != 0 )
+   {
+      /* clear print buffer */
+      memset(printBuf, 0, sizeof(printBuf));
+
+      /* setup 16-byte aligned address with no null terminator */
+      (void) sprintf(&printBuf[address_index], "%08X: ", address & (~0xF));
+
+      /* print data */
+      do {
+         /* setup hex data with no null terminator*/
+         (void) sprintf(&printBuf[data_index + (3 * (address % 16))], "%02X ", *pData );
+         
+         /* setup ASCII value or . with no null terminator*/
+         (void) sprintf(&printBuf[ascii_index + (address % 16)], "%c", ((*pData >= 0x20) & (*pData <= 0x7F)) ? *pData : '.' );
+      
+         pData++;
+         address++;
+         bytesLeft--;
+      } while (((address % 16) != 0) && (bytesLeft > 0));
+      
+      /* remove null terminators except last one */
+      for (int i = 0; i < (sizeof(printBuf) - 1); i++)
+      {
+         if ('\0' == printBuf[i])
+         {
+            printBuf[i] = ' ';
+         }
+      }
+      
+      DBG_printf( "%s", &printBuf[0] );
+      OS_TASK_Sleep( 10 );
+   }
+   
+}
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_NvRead
@@ -3951,6 +4014,9 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
                   cnt = min( bytesLeft, sizeof( buffer ) );
                   if ( eSUCCESS == PAR_partitionFptr.parRead( &buffer[0], offset, cnt, pPTbl_ ) )
                   {
+#if 1  // new print
+                     _printHex(offset, cnt, &buffer[0]);
+#else
                      uint8_t i;
                      uint8_t *pPtr;
                      for ( i = 0, pPtr = &respDataHex[ 0 ]; i < cnt; i++ )
@@ -3964,6 +4030,7 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
                      *pPtr = 0;
                      DBG_logPrintf( 'R', "Partition: %d, Offset: 0x%x\n%s", part, offset, &respDataHex[0] );
                      OS_TASK_Sleep( 100 );
+#endif
                      bytesLeft -= cnt;
                      offset += cnt;
                   }
@@ -3992,7 +4059,7 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
    {
       DBG_logPrintf( 'R', "USAGE: nvr id start len" );
    }
-#endif
+   
    return ( 0 );
 } /* end DBG_CommandLine_NvRead () */
 

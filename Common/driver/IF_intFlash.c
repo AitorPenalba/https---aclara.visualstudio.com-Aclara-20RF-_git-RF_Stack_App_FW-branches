@@ -189,28 +189,17 @@ const DeviceDriverMem_t IF_deviceDriver =
 
 #ifndef __BOOTLOADER
 static bool       bIntSemCreated_ = (bool)false;
-#if 0
 static OS_SEM_Obj intFlashSem_    = {0};                 /* Semaphore given when flash access completed */
-#else
-OS_SEM_Obj intFlashSem_    = {0};                 /* Semaphore given when flash access completed */
-#endif
 #endif   /* BOOTLOADER  */
 
 #if ( MCU_SELECTED == RA6E1 )
 static bool bInternalFlashOpened = false;
 
 /* Flags, set from Callback function */
-#if 0
 static volatile bool g_b_flash_event_not_blank = false;
 static volatile bool g_b_flash_event_blank = false;
 static volatile bool g_b_flash_event_erase_complete = false;
 static volatile bool g_b_flash_event_write_complete = false;
-#else
-volatile bool g_b_flash_event_not_blank = false;
-volatile bool g_b_flash_event_blank = false;
-volatile bool g_b_flash_event_erase_complete = false;
-volatile bool g_b_flash_event_write_complete = false;
-#endif
 
 uint8_t localVar[FLASH_HP_DATAFLASH_MINIMAL_ERASE_SIZE]; // TODO: RA6E1 Currently using data flash erase size. Check whether localVar support needed for code flash write.
                       // Modify the array size of minimal code flash erase size if erase must required to write in code flash (We mostly dont need it for code flash as the write happens with erasing the complete partition memory)
