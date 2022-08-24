@@ -3924,7 +3924,6 @@ uint32_t DBG_CommandLine_Partition ( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
 {
-#if ( PARTITION_MANAGER == 1 )
    char     *endptr;
    uint8_t  buffer[ 64 ];        /* Data read from NV */
    uint8_t  respDataHex[ ( sizeof( buffer ) * 3 ) + ( sizeof( buffer ) / 16 ) + 1 ];
@@ -3940,7 +3939,11 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
 
       if ( eSUCCESS == PAR_partitionFptr.parOpen( &pPTbl_, ( ePartitionName )part, 0L ) )
       {  //If this is NOT an internalFlash partition
-         if ( 0 != memcmp (pPTbl_->PartitionType.pDevice, &_sIntFlashType[0], sizeof( pPTbl_->PartitionType.pDevice )) )
+         if ( (0 != memcmp (pPTbl_->PartitionType.pDevice, &_sIntFlashType[0], sizeof( pPTbl_->PartitionType.pDevice ))) 
+#ifdef TM_BL_TEST_COMMANDS
+              || (part == ePART_DFW_BL_INFO) 
+#endif
+            )
          {
             offset = strtoul( argv[2], &endptr, 0 );
             bytesLeft  = ( uint16_t )( strtoul( argv[3], &endptr, 0 ) );
@@ -3951,6 +3954,7 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
                   bytesLeft = ( uint16_t )( pPTbl_->lDataSize - offset );
                   DBG_logPrintf( 'I', "Limiting Read to Partition DataSize %d", bytesLeft );
                }
+               DBG_logPrintf( 'R', "Partition: %d, Offset: 0x%x", part, offset );
                while ( bytesLeft != 0 )
                {
                   cnt = min( bytesLeft, sizeof( buffer ) );
