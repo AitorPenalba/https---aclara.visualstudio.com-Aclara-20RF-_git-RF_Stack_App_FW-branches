@@ -393,6 +393,10 @@ static PartitionData_t const *pTM_IntFlashEncryptKeyPart_;                   /* 
 static PartitionData_t const *pTM_IntFlashDfwBlInfoPart_;                   /* Test Mode code's DFW BL Info partition */
 #endif // TM_INTERNAL_FLASH_TEST
 
+#ifdef TM_BL_TEST_COMMANDS
+static PartitionData_t const *pTM_BL_Test_Part_;                            /* partition handle for testing */
+#endif
+
 #if ( TM_LINKED_LIST == 1)
 static OS_List_Obj osLinkedListTestObj;
 static OS_List_Handle osLinkedListTestHandle = &osLinkedListTestObj;
@@ -886,6 +890,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "intflashtestblankcheck",  DBG_CommandLine_IntFlash_BlankCheckPartition,     "Blank check Partition for Test in Internal Flash" },
 #endif
    { "intflashtestclose",    DBG_CommandLine_IntFlash_ClosePartition,     "Close Partition for Test in Internal Flash" },
+#ifdef TM_BL_TEST_COMMANDS
+   { "intflashtestbill",     DBG_CommandLine_IntFlash_TestBill,         "Test erase, read, write, and blank checking in Internal Flash" },
+#endif
 #endif
 #if ( TM_LINKED_LIST == 1)
    { "oslinkedlistcreate",   DBG_CommandLine_OS_LinkedList_Create,      "Creates test LinkedList" },
@@ -3006,6 +3013,190 @@ uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv
 }
 #endif
 
+#ifdef TM_BL_TEST_COMMANDS
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_BlankCheckPartition
+
+   Purpose: This function blank checks the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+extern volatile bool g_b_flash_event_not_blank;
+extern volatile bool g_b_flash_event_blank;
+extern volatile bool g_b_flash_event_erase_complete;
+extern volatile bool g_b_flash_event_write_complete;
+extern OS_SEM_Obj intFlashSem_;
+uint32_t DBG_CommandLine_IntFlash_TestBill( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   lAddr address;
+   uint32_t offset;
+   lCnt sizeToBlankCheck;
+   uint32_t sizeofData;
+   fsp_err_t err;
+   flash_result_t blank_check_result;
+   uint8_t writeData[] = {0,1,2,3, 4,5,6,7, 8,9,10,11, 12,13,14,15, 16,17,18,19};
+   
+   if ( argc == 1 )
+   {
+      /* setup to perform test in BL_INFO partition */
+      address = 0x8001000;
+      
+      //err = R_FLASH_HP_Open( &g_flash0_ctrl, &g_flash0_cfg );
+      //DBG_logPrintf( 'I', "opening flash driver - %s[%d]", (FSP_SUCCESS == err) ? "SUCCESS" : "FAILURE", err);
+
+      err = R_FLASH_HP_Erase( &g_flash0_ctrl, address, 1 );
+      if (FSP_SUCCESS == err)
+      {
+         /* Wait for the erase complete event flag, if BGO is SET  */
+         if ( true == g_flash0_cfg.data_flash_bgo )
+         {
+            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+            DBG_logPrintf( 'I', "erasing block at 0x%08X - %s", address, (true == g_b_flash_event_erase_complete) ? "SUCCESS" : "FAILURE");
+            g_b_flash_event_erase_complete = false;
+         }
+      }
+      else
+      {
+          DBG_logPrintf( 'E', "R_FLASH_HP_Erase FAILED [%d]", err);
+      }
+
+      sizeToBlankCheck = 64;
+      err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, address, sizeToBlankCheck, &blank_check_result);
+      if (FSP_SUCCESS == err)
+      {
+         /* Wait for the blank check complete event flag, if BGO is SET  */
+         if ( true == g_flash0_cfg.data_flash_bgo )
+         {
+            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+            DBG_logPrintf( 'I', "blank check %d bytes @ 0x%08X - %s", sizeToBlankCheck, address, 
+                (true == g_b_flash_event_blank) ? "BLANK" : (true == g_b_flash_event_not_blank) ? "NOT BLANK" : "ERROR");
+            g_b_flash_event_blank = false;
+            g_b_flash_event_not_blank = false;
+         }
+      }
+      else
+      {
+          DBG_logPrintf( 'E', "R_FLASH_HP_BlankCheck FAILED [%d]", err);
+      }
+
+      offset = 16;
+      sizeofData = sizeof(writeData);
+      err = R_FLASH_HP_Write( &g_flash0_ctrl, (uint32_t) &writeData[0], address + offset, sizeofData );
+      if (FSP_SUCCESS == err)
+      {
+         /* Wait for the write complete event flag, if BGO is SET  */
+         if ( true == g_flash0_cfg.data_flash_bgo )
+         {
+            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+            DBG_logPrintf( 'I', "writing %d bytes @ 0x%08X - %s", sizeofData, address + offset, (true == g_b_flash_event_write_complete) ? "SUCCESS" : "FAILURE");
+            g_b_flash_event_write_complete = false;
+            
+            for (int i = 0; i < sizeofData; i++)
+            {
+              DBG_printfNoCr("%02X ", writeData[i]);
+              if ((i % 16) == 15)
+              {
+                  DBG_printf("");
+              }
+            }
+            DBG_printf("");
+         }
+      }
+      else
+      {
+          DBG_logPrintf( 'E', "R_FLASH_HP_Write FAILED [%d]", err);
+      }
+
+      sizeofData = 64;
+      uint8_t readData[64] = {0};
+      (void)memcpy(readData, (uint8_t *)address, sizeofData);
+      DBG_logPrintf( 'I', "reading %d bytes @ 0x%08X", sizeofData, address);
+      for (int i = 0; i < sizeofData; i++)
+      {
+        DBG_printfNoCr("%02X ", readData[i]);
+        if ((i % 16) == 15)
+        {
+            DBG_printf("");
+        }
+      }
+      DBG_printf("");
+      
+      sizeToBlankCheck = 5;
+      offset = 5;
+      err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, address + offset, sizeToBlankCheck, &blank_check_result);
+      if (FSP_SUCCESS == err)
+      {
+         /* Wait for the blank check complete event flag, if BGO is SET  */
+         if ( true == g_flash0_cfg.data_flash_bgo )
+         {
+            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+            DBG_logPrintf( 'I', "blank check %d bytes @ 0x%08X (outside range) - %s", sizeToBlankCheck, address + offset, 
+                (true == g_b_flash_event_blank) ? "BLANK" : (true == g_b_flash_event_not_blank) ? "NOT BLANK" : "ERROR");
+            g_b_flash_event_blank = false;
+            g_b_flash_event_not_blank = false;
+         }
+      }
+      else
+      {
+          DBG_logPrintf( 'E', "R_FLASH_HP_BlankCheck FAILED [%d]", err);
+      }
+      
+      sizeToBlankCheck = 5;
+      offset = 14;
+      err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, address + offset, sizeToBlankCheck, &blank_check_result);
+      if (FSP_SUCCESS == err)
+      {
+         /* Wait for the blank check complete event flag, if BGO is SET  */
+         if ( true == g_flash0_cfg.data_flash_bgo )
+         {
+            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+            DBG_logPrintf( 'I', "blank check %d bytes @ 0x%08X (overlap blank/write write range) - %s", sizeToBlankCheck, address + offset, 
+                (true == g_b_flash_event_blank) ? "BLANK" : (true == g_b_flash_event_not_blank) ? "NOT BLANK" : "ERROR");
+            g_b_flash_event_blank = false;
+            g_b_flash_event_not_blank = false;
+         }
+      }
+      else
+      {
+          DBG_logPrintf( 'E', "R_FLASH_HP_BlankCheck FAILED [%d]", err);
+      }
+      
+      sizeToBlankCheck = 2;
+      offset = 16;
+      err = R_FLASH_HP_BlankCheck(&g_flash0_ctrl, address + offset, sizeToBlankCheck, &blank_check_result);
+      if (FSP_SUCCESS == err)
+      {
+         /* Wait for the blank check complete event flag, if BGO is SET  */
+         if ( true == g_flash0_cfg.data_flash_bgo )
+         {
+            (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+            DBG_logPrintf( 'I', "blank check %d bytes @ 0x%08X (inside write range) - %s", sizeToBlankCheck, address + offset, 
+                (true == g_b_flash_event_blank) ? "BLANK" : (true == g_b_flash_event_not_blank) ? "NOT BLANK" : "ERROR");
+            g_b_flash_event_blank = false;
+            g_b_flash_event_not_blank = false;
+         }
+      }
+      else
+      {
+          DBG_logPrintf( 'E', "R_FLASH_HP_BlankCheck FAILED [%d]", err);
+      }
+
+      //err = R_FLASH_HP_Close(&g_flash0_ctrl);
+      //DBG_logPrintf( 'I', "closing flash driver - %s[%d]", (FSP_SUCCESS == err) ? "SUCCESS" : "FAILURE", err);
+
+      DBG_logPrintf( 'I', "Test complete");
+      retVal = eSUCCESS;
+   }
+   
+   return ( uint32_t )retVal;
+}
+#endif
 /*******************************************************************************
 
    Function name: DBG_CommandLine_IntFlash_ClosePartition
