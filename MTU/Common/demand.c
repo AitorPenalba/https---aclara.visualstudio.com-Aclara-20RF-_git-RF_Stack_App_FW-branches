@@ -187,7 +187,7 @@ static volatile bool dmdResetDone_;                //Indicates demand reset comp
 //Set for the maximum demand reading supported (TODO: Verify against the value in the HEEP)
 #if ( RTOS_SELECTION == MQX_RTOS )
 #define INVALID_DMD_ENERGY                (MAX_UINT_32)
-#elif ( RTOS_SELECTION == FREE_RTOS ) // TODO: RA6E1 Can we use this direct from stdint.h or should need a separate header to define this?
+#elif ( RTOS_SELECTION == FREE_RTOS )
 #define INVALID_DMD_ENERGY                ( UINT32_MAX )
 #endif
 #define DISABLE_SCHED_DMD_RESET_DATE      ((uint8_t) 0)  /* Used for an unassigned Demand Reset Day */

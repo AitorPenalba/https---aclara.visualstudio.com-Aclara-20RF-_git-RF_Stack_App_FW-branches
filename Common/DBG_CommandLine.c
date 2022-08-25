@@ -909,6 +909,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "oslinkedlisthead",     DBG_CommandLine_OS_LinkedList_Head,        "Returns the Head element from test LinkedList" },
    { "oslinkedlistnumele",   DBG_CommandLine_OS_LinkedList_NumElements, "Adds LinkedList element and checks for the count" },
 #endif
+#if ( TM_RTC_UNIT_TEST == 1 )
+   { "rtcUnitTest",   DBG_CommandLine_RTC_UnitTest,      "Run the RTC_UnitTest" },
+#endif
 #if ( TM_UART_EVENT_COUNTERS == 1 )
    { "UARTcounters",         DBG_CommandLine_UARTcounters,              "Dumps RA6E1 UART driver counters" },
    { "UARTclearCounters",    DBG_CommandLine_UARTclearCounters,         "Clears RA6E1 UART driver counters" },
@@ -16323,5 +16326,27 @@ static uint32_t DBG_CommandLine_Queues ( uint32_t argc, char *argv[] )
    (void)OS_QUEUE_DumpQueues( (bool)true );
    return ( 0 );
 }
-
+#endif
+#if ( TM_RTC_UNIT_TEST == 1 )
+uint32_t DBG_CommandLine_RTC_UnitTest( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   if ( argc == 1 )
+   {
+      if ( RTC_UnitTest() )
+      {
+          DBG_logPrintf( 'R', "RTC_UnitTest_Success" );
+          retVal = eSUCCESS;
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "ERROR - RTC_UnitTest_Failure" );
+      }
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - RTC_UnitTest_Failure Too many arguments" );
+   }
+   return ( uint32_t )retVal;
+}
 #endif

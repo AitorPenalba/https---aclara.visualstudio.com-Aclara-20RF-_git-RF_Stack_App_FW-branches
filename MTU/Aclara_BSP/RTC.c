@@ -622,7 +622,6 @@ static void rtc_time_set( rtc_time_primitive *time)
   Returns: bool - 0 if everything was successful, 1 if something failed
 
 *******************************************************************************/
-// TODO: RA6 [name_Balaji]: Move to SelfTest Task
 bool RTC_UnitTest(void)
 {
    bool                 retVal   = (bool)true;
@@ -765,22 +764,9 @@ bool RTC_UnitTest(void)
    Sec = 2;
    g_alarm_irq_flag = RESET_FLAG;
    RTC_ConfigureAlarm(Sec);
-   (void)printf( "seconds after config %d", Sec );
    OS_TASK_Sleep(3000);
    if ( RESET_FLAG == g_alarm_irq_flag )
    {
-      while(1)
-      {
-         RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-         (void)printf ( "Alarm count : %lu - RTC count : %lu\n",(uint32_t)SecTemp, (uint32_t)Sec );
-         if ( SecTemp == Sec )
-         {
-            (void)printf ( "Alarm count : %lu - RTC count : %lu\n",(uint32_t)SecTemp, (uint32_t)Sec );
-            break;
-         }
-         
-         
-      }
       retVal = false;
    }
 

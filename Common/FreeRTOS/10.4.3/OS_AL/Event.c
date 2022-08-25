@@ -90,8 +90,15 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line )
 {
 #if( RTOS_SELECTION == FREE_RTOS )
-      //TODO: RA6E1: Error Handling, return value
-      xEventGroupSetBits( *EventHandle , EventMask );
+//   xEventGroupSetBits( *EventHandle , EventMask );
+   uint32_t status = 0;
+   status = (uint32_t)xEventGroupSetBits( *EventHandle , EventMask );
+//   (void)printf( "EVENT STATUS %lu\n", status );
+//      if( xEventGroupSetBits( *EventHandle , EventMask ) )
+//      if( status != 0 )
+//      {
+//         EVL_FirmwareError( "OS_EVNT_Set" , file, line );
+//      }
 #elif( RTOS_SELECTION == MQX_RTOS )
    if ( _lwevent_set ( EventHandle, EventMask ) ) {
       EVL_FirmwareError( "OS_EVNT_Set" , file, line );
