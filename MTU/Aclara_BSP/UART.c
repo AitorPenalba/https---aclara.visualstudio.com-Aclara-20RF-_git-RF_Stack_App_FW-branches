@@ -406,22 +406,17 @@ returnStatus_t UART_init ( void )
 
    for( i = 0; i < ( uint8_t ) MAX_UART_ID; i++ )
    {
-      uint16_t semReceiveCount = 0;
-
       // Setting bool values to false at init
       ringBufoverflow[i] = false;
+      uartOverflow[i] = false;
       transmitUARTEnable[i] = false;
-
       uartRingBuf[i].head = 0;
       uartRingBuf[i].tail = 0;
 
+      uint16_t semReceiveCount = 0;
       if ( ( i == UART_MANUF_TEST ) || ( i == UART_DEBUG_PORT ) ) // TODO: check optical port needed counting semaphore
       {
-#if 0
-         semReceiveCount = MAX_RING_BUFFER_SIZE;
-#else
          semReceiveCount = uartRingBuf[i].size;
-#endif
       }
 
       if( 0 == ( ( OS_SEM_Create  ( &UART_semHandle[i].receiveUART_sem, semReceiveCount ) ) &&
@@ -978,6 +973,7 @@ uint8_t UART_flush( enum_UART_ID UartId )
    TM_UART_COUNTER_INC( uart_events[UartId].uartFlushCalls );
    // Setting bool values to false at init
    ringBufoverflow   [ (uint32_t)UartId ] = false;
+   uartOverflow      [ (uint32_t)UartId ] = false;
    uartRingBuf       [ (uint32_t)UartId ].head = 0;
    uartRingBuf       [ (uint32_t)UartId ].tail = 0;
 
@@ -1036,6 +1032,7 @@ void UART_RX_flush ( enum_UART_ID UartId )
    TM_UART_COUNTER_INC( uart_events[UartId].uartFlushCalls );
    // Setting bool values to false at init
    ringBufoverflow   [ (uint32_t)UartId ] = false;
+   uartOverflow      [ (uint32_t)UartId ] = false;
    uartRingBuf       [ (uint32_t)UartId ].head = 0;
    uartRingBuf       [ (uint32_t)UartId ].tail = 0;
 
