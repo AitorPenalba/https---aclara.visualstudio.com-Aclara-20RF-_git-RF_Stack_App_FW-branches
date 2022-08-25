@@ -238,7 +238,7 @@
 #else
 #define DTLS_FIELD_TRIAL               1     /* Allows unsecured comm. until session established   */
 #endif
-#define DTLS_DEBUG                     (1)   /* Turn DTLS Debug On */  // TODO: RA6E1: Remove it before releasing for production
+#define DTLS_DEBUG                     (0)   /* Turn DTLS Debug On */  // TODO: RA6E1: Remove it before releasing for production
 #define DTLS_CHECK_UNENCRYPTED         (1)   /* Check for previous version major file not encrypted   */
 /* ------------------------------------------------------------------------------------------------------------------ */
 #define BM_DEBUG                       0     /* Buffer allocate/free debug printing */
@@ -330,6 +330,7 @@
 #define TM_UART_COUNTER_INC(x)
 #endif
 #define TM_RANDOM_NUMBER_GEN              0 /* Enable commands to test aclara random number generator */
+#define TM_EXT_FLASH_BUSY_TIMING          1 /* Measure time for busyCheck in dvr_extflash to receive a complete interrupt */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

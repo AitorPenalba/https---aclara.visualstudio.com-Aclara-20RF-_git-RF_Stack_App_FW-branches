@@ -13614,7 +13614,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       samplingRate = 0;
    }
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
-// R_BSP_PinCfg (BSP_IO_PORT_04_PIN_06, ((uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)IOPORT_CFG_PORT_OUTPUT_HIGH | (uint32_t)IOPORT_CFG_DRIVE_MID )); // P406: TP121 (used for timing verification)
    uint32_t portConfig;
 #define IOPORT_CFG_DRIVE_LOW 0UL
 
@@ -15742,14 +15741,14 @@ static uint32_t DBG_CommandLine_UARTcounters ( uint32_t argc, char *argv[] )
    };
    const char *pHeaders[UART_NUM_FIELDS] = /* The following srings must match the order of elements in Uart_events_t */
    {
-      "eventRxComplete",     "eventTxComplete",    "eventRxChar",        "eventErrParity",           "eventErrFraming",
-      "eventErrOverflow",    "eventBreakDetect",   "eventDataEmpty",     "eventUnknownType",         "basicUARTWriteVar",
-      "uartWritePendBefore", "uartWritePendAfter", "uartGetcPendBefore", "uartGetcPendAfter",        "ringOverFlowVar",
-      "uartEchoPendBefore",  "uartEchoPendAfter",  "receiveRxChar",      "missingPacketsCozRingBuf", "isrRingBufferOverflow",
-      "UARTechoVar",         "ZeroLengthEcho"
+      "eventRxComplete",     "eventTxComplete",    "eventRxChar",         "eventErrParity",           "eventErrFraming",
+      "eventErrOverflow",    "eventBreakDetect",   "eventDataEmpty",      "eventUnknownType",         "basicUARTWriteVar",
+      "uartWritePendBefore", "uartWritePendAfter", "uartGetcPendBefore",  "uartGetcPendAfter",        "ringOverFlowVar",
+      "uartEchoPendBefore",  "uartEchoPendAfter",  "receiveRxChar",       "missingPacketsCozRingBuf", "isrRingBufferOverflow",
+      "UARTechoVar",         "ZeroLengthEcho"   ,  "uartOverflowFlagged", "uartFlushCalls"
    };
    /* This vector allows for skipping the display of some of the counters.  It is in the same order as pHeaders */
-   const uint8_t display[UART_NUM_FIELDS] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+   const uint8_t display[UART_NUM_FIELDS] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
    char buffer[FIELD_NAME_WIDTH + ( MAX_UART_ID * ELEMENT_WIDTH ) + 2];
    bool calledFromMfgPort = ( OS_TASK_GetId() == OS_TASK_GetID_fromName( "DBG" ) ) ? (bool)false : (bool)true;
 #define DBG_PRINTF(fmt, ... ) if ( calledFromMfgPort ) { DBG_LW_printf(fmt, ##__VA_ARGS__); } else { DBG_printf   (fmt, ##__VA_ARGS__); }
