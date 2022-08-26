@@ -538,6 +538,7 @@ static returnStatus_t calcCRC(flAddr StartAddr, uint32_t cnt, bool start, uint32
 }
 #endif
 
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function Name:  bitReverse
@@ -556,6 +557,7 @@ static uint32_t bitReverse( uint32_t x )
    return( ( x >> 16 ) | ( x << 16 ) );                                 /* swap 2-byte long pairs  */
 
 }
+#endif
 
 #if ( MCU_SELECTED == NXP_K24 )
 /* Cleaned up version of mqx version of crc_kn.c */
@@ -627,7 +629,7 @@ static uint32_t bl_crc32( uint32_t seed, uint32_t poly, const uint8_t *input, ui
 
    /* Set CRC engine parameters.  */
    crcDevice->CTRL = CRC_CTRL_TCRC_MASK | ( tot << 30 ) | ( totr << 28 ) | ( fxor << 26 );
-   crcDevice->GPOLY = poly;                  /* Set the polynomial value.  */
+   crcDevice->GPOLY = bitReverse( poly );    /* Set the polynomial value. Note: CRC engine requires this to be bit reversed */
 
    crcDevice->CTRL |= CRC_CTRL_WAS_MASK;     /* Input data, Set WaS=1   */
    crcDevice->DATA = seed;                   /* Set the seed value.  */
@@ -725,61 +727,62 @@ int BL_MAIN_Main( void )
 #endif
             {
                /* Read an update segment from the DFW BL INFO partition.   */
-            if ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
-                                                PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
-                                                sizeof( DfwBlInfo_t ), pDFWinfo ))
-            {
-                  /* update info length indicates an image is available? */
-               if ( DFWinfo[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
+               if ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
+                                                   PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
+                                                   sizeof( DfwBlInfo_t ), pDFWinfo ))
                {
-                  /* collect update info and begin update */
-                  CRCAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
-                  CRCLength   =  DFWinfo[ DFWInfoIdx ].Length;
-                  expectedCRC =  DFWinfo[ DFWInfoIdx ].CRC;
-
-                  SrcAddr     =  DFWinfo[ DFWInfoIdx ].SrcAddr;   /* Save src addr, dst addr and length for loop. */
-                  DstAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
-                  Length      =  DFWinfo[ DFWInfoIdx ].Length;    /* Save CRC start addr, length and expected value. */
-                  if ( DFWinfo[ DFWInfoIdx ].FailCount == 0xffffffff )   /* If errCount is "erased", set to 0.  */
+                  /* update info length indicates an image is available? */
+                  if ( DFWinfo[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
                   {
-                     DFWinfo[ DFWInfoIdx ].FailCount = 0;
-                  }
+                     /* collect update info and begin update */
+                     CRCAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
+                     CRCLength   =  DFWinfo[ DFWInfoIdx ].Length;
+                     expectedCRC =  DFWinfo[ DFWInfoIdx ].CRC;
 
-                  while ( Length != 0 )    /* Loop until all bytes in the range have been copied.  */
-                  {
-                     /* Calculate data to be copied per pass.  */
-                     bytesCopied = min( EXT_FLASH_ERASE_SIZE, Length );
-                     ( void )PAR_partitionFptr.parRead( ( uint8_t * )&sectorData[0], SrcAddr, bytesCopied, pNVinfo  );
-                     ( void )PAR_partitionFptr.parWrite( DstAddr, ( uint8_t * )&sectorData[0], bytesCopied, pCodeInfo );
-                     Length  -= bytesCopied;
-                     SrcAddr += bytesCopied;
-                     DstAddr += bytesCopied;
-                     copyAttempted = ( bool )true;
-                     WDOG_Kick();
-                  }
+                     SrcAddr     =  DFWinfo[ DFWInfoIdx ].SrcAddr;   /* Save src addr, dst addr and length for loop. */
+                     DstAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
+                     Length      =  DFWinfo[ DFWInfoIdx ].Length;    /* Save CRC start addr, length and expected value. */
+                     if ( DFWinfo[ DFWInfoIdx ].FailCount == 0xffffffff )   /* If errCount is "erased", set to 0.  */
+                     {
+                        DFWinfo[ DFWInfoIdx ].FailCount = 0;
+                     }
+
+                     while ( Length != 0 )    /* Loop until all bytes in the range have been copied.  */
+                     {
+                        /* Calculate data to be copied per pass.  */
+                        bytesCopied = min( EXT_FLASH_ERASE_SIZE, Length );
+                        (void) PAR_partitionFptr.parRead( ( uint8_t * )&sectorData[0], SrcAddr, bytesCopied, pNVinfo  );
+                        (void) PAR_partitionFptr.parWrite( DstAddr, ( uint8_t * )&sectorData[0], bytesCopied, pCodeInfo );
+                        Length  -= bytesCopied;
+                        SrcAddr += bytesCopied;
+                        DstAddr += bytesCopied;
+                        copyAttempted = ( bool )true;
+                        WDOG_Kick();
+                     }
 
 #if 0
-                  calculatedCRC = ( uint32_t )compareNVtoCode( pCodeInfo->PhyStartingAddress + CRCAddr, pNVinfo, CRCLength );
-                  calcCRC(  CRCAddr, CRCLength, true, &calculatedCRC, pCodeInfo );
+                     calculatedCRC = ( uint32_t )compareNVtoCode( pCodeInfo->PhyStartingAddress + CRCAddr, pNVinfo, CRCLength );
+                     calcCRC(  CRCAddr, CRCLength, true, &calculatedCRC, pCodeInfo );
 #endif
-                  /* Validate CRC.
-                     Src, Dst values from DFWinfo are offsets into their respective partitions. Translate for use in CRC
-                     validation. Physical code address is partition starting address + value from DFWinfo struct.
-                  */
-                  calculatedCRC = bl_crc32(  CRC32_DFW_START_VALUE,                                /* Seed  */
-                                             /* Polynomial - CRC engine requires this to be bit reversed */
-                                             bitReverse( CRC32_DFW_POLY ), /* TODO: define bit reversed value to remove bitReverse routine */
-                                             (uint8_t *)(pCodeInfo->PhyStartingAddress + CRCAddr), /* Starting addr. */
-                                             CRCLength );                                          /* Length   */
+                     /* Validate CRC.
+                        Src, Dst values from DFWinfo are offsets into their respective partitions. Translate for use in CRC
+                        validation. Physical code address is partition starting address + value from DFWinfo struct.
+                     */
+                     calculatedCRC = bl_crc32(  CRC32_DFW_START_VALUE,                                /* Seed  */
+                                                CRC32_DFW_POLY,                                       /* Polynomial */
+                                                (uint8_t *)(pCodeInfo->PhyStartingAddress + CRCAddr), /* Starting addr. */
+                                                CRCLength );                                          /* Length   */
 
-                  if ( calculatedCRC != expectedCRC )
-                  {
-                     DFWinfo[ DFWInfoIdx ].FailCount++;
-                     success = ( bool )false;
+                     if ( calculatedCRC != expectedCRC )
+                     {
+                        DFWinfo[ DFWInfoIdx ].FailCount++;
+                        success = ( bool )false;
+                     }
                   }
                }
             }
-            DFWInfoIdx++;  /* Bump to next segment.   */
+
+            DFWInfoIdx++;  /* Bump to next update segment */
          }
       }
    }
