@@ -54,9 +54,11 @@
 #include "buffer.h"
 
 #include "vbat_reg.h"
-#if ( MCU_SELECTED == NXP_K24 )  /* TODO: RA6E1: Add includes for RA6 */
+#if ( RTOS_SELECTION == MQX_RTOS )
 #include "fio.h"           /* For ecc108_mqx.h" */
 #include "ecc108_mqx.h"    /* For the delay_xx functions */
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#include "ecc108_freertos.h"
 #endif
 #include "EVL_event_log.h"
 #if ( ENABLE_METER_EVENT_LOGGING != 0 )
@@ -1175,11 +1177,7 @@ static void PowerGoodDebounce( void )
    // Make sure PF_METER deasserted for 1ms.
    while ( debounceCount < DEBOUNCE_CNT_RST_VAL )
    {
-#if ( RTOS_SELECTION == MQX_RTOS )
-      delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
-#elif ( RTOS_SELECTION == FREE_RTOS )
-      R_BSP_SoftwareDelay( DEBOUNCE_DELAY_VAL * 10 , BSP_DELAY_UNITS_MICROSECONDS );
-#endif
+      delay_10us( DEBOUNCE_DELAY_VAL );
       CLRWDT();
       if ( BRN_OUT() )
       {
@@ -1217,11 +1215,7 @@ static returnStatus_t PowerFailDebounce( void )
    // Make sure BRN_OUT asserted for 1ms.
    while ( ( eSUCCESS == brownOut ) && ( debounceCount < DEBOUNCE_CNT_RST_VAL ) )
    {
-#if ( RTOS_SELECTION == MQX_RTOS )
-      delay_10us( DEBOUNCE_DELAY_VAL );  /* TODO: RA6E1: Create delay_10us() for FreeRTOS */
-#elif ( RTOS_SELECTION == FREE_RTOS )
-      R_BSP_SoftwareDelay( DEBOUNCE_DELAY_VAL * 10 , BSP_DELAY_UNITS_MICROSECONDS );
-#endif
+      delay_10us( DEBOUNCE_DELAY_VAL );
       if ( BRN_OUT() )
       {
          ++debounceCount;

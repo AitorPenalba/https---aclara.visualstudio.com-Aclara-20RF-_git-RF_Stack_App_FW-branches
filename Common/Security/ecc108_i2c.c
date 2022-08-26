@@ -93,7 +93,7 @@ enum i2c_read_write_flag {
    I2C_WRITE = (uint8_t) 0x00,  //!< write command flag
    I2C_READ  = (uint8_t) 0x01   //!< read command flag
 };
-
+#if ( MCU_SELECTED == NXP_K24 )
 //! I2C address is set when calling #ecc108p_init or #ecc108p_set_device_id.
 static uint8_t device_address;
 
@@ -118,7 +118,7 @@ void ecc108p_init(void)
    device_address = ECC108_I2C_DEFAULT_ADDRESS;
 }
 
-
+#endif
 //#ifndef DEBUG_DIAMOND
 //#   define DEBUG_DIAMOND
 //#endif

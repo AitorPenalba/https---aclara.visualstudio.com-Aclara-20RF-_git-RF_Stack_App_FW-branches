@@ -478,13 +478,24 @@
 #define NV_CS_INACTIVE()               (GPIOA_PSOR = 1<<14)    /* NV memory chip select pin */
 #define NV_BUSY()                      (~(GPIOA_PDIR >> 17) & 1)/* NV memory chip busy pin */
 #define NV_MISO_CFG(port, cfg)         SPI_misoCfg(port, cfg)
+#define NV_HW_BUSY_DEBUG_CONFIG()      { PORTE_PCR24 = PORT_PCR_MUX(1);   /* Make GPIO   */  \
+                                         GPIOE_PDDR |= ( 1 << 24 );       /* Make output */   }
+#define NV_HW_BUSY_DEBUG_CLEAR()       GPIOE_PCOR = ( 1 << 24 );        /* Set output low */
+#define NV_HW_BUSY_DEBUG_SET()         GPIOE_PSOR = ( 1 << 24 );        /* Set output high, trigger scope */
 #else
 #define NV_CS_TRIS()
 #define NV_CS_TRIS_LG()
-#define NV_CS_ACTIVE()                 R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_LOW)
-#define NV_CS_INACTIVE()               R_BSP_PinWrite(BSP_IO_PORT_05_PIN_01, BSP_IO_LEVEL_HIGH)
-#define NV_BUSY()                      R_BSP_PinRead(BSP_IO_PORT_05_PIN_03)
-#define NV_MISO_CFG(port, cfg)         R_BSP_PinCfg (port, cfg)
+#define NV_CS_PIN_NUMBER               BSP_IO_PORT_05_PIN_01 /* Signal /SPIQ_CS_FLASH, the chip select line to the serial flash chip */
+#define NV_MISO_PIN_NUMBER             BSP_IO_PORT_05_PIN_03 /* Signal SPIQ_MISO, the SPI MISO line busy line from serial flash chip */
+#define NV_BUSY_INTERRUPT_PIN          BSP_IO_PORT_05_PIN_05 /* Signal GPIO P505, which must be connected to signal SPIQ_MISO        */
+#define NV_CS_ACTIVE()                 R_BSP_PinWrite(NV_CS_PIN_NUMBER, BSP_IO_LEVEL_LOW)
+#define NV_CS_INACTIVE()               R_BSP_PinWrite(NV_CS_PIN_NUMBER, BSP_IO_LEVEL_HIGH)
+#define NV_BUSY()                      R_BSP_PinRead (NV_MISO_PIN_NUMBER)
+#define NV_MISO_CFG(port, cfg)         R_BSP_PinCfg  (port, cfg)
+#define NV_HW_BUSY_DEBUG_PIN_NUMBER    BSP_IO_PORT_04_PIN_06  /* TP121, used to observe timing of the QSPI/busy handshake            */
+#define NV_HW_BUSY_DEBUG_CONFIG()      R_BSP_PinCfg  (NV_HW_BUSY_DEBUG_PIN_NUMBER, IOPORT_CFG_PORT_DIRECTION_OUTPUT )
+#define NV_HW_BUSY_DEBUG_CLEAR()       R_BSP_PinWrite(NV_HW_BUSY_DEBUG_PIN_NUMBER, BSP_IO_LEVEL_LOW)
+#define NV_HW_BUSY_DEBUG_SET()         R_BSP_PinWrite(NV_HW_BUSY_DEBUG_PIN_NUMBER, BSP_IO_LEVEL_HIGH)
 #endif
 
 /* Set PCR for GPIO, Make Output */

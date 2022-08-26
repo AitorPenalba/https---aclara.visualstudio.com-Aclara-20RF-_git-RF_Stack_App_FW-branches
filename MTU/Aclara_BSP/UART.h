@@ -52,6 +52,8 @@ typedef struct
    uint32_t isrRingBufferOverflow;
    uint32_t UARTechoVar;
    uint32_t ZeroLengthEcho;
+   uint32_t uartOverflowFlagged;
+   uint32_t uartFlushCalls;
 } Uart_Events_t;
 #define UART_NUM_FIELDS ( sizeof(Uart_Events_t) / 4 ) /* All data elements must be uint32_t */
 

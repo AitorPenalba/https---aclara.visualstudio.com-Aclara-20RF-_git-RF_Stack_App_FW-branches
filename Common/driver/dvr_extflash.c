@@ -69,6 +69,9 @@
 #include "DBG_SerialDebug.h"
 #endif   /* BOOTLOADER  */
 #include "dvr_sharedMem.h"
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+#include "sys_clock.h"
+#endif
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
@@ -300,8 +303,15 @@ static const DeviceId_t sDeviceId[] =
    /* Disallow a "default" configuration. Require a device ID that is recognizable.                         */
    {  8000000,   3000000,     200000,   12,       5000,         1,    0x00,  0x00,  0x00,   0,    0 },                                /* Not qualified */
 #endif
-   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */                 /* Not qualified */
-   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */       /* Default */
+#if ( ( MCU_SELECTED != RA6E1 ) || ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B ) )
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */            /* Use MISO busy and AAI */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   1,    1 },  /* SST 16Mb 25VF016B */  /* Use MISO busy and AAI */
+#elif ( ( ( MCU_SELECTED == RA6E1 ) && ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) ) )
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   0,    0 },  /* SST 8Mb */            /* No MISO busy nor AAI  */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */  /* No MISO busy nor AAI  */
+#else
+   #error "Inconsistent settings of MCU_SELECTED and HAL_TARGET_HARDWARE compile switches!"
+#endif
    {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x41,   0,    0 },  /* SST 16Mb 26VF016B */       /* Not qualified */
    {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x42,   0,    0 },  /* SST 32Mb 26VF032B */       /* Not qualified */
    { 15000000,   1000000,     300000,   25,       1000,       256,    0x9D,  0x40,  0x15,   0,    0 },  /* ISSI 16Mb 25LQ080B */      /* Not qualified */
@@ -412,6 +422,13 @@ STATIC eDVR_EFL_IoctlRtosCmds_t rtosCmds_ = eRtosCmdsEn;   /* eRtosCmdsDis or eR
 STATIC const DeviceId_t *pChipId_ = &sDeviceId[0];  /* Flash Mem MFG, Points to the sDeviceId table, init to DEFAULT. */
 
 #endif
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+#define NUM_TIMING_SAMPLES 1000
+static uint32_t DVR_ExtflashInterruptCounter = 0, DVR_ExtflashIndex = 0, DVR_ExtflashMissedInts = 0;
+static uint32_t DVR_ExtflashInterruptTimeoutWhileBusy = 0;
+static uint32_t DVR_ExtflashInterruptTiming[NUM_TIMING_SAMPLES] = { 0 };
+static uint32_t DVR_ExtflashDivisor = 120;
+#endif
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 /***********************************************************************************************************************
@@ -475,10 +492,12 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
       R_BSP_PinAccessEnable();
 #endif
    }
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+   DVR_ExtflashDivisor = getCoreClock()/1000000UL;
+#endif
 #if ( (DEBUG_HARDWARE_BUSY == 1) || (DEBUG_POLL_BUSY == 1 ) ) /* For NV device ready */
-   PORTE_PCR24 = PORT_PCR_MUX(1);   /* Make GPIO   */
-   GPIOE_PDDR |= ( 1 << 24 );       /* Make output */
-   GPIOE_PCOR = ( 1 << 24 );        /* Set output low */
+   NV_HW_BUSY_DEBUG_CONFIG();
+   NV_HW_BUSY_DEBUG_CLEAR();        /* Set output low */
 #endif
 #if ( MCU_SELECTED == NXP_K24 )
    return ( NV_SPI_PORT_INIT( ((SpiFlashDevice_t*)pPartitionData->pDriverCfg)->port ) );
@@ -1176,7 +1195,9 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( MCU_SELECTED == NXP_K24 )
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_GPIO_e ); /* Change pin to digital input from SPI MISO */
 #elif ( MCU_SELECTED == RA6E1 )
-      (void)NV_MISO_CFG( BSP_IO_PORT_05_PIN_03, (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT );
+/* Now that we are using a separate GPIO pin (P505) for the busy-complete interrupt in Rev B of the RA6E1 board,   *
+ * the MISO pin can always remainwith the QSPI peripheral.  So we no longer need the following line.               */
+/*    (void)NV_MISO_CFG( NV_MISO_PIN_NUMBER, (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT );                         */
 #endif
 #if !RTOS
       bBusyIsr_ = false;
@@ -1193,18 +1214,35 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
             NV_SPI_ChkSharedPortCfg(pDevice->port);
 #elif ( RTOS_SELECTION == FREE_RTOS )
             OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
-#endif
+#endif // RTOS_SELECTION
             NV_CS_ACTIVE();                                 /* Activate the chip select  */
 #else /* Level triggered   */
 #if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexLock(pDevice->port);
             NV_SPI_ChkSharedPortCfg(pDevice->port);
 #elif ( RTOS_SELECTION == FREE_RTOS )
+            /* Since QSPI_MISO (P503) is now tri-state, it will not go low on its own.  Therefore, use P505, which is connected   *
+             * to QSPI_MISO, to stobe it low briefly, which will allow it remain low and then trigger the interrupt when the      *
+             * serial flash chip drives it high to signal that the operation is complete.  Since we changed P505 to a GPIO pin    *
+             * to do this, we have to revert it back to its baseline configuration as an IRQ pin and an input. We need to do      *
+             * this as a critical section so that the serial flash does not raise QSPI_MISO before our interrupt is armed.        */
+            OS_INT_disable();
+            R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)BSP_IO_LEVEL_LOW      ) );
+            R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                                    ) );
+            R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT  | (uint32_t)IOPORT_CFG_IRQ_ENABLE ) );
             OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
-#endif
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+            DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] = DWT->CYCCNT;
+#endif // ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+            NV_CS_INACTIVE(); /* Signal to the serial flash chip that we are ready for it to assert the MISO line when done */
+            DVR_EFL_BUSY_IRQ_EI();                          /* Enable the ISR on MISO. */
+            OS_INT_enable();
+#endif // RTOS_SELECTION
+#if ( RTOS_SELECTION == MQX_RTOS )
             NV_CS_ACTIVE();                                 /* Activate the chip select  */
             DVR_EFL_BUSY_IRQ_EI();                          /* Enable the ISR on MISO. */
-#endif
+#endif // RTOS_SELECTION
+#endif // ( DVR_EFL_BUSY_EDGE_TRIGGERED != 0 )
 #if ( DVR_EFL_BUSY_EDGE_TRIGGERED != 0 ) /* Edge triggered */
             if ( !NV_BUSY() ) /*  Is device ready immediately upon chip select?  */
             {
@@ -1214,13 +1252,17 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
             else if ( !OS_SEM_Pend( &extFlashSem_, max( OS_TICK_mS + 1, u32BusyTime_uS / OS_TICK_uS ) ) )
 #else
             if ( !OS_SEM_Pend( &extFlashSem_, max( OS_TICK_mS + 1, u32BusyTime_uS / OS_TICK_uS ) ) )
-#endif
+#endif // DVR_EFL_BUSY_EDGE_TRIGGERED
             {
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+               if ( NV_BUSY() ) DVR_ExtflashInterruptTimeoutWhileBusy++;
+               DVR_ExtflashMissedInts++;
+#endif // ( TM_EXT_FLASH_BUSY_TIMING == 1 )
 #if (DEBUG_HARDWARE_BUSY == 1 ) /* For debugging missed ready/busy interrupts   */
                /* Missed the RY/BY# interrupt - good place for a scope trigger and breakpoint */
-               GPIOE_PSOR = ( 1 << 24 );        /* Set output high, trigger scope */
+               NV_HW_BUSY_DEBUG_SET();
                NOP();
-               GPIOE_PCOR = ( 1 << 24 );        /* Set output low */
+               NV_HW_BUSY_DEBUG_CLEAR();
 #endif
                retVal = (returnStatus_t)NV_BUSY();
             }
@@ -1285,7 +1327,9 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( MCU_SELECTED == NXP_K24 )
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_SPI_e );   /* Make pin SPI again MISO */
 #elif ( MCU_SELECTED == RA6E1 )
-      (void)NV_MISO_CFG( BSP_IO_PORT_05_PIN_03, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_QSPI) );
+/* Now that we are using a separate GPIO pin (P505) for the busy-complete interrupt in Rev B of the RA6E1 board,   *
+ * the MISO pin can always remainwith the QSPI peripheral.  So we no longer need the following line.               */
+/*    (void)NV_MISO_CFG( NV_MISO_PIN_NUMBER, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_QSPI) ) */
 #endif
    }
    else
@@ -1748,7 +1792,7 @@ static void enableWrites( uint8_t port )
 #elif ( MCU_SELECTED == RA6E1 )
    ( void )NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof ( instr ), false ); /* WR the Instr to the chip */
 #endif
-   NV_CS_INACTIVE(); /* Activate the chip select  */
+   NV_CS_INACTIVE(); /* Release the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
    NV_SPI_MutexUnlock(port);
 #elif ( RTOS_SELECTION == FREE_RTOS )
@@ -2092,6 +2136,16 @@ void isr_busy( external_irq_callback_args_t * p_args )
 #if ( MCU_SELECTED == NXP_K24 )
       OS_SEM_Post( &extFlashSem_ );  /* Post the semaphore */
 #elif ( MCU_SELECTED == RA6E1 )
+   #if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+      DVR_ExtflashInterruptCounter++;
+      if ( 0 != DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] )
+      {
+         DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] = ( (DWT->CYCCNT) - DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] ) / DVR_ExtflashDivisor;
+         DVR_ExtflashIndex++;
+         if ( DVR_ExtflashIndex >= NUM_TIMING_SAMPLES ) DVR_ExtflashIndex = 0;
+         DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] = 0;
+      }
+   #endif
       OS_SEM_Post_fromISR( &extFlashSem_ );  /* Post the semaphore */
 #endif
    }

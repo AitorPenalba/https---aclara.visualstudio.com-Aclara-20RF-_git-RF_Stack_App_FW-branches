@@ -510,7 +510,7 @@ enum HMC_APP_API_RPLY
    The exception is specialized modules like buffer management */
 typedef struct
 {
-#if 0 // TODO: RA6E1 - Queue handling
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_QUEUE_Element  QueueElement;  /* QueueElement as defined by MQX */
 #endif
    uint8_t           msgType;       // Type of message
@@ -547,12 +547,11 @@ typedef enum
    eCFG_SYS_MSG_TYPE_TIME_THRES_EXCEEDED_REV,
    eCFG_SYS_MSG_TYPE_RSSI_AGEING_TIMEOUT,
 } cfgSysMsgTypes_t;
+#if ( RTOS_SELECTION == MQX_RTOS )
 /* Data format to pass to the Any Application - This is the 'Standard' Queue Format */
 typedef struct
 {
-#if 0 // TODO: RA6E1 - Queue handling
    OS_QUEUE_Element  QueueElement;   /* QueueElement as defined by MQX */
-#endif
    uint8_t ucPacketFormat; /* Pointer style or Structure, 0 = Pointers, 1 = Structure */
    uint8_t ucMsgType; /* Type of message */
 
@@ -566,6 +565,7 @@ typedef struct
       uint8_t ucBuffer[CFG_SYS_BUFFER_SIZE];
    } uData;
 } tSysQueueFormat;
+#endif
 /* ****************************************************************************************************************** */
 /* GLOBAL VARIABLES */
 

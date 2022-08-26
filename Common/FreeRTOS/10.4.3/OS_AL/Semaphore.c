@@ -208,11 +208,13 @@ bool OS_SEM_PEND ( OS_SEM_Handle SemHandle, uint32_t Timeout_msec, char *file, i
   Notes:
 
 *******************************************************************************/
+static uint32_t OS_SEM_PostFromIsrFailures = 0;
 void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
 {
    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
    if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
+      OS_SEM_PostFromIsrFailures++;
       /* TODO: */
       //      APP_ERR_PRINT("OS_SEM_POST!");
       //      EVL_FirmwareError( "OS_SEM_Post" , file, line );
@@ -271,47 +273,3 @@ void OS_SEM_Reset ( OS_SEM_Handle SemHandle )
       RetStatus = xSemaphoreTake ( *SemHandle, ( TickType_t )0 );
    } while ( RetStatus != pdFAIL );
 } /* end OS_SEM_Reset () */
-
-
-#if (TM_SEMAPHORE == 1)
-static OS_SEM_Obj       testSem_ = NULL;
-static volatile uint8_t counter = 0;
-void OS_SEM_TestCreate ( void )
-{
-   if( OS_SEM_Create(&testSem_, 0) )
-   {
-      counter++;
-   }
-   else
-   {
-      counter++;
-      APP_ERR_PRINT("Unable to Create the Mutex!");
-   }
-
-}
-bool OS_SEM_TestPend( void )
-{
-   bool retVal = false;
-   if( OS_SEM_Pend(&testSem_, OS_WAIT_FOREVER) )
-   {
-      counter--;
-      retVal = true;
-   }
-
-   if( 0 == counter )
-   {
-      APP_PRINT("Success");
-   }
-   else
-   {
-      APP_ERR_PRINT("Fail");
-   }
-   return(retVal);
-}
-
-void OS_SEM_TestPost( void )
-{
-   OS_SEM_Post(&testSem_);
-}
-
-#endif

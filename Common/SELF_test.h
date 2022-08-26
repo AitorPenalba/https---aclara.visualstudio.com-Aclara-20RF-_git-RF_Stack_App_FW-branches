@@ -58,7 +58,12 @@ typedef struct
          uint16_t    securityBFCFail :   1;
          uint16_t    securityFail    :   1;
          uint16_t    sdRAMFail       :   1;
+#if ( ( TEST_MODE_ENABLE == 1) && ( ( TM_SEMAPHORE == 1 ) || ( TM_MSGQ == 1 ) || ( TM_EVENTS == 1 ) || ( TM_QUEUE == 1 ) || ( TM_MUTEX == 1) ) )
+         uint16_t    testModulesFail :   1;
+         uint16_t    RSVD            :   10;
+#else
          uint16_t    RSVD            :   11;
+#endif
       }Bits;
       uint16_t Bytes;
    }uAllResults;
