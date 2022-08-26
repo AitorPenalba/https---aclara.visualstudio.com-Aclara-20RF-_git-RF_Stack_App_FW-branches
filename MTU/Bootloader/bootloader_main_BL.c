@@ -713,12 +713,23 @@ int BL_MAIN_Main( void )
          /* check for possible bootloader info */
          while ( ( DFWInfoIdx < ARRAY_IDX_CNT( DFWinfo ) ) )  /* Loop while in valid DFWinfo[] range and */
          {
-            /* Read a DFWInfo_t from the DFW info partition.   */
+#if ( MCU_SELECTED == RA6E1)
+            /* is DFW INFO blank in the DFW BL INFO partition? */
+            if ( eSUCCESS == PAR_partitionFptr.parBlankCheck( 
+                                                PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
+                                                sizeof( DfwBlInfo_t ), pDFWinfo ))
+            {
+               /* blank indicates no update, skip */
+            }
+            else
+#endif
+            {
+               /* Read an update segment from the DFW BL INFO partition.   */
             if ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
                                                 PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
                                                 sizeof( DfwBlInfo_t ), pDFWinfo ))
             {
-               /* update info indicates an image is available? */
+                  /* update info length indicates an image is available? */
                if ( DFWinfo[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
                {
                   /* collect update info and begin update */
