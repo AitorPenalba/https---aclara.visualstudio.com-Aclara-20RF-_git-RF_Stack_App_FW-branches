@@ -73,6 +73,7 @@ uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv
 uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_BL_Test_Clear_BL_Info( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_BL_Test_Erase_BL_Info( uint32_t argc, char *argv[] );
 #endif
 
 uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] );

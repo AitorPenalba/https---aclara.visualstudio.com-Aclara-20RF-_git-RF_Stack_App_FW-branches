@@ -89,6 +89,7 @@
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "ecc108_freertos.h"
 #include "crc.h"
+#include "crc32.h"
 #endif
 #include "ecc108_lib_return_codes.h"
 //#include "compiler_types.h"
@@ -894,7 +895,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #ifdef TM_BL_TEST_COMMANDS
    { "blwritetestimage",     DBG_CommandLine_BL_Test_Write_DFW_Image,   "Write known data (increasing 32-bit values) to external Flash DFW partition" },
    { "blwriteblinfo",        DBG_CommandLine_BL_Test_Write_BL_Info,     "Write test BL_INFO to data flash" },
-   { "bleraseblinfo",        DBG_CommandLine_BL_Test_Clear_BL_Info,     "Erase test BL_INFO to data flash" },
+   { "blclearblinfo",        DBG_CommandLine_BL_Test_Clear_BL_Info,     "Clear (0xFF) test BL_INFO in data flash" },
+   { "bleraseblinfo",        DBG_CommandLine_BL_Test_Erase_BL_Info,     "Erase (blank) test BL_INFO in data flash" },
 #endif
 #endif
 #if ( TM_LINKED_LIST == 1)
@@ -3035,14 +3037,16 @@ uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv
    Returns: retVal - Successful status of this function
 
 *******************************************************************************/
-#define TEST_DATA_BLOCK_SIZE    (1024)
-#define TEST_DATA_SIZE          (10  * TEST_DATA_BLOCK_SIZE)  /* 10K Bytes */
+#define TEST_DATA_BLOCK_SIZE    (1024)                         /* must be a multiple of 4 */
+#define TEST_DATA_SIZE          (10  * TEST_DATA_BLOCK_SIZE)   /* 10K Bytes */
 uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
    uint32_t writeData[TEST_DATA_BLOCK_SIZE / sizeof(uint32_t)];
    uint32_t dfwOffset;
    uint32_t dataIndex;
+   crc32Cfg_t crcCfg;
+   uint32_t dataCrc32 = 0xFFFFFFFF;
 
    /* open DFW partition */
    retVal = PAR_partitionFptr.parOpen( &pTM_BL_Test_Part_, ePART_DFW_PGM_IMAGE, 0L );
@@ -3057,6 +3061,9 @@ uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
          /* write known data */
          dataIndex = 0;
          dfwOffset = 0;
+         
+         CRC32_init(CRC32_DFW_START_VALUE, CRC32_DFW_POLY, eCRC32_RESULT_INVERT, &crcCfg);
+         
          while (dfwOffset < TEST_DATA_SIZE) {
             /* create known data block (increasing 32-bit values) */
             uint32_t* puint32Data = (uint32_t*) writeData;
@@ -3066,6 +3073,8 @@ uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
                puint32Data++;
                dataIndex++;
             }
+            /* add to CRC32 calculation */
+            dataCrc32 = CRC32_calc( &writeData[0], TEST_DATA_BLOCK_SIZE, &crcCfg );
          
             /* write test data to DFW partition */
             retVal = PAR_partitionFptr.parWrite(dfwOffset, (uint8_t*) writeData, TEST_DATA_BLOCK_SIZE,  pTM_BL_Test_Part_ );
@@ -3083,27 +3092,20 @@ uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
       {
           DBG_logPrintf( 'E', "Unable to erase %d bytes at offset 0x0 in DFW partition [%d]", TEST_DATA_SIZE, retVal );
       }
-
-      /* close DFW partition */
-       retVal = PAR_partitionFptr.parClose( pTM_BL_Test_Part_ );
-      if ( retVal != eSUCCESS)
-      {
-         DBG_logPrintf( 'E', "Unable to close DFW partition [%d]", retVal );
-      } 
    }
    else
    {
        DBG_logPrintf( 'E', "Unable to open DFW partition [%d]", retVal );
    }
 
-
+   DBG_logPrintf( 'I', "CRC32 for %d bytes of test data is: %d (0x%08X)", TEST_DATA_SIZE, dataCrc32, dataCrc32 );
 
    return retVal;
 }
 #endif
 
 #ifdef TM_BL_TEST_COMMANDS
-static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length)
+static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length, bool eraseOnly)
 {
    returnStatus_t retVal;
    
@@ -3116,27 +3118,23 @@ static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length)
       if ( eSUCCESS == retVal)
       {
          DBG_logPrintf( 'I', "Erased %d bytes at offset 0x0 in DFW BL INFO partition", INT_FLASH_ERASE_SIZE );
-         /* write BL INFO to DFW partition */
-         retVal = PAR_partitionFptr.parWrite(PART_DFW_BL_INFO_DATA_OFFSET, pDFWinfo, length, pTM_BL_Test_Part_ );
-         if ( retVal != eSUCCESS)
+         if (!eraseOnly)
          {
-            DBG_logPrintf( 'E', "Unable to write %d bytes at offset 0x0 in DFW BL INFO partition [%d]", length, retVal );
-         }
-         else
-         {
-            DBG_logPrintf( 'I', "Wrote %d bytes at offset 0x%X to DFW BL INFO partition", length, PART_DFW_BL_INFO_DATA_OFFSET);
+            /* write BL INFO to DFW partition */
+            retVal = PAR_partitionFptr.parWrite(PART_DFW_BL_INFO_DATA_OFFSET, pDFWinfo, length, pTM_BL_Test_Part_ );
+            if ( retVal != eSUCCESS)
+            {
+               DBG_logPrintf( 'E', "Unable to write %d bytes at offset 0x0 in DFW BL INFO partition [%d]", length, retVal );
+            }
+            else
+            {
+               DBG_logPrintf( 'I', "Wrote %d bytes at offset 0x%X to DFW BL INFO partition", length, PART_DFW_BL_INFO_DATA_OFFSET);
+            }
          }
       }
       else
       {
-         DBG_logPrintf( 'E', "Unable to erase %d bytes at offset 0x0 in DFW partition [%d]", length, retVal );
-      }
-      
-      /* close DFW partition */
-      retVal = PAR_partitionFptr.parClose( pTM_BL_Test_Part_ );
-      if ( retVal != eSUCCESS)
-      {
-         DBG_logPrintf( 'E', "Unable to close DFW partition [%d]", retVal );
+         DBG_logPrintf( 'E', "Unable to erase %d bytes at offset 0x0 in DFW BL INFO partition [%d]", INT_FLASH_ERASE_SIZE, retVal );
       }
    }
    else
@@ -3160,16 +3158,27 @@ static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length)
 
 *******************************************************************************/
 #define MAX_COPY_RANGES          2          /* Maximum number of ranges to copy from NV to ROM.   */
-#define UNUSED_APP_OFFSET       0xD0000     /* unused section of APP Code space */
+#define UNUSED_APP_OFFSET       0xD0000     /* unused section of APP Code space - this will place the data at APP_START + OFFSET (0xD4000) */
 uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
 {
    DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ];
+
+   /* command must include CRC value */
+   if ( argc < 2 )
+   {
+      DBG_logPrintf( 'I', "Usage: %s crc where crc is the CRC32(dec or 0xXX) to include in the BL INFO", argv[0] );
+      return 0;
+   }
+
+   /* get decimal or hex (0xXXX) CRC value */
+   uint32_t dataCrc32 = strtoull( argv[1], NULL, 0 );
+   DBG_logPrintf( 'I', "Using %d (0x%08X) for test data CRC32", dataCrc32, dataCrc32 );
 
    /* setup test data */
    DFWinfo[0].SrcAddr = 0L;
    DFWinfo[0].DstAddr = UNUSED_APP_OFFSET;
    DFWinfo[0].Length = TEST_DATA_SIZE;
-   DFWinfo[0].CRC = 0x0;                    // Fill in after computing CRC in bootloader
+   DFWinfo[0].CRC = dataCrc32;               // add user entered CRC value (see output of write DFW image command for calculated value)
    DFWinfo[0].FailCount = 0xFFFFFFFF;
 
    DFWinfo[1].SrcAddr = 0xFFFFFFFF;
@@ -3178,14 +3187,14 @@ uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
    DFWinfo[1].CRC = 0xFFFFFFFF;
    DFWinfo[1].FailCount = 0xFFFFFFFF;
 
-   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo));
+   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo), false);
 }
 
 /*******************************************************************************
 
    Function name: DBG_CommandLine_BL_Test_Clear_BL_Info
 
-   Purpose: Writes known data to the DFW partition for testing
+   Purpose: Writes 0xFF data to the DFW BL INFO partition for testing
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -3210,8 +3219,27 @@ uint32_t DBG_CommandLine_BL_Test_Clear_BL_Info( uint32_t argc, char *argv[] )
    DFWinfo[1].FailCount = 0xFFFFFFFF;
    DFWinfo[1].CRC = 0xFFFFFFFF;
 
-   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo));
+   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo), false);
 }
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_BL_Test_Clear_BL_Info
+
+   Purpose: Writes 0xFF data to the DFW BL INFO partition for testing
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_BL_Test_Erase_BL_Info( uint32_t argc, char *argv[] )
+{
+   DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ] = {0};
+   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo), true);
+}
+
 #endif
 
 /*******************************************************************************
