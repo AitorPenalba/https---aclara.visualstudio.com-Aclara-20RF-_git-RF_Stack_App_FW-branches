@@ -478,7 +478,7 @@
 #define NV_CS_INACTIVE()               (GPIOA_PSOR = 1<<14)    /* NV memory chip select pin */
 #define NV_BUSY()                      (~(GPIOA_PDIR >> 17) & 1)/* NV memory chip busy pin */
 #define NV_MISO_CFG(port, cfg)         SPI_misoCfg(port, cfg)
-#define NV_HW_BUYS_DEBUG_CONFIG()      { PORTE_PCR24 = PORT_PCR_MUX(1);   /* Make GPIO   */  \
+#define NV_HW_BUSY_DEBUG_CONFIG()      { PORTE_PCR24 = PORT_PCR_MUX(1);   /* Make GPIO   */  \
                                          GPIOE_PDDR |= ( 1 << 24 );       /* Make output */   }
 #define NV_HW_BUSY_DEBUG_CLEAR()       GPIOE_PCOR = ( 1 << 24 );        /* Set output low */
 #define NV_HW_BUSY_DEBUG_SET()         GPIOE_PSOR = ( 1 << 24 );        /* Set output high, trigger scope */

@@ -158,6 +158,7 @@ static OS_MUTEX_Obj      UART_writeMutex[MAX_UART_ID]    = { NULL };
 static bool              ringBufoverflow[MAX_UART_ID]    = { (bool)false };
 static bool              uartOverflow   [MAX_UART_ID]    = { (bool)false };
 static bool              transmitUARTEnable[MAX_UART_ID] = { (bool)false };
+static bool              currentEchoing [MAX_UART_ID]    = { (bool)false };
 static const char        CRLF[] = { '\r', '\n' };        /* For RA6E1, Used to Process Carriage return */
 static bool              dbgUartEchoEnable_ = (bool)true;
 static bool              UART_initReady_    = (bool)false;
@@ -200,14 +201,21 @@ static void UART_CallbackHandler( enum_UART_ID UartId, bool echoRequired, uart_c
          case UART_EVENT_TX_COMPLETE:
          {
             TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventTxComplete );
-            if ( ( echoRequired ) && ( UART_semHandle[ (uint32_t)UartId ].echoUART_sem != NULL ) )
+            if ( currentEchoing[ (uint32_t)UartId ] )
             {
-               OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
+               if ( ( echoRequired ) && ( UART_semHandle[ (uint32_t)UartId ].echoUART_sem != NULL ) )
+               {
+                  OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
+               }
+               currentEchoing[ (uint32_t)UartId ] = false;
             }
-            if ( transmitUARTEnable[ (uint32_t)UartId ] )
+            else
             {
-               OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
-               transmitUARTEnable[ (uint32_t)UartId ] = false;
+               if ( transmitUARTEnable[ (uint32_t)UartId ] )
+               {
+                  OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+                  transmitUARTEnable[ (uint32_t)UartId ] = false;
+               }
             }
             break;
          }
@@ -410,6 +418,7 @@ returnStatus_t UART_init ( void )
       ringBufoverflow[i] = false;
       uartOverflow[i] = false;
       transmitUARTEnable[i] = false;
+      currentEchoing[i] = false;
       uartRingBuf[i].head = 0;
       uartRingBuf[i].tail = 0;
 
@@ -586,35 +595,36 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
       {
          if ( DataLength > 1 )
          {
-            transmitUARTEnable[UartId] = true;
             OS_MUTEX_Lock  ( &UART_writeMutex[ (uint32_t)UartId ] );
+            transmitUARTEnable[UartId] = true;
+            currentEchoing    [UartId] = false;
             ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength-1 );
-            OS_MUTEX_Unlock( &UART_writeMutex[ (uint32_t)UartId ] );
             TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendBefore );
             ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
             TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendAfter  );
+            OS_MUTEX_Unlock( &UART_writeMutex[ (uint32_t)UartId ] );
    //         OS_TASK_Sleep( (uint32_t) 10 );  // It requires a sleep of 10 ms for this write to process/transmit the data completely
          }
-
-         transmitUARTEnable[UartId] = true;
-         TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendBefore );
          OS_MUTEX_Lock  ( &UART_writeMutex[ (uint32_t)UartId ] );
+         transmitUARTEnable[UartId] = true;
+         currentEchoing    [UartId] = false;
+         TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendBefore );
          ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], (uint8_t *)&CRLF, sizeof(CRLF) );
-         OS_MUTEX_Unlock( &UART_writeMutex[ (uint32_t)UartId ] );
          ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
          TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendAfter  );
+         OS_MUTEX_Unlock( &UART_writeMutex[ (uint32_t)UartId ] );
       }
       else if ( DataLength > 0 ) /* Avoid potential problems with a zero-length write */
       {
          TM_UART_COUNTER_INC( uart_events[UartId].basicUARTWriteVar );
-         transmitUARTEnable[UartId] = true;
          OS_MUTEX_Lock  ( &UART_writeMutex[ (uint32_t)UartId ] );
+         transmitUARTEnable[UartId] = true;
+         currentEchoing    [UartId] = false;
          ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-         OS_MUTEX_Unlock( &UART_writeMutex[ (uint32_t)UartId ] );
          TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendBefore );
          ( void )OS_SEM_Pend( &UART_semHandle[UartId].transmitUART_sem, OS_WAIT_FOREVER );
          TM_UART_COUNTER_INC( uart_events[UartId].uartWritePendAfter  );
-
+         OS_MUTEX_Unlock( &UART_writeMutex[ (uint32_t)UartId ] );
       }
    }
    else if ( UartId == UART_DEBUG_PORT )
@@ -754,11 +764,12 @@ extern uint32_t UART_echo ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint
             {
                TM_UART_COUNTER_INC( uart_events[UartId].UARTechoVar );
                OS_MUTEX_Lock  ( &UART_writeMutex[ (uint32_t)UartId ] );
+               currentEchoing[ (uint32_t)UartId ] = true;
                ( void )R_SCI_UART_Write( (void *)UartCtrl[ UartId ], DataBuffer, DataLength );
-               OS_MUTEX_Unlock( &UART_writeMutex[ (uint32_t)UartId ] );
                TM_UART_COUNTER_INC( uart_events[UartId].uartEchoPendBefore );
                ( void )OS_SEM_Pend( &UART_semHandle[UartId].echoUART_sem, OS_WAIT_FOREVER );
                TM_UART_COUNTER_INC( uart_events[UartId].uartEchoPendAfter  );
+               OS_MUTEX_Unlock( &UART_writeMutex[ (uint32_t)UartId ] );
             }
          }
          else
