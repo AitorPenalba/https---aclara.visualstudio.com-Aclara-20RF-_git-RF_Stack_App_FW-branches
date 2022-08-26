@@ -803,6 +803,7 @@ static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t co
    }
    else if( ( destAddr >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( destAddr <= FLASH_HP_DATAFLASH_END_ADDRESS ) )
    {
+      /* check for data flash in erased state (BGO operation if enabled) */
       err = R_FLASH_HP_BlankCheck( &g_flash0_ctrl, destAddr, cnt, &blankCheckResult );
 #ifndef __BOOTLOADER
       if (err == FSP_SUCCESS)
@@ -825,7 +826,7 @@ static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t co
       }
 #endif    /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
    }
-   /*Note: if R_FLASH_HP_BlankCheck result is not FSP_SUCCESS not successful, default result is NOT_BLANK */
+   /*Note: if R_FLASH_HP_BlankCheck result is not FSP_SUCCESS, default result is NOT_BLANK */
       
    /* translate FSP error into an error similar to what would be returned by flashErase */
    eRetVal = (( FLASH_RESULT_BLANK == blankCheckResult ) && (FSP_SUCCESS == err)) ? eSUCCESS : eFAILURE;
