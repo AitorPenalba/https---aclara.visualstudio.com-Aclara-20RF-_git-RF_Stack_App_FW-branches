@@ -268,7 +268,7 @@ void delay_10us( uint32_t delay )
    endTime = startTime;
    localDelay = delay * 10;
 
-   while ( ( uint32_t ) OS_TICK_Get_Diff_InMicroseconds( &endTime, &startTime ) < localDelay )
+   while ( ( uint32_t ) OS_TICK_Get_Diff_InMicroseconds(  &startTime , &endTime ) < localDelay )
    {
       OS_TICK_Get_CurrentElapsedTicks( &endTime );
    }
@@ -320,20 +320,26 @@ void i2c_wakeUp(void)
 ***********************************************************************************************************************/
 uint8_t i2c_receive_response( uint8_t size, uint8_t *response )
 {
+   uint8_t status;
    fsp_err_t err = FSP_SUCCESS;
    err = R_IIC_MASTER_Read(&g_i2c_master0_ctrl, response, size, false);
    if (err == FSP_SUCCESS)
    {
+      status = (uint8_t)err;
       /* Pend for the receive complete interrupt. Wait for only certain time as there
        * won't be replies for every tranmit command from the security chip */
       ( void ) OS_SEM_Pend( &_i2cTransmitRecieveSem, WRITE_READ_IIC_TIMEOUT );
       if( I2C_MASTER_EVENT_RX_COMPLETE != i2c_event )
       {
-         err = (uint8_t) ECC108_RX_NO_RESPONSE;
+         status = ECC108_RX_NO_RESPONSE;
       }
    }
+   else
+   {
+      status = (uint8_t)err;
+   }
 
-   return (uint8_t) err;
+   return status;
 }
 
 /***********************************************************************************************************************
@@ -379,6 +385,7 @@ uint8_t ecc108p_flush( void )
 ***********************************************************************************************************************/
 uint8_t i2c_send( uint8_t word_address, uint8_t count, uint8_t *buffer )
 {
+   uint8_t status;
    fsp_err_t err = FSP_SUCCESS;
    memset(sendVal, 0, sizeof(sendVal));
    uint8_t sendCount = count + 1;
@@ -389,13 +396,14 @@ uint8_t i2c_send( uint8_t word_address, uint8_t count, uint8_t *buffer )
    }
 
    err = R_IIC_MASTER_Write( &g_i2c_master0_ctrl, sendVal, sendCount, false );
+   status = (uint8_t)err;
    /* Pend for the transmit complete. Wait for only certain time to avoid hung up
     * as there wont be any interrupts for the reset and sleep commands from the security chip */
    ( void ) OS_SEM_Pend( &_i2cTransmitRecieveSem, WRITE_READ_IIC_TIMEOUT );
    if( I2C_MASTER_EVENT_TX_COMPLETE != i2c_event )
    {
-      err = (uint8_t) ECC108_GEN_FAIL;
+      status = ECC108_GEN_FAIL;
    }
 
-   return (uint8_t) err;
+   return status;
 }

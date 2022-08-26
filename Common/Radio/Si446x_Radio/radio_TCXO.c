@@ -329,8 +329,6 @@ void RADIO_Update_Freq( void )
    Disable_DMA_Reset_Filter();
 
    DMAcntr  = 0; // Reset DMA Major loop counter
-
-
    // Disable DMA channel before configuration
    DMA_CERQ = RADIO_CLK_DMA_CH; // Disable DMA channel before programming
    DMA_CINT = RADIO_CLK_DMA_CH; // Clear any pending interrupts

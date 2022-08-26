@@ -100,7 +100,7 @@
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)119)   /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)125)   /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -122,7 +122,7 @@ static char const HWVersionDefault[] =
   "A.1.99852"      /* Y99852-1   (ILC) default hardware revision */
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84030_1_REV_A )
   "B.301-XA.84024"      /* Y84030-1   (K24 KV2c)  default hardware revision */
-#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
+#elif ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) || ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B ) )
    #define DASH_NUMBER_OFFSET 2 /* This must correspond to the position of the 'x' in the string below */
   "A.x.84580"           /* Y84580-x where 1 = Maxim boost, 2 = TI boost */
 #else

@@ -181,16 +181,6 @@ returnStatus_t DBG_init( void )
          }
       }
    }
-#if (TM_SEMAPHORE == 1)
-OS_SEM_TestCreate();
-#endif
-#if (TM_MSGQ == 1)
-OS_MSGQ_TestCreate();
-#endif
-#if( TM_EVENTS == 1 )
-OS_EVENT_TestCreate();
-#endif
-
    DBG_PortTimer_Manage ( );
    DBG_PortEcho_Set( DBG_PortEcho_Get() ); // Get the echo setting and update the current UART setting
    return( retVal );
@@ -208,19 +198,8 @@ OS_EVENT_TestCreate();
  **********************************************************************************************************************/
 void DBG_TxTask( taskParameter )
 {
-   /* TODO: RA6: Move these TM_xxx code to appropriate location */
-#if (TM_SEMAPHORE == 1)
-   OS_SEM_TestPost();
-#endif
-#if (TM_MSGQ == 1)
-   OS_MSGQ_TestPost();
-#endif
-#if( TM_EVENTS == 1 )
-   OS_EVENT_TestSet();
-#endif
    for ( ; ; )
    {
-
       buffer_t *pBuf;
       (void)OS_MSGQ_Pend( &mQueueHandle_, ( void * )&pBuf, OS_WAIT_FOREVER );  /* Check for message in the queue */
       OS_MUTEX_Lock( &mutex_ ); // Function will not return if it fails
