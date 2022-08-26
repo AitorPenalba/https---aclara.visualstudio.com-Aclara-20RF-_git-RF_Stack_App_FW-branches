@@ -122,7 +122,7 @@
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #define OS_INT_disable()                               taskENTER_CRITICAL()
 #define OS_INT_enable()                                 taskEXIT_CRITICAL()
-#define OS_INT_ISR_disable()                  taskENTER_CRITICAL_FROM_ISR() // this returs a value to be used for the enable
+#define OS_INT_ISR_disable()                  taskENTER_CRITICAL_FROM_ISR() // this returns a value to be used for the enable
 #define OS_INT_ISR_enable(x)                   taskEXIT_CRITICAL_FROM_ISR(x)
 #define OS_TASK_Yield()                                         taskYIELD()
 #endif
@@ -135,6 +135,11 @@
 #define OS_MSGQ_Create( MsgqHandle, numItems, name )     OS_MSGQ_CREATE( MsgqHandle, numItems, name )
 #else
 #define OS_MSGQ_Create( MsgqHandle, numItems, name )     OS_MSGQ_CREATE( MsgqHandle, numItems)
+#endif
+#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+#define OS_QUEUE_Create(QueueHandle, QueueLength, name)  OS_QUEUE_CREATE( QueueHandle_t, QueueLength, name )
+#else
+#define OS_QUEUE_Create(QueueHandle, QueueLength, name)  OS_QUEUE_CREATE( QueueHandle, QueueLength )
 #endif
 #define OS_MSGQ_Post(MsgqHandle, MessageData)            OS_MSGQ_POST(MsgqHandle, MessageData, (bool)true, __FILE__, __LINE__)
 #define OS_MSGQ_Post_RetStatus(MsgqHandle, MessageData)  OS_MSGQ_POST_RetStatus(MsgqHandle, MessageData, (bool)true, __FILE__, __LINE__)
@@ -287,7 +292,6 @@ typedef struct
 #endif
 
 
-//#endif //#if ( RTOS_SELECTION == MQX_RTOS )
 typedef enum
 {
   eSYSFMT_NULL = ((uint8_t)0),
@@ -412,9 +416,9 @@ returnStatus_t OS_MSGQ_POST_RetStatus ( OS_MSGQ_Handle MsgqHandle, void *Message
 bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
 
 #if ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 )
-bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, char *name );
+bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, char *name );
 #else
-bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength );
+bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength );
 #endif
 void OS_QUEUE_ENQUEUE ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );
 returnStatus_t OS_QUEUE_ENQUEUE_RetStatus ( OS_QUEUE_Handle QueueHandle, void *QueueElement, char *file, int line );

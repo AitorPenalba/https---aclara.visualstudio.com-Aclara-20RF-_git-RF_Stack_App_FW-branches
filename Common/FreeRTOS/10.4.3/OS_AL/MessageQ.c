@@ -54,11 +54,11 @@ bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
 #endif
 {
    bool RetStatus = true;
-#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+//#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
    if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), NumMessages, name) )
-#else
-   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), NumMessages) )
-#endif
+//#else // TODO: RA6E1: Remove the commented code
+//   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), NumMessages) )
+//#endif
    {
       RetStatus = false;
    } /* end if() */
