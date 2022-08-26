@@ -39,9 +39,6 @@
  * \atmel_crypto_device_library_license_stop
  */
 #include "project.h"
-#if ( MCU_SELECTED == RA6E1 )
-#include "hal_data.h"
-#endif
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>                       // Need mqx types
 #include <fio.h>                       // mqx file types

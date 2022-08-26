@@ -180,7 +180,11 @@ returnStatus_t HMC_APP_RTOS_Init( void )
    returnStatus_t retVal = eSUCCESS;   /* Return value */
 
    /* Create queue needed for Meter Applets */
+#if 1
    if ( !OS_QUEUE_Create( &HMC_APP_QueueHandle, HMC_APP_QUEUE_SIZE, "HMC_APP" ) )
+#else // TODO: RA6E1: Fix this 
+   if ( !OS_QUEUE_Create( &HMC_APP_QueueHandle, HMC_APP_QUEUE_SIZE) )
+#endif
    {
       /* Queue create failed */
       retVal = eFAILURE;

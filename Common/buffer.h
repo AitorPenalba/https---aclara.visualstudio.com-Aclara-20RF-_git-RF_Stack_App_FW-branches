@@ -198,11 +198,16 @@ BM_EXTERN const bufferPoolParams_t BM_bufferPoolParams[14]   /* Note:  Must chan
    { "qBufferS516",    516,    6, eBM_STACK, eBM_INT_RAM      },
    { "qBufferS1320",  1320,    4, eBM_STACK, eBM_INT_RAM      },
    { "qBufferS1752",  1920,    3, eBM_STACK, eBM_INT_RAM      },
+   { "qBufferS1752",  2200,    1, eBM_STACK, eBM_INT_RAM      }, // TODO: RA6E1: Buffer size of 2108 was required by WolfSSL Lib
 #if ( DTLS_DEBUG == 1 )
+#if ( MCU_SELECTED == NXP_K24 )
    { "qBufferS1752",    36,  100, eBM_DEBUG, eBM_EXT_RAM    }, // Many DTLS_DEBUG alloc/free messages fit this smaller size
+#elif ( MCU_SELECTED == RA6E1 )
+   { "qBufferS1752",    36,  100, eBM_DEBUG, eBM_INT_RAM    }, // Many DTLS_DEBUG alloc/free messages fit this smaller size
 #endif
-   { "qBufferD120",    120,   100, /* 40, */ eBM_DEBUG, eBM_INT_RAM      }, // TODO: RA6E1 Bob: temporarily increase number of debug buffers, restore later!
-   { "qBufferD192",    192,    50, /* 5,  */ eBM_DEBUG, eBM_INT_RAM      }, // TODO: RA6E1 Bob: temporarily increase number of debug buffers, restore later!
+#endif
+   { "qBufferD120",    120,   40, /* 40, */ eBM_DEBUG, eBM_INT_RAM      }, // TODO: RA6E1 Bob: temporarily increase number of debug buffers, restore later!
+//   { "qBufferD192",    192,    5, /* 5,  */ eBM_DEBUG, eBM_INT_RAM      }, // TODO: RA6E1 Bob: temporarily increase number of debug buffers, restore later!
    { "qBufferD400",    DEBUG_MSG_SIZE,    3, eBM_DEBUG,     eBM_INT_RAM      }  // Maximum debug line size. Very rare; may be used by dtls and PHY and U? command
 #else //No BM_USE_KERNEL_AWARE_DEBUGGING
    /* size, count, Buffer Type */
@@ -219,7 +224,11 @@ BM_EXTERN const bufferPoolParams_t BM_bufferPoolParams[14]   /* Note:  Must chan
    {  1320,     8, eBM_STACK, eBM_INT_RAM    },
    {  1920,     6, eBM_STACK, eBM_INT_RAM    },
 #if ( DTLS_DEBUG == 1 )
+#if ( MCU_SELECTED == NXP_K24 )
    {    36,   100, eBM_DEBUG, eBM_EXT_RAM    }, // Many DTLS_DEBUG alloc/free messages fit this smaller size
+#elif ( MCU_SELECTED == RA6E1 )
+   {    36,   100, eBM_DEBUG, eBM_INT_RAM    }, // Many DTLS_DEBUG alloc/free messages fit this smaller size
+#endif
 #endif
    {   120,    40, eBM_DEBUG, eBM_INT_RAM    }, // Most Debug prints on one line (less than 120 characters)
    {   192,    10, eBM_DEBUG, eBM_INT_RAM    },
