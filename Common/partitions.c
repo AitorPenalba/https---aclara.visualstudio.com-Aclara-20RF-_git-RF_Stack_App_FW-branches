@@ -83,7 +83,6 @@ static bool flushPartitions_ = (bool)false;
 
 static returnStatus_t init( void );
 static returnStatus_t open( PartitionData_t const **pPartitionTbl, const ePartitionName ePartitionId, uint32_t u32UpdateRate );
-static returnStatus_t close( PartitionData_t const *pPartitionTbl );
 static returnStatus_t read( uint8_t *pDest, const dSize dSrc, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t write( const dSize dDest, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t erase( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
@@ -92,6 +91,7 @@ static returnStatus_t blankCheck( lAddr lDest, lCnt Cnt, PartitionData_t const *
 #endif
 static returnStatus_t size(const ePartitionName ePName, lCnt *pPartitionSize);
 #ifndef __BOOTLOADER
+static returnStatus_t close( PartitionData_t const *pPartitionTbl );
 static returnStatus_t pwrMode( const ePowerMode powerMode );
 static returnStatus_t flush( PartitionData_t const * );
 static returnStatus_t restore( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
@@ -111,7 +111,7 @@ const PartitionTbl_t PAR_partitionFptr =
 #ifdef __BOOTLOADER
    .parInit       = init,        /* Initialize each partition in the partition list */
    .parOpen       = open,        /* Opens each partition in the partition list*/
-   .parClose      = close,       /* Closes the desired partition */
+   .parClose      = NULL ,       /* Close - not needed for bootloader */
    .parMode       = NULL,        /* Sets the power mode in the drivers.  Used for system power down and normal run modes. */
    .parRead       = read,        /* Reads data from the desired partition */
    .parWrite      = write,       /* writes data from the desired partition */
@@ -334,6 +334,7 @@ static returnStatus_t open( PartitionData_t const **pPartitionTbl,
    return (eRetVal);
 }
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: close
@@ -353,6 +354,7 @@ static returnStatus_t close( PartitionData_t const *pPartitionTbl )
 {
    return ((*pPartitionTbl->pDriverTbl)->devClose(pPartitionTbl, pPartitionTbl->pDriverTbl + 1));
 }
+#endif
 
 #ifndef __BOOTLOADER
 /***********************************************************************************************************************

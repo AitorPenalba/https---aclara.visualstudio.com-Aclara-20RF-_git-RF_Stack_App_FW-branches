@@ -71,11 +71,11 @@
 #include "byteswap.h"
 #ifndef __BOOTLOADER
 #include "DBG_SerialDebug.h"
-#endif   /* BOOTLOADER  */
-#include "dvr_sharedMem.h"
 #if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
 #include "sys_clock.h"
 #endif
+#endif   /* NOT __BOOTLOADER  */
+#include "dvr_sharedMem.h"
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
@@ -245,7 +245,6 @@ PACK_END
 /* Functions accessed via a table entry (indirect call) */
 static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNextDvr );
-static returnStatus_t close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cnt, PartitionData_t const *pParData,
                                 DeviceDriverMem_t const * const * pNextDvr );
 #if ( MCU_SELECTED == RA6E1 )
@@ -254,6 +253,7 @@ static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t co
 #endif
 
 #ifndef __BOOTLOADER
+static returnStatus_t close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData,
                                DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pParData,
@@ -345,7 +345,7 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
 #ifdef __BOOTLOADER
    .devInit       = init,        // Init function - Empty function for BOOTLOADER
    .devOpen       = dvr_open,    // Open Command - For this implementation it only calls the lower level drivers.
-   .devClose      = close,       // Close Command - For this implementation it only calls the lower level drivers.
+   .devClose      = NULL,        // Close - not required by bootloader
    .devSetPwrMode = NULL,        // Power Mode - not required by bootloader
    .devRead       = dvr_read,    // Read Command
    .devWrite      = NULL,        // Write - not required by bootloader
@@ -428,7 +428,6 @@ STATIC eDVR_EFL_IoctlRtosCmds_t rtosCmds_ = eRtosCmdsEn;   /* eRtosCmdsDis or eR
 //STATIC bool rtosCmds_ = (bool)eRtosCmdsEn;  /* eRtosCmdsDis or eRtosCmdsEn */
 STATIC const DeviceId_t *pChipId_ = &sDeviceId[0];  /* Flash Mem MFG, Points to the sDeviceId table, init to DEFAULT. */
 
-#endif
 #if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
 #define NUM_TIMING_SAMPLES 1000
 static uint32_t DVR_ExtflashInterruptCounter = 0, DVR_ExtflashIndex = 0, DVR_ExtflashMissedInts = 0;
@@ -436,6 +435,8 @@ static uint32_t DVR_ExtflashInterruptTimeoutWhileBusy = 0;
 static uint32_t DVR_ExtflashInterruptTiming[NUM_TIMING_SAMPLES] = { 0 };
 static uint32_t DVR_ExtflashDivisor = 120;
 #endif
+#endif   /* NOT __BOOTLOADER */
+
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 /***********************************************************************************************************************
@@ -669,6 +670,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
    return ( eRetVal ); /*lint -esym(715,pNextDvr) */
 }
 /*lint +esym(715,pNextDvr) */
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: close
@@ -710,7 +712,9 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
    }
    return ( eSUCCESS );
 }
+#endif  /* NOT BOOTLOADER */
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: pwrMode
@@ -729,7 +733,6 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
    Reentrant Code: Yes - because it is an atomic operation.
 
  **********************************************************************************************************************/
-#ifndef __BOOTLOADER
 /*lint -efunc( 715, pwrMode ) : pNextDvr is not used.  It is a part of the common API. */
 /*lint -efunc( 818, pwrMode ) : pNextDvr is declared correctly.  It is a part of the common API. */
 static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData,

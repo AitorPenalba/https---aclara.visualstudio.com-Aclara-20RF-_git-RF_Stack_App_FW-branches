@@ -123,7 +123,6 @@ typedef enum
 /* START - Functions accessed via a table entry (indirect call) */
 static returnStatus_t   init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const *pNextDvr );
-static returnStatus_t   close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cnt, PartitionData_t const *pParData,
                                  DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pParData,
@@ -133,6 +132,7 @@ static returnStatus_t   erase( dSize destOffset, lCnt Cnt, PartitionData_t const
 static returnStatus_t   blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr );
 #endif
 #ifndef __BOOTLOADER
+static returnStatus_t   close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   setPowerMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   flush( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
 static returnStatus_t   dvr_ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const *pNextDvr );
@@ -175,7 +175,7 @@ const DeviceDriverMem_t IF_deviceDriver =
 #ifdef __BOOTLOADER
    .devInit       = init,           // Init function - Creates mutex & calls lower drivers
    .devOpen       = dvr_open,       // Open Command - For this implementation it only calls the lower level drivers.
-   .devClose      = close,          // Close Command - For this implementation it only calls the lower level drivers.
+   .devClose      = NULL,           // Close - not used in bootloader
    .devSetPwrMode = NULL,           // SetPowerMode - not used in bootloader
    .devRead       = dvr_read,       // Read Command
    .devWrite      = dvr_write,      // Write Command
@@ -377,6 +377,8 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
    return (eSUCCESS);
 #endif
 } /*lint !e715 !e818  Parameters passed in may not be used */
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: close
@@ -414,6 +416,8 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
    return (eSUCCESS);
 #endif
 } /*lint !e715 !e818  Parameters passed in may not be used */
+#endif
+
 /***********************************************************************************************************************
 
    Function Name: dvr_read
