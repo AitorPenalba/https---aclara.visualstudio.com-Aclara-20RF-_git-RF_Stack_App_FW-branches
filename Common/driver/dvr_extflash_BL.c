@@ -492,10 +492,23 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
 #else
    return ( eSUCCESS );
 #endif
-#else
+#else /* NOT RTOS (bootloader) */
+#if ( MCU_SELECTED == RA6E1 )
+   /* initialize QSPI with no busy interrupt */
+   NV_SPI_PORT_INIT( &g_qspi0_ctrl, &g_qspi0_cfg );
+   R_QSPI_SpiProtocolSet(&g_qspi0_ctrl, SPI_FLASH_PROTOCOL_EXTENDED_SPI);
+   
+   /* TODO: RA6: Access needs to be enabled so we can operate the chip select of external flash during startup.
+            Need to investigate if this should be moved to a more appropriate/generic location, otherwise having
+            it here ensures it will be enabled before files stored in NV are utilized. */
+   R_BSP_PinAccessEnable();
+#elif ( MCU_SELECTED == NXP_K24 )
+   /* do nothing, K24 initialization is RTOS-based and focused on the interrupt initialization */
+#endif
    return ( eSUCCESS );
 #endif
 }
+
 /***********************************************************************************************************************
 
    Function Name: dvr_open
