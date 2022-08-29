@@ -2542,7 +2542,4 @@
             <name>$PROJ_DIR$\..\..\..\Aclara_BSP\WDOG_BL.c</name>
         </file>
     </group>
-    <file>
-        <name>$PROJ_DIR$\buildinfo.ipcf</name>
-    </file>
 </project>
