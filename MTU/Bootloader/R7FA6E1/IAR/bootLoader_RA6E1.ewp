@@ -2424,7 +2424,4 @@
             </file>
         </group>
     </group>
-    <file>
-        <name>$PROJ_DIR$\buildinfo.ipcf</name>
-    </file>
 </project>

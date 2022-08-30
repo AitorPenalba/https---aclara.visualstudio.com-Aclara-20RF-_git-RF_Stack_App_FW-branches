@@ -143,7 +143,7 @@ BSP_DONT_REMOVE const exc_ptr_t __Vectors[BSP_CORTEX_VECTOR_TABLE_ENTRIES] BSP_P
     0,                                                         /*      Reserved                  */
     0,                                                         /*      Reserved                  */
     SVC_Handler,                                               /*      SVCall Handler            */
-    DebugMon_Handler,                                          /*      Debug Monitor Handler     */
+    HardFault_Handler,                                         /*      Debug Monitor Handler     */
     0,                                                         /*      Reserved                  */
     PendSV_Handler,                                            /*      PendSV Handler            */
     SysTick_Handler,                                           /*      SysTick Handler           */

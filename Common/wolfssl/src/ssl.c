@@ -196,7 +196,7 @@ int wolfSSL_dtls_export(WOLFSSL* ssl, unsigned char* buf, unsigned int* sz)
  * sequence number, epoch, AEAD state etc.
  *
  * buf is the argument to contain the serialized state, if null then set "sz" to
- *     buffer size required 
+ *     buffer size required
  * sz  is the size of the buffer passed in
  * ssl is the WOLFSSL struct to serialize
  * returns the size of serialized session on success, 0 on no action, and
@@ -9295,16 +9295,16 @@ int wolfSSL_DTLS_SetCookieSecret(WOLFSSL* ssl,
                 /* In DTLS, when resuming, we can go straight to FINISHED,
                  * or do a cookie exchange and then skip to FINISHED, assume
                  * we need the cookie exchange first. */
-				 
-				/***
-				* This and the other #ifdef WOLFSSL_SEND_HELLO_VERIFY modified by Aclara
-				* Hello Verify not supported by the 3.6.0 wolfssl library used by
-				* firmware in the field.
-				***/
-#ifdef WOLFSSL_SEND_HELLO_VERIFY                
-				if (IsDtlsNotSctpMode(ssl))
+
+            /***
+            * This and the other #ifdef WOLFSSL_SEND_HELLO_VERIFY modified by Aclara
+            * Hello Verify not supported by the 3.6.0 wolfssl library used by
+            * firmware in the field.
+            ***/
+#ifdef WOLFSSL_SEND_HELLO_VERIFY
+            if (IsDtlsNotSctpMode(ssl))
                     neededState = SERVER_HELLOVERIFYREQUEST_COMPLETE;
-#endif					
+#endif
             #endif
             /* get response */
             while (ssl->options.serverState < neededState) {
@@ -9322,11 +9322,11 @@ int wolfSSL_DTLS_SetCookieSecret(WOLFSSL* ssl,
                         if (!IsDtlsNotSctpMode(ssl))
                             neededState = SERVER_HELLODONE_COMPLETE;
                         else
-#ifdef WOLFSSL_SEND_HELLO_VERIFY						
+#ifdef WOLFSSL_SEND_HELLO_VERIFY
                             neededState = SERVER_HELLOVERIFYREQUEST_COMPLETE;
 #else
-							neededState = SERVER_HELLODONE_COMPLETE;
-#endif							
+                     neededState = SERVER_HELLODONE_COMPLETE;
+#endif
                     }
             }
 
@@ -9344,7 +9344,7 @@ int wolfSSL_DTLS_SetCookieSecret(WOLFSSL* ssl,
         #endif
 
             #ifdef WOLFSSL_DTLS
-#ifdef WOLFSSL_SEND_HELLO_VERIFY		
+#ifdef WOLFSSL_SEND_HELLO_VERIFY
                 if (IsDtlsNotSctpMode(ssl)) {
                     /* re-init hashes, exclude first hello and verify request */
                     if ((ssl->error = InitHandshakeHashes(ssl)) != 0) {
@@ -22956,7 +22956,7 @@ int wolfSSL_RAND_bytes(unsigned char* buf, int num)
         rng = tmpRNG;
         initTmpRng = 1;
     }
- 
+
     if (rng) {
         if (wc_RNG_GenerateBlock(rng, buf, num) != 0)
             WOLFSSL_MSG("Bad wc_RNG_GenerateBlock");
