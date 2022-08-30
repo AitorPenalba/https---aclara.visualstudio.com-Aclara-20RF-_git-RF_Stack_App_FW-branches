@@ -137,7 +137,7 @@
 #define OS_MSGQ_Create( MsgqHandle, numItems, name )     OS_MSGQ_CREATE( MsgqHandle, numItems)
 #endif
 #if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-#define OS_QUEUE_Create(QueueHandle, QueueLength, name)  OS_QUEUE_CREATE( QueueHandle_t, QueueLength, name )
+#define OS_QUEUE_Create(QueueHandle, QueueLength, name)  OS_QUEUE_CREATE( QueueHandle, QueueLength, name )
 #else
 #define OS_QUEUE_Create(QueueHandle, QueueLength, name)  OS_QUEUE_CREATE( QueueHandle, QueueLength )
 #endif
@@ -407,7 +407,7 @@ bool OS_QUEUE_Insert ( OS_QUEUE_Handle QueueHandle, void *QueuePosition, void *Q
 void OS_QUEUE_Remove ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
 void *OS_QUEUE_Next ( OS_QUEUE_Handle QueueHandle, void *QueueElement );
 #if ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 )
-bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages, char *name);
+bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages, const char *name);
 #else
 bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle, uint32_t NumMessages);
 #endif
@@ -416,7 +416,7 @@ returnStatus_t OS_MSGQ_POST_RetStatus ( OS_MSGQ_Handle MsgqHandle, void *Message
 bool OS_MSGQ_PEND ( OS_MSGQ_Handle MsgqHandle, void **MessageData, uint32_t TimeoutMs, bool ErrorCheck, char *file, int line );
 
 #if ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 )
-bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, char *name );
+bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, const char *name );
 #else
 bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength );
 #endif

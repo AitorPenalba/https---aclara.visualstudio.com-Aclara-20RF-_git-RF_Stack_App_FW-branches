@@ -52,7 +52,7 @@
 
 *******************************************************************************/
 #if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, char *name)
+bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, const char *name)
 #else
 bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength )
 #endif
