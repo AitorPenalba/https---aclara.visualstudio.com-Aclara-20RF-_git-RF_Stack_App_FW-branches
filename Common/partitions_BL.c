@@ -1022,7 +1022,7 @@ returnStatus_t PAR_ValidatePartitionTable( void )
    uint8_t const *pWarn;
    uint8_t metaDataSize;        /* Number of bytes used for meta data */
 
-   DBG_printf( "PId,   Partition Desc, Cached, Banked, dfwManip,    Ext Bus,   NV Type, Phy,   Adr St,  Adr End,   Size  , Erase Size, Error, Warn");
+   DBG_printf( "PId,   Partition Desc, Cached, Banked, dfwManip,    Ext Bus,   NV Type, Phy,    Adr St,   Adr End,   Size  , Erase Size, Error, Warn");
 
    /* Check for memory overlaps... */
    for ( parCnt = 0, pEntryUnderTest = sPartitionData; parCnt < ARRAY_IDX_CNT(sPartitionData); parCnt++, pEntryUnderTest++ )
