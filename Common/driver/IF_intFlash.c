@@ -610,12 +610,12 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
             /* if erase has started, allow other tasks to run while waiting for completion */
             if ( FSP_SUCCESS == err )
             {
-             /* Wait for the erase complete event flag, if BGO is SET  */
-             if ( true == g_flash0_cfg.data_flash_bgo )
-             {
-                (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-                g_b_flash_event_erase_complete = false;
-             }
+               /* Wait for the erase complete event flag, if BGO is SET  */
+               if ( true == g_flash0_cfg.data_flash_bgo )
+               {
+                  (void)OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+                  g_b_flash_event_erase_complete = false;
+               }
             }
 #endif      /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
       
@@ -814,19 +814,19 @@ static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t co
       {
          /* Wait for a blank check event flag, if BGO is SET  */
          if ( true == g_flash0_cfg.data_flash_bgo )
-   {
-      ( void )OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
-      if( g_b_flash_event_not_blank )
-      {
+         {
+            ( void )OS_SEM_Pend( &intFlashSem_, OS_WAIT_FOREVER );
+            if( g_b_flash_event_not_blank )
+            {
                blankCheckResult = FLASH_RESULT_NOT_BLANK;
-         g_b_flash_event_not_blank = false;
-      }
-      else if (g_b_flash_event_blank)
-      {
+               g_b_flash_event_not_blank = false;
+            }
+            else if (g_b_flash_event_blank)
+            {
                blankCheckResult = FLASH_RESULT_BLANK;
-         g_b_flash_event_blank = false;
-      }
-   }
+               g_b_flash_event_blank = false;
+            }
+         }
       }
 #endif    /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
    }
@@ -1196,7 +1196,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
        {
           err = R_FLASH_HP_Write( &g_flash0_ctrl, srcAddr, address, cnt );
 #ifndef __BOOTLOADER
-          /* if erase has started, allow other tasks to run while waiting for completion */
+          /* if write has started, allow other tasks to run while waiting for completion */
           if (FSP_SUCCESS == err)
           {
              /* Wait for the write complete event flag, if BGO is SET  */
@@ -1206,7 +1206,7 @@ static returnStatus_t flashWrite( uint32_t address, uint32_t cnt, uint8_t const 
                 g_b_flash_event_write_complete = false;
              }
           }
-#endif    /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
+#endif    /* for bootloader, do nothing, R_FLASH_HP_Write is blocking when BGO is not enabled */
        }
        else
        {

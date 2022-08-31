@@ -1741,7 +1741,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 static void setBusyTimer( uint32_t busyTimer_uS )
 {
    busyTime_uS_ = busyTimer_uS;
-#if ( MCU_SELECTED == NXP_K24 ) // TODO: RA6E1: Melvin: revisit with a OS Timer
+#if ( MCU_SELECTED == NXP_K24 )
    EXT_FLASH_TIMER_DIS();
    EXT_FLASH_TIMER_COMPARE = busyTimer_uS / 1000;  /* 1mS timer, so convert to mS */
    EXT_FLASH_TIMER_RST();               /* Reset the timer */
