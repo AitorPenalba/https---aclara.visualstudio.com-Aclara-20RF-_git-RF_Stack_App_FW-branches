@@ -181,17 +181,17 @@
             </member>
         </batchDefinition>
         <batchDefinition>
-            <name>RA6E1 batch build</name>
+            <name>RA6E1-I210_C</name>
+            <member>
+                <project>bootLoader_RA6E1</project>
+                <configuration>Debug</configuration>
+            </member>
             <member>
                 <project>EP_FreeRTOS_RA6</project>
                 <configuration>Debug</configuration>
             </member>
             <member>
                 <project>wolfSSL-Lib_RA6_FreeRTOS</project>
-                <configuration>Debug</configuration>
-            </member>
-            <member>
-                <project>bootLoader_RA6E1</project>
                 <configuration>Debug</configuration>
             </member>
             <member>

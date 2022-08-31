@@ -5474,11 +5474,22 @@ void SetSkipValidateDate(const byte value)
   _skipValidateDate = value;
 }
 
+#if ( USE_ACLARA_TIME == 1 ) /* Aclara Added */
+typedef struct
+{
+   uint32_t date;         /* Number of days since epoc */
+   uint32_t time;         /* Number of MS since midnight */
+   uint32_t tictoc;       /* How many RTOS ticks happened in system ticks */
+   uint32_t elapsedCycle; /* How many CPU cycles elapsed since the last RTOS tick */
+}sysTime_t;
+extern bool DST_getLocalTime( sysTime_t *pSysTime );
+#endif
 /* like atoi but only use first byte */
 /* Make sure before and after dates are valid */
 int ValidateDate(const byte* date, byte format, int dateType)
 {
-    time_t ltime;
+    static time_t ltime;
+    sysTime_t    localSysTime;
     struct tm  certTime;
     struct tm* localTime;
     struct tm* tmpTime = NULL;
@@ -5498,8 +5509,12 @@ int ValidateDate(const byte* date, byte format, int dateType)
 #else
     (void)tmpTime;
 #endif
-
+#if ( USE_ACLARA_TIME == 0 )
     ltime = XTIME(0);
+#else    /* Aclara Added */
+    DST_getLocalTime(&localSysTime);
+    ltime = localSysTime.date * 24 * 60 * 60 + localSysTime.time/1000;
+#endif
 
 #ifdef WOLFSSL_BEFORE_DATE_CLOCK_SKEW
     if (dateType == BEFORE) {

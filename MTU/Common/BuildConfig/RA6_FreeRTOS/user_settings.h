@@ -34,7 +34,7 @@
 #define ALT_ECC_SIZE			         /* Reduce ECC memory consumption. Instead of using stack for ECC points it will allocate from the heap. Must define USE_FAST_MATH */
 #define WOLFSSL_SMALL_STACK 	      /* Increases use of dynamic memory, but can lead to slower performance */
 #define SMALL_SESSION_CACHE         /* Reduce the default session cache from 33 sessions to 6 sessions and save approximately 2.5 kB */
-#define FP_MAX_BITS (512)		      /* Fastmath max suport 512 bits integer or 256 bits x 256 bits multiplications. */
+#define FP_MAX_BITS (512)		      /* Fastmath max support 512 bits integer or 256 bits x 256 bits multiplications. */
 #define POSITIVE_EXP_ONLY           /* Reduces stack usage if only positive Floating point numbers */
 
 // - Customization
@@ -48,7 +48,8 @@
 
 #if ( DTLS_DEBUG == 1 )             /* Only enable if application is turned on*/
 #define DEBUG_WOLFSSL		         /* Enables debug print, requires MQX fio.h support for stderr */
-#define WOLFSSL_DEBUG_MEMORY        /* Enables extra function and line number args for memory callbacks */
+//#define WOLFSSL_DEBUG_MEMORY      /* Enables extra function and line number args for memory callbacks */
+#undef WOLFSSL_DEBUG_MEMORY         // TODO: RA6E1: Remove and uncomment above line
 #else
 #undef DEBUG_WOLFSSL
 #undef WOLFSSL_DEBUG_MEMORY
@@ -77,3 +78,18 @@ WC_NO_RSA_OAEP
 */
 /* For Integrate to wolfSSL4.3.0 */
 #define HAVE_IDEA
+
+/* TLS Extensions */
+#define HAVE_TLS_EXTENSIONS
+#define HAVE_SUPPORTED_CURVES
+#define HAVE_ONE_TIME_AUTH
+#define HAVE_SNI
+#define HAVE_ALPN
+#define HAVE_MAX_FRAGMENT
+#define HAVE_TRUNCATED_HMAC
+#define HAVE_SESSION_TICKET
+#define HAVE_EXTENDED_MASTER
+#define HAVE_TRUSTED_CA
+#define HAVE_ENCRYPT_THEN_MAC
+
+#define USE_ACLARA_TIME          1

@@ -180,6 +180,7 @@ returnStatus_t HMC_APP_RTOS_Init( void )
    returnStatus_t retVal = eSUCCESS;   /* Return value */
 
    /* Create queue needed for Meter Applets */
+
    if ( !OS_QUEUE_Create( &HMC_APP_QueueHandle, HMC_APP_QUEUE_SIZE, "HMC_APP" ) )
    {
       /* Queue create failed */

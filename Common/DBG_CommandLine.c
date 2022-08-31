@@ -4008,7 +4008,7 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
    {
       DBG_logPrintf( 'R', "USAGE: nvr id start len" );
    }
-   
+
    return ( 0 );
 } /* end DBG_CommandLine_NvRead () */
 
@@ -15733,7 +15733,10 @@ uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
 #if 0  // RA6E1 Bob: This command was removed from original K24 code
 static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
 {
-   *(uint32_t *)0 = 0;
+   __iar_builtin_set_PRIMASK(1);
+   asm("SVC 03" );
+   __iar_builtin_set_PRIMASK(0);
+//   *(uint32_t *)0 = 0;
    return 0;
 }
 #endif // RA6E1 Bob: This command was removed from original K24 code

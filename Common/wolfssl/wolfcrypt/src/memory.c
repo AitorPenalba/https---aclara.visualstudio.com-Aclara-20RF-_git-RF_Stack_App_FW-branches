@@ -128,21 +128,25 @@ void* wolfSSL_Malloc(size_t size)
 {
     void* res = 0;
 
-    if (malloc_function) {
+#if 0 // TODO: RA6E1: This doesn't compile for RA6
+    if (malloc_function)
+#endif
+    {
     #ifdef WOLFSSL_DEBUG_MEMORY
         res = malloc_function(size, func, line);
     #else
         res = malloc_function(size);
     #endif
     }
-    else {
-    #ifndef WOLFSSL_NO_MALLOC
-        res = malloc(size);
-    #else
-        WOLFSSL_MSG("No malloc available");
-    #endif
-    }
-
+#if 0 // TODO: RA6E1: This doesn't compile for RA6
+//    else {
+//    #ifndef WOLFSSL_NO_MALLOC
+//        res = malloc(size);
+//    #else
+//        WOLFSSL_MSG("No malloc available");
+//    #endif
+//    }
+#endif
 #ifdef WOLFSSL_DEBUG_MEMORY
 #if defined(WOLFSSL_DEBUG_MEMORY_PRINT) && !defined(WOLFSSL_TRACK_MEMORY)
     printf("Alloc: %p -> %u at %s:%d\n", res, (word32)size, func, line);
