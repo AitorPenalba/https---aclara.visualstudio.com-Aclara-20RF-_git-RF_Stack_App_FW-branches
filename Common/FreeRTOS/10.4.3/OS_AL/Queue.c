@@ -52,9 +52,9 @@
 
 *******************************************************************************/
 #if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
-bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, char *name)
+bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength, const char *name)
 #else
-bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength )
+bool OS_QUEUE_CREATE ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength )
 #endif
 {
    bool FuncStatus = true;
@@ -71,7 +71,7 @@ bool OS_QUEUE_Create ( OS_QUEUE_Handle QueueHandle, uint32_t QueueLength )
    {
       vQueueAddToRegistry(*QueueHandle, name);
    }
-#endif // BOB_DEBUG_BUFMGR
+#endif
 #elif( RTOS_SELECTION == MQX_RTOS )
     //queue length is not necessary in MQX
     _queue_init ( QueueHandle, 0 );

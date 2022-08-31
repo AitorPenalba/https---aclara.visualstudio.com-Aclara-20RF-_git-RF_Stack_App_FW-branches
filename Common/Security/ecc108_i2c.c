@@ -40,9 +40,6 @@
  */
 
 #include "project.h"
-#if ( MCU_SELECTED == RA6E1 )
-#include "hal_data.h"
-#endif
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <fio.h>

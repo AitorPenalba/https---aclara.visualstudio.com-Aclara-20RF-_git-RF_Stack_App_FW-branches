@@ -658,12 +658,19 @@ extern void uITRON4_free(void *p) ;
 
 #ifdef FREERTOS
     #include "FreeRTOS.h"
-
+/* Aclara Added -- Start */
+    WOLFSSL_API void* wolfSSL_Malloc(size_t size);
+    WOLFSSL_API void  wolfSSL_Free(void *ptr);
+#define XMALLOC(s, h, t)     ((void)h, (void)t, wolfSSL_Malloc((s)))
+#define XFREE(p, h, t)       {void* xp = (p); if((xp)) wolfSSL_Free((xp));}
+/* Aclara Added -- End */
     /* FreeRTOS pvPortRealloc() only in AVR32_UC3 port */
     #if !defined(XMALLOC_USER) && !defined(NO_WOLFSSL_MEMORY) && \
         !defined(WOLFSSL_STATIC_MEMORY)
+#if 0 // Not required as we use the Buffers
         #define XMALLOC(s, h, type)  pvPortMalloc((s))
         #define XFREE(p, h, type)    vPortFree((p))
+#endif 
     #endif
     #if defined(HAVE_ED25519) || defined(WOLFSSL_ESPIDF)
         #define XREALLOC(p, n, h, t) wolfSSL_Realloc((p), (n))
@@ -861,10 +868,10 @@ extern void uITRON4_free(void *p) ;
         #include "mutex.h"
     #endif
 
-	WOLFSSL_API void* wolfSSL_Malloc(size_t size);
+    WOLFSSL_API void* wolfSSL_Malloc(size_t size);
     WOLFSSL_API void  wolfSSL_Free(void *ptr);
     #define XMALLOC(s, h, t)     ((void)h, (void)t, wolfSSL_Malloc((s)))
-	#define XFREE(p, h, t)       {void* xp = (p); if((xp)) wolfSSL_Free((xp));}
+   #define XFREE(p, h, t)       {void* xp = (p); if((xp)) wolfSSL_Free((xp));}
 
     #if 0	// !defined(XMALLOC_OVERRIDE) && !defined(XMALLOC_USER)
         #define XMALLOC_OVERRIDE

@@ -53,7 +53,6 @@
 #include "ecc108_freertos.h"
 #endif
 #include "byteswap.h"
-#include "user_settings.h"  // Added for defining WOLFSSL_DTLS  /* TODO: RA6E1: SG Determine if the need for this can be migrated to FreeRTOS headers */
 #include <wolfssl/ssl.h>
 #include <wolfssl/internal.h>
 #include <wolfssl/error-ssl.h>

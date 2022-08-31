@@ -6785,10 +6785,28 @@ ProtocolVersion MakeDTLSv1_2(void)
     #if !defined(USER_TIME) && !defined(USE_WOLF_TM)
     #include <time.h>
     #endif
-
+#if ( USE_ACLARA_TIME == 1 ) /* Aclara Added */
+    typedef struct
+    {
+       uint32_t date;         /* Number of days since epoc */
+       uint32_t time;         /* Number of MS since midnight */
+       uint32_t tictoc;       /* How many RTOS ticks happened in system ticks */
+       uint32_t elapsedCycle; /* How many CPU cycles elapsed since the last RTOS tick */
+    }sysTime_t;
+    extern bool DST_getLocalTime( sysTime_t *pSysTime );
+#endif
     word32 LowResTimer(void)
     {
+
+#if ( USE_ACLARA_TIME == 0 )
         return (word32)XTIME(0);
+#else    /* Aclara Added */
+        sysTime_t  localSysTime;
+        word32     ltime;
+        DST_getLocalTime(&localSysTime);
+        ltime = localSysTime.date * 24 * 60 * 60 + localSysTime.time/1000;
+        return ltime;
+#endif
     }
 #endif
 #if !defined(WOLFSSL_NO_CLIENT_AUTH) && defined(HAVE_ED25519) && \

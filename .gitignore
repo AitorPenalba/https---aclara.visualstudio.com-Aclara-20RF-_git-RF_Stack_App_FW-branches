@@ -127,3 +127,5 @@ mtu/iar_v9.20/*debug
 /MTU/BootLoader/R7FA6E1/IAR/.settings/standalone.prefs
 /MTU/Bootloader/~$ReadMe.docx
 *.out_nochecksum
+*.rpd
+*.sbd
