@@ -667,10 +667,10 @@ extern void uITRON4_free(void *p) ;
     /* FreeRTOS pvPortRealloc() only in AVR32_UC3 port */
     #if !defined(XMALLOC_USER) && !defined(NO_WOLFSSL_MEMORY) && \
         !defined(WOLFSSL_STATIC_MEMORY)
-#if 0 // Not required as we use the Buffers
+#if 0 // Aclara Modified: Not required as we use the Buffers
         #define XMALLOC(s, h, type)  pvPortMalloc((s))
         #define XFREE(p, h, type)    vPortFree((p))
-#endif 
+#endif
     #endif
     #if defined(HAVE_ED25519) || defined(WOLFSSL_ESPIDF)
         #define XREALLOC(p, n, h, t) wolfSSL_Realloc((p), (n))
@@ -698,6 +698,28 @@ extern void uITRON4_free(void *p) ;
     #ifndef SINGLE_THREADED
         #include "semphr.h"
     #endif
+    /* Aclara Added -- Start */
+    /* Trying match MQX config */
+    /* enable features */
+    #ifndef NO_RABBIT
+        #define NO_RABBIT
+    #endif
+    #define NO_FILESYSTEM
+    #undef  NO_WOLFSSL_DIR
+    #define NO_WOLFSSL_DIR
+    #undef  NO_RC4
+    #define NO_RC4
+
+    #undef  USE_FAST_MATH
+    #define USE_FAST_MATH
+
+    #define USE_CERT_BUFFERS_2048
+    #define BENCH_EMBEDDED
+
+    #define TFM_TIMING_RESISTANT
+    #define ECC_TIMING_RESISTANT
+    /* Aclara Added -- End */
+
 #endif
 
 #ifdef FREERTOS_TCP

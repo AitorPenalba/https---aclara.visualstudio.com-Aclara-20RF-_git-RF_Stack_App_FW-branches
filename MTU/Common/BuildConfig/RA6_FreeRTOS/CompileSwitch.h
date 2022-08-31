@@ -238,7 +238,7 @@
 #else
 #define DTLS_FIELD_TRIAL               1     /* Allows unsecured comm. until session established   */
 #endif
-#define DTLS_DEBUG                     (0)   /* Turn DTLS Debug On */  // TODO: RA6E1: Remove it before releasing for production
+#define DTLS_DEBUG                     (1)   /* Turn DTLS Debug On */  // TODO: RA6E1: Remove it before releasing for production
 #define DTLS_CHECK_UNENCRYPTED         (1)   /* Check for previous version major file not encrypted   */
 /* ------------------------------------------------------------------------------------------------------------------ */
 #define BM_DEBUG                       0     /* Buffer allocate/free debug printing */

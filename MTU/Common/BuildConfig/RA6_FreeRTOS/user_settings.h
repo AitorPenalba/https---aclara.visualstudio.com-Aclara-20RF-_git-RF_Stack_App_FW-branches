@@ -79,17 +79,4 @@ WC_NO_RSA_OAEP
 /* For Integrate to wolfSSL4.3.0 */
 #define HAVE_IDEA
 
-/* TLS Extensions */
-#define HAVE_TLS_EXTENSIONS
-#define HAVE_SUPPORTED_CURVES
-#define HAVE_ONE_TIME_AUTH
-#define HAVE_SNI
-#define HAVE_ALPN
-#define HAVE_MAX_FRAGMENT
-#define HAVE_TRUNCATED_HMAC
-#define HAVE_SESSION_TICKET
-#define HAVE_EXTENDED_MASTER
-#define HAVE_TRUSTED_CA
-#define HAVE_ENCRYPT_THEN_MAC
-
-#define USE_ACLARA_TIME          1
+#define USE_ACLARA_TIME          1  /* FreeRTOS doesn't provide time Utility function, hence use System Time */
