@@ -139,10 +139,10 @@
 
 #if ( RTOS_SELECTION == MQX_RTOS )
 #define DEFAULT_ATTR       (MQX_FLOATING_POINT_TASK)                       /* All tasks save floating point on switch */
-#define DEFAULT_ATTR_STRT  (MQX_AUTO_START_TASK|MQX_FLOATING_POINT_TASK)   /* Add the auto start attribute */
+#define DEFAULT_ATTR_STRT  (AUTO_START_TASK|MQX_FLOATING_POINT_TASK)   /* Add the auto start attribute */
 #elif (RTOS_SELECTION == FREE_RTOS)
 #define DEFAULT_ATTR        (0)                                            /* All tasks save floating point on switch */
-#define DEFAULT_ATTR_STRT   (MQX_AUTO_START_TASK)
+#define DEFAULT_ATTR_STRT   (AUTO_START_TASK)
 #endif
 #define TASK_CPULOAD_SIZE  10 // Keep track of the last 10 seconds
 #define QUIET_MODE_ATTR    ((uint32_t)(1<<30))                             /* Task runs in quiet mode, also */
@@ -728,7 +728,7 @@ void OS_TASK_Create_All ( bool initSuccess )
    for (pTaskList = &Task_template_list[0]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++)
    {  /* Create the task if the "Auto Start" attribute is NOT set */
 
-      if (!(pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK))
+      if (!(pTaskList->TASK_ATTRIBUTES & AUTO_START_TASK))
       {
          /* Create the task */
          if ( ( (quiet == 0) || ((pTaskList->TASK_ATTRIBUTES & QUIET_MODE_ATTR) != 0) ) &&

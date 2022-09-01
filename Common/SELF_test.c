@@ -746,12 +746,6 @@ returnStatus_t SELF_testRTC( void )
       OS_TICK_Get_CurrentElapsedTicks( &currentTick );
    } while ( ( retVal == eFAILURE ) && ( OS_TICK_Get_Diff_InMilliseconds( &startTick, &currentTick ) < 1200 ) );
 #endif
-#if ( TM_RTC_UNIT_TEST == 1 )
-   if ( !RTC_UnitTest() )
-   {
-     DBG_printf( "ERROR - RTC failed unit test\n" );
-   }
-#endif // TM_RTC_UNIT_TEST
    if ( retVal == eFAILURE )
    {
       if( SELF_TestData.RTCFail < ( ( 1 << ( 8 * sizeof( SELF_TestData.RTCFail ) ) ) - 1 ) ) /* Do not let counter rollover.  */

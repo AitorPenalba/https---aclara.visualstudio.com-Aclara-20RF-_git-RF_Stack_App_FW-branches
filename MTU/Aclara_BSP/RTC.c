@@ -758,9 +758,6 @@ bool RTC_UnitTest(void)
       retVal = false;
    }
 
-   /* Verify the Alarm can be set and fires */
-//   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-//   (void)printf( "seconds before set %d", Sec );
    Sec = 2;
    g_alarm_irq_flag = RESET_FLAG;
    RTC_ConfigureAlarm(Sec);
@@ -770,9 +767,6 @@ bool RTC_UnitTest(void)
       retVal = false;
    }
 
-   /* Verify the Alarm can be disabled and does not fire */
-//   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-//   RTC_GetDateTime(&get_time);
    Sec = 2;
    g_alarm_irq_flag = RESET_FLAG;
    RTC_ConfigureAlarm(Sec);

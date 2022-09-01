@@ -348,7 +348,7 @@ void PWRLG_Task( taskParameter )
    /* Create/start all the tasks */
    for ( pTaskList = &OS_template_list_last_gasp[0]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
-      if ( !( pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK ) )
+      if ( !( pTaskList->TASK_ATTRIBUTES & AUTO_START_TASK ) )
       {
 #if ( RTOS_SELECTION == MQX_RTOS )
          taskID = OS_TASK_Create( pTaskList );

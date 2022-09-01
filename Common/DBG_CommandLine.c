@@ -16328,6 +16328,19 @@ static uint32_t DBG_CommandLine_Queues ( uint32_t argc, char *argv[] )
 }
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_RTC_UnitTest ( uint32_t argc, char *argv[] )
+
+   Purpose: This function run the unit for the RTC
+
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal 
+
+******************************************************************************/
 uint32_t DBG_CommandLine_RTC_UnitTest( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;

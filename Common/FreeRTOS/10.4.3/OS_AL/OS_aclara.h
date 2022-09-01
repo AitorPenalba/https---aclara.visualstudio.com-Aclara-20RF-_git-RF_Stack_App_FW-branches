@@ -82,9 +82,10 @@
 #if OS_MAX_TASK_PRIORITY <= 8
 #error  Highest allowable task priority is nine
 #endif
-
-#if ( RTOS_SELECTION == FREE_RTOS )
-#define MQX_AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */ // TODO: RA6: Update MQX_AUTO_START_TASK to be more generic.
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define AUTO_START_TASK    MQX_AUTO_START_TASK
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */
 
 #if OS_MIN_TASK_PRIORITY >= configMAX_PRIORITIES
 #error  Task minimum must be less than configMAX_PRIORITIES in FreeRTOSConfig.h

@@ -350,7 +350,7 @@ void STRT_CpuLoadPrint ( STRT_CPU_LOAD_PRINT_e mode )
          MQX uses the MQX_template_list inside a structure MQX_init_struct to
          start the appropriate tasks.
          This task is in that list and is set to automatically start when MQX
-         starts (by setting MQX_AUTO_START_TASK).
+         starts (by setting AUTO_START_TASK).
 
 *******************************************************************************/
 /*lint -e{715} Arg0 not used; required by API */

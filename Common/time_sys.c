@@ -220,6 +220,7 @@ static bool      _nuDST_TimeChanged;                     /* System time changed 
 //static uint32_t  CYCdiff=0;
 //End TODO
 extern uint32_t  DMAint;
+uint32_t  semTestCount = 1000;
 #endif
 
 static uint32_t _ticTocCntr = 0;
@@ -2218,6 +2219,7 @@ void TIME_SYS_HandlerTask( taskParameter )
          timeout functionality to run system time.  For Aclara-RF, this semaphore will be posted at twice the rate of
          system clock */
       (void)OS_SEM_Pend( &_timeSysSem, OS_WAIT_FOREVER );
+      semTestCount--;
 #if ( DCU == 1 )
       if (VER_getDCUVersion() != eDCU2) {
          // Copy current clock state
@@ -2507,6 +2509,7 @@ STATIC void TIME_SYS_vApplicationTickHook( void * user_isr_ptr )
    /* RTOS tick, signal the timer task */
    if ( _timeSysSemCreated == (bool)true )
    {
+      semTestCount++;
       OS_SEM_Post( &_timeSysSem );
       (*isr_ptr->OLD_ISR)(isr_ptr->OLD_ISR_DATA);     /* Chain to the previous notifier - This will call the RTOS tick. */
    }
@@ -2531,6 +2534,7 @@ void vApplicationTickHook()
    if ( _timeSysSemCreated == (bool)true )
    {
       OS_SEM_Post_fromISR( &_timeSysSem );
+      semTestCount++;
    }
 
    TMR_vApplicationTickHook();
