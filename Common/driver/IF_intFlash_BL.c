@@ -808,6 +808,7 @@ static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t co
    else if( ( destAddr >= FLASH_HP_DATAFLASH_START_ADDRESS ) && ( destAddr <= FLASH_HP_DATAFLASH_END_ADDRESS ) )
    {
       /* check for data flash in erased state (BGO operation if enabled) */
+      /* Note: if FSP parameter checking is off, no check to ensure that destAddr+cnt will fit in dataflash memory */
       err = R_FLASH_HP_BlankCheck( &g_flash0_ctrl, destAddr, cnt, &blankCheckResult );
 #ifndef __BOOTLOADER
       if (err == FSP_SUCCESS)
