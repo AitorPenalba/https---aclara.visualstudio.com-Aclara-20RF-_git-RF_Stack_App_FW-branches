@@ -109,7 +109,7 @@ returnStatus_t dvr_shm_init( void )
    return retVal;
 #else
    return eSUCCESS;
-#endif   /* BOOTLOADER  */
+#endif   /* NOT __BOOTLOADER */
 }
 
 /***********************************************************************************************************************
@@ -129,9 +129,9 @@ returnStatus_t dvr_shm_init( void )
  **********************************************************************************************************************/
 void dvr_shm_lock( void )
 {
-#ifndef __BOOTLOADER
+#if RTOS == 1
    OS_MUTEX_Lock ( &dvrShmFlashMutex_ );   // Function will not return if it fails
-#endif   /* BOOTLOADER  */
+#endif
 }
 
 /***********************************************************************************************************************
@@ -151,9 +151,9 @@ void dvr_shm_lock( void )
  **********************************************************************************************************************/
 void dvr_shm_unlock( void )
 {
-#ifndef __BOOTLOADER
+#if RTOS == 1
    OS_MUTEX_Unlock ( &dvrShmFlashMutex_ ); // Function will not return if it fails
-#endif   /* BOOTLOADER  */
+#endif
 }
 
 

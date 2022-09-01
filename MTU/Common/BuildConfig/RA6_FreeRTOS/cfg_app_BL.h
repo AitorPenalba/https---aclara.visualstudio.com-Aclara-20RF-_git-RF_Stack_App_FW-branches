@@ -334,7 +334,11 @@ typedef enum
 #define HMC_TROUBLE()               (((GPIOC_PDIR & (1<<11))>>11)) /* TROUBLE signal from the host meter */
 #define HMC_TROUBLE_TRIS()          { PORTC_PCR11= 0x100;   GPIOC_PDDR &= ~(1<<11); } /* Set for GPIO, Make Input */
 #elif ( MCU_SELECTED == RA6E1 )
-#define HMC_TROUBLE()               R_BSP_PinRead(BSP_IO_PORT_05_PIN_05) /* Signal T_I-210+C_METER */
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
+#define HMC_TROUBLE()               R_BSP_PinRead(BSP_IO_PORT_05_PIN_05) /* Signal T_I-210+C_METER on Rev A board */
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
+#define HMC_TROUBLE()               R_BSP_PinRead(BSP_IO_PORT_01_PIN_11) /* Signal T_I-210+C_METER on Rev B board*/
+#endif
 #define HMC_TROUBLE_TRIS()                                               /* Pin already set as input in pin_data */
 #endif // MCU SELECTED
 #endif // ( HMC_KV || HMC_I210_PLUS_C )
@@ -506,7 +510,7 @@ enum HMC_APP_API_RPLY
    The exception is specialized modules like buffer management */
 typedef struct
 {
-#if 0 // TODO: RA6E1 - Queue handling
+#if ( RTOS_SELECTION == MQX_RTOS )
    OS_QUEUE_Element  QueueElement;  /* QueueElement as defined by MQX */
 #endif
    uint8_t           msgType;       // Type of message
@@ -543,12 +547,11 @@ typedef enum
    eCFG_SYS_MSG_TYPE_TIME_THRES_EXCEEDED_REV,
    eCFG_SYS_MSG_TYPE_RSSI_AGEING_TIMEOUT,
 } cfgSysMsgTypes_t;
+#if ( RTOS_SELECTION == MQX_RTOS )
 /* Data format to pass to the Any Application - This is the 'Standard' Queue Format */
 typedef struct
 {
-#if 0 // TODO: RA6E1 - Queue handling
    OS_QUEUE_Element  QueueElement;   /* QueueElement as defined by MQX */
-#endif
    uint8_t ucPacketFormat; /* Pointer style or Structure, 0 = Pointers, 1 = Structure */
    uint8_t ucMsgType; /* Type of message */
 
@@ -562,6 +565,7 @@ typedef struct
       uint8_t ucBuffer[CFG_SYS_BUFFER_SIZE];
    } uData;
 } tSysQueueFormat;
+#endif
 /* ****************************************************************************************************************** */
 /* GLOBAL VARIABLES */
 

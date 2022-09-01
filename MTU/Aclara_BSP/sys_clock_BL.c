@@ -30,11 +30,16 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
+#elif ( RTOS_SELECTION == FREE_RTOS)
+#include "hal_data.h"
+#endif
+#else   /* __BOOTLOADER */
+#if (MCU_SELECTED == NXP_K24)
 #include <MK24F12.h>
-#else
-
-#endif // ( RTOS_SELECTION )
-#endif   /* BOOTLOADER  */
+#elif (MCU_SELECTED == RA6E1)
+#include "hal_data.h"
+#endif
+#endif   /* NOT __BOOTLOADER  */
 #include "sys_clock_BL.h"
 
 // </editor-fold>
@@ -269,7 +274,7 @@ uint32_t getBusClock( void )
 #ifndef __BOOTLOADER
    return ( R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB) ); // TODO: RA6E1 Bob: Verify that PCLKB is the correct bus clock
 #else
-
+   return BSP_BUS_CLOCK;   //TODO: is this correct or needed?
 #endif // __BOOTLOADER
 #endif // ( MCU SELECTED )
 }

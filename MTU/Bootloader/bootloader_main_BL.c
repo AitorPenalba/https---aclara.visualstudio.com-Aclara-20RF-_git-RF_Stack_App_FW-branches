@@ -22,16 +22,14 @@
 /* ****************************************************************************************************************** */
 /* Include Files */
 #include "project_BL.h"
-#include <intrinsics.h>
-#include <MK24F12.h>
-#include <cfg_hal.h>
-#include <cfg_app.h>
-#include "portable_freescale.h"
-#include "partitions.h"
+
+#include "partitions_BL.h"
 #include "partition_cfg_BL.h"
-#include "dvr_intFlash_cfg.h"
-#include "crc32.h"
+#include "dvr_intFlash_cfg_BL.h"
+#include "IF_intFlash_BL.h"
 #include "BSP_aclara_BL.h"
+#include "crc32.h"
+
 
 /*lint -esym(526, app_vector, __set_SP) defined at time of link */
 /*lint -esym(628, __set_SP) no protoype available */
@@ -53,6 +51,8 @@
 #else
 #define BOOTLOADER_TEST(x)
 #endif //endif BOOTLOADER_UT_ENABLE
+
+#if ( MCU_SELECTED == NXP_K24 )
 
 /******************************************************************************
  * Register settings for FBE Mode
@@ -134,6 +134,8 @@
 #define SIM_SOPT1_VALUE   0x00080000    /* LPTMR_32KOscClkSel=RTC32K, all other "read-only" */
 #define SIM_SOPT2_VALUE   0x00050000    /* PLL/FLLClkSel=PLL, USBClk=PLL, all other remain at default/dont' care  */
 
+#endif
+
 /* ****************************************************************************************************************** */
 /* Type Definitions */
 /*lint -esym(751,enum_TestCase_t)   */
@@ -161,11 +163,20 @@ typedef enum
 
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
+#if ( MCU_SELECTED == NXP_K24 )
 extern const vector_t   app_vector; // Application vector address symbol from the linker configuration file
+#elif ( MCU_SELECTED == RA6E1 )
+extern void hal_boot_app(void);     // Jump to the Application located after the block protection swap memory (0x4000)
+#endif
 
 /* ****************************************************************************************************************** */
 /* File Scope Variables Definition */
 static uint8_t  sectorData[ EXT_FLASH_ERASE_SIZE ];
+
+#if ( MCU_SELECTED == RA6E1 )
+/* CRC32 configuration structure */
+crc32Cfg_t crcCfg;
+#endif
 
 /* ****************************************************************************************************************** */
 /* Function Prototypes */
@@ -212,12 +223,17 @@ void BL_DefaultISR( void )
 *******************************************************************************/
 static void BL_MAIN_RunApp ( void )
 {
-
+#if ( MCU_SELECTED == NXP_K24 )
    __disable_interrupt();              // 1. Disable interrupts
    __set_SP( app_vector.stack_addr );  // 2. Configure stack pointer
    SCB_VTOR = ( uint32_t )&app_vector; // 3. Configure VTOR
    __enable_interrupt();               // 4. Enable interrupts
    app_vector.func_p();                // 5. Jump to application
+   
+#elif ( MCU_SELECTED == RA6E1 )
+   /* look-up the application stack pointer and PC from its vector table at 0x4000 and jump to it */
+   hal_boot_app();
+#endif
 }  /* End BL_MAIN_RunApp() */
 
 /*******************************************************************************
@@ -231,6 +247,7 @@ static void BL_MAIN_RunApp ( void )
 *******************************************************************************/
 static void BL_MAIN_ClockSetup( void )
 {
+#if ( MCU_SELECTED == NXP_K24 )
    // Perform Clock configurations (120/60/24/24MHz) {Saves code space in the App}
    /* Disable the USB Regulator */
    SIM_SOPT1CFG |= SIM_SOPT1CFG_URWE_MASK;         /* First allow USBREGEN bit to be written - SMG from 0x00 to 0x00 */
@@ -335,6 +352,9 @@ static void BL_MAIN_ClockSetup( void )
 
    SYST_CSR = (SysTick_CSR_ENABLE_MASK | SysTick_CSR_CLKSOURCE_MASK); /* needed systick enabled to count cycles for needed delays */
    SYST_RVR = SYST_RVR_VALUE; /* set the reload register */
+#elif ( MCU_SELECTED == RA6E1 )
+   // clock is setup in SystemInit, do nothing
+#endif
 }  /* End BL_MAIN_ClockSetup() */
 
 /*******************************************************************************
@@ -348,6 +368,8 @@ static void BL_MAIN_ClockSetup( void )
 *******************************************************************************/
 static void BL_MAIN_HWInit( void )
 {
+   /* device specific hardware setup */
+#if ( MCU_SELECTED == NXP_K24 )
    // Configure active PORTx for GPIO
    /* Enable clock gating to all ports */
    SIM_SCGC5 |=   SIM_SCGC5_PORTA_MASK \
@@ -368,8 +390,7 @@ static void BL_MAIN_HWInit( void )
    //  {XTAL0,          PORTA bit 19 - setup during clock configuration
    //  {3V6LDO_EN,      PORTB bit 1
    //  {3V6BOOST_EN,    PORTC bit 0
-   PWR_3P6LDO_EN_TRIS_ON();
-   PWR_3V6BOOST_EN_TRIS_OFF();
+   //
    //  {/WP_FLASH,      PORTB bit 18 - SPI driver to set up
    //  {/PF_METER,      PORTD bit 0
    BRN_OUT_TRIS();
@@ -378,8 +399,15 @@ static void BL_MAIN_HWInit( void )
    GRN_LED_PIN_TRIS();
    RED_LED_PIN_TRIS();
    BLU_LED_PIN_TRIS();
-   //
+   
+#elif ( MCU_SELECTED == RA6E1 )
+   // hardware clocks and GPIO are setup in R_BSP_WarmStart, do nothing
+#endif
+   /* common hardware setup */
+   PWR_3P6LDO_EN_TRIS_ON();
+   PWR_3V6BOOST_EN_TRIS_OFF();
 }  /* End BL_MAIN_HWInit() */
+
 #if 0
 /* Debug only replacement for memcmp that gives address of 1st difference. */
 flAddr doDiff( uint8_t *ramBuf, uint8_t *romData, uint32_t len )
@@ -510,6 +538,7 @@ static returnStatus_t calcCRC(flAddr StartAddr, uint32_t cnt, bool start, uint32
 }
 #endif
 
+#if ( MCU_SELECTED == NXP_K24 )
 /*******************************************************************************
 
   Function Name:  bitReverse
@@ -528,6 +557,9 @@ static uint32_t bitReverse( uint32_t x )
    return( ( x >> 16 ) | ( x << 16 ) );                                 /* swap 2-byte long pairs  */
 
 }
+#endif
+
+#if ( MCU_SELECTED == NXP_K24 )
 /* Cleaned up version of mqx version of crc_kn.c */
 /*******************************************************************************
 
@@ -570,6 +602,10 @@ static uint32_t do_CRC( const uint8_t *input, uint32_t length )
    }
    return crcDevice->DATA;
 }
+#elif ( MCU_SELECTED == RA6E1 )
+/* CRC32 calculation (matching DFW) provided by crc32.c */
+#endif
+
 /*******************************************************************************
 
   Function Name:  bl_crc32
@@ -584,6 +620,8 @@ static uint32_t do_CRC( const uint8_t *input, uint32_t length )
 *******************************************************************************/
 static uint32_t bl_crc32( uint32_t seed, uint32_t poly, const uint8_t *input, uint32_t length )
 {
+#if ( MCU_SELECTED == NXP_K24 )
+   /* configure CRC calculation */
    CRC_MemMapPtr  crcDevice = CRC_BASE_PTR;
    uint32_t       totr  = 0x2;   /* Data read from engine have bits AND bits reversed  */
    uint32_t       tot   = 1;     /* Data writteng to engine have bytes transposed      */
@@ -591,13 +629,21 @@ static uint32_t bl_crc32( uint32_t seed, uint32_t poly, const uint8_t *input, ui
 
    /* Set CRC engine parameters.  */
    crcDevice->CTRL = CRC_CTRL_TCRC_MASK | ( tot << 30 ) | ( totr << 28 ) | ( fxor << 26 );
-   crcDevice->GPOLY = poly;                  /* Set the polynomial value.  */
+   crcDevice->GPOLY = bitReverse( poly );    /* Set the polynomial value. Note: CRC engine requires this to be bit reversed */
 
    crcDevice->CTRL |= CRC_CTRL_WAS_MASK;     /* Input data, Set WaS=1   */
    crcDevice->DATA = seed;                   /* Set the seed value.  */
    crcDevice->CTRL &= ~CRC_CTRL_WAS_MASK;    /* Input data, Set WaS=0   */
 
    return do_CRC( input, length );
+#elif ( MCU_SELECTED == RA6E1 )
+   /* configure CRC calculation */
+   crc32Cfg_t crcCfg;
+   CRC32_init(seed, poly, eCRC32_RESULT_INVERT, &crcCfg);
+
+   /* calculate CRC */
+   return CRC32_calc(input, length, &crcCfg);
+#endif
 }
 /*******************************************************************************
 
@@ -608,7 +654,11 @@ static uint32_t bl_crc32( uint32_t seed, uint32_t poly, const uint8_t *input, ui
   Notes:           This function NEVER returns
 
 *******************************************************************************/
+#if ( MCU_SELECTED == NXP_K24 )
 int main( void )
+#elif ( MCU_SELECTED == RA6E1 )
+int BL_MAIN_Main( void )
+#endif
 {
    PartitionData_t const * pDFWinfo;      /* Partition handle for DFW information   */
    PartitionData_t const * pNVinfo;       /* Partition handle for whole external NV */
@@ -632,12 +682,16 @@ int main( void )
 
 //   printf( "Hello from bootloader!\n" );
 
+#if ( MCU_SELECTED == NXP_K24 )
    // If ACKISO is active, then must be coming out of reset from Last Gasp (VLLS1) and can ignore DFW requests for now
    if ( PMC_REGSC & PMC_REGSC_ACKISO_MASK )
    {
       //   Doing Last Gasp so run application
       BL_MAIN_RunApp();
    }
+#elif ( MCU_SELECTED == RA6E1 )
+   // add equivalent code to check for last gasp active to bypass update check
+#endif
 
    //OK, we are going to run the Bootloader!
    BL_MAIN_ClockSetup();
@@ -651,70 +705,88 @@ int main( void )
    /* Read the DFW Info partition to determine if there is an application or bootloader update pending.  */
    ( void ) PAR_init();
 
+   /* Verify DFW Bootloader partition is accessible.  */ 
    if ( eSUCCESS == PAR_partitionFptr.parOpen( &pDFWinfo, ePART_DFW_BL_INFO, 0 ) )
    {
       /* Verify both external NV and internal NV are accessible.  */
       if ( eSUCCESS == PAR_partitionFptr.parOpen( &pNVinfo, ePART_DFW_PGM_IMAGE, 0 )  &&
          ( eSUCCESS == PAR_partitionFptr.parOpen( &pCodeInfo, ePART_APP_CODE, 0 ) ) )
       {
+         /* check for possible bootloader info */
          while ( ( DFWInfoIdx < ARRAY_IDX_CNT( DFWinfo ) ) )  /* Loop while in valid DFWinfo[] range and */
          {
-            /* Read a DFWInfo_t from the DFW info partition.   */
-            ( void )PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
+#if ( MCU_SELECTED == RA6E1)
+            /* is DFW INFO blank in the DFW BL INFO partition? */
+            if ( eSUCCESS == PAR_partitionFptr.parBlankCheck( 
                                                 PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
-                                                sizeof( DfwBlInfo_t ), pDFWinfo );
-
-            if ( DFWinfo[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
+                                                sizeof( DfwBlInfo_t ), pDFWinfo ))
             {
-               CRCAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
-               CRCLength   = DFWinfo[ DFWInfoIdx ].Length;
-               expectedCRC = DFWinfo[ DFWInfoIdx ].CRC;
-
-               SrcAddr     =  DFWinfo[ DFWInfoIdx ].SrcAddr;   /* Save src addr, dst addr and length for loop. */
-               DstAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
-               Length      =  DFWinfo[ DFWInfoIdx ].Length;    /* Save CRC start addr, length and expected value. */
-               if ( DFWinfo[ DFWInfoIdx ].FailCount == 0xffffffff )   /* If errCount is "erased", set to 0.  */
+               /* blank indicates no update, skip */
+            }
+            else
+#endif
+            {
+               /* Read an update segment from the DFW BL INFO partition.   */
+               if ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
+                                                   PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
+                                                   sizeof( DfwBlInfo_t ), pDFWinfo ))
                {
-                  DFWinfo[ DFWInfoIdx ].FailCount = 0;
-               }
+                  /* update info length indicates an image is available? */
+                  if ( DFWinfo[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
+                  {
+                     /* collect update info and begin update */
+                     CRCAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
+                     CRCLength   =  DFWinfo[ DFWInfoIdx ].Length;
+                     expectedCRC =  DFWinfo[ DFWInfoIdx ].CRC;
 
-               while ( Length != 0 )    /* Loop until all bytes in the range have been copied.  */
-               {
-                  /* Calculate data to be copied per pass.  */
-                  bytesCopied = min( EXT_FLASH_ERASE_SIZE, Length );
-                  ( void )PAR_partitionFptr.parRead( ( uint8_t * )&sectorData[0], SrcAddr, bytesCopied, pNVinfo  );
-                  ( void )PAR_partitionFptr.parWrite( DstAddr, ( uint8_t * )&sectorData[0], bytesCopied, pCodeInfo );
-                  Length  -= bytesCopied;
-                  SrcAddr += bytesCopied;
-                  DstAddr += bytesCopied;
-                  copyAttempted = ( bool )true;
-                  WDOG_Kick();
-               }
+                     SrcAddr     =  DFWinfo[ DFWInfoIdx ].SrcAddr;   /* Save src addr, dst addr and length for loop. */
+                     DstAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
+                     Length      =  DFWinfo[ DFWInfoIdx ].Length;    /* Save CRC start addr, length and expected value. */
+                     if ( DFWinfo[ DFWInfoIdx ].FailCount == 0xffffffff )   /* If errCount is "erased", set to 0.  */
+                     {
+                        DFWinfo[ DFWInfoIdx ].FailCount = 0;
+                     }
+
+                     while ( Length != 0 )    /* Loop until all bytes in the range have been copied.  */
+                     {
+                        /* Calculate data to be copied per pass.  */
+                        bytesCopied = min( EXT_FLASH_ERASE_SIZE, Length );
+                        (void) PAR_partitionFptr.parRead( ( uint8_t * )&sectorData[0], SrcAddr, bytesCopied, pNVinfo  );
+                        (void) PAR_partitionFptr.parWrite( DstAddr, ( uint8_t * )&sectorData[0], bytesCopied, pCodeInfo );
+                        Length  -= bytesCopied;
+                        SrcAddr += bytesCopied;
+                        DstAddr += bytesCopied;
+                        copyAttempted = ( bool )true;
+                        WDOG_Kick();
+                     }
 
 #if 0
-               calculatedCRC = ( uint32_t )compareNVtoCode( pCodeInfo->PhyStartingAddress + CRCAddr, pNVinfo, CRCLength );
-               calcCRC(  CRCAddr, CRCLength, true, &calculatedCRC, pCodeInfo );
+                     calculatedCRC = ( uint32_t )compareNVtoCode( pCodeInfo->PhyStartingAddress + CRCAddr, pNVinfo, CRCLength );
+                     calcCRC(  CRCAddr, CRCLength, true, &calculatedCRC, pCodeInfo );
 #endif
-               /* Validate CRC.
-                  Src, Dst values from DFWinfo are offsets into their respective partitions. Translate for use in CRC
-                  validation. Physical code address is partition starting address + value from DFWinfo struct.
-               */
-               calculatedCRC = bl_crc32(  CRC32_DFW_START_VALUE,                                /* Seed  */
-                                          /* Polynomial - CRC engine requires this to be bit reversed */
-                                          bitReverse( CRC32_DFW_POLY ),
-                                          (uint8_t *)(pCodeInfo->PhyStartingAddress + CRCAddr), /* Starting addr. */
-                                          CRCLength );                                          /* Length   */
+                     /* Validate CRC.
+                        Src, Dst values from DFWinfo are offsets into their respective partitions. Translate for use in CRC
+                        validation. Physical code address is partition starting address + value from DFWinfo struct.
+                     */
+                     calculatedCRC = bl_crc32(  CRC32_DFW_START_VALUE,                                /* Seed  */
+                                                CRC32_DFW_POLY,                                       /* Polynomial */
+                                                (uint8_t *)(pCodeInfo->PhyStartingAddress + CRCAddr), /* Starting addr. */
+                                                CRCLength );                                          /* Length   */
 
-               if ( calculatedCRC != expectedCRC )
-               {
-                  DFWinfo[ DFWInfoIdx ].FailCount++;
-                  success = ( bool )false;
+                     if ( calculatedCRC != expectedCRC )
+                     {
+                        DFWinfo[ DFWInfoIdx ].FailCount++;
+                        success = ( bool )false;
+                     }
+                  }
                }
             }
-            DFWInfoIdx++;  /* Bump to next segment.   */
+
+            DFWInfoIdx++;  /* Bump to next update segment */
          }
       }
    }
+   
    /* Update the DFWinfo in ROM. */
    if ( copyAttempted )
    {
@@ -884,7 +956,9 @@ static void BL_MAIN_delayForStablePower(void)
  **********************************************************************************************************************/
 static void BL_MAIN__msDelay(uint16_t mSeconds)
 {
-
+#if ( MCU_SELECTED == RA6E1 )
+   R_BSP_SoftwareDelay(mSeconds, BSP_DELAY_UNITS_MILLISECONDS);
+#elif ( MCU_SELECTED == NXP_K24 )
    uint32_t initialSysTick = 0; /* variable to store initial systick value */
    uint32_t currentSystick = 0; /* variable to track change in systick valuet to compare to initial */
    bool msTickOccurred; /* flag used to stop do/while loop */
@@ -892,14 +966,20 @@ static void BL_MAIN__msDelay(uint16_t mSeconds)
 
    while( counter < mSeconds)
    {
-
       msTickOccurred = false;
+#if ( MCU_SELECTED == NXP_K24 )
       initialSysTick = SYST_CVR; /* update the initial systick value */
+#elif ( MCU_SELECTED == RA6E1 )
+      initialSysTick = SysTick->VAL; /* update the initial systick value */
+#endif
 
       do /* spin here until 120000 system ticks have occured appr. 1ms */
       {
+#if ( MCU_SELECTED == NXP_K24 )
          currentSystick = SYST_CVR; /* get current systick value */
-
+#elif ( MCU_SELECTED == RA6E1 )
+         currentSystick = SysTick->VAL; /* get current systick value */
+#endif
          /* systick value counts down from SYS_RVR to 0 */
          if( initialSysTick > currentSystick ) /* if initial systick value is larger than current, systick reload has not occured */
          {
@@ -910,7 +990,11 @@ static void BL_MAIN__msDelay(uint16_t mSeconds)
          }
          else  /* current systick value is larger than intitial value, systick reload has occured */
          {
+#if ( MCU_SELECTED == NXP_K24 )
             if( ( initialSysTick + ( SYST_RVR - currentSystick ) ) > SYSTICK_CYCLES_1MS ) /* has 1ms worth of clock cycles occured? */
+#elif ( MCU_SELECTED == RA6E1 )
+            if( ( initialSysTick + ( SysTick->LOAD - currentSystick ) ) > SYSTICK_CYCLES_1MS ) /* has 1ms worth of clock cycles occured? */
+#endif
             {
                msTickOccurred = true;
             }
@@ -926,5 +1010,5 @@ static void BL_MAIN__msDelay(uint16_t mSeconds)
       }
 
    }
-
+#endif  /* NXP_K24 */
 }

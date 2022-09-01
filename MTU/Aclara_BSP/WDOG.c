@@ -22,9 +22,14 @@
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "hal_data.h"
 #endif
-#else
+#else   /* BOOTLOADER */
+#if ( MCU_SELECTION == NXP_K24 )
 #include <MK24F12.h>
-#endif   /* BOOTLOADER  */
+#elif (MCU_SELECTED == RA6E1)
+#include "hal_data.h"
+#endif
+#endif  /* NOT BOOTLOADER  */
+
 #include "error_codes.h"
 #include "BSP_aclara.h"
 

@@ -22,11 +22,16 @@
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "hal_data.h"
 #endif
-#else
+#else   /* BOOTLOADER */
+#if ( MCU_SELECTION == NXP_K24 )
 #include <MK24F12.h>
-#endif   /* BOOTLOADER  */
+#elif (MCU_SELECTED == RA6E1)
+#include "hal_data.h"
+#endif
+#endif  /* NOT BOOTLOADER  */
+
 #include "error_codes.h"
-#include "BSP_aclara.h"
+#include "BSP_aclara_BL.h"
 
 /* #DEFINE DEFINITIONS */
 #define WATCHDOG_CLOCK_DIVIDE_PRESCALER 4 /* This value is 1 less than the actual prescaler/divider used */

@@ -36,7 +36,6 @@
 
 #include <stdint.h>
 #include "portable_freescale.h"
-#include "ecc108_comm_marshaling.h"    /* Needed for key sizes */
 
 #ifndef __BOOTLOADER
 #include "ecc108_comm_marshaling.h"    /* Needed for key sizes */

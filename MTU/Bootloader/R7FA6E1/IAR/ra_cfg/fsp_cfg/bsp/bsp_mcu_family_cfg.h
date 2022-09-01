@@ -43,7 +43,7 @@
 
             /* CMSIS TrustZone Settings */
             #define SCB_CSR_AIRCR_INIT                (1)
-            #define SCB_AIRCR_BFHFNMINS_VAL           (0)
+            #define SCB_AIRCR_BFHFNMINS_VAL           (1)
             #define SCB_AIRCR_SYSRESETREQS_VAL        (1)
             #define SCB_AIRCR_PRIS_VAL                (0)
             #define TZ_FPU_NS_USAGE                   (1)
@@ -210,7 +210,7 @@
 
             /* Security attribution for NMI registers. */
 #ifndef BSP_TZ_CFG_ICUSARB
-#define BSP_TZ_CFG_ICUSARB (0 | 0xFFFFFFFEU) /* Should match AIRCR.BFHFNMINS. */
+#define BSP_TZ_CFG_ICUSARB (1 | 0xFFFFFFFEU) /* Should match AIRCR.BFHFNMINS. */
 #endif
 
             /* Security attribution for registers for DMAC channels */

@@ -45,6 +45,7 @@
 #define dvr_eflash_GLOBAL
 #include "dvr_extflash_BL.h"
 #undef  dvr_eflash_GLOBAL
+
 #ifndef __BOOTLOADER
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
@@ -53,22 +54,28 @@
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #include "hal_data.h"
 #endif
-#else
+#else   /* BOOTLOADER */
 #include <string.h>
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 #include <MK66F18.h>
-#else
+#elif (MCU_SELECTED == NXP_K24)
 #include <MK24F12.h>
+#elif (MCU_SELECTED == RA6E1)
+#include "hal_data.h"
 #endif
-#endif
+#endif  /* NOT BOOTLOADER */
+
 #include "partitions_BL.h"
 #include "spi_mstr_BL.h"
 #include "invert_bits_BL.h"
 #include "byteswap_BL.h"
 #ifndef __BOOTLOADER
 #include "DBG_SerialDebug.h"
-#endif   /* BOOTLOADER  */
-#include "dvr_sharedMem_BL.h"
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+#include "sys_clock.h"
+#endif
+#endif   /* NOT __BOOTLOADER  */
+#include "dvr_sharedMem.h"
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
@@ -236,10 +243,15 @@ PACK_END
 /* FUNCTION PROTOTYPES */
 
 /* Functions accessed via a table entry (indirect call) */
+static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cnt, PartitionData_t const *pParData,
                                 DeviceDriverMem_t const * const * pNextDvr );
-static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
+                                 DeviceDriverMem_t const * const * pNxtDvr );
+#endif
+
 #ifndef __BOOTLOADER
 static returnStatus_t close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData,
@@ -272,8 +284,7 @@ static void           enableWrites( uint8_t port );
 #if ( MCU_SELECTED == NXP_K24 )
 static void           isr_busy( void );
 static void           isr_tmr( void );
-#endif
-#if ( MCU_SELECTED == RA6E1 )
+#elif ( MCU_SELECTED == RA6E1 )
 static fsp_err_t      MisoBusy_isr_init( void );
 #endif
 #endif
@@ -294,30 +305,37 @@ static const DeviceId_t sDeviceId[] =
    /* Erase uS       uS        uS       uS        uS         WR       ID     Type    ID   Busy        */
 #if 0
    /* Disallow a "default" configuration. Require a device ID that is recognizable.                         */
-   {  8000000,   3000000,     200000,   12,       5000,         1,    0x00,  0x00,  0x00,   0,    0 },  /* Default */
+   {  8000000,   3000000,     200000,   12,       5000,         1,    0x00,  0x00,  0x00,   0,    0 },                                /* Not qualified */
 #endif
-   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */
-   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */
-   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x41,   0,    0 },  /* SST 16Mb 26VF016B */
-   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x42,   0,    0 },  /* SST 32Mb 26VF032B */
-   { 15000000,   1000000,     300000,   25,       1000,       256,    0x9D,  0x40,  0x15,   0,    0 },  /* ISSI 16Mb 25LQ080B */
-   { 25000000,   3000000,     300000,  100,       2500,       256,    0x1F,  0x86,  0x01,   0,    0 },  /* Adesto 16Mb AT25SF161 */
-   { 25000000,   2000000,     400000,  100,       3000,       256,    0xEF,  0x40,  0x15,   0,    0 },  /* Windbond 16Mb W25Q16JV */
+#if ( ( MCU_SELECTED != RA6E1 ) || ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B ) )
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   1,    1 },  /* SST 8Mb */            /* Use MISO busy and AAI */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   1,    1 },  /* SST 16Mb 25VF016B */  /* Use MISO busy and AAI */
+#elif ( ( ( MCU_SELECTED == RA6E1 ) && ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) ) )
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x8E,   0,    0 },  /* SST 8Mb */            /* No MISO busy nor AAI  */
+   {    50000,     25000,      25000,   10,         10,         1,    0xBF,  0x25,  0x41,   0,    0 },  /* SST 16Mb 25VF016B */  /* No MISO busy nor AAI  */
+#else
+   #error "Inconsistent settings of MCU_SELECTED and HAL_TARGET_HARDWARE compile switches!"
+#endif
+   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x41,   0,    0 },  /* SST 16Mb 26VF016B */       /* Not qualified */
+   {    50000,     25000,      25000,   70,       1500,       256,    0xBF,  0x26,  0x42,   0,    0 },  /* SST 32Mb 26VF032B */       /* Not qualified */
+   { 15000000,   1000000,     300000,   25,       1000,       256,    0x9D,  0x40,  0x15,   0,    0 },  /* ISSI 16Mb 25LQ080B */      /* Not qualified */
+   { 25000000,   3000000,     300000,  100,       2500,       256,    0x1F,  0x86,  0x01,   0,    0 },  /* Adesto 16Mb AT25SF161 */   /* Not qualified */
+   { 25000000,   2000000,     400000,  100,       3000,       256,    0xEF,  0x40,  0x15,   0,    0 },  /* Windbond 16Mb W25Q16JV */  /* Not qualified */
 #if 0
    /* Temporarily removed. If this JEDEC id is returned (errantly) with the SST device installed, writes fail. Found
       that even reducing the Max Bytes WR to 1 still resulted in failed writes. */
-   { 80000000,   3000000,     150000, 5000,       5000,       256,    0x20,  0x00,  0x00,   0,    0 },  /* Numonyx */
+   { 80000000,   3000000,     150000, 5000,       5000,       256,    0x20,  0x00,  0x00,   0,    0 },  /* Numonyx */                 /* Not qualified */
 #endif
-   {  8000000,    950000,     200000,    7,       3000,         1,    0x1F,  0x00,  0x00,   0,    0 },  /* Atmel */
+   {  8000000,    950000,     200000,    7,       3000,         1,    0x1F,  0x00,  0x00,   0,    0 },  /* Atmel */                   /* Not qualified */
 #if 0
-   {    10000,     10000,      10000,    7,       5000,       256,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */
+   {    10000,     10000,      10000,    7,       5000,       256,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */                    /* Not qualified */
 #else
    /* Temporarily modify the Max Bytes WR so that if this JEDED id is returned (errantly) with the SST device installed,
       writes still pass.   */
-   {    10000,     10000,      10000,    7,       5000,         1,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */
+   {    10000,     10000,      10000,    7,       5000,         1,    0x7F,  0x00,  0x00,   0,    0 }   /* ISSI */                    /* Not qualified */
 #endif
 };
-#endif
+#endif  /* NOT BOOTLOADER */
 
 /* The driver table must be defined after the function definitions. The list below are the supported commands for this
    driver. */
@@ -325,17 +343,20 @@ static const DeviceId_t sDeviceId[] =
 DeviceDriverMem_t sDeviceDriver_eFlash =
 {
 #ifdef __BOOTLOADER
-   init,       // Init function - Empty function for BOOTLOADER
-   dvr_open,   // Open Command - For this implementation it only calls the lower level drivers.
-   NULL,       // Close Command - For this implementation it only calls the lower level drivers.
-   NULL,       // Sets the power mode of the lower drivers (the app may set to low power mode when power is lost
-   dvr_read,   // Read Command
-   NULL,       // Write Command
-   NULL,       // Erases a portion (or all) of the banked memory.
-   NULL,       // Write the cache content to the lower layer driver
-   NULL,       // ioctl function - Does Nothing for this implementation
-   NULL,       // Not supported - API support only
-   NULL        // Not supported - API support only
+   .devInit       = init,        // Init function - Empty function for BOOTLOADER
+   .devOpen       = dvr_open,    // Open Command - For this implementation it only calls the lower level drivers.
+   .devClose      = NULL,        // Close - not required by bootloader
+   .devSetPwrMode = NULL,        // Power Mode - not required by bootloader
+   .devRead       = dvr_read,    // Read Command
+   .devWrite      = NULL,        // Write - not required by bootloader
+   .devErase      = NULL,        // Erase - not required by bootloader
+#if ( MCU_SELECTED == RA6E1 )
+   .devBlankCheck = blankCheck,  // Blank check - not required by bootloader
+#endif
+   .devFlush      = NULL,        // Flush - not required by bootloader
+   .devIoctl      = NULL,        // ioctl function - Does Nothing for this implementation
+   .devRestore    = NULL,        // Not supported - API support only
+   .devTimeSlice  = NULL         // Not supported - API support only
 #else
    init,       // Init function - Creates mutex & calls lower drivers
    dvr_open,   // Open Command - For this implementation it only calls the lower level drivers.
@@ -344,11 +365,14 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
    dvr_read,   // Read Command
    dvr_write,  // Write Command
    erase,      // Erases a portion (or all) of the banked memory.
+#if ( MCU_SELECTED == RA6E1 )
+   blankCheck, // Blank check a memory in the partition
+#endif
    flush,      // Write the cache content to the lower layer driver
    dvr_ioctl,  // ioctl function - Does Nothing for this implementation
    restore,    // Not supported - API support only
    timeSlice   // Not supported - API support only
-#endif
+#endif   /* NOT BOOTLOADER */
 };
 
 #if ( MCU_SELECTED == NXP_K24 )
@@ -404,7 +428,15 @@ STATIC eDVR_EFL_IoctlRtosCmds_t rtosCmds_ = eRtosCmdsEn;   /* eRtosCmdsDis or eR
 //STATIC bool rtosCmds_ = (bool)eRtosCmdsEn;  /* eRtosCmdsDis or eRtosCmdsEn */
 STATIC const DeviceId_t *pChipId_ = &sDeviceId[0];  /* Flash Mem MFG, Points to the sDeviceId table, init to DEFAULT. */
 
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+#define NUM_TIMING_SAMPLES 1000
+static uint32_t DVR_ExtflashInterruptCounter = 0, DVR_ExtflashIndex = 0, DVR_ExtflashMissedInts = 0;
+static uint32_t DVR_ExtflashInterruptTimeoutWhileBusy = 0;
+static uint32_t DVR_ExtflashInterruptTiming[NUM_TIMING_SAMPLES] = { 0 };
+static uint32_t DVR_ExtflashDivisor = 120;
 #endif
+#endif   /* NOT __BOOTLOADER */
+
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
 /***********************************************************************************************************************
@@ -468,20 +500,35 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
       R_BSP_PinAccessEnable();
 #endif
    }
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+   DVR_ExtflashDivisor = getCoreClock()/1000000UL;
+#endif
 #if ( (DEBUG_HARDWARE_BUSY == 1) || (DEBUG_POLL_BUSY == 1 ) ) /* For NV device ready */
-   PORTE_PCR24 = PORT_PCR_MUX(1);   /* Make GPIO   */
-   GPIOE_PDDR |= ( 1 << 24 );       /* Make output */
-   GPIOE_PCOR = ( 1 << 24 );        /* Set output low */
+   NV_HW_BUSY_DEBUG_CONFIG();
+   NV_HW_BUSY_DEBUG_CLEAR();        /* Set output low */
 #endif
 #if ( MCU_SELECTED == NXP_K24 )
    return ( NV_SPI_PORT_INIT( ((SpiFlashDevice_t*)pPartitionData->pDriverCfg)->port ) );
 #else
    return ( eSUCCESS );
 #endif
-#else
+#else /* NOT RTOS (bootloader) */
+#if ( MCU_SELECTED == RA6E1 )
+   /* initialize QSPI with no busy interrupt */
+   NV_SPI_PORT_INIT( &g_qspi0_ctrl, &g_qspi0_cfg );
+   R_QSPI_SpiProtocolSet(&g_qspi0_ctrl, SPI_FLASH_PROTOCOL_EXTENDED_SPI);
+   
+   /* TODO: RA6: Access needs to be enabled so we can operate the chip select of external flash during startup.
+            Need to investigate if this should be moved to a more appropriate/generic location, otherwise having
+            it here ensures it will be enabled before files stored in NV are utilized. */
+   R_BSP_PinAccessEnable();
+#elif ( MCU_SELECTED == NXP_K24 )
+   /* do nothing, K24 initialization is RTOS-based and focused on the interrupt initialization */
+#endif
    return ( eSUCCESS );
 #endif
 }
+
 /***********************************************************************************************************************
 
    Function Name: dvr_open
@@ -523,7 +570,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
 #elif ( RTOS_SELECTION == FREE_RTOS )
       OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
 #endif
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if ( MCU_SELECTED == NXP_K24 )
       eRetVal = NV_SPI_PORT_OPEN( pDevice->port, &_NV_spiCfg, SPI_MASTER );
 #endif
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -557,6 +604,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
                   erroneous read of JEDEC ID. */
                eRetVal = busyCheck( pDevice, 1000 );
             } while ( eRetVal != eSUCCESS );
+
 #ifndef __BOOTLOADER
             {
                /* Clear the "current level of block write protection" bits, bits 2-5 and 7.  This allows us to write to
@@ -613,8 +661,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
                OS_MUTEX_Unlock( &qspiMutex_ );   // Function will not return if it fails
 #endif
             }
-
-#endif
+#endif  /* NOT BOOTLOADER */
          }
       }
       dvr_shm_unlock(); /* End critical section */
@@ -623,6 +670,7 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
    return ( eRetVal ); /*lint -esym(715,pNextDvr) */
 }
 /*lint +esym(715,pNextDvr) */
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: close
@@ -641,7 +689,6 @@ static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem
    Reentrant Code: No
 
  **********************************************************************************************************************/
-#ifndef __BOOTLOADER
 /*lint -efunc( 715, close ) : pNextDvr is not used.  It is a part of the common API. */
 /*lint -efunc( 818, close ) : pNextDvr is declared correctly.  It is a part of the common API. */
 static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNextDvr )
@@ -658,12 +705,16 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
       NV_SPI_PORT_CLOSE( &g_qspi0_ctrl );
 #endif
 
+#ifndef __BOOTLOADER
       HOLD_PIN_GPIO();
       WRITE_PROTECT_PIN_GPIO();
+#endif
    }
    return ( eSUCCESS );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
+
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: pwrMode
@@ -682,7 +733,6 @@ static returnStatus_t close( PartitionData_t const *pParData, DeviceDriverMem_t 
    Reentrant Code: Yes - because it is an atomic operation.
 
  **********************************************************************************************************************/
-#ifndef __BOOTLOADER
 /*lint -efunc( 715, pwrMode ) : pNextDvr is not used.  It is a part of the common API. */
 /*lint -efunc( 818, pwrMode ) : pNextDvr is declared correctly.  It is a part of the common API. */
 static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const *pPartitionData,
@@ -696,7 +746,7 @@ static returnStatus_t pwrMode( const ePowerMode ePwrMode, PartitionData_t const 
 #endif
    return ( eSUCCESS );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: dvr_write
@@ -779,7 +829,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt
    }
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: dvr_read
@@ -811,13 +861,9 @@ static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, const lCn
    ASSERT( Cnt <= EXT_FLASH_SECTOR_SIZE ); /* Count must be <= the sector size. */
    if ( Cnt )
    {
-#if RTOS == 1
       dvr_shm_lock(); /* Take mutex, critical section */
-#endif
       eRetVal = localRead( pDest, pParData->PhyStartingAddress + srcOffset, Cnt, pParData->pDriverCfg );
-#if RTOS == 1
       dvr_shm_unlock(); /* End critical section */
-#endif
    }
    return ( eRetVal );
 }
@@ -877,10 +923,8 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
    {
       eRetVal = eSUCCESS; /* Assume Seccess - Also checked in while loop below. */
 
-#if RTOS == 1
       /* Take mutex, critical section */
       dvr_shm_lock();
-#endif
 
       while ( Cnt && ( eSUCCESS == eRetVal ) )
       {
@@ -940,13 +984,41 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
          phDestOffset += nBytesOperatedOn;
          Cnt -= nBytesOperatedOn;
       }
-#if RTOS == 1
+
       dvr_shm_unlock(); /* End critical section */
-#endif
    }
    return ( eRetVal );
 }
+#endif  /* NOT BOOTLOADER */
+
+#if ( MCU_SELECTED == RA6E1 )
+/***********************************************************************************************************************
+
+   Function Name: blankCheck
+
+   Purpose: Blank check a portion of the current partition of memory.
+
+   Arguments:
+      dSize destOffset - Offset into the partition to blank check
+      lCnt cnt - number of bytes to blank check
+      PartitionData_t const *pParData Points to a partition table entry.  This contains all information to access the
+                               partition to initialize.
+      DeviceDriverMem_t const * const *pNextDriver Points to the next driver's table.
+
+   Returns: As defined by error_codes.h
+
+   Side Effects: None
+
+   Reentrant Code: Yes
+
+ **********************************************************************************************************************/
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNxtDvr )
+{
+   //TODO: should this check to see if all bytes are 0xFF (erased state)?	
+   return (eSUCCESS);
+}
 #endif
+
 /***********************************************************************************************************************
 
    Function Name: flush
@@ -972,7 +1044,7 @@ static returnStatus_t flush( PartitionData_t const *pPartitionData, DeviceDriver
 {
    return ( eSUCCESS );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: dvr_ioctl
@@ -1011,7 +1083,7 @@ static returnStatus_t dvr_ioctl( const void *pCmd, void *pData, PartitionData_t 
 #endif
    return ( retVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: localErase
@@ -1112,7 +1184,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
 #endif
    return ( eRetVal );  /*lint !e438 last value of retries not used  */
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: busyCheck
@@ -1141,7 +1213,9 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( MCU_SELECTED == NXP_K24 )
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_GPIO_e ); /* Change pin to digital input from SPI MISO */
 #elif ( MCU_SELECTED == RA6E1 )
-      (void)NV_MISO_CFG( BSP_IO_PORT_05_PIN_03, (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT );
+/* Now that we are using a separate GPIO pin (P505) for the busy-complete interrupt in Rev B of the RA6E1 board,   *
+ * the MISO pin can always remainwith the QSPI peripheral.  So we no longer need the following line.               */
+/*    (void)NV_MISO_CFG( NV_MISO_PIN_NUMBER, (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT );                         */
 #endif
 #if !RTOS
       bBusyIsr_ = false;
@@ -1158,18 +1232,35 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
             NV_SPI_ChkSharedPortCfg(pDevice->port);
 #elif ( RTOS_SELECTION == FREE_RTOS )
             OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
-#endif
+#endif // RTOS_SELECTION
             NV_CS_ACTIVE();                                 /* Activate the chip select  */
 #else /* Level triggered   */
 #if ( RTOS_SELECTION == MQX_RTOS )
             NV_SPI_MutexLock(pDevice->port);
             NV_SPI_ChkSharedPortCfg(pDevice->port);
 #elif ( RTOS_SELECTION == FREE_RTOS )
+            /* Since QSPI_MISO (P503) is now tri-state, it will not go low on its own.  Therefore, use P505, which is connected   *
+             * to QSPI_MISO, to stobe it low briefly, which will allow it remain low and then trigger the interrupt when the      *
+             * serial flash chip drives it high to signal that the operation is complete.  Since we changed P505 to a GPIO pin    *
+             * to do this, we have to revert it back to its baseline configuration as an IRQ pin and an input. We need to do      *
+             * this as a critical section so that the serial flash does not raise QSPI_MISO before our interrupt is armed.        */
+            OS_INT_disable();
+            R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)BSP_IO_LEVEL_LOW      ) );
+            R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                                    ) );
+            R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT  | (uint32_t)IOPORT_CFG_IRQ_ENABLE ) );
             OS_MUTEX_Lock( &qspiMutex_ );  // Function will not return if it fails
-#endif
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+            DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] = DWT->CYCCNT;
+#endif // ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+            NV_CS_INACTIVE(); /* Signal to the serial flash chip that we are ready for it to assert the MISO line when done */
+            DVR_EFL_BUSY_IRQ_EI();                          /* Enable the ISR on MISO. */
+            OS_INT_enable();
+#endif // RTOS_SELECTION
+#if ( RTOS_SELECTION == MQX_RTOS )
             NV_CS_ACTIVE();                                 /* Activate the chip select  */
             DVR_EFL_BUSY_IRQ_EI();                          /* Enable the ISR on MISO. */
-#endif
+#endif // RTOS_SELECTION
+#endif // ( DVR_EFL_BUSY_EDGE_TRIGGERED != 0 )
 #if ( DVR_EFL_BUSY_EDGE_TRIGGERED != 0 ) /* Edge triggered */
             if ( !NV_BUSY() ) /*  Is device ready immediately upon chip select?  */
             {
@@ -1179,13 +1270,17 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
             else if ( !OS_SEM_Pend( &extFlashSem_, max( OS_TICK_mS + 1, u32BusyTime_uS / OS_TICK_uS ) ) )
 #else
             if ( !OS_SEM_Pend( &extFlashSem_, max( OS_TICK_mS + 1, u32BusyTime_uS / OS_TICK_uS ) ) )
-#endif
+#endif // DVR_EFL_BUSY_EDGE_TRIGGERED
             {
+#if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+               if ( NV_BUSY() ) DVR_ExtflashInterruptTimeoutWhileBusy++;
+               DVR_ExtflashMissedInts++;
+#endif // ( TM_EXT_FLASH_BUSY_TIMING == 1 )
 #if (DEBUG_HARDWARE_BUSY == 1 ) /* For debugging missed ready/busy interrupts   */
                /* Missed the RY/BY# interrupt - good place for a scope trigger and breakpoint */
-               GPIOE_PSOR = ( 1 << 24 );        /* Set output high, trigger scope */
+               NV_HW_BUSY_DEBUG_SET();
                NOP();
-               GPIOE_PCOR = ( 1 << 24 );        /* Set output low */
+               NV_HW_BUSY_DEBUG_CLEAR();
 #endif
                retVal = (returnStatus_t)NV_BUSY();
             }
@@ -1250,11 +1345,13 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 #if ( MCU_SELECTED == NXP_K24 )
       (void)NV_MISO_CFG( pDevice->port, SPI_MISO_SPI_e );   /* Make pin SPI again MISO */
 #elif ( MCU_SELECTED == RA6E1 )
-      (void)NV_MISO_CFG( BSP_IO_PORT_05_PIN_03, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_QSPI) );
+/* Now that we are using a separate GPIO pin (P505) for the busy-complete interrupt in Rev B of the RA6E1 board,   *
+ * the MISO pin can always remainwith the QSPI peripheral.  So we no longer need the following line.               */
+/*    (void)NV_MISO_CFG( NV_MISO_PIN_NUMBER, ((uint32_t) IOPORT_CFG_PERIPHERAL_PIN | (uint32_t) IOPORT_PERIPHERAL_QSPI) ) */
 #endif
    }
    else
-#endif   /* BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
    {
       uint8_t nvStatus;                                       /* Contains the Flash nvStatus. */
       uint8_t instr = FL_INSTR_READ_STATUS_REG;               /* Instruction to send to the flash device. */
@@ -1282,7 +1379,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       /* Calculate sleep time to be 20 percent of busy time, we don't want to sleep entire busyTime */
       OS_TICK_Struct TickTime;
       uint32_t sleepTime = u32BusyTime_uS / ( uint32_t )( 1000 * 5 );
-#endif   /* BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
 
       do /* Spin here until the chip returns a nvStatus of NOT busy. */
       {
@@ -1300,7 +1397,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
          OS_TICK_Sleep ( &TickTime, sleepTime );
 
          OS_TICK_Get_CurrentElapsedTicks(&endTime); /* update endtime to the latest ticktime */
-#endif   /* BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
 #if ( MCU_SELECTED == NXP_K24 )
          (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus) ); /* check nvStatus for busy */
 #elif ( MCU_SELECTED == RA6E1 )
@@ -1323,7 +1420,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
    }
 #ifndef __BOOTLOADER
    busyTime_uS_ = 0;
-#endif   //end of #ifndef __BOOTLOADER
+#endif   /* NOT BOOTLOADER  */
    return ( retVal );
 }
 /***********************************************************************************************************************
@@ -1424,7 +1521,7 @@ static returnStatus_t localWrite( dSize nDest, uint8_t const *pSrc, lCnt Cnt, bo
    }
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: localWriteBytesToSPI
@@ -1624,7 +1721,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
    disableWrites( pDevice->port ); /* Disable writes. */
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: setBusyTimer
@@ -1644,7 +1741,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
 static void setBusyTimer( uint32_t busyTimer_uS )
 {
    busyTime_uS_ = busyTimer_uS;
-#if 0 // TODO: RA6E1: Melvin: revisit with a OS Timer
+#if ( MCU_SELECTED == NXP_K24 )
    EXT_FLASH_TIMER_DIS();
    EXT_FLASH_TIMER_COMPARE = busyTimer_uS / 1000;  /* 1mS timer, so convert to mS */
    EXT_FLASH_TIMER_RST();               /* Reset the timer */
@@ -1652,7 +1749,8 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
    EXT_FLASH_TIMER_EN();                /* Enable Interrupt & Start the timer. */
-#endif  // if 0
+
+#elif ( MCU_SELECTED == RA6E1 )
 
 #if USE_POWER_MODE  // TODO: RA6E1: Remove if the above TODO is resolved
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
@@ -1660,18 +1758,23 @@ static void setBusyTimer( uint32_t busyTimer_uS )
 
    timer_info_t   info;
    uint32_t       timer_freq_hz;
-
+   uint32_t       period_counts = 0;
    (void) R_AGT_InfoGet(&AGT0_ExtFlashBusy_ctrl, &info);
 
    timer_freq_hz = info.clock_frequency;
-   uint32_t period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000);
+   period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000); // TODO: RA6E1: This calculation overflows
+   if( period_counts >= UINT16_MAX )
+   {
+      period_counts = UINT16_MAX - 1;  /* period count cannot be more than or equal to UINT16_MAX */
+   }
 
    R_AGT_PeriodSet( &AGT0_ExtFlashBusy_ctrl, period_counts );
 
    /* Start the timer. */
    (void) R_AGT_Start(&AGT0_ExtFlashBusy_ctrl);
 }
-#endif
+#endif  // #if ( MCU_SELECTED == NXP_K24 )
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: enableWrites
@@ -1707,7 +1810,7 @@ static void enableWrites( uint8_t port )
 #elif ( MCU_SELECTED == RA6E1 )
    ( void )NV_SPI_PORT_WRITE( &g_qspi0_ctrl, &instr, sizeof ( instr ), false ); /* WR the Instr to the chip */
 #endif
-   NV_CS_INACTIVE(); /* Activate the chip select  */
+   NV_CS_INACTIVE(); /* Release the chip select  */
 #if ( RTOS_SELECTION == MQX_RTOS )
    NV_SPI_MutexUnlock(port);
 #elif ( RTOS_SELECTION == FREE_RTOS )
@@ -1715,7 +1818,7 @@ static void enableWrites( uint8_t port )
 #endif
    bWrEnabled_ = 1;
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: disableWrites
@@ -1971,7 +2074,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
 
    return ( eRetVal );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: restore
@@ -1998,7 +2101,7 @@ static returnStatus_t restore( lAddr lDest, lCnt cnt, PartitionData_t const *pPa
    /*lint -efunc( 818, restore ) : Parameters are not used.  It is a part of the common API. */
    return ( eSUCCESS );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: timeSlice
@@ -2022,7 +2125,7 @@ static bool timeSlice( PartitionData_t const *pParData, DeviceDriverMem_t const 
 {
    return( false );
 }
-#endif
+#endif  /* NOT BOOTLOADER */
 /***********************************************************************************************************************
 
    Function Name: isr_busy
@@ -2051,6 +2154,16 @@ void isr_busy( external_irq_callback_args_t * p_args )
 #if ( MCU_SELECTED == NXP_K24 )
       OS_SEM_Post( &extFlashSem_ );  /* Post the semaphore */
 #elif ( MCU_SELECTED == RA6E1 )
+   #if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
+      DVR_ExtflashInterruptCounter++;
+      if ( 0 != DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] )
+      {
+         DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] = ( (DWT->CYCCNT) - DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] ) / DVR_ExtflashDivisor;
+         DVR_ExtflashIndex++;
+         if ( DVR_ExtflashIndex >= NUM_TIMING_SAMPLES ) DVR_ExtflashIndex = 0;
+         DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] = 0;
+      }
+   #endif
       OS_SEM_Post_fromISR( &extFlashSem_ );  /* Post the semaphore */
 #endif
    }
@@ -2058,7 +2171,7 @@ void isr_busy( external_irq_callback_args_t * p_args )
    bBusyIsr_ = true;
 #endif
 }
-#endif   /* BOOTLOADER  */
+#endif  /* NOT BOOTLOADER */
 
 #ifndef __BOOTLOADER
 #if ( MCU_SELECTED == RA6E1 )
@@ -2085,8 +2198,9 @@ static fsp_err_t MisoBusy_isr_init( void )
    return err;
 }
 #endif   /* MCU_SELECTED == RA6E1 */
-#endif   /* BOOTLOADER  */
+#endif  /* NOT BOOTLOADER */
 
+#ifndef __BOOTLOADER
 #if ( MCU_SELECTED == NXP_K24 )
 /***********************************************************************************************************************
 
@@ -2103,7 +2217,6 @@ static fsp_err_t MisoBusy_isr_init( void )
    Reentrant Code: No
 
  **********************************************************************************************************************/
-#ifndef __BOOTLOADER
 static void isr_tmr( void )
 {
    EXT_FLASH_TIMER_DIS();
@@ -2112,15 +2225,14 @@ static void isr_tmr( void )
 #endif
    LPTMR0_CSR &= ~( LPTMR_CSR_TEN_MASK | LPTMR_CSR_TIE_MASK );
 }
-#endif
 #elif ( MCU_SELECTED == RA6E1 )
 /***********************************************************************************************************************
 
-   Function Name: g_timer0_callback
+   Function Name: AGT0_ExtFlashBusy_Callback
 
    Purpose: Timer ISR callback for AGT timer 0
 
-   Arguments:  None
+   Arguments:  timer_callback_args_t *
 
    Returns: None
 
@@ -2129,7 +2241,7 @@ static void isr_tmr( void )
    Reentrant Code: No
 
  **********************************************************************************************************************/
-void g_timer0_callback (timer_callback_args_t * p_args)
+void AGT0_ExtFlashBusy_Callback (timer_callback_args_t * p_args)
 {
     if (TIMER_EVENT_CYCLE_END == p_args->event)
     {
@@ -2137,12 +2249,14 @@ void g_timer0_callback (timer_callback_args_t * p_args)
     }
 }
 #endif
+#endif  /* NOT BOOTLOADER */
+
 /* ****************************************************************************************************************** */
 /* Unit Test Code */
 
 #ifdef TM_DVR_EXT_FL_UNIT_TEST
-#include "partitions.h"
-#include "partition_cfg.h"
+#include "partitions_BL.h"
+#include "partition_cfg_BL.h"
 #ifndef __BOOTLOADER
 /*lint -efunc(578,incCountLimit) argument same as enum OK  */
 static uint32_t incCountLimit( uint32_t count, uint32_t limit )
@@ -2181,11 +2295,8 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
    PartitionData_t const * partitionData;    /* Pointer to partition information   */
    uint8_t                 startPattern;
 
-#if 0 //TODO Melvin: random number generator to be implemented
    startPattern = ( uint8_t )aclara_rand();
-#else
-   startPattern = 0x00;
-#endif
+
    /* Find the NV test partition - don't care about update rate   */
    retVal = PAR_partitionFptr.parOpen( &partitionData, ePART_NV_TEST, 0xffffffff );
    if ( eSUCCESS == retVal )
@@ -2252,4 +2363,4 @@ uint32_t DVR_EFL_UnitTest( uint32_t ReadRepeat )
    return failCount;
 }
 #endif
-#endif
+#endif  /* NOT BOOTLOADER */

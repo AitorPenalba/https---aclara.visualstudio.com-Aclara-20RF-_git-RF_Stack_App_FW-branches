@@ -36,6 +36,7 @@
 /* INCLUDE FILES */
 #include <stdint.h>
 #include <stdbool.h>
+#include "project_BL.h"
 #include "byteswap_BL.h"
 
 /* ************************************************************************* */

@@ -72,6 +72,13 @@ uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv
 uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] );
 #endif
 
+#ifdef TM_BL_TEST_COMMANDS
+uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_BL_Test_Clear_BL_Info( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_BL_Test_Erase_BL_Info( uint32_t argc, char *argv[] );
+#endif
+
 #if ( TM_LINKED_LIST == 1)
 uint32_t DBG_CommandLine_OS_LinkedList_Create( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] );

@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2013-2022 Aclara.  All Rights Reserved.
+ * Copyright 2013-2021 Aclara.  All Rights Reserved.
  *
  * PROPRIETARY NOTICE
  * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -105,9 +105,10 @@
 #error Invalid Application device - Select ony one of EP, PORTABLE_DCU or MFG_MODE_DCU
 #endif
 
+#define HAL_IGNORE_BROWN_OUT_SIGNAL    0 /* 1 = Ignore brown-out signal, 0 = Use Brown Out Signal */
+
 #define DFW_TEST_KEY                   0  /* 1=Use DFW test key, 0=Used default DFW Key */
-#define DFW_XZCOMPRESS_BSPATCHING      1  /* Update firmware patching technique - Uses XZ for decompression and minibs for patching */
-/* Note:  All of the following DFW tests must be disabled "0" before releasing code! */
+/* Note:  All of the folowing DFW tests must be disabled "0" before releasing code! */
 /* Select one below for DFW testing */
 #define BUILD_DFW_TST_VERSION_CHANGE   0  /* Build for testing DFW, version change */
 #define BUILD_DFW_TST_CMD_CHANGE       0  /* Build for testing DFW, Changes dbg cmd from GenDFWkey to GenDfwKey */
@@ -125,13 +126,6 @@
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 #define ENABLE_DEBUG_PORT              0  /* Use to enable/disable the Debug port */
-#if ( RTOS_SELECTION == MQX_RTOS )
-#define DEBUG_PORT_BAUD_RATE           0
-#define FULL_USER_INTERFACE            0  /* Prints actual error messages on debug commands rather than just ERROR */
-#elif ( RTOS_SELECTION == FREE_RTOS )
-#define DEBUG_PORT_BAUD_RATE           1  /* Enable command to change the debug port baud rate */
-#define FULL_USER_INTERFACE            1  /* Prints actual error messages on debug commands rather than just ERROR */
-#endif
 
 /* For using trace signals on debugger - replaces LED signals! */
 #define TRACE_MODE                     0
@@ -166,7 +160,7 @@
 #define ENABLE_PRNT_HMC_MSG_WARN       0
 #define ENABLE_PRNT_HMC_MSG_ERROR      0
 
-/* HMC - protocol assemble/decode results */
+/* HMC - protcol assemble/decode results */
 #define ENABLE_PRNT_HMC_PROT_INFO      0
 #define ENABLE_PRNT_HMC_PROT_WARN      0
 #define ENABLE_PRNT_HMC_PROT_ERROR     0
@@ -238,13 +232,13 @@
 #else
 #define DTLS_FIELD_TRIAL               1     /* Allows unsecured comm. until session established   */
 #endif
-#define DTLS_DEBUG                     (0)   /* Turn DTLS Debug On */  // TODO: RA6E1: Remove it before releasing for production
+#define DTLS_DEBUG                     (0)   /* Turn DTLS Debug On */
 #define DTLS_CHECK_UNENCRYPTED         (1)   /* Check for previous version major file not encrypted   */
 /* ------------------------------------------------------------------------------------------------------------------ */
 #define BM_DEBUG                       0     /* Buffer allocate/free debug printing */
 #define ENABLE_B2B_COMM                0     /* DCU3 XCVR only */
 /* ------------------------------------------------------------------------------------------------------------------ */
-#define USE_MTLS                       1     // TODO: RA6 [name_Balaji]: Add USE_MTLS support for RA6E1
+#define USE_MTLS                       1
 #define MTLS_DEBUG                     (1)   /* Turn MTLS Debug On */
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -256,9 +250,9 @@
 #endif
 
 #if ( NEGOTIATE_HMC_COMM == 1)
-#define NEGOTIATE_HMC_BAUD             1     /* negotiate an alternative baud rate*/
-#define NEGOTIATE_HMC_PACKET_NUMBER    0     /* negotiate an alternative MAX packet number*/
-#define NEGOTIATE_HMC_PACKET_SIZE      0     /* negotiate an alternative MAX packet size*/
+#define NEGOTIATE_HMC_BAUD             1     /* negotiate an alernative baud rate*/
+#define NEGOTIATE_HMC_PACKET_NUMBER    0     /* negotiate an alernative MAX packet number*/
+#define NEGOTIATE_HMC_PACKET_SIZE      0     /* negotiate an alernative MAX packet size*/
 #endif
 /* ------------------------------------------------------------------------------------------------------------------ */
 //Enable Processor Random Number Generator if supported
@@ -278,7 +272,7 @@
 /**** Various Test Modes available in the Project ****/
 
 /* Set to true to enable unit/integration test code */
-#define TEST_MODE_ENABLE                  1     /* Set to 0 before releasing production code! */
+#define TEST_MODE_ENABLE                  0     /* Set to 0 before releasing production code! */
 
 // NOTE: 0=Production mode, !0=Enable the respective feature
 #define TEST_QUIET_MODE                   0     /* Enable Debug output during quiet mode */
@@ -293,44 +287,12 @@
                                                    NOTE: Be sure to clear VBAT memory and RFSYS memory prior to operation! */
 #define LG_QUICK_TEST                     0     /* For quick testing - makes all windows the same as the outage declaration delay
                                                    Only available when DEBUG_PWR_LG is 0 */
-#define DEBUG_LAST_GASP_TASK              0     /* This is dev test code to debug the LastGasp Task while the Power is still On */
 #define TEST_TDMA                         0     /* Basic TDMA test */
 #define TEST_DEVIATION                    0     /* Test 600Hz, 700Hz and 800Hz deviation */
 #define OVERRIDE_TEMPERATURE              0     /* 0=Do not include temperature override, 1=Do inlcude temperature override */
-#define TEST_SYNC_ERROR                   0     /* Allow configuration of the number of errored bit acceptable in SYNC */
 
 /* All unit/integration defines MUST code inside the #if below! */
 #if (TEST_MODE_ENABLE == 1)
-#define TM_MUTEX                          0
-#define TM_SEMAPHORE                      0
-#define TM_RTC_UNIT_TEST                  0
-#define TM_ADC_UNIT_TEST                  0
-#define TM_QUEUE                          0
-#define TM_MSGQ                           0
-#define TM_EVENTS                         0
-#define TM_LINKED_LIST                    0
-#define TM_CRC_UNIT_TEST                  0
-#define TM_TIME_COMPOUND_TEST             0
-#define TM_OS_EVENT_TEST                  0 /* Test the time compound functions */
-#define TM_INTERNAL_FLASH_TEST            0
-#define TM_BSP_SW_DELAY                   0 /* Tests the Renesas R_BSP_SoftwareDelay function */
-#define TM_ENHANCE_NOISEBAND_FOR_RA6E1    0 /* Enhancements to Noiseband: 1MHz clock test, list frequencies, control GPIO pins, extra HMC traffic */
-#define TM_DELAY_FOR_TACKED_ON_LED        0 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
-#define TM_MEASURE_SLEEP_TIMES            0 /* Adds a debug command to measure the actual sleep times based on the CYCCNT */
-#define TM_BYPASS_SI4467_GPIP0_WAIT       0 /* Bypass signal SI4467_GPIO0 after resetting the radio.  Used to test cutting this trace */
-#define TM_UART_ECHO_COMMAND              0 /* Adds an echo command to the debug port for testing UART echoing */
-#define TM_INSTRUMENT_NOISEBAND_TIMING    0 /* Adds instrumentation of noiseband timing to determine if there are bugs */
-#define TM_TEST_SECURITY_CHIP             0 /* More extensive test code for security chip that was disabled in the K24 starting point DOES NOT COMPILE! */
-#define TM_UART_EVENT_COUNTERS            0 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
-#define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  0 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
-#define TM_CREATE_TWO_BLABBER_TASKS       0 /* Create two tasks that output random numbers of messages on DBG port with random timing */
-#if ( TM_UART_EVENT_COUNTERS == 1 )
-#define TM_UART_COUNTER_INC(x) (x)++
-#else
-#define TM_UART_COUNTER_INC(x)
-#endif
-#define TM_RANDOM_NUMBER_GEN              0 /* Enable commands to test aclara random number generator */
-#define TM_EXT_FLASH_BUSY_TIMING          1 /* Measure time for busyCheck in dvr_extflash to receive a complete interrupt */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */
@@ -344,15 +306,11 @@
 //#define TM_ENCRYPT_UNIT_TEST      /* Enable the Encryption Driver Unit Test Code */
 //#define TM_AES_UNIT_TEST          /* Enable the AES Unit Test Code */
 //#define TM_DTLS_UNIT_TEST         /* Enable the DTLS Unit Test Code */
-#define TM_BL_TEST_COMMANDS         /* Enable the Bootloader Test Commands */
 #endif
 /* These are now part of normal build   */
-#ifndef __BOOTLOADER
-//TODO: undefine external flash driver testing for boot
 #define TM_DVR_EXT_FL_UNIT_TEST     /* Enabled - Run unit testing on external flash driver. */
 #define TM_PARTITION_TBL            /* Will validate the partition tables. */
-#define TM_PARTITION_USAGE          /* Enables printing of partition usage */
-#endif  /* NOT BOOTLOADER */
+#define TM_PARTITION_USAGE          /* Enables printing of partition useage */
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
