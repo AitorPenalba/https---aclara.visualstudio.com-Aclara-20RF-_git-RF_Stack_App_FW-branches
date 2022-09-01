@@ -91,14 +91,13 @@ void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, i
 {
 #if( RTOS_SELECTION == FREE_RTOS )
 //   xEventGroupSetBits( *EventHandle , EventMask );
-   uint32_t status = 0;
-   status = (uint32_t)xEventGroupSetBits( *EventHandle , EventMask );
-//   (void)printf( "EVENT STATUS %lu\n", status );
-//      if( xEventGroupSetBits( *EventHandle , EventMask ) )
-//      if( status != 0 )
-//      {
+   uint32_t eventStatus;
+   eventStatus = xEventGroupSetBits( *EventHandle , EventMask );
+    (void)printf( "EVENT STATUS %lu\n", eventStatus );
+      if( eventStatus == 0 )
+      {
 //         EVL_FirmwareError( "OS_EVNT_Set" , file, line );
-//      }
+      }
 #elif( RTOS_SELECTION == MQX_RTOS )
    if ( _lwevent_set ( EventHandle, EventMask ) ) {
       EVL_FirmwareError( "OS_EVNT_Set" , file, line );
