@@ -24,9 +24,8 @@
 /* INCLUDE FILES */
 #include <stdint.h>
 #include <stdbool.h>
-//#include <project_BL.h>
 #define invert_bits_GLOBAL
-#include "invert_bits.h"
+#include "invert_bits_BL.h"
 #undef  invert_bits_GLOBAL
 
 /* ****************************************************************************************************************** */
