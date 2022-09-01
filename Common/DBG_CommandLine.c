@@ -892,12 +892,12 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "intflashtestblankcheck",  DBG_CommandLine_IntFlash_BlankCheckPartition,     "Blank check Partition for Test in Internal Flash" },
 #endif
    { "intflashtestclose",    DBG_CommandLine_IntFlash_ClosePartition,     "Close Partition for Test in Internal Flash" },
+#endif
 #ifdef TM_BL_TEST_COMMANDS
    { "blwritetestimage",     DBG_CommandLine_BL_Test_Write_DFW_Image,   "Write known data (increasing 32-bit values) to external Flash DFW partition" },
    { "blwriteblinfo",        DBG_CommandLine_BL_Test_Write_BL_Info,     "Write test BL_INFO to data flash" },
    { "blclearblinfo",        DBG_CommandLine_BL_Test_Clear_BL_Info,     "Clear (0xFF) test BL_INFO in data flash" },
    { "bleraseblinfo",        DBG_CommandLine_BL_Test_Erase_BL_Info,     "Erase (blank) test BL_INFO in data flash" },
-#endif
 #endif
 #if ( TM_LINKED_LIST == 1)
    { "oslinkedlistcreate",   DBG_CommandLine_OS_LinkedList_Create,      "Creates test LinkedList" },
@@ -2998,6 +2998,69 @@ uint32_t DBG_CommandLine_IntFlash_BlankCheckPartition( uint32_t argc, char *argv
 }
 #endif
 
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_IntFlash_ClosePartition
+
+   Purpose: This function Close the partition for Testing Internal Flash
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] )
+{
+   returnStatus_t retVal = eFAILURE;
+   uint8_t parSelection;
+   PartitionData_t const *partitionHandle;
+   if ( argc == 2 )
+   {
+      /* The number of arguments must be 1 */
+      parSelection = ( uint8_t ) atoi( argv[1] );
+      if ( parSelection == 0 )
+      {
+         partitionHandle = pTM_IntFlashEncryptKeyPart_;
+      }
+      else if ( parSelection == 1 )
+      {
+         partitionHandle = pTM_IntFlashDfwBlInfoPart_;
+      }
+      else
+      {
+         DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
+         return ( uint32_t )retVal;
+      }
+      if( partitionHandle != NULL )
+      {
+         if ( eSUCCESS == PAR_partitionFptr.parClose( partitionHandle ) )
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
+            retVal = eSUCCESS;
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "InternalFlash_Failure Test Failure" );
+         }
+      }
+      else
+      {
+         DBG_logPrintf( 'R', "Invalid_Argument partition is not opened" );
+      }
+   }
+   else if ( argc < 2 )
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestclose <partition>" );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestclose <partition>" );
+   }
+   return ( uint32_t )retVal;
+}/* end DBG_CommandLine_IntFlash_ClosePartition() */
+#endif
+
 #ifdef TM_BL_TEST_COMMANDS
 /*******************************************************************************
 
@@ -3088,10 +3151,10 @@ static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length, bool eraseOnly
    if ( eSUCCESS == retVal)
    {
       /* erase DFW partition */
-      retVal = PAR_partitionFptr.parErase(0L, INT_FLASH_ERASE_SIZE, pTM_BL_Test_Part_ );
+      retVal = PAR_partitionFptr.parErase(0L, pTM_BL_Test_Part_->lSize, pTM_BL_Test_Part_ );
       if ( eSUCCESS == retVal)
       {
-         DBG_logPrintf( 'I', "Erased %d bytes at offset 0x0 in DFW BL INFO partition", INT_FLASH_ERASE_SIZE );
+         DBG_logPrintf( 'I', "Erased %d bytes at offset 0x0 in DFW BL INFO partition", pTM_BL_Test_Part_->lSize );
          if (!eraseOnly)
          {
             /* write BL INFO to DFW partition */
@@ -3213,70 +3276,6 @@ uint32_t DBG_CommandLine_BL_Test_Erase_BL_Info( uint32_t argc, char *argv[] )
    DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ] = {0};
    return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo), true);
 }
-
-#endif
-
-/*******************************************************************************
-
-   Function name: DBG_CommandLine_IntFlash_ClosePartition
-
-   Purpose: This function Close the partition for Testing Internal Flash
-
-   Arguments:  argc - Number of Arguments passed to this function
-               argv - pointer to the list of arguments passed to this function
-
-   Returns: retVal - Successful status of this function
-
-*******************************************************************************/
-uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] )
-{
-   returnStatus_t retVal = eFAILURE;
-   uint8_t parSelection;
-   PartitionData_t const *partitionHandle;
-   if ( argc == 2 )
-   {
-      /* The number of arguments must be 1 */
-      parSelection = ( uint8_t ) atoi( argv[1] );
-      if ( parSelection == 0 )
-      {
-         partitionHandle = pTM_IntFlashEncryptKeyPart_;
-      }
-      else if ( parSelection == 1 )
-      {
-         partitionHandle = pTM_IntFlashDfwBlInfoPart_;
-      }
-      else
-      {
-         DBG_logPrintf( 'E', "Invalid_Argument ( 0 ) - ePART_ENCRYPT_KEY ( 1 ) - ePART_DFW_BL_INFO" );
-         return ( uint32_t )retVal;
-      }
-      if( partitionHandle != NULL )
-      {
-         if ( eSUCCESS == PAR_partitionFptr.parClose( partitionHandle ) )
-         {
-            DBG_logPrintf( 'R', "InternalFlash_Success Test Success" );
-            retVal = eSUCCESS;
-         }
-         else
-         {
-            DBG_logPrintf( 'R', "InternalFlash_Failure Test Failure" );
-         }
-      }
-      else
-      {
-         DBG_logPrintf( 'R', "Invalid_Argument partition is not opened" );
-      }
-   }
-   else if ( argc < 2 )
-   {
-      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too few arguments example, intflashtestclose <partition>" );
-   }
-   else
-   {
-      DBG_logPrintf( 'E', "ERROR - Invalid_Argument Too many arguments example, intflashtestclose <partition>" );
-   }
-   return ( uint32_t )retVal;
-}/* end DBG_CommandLine_IntFlash_ClosePartition() */
 
 #endif
 
