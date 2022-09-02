@@ -319,10 +319,12 @@ void DBG_log ( char category, uint8_t options, const char *fmt, ... )
 #endif
          }
 
+#if ( MCU_SELECTED == NXP_K24 )
          if ( len < sizeof( logPrintf_buf ) )
          {
             len++;      // Account for the NULL terminator
          }
+#endif
          pBuf = BM_allocDebug( len );
 
          if ( NULL != pBuf )
