@@ -1574,7 +1574,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
                 * to QSPI_MISO, to stobe it low briefly, which will allow it remain low and then trigger the interrupt when the      *
                 * serial flash chip drives it high to signal that the operation is complete.  When we do this, this "undoes" the     *
                 * configuration of this pin as an IRQ.  To use it as an IRQ, we have to revert it back to its baseline configuration *
-                * as an IRQ pin and an input.  This is donein the busyCheck() function so that we do not lose any interrupts.        */
+                * as an IRQ pin and an input.  This is done in the busyCheck() function so that we do not lose any interrupts.       */
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)BSP_IO_LEVEL_LOW ) );
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                               ) );
                /* The SST chips require chip select to be inactive (signal high) for at least 1 microsecond, give it at least 2usec  */
