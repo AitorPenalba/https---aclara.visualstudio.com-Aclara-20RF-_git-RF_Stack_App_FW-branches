@@ -335,15 +335,15 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
-                    <state>$PROJ_DIR$/ra/arm/CMSIS_5/CMSIS/Core/Include</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc/api</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc/instances</state>
-                    <state>$PROJ_DIR$/ra_cfg/driver</state>
-                    <state>$PROJ_DIR$/ra_cfg/fsp_cfg</state>
-                    <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
-                    <state>$PROJ_DIR$/ra_gen</state>
-                    <state>$PROJ_DIR$/src</state>
+                    <state>$PROJ_DIR$/../ra/arm/CMSIS_5/CMSIS/Core/Include</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc/api</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc/instances</state>
+                    <state>$PROJ_DIR$/../ra_cfg/driver</state>
+                    <state>$PROJ_DIR$/../ra_cfg/fsp_cfg</state>
+                    <state>$PROJ_DIR$/../ra_cfg/fsp_cfg/bsp</state>
+                    <state>$PROJ_DIR$/../ra_gen</state>
+                    <state>$PROJ_DIR$/../src</state>
                     <state>$PROJ_DIR$\..\..\..\..\Common</state>
                     <state>$PROJ_DIR$\..\..\..\..\Common\driver</state>
                     <state>$PROJ_DIR$\..\..\..\..\Common\FreeRTOS\10.4.3\OS_AL</state>
@@ -614,15 +614,15 @@
                 </option>
                 <option>
                     <name>AUserIncludes</name>
-                    <state>$PROJ_DIR$/ra/arm/CMSIS_5/CMSIS/Core/Include</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc/api</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc/instances</state>
-                    <state>$PROJ_DIR$/ra_cfg/fsp_cfg</state>
-                    <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
-                    <state>$PROJ_DIR$/ra_gen</state>
-                    <state>$PROJ_DIR$/src</state>
-                    <state>$PROJ_DIR$/ra_cfg/driver</state>
+                    <state>$PROJ_DIR$/../ra/arm/CMSIS_5/CMSIS/Core/Include</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc/api</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc/instances</state>
+                    <state>$PROJ_DIR$/../ra_cfg/fsp_cfg</state>
+                    <state>$PROJ_DIR$/../ra_cfg/fsp_cfg/bsp</state>
+                    <state>$PROJ_DIR$/../ra_gen</state>
+                    <state>$PROJ_DIR$/../src</state>
+                    <state>$PROJ_DIR$/../ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
@@ -1413,15 +1413,15 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
-                    <state>$PROJ_DIR$/ra/arm/CMSIS_5/CMSIS/Core/Include</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc/api</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc/instances</state>
-                    <state>$PROJ_DIR$/ra_cfg/fsp_cfg</state>
-                    <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
-                    <state>$PROJ_DIR$/ra_gen</state>
-                    <state>$PROJ_DIR$/src</state>
-                    <state>$PROJ_DIR$/ra_cfg/driver</state>
+                    <state>$PROJ_DIR$/../ra/arm/CMSIS_5/CMSIS/Core/Include</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc/api</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc/instances</state>
+                    <state>$PROJ_DIR$/../ra_cfg/fsp_cfg</state>
+                    <state>$PROJ_DIR$/../ra_cfg/fsp_cfg/bsp</state>
+                    <state>$PROJ_DIR$/../ra_gen</state>
+                    <state>$PROJ_DIR$/../src</state>
+                    <state>$PROJ_DIR$/../ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1685,15 +1685,15 @@
                 </option>
                 <option>
                     <name>AUserIncludes</name>
-                    <state>$PROJ_DIR$/ra/arm/CMSIS_5/CMSIS/Core/Include</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc/api</state>
-                    <state>$PROJ_DIR$/ra/fsp/inc/instances</state>
-                    <state>$PROJ_DIR$/ra_cfg/fsp_cfg</state>
-                    <state>$PROJ_DIR$/ra_cfg/fsp_cfg/bsp</state>
-                    <state>$PROJ_DIR$/ra_gen</state>
-                    <state>$PROJ_DIR$/src</state>
-                    <state>$PROJ_DIR$/ra_cfg/driver</state>
+                    <state>$PROJ_DIR$/../ra/arm/CMSIS_5/CMSIS/Core/Include</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc/api</state>
+                    <state>$PROJ_DIR$/../ra/fsp/inc/instances</state>
+                    <state>$PROJ_DIR$/../ra_cfg/fsp_cfg</state>
+                    <state>$PROJ_DIR$/../ra_cfg/fsp_cfg/bsp</state>
+                    <state>$PROJ_DIR$/../ra_gen</state>
+                    <state>$PROJ_DIR$/../src</state>
+                    <state>$PROJ_DIR$/../ra_cfg/driver</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
@@ -2154,307 +2154,307 @@
         <group>
             <name>Build Configuration</name>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\bsp\board_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\board_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\bsp\bsp_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\bsp\bsp_mcu_device_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_mcu_device_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\bsp\bsp_mcu_device_pn_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_mcu_device_pn_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\bsp\bsp_mcu_family_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_mcu_family_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\bsp\bsp_pin_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\bsp\bsp_pin_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\r_flash_hp_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_flash_hp_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\r_ioport_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_ioport_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\fsp_cfg\r_iwdt_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\fsp_cfg\r_iwdt_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_cfg\driver\r_qspi_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_cfg\driver\r_qspi_cfg.h</name>
             </file>
         </group>
         <group>
             <name>Components</name>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include\base_addresses.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include\base_addresses.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\api\bsp_api.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\api\bsp_api.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_arm_exceptions.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_arm_exceptions.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_clocks.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_clocks.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_clocks.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_clocks.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_common.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_common.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_common.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_common.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_compiler_support.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_compiler_support.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_delay.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_delay.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_delay.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_delay.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\ra6e1\bsp_elc.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\ra6e1\bsp_elc.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\ra6e1\bsp_feature.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\ra6e1\bsp_feature.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_group_irq.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_group_irq.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_group_irq.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_group_irq.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_guard.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_guard.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_guard.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_guard.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_io.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_io.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_io.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_io.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_irq.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_irq.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_irq.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_irq.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_mcu_api.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_mcu_api.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\ra6e1\bsp_mcu_info.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\ra6e1\bsp_mcu_info.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_module_stop.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_module_stop.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_register_protection.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_register_protection.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_register_protection.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_register_protection.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_rom_registers.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_rom_registers.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_sbrk.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_sbrk.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_security.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_security.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_security.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_security.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\mcu\all\bsp_tfu.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\mcu\all\bsp_tfu.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\cachel1_armv7.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\cachel1_armv7.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_armcc.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_armcc.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_armclang.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_armclang.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_armclang_ltm.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_armclang_ltm.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_compiler.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_compiler.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_gcc.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_gcc.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_iccarm.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_iccarm.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_version.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\cmsis_version.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_armv81mml.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_armv81mml.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_armv8mbl.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_armv8mbl.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_armv8mml.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_armv8mml.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm0.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm0.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm0plus.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm0plus.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm1.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm1.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm23.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm23.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm3.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm3.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm33.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm33.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm35p.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm35p.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm4.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm4.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm55.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm55.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm7.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_cm7.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_sc000.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_sc000.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\core_sc300.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\core_sc300.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\fsp_common_api.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\fsp_common_api.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\fsp_features.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\fsp_features.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\fsp_version.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\fsp_version.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\LICENSE.txt</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\LICENSE.txt</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\mpu_armv7.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\mpu_armv7.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\mpu_armv8.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\mpu_armv8.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\pmu_armv8.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\pmu_armv8.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\api\r_cgc_api.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_cgc_api.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\api\r_flash_api.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_flash_api.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\r_flash_hp\r_flash_hp.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\r_flash_hp\r_flash_hp.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\instances\r_flash_hp.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_flash_hp.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\r_ioport\r_ioport.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\r_ioport\r_ioport.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\instances\r_ioport.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_ioport.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\api\r_ioport_api.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_ioport_api.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\r_iwdt\r_iwdt.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\r_iwdt\r_iwdt.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\instances\r_iwdt.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_iwdt.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\r_qspi\r_qspi.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\r_qspi\r_qspi.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\instances\r_qspi.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_qspi.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\api\r_spi_flash_api.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_spi_flash_api.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\inc\api\r_wdt_api.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_wdt_api.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include\renesas.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include\renesas.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\cmsis\Device\RENESAS\Source\startup.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\cmsis\Device\RENESAS\Source\startup.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\cmsis\Device\RENESAS\Source\system.c</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\cmsis\Device\RENESAS\Source\system.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include\system.h</name>
+                <name>$PROJ_DIR$\..\ra\fsp\src\bsp\cmsis\Device\RENESAS\Include\system.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra\arm\CMSIS_5\CMSIS\Core\Include\tz_context.h</name>
+                <name>$PROJ_DIR$\..\ra\arm\CMSIS_5\CMSIS\Core\Include\tz_context.h</name>
             </file>
         </group>
         <group>
             <name>Generated Data</name>
             <file>
-                <name>$PROJ_DIR$\ra_gen\bsp_clock_cfg.h</name>
+                <name>$PROJ_DIR$\..\ra_gen\bsp_clock_cfg.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_gen\common_data.c</name>
+                <name>$PROJ_DIR$\..\ra_gen\common_data.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_gen\common_data.h</name>
+                <name>$PROJ_DIR$\..\ra_gen\common_data.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_gen\hal_data.c</name>
+                <name>$PROJ_DIR$\..\ra_gen\hal_data.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_gen\hal_data.h</name>
+                <name>$PROJ_DIR$\..\ra_gen\hal_data.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_gen\main.c</name>
+                <name>$PROJ_DIR$\..\ra_gen\main.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_gen\pin_data.c</name>
+                <name>$PROJ_DIR$\..\ra_gen\pin_data.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_gen\vector_data.c</name>
+                <name>$PROJ_DIR$\..\ra_gen\vector_data.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\ra_gen\vector_data.h</name>
+                <name>$PROJ_DIR$\..\ra_gen\vector_data.h</name>
             </file>
         </group>
         <group>
             <name>Program Entry</name>
             <file>
-                <name>$PROJ_DIR$\src\hal_entry.c</name>
+                <name>$PROJ_DIR$\..\src\hal_entry.c</name>
             </file>
         </group>
     </group>

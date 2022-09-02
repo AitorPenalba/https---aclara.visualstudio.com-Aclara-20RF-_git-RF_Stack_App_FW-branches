@@ -274,7 +274,7 @@ uint32_t getBusClock( void )
 #ifndef __BOOTLOADER
    return ( R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB) ); // TODO: RA6E1 Bob: Verify that PCLKB is the correct bus clock
 #else
-
+   return BSP_BUS_CLOCK;   //TODO: is this correct or needed?
 #endif // __BOOTLOADER
 #endif // ( MCU SELECTED )
 }
