@@ -50,7 +50,8 @@
 
 // check for valid RTOS choice from hardware specific HAL
 #if ( ( RTOS_SELECTION != MQX_RTOS )    && \
-      ( RTOS_SELECTION != FREE_RTOS ))
+      ( RTOS_SELECTION != FREE_RTOS )  && \
+      ( RTOS_SELECTION != BARE_METAL))
 
 #error "Invalid RTOS_SELECTION setting"
 #endif

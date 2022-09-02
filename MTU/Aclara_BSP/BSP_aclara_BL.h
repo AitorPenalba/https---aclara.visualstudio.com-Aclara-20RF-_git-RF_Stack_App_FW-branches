@@ -49,19 +49,19 @@
 #define RESET_SOURCE_POWER_ON_RESET      0x0001
 #define RESET_SOURCE_EXTERNAL_RESET_PIN  0x0002
 #define RESET_SOURCE_WATCHDOG            0x0004
-#define RESET_SOURCE_LOSS_OF_EXT_CLOCK   0x0008
+#define RESET_SOURCE_LOSS_OF_EXT_CLOCK   0x0008  /* Not available in RA6E1 */
 #define RESET_SOURCE_LOW_VOLTAGE         0x0010
 #if ( MCU_SELECTED == NXP_K24 )
 #define RESET_SOURCE_LOW_LEAKAGE_WAKEUP  0x0020
 #elif ( MCU_SELECTED == RA6E1 )
 #define RESET_SOURCE_DEEP_SW_STANDBY_CANCEL 0x0020
 #endif
-#define RESET_SOURCE_STOP_MODE_ACK_ERROR 0x0040
-#define RESET_SOURCE_EZPORT_RESET        0x0080
-#define RESET_SOURCE_MDM_AP              0x0100
+#define RESET_SOURCE_STOP_MODE_ACK_ERROR 0x0040  /* Not available in RA6E1 */
+#define RESET_SOURCE_EZPORT_RESET        0x0080  /* Not available in RA6E1 */
+#define RESET_SOURCE_MDM_AP              0x0100  /* Not available in RA6E1 */
 #define RESET_SOURCE_SOFTWARE_RESET      0x0200
-#define RESET_SOURCE_CORE_LOCKUP         0x0400
-#define RESET_SOURCE_JTAG                0x0800
+#define RESET_SOURCE_CORE_LOCKUP         0x0400  /* Not available in RA6E1 */
+#define RESET_SOURCE_JTAG                0x0800  /* Not available in RA6E1 */
 #define RESET_ANOMALY_COUNT              0x1000
 
 /* ADC Temperature Read type */
@@ -89,7 +89,17 @@
 #define BSP_IS_GLOBAL_INT_ENABLED()  (bool)(0 == __get_PRIMASK() ? TRUE : FALSE)
 
 #if ( MCU_SELECTED == RA6E1 )
-#define printf( fmt, ... )         DBG_printfDirect( fmt, ##__VA_ARGS__ )
+#define printf( fmt, ... )         DBG_LW_printf( fmt, ##__VA_ARGS__ )
+#endif
+
+#if ( MCU_SELECTED == RA6E1 )
+#define MPARTNUMBER_ADDR              0x010080f0
+#define MCUVERSION_ADDR               0x010081B0
+#endif
+
+#if ( MCU_SELECTED == RA6E1 )
+#define MPARTNUMBER_ADDR              0x010080f0
+#define MCUVERSION_ADDR               0x010081B0
 #endif
 
 /* TYPE DEFINITIONS */
@@ -312,13 +322,14 @@ extern returnStatus_t AGT_FreqSyncTimerCount  (uint16_t *count);
 #if ( GENERATE_RUN_TIME_STATS == 1 )
 extern void           AGT_RunTimeStatsStart   ( void );
 extern uint32_t       AGT_RunTimeStatsCount   ( void );
+extern returnStatus_t AGT_RunTimeStatsStop    ( void );
 #endif
 extern returnStatus_t GPT_PD_Init             ( void );
 extern void           GPT_PD_Enable           ( void );
-extern void           GPT_PD_Disable          ( void );
+extern returnStatus_t GPT_PD_Disable          ( void );
 extern returnStatus_t GPT_Radio0_Init         ( void );
 extern void           GPT_Radio0_Enable       ( void );
-extern void           GPT_Radio0_Disable      ( void );
+extern returnStatus_t GPT_Radio0_Disable      ( void );
 #endif
 
 #endif /* ERROR_CODES_H_ */

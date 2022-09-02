@@ -40,9 +40,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>  // TODO: Do we need this?
-#include "error_codes.h"
+
 #include "portable_freescale.h"
 #include "portable_aclara.h"
+#include "error_codes.h"
 
 #include "features.h"   /* Need bootloader defined (or not) before cfg_app.h  */
 #include "cfg_hal.h"
@@ -52,7 +53,6 @@
 #ifndef __BOOTLOADER
 #include "OS_aclara.h"
 #endif
-
 #include "heep.h"
 #include "BSP_aclara.h"
 

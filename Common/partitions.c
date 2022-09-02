@@ -30,7 +30,8 @@
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #endif
-#endif /* __BOOTLOADER  */
+#endif /* NOT BOOTLOADER  */
+
 #define partitions_GLOBAL
 #include "partitions.h"
 #include "partition_cfg.h"
@@ -41,7 +42,7 @@
 #ifdef TM_DVR_PARTITION_UNIT_TEST
 #include "unit_test_partition.h"
 #endif
-#endif /* __BOOTLOADER  */
+#endif /* NOT BOOTLOADER  */
 
 #undef  partitions_GLOBAL
 
@@ -54,7 +55,7 @@
 #include "logger.h"
 #include "os_aclara.h"
 #endif
-#endif /* __BOOTLOADER  */
+#endif /* NOT BOOTLOADER  */
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
@@ -73,39 +74,57 @@
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 
+#ifndef __BOOTLOADER
 static bool flushPartitions_ = (bool)false;
+#endif   /* NOT BOOTLOADER  */
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
 
 static returnStatus_t init( void );
 static returnStatus_t open( PartitionData_t const **pPartitionTbl, const ePartitionName ePartitionId, uint32_t u32UpdateRate );
-static returnStatus_t close( PartitionData_t const *pPartitionTbl );
-static returnStatus_t pwrMode( const ePowerMode powerMode );
 static returnStatus_t read( uint8_t *pDest, const dSize dSrc, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t write( const dSize dDest, uint8_t const *pSrc, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t erase( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 #if ( MCU_SELECTED == RA6E1 )
 static returnStatus_t blankCheck( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 #endif
+static returnStatus_t size(const ePartitionName ePName, lCnt *pPartitionSize);
+#ifndef __BOOTLOADER
+static returnStatus_t close( PartitionData_t const *pPartitionTbl );
+static returnStatus_t pwrMode( const ePowerMode powerMode );
 static returnStatus_t flush( PartitionData_t const * );
 static returnStatus_t restore( lAddr lDest, lCnt Cnt, PartitionData_t const *pPartitionTbl );
 static returnStatus_t ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionTbl );
-static returnStatus_t size(const ePartitionName ePName, lCnt *pPartitionSize);
-#ifndef __BOOTLOADER
 static void           flushPartitions_CB(uint8_t cmd, void *pData);
-#endif   /* __BOOTLOADER  */
+#endif   /* NOT BOOTLOADER  */
 
 #if defined TEST_MODE_ENABLE && !defined TM_DVR_PARTITION_UNIT_TEST
 // STATIC returnStatus_t ValidatePartitionTable( PartitionData_t const *pPartitionTbl, uint8_t numOfPartitions );
 #endif
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
-
 /* The following are the access functions for the partition module. */
 #ifndef TM_FILE_IO_UNIT_TEST
 const PartitionTbl_t PAR_partitionFptr =
 {
+#ifdef __BOOTLOADER
+   .parInit       = init,        /* Initialize each partition in the partition list */
+   .parOpen       = open,        /* Opens each partition in the partition list*/
+   .parClose      = NULL ,       /* Close - not needed for bootloader */
+   .parMode       = NULL,        /* Sets the power mode in the drivers.  Used for system power down and normal run modes. */
+   .parRead       = read,        /* Reads data from the desired partition */
+   .parWrite      = write,       /* writes data from the desired partition */
+   .parErase      = erase,       /* erases an entire partition */
+#if ( MCU_SELECTED == RA6E1 )
+   .parBlankCheck = blankCheck,  /* blank check the partition address */
+#endif
+   .parFlush      = NULL,        /* flush - not needed for bootloader */
+   .parRestore    = NULL,        /* Restore - not needed for bootloader */
+   .parIoctl      = NULL,        /* IOCTL - not needed for bootloader */
+   .parSize       = size,        /* returns the size of the partition requested. */
+   .parTimeSlice  = NULL         /* Time Slice  - not needed for bootloader */
+#else
    init,       /* Initialize each partition in the partition list */
    open,       /* Opens each partition in the partition list*/
    close,      /* Closes the desired partition */
@@ -121,6 +140,7 @@ const PartitionTbl_t PAR_partitionFptr =
    ioctl,      /* IOCTL commands to send to a partition */
    size,       /* returns the size of the partition requested. */
    PAR_timeSlice /* Allows maintenance to be completed on all drivers under the partition manager. */
+#endif
 };
 #endif
 
@@ -190,6 +210,7 @@ returnStatus_t PAR_init( void )
 }  /*lint !e715 !e818  pvParameters is not used */
 #endif
 
+#if RTOS == 1
 /***********************************************************************************************************************
 
    Function Name: PAR_initRtos
@@ -220,6 +241,7 @@ returnStatus_t PAR_initRtos( void )
    }
    return (retVal);
 }
+#endif
 
 /***********************************************************************************************************************
 
@@ -312,6 +334,7 @@ static returnStatus_t open( PartitionData_t const **pPartitionTbl,
    return (eRetVal);
 }
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: close
@@ -331,7 +354,9 @@ static returnStatus_t close( PartitionData_t const *pPartitionTbl )
 {
    return ((*pPartitionTbl->pDriverTbl)->devClose(pPartitionTbl, pPartitionTbl->pDriverTbl + 1));
 }
+#endif
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: pwrMode
@@ -362,6 +387,7 @@ static returnStatus_t pwrMode( const ePowerMode powerMode )
    }
    return (eRetVal);
 }
+#endif
 
 /***********************************************************************************************************************
 
@@ -640,6 +666,7 @@ static returnStatus_t blankCheck( lAddr lDest, lCnt cnt, PartitionData_t const *
 }
 #endif
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: flush
@@ -681,7 +708,9 @@ static returnStatus_t flush( PartitionData_t const *pPartitionTbl )
    }
    return (eRetVal);
 }
+#endif   /* NOT BOOTLOADER   */
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: restore
@@ -710,7 +739,9 @@ static returnStatus_t restore( lAddr lDest, lCnt Cnt, PartitionData_t const *pPa
    }
    return (eRetVal);
 }
+#endif   /* NOT BOOTLOADER   */
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: ioctl
@@ -733,7 +764,9 @@ static returnStatus_t ioctl( const void *pCmd, void *pData, PartitionData_t cons
 {
    return ((*pPartitionTbl->pDriverTbl)->devIoctl(pCmd, pData, pPartitionTbl, pPartitionTbl->pDriverTbl + 1));
 }
+#endif   /* NOT BOOTLOADER   */
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: PAR_timeSlice
@@ -771,6 +804,7 @@ bool PAR_timeSlice(void)
 
    return(retVal);
 }
+#endif   /* NOT BOOTLOADER   */
 
 /***********************************************************************************************************************
 
@@ -831,6 +865,7 @@ static returnStatus_t size(const ePartitionName ePName, lCnt *pPartitionSize)
    return(retVal);
 }
 
+#ifndef __BOOTLOADER
 /***********************************************************************************************************************
 
    Function Name: PAR_flushPartitions
@@ -850,6 +885,7 @@ void PAR_flushPartitions(void)
 {
    flushPartitions_ = (bool)true;
 }
+#endif   /* NOT BOOTLOADER   */
 
 #ifndef __BOOTLOADER
 /***********************************************************************************************************************
@@ -873,7 +909,7 @@ static void flushPartitions_CB(uint8_t cmd, void *pData)
 {
    flushPartitions_ = (bool)true;
 } /*lint !e818 pData could be pointer to const */
-#endif   /* __BOOTLOADER   */
+#endif   /* NOT BOOTLOADER   */
 
 /***********************************************************************************************************************
 
@@ -986,7 +1022,7 @@ returnStatus_t PAR_ValidatePartitionTable( void )
    uint8_t const *pWarn;
    uint8_t metaDataSize;        /* Number of bytes used for meta data */
 
-   DBG_printf( "PId,   Partition Desc, Cached, Banked, dfwManip,    Ext Bus,   NV Type, Phy,   Adr St,  Adr End,   Size  , Erase Size, Error, Warn");
+   DBG_printf( "PId,   Partition Desc, Cached, Banked, dfwManip,    Ext Bus,   NV Type, Phy,    Adr St,   Adr End,   Size  , Erase Size, Error, Warn");
 
    /* Check for memory overlaps... */
    for ( parCnt = 0, pEntryUnderTest = sPartitionData; parCnt < ARRAY_IDX_CNT(sPartitionData); parCnt++, pEntryUnderTest++ )
@@ -1089,7 +1125,7 @@ returnStatus_t PAR_ValidatePartitionTable( void )
          }
       }
       CLRWDT();
-      DBG_printf( "%3u,%17s,%7s,%7s,%9s,%11s, %14s, 0x%06lX, 0x%06lX, 0x%06lX, %10lu,%6s, %-15s",
+      DBG_printf( "%3u,%17s,%7s,%7s,%9s,%11s, %14s, 0x%07lX, 0x%07lX, 0x%06lX, %10lu,%6s, %-15s",
                   (uint32_t)pEntryUnderTest->ePartition,
                   pEntryUnderTest->PartitionType.pPartType,
                   pCached,

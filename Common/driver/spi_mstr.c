@@ -34,8 +34,10 @@
 #else
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
 #include <MK66F18.h>
-#else
+#elif (MCU_SELECTED == NXP_K24)
 #include <MK24F12.h>
+#elif (MCU_SELECTED == RA6E1)
+#include "hal_data.h"
 #endif
 #endif   /* BOOTLOADER  */
 
