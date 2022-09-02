@@ -404,9 +404,13 @@
 #endif // #if ( MCU_SELECTED == NXP_K24 )
 
 #if ( MCU_SELECTED == RA6E1 )
+   #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
 #define TEST_LED_TACKON          BSP_IO_PORT_03_PIN_01       /* Tack on LED is located on P301, TP119, pin 49 */
+   #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
+#define TEST_LED_TACKON          BSP_IO_PORT_04_PIN_07       /* Tack on LED has an actual pin assignment on Rev B */
+   #endif
 #define TEST_LED_TACKON_ON       R_BSP_PinCfg( TEST_LED_TACKON, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_HIGH | IOPORT_CFG_DRIVE_HIGH ) )
-#define TEST_LED_TACKON_OFF      R_BSP_PinCfg( TEST_LED_TACKON, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_LOW                          ) )
+#define TEST_LED_TACKON_OFF      R_BSP_PinCfg( TEST_LED_TACKON, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_LOW  | IOPORT_CFG_DRIVE_HIGH ) )
 #endif
 
 #if ( ENABLE_TRACE_PINS_LAST_GASP == 1 )
@@ -459,14 +463,15 @@
 #define NV_SPI_PORT_INIT               SPI_initPort
 #define NV_SPI_PORT_OPEN               SPI_OpenPort
 #define NV_SPI_PORT_CLOSE              SPI_ClosePort
-#define NV_SPI_PORT_WRITE              SPI_WritePort
-#define NV_SPI_PORT_READ               SPI_ReadPort
+#define NV_SPI_PORT_WRITE(a,b,c,d)     SPI_WritePort(a, b, c) /* K24: NXP BSP does not require fourth parameter for write */
+#define NV_SPI_PORT_READ(a,b,c,d)      SPI_ReadPort (a, b, c) /* K24: NXP BSP does not require fourth parameter for read  */
 #elif ( MCU_SELECTED == RA6E1 )
 #define NV_SPI_PORT_INIT               R_QSPI_Open
 #define NV_SPI_PORT_OPEN               //open and init happens in the same routine
 #define NV_SPI_PORT_CLOSE              R_QSPI_Close
-#define NV_SPI_PORT_WRITE              R_QSPI_DirectWrite
-#define NV_SPI_PORT_READ               R_QSPI_DirectRead
+/* The following macros translate the Renesas FSP return codes to Aclara returnStatus_t error codes */
+#define NV_SPI_PORT_WRITE(a,b,c,d)     ( ( FSP_SUCCESS == R_QSPI_DirectWrite(&g_qspi0_ctrl, b, c, d) ) ? eSUCCESS : eFAILURE )
+#define NV_SPI_PORT_READ(a,b,c,d)      ( ( FSP_SUCCESS == R_QSPI_DirectRead (&g_qspi0_ctrl, b, c, d) ) ? eSUCCESS : eFAILURE )
 #define POLLING_READ_EXIT()            { R_QSPI->SFMCMD = 1U; R_QSPI->SFMCMD = 0U; } //Exit QSPI Direct Communication Mode, Only use when read polling is set to TRUE
 #endif
 

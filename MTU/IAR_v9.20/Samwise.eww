@@ -199,5 +199,16 @@
                 <configuration>Debug</configuration>
             </member>
         </batchDefinition>
+        <batchDefinition>
+            <name>FreeRTOS and I-210+c_RA6_Dev</name>
+            <member>
+                <project>EP_FreeRTOS_RA6</project>
+                <configuration>Debug</configuration>
+            </member>
+            <member>
+                <project>I210+c_RA6_Dev</project>
+                <configuration>Debug</configuration>
+            </member>
+        </batchDefinition>
     </batchBuild>
 </workspace>
