@@ -386,7 +386,7 @@ static const spiCfg_t _NV_spiCfg =
 #endif
 
 #ifndef __BOOTLOADER
-#if ( MCU_SELECTED == NXP_K24 )
+#if ( RTOS_SELECTION == MQX_RTOS )
 #define NV_SPI_ChkSharedPortCfg(...)   SPI_ChkSharedPortCfg(__VA_ARGS__, &_NV_spiCfg)
 #define NV_SPI_MutexLock(...)          SPI_MutexLock(__VA_ARGS__)
 #define NV_SPI_MutexUnlock(...)        SPI_MutexUnlock(__VA_ARGS__)
