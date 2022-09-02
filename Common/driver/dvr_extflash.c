@@ -1572,23 +1572,19 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
             {
                /* Since QSPI_MISO (P503) is now tri-state, it will not go low on its own.  Therefore, use P505, which is connected   *
                 * to QSPI_MISO, to stobe it low briefly, which will allow it remain low and then trigger the interrupt when the      *
-                * serial flash chip drives it high to signal that the operation is complete.  Since we changed P505 to a GPIO pin    *
-                * to do this, we have to revert it back to its baseline configuration as an IRQ pin and an input.  This is done      *
-                * in the busyCheck() function so that we do not lose any interrupts.                                                 */
+                * serial flash chip drives it high to signal that the operation is complete.  When we do this, this "undoes" the     *
+                * configuration of this pin as an IRQ.  To use it as an IRQ, we have to revert it back to its baseline configuration *
+                * as an IRQ pin and an input.  This is donein the busyCheck() function so that we do not lose any interrupts.        */
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)BSP_IO_LEVEL_LOW ) );
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                               ) );
-               uint32_t loops = SystemCoreClock / 8000000; /* Delay for 2 microseconds */
+               /* The SST chips require chip select to be inactive (signal high) for at least 1 microsecond, give it at least 2usec  */
+               uint32_t loops = SystemCoreClock / 8000000; /* Delay for 2 microseconds.  The constant is determined empirically.     */
                for ( uint32_t loop = 0; loop < loops; loop++) { NOP(); }
-               /* The SST chips require chip select to be inactive (signal high) for at least 1 microsecond, give it 2 */
- //              R_BSP_SoftwareDelay( (uint32_t)2, BSP_DELAY_UNITS_MICROSECONDS );
                NV_CS_ACTIVE(); /* Activate the chip select to tell the SST chip to assert SO low for busy, high when write completes */
             }
 #endif // MCU_SELECTED
             NV_SPI_MUTEXUNLOCK();
 #if ( MCU_SELECTED == RA6E1 )
-//            /* The SST chips require chip select to be inactive (signal high) for at least 1 microsecond */
-//            R_BSP_SoftwareDelay( (uint32_t)1, BSP_DELAY_UNITS_MICROSECONDS );
-//            NV_CS_ACTIVE(); /* Activate the chip select to tell the SST chip to assert SO low for busy, high when write completes */
             /* In some cases, the SST chip has already finished the write when we get here.  If so, no need to do the busyCheck   */
             if ( ! R_BSP_PinRead( NV_BUSY_INTERRUPT_PIN ) )
 #endif // MCU_SELECTED
