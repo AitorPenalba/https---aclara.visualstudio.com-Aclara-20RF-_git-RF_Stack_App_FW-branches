@@ -1120,7 +1120,7 @@ static returnStatus_t localErase(   const eEraseCmd eCmd,
    setBusyTimer( busyTime_uS );  /* This value set based on the specific device parameters and erase command (e.g., 4k,
                                     16k, whole device, etc. ) */
    bUseHardwareBsy_ = 0;         /* Make sure that the busy check reads the status register! */
-   do
+   do // TODO: RA6E1 Bob: This needs to be re-visited and possibly changed to a while loop because this code "covers up" an error from SPI_write
    {
       eRetVal = busyCheck( pDevice, busyTime_uS );
    } while( ( eSUCCESS != eRetVal ) && ( 0 != retries-- ) );
@@ -1318,6 +1318,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
          OS_TICK_Get_CurrentElapsedTicks(&endTime); /* update endtime to the latest ticktime */
 #endif   /* NOT BOOTLOADER  */
          (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), true ); /* check nvStatus for busy */
+// TODO: RA6E1 Bob: add a duplicate read of the status and make sure it doesn't cause any problems.
       } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
 
 #if ( MCU_SELECTED == RA6E1 )
@@ -1408,10 +1409,8 @@ static returnStatus_t localWrite( dSize nDest, uint8_t const *pSrc, lCnt Cnt, bo
                   if ( eSUCCESS == eRetVal )
                   {
                      /* Write the data to the SPI Device */
-// TODO: RA6E1 Bob: remove   R_BSP_PinCfg( BSP_IO_PORT_04_PIN_06, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_HIGH ) );
                      eRetVal = localWriteBytesToSPI( sectorStartAddr, &dvr_shm_t.pExtSectBuf_[0],
                                                      EXT_FLASH_SECTOR_SIZE, pDevice );
-// TODO: RA6E1 Bob: remove   R_BSP_PinCfg( BSP_IO_PORT_04_PIN_06, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_LOW ) );
                   }
                }
             }
