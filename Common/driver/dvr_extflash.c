@@ -1577,7 +1577,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
                 * in the busyCheck() function so that we do not lose any interrupts.                                                 */
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)BSP_IO_LEVEL_LOW ) );
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                               ) );
-               uint32_t loops = SystemCoreClock / 8000000;
+               uint32_t loops = SystemCoreClock / 8000000; /* Delay for 2 microseconds */
                for ( uint32_t loop = 0; loop < loops; loop++) { NOP(); }
                /* The SST chips require chip select to be inactive (signal high) for at least 1 microsecond, give it 2 */
  //              R_BSP_SoftwareDelay( (uint32_t)2, BSP_DELAY_UNITS_MICROSECONDS );
