@@ -700,7 +700,7 @@ int BL_MAIN_Main( void )
 
    /* Test Case: Initial */
    BOOTLOADER_TEST(TESTCASE_1);
-   BL_MAIN_delayForStablePower(); /* check to make sure power is stable before continue*/  // TODO: Add later
+   BL_MAIN_delayForStablePower(); /* check to make sure power is stable before continue*/
 
    /* Read the DFW Info partition to determine if there is an application or bootloader update pending.  */
    ( void ) PAR_init();
