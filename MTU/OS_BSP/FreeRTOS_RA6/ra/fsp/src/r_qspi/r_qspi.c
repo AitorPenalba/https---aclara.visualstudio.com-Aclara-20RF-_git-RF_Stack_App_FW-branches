@@ -733,9 +733,14 @@ static void r_qspi_direct_write_sub (uint8_t const * const p_src, uint32_t const
         /* Close the SPI bus cycle. Reference section 39.10.3 "Generating the SPI Bus Cycle during Direct
          * Communication" in the RA6M3 manual R01UH0886EJ0100. */
         R_QSPI->SFMCMD = 1U;
-
+        /* The following instruction "stalls" the CPU core for approximately 360 nsec. during which it does   *
+         * not execute the subsequent pin toggling instructions.  It is likely that the CPU cannot take an    *
+         * interrupt during this period but proving this was not attempted.  This is an undesriable situation *
+         * for the current SRFN product and possibly a worse future impact.  Setting SFMCMD to 0 switches the *
+         * QSPI into the "instruction fetch from ROM" mode, which we have no intention of using on SRFN.  So  *
+         * this line of code has been removed with no observed harmful effects.                               */
         /* Return to ROM access mode */
-        R_QSPI->SFMCMD = 0U;
+//////////        R_QSPI->SFMCMD = 0U;
     }
 }
 
