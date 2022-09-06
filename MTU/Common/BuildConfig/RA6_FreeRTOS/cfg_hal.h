@@ -472,7 +472,7 @@
 /* The following macros translate the Renesas FSP return codes to Aclara returnStatus_t error codes */
 #define NV_SPI_PORT_WRITE(a,b,c,d)     ( ( FSP_SUCCESS == R_QSPI_DirectWrite(&g_qspi0_ctrl, b, c, d) ) ? eSUCCESS : eFAILURE )
 #define NV_SPI_PORT_READ(a,b,c,d)      ( ( FSP_SUCCESS == R_QSPI_DirectRead (&g_qspi0_ctrl, b, c, d) ) ? eSUCCESS : eFAILURE )
-#define POLLING_READ_EXIT()            { R_QSPI->SFMCMD = 1U; R_QSPI->SFMCMD = 0U; } //Exit QSPI Direct Communication Mode, Only use when read polling is set to TRUE
+#define POLLING_READ_EXIT()            { R_QSPI->SFMCMD = 1U; } // Complete the SPI bus cycle; Only use when read polling is set to TRUE
 #endif
 
 /* Set PCR for GPIO, high drive strength, Make Output */

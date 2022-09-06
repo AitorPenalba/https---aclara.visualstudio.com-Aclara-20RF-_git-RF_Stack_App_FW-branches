@@ -1318,7 +1318,9 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
          OS_TICK_Get_CurrentElapsedTicks(&endTime); /* update endtime to the latest ticktime */
 #endif   /* NOT BOOTLOADER  */
          (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), true ); /* check nvStatus for busy */
-// TODO: RA6E1 Bob: add a duplicate read of the status and make sure it doesn't cause any problems.
+         /* The following duplicate read of the flash chip's status ensures that we do not get a "stale" value. *
+          * This was found on the K24 while looking for a serial flash corruption problem.                      */
+         (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), true ); /* check nvStatus for busy */
       } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
 
 #if ( MCU_SELECTED == RA6E1 )
@@ -1578,7 +1580,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)BSP_IO_LEVEL_LOW ) );
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                               ) );
                /* The SST chips require chip select to be inactive (signal high) for at least 1 microsecond, give it at least 2usec  */
-               uint32_t loops = SystemCoreClock / 8000000; /* Delay for 2 microseconds.  The constant is determined empirically.     */
+               uint32_t loops = SystemCoreClock / 6000000; /* Delay for 2 microseconds.  The constant is determined empirically.     */
                for ( uint32_t loop = 0; loop < loops; loop++) { NOP(); }
                NV_CS_ACTIVE(); /* Activate the chip select to tell the SST chip to assert SO low for busy, high when write completes */
             }

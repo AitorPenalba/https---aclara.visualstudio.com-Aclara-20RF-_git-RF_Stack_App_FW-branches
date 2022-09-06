@@ -719,68 +719,20 @@ static bool r_qspi_status_sub (qspi_instance_ctrl_t * p_instance_ctrl)
  **********************************************************************************************************************/
 static void r_qspi_direct_write_sub (uint8_t const * const p_src, uint32_t const bytes, bool const read_after_write)
 {
-#define TM_ACLARA_QSPI_TIMING 0 /* Aclara added code for low-level QSPI timing assessment */
-#define TM_ACLARA_QSPI_SIMPLE 0 /* Aclara added code for higher-level QSPI timing measurement */
-#if ( TM_ACLARA_QSPI_TIMING == 1)
-    #define NOP() asm("nop")
-    #define NOPs { NOP(); NOP(); NOP(); NOP(); NOP(); NOP(); NOP(); NOP(); } /* Test of M33 pipeline execution */
-    register uint32_t cfgOutputLow  = 0xC04;
-    register uint32_t cfgOutputHigh = 0xC05;
-    vPortEnterCritical();
-    *((uint32_t *)0x4008087C) = 0x00000C05; /* Set P115 to output direction, high drive */
-    if ( !read_after_write )
-    {
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-    }
-#elif ( TM_ACLARA_QSPI_SIMPLE == 1)
-    *((uint32_t *)0x4008087C) = 0x00000C05; /* Set P115 to output direction, high drive */
-#endif
     /* Enter direct communication mode */
     R_QSPI->SFMCMD = 1U;
-#if ( TM_ACLARA_QSPI_TIMING == 1)
-    if ( !read_after_write )
-    {
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-    }
-#endif
+
     /* Write data to QSPI. */
     for (uint32_t i = 0; i < bytes; i++)
     {
         R_QSPI->SFMCOM = p_src[i];
-#if ( TM_ACLARA_QSPI_TIMING == 1)
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOP(); NOP(); /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOP(); NOP(); /* Set P115 to low  output state */
-#endif
     }
 
     if (!read_after_write)
     {
-#if ( TM_ACLARA_QSPI_TIMING == 1)
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-#endif
         /* Close the SPI bus cycle. Reference section 39.10.3 "Generating the SPI Bus Cycle during Direct
          * Communication" in the RA6M3 manual R01UH0886EJ0100. */
         R_QSPI->SFMCMD = 1U;
-#if ( TM_ACLARA_QSPI_TIMING == 1)
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-#endif
         /* The following instruction "stalls" the CPU core for approximately 360 nsec. during which it does   *
          * not execute the subsequent pin toggling instructions.  It is likely that the CPU cannot take an    *
          * interrupt during this period but proving this was not attempted.  This is an undesriable situation *
@@ -789,19 +741,7 @@ static void r_qspi_direct_write_sub (uint8_t const * const p_src, uint32_t const
          * this line of code has been removed with no observed harmful effects.                               */
         /* Return to ROM access mode */
 //////////        R_QSPI->SFMCMD = 0U;
-#if ( TM_ACLARA_QSPI_TIMING == 1)
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-        *((uint32_t *)0x4008087C) = cfgOutputLow;  NOPs; /* Set P115 to low  output state */
-        *((uint32_t *)0x4008087C) = cfgOutputHigh; NOPs; /* Set P115 to high output state */
-#endif
     }
-#if ( TM_ACLARA_QSPI_TIMING == 1)
-    vPortExitCritical();
-#elif ( TM_ACLARA_QSPI_SIMPLE == 1)
-    *((uint32_t *)0x4008087C) = 0x00000C04; /* Set P115 to output direction, high drive */
-#endif
 }
 
 /*******************************************************************************************************************//**
