@@ -933,16 +933,11 @@ static void vRadio_PowerUp(void)
    si446x_reset();
 
    OS_TASK_Sleep(TEN_MSEC); // Give some time to radio to get all out of reset
-#if ( TM_BYPASS_SI4467_GPIP0_WAIT == 0 ) // TODO: RA6E1 Bob: Set to 0 for tempoaray code for Faiz to test cutting trace from SI4467_GPIO0 to the MCU
    // Monitor GPIO0 of radio 0 for power on reset
    while( RDO_0_GPIO0() == (uint32_t)BSP_IO_LEVEL_LOW  ) {
       INFO_printf("Waiting on radio 0 to get out of reset");
       OS_TASK_Sleep(TEN_MSEC);
    }
-#else
-   OS_TASK_Sleep( 2000 );
-   #warning "You have built a version of code that does not wait for the radio to come out of reset!!  Do not check it in this way!!"
-#endif // ( TM_BYPASS_SI4467_GPIP0_WAIT == 0 )
 #if ( DCU == 1 )
    // Monitor GPIO0 of radio 1 for power on reset
    while( RDO_1_GPIO0() == (uint32_t)LWGPIO_VALUE_LOW ) {
