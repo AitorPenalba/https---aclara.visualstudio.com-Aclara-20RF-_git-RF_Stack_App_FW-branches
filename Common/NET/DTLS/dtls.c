@@ -11,7 +11,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2015-2021 Aclara.  All Rights Reserved.
+   Copyright 2015-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -93,7 +93,7 @@
 #define DTLS_TRANSPORT_TIMEOUT_SERIAL ( 10 * 1000 )         /* 10 seconds */
 #define DTLS_GROUP_MESSAGES ( 1 )                           /* Process group messages from DTLS */
 #define DTLS_MAX_CERT_SIZE ( 512 )                          /* Maximum cert size */
-#define DTLS_MILLISECONDS_IN_SECOND ( 1000 )                /* Number of millisconds in a second */
+#define DTLS_MILLISECONDS_IN_SECOND ( 1000 )                /* Number of milliseconds in a second */
 #define DTLS_MAX_RX_COUNT ( 5 )                             /* Max number of failed receives before connection is torn down */
 #define DTLS_RF_QOS ( 0x39 )
 #define DTLS_EXPECTED_MAX_RX ( 1300 )
@@ -173,15 +173,15 @@ typedef enum
 
 /* The following struct was created to allow patching SRFN DCU's.  In v1.40, the DtlsMajorSession_s structure contained
    a member of type sysTime_t sized at 8 bytes.  This type, sysTime_t, grew larger in size during v1.50 from
-   8 bytes to 16 bytes.  This resulted in the size of DtlsMajorSession_s growing by 8 bytes.  Currenlty there is
-   no way in the DFW process to modify the parition to accomadate the structures change in size. As result, patching
+   8 bytes to 16 bytes.  This resulted in the size of DtlsMajorSession_s growing by 8 bytes.  Currently there is
+   no way in the DFW process to modify the partition to accommodate the structures change in size. As result, patching
    from v1.40 to v1.70 is not possible because after updating to v1.70, the firmware is expecting the
-   DtlsMajorSession_s parition data to be 8 bytes larger and device startup will fail attempting to read the file.
+   DtlsMajorSession_s partition data to be 8 bytes larger and device startup will fail attempting to read the file.
    This change will be updated to only be included in the SRFN DCU product.
 
    SRFN I210+c and DCU2+ fw versions have been released using the larger 16 byte sysTime_t.  Patches for these
    products do not need to use the special DtlsTime_t data structure.  In the future, when the ability to update the
-   DtlsMajorSession_s becomes available via DFW, this structure can be removed from the code.  All released prodcuct
+   DtlsMajorSession_s becomes available via DFW, this structure can be removed from the code.  All released product
    can then used the 16 byte sysTime_t in the DtlsMajorSession_s partition. */
 #if ( DCU == 1 )
 typedef struct /* DCU2 ONLY */
@@ -192,9 +192,9 @@ typedef struct /* DCU2 ONLY */
 
 typedef struct /* DCU2 ONLY */
 {
-   DtlsTime_t serverCertificateExpirationSysTime;  /* declared to accomadate SRFN DCU patches, see comment in DtlsTime_t struct declaration */
+   DtlsTime_t serverCertificateExpirationSysTime;  /* declared to accommodate SRFN DCU patches, see comment in DtlsTime_t struct declaration */
    uint16_t dataSize;
-   uint8_t data[DTLS_MAJOR_MAX_SIZE_WOLF36];       /* Ming: Temprory change to DTLS_MAJOR_MAX_SIZE size to make the buff size the same as wolfSSL36 */
+   uint8_t data[DTLS_MAJOR_MAX_SIZE_WOLF36];       /* Ming: Temporary change to DTLS_MAJOR_MAX_SIZE size to make the buff size the same as wolfSSL36 */
 } DCU2_DtlsMajorSession_s;
 #endif
 
@@ -202,7 +202,7 @@ typedef struct
 {
    sysTime_t serverCertificateExpirationSysTime;
    uint16_t dataSize;
-   uint8_t data[DTLS_MAJOR_MAX_SIZE_WOLF36];       /* Ming: Temprory change to DTLS_MAJOR_MAX_SIZE size to make the buff size the same as wolfSSL36 */
+   uint8_t data[DTLS_MAJOR_MAX_SIZE_WOLF36];       /* Ming: Temporary change to DTLS_MAJOR_MAX_SIZE size to make the buff size the same as wolfSSL36 */
 } DtlsMajorSession_s;
 
 #if 0
@@ -222,7 +222,7 @@ typedef struct
 #if ( DCU == 1 )
 typedef struct /* DCU2 ONLY */
 {
-   DtlsTime_t serverCertificateExpirationSysTime; /* declared to accomadate SRFN DCU patches, see comment in DtlsTime_t struct declaration */
+   DtlsTime_t serverCertificateExpirationSysTime; /* declared to accommodate SRFN DCU patches, see comment in DtlsTime_t struct declaration */
    uint16_t dataSize;
    bool isAvailable;    /*Ming: When this flag is true, it indicates the FW was just upgraded from the wolfSSL 3.6 and the data is fresh. We
                                    shall recover the session from this structure instead of Major & Minor.
@@ -659,7 +659,7 @@ void DTLS_Task( taskParameter )
       }
       else
       {
-         /* Transport timeout occured, depending on state we need to get wolfssl to retransmit. */
+         /* Transport timeout occurred, depending on state we need to get wolfssl to retransmit. */
          _dtlsRxTimeout = true;
          ( void )DtlsTransportRx( NULL );
       }
@@ -679,7 +679,7 @@ void DTLS_Task( taskParameter )
          NWK_Address_t const *dst_addr - Destination address
          NWK_Override_t const *override - Override settings
          MAC_dataConfCallback callback - Mac callback function
-         NWK_ConfirmHandler confirm_cb * - Pointre to the confirm handler.
+         NWK_ConfirmHandler confirm_cb * - Pointer to the confirm handler.
 
    Returns:
          uint32_t                  - handle or 0 for error
@@ -747,7 +747,7 @@ uint32_t DTLS_DataRequest( uint8_t port, uint8_t qos, uint16_t size, uint8_t  co
             module.  That function is also responsible for freeing the
             indication buffer.
 
-   Arguments: pointer to a funciton of type DTLS_RegisterIndicationHandler
+   Arguments: pointer to a function of type DTLS_RegisterIndicationHandler
 
    Returns: none
 
@@ -779,31 +779,31 @@ void DTLS_RegisterSessionStateChangedCallback( DTLS_SessionStateChangedCallback_
 #if ( DTLS_DEBUG == 1 )
 static void DTLS_dumpState( const char *title, WOLFSSL *ssl )
 {
-   DBG_printf( "\n%s\n"
-               "peerSeqHi     %4u\n"
-               "peerSeqLo     %4u\n"
-               "seqHi         %4u\n"
-               "seqLo         %4u\n"
-               "nextEpoch     %4hu\n"
-               "nextSeqHi     %4hu\n"
-               "nextSeqLo     %4u\n"
-               "curEpoch      %4hu\n"
-               "curSeqHi      %4hu\n"
-               "curSeqLo      %4u\n"
-               "prevSeqHi     %4hu\n"
-               "prevSeqLo     %4u\n"
-               "peerHshake    %4hu\n"
-               "expPerHshake  %4hu\n"
-               "dtlsSeqHi     %4hu\n"
-               "dtlsSeqLo     %4u\n"
-               "dtlsPrevSeqHi %4hu\n"
-               "dtlsPrevSeqLo %4u\n"
-               "dtlsPpoch     %4hu\n"
-               "dtlsHshake_no %4hu\n"
-               "encryptSz     %4u\n"
-               "padSz         %4u\n"
-               "encryptionOn  %4hhu\n"
-               "decryptedCur  %4hhu\n",
+   DBG_printf( "\n%s\r\n"
+               "peerSeqHi     %4u\r\n"
+               "peerSeqLo     %4u\r\n"
+               "seqHi         %4u\r\n"
+               "seqLo         %4u\r\n"
+               "nextEpoch     %4hu\r\n"
+               "nextSeqHi     %4hu\r\n"
+               "nextSeqLo     %4u\r\n"
+               "curEpoch      %4hu\r\n"
+               "curSeqHi      %4hu\r\n"
+               "curSeqLo      %4u\r\n"
+               "prevSeqHi     %4hu\r\n"
+               "prevSeqLo     %4u\r\n"
+               "peerHshake    %4hu\r\n"
+               "expPerHshake  %4hu\r\n"
+               "dtlsSeqHi     %4hu\r\n"
+               "dtlsSeqLo     %4u\r\n"
+               "dtlsPrevSeqHi %4hu\r\n"
+               "dtlsPrevSeqLo %4u\r\n"
+               "dtlsPpoch     %4hu\r\n"
+               "dtlsHshake_no %4hu\r\n"
+               "encryptSz     %4u\r\n"
+               "padSz         %4u\r\n"
+               "encryptionOn  %4hhu\r\n"
+               "decryptedCur  %4hhu\r\n",
                title,
                ssl->keys.peer_sequence_number_hi,
                ssl->keys.peer_sequence_number_lo,
@@ -1150,7 +1150,7 @@ static void DtlsStartBackoff( void )
 
    Function name: DtlsConnectSerial
 
-   Purpose: This function is called to start the "unblocked" DTLS seraial connection
+   Purpose: This function is called to start the "unblocked" DTLS serial connection
 
    Arguments: None
 
@@ -3989,6 +3989,7 @@ static int32_t DtlsRfWrite( const char *pBuf, int32_t size )
    {
       /* This is an internal handshake or alert packet.  Add network parameters */
       result = NWK_DataRequest( ( uint8_t )UDP_DTLS_PORT, DTLS_RF_QOS, ( uint16_t )size, ( uint8_t* )pBuf, &dst_addr, &override, NULL, NULL );
+      OS_TASK_Sleep(1000); // TODO: RA6E1: Remove this once the MAC FrameManagement is fixed
       DTLS_CounterInc( eDTLS_IfOutNonApplicationPkts );
    }
 
@@ -4003,7 +4004,7 @@ static int32_t DtlsRfWrite( const char *pBuf, int32_t size )
 
    Function name: DtlsTransportTx
 
-   Purpose: This function is called to transmit DTLS data. It deterimines the which port is connected and will
+   Purpose: This function is called to transmit DTLS data. It determines the which port is connected and will
             make the appropriate call.
 
    Arguments:
