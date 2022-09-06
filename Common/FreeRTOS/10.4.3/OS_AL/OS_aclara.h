@@ -255,8 +255,8 @@ typedef struct
 
 typedef struct
 {
-  OS_Linked_List_Element  head;
-  OS_Linked_List_Element  tail;
+  OS_Linked_List_Element  *NEXT;
+  OS_Linked_List_Element  *PREV;
   uint32_t                size;
 } OS_List_Obj, *OS_List_Handle;
 

@@ -34,6 +34,7 @@
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
+#if 0  // TODO: RA6E1: Remove once verified
 /******************************************************************************
  *
  * Function name: verifyListElement
@@ -43,92 +44,74 @@
  * Arguments: List - list Object handle to search
               listElement - pointer to list element you would like to check
  *
- * Returns: true: element exists in list; false: elment does not exist in list
+ * Returns: true: element exists in list; false: element does not exist in list
  *
  * Notes: internal use only for linked list object
  *
  *****************************************************************************/
 static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle listElement)
 {
-  bool retVal = (bool)false;
-  uint32_t  i, listSize; //loop variables
-  OS_Linked_List_Element_Handle tmp;
+   bool retVal = (bool)false;
+   uint32_t  i, listSize; //loop variables
+   OS_Linked_List_Element_Handle tmp;
 
-  if( list == NULL || listElement == NULL )
-  {
-    return retVal;
-  }
+   if( list == NULL || listElement == NULL )
+   {
+      return retVal;
+   }
 
-  listSize = list->size;
-  tmp = list->head.NEXT;
+   listSize = list->size;
+   tmp = list->NEXT->NEXT;
 
-  for(i = 0; ( (i < listSize) && (tmp->NEXT != NULL)) ; i++ )
-  {
-    if( tmp == listElement )
-    {
-      retVal = (bool)true;
-    }
-    tmp = tmp->NEXT;
-  }
+   for(i = 0; ( (i < listSize) && (tmp->NEXT != NULL)) ; i++ )
+   {
+      if( tmp == listElement )
+      {
+         retVal = (bool)true;
+      }
+      tmp = tmp->NEXT;
+   }
 
-  return retVal;
+   return retVal;
 }
-
+#endif
 /******************************************************************************
  *
  * Function name: OS_QUEUE_Create
  *
- * Purpose: Initlalizes a linkedList Object
+ * Purpose: Initializes a linkedList Object
  *
  * Arguments: listHandle, preallocated list handle
  *
- * Returns: true: list object correctly intialized; false: invalid list object
+ * Returns: true: list object correctly initialized; false: invalid list object
  *
  * Notes: the head and tail of a list object are dummy elements,
- *       the head->NEXT awlays points to the first element in the queue
+ *       the head->NEXT always points to the first element in the queue
  *       the tail->PREV always points to the last element in the queue
  *
  *****************************************************************************/
 bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
 {
 #if( RTOS_SELECTION == MQX_RTOS )
-  return OS_QUEUE_Create ( listHandle, 0 );
+   return OS_QUEUE_Create ( listHandle, 0 );
 #elif( RTOS_SELECTION == FREE_RTOS )
 
-  if (listHandle == NULL)
-  {
-    return (false);     /* XXX KEL Add error logging */
-  }
-
-  listHandle->head.PREV = NULL;
-  listHandle->head.NEXT = ((OS_Linked_List_Element_Handle)&(listHandle->tail));
-  listHandle->tail.NEXT = NULL;
-  listHandle->tail.PREV = ((OS_Linked_List_Element_Handle)&(listHandle->head));
-  listHandle->size = 0;
-  return (true);
+   if (listHandle == NULL)
+   {
+      return (false);     /* XXX KEL Add error logging */
+   }
+#if 0  // TODO: RA6E1: Remove once verified
+   listHandle->head->PREV = ((OS_Linked_List_Element_Handle)&(listHandle->head->NEXT));
+   listHandle->head->NEXT = ((OS_Linked_List_Element_Handle)&(listHandle->head->NEXT));
+   listHandle->tail->NEXT = ((OS_Linked_List_Element_Handle)&(listHandle->head->NEXT));
+   listHandle->tail->PREV = ((OS_Linked_List_Element_Handle)&(listHandle->head->NEXT));
+#else
+   listHandle->NEXT = (OS_Linked_List_Element_Handle)(void *)&(listHandle->NEXT);
+   listHandle->PREV = (OS_Linked_List_Element_Handle)(void *)&(listHandle->NEXT);
 #endif
-//   OS_QUEUE_Obj *que_obj;
-//
-//
-//   que_obj = (OS_QUEUE_Obj *) malloc (sizeof (OS_QUEUE_Obj));
-//
-//   if (que_obj == NULL)
-//   {
-//      return (NULL);    /* XXX KEL Add error logging */
-//   }
-//
-//   que_obj->Next = que_obj;
-//   que_obj->Prev = que_obj;
-//   que_obj->Lock = OS_LOCK_Create ();
-//
-//  if (ALERT (que_obj->Lock == NULL)) {
-//    return NULL;
-//  }
-//
-//   return (que_obj);
-//
-//  return (que_obj);
-
+   listHandle->size = 0;
+   return (true);
+#endif
 }
 
 
@@ -148,30 +131,23 @@ bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
 void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
 {
 #if( RTOS_SELECTION == MQX_RTOS )
-  OS_QUEUE_Enqueue(list, listElement);
+   OS_QUEUE_Enqueue(list, listElement);
 #elif( RTOS_SELECTION == FREE_RTOS )
-  if ( (NULL == list) ||  (NULL == listElement))
-  {
-    return;
-  }
-  OS_Linked_List_Element_Handle tail_handle = &(list->tail);
-  ((OS_Linked_List_Element_Handle)listElement)->PREV = tail_handle->PREV;
-  ((OS_Linked_List_Element_Handle)listElement)->NEXT = tail_handle;
-  tail_handle->PREV->NEXT = (OS_Linked_List_Element_Handle)listElement;
-  tail_handle->PREV = listElement;
-  list->size++;
-
+   if ( (NULL == list) ||  (NULL == listElement))
+   {
+      return;
+   }
+#if 0  // TODO: RA6E1: Remove once verified
+   OS_Linked_List_Element_Handle tail_handle = &(list->tail);
+   ((OS_Linked_List_Element_Handle)listElement)->PREV = tail_handle->PREV;
+   ((OS_Linked_List_Element_Handle)listElement)->NEXT = tail_handle;
+   tail_handle->PREV->NEXT = (OS_Linked_List_Element_Handle)listElement;
+   tail_handle->PREV = listElement;
+   list->size++;
+#else
+   OS_LINKEDLIST_Insert( list, ((void*)(&list->PREV->NEXT)), listElement );
 #endif
-//    if (ALERT (NULL == Queue) || ALERT (NULL == Elem)) {
-//       return;
-//    }
-//
-//    OS_LIST_Obj *Prev = Queue->Prev;
-//
-//    ((OS_LIST_Obj *) Elem)->Next = Queue;
-//    ((OS_LIST_Obj *) Elem)->Prev = Prev;
-//    Prev->Next = (OS_LIST_Obj *) Elem;
-//    Queue->Prev = (OS_LIST_Obj *) Elem;
+#endif
 }
 
 
@@ -192,38 +168,41 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
 bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listElement )
 {
 #if( RTOS_SELECTION == MQX_RTOS )
-  return OS_QUEUE_Insert(list, listPosition, listElement);
+   return OS_QUEUE_Insert(list, listPosition, listElement);
 #elif( RTOS_SELECTION == FREE_RTOS )
    bool retVal = (bool)false;
-   bool found = (bool)false;
+   bool found = true; //(bool)false;
+#if 0  // TODO: RA6E1: Remove once verified
    OS_Linked_List_Element_Handle tmp = listPosition;
-   found = verifyListElement(list, ( OS_Linked_List_Element_Handle ) listPosition);
+
+   //   found = verifyListElement(list, ( OS_Linked_List_Element_Handle ) listPosition);
+#endif
    if( found )
    {
-     tmp->NEXT->PREV = ( OS_Linked_List_Element_Handle) listElement;
-     ((OS_Linked_List_Element_Handle) listElement)->NEXT = tmp->NEXT;
-     tmp->NEXT = ( OS_Linked_List_Element_Handle) listElement;
-     (( OS_Linked_List_Element_Handle)listElement)->PREV = tmp;
-     list->size++;
-     retVal = (bool)true;
+#if 0  // TODO: RA6E1: Remove once verified
+      tmp->NEXT->PREV = ( OS_Linked_List_Element_Handle) listElement;
+      ((OS_Linked_List_Element_Handle) listElement)->NEXT = tmp->NEXT;
+      tmp->NEXT = ( OS_Linked_List_Element_Handle) listElement;
+      (( OS_Linked_List_Element_Handle)listElement)->PREV = tmp;
+#else
+      OS_Linked_List_Element_Handle nxt = ((OS_Linked_List_Element_Handle) listPosition)->NEXT;
+      ((OS_Linked_List_Element_Handle) listElement)->NEXT  = nxt;
+      ((OS_Linked_List_Element_Handle) listPosition)->NEXT = (OS_Linked_List_Element_Handle) listElement;
+      ((OS_Linked_List_Element_Handle) listElement)->PREV  = (OS_Linked_List_Element_Handle) listPosition;
+      nxt->PREV                                            = (OS_Linked_List_Element_Handle) listElement;
+#endif
+      list->size++;
+      retVal = (bool)true;
    }
    return retVal;
-
 #endif
-//   if (ALERT (NULL == Queue) || ALERT (NULL == Elem)) {
-//      return;
-//   }
-//
-//   OS_QUEUE_Enqueue (Queue, Elem);
-//   return retVal;
 }
-
 
 /******************************************************************************
  *
  * Function name: OS_QUEUE_Remove
  *
- * Purpose: Removes the given "elem" from the list if it it exists in that list
+ * Purpose: Removes the given "elem" from the list if it exists in that list
  *
  * Arguments: list object pointer, Pointer to element
  *
@@ -235,22 +214,24 @@ bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listE
 void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
 {
 #if( RTOS_SELECTION == MQX_RTOS )
-  OS_QUEUE_Remove(list, Elem);
+   OS_QUEUE_Remove(list, Elem);
 #elif( RTOS_SELECTION == FREE_RTOS )
    if( NULL == listElement)
    {
       return;
    }
-   bool found = (bool)false;
-   found = verifyListElement(list, (OS_Linked_List_Element_Handle) listElement);
+   bool found = true;//(bool)false;
+#if 0  // TODO: RA6E1: Remove once verified
+   //   found = verifyListElement(list, (OS_Linked_List_Element_Handle) listElement);
+#endif
    if( found )
    {
-     ((OS_Linked_List_Element *) listElement)->PREV->NEXT = ((OS_Linked_List_Element *) listElement)->NEXT;
-     ((OS_Linked_List_Element *) listElement)->NEXT->PREV = ((OS_Linked_List_Element *) listElement)->PREV;
-     list->size--;
-     /*clear out the pointers for the removed element*/
-     ((OS_Linked_List_Element *) listElement)->PREV = NULL;
-     ((OS_Linked_List_Element *) listElement)->NEXT = NULL;
+      ((OS_Linked_List_Element *) listElement)->PREV->NEXT = ((OS_Linked_List_Element *) listElement)->NEXT;
+      ((OS_Linked_List_Element *) listElement)->NEXT->PREV = ((OS_Linked_List_Element *) listElement)->PREV;
+      list->size--;
+//      /*clear out the pointers for the removed element*/
+//      ((OS_Linked_List_Element *) listElement)->PREV = NULL;
+//      ((OS_Linked_List_Element *) listElement)->NEXT = NULL;
    }
 #endif
 }
@@ -273,20 +254,29 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
 void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement )
 {
 #if( RTOS_SELECTION == MQX_RTOS )
-  OS_QUEUE_Next ( OS_QUEUE_Handle) list, listElement );
+   OS_QUEUE_Next ( OS_QUEUE_Handle) list, listElement );
 #elif( RTOS_SELECTION == FREE_RTOS )
-  if ( (NULL == list) ||  (NULL ==listElement) )
-  {
-    return (NULL);
-  }
-  else
-  {
-    return ((OS_Linked_List_Element *) listElement)->NEXT;
-  }
+   if ( (NULL == list) ||  (NULL ==listElement) )
+   {
+      return (NULL);
+   }
+   else
+   {
+#if 0  // TODO: RA6E1: Remove once verified
+      return ((OS_Linked_List_Element *) listElement)->NEXT;
+#else
+      OS_Linked_List_Element *next_ptr;
+      next_ptr = ((OS_Linked_List_Element *) listElement)->NEXT;
+      if( next_ptr == (OS_Linked_List_Element *) (( void *) list) )
+      {
+         next_ptr = NULL;
+      }
+
+      return (next_ptr);
 #endif
-
+   }
+#endif
 }
-
 
 /******************************************************************************
  *
@@ -301,24 +291,32 @@ void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement )
  * Notes: -
  *
  *****************************************************************************/
-void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list )
+void *OS_LINKEDLIST_Dequeue (OS_List_Handle list )
 {
 #if( RTOS_SELECTION == MQX_RTOS )
-  return  OS_QUEUE_Dequeue( (OS_QUEUE_Handle) list);
+   return  OS_QUEUE_Dequeue( (OS_QUEUE_Handle) list);
 #elif( RTOS_SELECTION == FREE_RTOS )
-  if ( NULL == list || list->size == 0 ) {
-    return NULL;
-  }
-  OS_Linked_List_Element *  handle;
-  handle = list->head.NEXT;
-  list->head.NEXT = handle->NEXT;
-  list->head.NEXT->PREV = &(list->head);
-  list->size--;
-  /*clear out the pointers for the removed element*/
-  handle->NEXT = NULL;
-  handle->PREV = NULL;
+   if ( NULL == list || list->size == 0 ) {
+      return NULL;
+   }
+   OS_Linked_List_Element *  handle;
+#if 0  // TODO: RA6E1: Remove once verified
+   handle = list->head->NEXT;
+   list->head->NEXT = handle->NEXT;
+   list->head->NEXT->PREV = &(list->head);
+#else
+   handle = list->NEXT->NEXT;
+   OS_Linked_List_Element *prev_ptr = list->PREV->PREV;
+   OS_Linked_List_Element *nxt_ptr = list->NEXT->NEXT;
+   prev_ptr->NEXT  = nxt_ptr;
+   nxt_ptr->PREV   = prev_ptr;
+#endif
+   list->size--;
+   /*clear out the pointers for the removed element*/
+   //  handle->NEXT = NULL;
+   //  handle->PREV = NULL;
 
-  return ((void *) (handle));
+   return ((void *) (handle));
 #endif
 }
 
@@ -339,13 +337,13 @@ void *OS_LINKEDLIST_Dequeue  (OS_List_Handle list )
 uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list )
 {
 #if( RTOS_SELECTION == MQX_RTOS )
-  return OS_QUEUE_NumElements( (OS_QUEUE_Handle) list);
+   return OS_QUEUE_NumElements( (OS_QUEUE_Handle) list);
 #elif( RTOS_SELECTION == FREE_RTOS )
-  if ( NULL == list) {
-    return 0;
-  }
+   if ( NULL == list) {
+      return 0;
+   }
 
-  return (uint16_t)(list->size);
+   return (uint16_t)(list->size);
 #endif
 }
 
@@ -366,14 +364,17 @@ uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list )
 void *OS_LINKEDLIST_Head ( OS_List_Handle list )
 {
 #if( RTOS_SELECTION == MQX_RTOS )
-  return OS_QUEUE_Head( (OS_QUEUE_Handle) list);
+   return OS_QUEUE_Head( (OS_QUEUE_Handle) list);
 #elif( RTOS_SELECTION == FREE_RTOS )
-  if ( NULL == list  || list->size == 0 ){
-    return NULL;
-  }
-  return ((void *) list->head.NEXT);
+   if ( NULL == list  || list->size == 0 ){
+      return NULL;
+   }
+   return ((void *) list->NEXT);
 #endif
 }
+
+
+ /*****************************************************************************/
 #if( TM_LINKED_LIST == 2)
 static OS_List_Obj testList;
 static OS_List_Handle handle = &testList;
@@ -387,21 +388,19 @@ static OS_Linked_List_Element_Handle tmp;
 
 void OS_LINKEDLIST_Test( void )
 {
-
-  OS_LINKEDLIST_Create(handle);
-  OS_LINKEDLIST_Enqueue(handle, &data1);
-  tmp = OS_LINKEDLIST_Head(handle);
-  OS_LINKEDLIST_Enqueue(handle, &data3);
-  OS_LINKEDLIST_Insert(handle, &data1, &data2);
-  num = OS_LINKEDLIST_NumElements(handle);
-  for( int i = 0; i< num ; i++)
-  {
-    tmp = OS_LINKEDLIST_Next(handle, tmp);
-  }
-  //tmp should point to the tail at this point
-  tmp = OS_LINKEDLIST_Dequeue(handle);
-  OS_LINKEDLIST_Remove(handle, &data2);
-
+   OS_LINKEDLIST_Create(handle);
+   OS_LINKEDLIST_Enqueue(handle, &data1);
+   tmp = OS_LINKEDLIST_Head(handle);
+   OS_LINKEDLIST_Enqueue(handle, &data3);
+   OS_LINKEDLIST_Insert(handle, &data1, &data2);
+   num = OS_LINKEDLIST_NumElements(handle);
+   for( int i = 0; i< num ; i++)
+   {
+      tmp = OS_LINKEDLIST_Next(handle, tmp);
+   }
+   //tmp should point to the tail at this point
+   tmp = OS_LINKEDLIST_Dequeue(handle);
+   OS_LINKEDLIST_Remove(handle, &data2);
 
 }
 #endif
@@ -443,7 +442,7 @@ void OS_LINKEDLIST_Test( void )
 //      }
 //   }
 //
-//   /* XXX BUMP priority to prevent priority inversion, this can be removed once glibc implments priority inheritence in locks */
+//   /* XXX BUMP priority to prevent priority inversion, this can be removed once glibc implements priority inheritance in locks */
 //   new.__sched_priority = TSK_MAXPRI+1;
 //
 //   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &new))
@@ -482,7 +481,7 @@ void OS_LINKEDLIST_Test( void )
 // *
 // * Arguments: Pointer to the queue
 // *
-// * Returns: Pointer to the element, or NULL if an error occured
+// * Returns: Pointer to the element, or NULL if an error occurred
 // *
 // * Notes: This function temporarily increases the priority of the calling thread
 // *        to ensure that priority inversion doesn't occur.
@@ -513,7 +512,7 @@ void OS_LINKEDLIST_Test( void )
 //      return NULL;
 //   }
 //
-//   /* XXX BUMP priority to prevent priority inversion, this can be removed once glibc implments priority inheritence in locks */
+//   /* XXX BUMP priority to prevent priority inversion, this can be removed once glibc implements priority inheritance in locks */
 //   new.__sched_priority = TSK_MAXPRI+1;
 //
 //   if (pthread_setschedparam (pthread_self (), SCHED_FIFO, &new))
@@ -542,4 +541,3 @@ void OS_LINKEDLIST_Test( void )
 //
 //   return (elem);
 //}
-

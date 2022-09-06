@@ -229,7 +229,7 @@ static void BL_MAIN_RunApp ( void )
    SCB_VTOR = ( uint32_t )&app_vector; // 3. Configure VTOR
    __enable_interrupt();               // 4. Enable interrupts
    app_vector.func_p();                // 5. Jump to application
-   
+
 #elif ( MCU_SELECTED == RA6E1 )
    /* look-up the application stack pointer and PC from its vector table at 0x4000 and jump to it */
    hal_boot_app();
@@ -399,7 +399,7 @@ static void BL_MAIN_HWInit( void )
    GRN_LED_PIN_TRIS();
    RED_LED_PIN_TRIS();
    BLU_LED_PIN_TRIS();
-   
+
 #elif ( MCU_SELECTED == RA6E1 )
    // hardware clocks and GPIO are setup in R_BSP_WarmStart, do nothing
 #endif
@@ -700,12 +700,12 @@ int BL_MAIN_Main( void )
 
    /* Test Case: Initial */
    BOOTLOADER_TEST(TESTCASE_1);
-   BL_MAIN_delayForStablePower(); /* check to make sure power is stable before continue*/
+   BL_MAIN_delayForStablePower(); /* check to make sure power is stable before continue*/  // TODO: Add later
 
    /* Read the DFW Info partition to determine if there is an application or bootloader update pending.  */
    ( void ) PAR_init();
 
-   /* Verify DFW Bootloader partition is accessible.  */ 
+   /* Verify DFW Bootloader partition is accessible.  */
    if ( eSUCCESS == PAR_partitionFptr.parOpen( &pDFWinfo, ePART_DFW_BL_INFO, 0 ) )
    {
       /* Verify both external NV and internal NV are accessible.  */
@@ -717,7 +717,7 @@ int BL_MAIN_Main( void )
          {
 #if ( MCU_SELECTED == RA6E1)
             /* is DFW INFO blank in the DFW BL INFO partition? */
-            if ( eSUCCESS == PAR_partitionFptr.parBlankCheck( 
+            if ( eSUCCESS == PAR_partitionFptr.parBlankCheck(
                                                 PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
                                                 sizeof( DfwBlInfo_t ), pDFWinfo ))
             {
@@ -786,7 +786,7 @@ int BL_MAIN_Main( void )
          }
       }
    }
-   
+
    /* Update the DFWinfo in ROM. */
    if ( copyAttempted )
    {
