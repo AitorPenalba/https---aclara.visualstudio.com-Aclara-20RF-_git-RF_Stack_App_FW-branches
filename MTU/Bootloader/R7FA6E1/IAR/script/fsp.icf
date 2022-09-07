@@ -88,6 +88,15 @@ else
 define region RAM_region        = mem:[from RAM_START         to RAM_END];
 define region DF_region         = mem:[from DATA_FLASH_START  to DATA_FLASH_END];
 
+/* Aclara: modified - add bootloader version at fixed address for App to read */
+
+define region Version_region        = mem:[from LNKR_BL_FW_VER_ADDR to LNKR_BL_FW_VER_ADDR + VERSION_SIZE - 1];
+define block  VersionInfo with size = VERSION_SIZE, alignment = 4 { ro data section .rodata object version.o };
+"Version": place in Version_region { block VersionInfo };
+keep { ro data section .rodata object version.o };
+
+/* Aclara: modified END */
+
 initialize manually { readwrite };
 do not initialize   { zeroinit };
 initialize manually { section .code_in_ram };
@@ -303,9 +312,9 @@ if(OPTION_SETTING_LENGTH > 0)
 {
   if (!isdefinedsymbol(PROJECT_NONSECURE))
   {
-    /* Aclara: modified - don't include option settings in bootloader.bin - use settings from application */
-	if (!isdefinedsymbol(OPTION_SETTINGS_EXCLUDE))
-	{
+    
+	if (!isdefinedsymbol(OPTION_SETTINGS_EXCLUDE))   /* Aclara: modified - don't include option settings in bootloader.bin */
+    {                                                /* Aclara: modified - use settings from application */
       place at address OPTION_SETTING_START { ro section .option_setting_ofs0 };
       place at address OPTION_SETTING_START+0x10 { ro section .option_setting_dualsel };
       place at address OPTION_SETTING_START+0x34 { ro section .option_setting_sas };
@@ -322,8 +331,7 @@ if(OPTION_SETTING_LENGTH > 0)
       place at address OPTION_SETTING_S_START+0xC0 { ro section .option_setting_bps_sel0 };
       place at address OPTION_SETTING_S_START+0xC4 { ro section .option_setting_bps_sel1 };
       place at address OPTION_SETTING_S_START+0xC8 { ro section .option_setting_bps_sel2 };
-	}
-	/* Aclara: modified END */
+    }                                                /* Aclara: modified - don't include option settings in bootloader.bin */
   }
   else
   {

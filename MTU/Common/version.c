@@ -96,11 +96,11 @@
 #ifdef __BOOTLOADER
    #define BOOTLOADER_VER    ((uint8_t)2)    /* current bootloader version */
    #define BOOTLOADER_REV    ((uint8_t)0)    /* current bootloader revision */
-   #define BOOTLOADER_BUILD  ((uint16_t)3)   /* current bootloader build */
+   #define BOOTLOADER_BUILD  ((uint16_t)4)   /* current bootloader build */
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
-   #define FIRMWARE_BUILD  ((uint16_t)130)   /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
+   #define FIRMWARE_BUILD  ((uint16_t)131)   /* current firmware build */ // Don't put a '0' in front of the rev number. It's going to be interpreted as an octal number and might not build.
 #endif
 
 #ifndef __BOOTLOADER
@@ -152,9 +152,7 @@ typedef struct
    };
 #else //Application version
    /*lint --esym(526,LNKR_BL_FW_VER_ADDR)  Address defined in Linker script */
-#if 0 // TODO: RA6E1 Link BL firmware version
    extern const firmwareVersion_u   LNKR_BL_FW_VER_ADDR;
-#endif
    static const firmwareVersion_u appFwVersion_ =
    {
       #if ( PRODUCTION_BUILD == 1 )
@@ -315,9 +313,7 @@ firmwareVersion_u VER_getFirmwareVersion ( eFwTarget_t target )
 #else
    else if ( eFWT_BL == target )
    {
-#if 0 // TODO: RA6E1 Link BL address
       ver = LNKR_BL_FW_VER_ADDR;
-#endif
    }
 #endif
    return (ver);
