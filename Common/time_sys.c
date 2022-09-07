@@ -220,7 +220,8 @@ static bool      _nuDST_TimeChanged;                     /* System time changed 
 //static uint32_t  CYCdiff=0;
 //End TODO
 extern uint32_t  DMAint;
-uint32_t  semTestCount = 1000;
+uint8_t _timeSysSemPendSuccess = 0;
+uint32_t  semTestCount = 0;
 #endif
 
 static uint32_t _ticTocCntr = 0;
@@ -336,8 +337,9 @@ returnStatus_t TIME_SYS_Init( void )
    if ( (bool)false == _timeSysSemCreated )
    {
       // counting because need to ensure time_sys does not fall behind
-      if ( OS_SEM_Create(&_timeSysSem, 1000) && OS_MUTEX_Create(&_timeVarsMutex) )  /* TODO: RA6E1: Review the need of 1000 as max value of counting semaphore */
-      {  //Semaphore and Mutex create succeeded, initialize the data structure
+//      if ( OS_SEM_Create(&_timeSysSem, 1000) && OS_MUTEX_Create(&_timeVarsMutex) )  /* TODO: RA6E1: Review the need of 1000 as max value of counting semaphore */
+     if ( OS_SEM_Create(&_timeSysSem, 0 ) && OS_MUTEX_Create(&_timeVarsMutex) )
+     {  //Semaphore and Mutex create succeeded, initialize the data structure
 #if (EP == 1)
          FileStatus_t   fileStatusCfg;  //Contains the file status
          statusTimeRequest_ = 0; //Default, time not needed
@@ -2212,12 +2214,17 @@ void TIME_SYS_HandlerTask( taskParameter )
    lastTime = ((uint64_t)sec * 1000000) + usec;
    //End TODO
 #endif
-
+   (void)TIME_SYS_SetTimeFromRTC();
    for ( ; ; ) /* RTOS Task, keep running forever */
    {
       /* Wait for the semaphore. If running off power line, this semaphore will be posted every half cycle otherwise use
          timeout functionality to run system time.  For Aclara-RF, this semaphore will be posted at twice the rate of
          system clock */
+//     if( _timeSysSemPendSuccess == 0 )
+//     {
+//     _timeSysSemPendSuccess = 1;
+//     semTestCount = 0;
+//     }
       (void)OS_SEM_Pend( &_timeSysSem, OS_WAIT_FOREVER );
       semTestCount--;
 #if ( DCU == 1 )
@@ -2489,7 +2496,7 @@ void TIME_SYS_reqTimeoutCallback( uint8_t cmd, void *pData )
  * Reentrant: This function is reentrant. This function should only be called from an RTOS Tick ISR
  *
  ******************************************************************************************************************/
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - Using the tickHook provided by FreeRTOS. Need to add a define to call this function
+#if ( RTOS_SELECTION == MQX_RTOS )
 STATIC void TIME_SYS_vApplicationTickHook( void * user_isr_ptr )
 {
    uint32_t primask = __get_PRIMASK();
@@ -2509,7 +2516,6 @@ STATIC void TIME_SYS_vApplicationTickHook( void * user_isr_ptr )
    /* RTOS tick, signal the timer task */
    if ( _timeSysSemCreated == (bool)true )
    {
-      semTestCount++;
       OS_SEM_Post( &_timeSysSem );
       (*isr_ptr->OLD_ISR)(isr_ptr->OLD_ISR_DATA);     /* Chain to the previous notifier - This will call the RTOS tick. */
    }
@@ -2533,8 +2539,17 @@ void vApplicationTickHook()
    /* RTOS tick, signal the timer task */
    if ( _timeSysSemCreated == (bool)true )
    {
-      OS_SEM_Post_fromISR( &_timeSysSem );
-      semTestCount++;
+       OS_SEM_Post_fromISR( &_timeSysSem );
+       semTestCount++;
+//     if( _timeSysSemPendSuccess == 0 )
+//     {
+//       semTestCount++;
+//     }
+//     if( _timeSysSemPendSuccess == 1 )
+//     {
+//         OS_SEM_Post_fromISR( &_timeSysSem );
+//         semTestCount++;
+//     }
    }
 
    TMR_vApplicationTickHook();

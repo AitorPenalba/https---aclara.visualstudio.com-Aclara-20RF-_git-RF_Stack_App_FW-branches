@@ -167,7 +167,7 @@ void VBATREG_EnableRegisterAccess( void )
  **********************************************************************************************************************/
 void VBATREG_DisableRegisterAccess( void )
 {
-#if 0  /* TODO: RA6: Always enable VBAT Reg Access*/
+#if 0  /* RA6: For secure purpose Always enable VBAT Reg Access*/
 #if ( MCU_SELECTED == RA6E1 )
    R_SYSTEM->VBTBER_b.VBAE = 0x00;  /* Disable access to VBTBKR */
 

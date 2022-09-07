@@ -114,7 +114,7 @@ typedef struct VBATREG_VbatRegisterFile
 #define VBATREG_BIT_FIELDS                ( VBATREG_RFSYS_BASE_PTR->uBitFields )
 #define VBATREG_SIG                       ( VBATREG_RFSYS_BASE_PTR->sig )
 #define VBATREG_VALID                     ( VBATREG_RFSYS_BASE_PTR->valid )
-#define VBATREG_RTC_VALID                 ( VBATREG_RFSYS_BASE_PTR->rtc_valid ) // TODO: RA6 [name_Balaji]:REview the usage of this macro and check RTC_SR Reg of K24
+#define VBATREG_RTC_VALID                 ( VBATREG_RFSYS_BASE_PTR->rtc_valid )
 #define VBATREG_MAC_CONFIG_VALID          ( VBATREG_RFSYS_BASE_PTR->mac_config_valid )
 #define VBATREG_SHORT_OUTAGE              ( VBATREG_RFSYS_BASE_PTR->short_outage )
 #define VBATREG_SHIP_MODE                 ( VBATREG_RFSYS_BASE_PTR->ship_mode )

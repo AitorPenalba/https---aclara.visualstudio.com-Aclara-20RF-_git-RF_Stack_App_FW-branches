@@ -41,6 +41,7 @@
 #include "dfw_interface.h"
 //#include "MIMT_info.h"
 
+
 #if ( EP == 1 )
 #include "pwr_last_gasp.h"
 #include "vbat_reg.h"
@@ -5091,6 +5092,7 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
    uint8_t string[VER_HW_STR_LEN];   /* Version string including the two '.' and a NULL */
 
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+
 #if ( MCU_SELECTED == NXP_K24 ) // The CLKOUT pin is grounded in the Y8409x K24 NIC, not in RA6E1
    /* Rev C HW, PTC3/CLKOUT pin is grounded */
    if ( 'C' == string[0] )

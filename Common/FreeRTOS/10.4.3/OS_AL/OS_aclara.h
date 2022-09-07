@@ -272,7 +272,7 @@ typedef struct
 typedef void (* TASK_FPTR)(void *);
 typedef struct
 {
-   uint32_t         TASK_TEMPLATE_INDEX;  /* TODO: RA6: This should be an enum*/
+   uint32_t         TASK_TEMPLATE_INDEX;
 
    TASK_FPTR        pvTaskCode;
 
@@ -376,7 +376,7 @@ extern const char pTskName_PhyRx[];
 #if ( SIMULATE_POWER_DOWN == 1 )
 extern const char pTskName_Mfg[];
 #endif
-#if ( ACLARA_DA == 1 ) // TODO: RA6E1 Bob: This reference is required by DBG_CommandLine in the DBG_CommandLine_SimulatePowerDown function, not just for ACLARA_DA
+#if ( ( ACLARA_DA == 1 ) || ( SIMULATE_POWER_DOWN == 1 ) )
 extern const char pTskName_MfgUartRecv[];
 #endif
 extern const char pTskName_MfgUartCmd[];
@@ -398,10 +398,9 @@ extern const char pTskName_Sleep[];
 /* FUNCTION PROTOTYPES */
 bool     OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void     OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
-#if ( RTOS_SELECTION == FREE_RTOS ) // TODO: RA6E1 Bob: the conditional is not needed because this file is unique to a FreeRTOS folder
 void OS_EVNT_SET_from_ISR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 void OS_EVNT_DELETE ( OS_EVNT_Obj EventObject );
-#endif
+
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
 void     OS_EVNT_CLEAR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 
