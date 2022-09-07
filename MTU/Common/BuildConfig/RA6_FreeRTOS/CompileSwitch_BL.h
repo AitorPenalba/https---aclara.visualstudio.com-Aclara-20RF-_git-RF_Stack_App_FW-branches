@@ -278,7 +278,7 @@
 /**** Various Test Modes available in the Project ****/
 
 /* Set to true to enable unit/integration test code */
-#define TEST_MODE_ENABLE                  1     /* Set to 0 before releasing production code! */
+#define TEST_MODE_ENABLE                  0     /* Set to 0 before releasing production code! */
 
 // NOTE: 0=Production mode, !0=Enable the respective feature
 #define TEST_QUIET_MODE                   0     /* Enable Debug output during quiet mode */
