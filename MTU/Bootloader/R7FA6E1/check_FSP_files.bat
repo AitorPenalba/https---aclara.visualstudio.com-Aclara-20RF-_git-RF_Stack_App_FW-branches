@@ -8,11 +8,11 @@ set WINMERGE_PATH="C:\Program Files\WinMerge\WinMergeU.exe"
 :: set Beyond Compare install location
 set BEYOND_COMPARE_PATH="C:\Program Files\Beyond Compare 4\BComp.com"
 
-if exist %BEYOND_COMPARE_PATH% (
-	set MERGE=%BEYOND_COMPARE_PATH%
+if exist %WINMERGE_PATH% (
+	set MERGE=%WINMERGE_PATH%
 ) else (
-	if exist %WINMERGE_PATH% (
-		set MERGE=%WINMERGE_PATH%
+	if exist %BEYOND_COMPARE_PATH% (
+		set MERGE=%BEYOND_COMPARE_PATH%
 	) else (
 		echo Error: requires either %BEYOND_COMPARE_PATH% or %WINMERGE_PATH% - exiting
 		exit /b 0

@@ -685,13 +685,15 @@ int BL_MAIN_Main( void )
 #if ( MCU_SELECTED == NXP_K24 )
    // If ACKISO is active, then must be coming out of reset from Last Gasp (VLLS1) and can ignore DFW requests for now
    if ( PMC_REGSC & PMC_REGSC_ACKISO_MASK )
+#elif ( MCU_SELECTED == RA6E1 )
+   // if Deep Software Standby Reset Flag, then must be coming out of reset from Last Gasp and can ignore DFW requests for now
+   // TODO: see PWRLG_LastGasp for additional check "&& ( 0 != PWRLG_LLWU() )" that might further qualify the Last Gasp condition
+   if ( ( R_SYSTEM->RSTSR0_b.DPSRSTF ) || ( R_SYSTEM->DPSIFR1_b.DIRQ11F ) ) /* DPSRSTF - Deep SW Standby Reset Flag or IRQ11-DS - Change in PF_METER flag */
+#endif
    {
-      //   Doing Last Gasp so run application
+      // Doing Last Gasp so run application
       BL_MAIN_RunApp();
    }
-#elif ( MCU_SELECTED == RA6E1 )
-   // add equivalent code to check for last gasp active to bypass update check
-#endif
 
    //OK, we are going to run the Bootloader!
    BL_MAIN_ClockSetup();
