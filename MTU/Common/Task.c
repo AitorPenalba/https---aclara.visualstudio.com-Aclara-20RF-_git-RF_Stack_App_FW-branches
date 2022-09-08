@@ -595,8 +595,12 @@ static void expt_frm_dump(void const * ext_frm_ptr)
       "SysTick"
    };
 
-   char                             pBuf[ 192 ];   /* Local buffer for printout  (must be < DEBUG_MSG_SIZE and < print size below) */
-   uint16_t                         pOff;          /* offset into pBuf/length    */
+   char        pBuf[ 192 ];                     /* Local buffer for printout  (must be < DEBUG_MSG_SIZE and < print size below) */
+   uint16_t    pOff;                            /* offset into pBuf/length    */
+   uint32_t    excpt_SHCSR = SCB->SHCSR;        /* capture SCB registers for printing later */
+   uint32_t    excpt_HFSR  = SCB->HFSR;
+   uint32_t    excpt_CFSR  = SCB->CFSR;
+   uint32_t    excpt_BFAR  = SCB->BFAR;
 
    uint32_t excpt_num = __get_PSR() & 0x1FF;
    if(excpt_num < 16)
@@ -659,10 +663,10 @@ static void expt_frm_dump(void const * ext_frm_ptr)
        * Bus Fault Address - ONLY valid if BFARVALID set
        */
                                                                                                                      // chars -> running total
-      pOff  = (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ) - pOff, "SHCSR: 0x%08x\r\n", SCB->SHCSR );    //  +19 -> 19
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "HFSR:  0x%08x\r\n", SCB->HFSR );     //  +19 -> 38
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "CFSR:  0x%08x\r\n", SCB->CFSR );     //  +19 -> 57
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "BFAR:  0x%08x\r\n", SCB->BFAR );     //  +19 -> 76
+      pOff  = (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ) - pOff, "SHCSR: 0x%08x\r\n", excpt_SHCSR );   //  +19 -> 19
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "HFSR:  0x%08x\r\n", excpt_HFSR );    //  +19 -> 38
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "CFSR:  0x%08x\r\n", excpt_CFSR );    //  +19 -> 57
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "BFAR:  0x%08x\r\n", excpt_BFAR );    //  +19 -> 76
    }
    else
    {
