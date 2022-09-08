@@ -335,7 +335,7 @@ uint32_t DBG_CommandLine_EVL_UNIT_TESTING( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_dfwMonMode( uint32_t argc, char *argv[] );
 #endif
 
-#if 0  // RA6E1 Bob: This command was removed from original K24 code
+#if (  TM_HARDFAULT == 1 )
 static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] );
 #endif
 
@@ -855,8 +855,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( WRITE_KEY_ALLOWED != 0 )
    { "wkey",         DBG_CommandLine_writeKey ,       "Write specifed key with specified data" },
 #endif
-#if 0  // RA6E1 Bob: This command was removed from original K24 code
-   { "x",            DBG_CommandLine_hardfault,       "Force a write to flash; test fault handler" },
+#if (  TM_HARDFAULT == 1 )
+   { "hardfault",            DBG_CommandLine_hardfault,        "Test fault handler" },
 #endif
 #if ( SIMULATE_POWER_DOWN == 1 )
    { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
@@ -15729,16 +15729,61 @@ uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
    return 0;
 }
 #endif
-#if 0  // RA6E1 Bob: This command was removed from original K24 code
+
+#if (  TM_HARDFAULT == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_hardfault ( uint32_t argc, char *argv[] )
+
+   Purpose: This function is used to cause a hard fault for testing
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: This command will typically cause a vector to the Hardfault handler
+
+******************************************************************************/
 static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
 {
-   __iar_builtin_set_PRIMASK(1);
-   asm("SVC 03" );
-   __iar_builtin_set_PRIMASK(0);
-//   *(uint32_t *)0 = 0;
+
+   uint16_t command;
+   command = ( uint16_t )atoi( argv[1] );
+
+   if ( argc > 1 )
+   {
+      switch ( command )
+      {
+         case ( 1 ) :
+         {
+            // create an SVC hard fault for testing
+            __iar_builtin_set_PRIMASK(1);
+            asm("SVC 03" );
+            __iar_builtin_set_PRIMASK(0);
+            break;
+         }
+
+         //
+         // add other hard faults as needed for testing
+         //
+
+         default:
+         {
+            INFO_printf( "Command %d not implemented", command );
+            break;
+         }
+      }
+   }
+   else
+   {
+      INFO_printf( "USAGE: hardfault fault" );
+      INFO_printf( "fault: 1=SVC fault, 2=TBD ..." );
+   }
+
    return 0;
 }
-#endif // RA6E1 Bob: This command was removed from original K24 code
+#endif
 /*lint +esym(715,argc, argv, Arg0)  */
 
 /******************************************************************************

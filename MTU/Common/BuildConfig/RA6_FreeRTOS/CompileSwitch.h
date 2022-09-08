@@ -331,6 +331,7 @@
 #endif
 #define TM_RANDOM_NUMBER_GEN              0 /* Enable commands to test aclara random number generator */
 #define TM_EXT_FLASH_BUSY_TIMING          0 /* Measure time for busyCheck in dvr_extflash to receive a complete interrupt */
+#define TM_HARDFAULT                      1 /* Enable hardfault command for testing */
 #define TM_BL_TEST_COMMANDS               1 /* Enable the Bootloader Test Commands */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
