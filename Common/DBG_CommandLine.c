@@ -15763,6 +15763,20 @@ static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
             break;
          }
 
+         case ( 2 ) :
+         {
+            /* Enable the generation of a DIVBYZERO UsageFault when attempting to perform integer division by zero.*/
+            SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk;
+
+            volatile int x = 10;
+            volatile int y = 0;
+            volatile int result;
+            result = x / y;
+
+            (void) result;
+            break;
+         }
+
          //
          // add other hard faults as needed for testing
          //
