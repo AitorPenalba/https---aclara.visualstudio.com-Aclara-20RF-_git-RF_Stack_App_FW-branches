@@ -69,6 +69,9 @@
 #include "SM_Protocol.h"
 #include "SM.h"
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+#include "UART.h"
+#endif
 
 
 /*****************************************************************************
@@ -933,16 +936,11 @@ static void vRadio_PowerUp(void)
    si446x_reset();
 
    OS_TASK_Sleep(TEN_MSEC); // Give some time to radio to get all out of reset
-#if ( TM_BYPASS_SI4467_GPIP0_WAIT == 0 ) // TODO: RA6E1 Bob: Set to 0 for tempoaray code for Faiz to test cutting trace from SI4467_GPIO0 to the MCU
    // Monitor GPIO0 of radio 0 for power on reset
    while( RDO_0_GPIO0() == (uint32_t)BSP_IO_LEVEL_LOW  ) {
       INFO_printf("Waiting on radio 0 to get out of reset");
       OS_TASK_Sleep(TEN_MSEC);
    }
-#else
-   OS_TASK_Sleep( 2000 );
-   #warning "You have built a version of code that does not wait for the radio to come out of reset!!  Do not check it in this way!!"
-#endif // ( TM_BYPASS_SI4467_GPIP0_WAIT == 0 )
 #if ( DCU == 1 )
    // Monitor GPIO0 of radio 1 for power on reset
    while( RDO_1_GPIO0() == (uint32_t)LWGPIO_VALUE_LOW ) {
@@ -2603,9 +2601,9 @@ static uint8_t reverseByte(uint8_t val)
 void printHex ( char const *rawStr, const uint8_t *str, uint16_t num_bytes )
 {
    // Use MFG port
-#if ( USE_USB_MFG != 0 )
    uint32_t     i;
    char         pDst[2];
+#if ( USE_USB_MFG != 0 )
    // Print the raw string
    usb_puts( (char*)rawStr );
 
@@ -2617,7 +2615,7 @@ void printHex ( char const *rawStr, const uint8_t *str, uint16_t num_bytes )
    }
    usb_putc( '\n' );
 #else
-#if 0 //TODO: RA6E1 Bob: need to figure out why this was needed and map to different printf function
+#if ( RTOS_SELECTION == MQX_RTOS )
    MQX_FILE_PTR stdout_ptr;       /* mqx file pointer for UART  */
    stdout_ptr = fopen("ittya:", NULL);
 
@@ -2634,8 +2632,21 @@ void printHex ( char const *rawStr, const uint8_t *str, uint16_t num_bytes )
    // Close port
    (void)fflush( stdout_ptr );
    (void)fclose( stdout_ptr );
-#endif
-#endif
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   /* For FreeRTOS, we do not have the fopen() function for UART peripherals.  So we use UART_write instead */
+   const uint8_t CRLF[] = { '\r', '\n' };
+   (void)UART_write( UART_MANUF_TEST, (const uint8_t *)rawStr, strlen(rawStr) );
+   if ( str != NULL )
+   {
+      for (i=0; i<num_bytes; i++ )
+      {
+         ASCII_htoa((uint8_t*) pDst, str[i]);
+         (void)UART_write( UART_MANUF_TEST, (const uint8_t *)&pDst, sizeof(pDst) );
+      }
+   }
+   (void)UART_write( UART_MANUF_TEST, (const uint8_t *)&CRLF, sizeof(CRLF) );
+#endif // RTOS_SELECTION
+#endif // USE_USB_MFG
 }
 
 /***********************************************************************************************************************
