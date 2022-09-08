@@ -53,13 +53,9 @@ static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Ptr li
    bool retVal = (bool)false;
    OS_Linked_List_Element_Ptr pElement;
 
-   if( list == NULL || listElement == NULL )
+   if( ( list == NULL ) || ( listElement == NULL ) || ( 0 == list->size ) )
    {
       return retVal;
-   }
-   if ( 0 == list->size )
-   {
-      return ((bool)true);
    }
 
    pElement = list->Head;
@@ -129,7 +125,6 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
    {
       return;
    }
-
    OS_Linked_List_Element_Ptr pTail                = list->Tail;
    /* Update the Prev and Next of the new Element */
    ((OS_Linked_List_Element_Ptr)listElement)->NEXT = (OS_Linked_List_Element_Ptr)list;
