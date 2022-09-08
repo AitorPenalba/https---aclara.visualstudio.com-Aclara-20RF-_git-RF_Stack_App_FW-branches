@@ -2,7 +2,7 @@
 
    Filename: Linked_list.c
 
-   Global Designator:
+   Global Designator: OS_LINKEDLIST_
 
    Contents:
 
@@ -21,7 +21,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-
 
 /* CONSTANTS */
 
@@ -58,10 +57,12 @@ static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Ptr li
    {
       return retVal;
    }
+   if ( 0 == list->size )
+   {
+      return ((bool)true);
+   }
 
    pElement = list->Head;
-   if ( 0 == list->size )
-      return ((bool)true);
 
    for(uint32_t i = 0; (i < list->size) ; i++ )
    {
@@ -130,10 +131,11 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
    }
 
    OS_Linked_List_Element_Ptr pTail                = list->Tail;
+   /* Update the Prev and Next of the new Element */
    ((OS_Linked_List_Element_Ptr)listElement)->NEXT = (OS_Linked_List_Element_Ptr)list;
    ((OS_Linked_List_Element_Ptr)listElement)->PREV = pTail;
+   /* Update the Next of the new Tail, Prev is already pointing to the List, hence no need to update it. */
    pTail->NEXT    = ((OS_Linked_List_Element_Ptr)listElement);
-   list->Tail     = ((OS_Linked_List_Element_Ptr)listElement);
    list->size++;
 #endif
 }
@@ -171,6 +173,7 @@ bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listE
       list->size++;
       retVal = (bool)true;
    }
+
    return retVal;
 #endif
 }
@@ -227,24 +230,20 @@ void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement )
 #if( RTOS_SELECTION == MQX_RTOS )
    OS_QUEUE_Next ( OS_QUEUE_Handle) list, listElement );
 #elif( RTOS_SELECTION == FREE_RTOS )
-   if ( (NULL == list) ||  (NULL ==listElement) )
+   if ( (NULL == list) ||  (NULL == listElement) )
    {
       return (NULL);
    }
    else
    {
-#if 0  // TODO: RA6E1: Remove once verified
-      return ((OS_Linked_List_Element *) listElement)->NEXT;
-#else
-      OS_Linked_List_Element *next_ptr;
-      next_ptr = ((OS_Linked_List_Element *) listElement)->NEXT;
+      OS_Linked_List_Element *next_ptr = ((OS_Linked_List_Element *) listElement)->NEXT;
+
       if( next_ptr == (OS_Linked_List_Element *) (( void *) list) )
       {
          next_ptr = NULL;
       }
 
       return (next_ptr);
-#endif
    }
 #endif
 }
@@ -364,140 +363,3 @@ void OS_LINKEDLIST_Test( void )
 
 }
 #endif
-
-//
-////******************************************************************************
-// *
-// * Function name: OS_QUEUE_Put
-// *
-// * Purpose: Atomically put an element at the end of the queue.
-// *
-// * Arguments: Pointers to the queue and the element
-// *
-// * Returns: -
-// *
-// * Notes: This function temporarily increases the priority of the calling thread
-// *        to ensure that priority inversion doesn't occur.
-// *
-// *****************************************************************************/
-//void OS_QUEUE_Put (OS_LIST_Obj *Queue, void *Elem)
-//{
-//
-//
-//   struct sched_param old, new;
-//   int policy;
-//   OS_LIST_Obj *prev;
-//
-//   if (ALERT (NULL == Elem) || ALERT (Queue == NULL) ||
-//      ALERT (Queue->Prev == NULL) || ALERT (Queue->Lock == NULL)) {
-//      return ;
-//   }
-//
-//   prev = Queue->Prev;
-//
-//   if (pthread_getschedparam (pthread_self(), &policy, &old))
-//   {
-//    if (ALERT (EPERM == errno)) {
-//         return; /* XXX Return an error? */
-//      }
-//   }
-//
-//   /* XXX BUMP priority to prevent priority inversion, this can be removed once glibc implements priority inheritance in locks */
-//   new.__sched_priority = TSK_MAXPRI+1;
-//
-//   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &new))
-//   {
-//    if (ALERT (EPERM == errno)) {
-//         return; /* XXX Return an error? */
-//      }
-//   }
-//
-//   if (ALERT (bool_false == OS_LOCK_Lock (Queue->Lock, OS_WAIT_FOREVER))) {
-//      return; /* XXX Return an error? */
-//   }
-//
-//   ((OS_LIST_Obj *) Elem)->Lock = Queue->Lock;
-//   ((OS_LIST_Obj *) Elem)->Next = Queue;
-//   ((OS_LIST_Obj *) Elem)->Prev = prev;
-//   prev->Next = (OS_LIST_Obj *) Elem;
-//   Queue->Prev = (OS_LIST_Obj *) Elem ;
-////   OS_LOCK_Unlock (Queue->Lock);
-//
-//   if (pthread_setschedparam (pthread_self(), policy, &old))
-//   {
-//    if (ALERT (EPERM == errno)) {
-//         return; /* XXX Return an error? */
-//      }
-//   }
-//
-//}
-//
-//
-////******************************************************************************
-// *
-// * Function name: OS_QUEUE_Get
-// *
-// * Purpose: Get an element from the head of the queue
-// *
-// * Arguments: Pointer to the queue
-// *
-// * Returns: Pointer to the element, or NULL if an error occurred
-// *
-// * Notes: This function temporarily increases the priority of the calling thread
-// *        to ensure that priority inversion doesn't occur.
-// *
-// *****************************************************************************/
-//void *OS_QUEUE_Get (OS_LIST_Obj *Queue)
-//{
-//   struct sched_param old, new;
-//   int policy;
-//   OS_LIST_Obj *elem;
-//   OS_LIST_Obj *next;
-//
-//
-//   if (ALERT (Queue == NULL) || ALERT (Queue->Next == NULL) ||
-//      ALERT (Queue->Next->Next == NULL) || ALERT (Queue->Lock == NULL)) {
-//      return NULL;
-//  }
-//
-//   elem = Queue->Next;
-//   next = elem->Next;
-//   Queue->Next = next;
-//   next->Prev = Queue;
-//
-//   if (pthread_getschedparam (pthread_self(), &policy, &old))
-//   {
-//      if (EPERM != errno)
-//   perror("pthread_getschedparam"); /* XXX add error reporting */
-//      return NULL;
-//   }
-//
-//   /* XXX BUMP priority to prevent priority inversion, this can be removed once glibc implements priority inheritance in locks */
-//   new.__sched_priority = TSK_MAXPRI+1;
-//
-//   if (pthread_setschedparam (pthread_self (), SCHED_FIFO, &new))
-//   {
-//      if (EPERM != errno)
-//   perror ("pthread_setschedparam");
-//      return NULL;
-//   }
-//
-//   if (OS_LOCK_Lock (Queue->Lock, OS_WAIT_FOREVER))
-//   {
-//      Queue->Next = next;
-//      next->Prev = Queue;
-//      OS_LOCK_Unlock (Queue->Lock);
-//   }
-//   else
-//   {
-//      elem = NULL;
-//   }
-//
-//   if (pthread_setschedparam(pthread_self(), policy, &old)) {
-//      if (EPERM != errno)
-//   perror ("pthread_setschedparam");  /* XXX add error reporting */
-//      return NULL;
-//   }
-//
-//   return (elem);
-//}
