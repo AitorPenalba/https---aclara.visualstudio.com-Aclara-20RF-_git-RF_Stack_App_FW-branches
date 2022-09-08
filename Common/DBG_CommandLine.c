@@ -3526,7 +3526,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
    returnStatus_t retVal = eFAILURE;
    uint8_t numElementBeforeDeq;
    uint8_t numElementAfterDeq;
-   static OS_Linked_List_Element_Handle deqReturnElement;
+   static OS_Linked_List_Element_Ptr pDeqReturnElement;
 
    if ( argc == 1 )
    {
@@ -3535,9 +3535,9 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
       numElementBeforeDeq = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
 
       /* Dequeue elements from the list */
-      deqReturnElement = OS_LINKEDLIST_Dequeue( osLinkedListTestHandle );
+      pDeqReturnElement = OS_LINKEDLIST_Dequeue( osLinkedListTestHandle );
 
-      if (deqReturnElement == NULL)
+      if (pDeqReturnElement == NULL)
       {
          DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure. LinkedList is already NULL" );
          return ( uint32_t )retVal;
@@ -3555,7 +3555,6 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
       {
          DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
       }
-
    }
    else
    {
@@ -3656,14 +3655,14 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   static OS_Linked_List_Element_Handle headElement;
+   static OS_Linked_List_Element_Ptr pHeadElement;
    if ( argc == 1 )
    {
 
       /* Get Head elements from the list */
-      headElement = OS_LINKEDLIST_Head( osLinkedListTestHandle );
+      pHeadElement = OS_LINKEDLIST_Head( osLinkedListTestHandle );
 
-      if ( headElement != NULL )
+      if ( pHeadElement != NULL )
       {
          DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
@@ -3699,7 +3698,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
    uint8_t indexElement;
-   static OS_Linked_List_Element_Handle nextElement;
+   static OS_Linked_List_Element_Ptr pNextElement;
    if ( argc == 2 )
    {
       indexElement = ( uint32_t )atoi( argv[1] );
@@ -3712,9 +3711,9 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
       }
 
       /* Get next elements from the list */
-      nextElement = OS_LINKEDLIST_Next( osLinkedListTestHandle, &LinkedListdata[ indexElement ] );
+      pNextElement = OS_LINKEDLIST_Next( osLinkedListTestHandle, &LinkedListdata[ indexElement ] );
 
-      if ( nextElement != NULL )
+      if ( pNextElement != NULL )
       {
          DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;

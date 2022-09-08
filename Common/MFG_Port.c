@@ -22,19 +22,12 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "project.h"
 #include <math.h>
 #include <string.h>
-
-#include "project.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <fio.h>
-#endif
-
-#if ( MCU_SELECTED == RA6E1 )
-#include "hal_data.h"
 #endif
 #include "radio_hal.h"
 
@@ -45,7 +38,6 @@
 #include "SELF_test.h"
 #include "ascii.h"
 #include "buffer.h"
-
 #include "partition_cfg.h"
 #include "mode_config.h"
 #include "EVL_event_log.h"
@@ -499,7 +491,6 @@ static void MFGP_MacChannelSetsSRFN          ( uint32_t argc, char *argv[] );
 #if ( DCU == 1 )
 static void MFGP_MacChannelSetsSTAR          ( uint32_t argc, char *argv[] );
 #endif
-
 static void MFGP_CommandLine_Help            ( uint32_t argc, char *argv[] );
 static void MFGP_DeviceType                  ( uint32_t argc, char *argv[] );
 static void MFGP_DevicePartNumber            ( uint32_t argc, char *argv[] );
@@ -1176,12 +1167,6 @@ static const struct_CmdLineEntry * const cmdTables[ ( uint16_t )menuLastValid ] 
 #endif
 };
 static const char CRLF[] = { '\r', '\n' };
-
-/* TODO: RA6E1 Re-insert MFGP_dtlsServerCertificateSN as shown:
-   ,MFGP_dtlsNetworkMSSubject \
-   ,MFGP_dtlsServerCertificateSN \
-   ,MFGP_dtlsNetworkRootCA \
-  once DTLS is in place */
 //lint -e750    Lint is complaining about macro not referenced
 #define MFG_COMMON_CALLS \
    MFGP_CommandLine_Help \
@@ -1203,6 +1188,7 @@ static const char CRLF[] = { '\r', '\n' };
    ,MFGP_dtlsMfgSubject2 \
    ,MFGP_dtlsNetworkHESubject \
    ,MFGP_dtlsNetworkMSSubject \
+   ,MFGP_dtlsServerCertificateSN \
    ,MFGP_dtlsNetworkRootCA \
    ,MFGP_engBuEnabled \
    ,MFGP_engData1 \

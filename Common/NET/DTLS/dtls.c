@@ -24,9 +24,6 @@
 #if ( USE_DTLS == 1 )
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 #include "file_io.h"
 #include "DBG_SerialDebug.h"
@@ -37,7 +34,7 @@
 #include "EVL_event_log.h"
 #include "partition_cfg.h"
 #include "dvr_intFlash_cfg.h"
-#include "MFG_port.h"
+#include "MFG_Port.h"
 #include "pwr_task.h"
 #include "timer_util.h"
 #include "time_util.h"
@@ -61,7 +58,7 @@
 #include <wolfssl/wolfcrypt/asn.h>
 #include <wolfssl/quicksession.h>
 #include <wolfssl/wolfcrypt/logging.h>
-#include "App_Msg_Handler.h"
+#include "APP_MSG_Handler.h"
 #include "sys_busy.h"
 
 #if ( DCU == 1 )
@@ -3989,7 +3986,6 @@ static int32_t DtlsRfWrite( const char *pBuf, int32_t size )
    {
       /* This is an internal handshake or alert packet.  Add network parameters */
       result = NWK_DataRequest( ( uint8_t )UDP_DTLS_PORT, DTLS_RF_QOS, ( uint16_t )size, ( uint8_t* )pBuf, &dst_addr, &override, NULL, NULL );
-      OS_TASK_Sleep(1000); // TODO: RA6E1: Remove this once the MAC FrameManagement is fixed
       DTLS_CounterInc( eDTLS_IfOutNonApplicationPkts );
    }
 
