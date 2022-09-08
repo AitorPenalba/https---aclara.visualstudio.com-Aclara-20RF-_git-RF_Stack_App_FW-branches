@@ -331,6 +331,7 @@
 #endif
 #define TM_RANDOM_NUMBER_GEN              0 /* Enable commands to test aclara random number generator */
 #define TM_EXT_FLASH_BUSY_TIMING          0 /* Measure time for busyCheck in dvr_extflash to receive a complete interrupt */
+#define TM_BL_TEST_COMMANDS               1 /* Enable the Bootloader Test Commands */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */
@@ -344,7 +345,6 @@
 //#define TM_ENCRYPT_UNIT_TEST      /* Enable the Encryption Driver Unit Test Code */
 //#define TM_AES_UNIT_TEST          /* Enable the AES Unit Test Code */
 //#define TM_DTLS_UNIT_TEST         /* Enable the DTLS Unit Test Code */
-#define TM_BL_TEST_COMMANDS         /* Enable the Bootloader Test Commands */
 #endif
 /* These are now part of normal build   */
 #ifndef __BOOTLOADER
