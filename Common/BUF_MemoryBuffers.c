@@ -10,7 +10,7 @@
  * A product of
  * Aclara Technologies LLC
  * Confidential and Proprietary
- * Copyright 2013 Aclara.  All Rights Reserved.
+ * Copyright 2013 - 2022 Aclara.  All Rights Reserved.
  ***********************************************************************************************************************
  *
  * @author Benjamin Hammond
@@ -18,14 +18,11 @@
  **********************************************************************************************************************/
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include "project.h" // Added for RTOS_SELECTION macro. Can be used only with features.h
+#include "project.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h> /* Necessary for Interrupt disable/enable calls */
 #endif
-#include "os_aclara.h"
+#include "OS_aclara.h"
 #include "BUF_MemoryBuffers.h"
 
 /* #DEFINE DEFINITIONS */
