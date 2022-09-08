@@ -34,7 +34,7 @@
 /* FUNCTION PROTOTYPES */
 
 /* FUNCTION DEFINITIONS */
-#if 0  // TODO: RA6E1: Remove once verified
+
 /******************************************************************************
  *
  * Function name: verifyListElement
@@ -49,32 +49,33 @@
  * Notes: internal use only for linked list object
  *
  *****************************************************************************/
-static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle listElement)
+static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Ptr listElement)
 {
    bool retVal = (bool)false;
-   uint32_t  i, listSize; //loop variables
-   OS_Linked_List_Element_Handle tmp;
+   OS_Linked_List_Element_Ptr pElement;
 
    if( list == NULL || listElement == NULL )
    {
       return retVal;
    }
 
-   listSize = list->size;
-   tmp = list->NEXT->NEXT;
+   pElement = list->Head;
+   if ( 0 == list->size )
+      return ((bool)true);
 
-   for(i = 0; ( (i < listSize) && (tmp->NEXT != NULL)) ; i++ )
+   for(uint32_t i = 0; (i < list->size) ; i++ )
    {
-      if( tmp == listElement )
+      if( pElement == listElement )
       {
          retVal = (bool)true;
+         break;
       }
-      tmp = tmp->NEXT;
+      pElement = pElement->NEXT;
    }
 
    return retVal;
 }
-#endif
+
 /******************************************************************************
  *
  * Function name: OS_QUEUE_Create
@@ -85,10 +86,6 @@ static bool verifyListElement(OS_List_Handle list, OS_Linked_List_Element_Handle
  *
  * Returns: true: list object correctly initialized; false: invalid list object
  *
- * Notes: the head and tail of a list object are dummy elements,
- *       the head->NEXT always points to the first element in the queue
- *       the tail->PREV always points to the last element in the queue
- *
  *****************************************************************************/
 bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
 {
@@ -98,19 +95,13 @@ bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
 
    if (listHandle == NULL)
    {
-      return (false);     /* XXX KEL Add error logging */
+      return ((bool)false);
    }
-#if 0  // TODO: RA6E1: Remove once verified
-   listHandle->head->PREV = ((OS_Linked_List_Element_Handle)&(listHandle->head->NEXT));
-   listHandle->head->NEXT = ((OS_Linked_List_Element_Handle)&(listHandle->head->NEXT));
-   listHandle->tail->NEXT = ((OS_Linked_List_Element_Handle)&(listHandle->head->NEXT));
-   listHandle->tail->PREV = ((OS_Linked_List_Element_Handle)&(listHandle->head->NEXT));
-#else
-   listHandle->NEXT = (OS_Linked_List_Element_Handle)(void *)&(listHandle->NEXT);
-   listHandle->PREV = (OS_Linked_List_Element_Handle)(void *)&(listHandle->NEXT);
-#endif
+   listHandle->Head = (OS_Linked_List_Element_Ptr)(void *)&(listHandle->Head);
+   listHandle->Tail = (OS_Linked_List_Element_Ptr)(void *)&(listHandle->Head);
    listHandle->size = 0;
-   return (true);
+
+   return ((bool)true);
 #endif
 }
 
@@ -123,7 +114,7 @@ bool OS_LINKEDLIST_Create (OS_List_Handle listHandle )
  *
  * Arguments: Pointer to a list object, pointer to the list element
  *
- * Returns: -
+ * Returns: None
  *
  * Notes: Not thread-safe!
  *
@@ -137,16 +128,13 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
    {
       return;
    }
-#if 0  // TODO: RA6E1: Remove once verified
-   OS_Linked_List_Element_Handle tail_handle = &(list->tail);
-   ((OS_Linked_List_Element_Handle)listElement)->PREV = tail_handle->PREV;
-   ((OS_Linked_List_Element_Handle)listElement)->NEXT = tail_handle;
-   tail_handle->PREV->NEXT = (OS_Linked_List_Element_Handle)listElement;
-   tail_handle->PREV = listElement;
+
+   OS_Linked_List_Element_Ptr pTail                = list->Tail;
+   ((OS_Linked_List_Element_Ptr)listElement)->NEXT = (OS_Linked_List_Element_Ptr)list;
+   ((OS_Linked_List_Element_Ptr)listElement)->PREV = pTail;
+   pTail->NEXT    = ((OS_Linked_List_Element_Ptr)listElement);
+   list->Tail     = ((OS_Linked_List_Element_Ptr)listElement);
    list->size++;
-#else
-   OS_LINKEDLIST_Insert( list, ((void*)(&list->PREV->NEXT)), listElement );
-#endif
 #endif
 }
 
@@ -160,9 +148,7 @@ void OS_LINKEDLIST_Enqueue( OS_List_Handle list, void *listElement)
  *
  * Arguments: list, Pointer to an element already in the list, pointer to new element.
  *
- * Returns: -
- *
- * Notes: -
+ * Returns: bool
  *
  *****************************************************************************/
 bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listElement )
@@ -171,26 +157,17 @@ bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listE
    return OS_QUEUE_Insert(list, listPosition, listElement);
 #elif( RTOS_SELECTION == FREE_RTOS )
    bool retVal = (bool)false;
-   bool found = true; //(bool)false;
-#if 0  // TODO: RA6E1: Remove once verified
-   OS_Linked_List_Element_Handle tmp = listPosition;
+   bool found  = (bool)false;
 
-   //   found = verifyListElement(list, ( OS_Linked_List_Element_Handle ) listPosition);
-#endif
+   found = verifyListElement(list, ( OS_Linked_List_Element_Ptr ) listPosition);
    if( found )
    {
-#if 0  // TODO: RA6E1: Remove once verified
-      tmp->NEXT->PREV = ( OS_Linked_List_Element_Handle) listElement;
-      ((OS_Linked_List_Element_Handle) listElement)->NEXT = tmp->NEXT;
-      tmp->NEXT = ( OS_Linked_List_Element_Handle) listElement;
-      (( OS_Linked_List_Element_Handle)listElement)->PREV = tmp;
-#else
-      OS_Linked_List_Element_Handle nxt = ((OS_Linked_List_Element_Handle) listPosition)->NEXT;
-      ((OS_Linked_List_Element_Handle) listElement)->NEXT  = nxt;
-      ((OS_Linked_List_Element_Handle) listPosition)->NEXT = (OS_Linked_List_Element_Handle) listElement;
-      ((OS_Linked_List_Element_Handle) listElement)->PREV  = (OS_Linked_List_Element_Handle) listPosition;
-      nxt->PREV                                            = (OS_Linked_List_Element_Handle) listElement;
-#endif
+      OS_Linked_List_Element_Ptr nxt = ((OS_Linked_List_Element_Ptr) listPosition)->NEXT;
+      ((OS_Linked_List_Element_Ptr) listElement)->NEXT  = nxt;
+      ((OS_Linked_List_Element_Ptr) listPosition)->NEXT = (OS_Linked_List_Element_Ptr) listElement;
+      ((OS_Linked_List_Element_Ptr) listElement)->PREV  = (OS_Linked_List_Element_Ptr) listPosition;
+      nxt->PREV                                         = (OS_Linked_List_Element_Ptr) listElement;
+
       list->size++;
       retVal = (bool)true;
    }
@@ -206,9 +183,7 @@ bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listE
  *
  * Arguments: list object pointer, Pointer to element
  *
- * Returns: -
- *
- * Notes: -
+ * Returns: None
  *
  *****************************************************************************/
 void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
@@ -220,18 +195,17 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
    {
       return;
    }
-   bool found = true;//(bool)false;
-#if 0  // TODO: RA6E1: Remove once verified
-   //   found = verifyListElement(list, (OS_Linked_List_Element_Handle) listElement);
-#endif
+   bool found = (bool)false;
+
+   found = verifyListElement(list, (OS_Linked_List_Element_Ptr) listElement);
    if( found )
    {
       ((OS_Linked_List_Element *) listElement)->PREV->NEXT = ((OS_Linked_List_Element *) listElement)->NEXT;
       ((OS_Linked_List_Element *) listElement)->NEXT->PREV = ((OS_Linked_List_Element *) listElement)->PREV;
       list->size--;
-//      /*clear out the pointers for the removed element*/
-//      ((OS_Linked_List_Element *) listElement)->PREV = NULL;
-//      ((OS_Linked_List_Element *) listElement)->NEXT = NULL;
+      /*clear out the pointers for the removed element*/
+      ((OS_Linked_List_Element *) listElement)->PREV = NULL;
+      ((OS_Linked_List_Element *) listElement)->NEXT = NULL;
    }
 #endif
 }
@@ -243,12 +217,9 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list,void *listElement )
  *
  * Purpose: Get the next element in the list
  *
- * Arguments: Pointer to the queue
-              Preceding element
+ * Arguments: Pointer to the queue Preceding element
  *
  * Returns: the next element in the list
- *
- * Notes: -
  *
  *****************************************************************************/
 void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement )
@@ -288,8 +259,6 @@ void *OS_LINKEDLIST_Next (OS_List_Handle list, void *listElement )
  *
  * Returns: Pointer to the first element in the list
  *
- * Notes: -
- *
  *****************************************************************************/
 void *OS_LINKEDLIST_Dequeue (OS_List_Handle list )
 {
@@ -299,24 +268,18 @@ void *OS_LINKEDLIST_Dequeue (OS_List_Handle list )
    if ( NULL == list || list->size == 0 ) {
       return NULL;
    }
-   OS_Linked_List_Element *  handle;
-#if 0  // TODO: RA6E1: Remove once verified
-   handle = list->head->NEXT;
-   list->head->NEXT = handle->NEXT;
-   list->head->NEXT->PREV = &(list->head);
-#else
-   handle = list->NEXT->NEXT;
-   OS_Linked_List_Element *prev_ptr = list->PREV->PREV;
-   OS_Linked_List_Element *nxt_ptr = list->NEXT->NEXT;
+
+   OS_Linked_List_Element *element  = list->Head;
+   OS_Linked_List_Element *prev_ptr = element->PREV;
+   OS_Linked_List_Element *nxt_ptr  = element->NEXT;
    prev_ptr->NEXT  = nxt_ptr;
    nxt_ptr->PREV   = prev_ptr;
-#endif
    list->size--;
    /*clear out the pointers for the removed element*/
-   //  handle->NEXT = NULL;
-   //  handle->PREV = NULL;
+   element->NEXT = NULL;
+   element->PREV = NULL;
 
-   return ((void *) (handle));
+   return ((void *) (element));
 #endif
 }
 
@@ -330,8 +293,6 @@ void *OS_LINKEDLIST_Dequeue (OS_List_Handle list )
  * Arguments: Given element
  *
  * Returns: Pointer to the next element.
- *
- * Notes: -
  *
  *****************************************************************************/
 uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list )
@@ -347,7 +308,6 @@ uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list )
 #endif
 }
 
-
 /******************************************************************************
  *
  * Function name: OS_QUEUE_Head
@@ -358,8 +318,6 @@ uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list )
  *
  * Returns: Pointer to the first element in the list
  *
- * Notes: -
- *
  *****************************************************************************/
 void *OS_LINKEDLIST_Head ( OS_List_Handle list )
 {
@@ -369,12 +327,14 @@ void *OS_LINKEDLIST_Head ( OS_List_Handle list )
    if ( NULL == list  || list->size == 0 ){
       return NULL;
    }
-   return ((void *) list->NEXT);
+   return ((void *) list->Head);
 #endif
 }
 
 
- /*****************************************************************************/
+ /*****************************************************************************
+                              TEST MODE CODE
+*****************************************************************************/
 #if( TM_LINKED_LIST == 2)
 static OS_List_Obj testList;
 static OS_List_Handle handle = &testList;
@@ -384,7 +344,7 @@ static OS_Linked_List_Element data3;
 static OS_Linked_List_Element data4;
 static OS_Linked_List_Element data5;
 static uint16_t num;
-static OS_Linked_List_Element_Handle tmp;
+static OS_Linked_List_Element_Ptr tmp;
 
 void OS_LINKEDLIST_Test( void )
 {

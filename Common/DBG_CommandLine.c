@@ -1353,7 +1353,7 @@ uint32_t DBG_CommandLine_Help ( uint32_t argc, char *argv[] )
          DBG_printf( "[M]%30s: %s", CmdLineEntry->pcCmd, CmdLineEntry->pcHelp );
          OS_TASK_Sleep( TEN_MSEC );
       }
-      
+
       CmdLineEntry++;
    } /* end while() */
    return ( 0 );
@@ -3098,9 +3098,9 @@ uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
          /* write known data */
          dataIndex = 0;
          dfwOffset = 0;
-         
+
          CRC32_init(CRC32_DFW_START_VALUE, CRC32_DFW_POLY, eCRC32_RESULT_INVERT, &crcCfg);
-         
+
          while (dfwOffset < TEST_DATA_SIZE) {
             /* create known data block (increasing 32-bit values) */
             uint32_t* puint32Data = (uint32_t*) writeData;
@@ -3112,7 +3112,7 @@ uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
             }
             /* add to CRC32 calculation */
             dataCrc32 = CRC32_calc( &writeData[0], TEST_DATA_BLOCK_SIZE, &crcCfg );
-         
+
             /* write test data to DFW partition */
             retVal = PAR_partitionFptr.parWrite(dfwOffset, (uint8_t*) writeData, TEST_DATA_BLOCK_SIZE,  pTM_BL_Test_Part_ );
             if ( retVal != eSUCCESS)
@@ -3121,7 +3121,7 @@ uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
                break;
             }
             DBG_logPrintf( 'I', "Wrote %d bytes at offset 0x%08X in DFW partition", TEST_DATA_BLOCK_SIZE, dfwOffset );
-         
+
             dfwOffset += TEST_DATA_BLOCK_SIZE;
          };
       }
@@ -3145,7 +3145,7 @@ uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
 static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length, bool eraseOnly)
 {
    returnStatus_t retVal;
-   
+
    /* open DFW partition */
    retVal = PAR_partitionFptr.parOpen( &pTM_BL_Test_Part_, ePART_DFW_BL_INFO, 0L );
    if ( eSUCCESS == retVal)
@@ -3178,7 +3178,7 @@ static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length, bool eraseOnly
    {
       DBG_logPrintf( 'E', "Unable to open DFW BL INFO partition [%d]", retVal );
    }
-   
+
    return retVal;
 }
 
@@ -3526,7 +3526,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
    returnStatus_t retVal = eFAILURE;
    uint8_t numElementBeforeDeq;
    uint8_t numElementAfterDeq;
-   static OS_Linked_List_Element_Handle deqReturnElement;
+   static OS_Linked_List_Element_Ptr pDeqReturnElement;
 
    if ( argc == 1 )
    {
@@ -3535,9 +3535,9 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
       numElementBeforeDeq = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
 
       /* Dequeue elements from the list */
-      deqReturnElement = OS_LINKEDLIST_Dequeue( osLinkedListTestHandle );
+      pDeqReturnElement = OS_LINKEDLIST_Dequeue( osLinkedListTestHandle );
 
-      if (deqReturnElement == NULL)
+      if (pDeqReturnElement == NULL)
       {
          DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure. LinkedList is already NULL" );
          return ( uint32_t )retVal;
@@ -3555,7 +3555,6 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
       {
          DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
       }
-
    }
    else
    {
@@ -3656,14 +3655,14 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
 uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
-   static OS_Linked_List_Element_Handle headElement;
+   static OS_Linked_List_Element_Ptr pHeadElement;
    if ( argc == 1 )
    {
 
       /* Get Head elements from the list */
-      headElement = OS_LINKEDLIST_Head( osLinkedListTestHandle );
+      pHeadElement = OS_LINKEDLIST_Head( osLinkedListTestHandle );
 
-      if ( headElement != NULL )
+      if ( pHeadElement != NULL )
       {
          DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
@@ -3699,7 +3698,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
 {
    returnStatus_t retVal = eFAILURE;
    uint8_t indexElement;
-   static OS_Linked_List_Element_Handle nextElement;
+   static OS_Linked_List_Element_Ptr pNextElement;
    if ( argc == 2 )
    {
       indexElement = ( uint32_t )atoi( argv[1] );
@@ -3712,9 +3711,9 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
       }
 
       /* Get next elements from the list */
-      nextElement = OS_LINKEDLIST_Next( osLinkedListTestHandle, &LinkedListdata[ indexElement ] );
+      pNextElement = OS_LINKEDLIST_Next( osLinkedListTestHandle, &LinkedListdata[ indexElement ] );
 
-      if ( nextElement != NULL )
+      if ( pNextElement != NULL )
       {
          DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
          retVal = eSUCCESS;
@@ -3945,9 +3944,9 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
 
       if ( eSUCCESS == PAR_partitionFptr.parOpen( &pPTbl_, ( ePartitionName )part, 0L ) )
       {  //If this is NOT an internalFlash partition
-         if ( (0 != memcmp (pPTbl_->PartitionType.pDevice, &_sIntFlashType[0], sizeof( pPTbl_->PartitionType.pDevice ))) 
+         if ( (0 != memcmp (pPTbl_->PartitionType.pDevice, &_sIntFlashType[0], sizeof( pPTbl_->PartitionType.pDevice )))
 #ifdef TM_BL_TEST_COMMANDS
-              || (part == ePART_DFW_BL_INFO) 
+              || (part == ePART_DFW_BL_INFO)
 #endif
             )
          {

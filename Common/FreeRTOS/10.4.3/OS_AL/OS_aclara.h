@@ -234,9 +234,9 @@ typedef QueueHandle_t         OS_QUEUE_Obj, *OS_QUEUE_Handle;
 typedef EventGroupHandle_t    OS_EVNT_Obj,  *OS_EVNT_Handle;
 typedef struct OS_Linked_List_Element
 {
-   struct OS_Linked_List_Element * NEXT; //match MQX member names QUEUE_ELEMENT_STRUCT
-   struct OS_Linked_List_Element * PREV;
-} OS_Linked_List_Element, *OS_Linked_List_Element_Handle;
+   struct OS_Linked_List_Element *NEXT;
+   struct OS_Linked_List_Element *PREV;
+} OS_Linked_List_Element, *OS_Linked_List_Element_Ptr;
 
 typedef OS_Linked_List_Element OS_LINKED_LIST_STRUCT;
 
@@ -255,8 +255,8 @@ typedef struct
 
 typedef struct
 {
-  OS_Linked_List_Element  *NEXT;
-  OS_Linked_List_Element  *PREV;
+  OS_Linked_List_Element  *Head;
+  OS_Linked_List_Element  *Tail;
   uint32_t                size;
 } OS_List_Obj, *OS_List_Handle;
 
@@ -269,7 +269,6 @@ typedef struct
 } OS_MSGQ_Obj, *OS_MSGQ_Handle;
 
 typedef void (* TASK_FPTR)(void *);
-//typedef void QueueMsgPtr  void *;
 typedef struct
 {
    uint32_t         TASK_TEMPLATE_INDEX;  /* TODO: RA6: This should be an enum*/
