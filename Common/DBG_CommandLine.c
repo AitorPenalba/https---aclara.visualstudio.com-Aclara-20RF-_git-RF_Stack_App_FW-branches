@@ -15779,6 +15779,9 @@ static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
 
          //
          // add other hard faults as needed for testing
+         // see Renesas r11an0576ej0100-ra-exception-handling.zip project for examples
+         // execute_divide_by_zero(), execute_instructions_from_illegal_region(), execute_wdt_underflow()
+         // execute_stack_overflow()
          //
 
          default:
