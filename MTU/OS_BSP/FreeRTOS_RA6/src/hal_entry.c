@@ -51,6 +51,11 @@ void R_BSP_WarmStart (bsp_warm_start_event_t event)
        R_IOPORT_Open(&g_ioport_ctrl, g_ioport.p_cfg);
 
        PWRLG_BSP_Setup();
+
+       /* Enable these faults as early as possible so they can be detected and reported by the Exception Handler (HardFault) */
+       SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk  |
+                     SCB_SHCSR_BUSFAULTENA_Msk  |
+                     SCB_SHCSR_MEMFAULTENA_Msk;
        /* Aclara Added  -- End */
     }
 }

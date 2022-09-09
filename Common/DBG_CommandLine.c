@@ -335,7 +335,7 @@ uint32_t DBG_CommandLine_EVL_UNIT_TESTING( uint32_t argc, char *argv[] );
 static uint32_t DBG_CommandLine_dfwMonMode( uint32_t argc, char *argv[] );
 #endif
 
-#if 0  // RA6E1 Bob: This command was removed from original K24 code
+#if (  TM_HARDFAULT == 1 )
 static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] );
 #endif
 
@@ -395,7 +395,7 @@ static PartitionData_t const *pTM_IntFlashEncryptKeyPart_;                   /* 
 static PartitionData_t const *pTM_IntFlashDfwBlInfoPart_;                   /* Test Mode code's DFW BL Info partition */
 #endif // TM_INTERNAL_FLASH_TEST
 
-#ifdef TM_BL_TEST_COMMANDS
+#if ( TM_BL_TEST_COMMANDS == 1 )
 static PartitionData_t const *pTM_BL_Test_Part_;                            /* partition handle for testing */
 #endif
 
@@ -855,8 +855,8 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( WRITE_KEY_ALLOWED != 0 )
    { "wkey",         DBG_CommandLine_writeKey ,       "Write specifed key with specified data" },
 #endif
-#if 0  // RA6E1 Bob: This command was removed from original K24 code
-   { "x",            DBG_CommandLine_hardfault,       "Force a write to flash; test fault handler" },
+#if (  TM_HARDFAULT == 1 )
+   { "hardfault",            DBG_CommandLine_hardfault,        "Test fault handler" },
 #endif
 #if ( SIMULATE_POWER_DOWN == 1 )
    { "PowerDownTest",DBG_CommandLine_SimulatePowerDown,"Simulate Power Down to measure the Worst Case Power Down Time" },
@@ -893,7 +893,7 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #endif
    { "intflashtestclose",    DBG_CommandLine_IntFlash_ClosePartition,     "Close Partition for Test in Internal Flash" },
 #endif
-#ifdef TM_BL_TEST_COMMANDS
+#if ( TM_BL_TEST_COMMANDS == 1 )
    { "blwritetestimage",     DBG_CommandLine_BL_Test_Write_DFW_Image,   "Write known data (increasing 32-bit values) to external Flash DFW partition" },
    { "blwriteblinfo",        DBG_CommandLine_BL_Test_Write_BL_Info,     "Write test BL_INFO to data flash" },
    { "blclearblinfo",        DBG_CommandLine_BL_Test_Clear_BL_Info,     "Clear (0xFF) test BL_INFO in data flash" },
@@ -3061,7 +3061,7 @@ uint32_t DBG_CommandLine_IntFlash_ClosePartition( uint32_t argc, char *argv[] )
 }/* end DBG_CommandLine_IntFlash_ClosePartition() */
 #endif
 
-#ifdef TM_BL_TEST_COMMANDS
+#if ( TM_BL_TEST_COMMANDS == 1 )
 /*******************************************************************************
 
    Function name: DBG_CommandLine_BL_Test_Write_DFW_Image
@@ -3141,7 +3141,7 @@ uint32_t DBG_CommandLine_BL_Test_Write_DFW_Image( uint32_t argc, char *argv[] )
 }
 #endif
 
-#ifdef TM_BL_TEST_COMMANDS
+#if ( TM_BL_TEST_COMMANDS == 1 )
 static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length, bool eraseOnly)
 {
    returnStatus_t retVal;
@@ -3945,7 +3945,7 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
       if ( eSUCCESS == PAR_partitionFptr.parOpen( &pPTbl_, ( ePartitionName )part, 0L ) )
       {  //If this is NOT an internalFlash partition
          if ( (0 != memcmp (pPTbl_->PartitionType.pDevice, &_sIntFlashType[0], sizeof( pPTbl_->PartitionType.pDevice )))
-#ifdef TM_BL_TEST_COMMANDS
+#if ( TM_BL_TEST_COMMANDS == 1 )
               || (part == ePART_DFW_BL_INFO)
 #endif
             )
@@ -15738,16 +15738,78 @@ uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
    return 0;
 }
 #endif
-#if 0  // RA6E1 Bob: This command was removed from original K24 code
+
+#if (  TM_HARDFAULT == 1 )
+/******************************************************************************
+
+   Function Name: DBG_CommandLine_hardfault ( uint32_t argc, char *argv[] )
+
+   Purpose: This function is used to cause a hard fault for testing
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: This command will typically cause a vector to the Hardfault handler
+
+******************************************************************************/
 static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
 {
-   __iar_builtin_set_PRIMASK(1);
-   asm("SVC 03" );
-   __iar_builtin_set_PRIMASK(0);
-//   *(uint32_t *)0 = 0;
+
+   uint16_t command;
+   command = ( uint16_t )atoi( argv[1] );
+
+   if ( argc > 1 )
+   {
+      switch ( command )
+      {
+         case ( 1 ) :
+         {
+            // create an SVC hard fault for testing
+            __iar_builtin_set_PRIMASK(1);
+            asm("SVC 03" );
+            __iar_builtin_set_PRIMASK(0);
+            break;
+         }
+
+         case ( 2 ) :
+         {
+            /* Enable the generation of a DIVBYZERO UsageFault when attempting to perform integer division by zero.*/
+            SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk;
+
+            volatile int x = 10;
+            volatile int y = 0;
+            volatile int result;
+            result = x / y;
+
+            (void) result;
+            break;
+         }
+
+         //
+         // add other hard faults as needed for testing
+         // see Renesas r11an0576ej0100-ra-exception-handling.zip project for examples
+         // execute_divide_by_zero(), execute_instructions_from_illegal_region(), execute_wdt_underflow()
+         // execute_stack_overflow()
+         //
+
+         default:
+         {
+            INFO_printf( "Command %d not implemented", command );
+            break;
+         }
+      }
+   }
+   else
+   {
+      INFO_printf( "USAGE: hardfault fault" );
+      INFO_printf( "fault: 1=SVC fault, 2=TBD ..." );
+   }
+
    return 0;
 }
-#endif // RA6E1 Bob: This command was removed from original K24 code
+#endif
 /*lint +esym(715,argc, argv, Arg0)  */
 
 /******************************************************************************

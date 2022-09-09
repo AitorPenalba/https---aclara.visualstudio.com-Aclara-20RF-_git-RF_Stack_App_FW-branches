@@ -544,6 +544,13 @@ static void expt_frm_dump(void const * ext_frm_ptr)
       pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );
       pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );
       pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );
+
+      /* Additional debug registers (SHCSR, HFSR, CFSR, and BFAR) can be printed using the RA6E1 code below as an example.
+      ** Use the K24 macros:  SCB_SHCSR, SCB_HFSR, SCB_CFSR, and SCB_BFAR to access the registers instead of SCB->register_name
+      ** Note: 3 additional faults must be enabled at K24 startup (see RA6E1 hal_entry: R_BSP_WarmStart() for an example),
+      ** e.g. add the line below:
+      **    SCB_SHCSR |= SCB_SHCSR_USGFAULTENA_MASK | SCB_SHCSR_BUSFAULTENA_MASK | SCB_SHCSR_MEMFAULTENA_MASK;
+      */
    }
    else
    {
@@ -588,21 +595,78 @@ static void expt_frm_dump(void const * ext_frm_ptr)
       "SysTick"
    };
 
-   char                             pBuf[ 192 ];   /* Local buffer for printout  */
-   uint16_t                         pOff;          /* offset into pBuf/length    */
+   char        pBuf[ 192 ];                     /* Local buffer for printout  (must be < DEBUG_MSG_SIZE and < print size below) */
+   uint16_t    pOff;                            /* offset into pBuf/length    */
+   uint32_t    excpt_SHCSR = SCB->SHCSR;        /* capture SCB registers for printing later */
+   uint32_t    excpt_HFSR  = SCB->HFSR;
+   uint32_t    excpt_CFSR  = SCB->CFSR;
+   uint32_t    excpt_BFAR  = SCB->BFAR;
 
    uint32_t excpt_num = __get_PSR() & 0x1FF;
    if(excpt_num < 16)
-   {
-      pOff =  (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ), "\r\nExcpt [%s] in TASK 0x%x\r\n", expt_name[excpt_num] , OS_TASK_GetId() );
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R0:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr ) );
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R1:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 1 ) );
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R2:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 2 ) );
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R3:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 3 ) );
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R12: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 4 ) );
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );
+   {                                                                                                                                                  //  chars -> running total
+      pOff =  (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ), "\r\nExcpt [%s] in TASK 0x%x\n", expt_name[excpt_num] , OS_TASK_GetId() );  // 23 + 5(max task ID) + 13(max string) -> 41
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R0:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr ) );                   // +17 -> 58
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R1:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 1 ) );               // +17 -> 75
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R2:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 2 ) );               // +17 -> 92
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R3:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 3 ) );               // +17 -> 109
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R12: 0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 4 ) );               // +17 -> 126
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );               // +17 -> 143
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );               // +17 -> 160
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );               // +17 -> 177
+      printf( "%s", pBuf );
+
+      /* print additional register debug data
+       * System Handler Control and State Register:
+       *    bit  Error
+       *     0   MEMFAULTACTb (typically interested in this one)
+       *     1   BUSFAULTACTb (typically interested in this one)
+       *     3   USGFAULTACTb (typically interested in this one)
+       *     7   SVCALLACTb
+       *     8   MONITORACTb
+       *    10   PENDSVACTb
+       *    11   SYSTICKACTb
+       *    12   USGFAULTPENDEDa
+       *    13   MEMFAULTPENDEDa
+       *    14   BUSFAULTPENDED
+       *    15   SVCALLPENDEDa
+       *    16   MEMFAULTENA (should be set)
+       *    17   BUSFAULTENA (should be set)
+       *    18   USGFAULTENA (should be set)
+       * Hard Fault Status Register:
+       *    bit  Error
+       *     0
+       *     1   VECTTBL  - Vector table read error
+       *    30   FORCED   - Escalated exception priority to a Hard Fault (typically due to a SVCall when interrupts disabled)
+       *    31   DEBUGEVT - Debug Event
+       * Configurable Fault Status Register:
+       *    bit  Error
+       *     0   IACCVIOL        MemManage - Instruction Access Violation
+       *     1   DACCVIOL        MemManage - Data Access Violation
+       *     3   MUNSTKERR       MemManage - derived fault occurred on exception return
+       *     4   MSTKERR         MemManage - derived fault occurred on exception entry
+       *     5   MLSPERR         MemManage - fault occurred during FP lazy state preservation
+       *     7   MMARVALID       MemManage - MMAR has valid contents
+       *     8   IBUSERR         BusFault  - A bus fault on an instruction prefetch has occurred
+       *     9   PRECISERR       BusFault  - Precise data access error has occurred
+       *    10   IMPRECISERR     BusFault  - Imprecise data access error has occurred
+       *    11   UNSTKERR        BusFault  - derived fault occurred on exception return
+       *    12   STKERR          BusFault  - derived fault occurred on exception entry
+       *    13   LSPERR          BusFault  - bus fault occurred during FP lazy state preservation
+       *    15   BFARVALID       BusFault  - BFAR has valid contents
+       *    16   UNDEFINSTR      UsageFault- Undefined instruction
+       *    17   INVSTATE        UsageFault- Instruction executed with invalid EPSR.T or EPSR.IT field
+       *    18   INVPC           UsageFault- Integrity check error on EXC_RETURN
+       *    19   NOCP            UsageFault- CoProcessor access
+       *    24   UNALIGNED       UsageFault- Unaligned access
+       *    25   DIVBYZERO       UsageFault- Divide by zero
+       * Bus Fault Address - ONLY valid if BFARVALID set
+       */
+                                                                                                                     // chars -> running total
+      pOff  = (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ) - pOff, "SHCSR: 0x%08x\n", excpt_SHCSR );   //  +19 -> 19
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "HFSR:  0x%08x\n", excpt_HFSR );    //  +19 -> 38
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "CFSR:  0x%08x\n", excpt_CFSR );    //  +19 -> 57
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "BFAR:  0x%08x\n", excpt_BFAR );    //  +19 -> 76
    }
    else
    {
@@ -621,7 +685,7 @@ void HardFault_Handler( void )
    void * expt_frm_ptr = (void *)__get_PSP();
    expt_frm_dump(expt_frm_ptr);
 }
-#endif // ( RTOS_SELECTION == MQX_RTOS )
+#endif // RTOS_SELECTION
 
 /***********************************************************************************************************************
  *
