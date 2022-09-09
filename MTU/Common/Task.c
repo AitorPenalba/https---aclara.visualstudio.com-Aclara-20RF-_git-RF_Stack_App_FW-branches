@@ -605,15 +605,15 @@ static void expt_frm_dump(void const * ext_frm_ptr)
    uint32_t excpt_num = __get_PSR() & 0x1FF;
    if(excpt_num < 16)
    {                                                                                                                                                  //  chars -> running total
-      pOff =  (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ), "\r\nExcpt [%s] in TASK 0x%x\r\n", expt_name[excpt_num] , OS_TASK_GetId() );  // 23 + 5(max task ID) + 13(max string) -> 41
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R0:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr ) );                   // +17 -> 58
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R1:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 1 ) );               // +17 -> 75
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R2:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 2 ) );               // +17 -> 92
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R3:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 3 ) );               // +17 -> 109
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R12: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 4 ) );               // +17 -> 126
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );               // +17 -> 143
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );               // +17 -> 160
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\r\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );               // +17 -> 177
+      pOff =  (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ), "\r\nExcpt [%s] in TASK 0x%x\n", expt_name[excpt_num] , OS_TASK_GetId() );  // 23 + 5(max task ID) + 13(max string) -> 41
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R0:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr ) );                   // +17 -> 58
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R1:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 1 ) );               // +17 -> 75
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R2:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 2 ) );               // +17 -> 92
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R3:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 3 ) );               // +17 -> 109
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R12: 0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 4 ) );               // +17 -> 126
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );               // +17 -> 143
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );               // +17 -> 160
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );               // +17 -> 177
       printf( "%s", pBuf );
 
       /* print additional register debug data
@@ -663,10 +663,10 @@ static void expt_frm_dump(void const * ext_frm_ptr)
        * Bus Fault Address - ONLY valid if BFARVALID set
        */
                                                                                                                      // chars -> running total
-      pOff  = (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ) - pOff, "SHCSR: 0x%08x\r\n", excpt_SHCSR );   //  +19 -> 19
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "HFSR:  0x%08x\r\n", excpt_HFSR );    //  +19 -> 38
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "CFSR:  0x%08x\r\n", excpt_CFSR );    //  +19 -> 57
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "BFAR:  0x%08x\r\n", excpt_BFAR );    //  +19 -> 76
+      pOff  = (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ) - pOff, "SHCSR: 0x%08x\n", excpt_SHCSR );   //  +19 -> 19
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "HFSR:  0x%08x\n", excpt_HFSR );    //  +19 -> 38
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "CFSR:  0x%08x\n", excpt_CFSR );    //  +19 -> 57
+      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "BFAR:  0x%08x\n", excpt_BFAR );    //  +19 -> 76
    }
    else
    {
