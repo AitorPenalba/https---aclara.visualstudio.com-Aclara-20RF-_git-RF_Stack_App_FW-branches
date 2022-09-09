@@ -522,30 +522,17 @@ void STRT_StartupTask ( taskParameter )
       }
    }
    //vRadio_Init(0);  // This is a test code
-#if 1 // TODO: RA6E1 Bob: this is temporary code to turn on an LED connected to pin P301 using high drive capacity
    if ( initSuccess_ )
    {
-#if ( TM_DELAY_FOR_TACKED_ON_LED == 1 )
-      OS_TASK_Sleep(2000);
-#endif
       TEST_LED_TACKON_ON; /* Drive the pin for a tacked-on LED high with high drive strength */
-#if ( TM_DELAY_FOR_TACKED_ON_LED == 1 )
-      OS_TASK_Sleep(2000);
-#endif
       TEST_LED_TACKON_OFF; /* Turn off the tacked-on LED */
    }
-#endif
 
    OS_TASK_Create_All(initSuccess_);   /* Start all of the tasks that were not auto started */
-#if 1 // TODO: RA6E1 Bob: this is temporary code to turn on an LED connected to pin P301 using high drive capacity
    if ( initSuccess_ )
    {
-#if ( TM_DELAY_FOR_TACKED_ON_LED == 1 )
-      OS_TASK_Sleep(2000);
-#endif
       TEST_LED_TACKON_ON; /* Drive the pin for a tacked-on LED high with high drive strength */
    }
-#endif
 
    if (!initSuccess_)
    {
