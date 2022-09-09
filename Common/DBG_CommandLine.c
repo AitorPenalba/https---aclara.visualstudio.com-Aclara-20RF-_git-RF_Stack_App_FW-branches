@@ -13498,13 +13498,16 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static ports_s  portPins, ports = { '_', '_', '_', '_', '_', '_', '_', '_' };
    OS_TICK_Struct  time1, time2;
    uint32_t        TimeDiff;
-   static float    lowestCapVoltage = 9.99;
+   OS_TASK_id      tidFilter;
 #else
    static uint16_t start = 0;
    static uint16_t end   = 0;
    static uint16_t step  = 0;
    static uint8_t  boost = 0;
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+   static float    lowestCapVoltage = 9.99;
+#endif
 
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    static bool     listFreqs = (bool)false;
@@ -13532,6 +13535,8 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
          DBG_printf( "   min    med    max     avg stddev    P90    P95    P99   P995   P999");
 #else
+         tidFilter = DBG_GetTaskFilter();           /* Save the debug filtering task id in case filtering is on */
+         (void)DBG_SetTaskFilter( (OS_TASK_id)999 ); /* Turn off debug output from everything except for DBG task */
          if ( listFreqs ) {
             DBG_printf( "\r\nFrequency   min    med    max     avg stddev    P90    P95    P99   P995   P999 'noiseband %d %d %d %d %d %d %d %d %d' "
                         "'rSPI:%c rSDN:%c rCS:%c rOSC:%c rGPIO:%c JTAG:%c Unused:%c Meter:%c' 'lowestCap=%d.%02dV'"
@@ -13591,7 +13596,9 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
             }
             OS_TASK_Sleep( 1 );
          }
-
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+         (void)DBG_SetTaskFilter( tidFilter ); /* Restore the task id of for debug filtering (typically 0 = off) */
+#endif
          // Free buffers
          free( workBuf );
          workBuf = NULL;
@@ -14126,6 +14133,8 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       HMC_DISP_SetContinuousUpdate(); /* This will cause HMC_display to continuously update the meter's LCD */
       HMC_DISP_UpdateDisplayBuffer( HMC_DISP_MSG_NOISEBAND, HMC_DISP_POS_PD_LCD_MSG ); //Update the Display
    }
+   tidFilter = DBG_GetTaskFilter();           /* Save the debug filtering task id in case filtering is on */
+   (void)DBG_SetTaskFilter( (OS_TASK_id)999 ); /* Turn off debug output from everything except for DBG task */
 #else
    DBG_logPrintf( 'R', "noiseband start" );
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
@@ -14144,12 +14153,12 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       CAPTURE_TIME(0); /* Get the starting time */
       PHY_Lock();      // Function will not return if it fails
       CAPTURE_TIME(1); /* Measure duration of PHY_Lock */
-#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
 #else
       float lv = RADIO_Get_RSSI( radioNum, i, workBuf, nSamples, samplingRate, boost);
       if ( lv < lowestCapVoltage ) lowestCapVoltage = lv;
-#endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
+#endif // ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       CAPTURE_TIME(2); /* Measure duration of the RSSI vector acquisition */
       PHY_Unlock();    // Function will not return if it fails
       CAPTURE_TIME(3); /* Measure duration of the PHY_Unlock */
@@ -14223,6 +14232,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       (void)OS_TASK_Set_Priority( pTskName_Print, oldTaskPriorityPRN );
       (void)OS_TASK_Set_Priority( pTskName_Dbg,   oldTaskPriorityDBG );
    }
+   (void)DBG_SetTaskFilter( tidFilter ); /* Restore the task id of for debug filtering (typically 0 = off) */
    #if ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
    DBG_printf( "Noiseband TOTALS:    Lock %10llu RSSI %10llu Unlock %10llu Qsort %10llu Stats %10llu Tabulate %10llu PAUSE %10llu",
                    totals[0], totals[1], totals[2], totals[3], totals[4], totals[5], totals[6] );
