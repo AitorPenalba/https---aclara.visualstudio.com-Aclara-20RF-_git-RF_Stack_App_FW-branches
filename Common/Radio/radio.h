@@ -190,7 +190,7 @@ uint32_t RADIO_Status_Get(uint8_t radioNum, uint8_t *state, uint8_t *int_pend,  
 float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uint16_t samplingRate);
 void      RADIO_Set_SyncTime(uint8_t radioNum, TIMESTAMP_t syncTime, uint32_t syncTimeCYCCNT);
 #endif
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
 void      RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSamples, uint16_t rate, uint8_t boost);
 #else
 float     RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSamples, uint16_t rate, uint8_t boost);

@@ -622,7 +622,7 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
       }
       result = ADC1_RA;
    }
-#endif
+#endif // USE_LWADC
 #elif ( MCU_SELECTED == RA6E1 )
    adc_status_t status;
 
@@ -635,7 +635,7 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
    }
    /* Read converted data. */
    (void)R_ADC_Read( &g_adc0_ctrl, (adc_channel_t)adc_source_adx, &result );
-#endif
+#endif // MCU_SELECTED
    OS_MUTEX_Unlock(&intAdcMutex_);
 
    /* Convert the raw value to voltage (voltage = (Value / ADC_ValueMax) * Vref) */
@@ -644,7 +644,7 @@ static float ADC_Get_Ch_Voltage ( uint32_t adc_source_adx )
 #elif ( MCU_SELECTED == RA6E1 )
    /* ADC's resolution is 12bit */
    voltage = ( ( ( float )result / 4095.0f ) * 3.3f );
-#endif
+#endif // MCU_SELECTED
    return ( voltage );
 }/* end ADC_Get_Ch_Voltage () */
 

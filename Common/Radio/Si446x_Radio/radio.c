@@ -5165,7 +5165,7 @@ void RADIO_Set_SyncError(uint8_t err)
    Reentrant Code: No
 
  **********************************************************************************************************************/
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
 void RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSamples, uint16_t rate, uint8_t boost)
 #else
 float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSamples, uint16_t rate, uint8_t boost)
@@ -5181,7 +5181,7 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
    (void)boost;
 #endif
    union si446x_cmd_reply_union Si446xCmd;
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
    float lowestCapVoltage = 9.99;
 #endif
    // Stop radio
@@ -5200,25 +5200,26 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
                            SI446X_CMD_START_RX_ARG_NEXT_STATE3_RXINVALID_STATE_ENUM_REMAIN );
 
 #if ( EP == 1 )
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
    fSuperCapV = ADC_Get_SC_Voltage();
-   if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
+   if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV; /* Capture lowest super-cap voltage */
 #endif
    if ( boost ) {
-      // Turn on boost
-      PWR_USE_BOOST();
-
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       // Get voltage
       fSuperCapV = ADC_Get_SC_Voltage();
 #endif
       // Make sure the capacitor voltage is high enough to compute noise estimate with boost turned on.
       if ( fSuperCapV < SUPER_CAP_MIN_VOLTAGE ) {
-
          PWR_USE_LDO();
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
          INFO_printf("vf %u", (uint32_t)(fSuperCapV*100));
 #endif
+      }
+      else
+      {
+         // Super-cap voltage is sufficiently high, turn on boost
+         PWR_USE_BOOST();
       }
    }
 #endif
@@ -5232,12 +5233,12 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
       buf[i] = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
    }
 #if ( EP == 1 )
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
    fSuperCapV = ADC_Get_SC_Voltage();
    if ( fSuperCapV < lowestCapVoltage ) lowestCapVoltage = fSuperCapV;
 #endif
    if ( boost ) {
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 0 )
       // Get voltage
       fSuperCapV = ADC_Get_SC_Voltage();
 #endif
@@ -5266,7 +5267,7 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
          buf[i] = (uint8_t)tempRSSI;
       }
    }
-#if ( NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
+#if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
    return ( lowestCapVoltage );
 #endif
 }
