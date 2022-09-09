@@ -64,7 +64,6 @@ static void rtc_time_get( rtc_time_primitive *time);
 static void rtc_time_set( rtc_time_primitive *time);
 #endif   //#if ( MCU_SELECTED == RA6E1 )
 
-uint32_t             SecTemp      = 0;
 
 /* FUNCTION DEFINITIONS */
 #if ( MCU_SELECTED == RA6E1 )
@@ -415,7 +414,6 @@ void RTC_ConfigureAlarm( uint32_t seconds )
 
    rtc_time_get( &time );        // Get current value of the Registers
    time.BCount.Word += seconds;  // Add the time delay
-   SecTemp = time.BCount.Word;
    R_RTC->BCNT0AR   = time.BCount.Byte[0];
    R_RTC->BCNT1AR   = time.BCount.Byte[1];
    R_RTC->BCNT2AR   = time.BCount.Byte[2];

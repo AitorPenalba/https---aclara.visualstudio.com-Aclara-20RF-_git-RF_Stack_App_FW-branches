@@ -220,8 +220,6 @@ static bool      _nuDST_TimeChanged;                     /* System time changed 
 //static uint32_t  CYCdiff=0;
 //End TODO
 extern uint32_t  DMAint;
-uint8_t _timeSysSemPendSuccess = 0;
-uint32_t  semTestCount = 0;
 #endif
 
 static uint32_t _ticTocCntr = 0;
@@ -2220,13 +2218,7 @@ void TIME_SYS_HandlerTask( taskParameter )
       /* Wait for the semaphore. If running off power line, this semaphore will be posted every half cycle otherwise use
          timeout functionality to run system time.  For Aclara-RF, this semaphore will be posted at twice the rate of
          system clock */
-//     if( _timeSysSemPendSuccess == 0 )
-//     {
-//     _timeSysSemPendSuccess = 1;
-//     semTestCount = 0;
-//     }
       (void)OS_SEM_Pend( &_timeSysSem, OS_WAIT_FOREVER );
-      semTestCount--;
 #if ( DCU == 1 )
       if (VER_getDCUVersion() != eDCU2) {
          // Copy current clock state
@@ -2540,16 +2532,6 @@ void vApplicationTickHook()
    if ( _timeSysSemCreated == (bool)true )
    {
        OS_SEM_Post_fromISR( &_timeSysSem );
-       semTestCount++;
-//     if( _timeSysSemPendSuccess == 0 )
-//     {
-//       semTestCount++;
-//     }
-//     if( _timeSysSemPendSuccess == 1 )
-//     {
-//         OS_SEM_Post_fromISR( &_timeSysSem );
-//         semTestCount++;
-//     }
    }
 
    TMR_vApplicationTickHook();
