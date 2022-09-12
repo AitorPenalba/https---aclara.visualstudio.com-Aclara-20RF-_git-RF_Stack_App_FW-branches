@@ -3196,6 +3196,10 @@ static void MFGP_smLogTimeDiversity( uint32_t argc, char *argv[] )
          {
             ( void )SMTDCFG_set_log( ( uint8_t )uSmLogTimeDiversity );
          }
+         else
+         {
+            DBG_logPrintf( 'R', "ERROR - Argument is out of range. Must be between 0 and 255" );
+         }
       }
    }
    else
