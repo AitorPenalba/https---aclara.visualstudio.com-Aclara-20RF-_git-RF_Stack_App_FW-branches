@@ -769,7 +769,7 @@ void OS_TASK_Create_All ( bool initSuccess )
                stack_check_init(taskID);
             }
 #elif (RTOS_SELECTION == FREE_RTOS)
-            // : RA6E1:Free RTOS not support the exception handling
+            // RA6E1:Free RTOS not support the exception handling
 #endif
          }
       }
