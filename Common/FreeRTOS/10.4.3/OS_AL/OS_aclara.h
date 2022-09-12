@@ -376,7 +376,7 @@ extern const char pTskName_PhyRx[];
 #if ( SIMULATE_POWER_DOWN == 1 )
 extern const char pTskName_Mfg[];
 #endif
-#if ( ( ACLARA_DA == 1 ) || ( SIMULATE_POWER_DOWN == 1 ) )
+#if ( ACLARA_DA == 1 ) // TODO: RA6E1 Bob: This reference is required by DBG_CommandLine in the DBG_CommandLine_SimulatePowerDown function, not just for ACLARA_DA
 extern const char pTskName_MfgUartRecv[];
 #endif
 extern const char pTskName_MfgUartCmd[];

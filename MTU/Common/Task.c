@@ -796,9 +796,6 @@ void OS_TASK_Create_All ( bool initSuccess )
  **********************************************************************************************************************/
 taskCreateReturnValue_t OS_TASK_Create ( OS_TASK_Template_t const *pTaskList )
 {
-#if ( RTOS_SELECTION == MQX_RTOS )
-   _task_id taskID;
-#endif
 #if (RTOS_SELECTION == MQX_RTOS)
    taskCreateReturnValue_t retVal = (taskCreateReturnValue_t)MQX_NULL_TASK_ID
 #elif (RTOS_SELECTION == FREE_RTOS)
@@ -821,16 +818,6 @@ taskCreateReturnValue_t OS_TASK_Create ( OS_TASK_Template_t const *pTaskList )
       // update the task handle lookup table index location with the newly created task's name
       taskHandleTable[pTaskList->TASK_TEMPLATE_INDEX].taskName = pTaskList->pcName;
    }
-#endif
-
-#if ( RTOS_SELECTION == MQX_RTOS )
-            /* Set the exception handler of the task if still valid */
-            if (MQX_NULL_TASK_ID != _task_get_id_from_name(pTaskList->TASK_NAME)) {
-               (void)_task_set_exception_handler(taskID, task_exception_handler);
-               stack_check_init(taskID);
-            }
-#elif (RTOS_SELECTION == FREE_RTOS)
-            // TODO: RA6E1: What is the equivalent operation for FreeRTOS, still need to investigate further?
 #endif
 
    return retVal;
