@@ -127,7 +127,7 @@
 #include "ilc_srfn_reg.h"
 #endif
 #include "SM_Protocol.h"
-#include "sm.h"
+#include "SM.h"
 #include "time_sync.h"
 
 #if (ACLARA_DA == 1)
@@ -1152,7 +1152,6 @@ static const struct_CmdLineEntry MFGP_SecureTable[] =
 };
 #endif
 
-// TODO: RA6 [name_Balaji]: Integrate Different Modes Tables
 static const struct_CmdLineEntry * const cmdTables[ ( uint16_t )menuLastValid ] =
 {
 #if ( EP == 1 )
@@ -1725,16 +1724,15 @@ static void mfgpReadByte( uint8_t rxByte )
             return;
          }
 #endif
-#if ( RTOS_SELECTION == FREE_RTOS )
-//        OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task.
-#endif
          commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
          if ( commandBuf != NULL )
          {
             commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
 #if ( DTLS_DEBUG == 1 )
             INFO_printHex( "MFG_buffer: ", (const uint8_t *)MFGP_CommandBuffer, MFGP_numBytes );
-            OS_TASK_Sleep( 50U );
+#if ( RTOS_SELECTION == MQX_RTOS )
+            OS_TASK_Sleep( 50U );  // This line causes the DTLS not to connect on the MFG port
+#endif
 #endif
 #if ( RTOS_SELECTION == FREE_RTOS )
             ( void )UART_echo( mfgUart, (const uint8_t *)CRLF, sizeof( CRLF ) );
@@ -2293,11 +2291,11 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
             table = menuSecure;
          }
 #else    /* DTLS disabled  */
-#endif
 #if ( EP == 1 )
          table = menuQuiet;
 #else
          table = menuStd;
+#endif // USE_DTLS
 #endif //EP
          CmdEntry = cmdTables[ table ];
 
