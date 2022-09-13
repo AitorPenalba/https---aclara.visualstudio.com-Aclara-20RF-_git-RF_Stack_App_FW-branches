@@ -583,11 +583,25 @@ void STRT_StartupTask ( taskParameter )
    OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
    CurrentIdleCount = IDL_Get_IdleCounter();
    PrevIdleCount = CurrentIdleCount;
-
+#if ( TM_VERIFY_TICK_TIME != 0 )
+   OS_TICK_Struct lastTime;
+   OS_TICK_Get_CurrentElapsedTicks ( &lastTime );
+   uint32_t pass = 0, lastCyc = DWT->CYCCNT;
+#endif
    for ( ;; )
    {
       OS_TICK_Sleep ( &TickTime, ONE_SEC );
-
+#if ( TM_VERIFY_TICK_TIME != 0 )
+      pass++;
+      if ( pass == TM_VERIFY_TICK_TIME )
+      {
+         uint32_t cyc = DWT->CYCCNT;
+         DBG_logPrintf( 'I', "%7lu %7lu", OS_TICK_Get_Diff_InMicroseconds( &lastTime, &TickTime ), (cyc - lastCyc)/120 );
+         lastTime = TickTime;
+         lastCyc = cyc;
+         pass = 0;
+      }
+#endif
       CurrentIdleCount = IDL_Get_IdleCounter();
       TempIdleCount = CurrentIdleCount - PrevIdleCount;
       PrevIdleCount = CurrentIdleCount;

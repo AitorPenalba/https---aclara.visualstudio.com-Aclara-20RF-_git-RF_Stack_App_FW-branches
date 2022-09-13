@@ -13506,7 +13506,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    static uint8_t  boost = 0;
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 #if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
-   static float    lowestCapVoltage = 9.99;
+   static float    lowestCapVoltage = 9.99; /* Set lowest voltage above the highest value super-cap can have */
 #endif
 
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
@@ -14119,7 +14119,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
                               SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_EN_TRUE_BIT |          // Enable divided system clock output
                               SI446X_PROP_GLOBAL_CLK_CFG_DIVIDED_CLK_SEL_ENUM_DIV_30 << 3); // Divide clock by 30
    PHY_Unlock();    // Function will not return if it fails
-   lowestCapVoltage = 9.99;
+   lowestCapVoltage = 9.99; /* Set lowest voltage above the highest value super-cap can have */
 
    static uint32_t oldTaskPriorityDBG, oldTaskPriorityPRN, oldTaskPriorityHMC, oldTaskPriorityPHY, oldTaskPriorityIDL;
    if ( updateDisplayDuringNoiseband )

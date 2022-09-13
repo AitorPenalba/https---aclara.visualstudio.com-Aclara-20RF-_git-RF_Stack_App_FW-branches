@@ -333,6 +333,7 @@
 #define TM_EXT_FLASH_BUSY_TIMING          0 /* Measure time for busyCheck in dvr_extflash to receive a complete interrupt */
 #define TM_HARDFAULT                      1 /* Enable hardfault command for testing */
 #define TM_BL_TEST_COMMANDS               1 /* Enable the Bootloader Test Commands */
+#define TM_VERIFY_TICK_TIME               0 /* Enable delta time printout from loop in STRT_Startup.c every 10 seconds; 0 disables this test */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

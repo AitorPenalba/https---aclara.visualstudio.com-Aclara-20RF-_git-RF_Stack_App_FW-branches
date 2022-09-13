@@ -5182,7 +5182,7 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
 #endif
    union si446x_cmd_reply_union Si446xCmd;
 #if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
-   float lowestCapVoltage = 9.99;
+   float lowestCapVoltage = 9.99; /* Set lowest voltage above the highest value super-cap can have */
 #endif
    // Stop radio
    (void)si446x_change_state(radioNum, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_READY);
