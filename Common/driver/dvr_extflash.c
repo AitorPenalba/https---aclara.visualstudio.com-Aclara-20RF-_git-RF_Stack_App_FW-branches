@@ -1325,7 +1325,7 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 
 #if ( MCU_SELECTED == RA6E1 )
       /* We are done polling the status bit.  We need indicate that the transaction is complete by closing the
-         SPI bus cycle and then turn off QSPI Direct Communication Mode */
+         SPI bus cycle.  We no longer turn off QSPI Direct Communication Mode in this macro.                    */
       POLLING_READ_EXIT();
 #endif
       NV_CS_INACTIVE(); /* Activate the chip select  */
