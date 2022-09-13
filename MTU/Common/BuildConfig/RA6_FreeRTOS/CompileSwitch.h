@@ -238,13 +238,13 @@
 #else
 #define DTLS_FIELD_TRIAL               1     /* Allows unsecured comm. until session established   */
 #endif
-#define DTLS_DEBUG                     (1)   /* Turn DTLS Debug On */  // TODO: RA6E1: Remove it before releasing for production
+#define DTLS_DEBUG                     (0)   /* Turn DTLS Debug On */  // TODO: RA6E1: Remove it before releasing for production
 #define DTLS_CHECK_UNENCRYPTED         (1)   /* Check for previous version major file not encrypted   */
 /* ------------------------------------------------------------------------------------------------------------------ */
 #define BM_DEBUG                       0     /* Buffer allocate/free debug printing */
 #define ENABLE_B2B_COMM                0     /* DCU3 XCVR only */
 /* ------------------------------------------------------------------------------------------------------------------ */
-#define USE_MTLS                       1     // TODO: RA6 [name_Balaji]: Add USE_MTLS support for RA6E1
+#define USE_MTLS                       1
 #define MTLS_DEBUG                     (1)   /* Turn MTLS Debug On */
 /* ------------------------------------------------------------------------------------------------------------------ */
 

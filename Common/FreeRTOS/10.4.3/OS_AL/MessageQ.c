@@ -2,7 +2,7 @@
  *
  * Filename: MessageQ.c
  *
- * Global Designator:
+ * Global Designator: OS_MSGQ_
  *
  * Contents:
  *
@@ -53,18 +53,15 @@ bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages, const ch
 bool OS_MSGQ_CREATE ( OS_MSGQ_Handle MsgqHandle,  uint32_t NumMessages )
 #endif
 {
-   bool RetStatus = true;
-//#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
+   bool RetStatus = (bool)true;
+
    if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), NumMessages, name) )
-//#else // TODO: RA6E1: Remove the commented code
-//   if ( false == OS_QUEUE_Create(&(MsgqHandle->MSGQ_QueueObj), NumMessages) )
-//#endif
    {
-      RetStatus = false;
+      RetStatus = (bool)false;
    } /* end if() */
    if ( false == OS_SEM_Create(&(MsgqHandle->MSGQ_SemObj), NumMessages ) )
    {
-      RetStatus = false;
+      RetStatus = (bool)false;
    } /* end if() */
 
    return ( RetStatus );

@@ -99,8 +99,10 @@ static void       mfgpBufferInit( buffer_t *bfr );
 static buffer_t   *mfgpCreateBuffer( uint16_t size );
 static buffer_t   *mfgpGrowBuffer( buffer_t *bfr, uint16_t newsize );
 static void       mfgpSlipAddCharacter( buffer_t **bfr_ptr, char c );
+#if ( RTOS_SELECTION == MQX_RTOS )
 #if !USE_USB_MFG
 static void       dtlsUART_isr( void *user_isr_ptr );
+#endif
 #endif
 
 /* ****************************************************************************************************************** */
@@ -609,6 +611,7 @@ void MFGP_DtlsInit( enum_UART_ID uartId )
    if ( uartId == UART_MANUF_TEST ) /* First time, or logging off optical port */
 #endif
    {
+
       dtlsUart = UART_MANUF_TEST;
 #if ( RTOS_SELECTION == MQX_RTOS )
       uint32_t vector;
@@ -619,8 +622,6 @@ void MFGP_DtlsInit( enum_UART_ID uartId )
          mqxUART_isr = _int_get_isr( vector );
          ( void )_int_install_isr( vector, dtlsUART_isr, dtlsUART_isr_data );
       }
-#elif ( RTOS_SELECTION == FREE_RTOS )
-   // TODO: RA6E1 dtls uart isr
 #endif
    }
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
@@ -645,10 +646,11 @@ void MFGP_DtlsInit( enum_UART_ID uartId )
    Notes:
 
 *******************************************************************************/
+#if ( RTOS_SELECTION == MQX_RTOS )
 #if !USE_USB_MFG
 static void dtlsUART_isr( void *user_isr_ptr )
 {
-#if ( RTOS_SELECTION == MQX_RTOS )
+
    IO_SERIAL_INT_DEVICE_STRUCT_PTR  int_io_dev_ptr = user_isr_ptr;
    KUART_INFO_STRUCT_PTR            sci_info_ptr = int_io_dev_ptr->DEV_INFO_PTR;
    UART_MemMapPtr                   sci_ptr = sci_info_ptr->SCI_PTR;
@@ -668,9 +670,7 @@ static void dtlsUART_isr( void *user_isr_ptr )
       stat = sci_ptr->S1;
    }
    mqxUART_isr( user_isr_ptr );        /* Chain to the previous handler */
-#elif ( RTOS_SELECTION == FREE_RTOS )
-   // TODO: RA6E1 dtls uart isr
-#endif
 }
-#endif
-#endif
+#endif // USE_USB_MFG
+#endif // RTOS_SELECTION
+#endif // USE_DTLS

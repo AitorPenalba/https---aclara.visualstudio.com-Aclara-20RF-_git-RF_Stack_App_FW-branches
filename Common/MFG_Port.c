@@ -127,7 +127,7 @@
 #include "ilc_srfn_reg.h"
 #endif
 #include "SM_Protocol.h"
-#include "sm.h"
+#include "SM.h"
 #include "time_sync.h"
 
 #if (ACLARA_DA == 1)
@@ -1152,7 +1152,6 @@ static const struct_CmdLineEntry MFGP_SecureTable[] =
 };
 #endif
 
-// TODO: RA6 [name_Balaji]: Integrate Different Modes Tables
 static const struct_CmdLineEntry * const cmdTables[ ( uint16_t )menuLastValid ] =
 {
 #if ( EP == 1 )
@@ -1725,16 +1724,15 @@ static void mfgpReadByte( uint8_t rxByte )
             return;
          }
 #endif
-#if ( RTOS_SELECTION == FREE_RTOS )
-//        OS_TASK_Sleep( (uint32_t)10 );  // Make sure the allocated buffer has been processed and freed in other task.
-#endif
          commandBuf = ( buffer_t * )BM_alloc( MFGP_numBytes + 1 );
          if ( commandBuf != NULL )
          {
             commandBuf->data[MFGP_numBytes] = 0; /* Null terminating string */
 #if ( DTLS_DEBUG == 1 )
             INFO_printHex( "MFG_buffer: ", (const uint8_t *)MFGP_CommandBuffer, MFGP_numBytes );
-            OS_TASK_Sleep( 50U );
+#if ( RTOS_SELECTION == MQX_RTOS )
+            OS_TASK_Sleep( 50U );  // This line causes the DTLS not to connect on the MFG port
+#endif
 #endif
 #if ( RTOS_SELECTION == FREE_RTOS )
             ( void )UART_echo( mfgUart, (const uint8_t *)CRLF, sizeof( CRLF ) );
@@ -2293,11 +2291,11 @@ static void MFGP_ProcessCommand ( char *command, uint16_t numBytes )
             table = menuSecure;
          }
 #else    /* DTLS disabled  */
-#endif
 #if ( EP == 1 )
          table = menuQuiet;
 #else
          table = menuStd;
+#endif // USE_DTLS
 #endif //EP
          CmdEntry = cmdTables[ table ];
 
@@ -3183,15 +3181,23 @@ Returns: void
 ***********************************************************************************************************************/
 static void MFGP_smLogTimeDiversity( uint32_t argc, char *argv[] )
 {
-   uint8_t uSmLogTimeDiversity;
+   int16_t uSmLogTimeDiversity;
 
    if ( argc <= 2 )
    {
       if ( 2 == argc )
       {
          // Write smLogTimeDiversity
-         uSmLogTimeDiversity = ( uint8_t )atol( argv[1] );
-         ( void )SMTDCFG_set_log( uSmLogTimeDiversity );
+         uSmLogTimeDiversity = atol( argv[1] );
+         // Range for uSmLogTimeDiversity is 0 to 255
+         if ( uSmLogTimeDiversity <= UCHAR_MAX && uSmLogTimeDiversity >= 0 )
+         {
+            ( void )SMTDCFG_set_log( ( uint8_t )uSmLogTimeDiversity );
+         }
+         else
+         {
+            DBG_logPrintf( 'R', "ERROR - Argument is out of range. Must be between 0 and 255" );
+         }
       }
    }
    else
@@ -6322,6 +6328,9 @@ static void MFGP_edMfgSerialNumber( uint32_t argc, char *argv[] )
    MFG_logPrintf("%s %s\n", argv[0], reading.Value.buffer);
 #else
    char strEdMfgSerialNumber[EDCFG_MFG_SERIAL_NUMBER_LENGTH + 1];
+#if ( MCU_SELECTED == RA6E1 )
+   ( void )memset( strEdMfgSerialNumber, 0, sizeof( strEdMfgSerialNumber ) );
+#endif
 
    if ( argc <= 2 )
    {
@@ -6570,7 +6579,7 @@ static void MFGP_stSecurityFailCount( uint32_t argc, char *argv[] )
 ***********************************************************************************************************************/
 static void MFGP_stSecurityFailTest( uint32_t argc, char *argv[] )
 {
-   uint32_t          LoopCount;           /* User supplied number of runs           */
+   int32_t          LoopCount;           /* User supplied number of runs           */
    char              *endptr;             /* Used with strtoul                      */
    uint32_t          event_flags;         /*lint !e578 local variable same name as global is OK here. */
    SELF_TestData_t   *SelfTestData;       /* Access to self-test failure counters   */
@@ -6588,7 +6597,7 @@ static void MFGP_stSecurityFailTest( uint32_t argc, char *argv[] )
    {
       LoopCount = 1;
    }
-   while( LoopCount-- )
+   while( LoopCount > 0 )
    {
       OS_EVNT_Set ( SELF_notify, ( uint32_t )( 1 << ( uint16_t )e_securityFail ) );
       event_flags = OS_EVNT_Wait ( &MFG_notify, ( uint32_t )( 1 << ( uint16_t )e_securityFail ), ( bool )false, 1003 );
@@ -6601,6 +6610,7 @@ static void MFGP_stSecurityFailTest( uint32_t argc, char *argv[] )
             initFailCount = SelfTestData->securityFail;
          }
       }
+      LoopCount--;
    }
 
    if ( failCount != 0 )
@@ -6876,7 +6886,7 @@ static void MFG_stRTCFailTest ( uint32_t argc, char *argv[] )
 {
    uint32_t          event_flags;   /*lint !e578 local variable same name as global is OK here. */
    SELF_TestData_t   *SelfTestData; /* Access to self-test failure counters   */
-   uint16_t          numberOfTests = 1;
+   int16_t          numberOfTests = 1;
    bool              updateTestResults = false;
 
    SelfTestData = SELF_GetTestFileHandle()->Data;
@@ -6886,7 +6896,7 @@ static void MFG_stRTCFailTest ( uint32_t argc, char *argv[] )
        {
           numberOfTests = ( uint16_t )atol( argv[1]);
        }
-       while(numberOfTests != 0)
+       while( numberOfTests > 0 )
        {
           OS_EVNT_Set ( SELF_notify, ( uint32_t )( 1 << ( uint16_t )e_RTCFail ) ); /* Request the test  */
           event_flags = OS_EVNT_Wait ( &MFG_notify, ( uint32_t )( 1 << ( uint16_t )e_RTCFail ), ( bool )false, ONE_SEC * 3 );
@@ -7652,8 +7662,12 @@ static void MFG_PhyCcaAdaptiveThresholdEnable ( uint32_t argc, char *argv[] )
    PHY_ATTRIBUTES_e eAttribute = ePhyAttr_CcaAdaptiveThresholdEnable;
    if ( argc == 2 )
    {
-      enable = ( bool )atoi( argv[1] );
-      (void)PHY_SetRequest( eAttribute, &enable);
+      /* Arguments should be only of type bool */
+      if( ( strcmp(argv[1],"1") == 0 ) || ( strcmp(argv[1],"0") == 0 ) )
+      {
+         enable = ( bool )atoi( argv[1] );
+         (void)PHY_SetRequest( eAttribute, &enable);
+      }
    }
    /* Always print read back value  */
    GetConf = PHY_GetRequest( eAttribute );
@@ -8407,8 +8421,12 @@ static void MFG_PhyThermalProtectionEnable( uint32_t argc, char *argv[] )
 
    if ( argc == 2 )
    {
-      state = ( bool )atoi( argv[1] );
-      (void)PHY_SetRequest( eAttribute, &state);
+      /* Arguments should be only of type bool */
+      if( ( strcmp( argv[1],"1" ) == 0 ) || ( strcmp( argv[1],"0" ) == 0 ) )
+      {
+         state = ( bool )atoi( argv[1] );
+         (void)PHY_SetRequest( eAttribute, &state);
+      }
    }
 
    /* Always print read back value  */
