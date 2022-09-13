@@ -58,7 +58,7 @@
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
-#define MFGP_5_MINUTES_IN_MILISECS (5*60*1000)          /* Connection timeout */
+#define MFGP_5_MINUTES_IN_MILISECS  (5*60*1000)          /* Connection timeout */
 #define MFGP_EVENT_CHAR_RX          (0x01)               /* A character was received. */
 #define MFGP_EVENT_COMMAND          (0x02)               /* Decrypted command was received. */
 

@@ -36,8 +36,6 @@
 #undef  SELF_GLOBALS
 
 #include "DBG_SerialDebug.h"
-#include "CompileSwitch.h"
-#include "hal_data.h"
 //#include "ascii.h"
 //#include "buffer.h"
 #include "partition_cfg.h"
@@ -1099,7 +1097,7 @@ static uint8_t testModeCount = 0;
 /***********************************************************************************************************************
    Function Name: SELF_testModulesTask
 
-   Purpose: 
+   Purpose:
 
    Arguments: taskParameter
 
