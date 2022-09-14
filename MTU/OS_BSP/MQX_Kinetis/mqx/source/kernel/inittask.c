@@ -60,14 +60,14 @@ void _mqx_init_task(uint32_t parameter) {
 
     _task_stop_preemption();
 
-    // set all task with flag AUTO_START_TASK to ready state
+    // set all task with flag MQX_AUTO_START_TASK to ready state
     _GET_KERNEL_DATA(kernel_data);
     _lwsem_wait((LWSEM_STRUCT_PTR)&kernel_data->TASK_CREATE_LWSEM);
 
     // check here for auto-create tasks, and create them here
     template_ptr = kernel_data->INIT.TASK_TEMPLATE_LIST;
     while (template_ptr->TASK_TEMPLATE_INDEX) {
-        if (template_ptr->TASK_ATTRIBUTES & AUTO_START_TASK) {
+        if (template_ptr->TASK_ATTRIBUTES & MQX_AUTO_START_TASK) {
             td_ptr = _task_init_internal(template_ptr, kernel_data->ACTIVE_PTR->TASK_ID, template_ptr->CREATION_PARAMETER, FALSE, NULL, 0);
 #if MQX_CHECK_MEMORY_ALLOCATION_ERRORS
             if (td_ptr == NULL) {
