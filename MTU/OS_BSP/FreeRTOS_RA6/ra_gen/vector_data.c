@@ -1,5 +1,7 @@
 /* generated vector source file - do not edit */
         #include "bsp_api.h"
+
+        extern void HardFault_Handler( void );
         /* Do not build these data structures if no interrupts are currently allocated because IAR will have build errors. */
         #if VECTOR_DATA_IRQ_COUNT > 0
         BSP_DONT_REMOVE const fsp_vector_t g_vector_table[BSP_ICU_VECTOR_MAX_ENTRIES] BSP_PLACE_IN_SECTION(BSP_SECTION_APPLICATION_VECTORS) =
@@ -42,6 +44,67 @@
             [35] = r_icu_isr, /* ICU IRQ4 (External pin interrupt 4) */
             [36] = gpt_counter_overflow_isr, /* GPT2 COUNTER OVERFLOW (Overflow) */
             [37] = gpt_capture_b_isr, /* GPT2 CAPTURE COMPARE B (Compare match B) */
+
+            /* Aclara Added: add unused interrupt handler for interrupts 38-95 */
+            [38] = HardFault_Handler,
+            [39] = HardFault_Handler,
+            [40] = HardFault_Handler,
+            [41] = HardFault_Handler,
+            [42] = HardFault_Handler,
+            [43] = HardFault_Handler,
+            [44] = HardFault_Handler,
+            [45] = HardFault_Handler,
+            [46] = HardFault_Handler,
+            [47] = HardFault_Handler,
+            [48] = HardFault_Handler,
+            [49] = HardFault_Handler,
+            [50] = HardFault_Handler,
+            [51] = HardFault_Handler,
+            [52] = HardFault_Handler,
+            [53] = HardFault_Handler,
+            [54] = HardFault_Handler,
+            [55] = HardFault_Handler,
+            [56] = HardFault_Handler,
+            [57] = HardFault_Handler,
+            [58] = HardFault_Handler,
+            [59] = HardFault_Handler,
+            [60] = HardFault_Handler,
+            [61] = HardFault_Handler,
+            [62] = HardFault_Handler,
+            [63] = HardFault_Handler,
+            [64] = HardFault_Handler,
+            [65] = HardFault_Handler,
+            [66] = HardFault_Handler,
+            [67] = HardFault_Handler,
+            [68] = HardFault_Handler,
+            [69] = HardFault_Handler,
+            [70] = HardFault_Handler,
+            [71] = HardFault_Handler,
+            [72] = HardFault_Handler,
+            [73] = HardFault_Handler,
+            [74] = HardFault_Handler,
+            [75] = HardFault_Handler,
+            [76] = HardFault_Handler,
+            [77] = HardFault_Handler,
+            [78] = HardFault_Handler,
+            [79] = HardFault_Handler,
+            [80] = HardFault_Handler,
+            [81] = HardFault_Handler,
+            [82] = HardFault_Handler,
+            [83] = HardFault_Handler,
+            [84] = HardFault_Handler,
+            [85] = HardFault_Handler,
+            [86] = HardFault_Handler,
+            [87] = HardFault_Handler,
+            [88] = HardFault_Handler,
+            [89] = HardFault_Handler,
+            [90] = HardFault_Handler,
+            [91] = HardFault_Handler,
+            [92] = HardFault_Handler,
+            [93] = HardFault_Handler,
+            [94] = HardFault_Handler,
+            [95] = HardFault_Handler,
+            /* Aclara Added - End */
         };
         const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENTRIES] =
         {

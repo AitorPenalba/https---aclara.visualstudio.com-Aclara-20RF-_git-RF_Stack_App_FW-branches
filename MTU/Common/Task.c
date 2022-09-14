@@ -554,7 +554,7 @@ static void expt_frm_dump(void const * ext_frm_ptr)
    }
    else
    {
-      pOff = (uint16_t)snprintf( pBuf, (int32_t)sizeof( pBuf ), "External interrupt %u occured with no handler to serve it.", excpt_num );
+      pOff = (uint16_t)snprintf( pBuf, (int32_t)sizeof( pBuf ), "External interrupt %u occured with no handler to serve it.\r\n", excpt_num );
    }
    for ( i = 0; i < pOff; i++ )
    {
@@ -604,77 +604,80 @@ static void expt_frm_dump(void const * ext_frm_ptr)
 
    uint32_t excpt_num = __get_PSR() & 0x1FF;
    if(excpt_num < 16)
-   {                                                                                                                                                  //  chars -> running total
-      pOff =  (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ), "\r\nExcpt [%s] in TASK 0x%x\n", expt_name[excpt_num] , OS_TASK_GetId() );  // 23 + 5(max task ID) + 13(max string) -> 41
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R0:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr ) );                   // +17 -> 58
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R1:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 1 ) );               // +17 -> 75
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R2:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 2 ) );               // +17 -> 92
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R3:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 3 ) );               // +17 -> 109
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R12: 0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 4 ) );               // +17 -> 126
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );               // +17 -> 143
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );               // +17 -> 160
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );               // +17 -> 177
-      printf( "%s", pBuf );
-
-      /* print additional register debug data
-       * System Handler Control and State Register:
-       *    bit  Error
-       *     0   MEMFAULTACTb (typically interested in this one)
-       *     1   BUSFAULTACTb (typically interested in this one)
-       *     3   USGFAULTACTb (typically interested in this one)
-       *     7   SVCALLACTb
-       *     8   MONITORACTb
-       *    10   PENDSVACTb
-       *    11   SYSTICKACTb
-       *    12   USGFAULTPENDEDa
-       *    13   MEMFAULTPENDEDa
-       *    14   BUSFAULTPENDED
-       *    15   SVCALLPENDEDa
-       *    16   MEMFAULTENA (should be set)
-       *    17   BUSFAULTENA (should be set)
-       *    18   USGFAULTENA (should be set)
-       * Hard Fault Status Register:
-       *    bit  Error
-       *     0
-       *     1   VECTTBL  - Vector table read error
-       *    30   FORCED   - Escalated exception priority to a Hard Fault (typically due to a SVCall when interrupts disabled)
-       *    31   DEBUGEVT - Debug Event
-       * Configurable Fault Status Register:
-       *    bit  Error
-       *     0   IACCVIOL        MemManage - Instruction Access Violation
-       *     1   DACCVIOL        MemManage - Data Access Violation
-       *     3   MUNSTKERR       MemManage - derived fault occurred on exception return
-       *     4   MSTKERR         MemManage - derived fault occurred on exception entry
-       *     5   MLSPERR         MemManage - fault occurred during FP lazy state preservation
-       *     7   MMARVALID       MemManage - MMAR has valid contents
-       *     8   IBUSERR         BusFault  - A bus fault on an instruction prefetch has occurred
-       *     9   PRECISERR       BusFault  - Precise data access error has occurred
-       *    10   IMPRECISERR     BusFault  - Imprecise data access error has occurred
-       *    11   UNSTKERR        BusFault  - derived fault occurred on exception return
-       *    12   STKERR          BusFault  - derived fault occurred on exception entry
-       *    13   LSPERR          BusFault  - bus fault occurred during FP lazy state preservation
-       *    15   BFARVALID       BusFault  - BFAR has valid contents
-       *    16   UNDEFINSTR      UsageFault- Undefined instruction
-       *    17   INVSTATE        UsageFault- Instruction executed with invalid EPSR.T or EPSR.IT field
-       *    18   INVPC           UsageFault- Integrity check error on EXC_RETURN
-       *    19   NOCP            UsageFault- CoProcessor access
-       *    24   UNALIGNED       UsageFault- Unaligned access
-       *    25   DIVBYZERO       UsageFault- Divide by zero
-       * Bus Fault Address - ONLY valid if BFARVALID set
-       */
-                                                                                                                     // chars -> running total
-      pOff  = (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ) - pOff, "SHCSR: 0x%08x\n", excpt_SHCSR );   //  +19 -> 19
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "HFSR:  0x%08x\n", excpt_HFSR );    //  +19 -> 38
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "CFSR:  0x%08x\n", excpt_CFSR );    //  +19 -> 57
-      pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "BFAR:  0x%08x\n", excpt_BFAR );    //  +19 -> 76
+   {                                                                                                                                             //  chars -> running total
+      pOff =  (uint16_t)snprintf( pBuf,     (int32_t)sizeof( pBuf ), "\nExcpt [%s] in TASK 0x%x \n", expt_name[excpt_num] , OS_TASK_GetId() );   // 23 + 13(max string) + 5(max task ID) -> 41
    }
    else
    {
-      pOff = (uint16_t)snprintf( pBuf, (int32_t)sizeof( pBuf ), "External interrupt %u occured with no handler to serve it.", excpt_num );
+      pOff =  (uint16_t)snprintf( pBuf,     (int32_t)sizeof( pBuf ), "\nUnused App Int [%d] in TASK 0x%x\n", excpt_num - 16 , OS_TASK_GetId() ); // 29 + 2(max int #) + 5(max task ID) = 36 < 41
    }
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R0:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr ) );                  // +17 -> 58
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R1:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 1 ) );              // +17 -> 75
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R2:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 2 ) );              // +17 -> 92
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R3:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 3 ) );              // +17 -> 109
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "R12: 0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 4 ) );              // +17 -> 126
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "LR:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 5 ) );              // +17 -> 143
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PC:  0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 6 ) );              // +17 -> 160
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "PSR: 0x%08x\n", *( ( uint32_t * )ext_frm_ptr + 7 ) );              // +17 -> 177
+   printf( "%s", pBuf );
+
+   /* print additional register debug data
+    * System Handler Control and State Register:
+    *    bit  Error
+    *     0   MEMFAULTACTb (typically interested in this one)
+    *     1   BUSFAULTACTb (typically interested in this one)
+    *     3   USGFAULTACTb (typically interested in this one)
+    *     7   SVCALLACTb
+    *     8   MONITORACTb
+    *    10   PENDSVACTb
+    *    11   SYSTICKACTb
+    *    12   USGFAULTPENDEDa
+    *    13   MEMFAULTPENDEDa
+    *    14   BUSFAULTPENDED
+    *    15   SVCALLPENDEDa
+    *    16   MEMFAULTENA (should be set)
+    *    17   BUSFAULTENA (should be set)
+    *    18   USGFAULTENA (should be set)
+    * Hard Fault Status Register:
+    *    bit  Error
+    *     0
+    *     1   VECTTBL  - Vector table read error
+    *    30   FORCED   - Escalated exception priority to a Hard Fault (typically due to a SVCall when interrupts disabled)
+    *    31   DEBUGEVT - Debug Event
+    * Configurable Fault Status Register:
+    *    bit  Error
+    *     0   IACCVIOL        MemManage - Instruction Access Violation
+    *     1   DACCVIOL        MemManage - Data Access Violation
+    *     3   MUNSTKERR       MemManage - derived fault occurred on exception return
+    *     4   MSTKERR         MemManage - derived fault occurred on exception entry
+    *     5   MLSPERR         MemManage - fault occurred during FP lazy state preservation
+    *     7   MMARVALID       MemManage - MMAR has valid contents
+    *     8   IBUSERR         BusFault  - A bus fault on an instruction prefetch has occurred
+    *     9   PRECISERR       BusFault  - Precise data access error has occurred
+    *    10   IMPRECISERR     BusFault  - Imprecise data access error has occurred
+    *    11   UNSTKERR        BusFault  - derived fault occurred on exception return
+    *    12   STKERR          BusFault  - derived fault occurred on exception entry
+    *    13   LSPERR          BusFault  - bus fault occurred during FP lazy state preservation
+    *    15   BFARVALID       BusFault  - BFAR has valid contents
+    *    16   UNDEFINSTR      UsageFault- Undefined instruction
+    *    17   INVSTATE        UsageFault- Instruction executed with invalid EPSR.T or EPSR.IT field
+    *    18   INVPC           UsageFault- Integrity check error on EXC_RETURN
+    *    19   NOCP            UsageFault- CoProcessor access
+    *    24   UNALIGNED       UsageFault- Unaligned access
+    *    25   DIVBYZERO       UsageFault- Divide by zero
+    * Bus Fault Address - ONLY valid if BFARVALID set
+    */
+                                                                                                                // chars -> running total
+   pOff  = (uint16_t)snprintf( pBuf,        (int32_t)sizeof( pBuf ) - pOff, "SHCSR: 0x%08x\n", excpt_SHCSR );   //  +19 -> 19
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "HFSR:  0x%08x\n", excpt_HFSR );    //  +19 -> 38
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "CFSR:  0x%08x\n", excpt_CFSR );    //  +19 -> 57
+   pOff += (uint16_t)snprintf( pBuf + pOff, (int32_t)sizeof( pBuf ) - pOff, "BFAR:  0x%08x\n", excpt_BFAR );    //  +19 -> 76
 
    // need Exclusion of RTOS to print
-    printf( "%s", pBuf );
+   printf( "%s", pBuf );
+
+   /* Execute software reset */
+   NVIC_SystemReset();
 }
 /*lint +esym(818, ext_frm_ptr)   */
 
