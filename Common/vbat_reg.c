@@ -89,9 +89,6 @@ returnStatus_t VBATREG_init(void)
 {
 
    VBATREG_EnableRegisterAccess();
-#if ( MCU_SELECTED == RA6E1 )
-//	R_SYSTEM->VBATTMNSELR = R_SYSTEM_VBATTMNSELR_VBATTMNSEL_Msk;  /* TODO: RA6 [DG]: Do we need this?
-#endif
    // Verify whether or not the VBAT register has been initialized since the last time
    // that the VBAT cap was drained completely.
    if ((0 == VBATREG_VALID) || (VBATREG_VALID_SIG != VBATREG_SIG))
@@ -167,7 +164,7 @@ void VBATREG_EnableRegisterAccess( void )
  **********************************************************************************************************************/
 void VBATREG_DisableRegisterAccess( void )
 {
-#if 0  /* TODO: RA6: Always enable VBAT Reg Access*/
+#if 0  /* RA6: For secure purpose Always enable VBAT Reg Access*/
 #if ( MCU_SELECTED == RA6E1 )
    R_SYSTEM->VBTBER_b.VBAE = 0x00;  /* Disable access to VBTBKR */
 

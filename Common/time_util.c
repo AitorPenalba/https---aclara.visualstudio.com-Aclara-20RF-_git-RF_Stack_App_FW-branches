@@ -28,9 +28,6 @@
 /* INCLUDE FILES */
 #include <stdint.h>
 #include <stdio.h>
-#if 0 // TODO: RA6E1 - Support PHY
-#include "PHY_Protocol.h"
-#endif
 #define TIME_UTIL_GLOBAL
 #include "time_util.h"
 #undef  TIME_UTIL_GLOBAL

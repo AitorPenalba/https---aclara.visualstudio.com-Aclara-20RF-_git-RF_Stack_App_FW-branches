@@ -26,7 +26,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include "meter.h"
 #include "OR_MR_Handler.h"
 #include "RG_CF_Handler.h"
 #include "RG_MD_Handler.h"

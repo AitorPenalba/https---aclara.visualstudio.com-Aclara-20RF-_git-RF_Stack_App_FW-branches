@@ -29,12 +29,12 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include "HEEP_util.h"
-#if 0 // TODO: RA6E1 - Support to DST and mac modules - Porting for Systick timer
+
 #if ( EP == 1 )
 #include "buffer.h"
 #include "MAC_Protocol.h"
 #endif
-#endif
+
 
 #ifdef TIME_SYS_GLOBAL
    #define GLOBAL

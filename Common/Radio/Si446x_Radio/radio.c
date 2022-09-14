@@ -106,7 +106,7 @@
 #define TEMPERATURE_MAX    98 // Maximum valid radio temperature
 
 #if ( EP == 1 )
-#define SUPER_CAP_MIN_VOLTAGE 2.10f // TODO: RA6E1 Bob: does this vary from Maxim to TI?  Minimum voltage required to compute noise estimate with boost capacitor turned on
+#define SUPER_CAP_MIN_VOLTAGE 2.10f
 #endif
 
 #define ENABLE_PSM          0 // Set to 1 to use preamble sense mode
@@ -724,7 +724,7 @@ void compbyte(uint8_t group, uint8_t number);
 void compare(void);
 #endif
 
-#if 0  // TODO: RA6E1 Bob: This was removed from original project
+#if 0  //RA6E1 Bob: This was removed from original project
 void RF_SetHardwareMode(RFHardwareMode_e newMode)
 {
    switch (newMode)
@@ -4911,7 +4911,7 @@ float32_t RADIO_Filter_CCA(uint8_t radioNum, CCA_RSSI_TYPEe *processingType, uin
       if (TimeDiff > 10) {
          break;
       }
-      OS_TASK_Yield(); // TODO: RA6E1 Bob: this needs to be tested for compatibility
+      OS_TASK_Yield(); // RA6E1 Bob: this needs to be tested for compatibility
    } while (currentRSSI == 0); // We use the latch value as a way to consume time until RSSI is meaningful.
 
    // Discard the first 4 samples because the radio internally averages 4 symbols and the RSSI might not be stable yet.
@@ -6545,81 +6545,6 @@ bool RADIO_Temperature_Get(uint8_t radioNum, int16_t *temp)
 
 #endif
 
-#if 0  // TODO: RA6E1: Bob: Do we need this?
-
-/*
-   Function name: RADIO_Get_Current_Temperature
-
-   Purpose: To get Radio Temperature and compute average of an array of floats;
-
-   Arguments:  bool    bSoft_demod - to verify if this function was called from softdemod
-              .
-*/
-
-float RADIO_Get_Current_Temperature( bool bSoft_demod )
-{
-  union si446x_cmd_reply_union Si446xCmd;
-  static uint8_t avg_index = 0;
-  static float temperature[RADIO_TEMP_SAMPLE];
-  float temp = 0;
-
-  if ( ( radio [ ( uint8_t ) RADIO_0 ].demodulator == 0 ) ) // if soft-demod disabled
-  {
-    if ( si446x_get_adc_reading ( RADIO_0, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd ) == SI446X_SUCCESS )
-    {
-      RADIO_Temperature = ( int16_t ) ( ( ( 899.0/4096.0 ) * Si446xCmd.GET_ADC_READING.TEMP_ADC ) - 293 );
-
-      // TODO: averaging mechanism
-    }
-  }
-  else
-  {
-    if ( TRUE == bSoft_demod )
-    {
-      if ( si446x_get_adc_reading ( RADIO_0, SI446X_CMD_GET_ADC_READING_ARG_ADC_EN_TEMPERATURE_EN_BIT, 9, &Si446xCmd ) == SI446X_SUCCESS )
-      {
-        temperature[avg_index] = ( int16_t ) ( ( ( 899.0/4096.0 ) * Si446xCmd.GET_ADC_READING.TEMP_ADC ) - 293 );
-        avg_index++ ;
-
-        //five samples to determine temperature
-        if ( avg_index >= RADIO_TEMP_SAMPLE )
-        {
-          avg_index = 0;
-          bAvg_done = TRUE;
-        }
-
-        for ( uint8_t i = 0; i < RADIO_TEMP_SAMPLE; i++ )
-        {
-          temp += temperature[i];
-        }
-
-        if ( FALSE == bAvg_done )
-        {
-          RADIO_Temperature = temp/avg_index;  // avg value for first five cycles
-        }
-        else
-        {
-          RADIO_Temperature = temp/RADIO_TEMP_SAMPLE; // avg value
-        }
-
-      }
-    }
-  }
-
-  // Sanitize output
-   if ( RADIO_Temperature < TEMPERATURE_MIN )
-   {
-      RADIO_Temperature = TEMPERATURE_MIN;
-   }
-   else if ( RADIO_Temperature > TEMPERATURE_MAX )
-   {
-      RADIO_Temperature = TEMPERATURE_MAX;
-   }
-
-  return RADIO_Temperature;
-}
-
-#endif
 
 /*!
  *  Used to get the transmit buffer

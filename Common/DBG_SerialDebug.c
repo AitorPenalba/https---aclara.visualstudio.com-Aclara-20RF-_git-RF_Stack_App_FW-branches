@@ -74,9 +74,6 @@
 #else
 #define SERIAL_DBG_NUM_MSGQ_ITEMS 0
 #endif
-#if ( MCU_SELECTED == RA6E1 )
-#define MAX_DBG_COMMAND_CHARS 1602 // TODO: RA6: Question: Please add comment for the magic number. 1600 seems way more than we need.
-#endif
 
 typedef struct
 {

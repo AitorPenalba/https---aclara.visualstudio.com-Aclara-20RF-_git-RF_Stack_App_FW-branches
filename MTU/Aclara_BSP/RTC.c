@@ -413,7 +413,7 @@ void RTC_ConfigureAlarm( uint32_t seconds )
 
    rtc_time_get( &time );        // Get current value of the Registers
    time.BCount.Word += seconds;  // Add the time delay
-
+   
    R_RTC->BCNT0AR   = time.BCount.Byte[0];
    R_RTC->BCNT1AR   = time.BCount.Byte[1];
    R_RTC->BCNT2AR   = time.BCount.Byte[2];
@@ -620,7 +620,6 @@ static void rtc_time_set( rtc_time_primitive *time)
   Returns: bool - 0 if everything was successful, 1 if something failed
 
 *******************************************************************************/
-// TODO: RA6 [name_Balaji]: Move to SelfTest Task
 bool RTC_UnitTest(void)
 {
    bool                 retVal   = (bool)true;
@@ -632,6 +631,7 @@ bool RTC_UnitTest(void)
    sysTime_t            sysTime;
    uint8_t              cnt;
    uint32_t             result;
+
 
    /*These functions are checked:
       RTC_SetDateTime
@@ -756,9 +756,7 @@ bool RTC_UnitTest(void)
       retVal = false;
    }
 
-   /* Verify the Alarm can be set and fires */
-   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-   Sec += 2;
+   Sec = 2;
    g_alarm_irq_flag = RESET_FLAG;
    RTC_ConfigureAlarm(Sec);
    OS_TASK_Sleep(3000);
@@ -767,10 +765,7 @@ bool RTC_UnitTest(void)
       retVal = false;
    }
 
-   /* Verify the Alarm can be disabled and does not fire */
-   RTC_GetTimeInSecMicroSec ( &Sec , &MicroSec);
-   RTC_GetDateTime(&get_time);
-   Sec += 2;
+   Sec = 2;
    g_alarm_irq_flag = RESET_FLAG;
    RTC_ConfigureAlarm(Sec);
    RTC_DisableAlarm();

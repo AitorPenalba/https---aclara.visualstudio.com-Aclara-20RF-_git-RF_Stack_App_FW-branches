@@ -235,7 +235,8 @@ int32_t aclara_rand(void)
       ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84114_1_REV_A ) || \
       ( HAL_TARGET_HARDWARE == HAL_TARGET_Y99852_1_REV_A ) || \
       ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84030_1_REV_A ) || \
-      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) )
+      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) || \
+      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B ) )
       float temp1, temp2;
       uint32_t utemp1, utemp2;
 
@@ -264,8 +265,6 @@ int32_t aclara_rand(void)
       utemp3 = *(uint32_t*)&temp3;  /*lint !e740 just want bit pattern from temp3   */
 
       aclara_srand(((utemp1 & 0xFFFF) << 16) | ((utemp2 & 0xFF) << 8) | (utemp3 & 0xFF));
-#elif ( MCU_SELECTED == RA6E1 )
-      // TODO: RA6E1 - Get temperature from Radio
 #else
 #error "Unsupported TARGET HARDWARE"
 #endif

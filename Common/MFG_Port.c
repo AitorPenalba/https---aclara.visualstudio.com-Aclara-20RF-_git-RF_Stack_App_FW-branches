@@ -1152,6 +1152,7 @@ static const struct_CmdLineEntry MFGP_SecureTable[] =
 };
 #endif
 
+
 static const struct_CmdLineEntry * const cmdTables[ ( uint16_t )menuLastValid ] =
 {
 #if ( EP == 1 )

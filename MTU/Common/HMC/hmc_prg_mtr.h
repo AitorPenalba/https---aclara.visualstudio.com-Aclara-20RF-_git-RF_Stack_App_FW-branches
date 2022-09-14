@@ -25,7 +25,6 @@
 
 #ifndef HMC_PRG_MTR
 #define HMC_PRG_MTR
-#include "meter.h"
 
 /****************** FOR PROGRAMMING METER DISPLAY ****************************
 In production, the MeterMate program MUST include ID's 998 and 999
@@ -58,7 +57,6 @@ for downloading to the meter Flash is included.
 /* INCLUDE FILES */
 #include "error_codes.h"
 #include "stdbool.h"
-#include "meter.h"
 
 /****************************************************************************/
 /* CONSTANT DEFINITIONS */
