@@ -198,20 +198,6 @@ void PWR_task( taskParameter )
 
    DBG_logPrintf( 'I', "PWR_task starting." );
 
-#if ( MCU_SELECTED == RA6E1 )
-#if 1 // TODO: RA6: DG: Test code
-   sysTime_dateFormat_t RTC_time;
-   if( !RTC_isRunning() )
-   {
-      printf("RTC Stopped\n");
-   }
-   else
-   {
-      RTC_GetDateTime(&RTC_time);
-      INFO_printf("RTC Time:  %02u/%02u/%04u %02u:%02u:%02u.%03u",RTC_time.month, RTC_time.day, RTC_time.year, RTC_time.hour, RTC_time.min, RTC_time.sec, RTC_time.msec);
-   }
-#endif
-#endif
 #if 0
    ( void ) DBG_CommandLine_GetHWInfo ( 0, NULL );
 #endif

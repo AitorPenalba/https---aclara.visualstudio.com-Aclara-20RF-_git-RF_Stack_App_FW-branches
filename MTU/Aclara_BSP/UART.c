@@ -20,7 +20,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include "meter.h"
 #include "stdarg.h"
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>

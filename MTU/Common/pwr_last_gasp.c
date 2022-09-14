@@ -348,7 +348,7 @@ void PWRLG_Task( taskParameter )
    /* Create/start all the tasks */
    for ( pTaskList = &OS_template_list_last_gasp[0]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
-      if ( !( pTaskList->TASK_ATTRIBUTES & MQX_AUTO_START_TASK ) )
+      if ( !( pTaskList->TASK_ATTRIBUTES & AUTO_START_TASK ) )
       {
 #if ( RTOS_SELECTION == MQX_RTOS )
          taskID = OS_TASK_Create( pTaskList );
@@ -906,8 +906,6 @@ void PWRLG_Startup( void )
 #if ( MCU_SELECTED == NXP_K24 )
       // Save the low order 8 bits of the RTC Status Register saved at reset before MQX modifies it.
       VBATREG_RTC_SR() = ( uint8_t )( RTC_SR & ( uint32_t )0xFF );
-#elif ( MCU_SELECTED == RA6E1 )
-      /* TODO: RA6: Do we need to special code for RA6? */
 #endif
 #if ( MCU_SELECTED == NXP_K24 )
       PWRLG_LLWU_F3_SET( uLLWU_F3 );
@@ -1756,9 +1754,6 @@ void PWRLG_BSP_Setup( void )
       /* Enable the RTC Clock for other peripherals */
       RTC_CR &= ( uint32_t )~( uint32_t )( RTC_CR_CLKO_MASK );
    }
-#elif ( MCU_SELECTED == RA6E1 )
-   /* TODO: RA6: Any special handling required??? */
-   /* TODO: RA6: Disable Unused Ports and Clocks ???? */
 #endif
 }
 

@@ -335,8 +335,8 @@ returnStatus_t TIME_SYS_Init( void )
    if ( (bool)false == _timeSysSemCreated )
    {
       // counting because need to ensure time_sys does not fall behind
-      if ( OS_SEM_Create(&_timeSysSem, 1000) && OS_MUTEX_Create(&_timeVarsMutex) )  /* TODO: RA6E1: Review the need of 1000 as max value of counting semaphore */
-      {  //Semaphore and Mutex create succeeded, initialize the data structure
+     if ( OS_SEM_Create(&_timeSysSem, 0 ) && OS_MUTEX_Create(&_timeVarsMutex) )
+     {  //Semaphore and Mutex create succeeded, initialize the data structure
 #if (EP == 1)
          FileStatus_t   fileStatusCfg;  //Contains the file status
          statusTimeRequest_ = 0; //Default, time not needed
@@ -2211,7 +2211,7 @@ void TIME_SYS_HandlerTask( taskParameter )
    lastTime = ((uint64_t)sec * 1000000) + usec;
    //End TODO
 #endif
-
+   (void)TIME_SYS_SetTimeFromRTC();
    for ( ; ; ) /* RTOS Task, keep running forever */
    {
       /* Wait for the semaphore. If running off power line, this semaphore will be posted every half cycle otherwise use
@@ -2487,7 +2487,7 @@ void TIME_SYS_reqTimeoutCallback( uint8_t cmd, void *pData )
  * Reentrant: This function is reentrant. This function should only be called from an RTOS Tick ISR
  *
  ******************************************************************************************************************/
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - Using the tickHook provided by FreeRTOS. Need to add a define to call this function
+#if ( RTOS_SELECTION == MQX_RTOS )
 STATIC void TIME_SYS_vApplicationTickHook( void * user_isr_ptr )
 {
    uint32_t primask = __get_PRIMASK();
@@ -2530,7 +2530,7 @@ void vApplicationTickHook()
    /* RTOS tick, signal the timer task */
    if ( _timeSysSemCreated == (bool)true )
    {
-      OS_SEM_Post_fromISR( &_timeSysSem );
+       OS_SEM_Post_fromISR( &_timeSysSem );
    }
 
    TMR_vApplicationTickHook();

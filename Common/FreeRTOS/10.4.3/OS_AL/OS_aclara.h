@@ -82,9 +82,10 @@
 #if OS_MAX_TASK_PRIORITY <= 8
 #error  Highest allowable task priority is nine
 #endif
-
-#if ( RTOS_SELECTION == FREE_RTOS )
-#define MQX_AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */ // TODO: RA6: Update MQX_AUTO_START_TASK to be more generic.
+#if ( RTOS_SELECTION == MQX_RTOS )
+#define AUTO_START_TASK    MQX_AUTO_START_TASK
+#elif ( RTOS_SELECTION == FREE_RTOS )
+#define AUTO_START_TASK    0x01  /* Defining for the FreeRTOS */
 
 #if OS_MIN_TASK_PRIORITY >= configMAX_PRIORITIES
 #error  Task minimum must be less than configMAX_PRIORITIES in FreeRTOSConfig.h
@@ -271,7 +272,7 @@ typedef struct
 typedef void (* TASK_FPTR)(void *);
 typedef struct
 {
-   uint32_t         TASK_TEMPLATE_INDEX;  /* TODO: RA6: This should be an enum*/
+   uint32_t         TASK_TEMPLATE_INDEX;
 
    TASK_FPTR        pvTaskCode;
 
@@ -397,10 +398,9 @@ extern const char pTskName_Sleep[];
 /* FUNCTION PROTOTYPES */
 bool     OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void     OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
-#if ( RTOS_SELECTION == FREE_RTOS ) // TODO: RA6E1 Bob: the conditional is not needed because this file is unique to a FreeRTOS folder
 void OS_EVNT_SET_from_ISR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 void OS_EVNT_DELETE ( OS_EVNT_Obj EventObject );
-#endif
+
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
 void     OS_EVNT_CLEAR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 
