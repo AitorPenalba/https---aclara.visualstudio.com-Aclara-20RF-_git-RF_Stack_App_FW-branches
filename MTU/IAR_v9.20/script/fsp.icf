@@ -130,7 +130,7 @@ if ((OPTION_SETTING_LENGTH == 0) && (FLASH_ORIGIN == FLASH_START))
 }
 else
 {
-  /* Aclara Added: include bootloader a application image */
+  /* Aclara Added: include bootloader in application image */
   if (isdefinedsymbol(BOOTLOADER_START))
   {
     keep { section .boot };
@@ -142,6 +142,15 @@ else
   place in FLASH_region           { ro section .application_vectors* };
 }
 
+/* Aclara Added: place partitions.o persistent cache at the top of RAM memory to avoid conflict with bootloader RAM usage */
+if (isdefinedsymbol(RAM_PERSISTENT_CACHE_LENGTH))
+{
+  define symbol RAM_PERSISTENT_CACHE_START = RAM_START + RAM_LENGTH - RAM_PERSISTENT_CACHE_LENGTH;
+  define symbol RAM_PERSISTENT_CACHE_END = RAM_PERSISTENT_CACHE_START + RAM_PERSISTENT_CACHE_LENGTH - 1;
+  define region PERSISTENT_CACHE_region = mem:[from RAM_PERSISTENT_CACHE_START to RAM_PERSISTENT_CACHE_END];
+  place at start of PERSISTENT_CACHE_region { rw data section .noinit object partitions.o };
+}
+/* Aclara Added/Modified end */
 
 /* If DTC is used, put the DTC vector table at the start of SRAM.
 This avoids memory holes due to 1K alignment required by it. */

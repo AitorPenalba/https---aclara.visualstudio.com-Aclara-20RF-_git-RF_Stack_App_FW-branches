@@ -24,3 +24,4 @@
                 define symbol BOOTLOADER_START = 0x00000000;                /*Aclara modified: position bootloader in start-up program memory (block 0) */
                 define symbol APPLICATION_START = 0x00004000;               /*Aclara modified: reserve 16K start-up program + new program memory (block 0 & block1) */
                 define exported symbol LNKR_BL_FW_VER_ADDR = 0x00000040;    /*Aclara added: location of BL version */
+                define symbol RAM_PERSISTENT_CACHE_LENGTH = 0x800;          /*Aclara added: no_init persistent cache memory size - MUST match bootloader! */
