@@ -399,8 +399,8 @@ static const spiCfg_t _NV_spiCfg =
 #endif // RTOS_SELECTION
 #else
 #define NV_SPI_ChkSharedPortCfg(...)
-#define NV_SPI_MutexLock(...)
-#define NV_SPI_MutexUnlock(...)
+#define NV_SPI_MUTEXLOCK()
+#define NV_SPI_MUTEXUNLOCK()
 #endif   /* NOT BOOTLOADER */
 
 /* ****************************************************************************************************************** */
