@@ -86,6 +86,13 @@ static bool        _tmrUtilSemCreated = false;
 nInt MaxTimersUsed = 0;
 nInt TimersUsed = 0;
 #endif
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS )
+#define MAX_JUMPS_OF_POST_ERRORS 10
+STATIC volatile uint32_t TMR_tickHookSemaphorePostErrors      = 0;
+STATIC          uint32_t TMR_prevTickHookSemaphorePostErrors  = 0;
+STATIC          uint32_t TMR_totalTickHookSemaphorePostErrors = 0;
+STATIC          uint32_t TMR_maximumJumpsOfPostFailures[2][MAX_JUMPS_OF_POST_ERRORS] = { 0 };
+#endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS )
 
 /* ****************************************************************************************************************** */
 /* FUNCTION PROTOTYPES */
@@ -252,7 +259,7 @@ returnStatus_t TMR_HandlerInit( void )
    if ( _tmrUtilSemCreated == false )
    {
       //TODO RA6: NRJ: determine if semaphores need to be counting
-      if ( OS_SEM_Create(&_tmrUtilSem, 0) && OS_MUTEX_Create(&_tmrUtilMutex) )
+      if ( OS_SEM_Create(&_tmrUtilSem, 20) && OS_MUTEX_Create(&_tmrUtilMutex) )
       {
          _tmrUtilSemCreated = true;
          (void)memset(_sTimer, 0, sizeof(_sTimer)); //Initialize Timer data-structure
@@ -303,7 +310,35 @@ void TMR_HandlerTask( taskParameter )
       /* Wait for the semaphore, at each tick, RTOS ISR will give a semaphore */
       if ( true == OS_SEM_Pend(&_tmrUtilSem, OS_WAIT_FOREVER ) )
       {  /* RTOS Tick */
-
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS )
+         uint32_t jump = TMR_tickHookSemaphorePostErrors - TMR_prevTickHookSemaphorePostErrors;
+         TMR_totalTickHookSemaphorePostErrors += jump;
+         TMR_prevTickHookSemaphorePostErrors = TMR_tickHookSemaphorePostErrors;
+         if ( jump > 0 )
+         {
+            for (uint32_t i = 0; i < MAX_JUMPS_OF_POST_ERRORS; i++ )
+            {
+               if ( jump == TMR_maximumJumpsOfPostFailures[0][i] )
+               {
+                  TMR_maximumJumpsOfPostFailures[1][i]++;
+                  break;
+               } else if ( jump > TMR_maximumJumpsOfPostFailures[0][i] )
+               {
+                  if ( i > 0 )
+                  {
+                     for (uint32_t j = MAX_JUMPS_OF_POST_ERRORS - 1; j >= i; j-- )
+                     {
+                        TMR_maximumJumpsOfPostFailures[0][j] = TMR_maximumJumpsOfPostFailures[0][j-1];
+                        TMR_maximumJumpsOfPostFailures[1][j] = TMR_maximumJumpsOfPostFailures[1][j-1];
+                     }
+                  }
+                  TMR_maximumJumpsOfPostFailures[0][i] = jump;
+                  TMR_maximumJumpsOfPostFailures[1][i] = 1;
+                  break;
+               }
+            }
+         }
+#endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS )
          OS_MUTEX_Lock(&_tmrUtilMutex); // Function will not return if it fails
 
          _TMR_Tick_Cntr++;  // Increment the global tick counter (ticks since powerup)
@@ -748,7 +783,14 @@ void TMR_vApplicationTickHook( void )
    /* RTOS tick, signal the timer task */
    if ( _tmrUtilSemCreated == true )
    {
-      OS_SEM_Post_fromISR(&_tmrUtilSem);
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
+      if ( eFAILURE == OS_SEM_Post_fromISR_retStatus( &_tmrUtilSem ) )
+      {
+         TMR_tickHookSemaphorePostErrors++;
+      }
+#else
+       OS_SEM_Post_fromISR( &_tmrUtilSem );
+#endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
    }
 }
 #endif

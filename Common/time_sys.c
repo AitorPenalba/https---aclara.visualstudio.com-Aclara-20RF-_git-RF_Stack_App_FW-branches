@@ -239,6 +239,13 @@ STATIC returnStatus_t   executeAlarm( uint8_t alarmId );
 #if ( RTOS_SELECTION == MQX_RTOS ) // The following is not required by FreeRTOS
 STATIC void             TIME_SYS_vApplicationTickHook( void * user_isr_ptr );
 #endif
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS )
+#define MAX_JUMPS_OF_POST_ERRORS 10
+STATIC volatile uint32_t TIME_tickHookSemaphorePostErrors      = 0;
+STATIC          uint32_t TIME_prevTickHookSemaphorePostErrors  = 0;
+STATIC          uint32_t TIME_totalTickHookSemaphorePostErrors = 0;
+STATIC          uint32_t TIME_maximumJumpsOfPostFailures[2][MAX_JUMPS_OF_POST_ERRORS] = { 0 };
+#endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS )
 
 /* ****************************************************************************************************************** */
 /* FUNCTION DEFINITIONS */
@@ -335,7 +342,7 @@ returnStatus_t TIME_SYS_Init( void )
    if ( (bool)false == _timeSysSemCreated )
    {
       // counting because need to ensure time_sys does not fall behind
-     if ( OS_SEM_Create(&_timeSysSem, 0 ) && OS_MUTEX_Create(&_timeVarsMutex) )
+     if ( OS_SEM_Create(&_timeSysSem, 20 ) && OS_MUTEX_Create(&_timeVarsMutex) )
      {  //Semaphore and Mutex create succeeded, initialize the data structure
 #if (EP == 1)
          FileStatus_t   fileStatusCfg;  //Contains the file status
@@ -2218,6 +2225,35 @@ void TIME_SYS_HandlerTask( taskParameter )
          timeout functionality to run system time.  For Aclara-RF, this semaphore will be posted at twice the rate of
          system clock */
       (void)OS_SEM_Pend( &_timeSysSem, OS_WAIT_FOREVER );
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS )
+      uint32_t jump = TIME_tickHookSemaphorePostErrors - TIME_prevTickHookSemaphorePostErrors;
+      TIME_totalTickHookSemaphorePostErrors += jump;
+      TIME_prevTickHookSemaphorePostErrors = TIME_tickHookSemaphorePostErrors;
+      if ( jump > 0 )
+      {
+         for (uint32_t i = 0; i < MAX_JUMPS_OF_POST_ERRORS; i++ )
+         {
+            if ( jump == TIME_maximumJumpsOfPostFailures[0][i] )
+            {
+               TIME_maximumJumpsOfPostFailures[1][i]++;
+               break;
+            } else if ( jump > TIME_maximumJumpsOfPostFailures[0][i] )
+            {
+               if ( i > 0 )
+               {
+                  for (uint32_t j = MAX_JUMPS_OF_POST_ERRORS - 1; j >= i; j-- )
+                  {
+                     TIME_maximumJumpsOfPostFailures[0][j] = TIME_maximumJumpsOfPostFailures[0][j-1];
+                     TIME_maximumJumpsOfPostFailures[1][j] = TIME_maximumJumpsOfPostFailures[1][j-1];
+                  }
+               }
+               TIME_maximumJumpsOfPostFailures[0][i] = jump;
+               TIME_maximumJumpsOfPostFailures[1][i] = 1;
+               break;
+            }
+         }
+      }
+#endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS )
 #if ( DCU == 1 )
       if (VER_getDCUVersion() != eDCU2) {
          // Copy current clock state
@@ -2530,7 +2566,14 @@ void vApplicationTickHook()
    /* RTOS tick, signal the timer task */
    if ( _timeSysSemCreated == (bool)true )
    {
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
+      if ( eFAILURE == OS_SEM_Post_fromISR_retStatus( &_timeSysSem ) )
+      {
+         TIME_tickHookSemaphorePostErrors++;
+      }
+#else
        OS_SEM_Post_fromISR( &_timeSysSem );
+#endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
    }
 
    TMR_vApplicationTickHook();

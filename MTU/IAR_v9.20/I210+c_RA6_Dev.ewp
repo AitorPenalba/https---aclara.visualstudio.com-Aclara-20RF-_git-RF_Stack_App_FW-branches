@@ -1874,7 +1874,7 @@
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Mutex.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\OS_aclara.h</name>
+                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_aclara.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_que.h</name>
@@ -2276,7 +2276,7 @@
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Common\HMC\HMC_seq_id.h</name>
+                    <name>$PROJ_DIR$\..\Common\HMC\hmc_seq_id.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Common\HMC\hmc_snapshot.c</name>
@@ -2470,9 +2470,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\TargetBuildConfigs\I210+C\RA6\hal.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\TargetBuildConfigs\I210+C\meter.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\TargetBuildConfigs\I210+C\meter_ansi_sig.h</name>
