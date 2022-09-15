@@ -159,6 +159,7 @@
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
 #define OS_SEM_Post_fromISR(SemHandle)                   OS_SEM_POST_fromISR(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend_fromISR(SemHandle)                   OS_SEM_PEND_fromISR(SemHandle, __FILE__, __LINE__)
+#define OS_SEM_Post_fromISR_retStatus(SemHandle)         OS_SEM_POST_fromISR_retStatus(SemHandle, __FILE__, __LINE__)
 #endif
 
 // Mapping HTONS and HTONL with Byte_Swap internal APIs
@@ -452,6 +453,7 @@ void OS_SEM_Reset ( OS_SEM_Handle SemHandle );
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
 void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line );
 void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line );
+returnStatus_t OS_SEM_POST_fromISR_retStatus( OS_SEM_Handle SemHandle, char *file, int line );
 #endif
 
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */

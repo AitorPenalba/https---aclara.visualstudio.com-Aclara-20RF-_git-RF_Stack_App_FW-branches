@@ -224,6 +224,36 @@ void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 } /* end OS_SEM_POST_fromISR () */
 
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
+/*******************************************************************************
+
+  Function name: OS_SEM_POST_fromISR_retStatus
+
+  Purpose: This function will post to the passed in Semaphore
+
+  Arguments: SemHandle - pointer to the Handle structure of the Semaphore
+
+  Returns: eSUCCESS if the post succeeded else eFAILURE
+
+  Notes:
+
+*******************************************************************************/
+returnStatus_t OS_SEM_POST_fromISR_retStatus ( OS_SEM_Handle SemHandle, char *file, int line )
+{
+   returnStatus_t eRetVal = eSUCCESS;
+   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+   if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
+   {
+      OS_SEM_PostFromIsrFailures++;
+      eRetVal = eFAILURE;
+   }
+
+   /* If xHigherPriorityTaskWoken was set to true you we should yield.  The actual macro used here is port specific. */
+   portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+   return ( eRetVal );
+} /* end OS_SEM_POST_fromISR_retStatus () */
+#endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
+
 /*******************************************************************************
 
   Function name: OS_SEM_PEND_fromISR
@@ -248,7 +278,7 @@ void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    }
 } /* end OS_SEM_PEND_fromISR () */
 
-#endif
+#endif // (RTOS_SELECTION == FREE_RTOS)
 
 /*******************************************************************************
 
