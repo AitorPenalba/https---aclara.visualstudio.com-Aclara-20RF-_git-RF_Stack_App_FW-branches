@@ -1467,7 +1467,7 @@ static const OL_tTableDef dircectLookupTbl_                                    =
 
  // lookup table for summation measurements
 static const uomLookupEntry_t masterSummationLookup [] =
-{
+{  //   ST12      ST14      pres   presA   presB   presC   presD    prev   prevA   prevB   prevC   prevD
    { 0x00024000, 0x0000,     12,     57,     58,     59,    139,    578,    587,    596,    605,    614 },  // Wh Q1+Q4 fund + harmonics
    { 0x00018000, 0x0000,     15,    143,    145,    147,    149,    579,    588,    597,    606,    615 },  // Wh Q2+Q3 fund + harmonics
    { 0x8003C002, 0x0000,     17,    429,    430,    431,    432,    586,    595,    604,    613,    622 },  // total Energy VAh (Q1+Q4)+(Q2+Q3)
@@ -1483,7 +1483,7 @@ static const uomLookupEntry_t masterSummationLookup [] =
 
  // lookup table for maximum demand measurements
 static const uomLookupEntry_t masterMaxDemandLookup [] =
-{
+{  //   ST12      ST14      pres   presA   presB   presC   presD    prev   prevA   prevB   prevC   prevD
    { 0x00024400, 0x0000,     45,    334,    335,    336,    337,     88,     48,     50,     93,    169 },  // W Q1+Q4 fund + harmonics
    { 0x00018400, 0x0000,    183,    338,    339,    340,    341,    188,    173,    175,    177,    179 },  // W Q2+Q3 fund + harmonics
    { 0x0003C400, 0x0000,    253,    346,    347,    344,    349,     55,     97,     98,     99,     96 },  // W (Q1+Q4)+(Q2+Q3) fund + harmonics
@@ -1499,7 +1499,7 @@ static const uomLookupEntry_t masterMaxDemandLookup [] =
 
  // lookup table for cumulative demand measurements
 static const uomLookupEntry_t masterCumulativeDemandLookup [] =
-{
+{  //   ST12      ST14      pres   presA   presB   presC   presD    prev   prevA   prevB   prevC   prevD
    { 0x00024400, 0x0000,    468,    477,    486,    495,    504,    513,    522,    531,    540,    549 },  // W Q1+Q4 fund + harmonics
    { 0x00018400, 0x0000,    469,    478,    487,    496,    505,    514,    523,    532,    541,    550 },  // W Q2+Q3 fund + harmonics
    { 0x0003C400, 0x0000,    470,    479,    488,    497,    506,    515,    524,    533,    542,    551 },  // W (Q1+Q4)+(Q2+Q3) fund + harmonics
