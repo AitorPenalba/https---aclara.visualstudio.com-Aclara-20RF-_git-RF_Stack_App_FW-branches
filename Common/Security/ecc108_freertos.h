@@ -74,6 +74,6 @@ extern void             i2c_wakeup(void);
 extern uint8_t          i2c_receive_response(uint8_t size, uint8_t *response);
 extern uint8_t          ecc108p_wakeup();
 extern uint8_t          ecc108p_flush( void );
-extern uint8_t          i2c_send(uint8_t word_address, uint8_t count, uint8_t *buffer);
+extern uint8_t          i2c_send( uint8_t word_address, uint8_t count, const uint8_t *buffer );
 
 #endif

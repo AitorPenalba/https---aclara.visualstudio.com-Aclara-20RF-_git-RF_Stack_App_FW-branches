@@ -321,11 +321,11 @@ void i2c_wakeUp(void)
 uint8_t i2c_receive_response( uint8_t size, uint8_t *response )
 {
    uint8_t status;
-   fsp_err_t err = FSP_SUCCESS;
-   err = R_IIC_MASTER_Read(&g_i2c_master0_ctrl, response, size, false);
+   fsp_err_t err;
+   err = R_IIC_MASTER_Read(&g_i2c_master0_ctrl, response, size, ( bool )false);
    if (err == FSP_SUCCESS)
    {
-      status = (uint8_t)err;
+      status = ( uint8_t )err;
       /* Pend for the receive complete interrupt. Wait for only certain time as there
        * won't be replies for every tranmit command from the security chip */
       ( void ) OS_SEM_Pend( &_i2cTransmitRecieveSem, WRITE_READ_IIC_TIMEOUT );
@@ -336,7 +336,7 @@ uint8_t i2c_receive_response( uint8_t size, uint8_t *response )
    }
    else
    {
-      status = (uint8_t)err;
+      status = ( uint8_t )err;
    }
 
    return status;
@@ -353,7 +353,7 @@ uint8_t i2c_receive_response( uint8_t size, uint8_t *response )
 ***********************************************************************************************************************/
 uint8_t ecc108p_wakeup( void )
 {
-   (void) i2c_wakeUp();
+   i2c_wakeUp();
    return ECC108_SUCCESS;
 }
 
@@ -383,10 +383,10 @@ uint8_t ecc108p_flush( void )
 
    Returns: Send status
 ***********************************************************************************************************************/
-uint8_t i2c_send( uint8_t word_address, uint8_t count, uint8_t *buffer )
+uint8_t i2c_send( uint8_t word_address, uint8_t count, const uint8_t *buffer )
 {
    uint8_t status;
-   fsp_err_t err = FSP_SUCCESS;
+   fsp_err_t err;
    memset(sendVal, 0, sizeof(sendVal));
    uint8_t sendCount = count + 1;
    sendVal[0] = word_address;
@@ -395,7 +395,7 @@ uint8_t i2c_send( uint8_t word_address, uint8_t count, uint8_t *buffer )
       sendVal[i] = buffer[i-1];
    }
 
-   err = R_IIC_MASTER_Write( &g_i2c_master0_ctrl, sendVal, sendCount, false );
+   err = R_IIC_MASTER_Write( &g_i2c_master0_ctrl, sendVal, sendCount, ( bool )false );
    status = (uint8_t)err;
    /* Pend for the transmit complete. Wait for only certain time to avoid hung up
     * as there wont be any interrupts for the reset and sleep commands from the security chip */

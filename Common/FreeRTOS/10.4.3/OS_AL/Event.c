@@ -90,7 +90,7 @@ bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle )
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line )
 {
 #if( RTOS_SELECTION == FREE_RTOS )
-   xEventGroupSetBits( *EventHandle , EventMask );
+   ( void )xEventGroupSetBits( *EventHandle , EventMask );
 #elif( RTOS_SELECTION == MQX_RTOS )
    if ( _lwevent_set ( EventHandle, EventMask ) ) {
       EVL_FirmwareError( "OS_EVNT_Set" , file, line );
@@ -166,7 +166,7 @@ void OS_EVNT_SET_from_ISR ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char
 *******************************************************************************/
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout_msec, char *file, int line )
 {
-   uint32_t SetMask = 0;
+   uint32_t SetMask;
    uint32_t timeout_ticks;  // Timeout in ticks
 
    if ( Timeout_msec > 0 )

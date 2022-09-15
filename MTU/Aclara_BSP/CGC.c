@@ -66,7 +66,7 @@
 **********************************************************************************************************************/
 fsp_err_t CGC_Stop_Unused_Clocks( void )
 {
-   fsp_err_t                err              = FSP_SUCCESS;
+   fsp_err_t                err;
    cgc_clock_t       		 sys_clock_source = CGC_CLOCK_PLL;
    cgc_divider_cfg_t 		 sys_divider_cf   = {0};
 	agt_extended_cfg_t const *p_agt1_extend	= AGT1_LPM_Wakeup_cfg.p_extend;
@@ -183,7 +183,7 @@ fsp_err_t CGC_Stop_Unused_Clocks( void )
 **********************************************************************************************************************/
 void CGC_Switch_SystemClock_to_MOCO( void )
 {
-   fsp_err_t         err             = FSP_SUCCESS;
+   fsp_err_t         err;
    cgc_clocks_cfg_t  clocks_cfg;
 
    clocks_cfg.system_clock          = CGC_CLOCK_MOCO;

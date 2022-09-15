@@ -4203,7 +4203,7 @@ static void generateEventLogCoruptionClearedEvents( EventLogCoruptionClearedEven
    (void)memset((uint8_t *)&nvpInfo, 0, sizeof(nvpInfo) );
 
    // Update the event and nvp info
-   eventInfo.eventId = comDeviceEventLogCorrupted;
+   eventInfo.eventId = ( uint16_t )comDeviceEventLogCorrupted;
    eventInfo.eventKeyValuePairsCount = 1;
    eventInfo.eventKeyValueSize = sizeof(eventBufClearedInfo->alarmIndexValue);
    (void)memcpy( nvpInfo.Key, (uint8_t *)&eventBufClearedInfo->alarmIndexReadingType, sizeof( nvpInfo.Key ) );
@@ -4214,7 +4214,7 @@ static void generateEventLogCoruptionClearedEvents( EventLogCoruptionClearedEven
 
    /* A new event needs to be sent with the same nvp information, update the event id in the event info
       structure and then log the event */
-   eventInfo.eventId = comDeviceEventLogInitialized;
+   eventInfo.eventId = ( uint16_t )comDeviceEventLogInitialized;
 
    // Log the event
    (void)EVL_LogEvent( 171, &eventInfo, &nvpInfo, TIMESTAMP_NOT_PROVIDED, NULL );
