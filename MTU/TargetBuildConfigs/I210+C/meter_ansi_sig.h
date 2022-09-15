@@ -1520,17 +1520,24 @@ static const uomLpLookupEntry_t uomLoadProfileLookupTable [] =
    { 0x00030501, 0x0000,  362,     76,     67,    123,    114 },  //varh Q3+Q4 fund + harmonics (LP)
    { 0x0007C501, 0x0000,  363,     80,     71,    127,    118 },  //varh (Q1+Q2)-(Q3+Q4) fund + harmonics (LP)
    { 0x0003C501, 0x0000,  364,    353,    352,    351,    350 },  //varh (Q1+Q2)+(Q3+Q4) fund + harmonics (LP)
-   { 0x80000246, 0x0004,  370,    369,    368,    367,    366 },  //Temperature Avg
-   { 0x0003C502, 0x0000,  373,    132,    133,    134,    135 },  //Apparent VAh (LP)
    { 0x8003C502, 0x0000,  373,    132,    133,    134,    135 },  //Apparent VAh (Q1+Q4)+(Q2+Q3) (LP)
-   { 0x80280208, 0x0001,    0,    382,    381,    380,    379 },  // VA fund + harmonics MAX  // TODO: RA6E1: Add the same for PhaseB & C
-   { 0x80280208, 0x0002,    0,    387,    386,    385,    384 },  // VA fund + harmonics MIN
+   { 0x80280208, 0x0001,  383,    382,    381,    380,    379 },  // VA fund + harmonics MAX
+   { 0x80280208, 0x0002,  388,    387,    386,    385,    384 },  // VA fund + harmonics MIN
+   { 0x80280208, 0x0003,    0,     34,     34,     34,     34 },  // VA fund + harmonics SNAPSHOT
    { 0x80380209, 0x0004,  376,    165,    162,    433,    434 },  //Average VC fund + harmonics
    { 0x80300209, 0x0004,  377,    166,    163,   3059,   3058 },  //Average VB fund + harmonics
    { 0x80280209, 0x0004,  378,    164,    161,    375,    374 },  //Average VA fund + harmonics
+   { 0x80000246, 0x0004,  370,    369,    368,    367,    366 },  //Temperature Avg
    { 0x80000246, 0x0001,  393,    392,    391,    390,    389 },  //Temperature Max
    { 0x80000246, 0x0002,  398,    397,    396,    395,    394 },  //Temperature Min
+   { 0x80000246, 0x0003,    0,     32,     32,     32,     32 },  // Temperature
+   { 0x8028020C, 0x0003,    0,     25,     25,     25,     25 },  //IA fund + harmonics SNAPSHOT
+   { 0x8028020C, 0x0001,    0,    402,    401,    400,    399 },  //IA fund + harmonics MAX
+   { 0x8028020C, 0x0002,    0,    407,    406,    405,    404 },  //IA fund + harmonics MIN
    { 0x8028020D, 0x0004,  413,    412,    411,    410,    409 },  //Average IA fund + harmonics
+   { 0x8038020C, 0x0001,    0,    417,    416,    415,    414 },  // IC fund + harmonics MAX
+   { 0x8038020C, 0x0002,    0,    422,    421,    420,    419 },  // IC fund + harmonics MIN
+   { 0x8038020C, 0x0003,    0,     27,     27,     27,     27 },  // IC fund + harmonics SNAPSHOT
    { 0x8038020D, 0x0004,  428,    427,    426,    425,    424 },  //Average IC fund + harmonics
    { 0x00424500, 0x0000, 2313,     74,     65,    121,    112 },  //Wh Q1+Q4 fund only (LP)
    { 0x00418500, 0x0000, 2318,   2317,   2316,   2315,   2314 },  //Wh Q2+Q3 fund only (LP)
