@@ -247,10 +247,6 @@ static returnStatus_t init( PartitionData_t const *pPartitionData, DeviceDriverM
 static returnStatus_t dvr_open( PartitionData_t const *pParData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, lCnt Cnt, PartitionData_t const *pParData,
                                 DeviceDriverMem_t const * const * pNextDvr );
-#if ( MCU_SELECTED == RA6E1 )
-static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
-                                 DeviceDriverMem_t const * const * pNxtDvr );
-#endif
 
 #ifndef __BOOTLOADER
 static returnStatus_t close( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
@@ -260,6 +256,10 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt Cnt
                                  DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *pPartitionData,
                              DeviceDriverMem_t const * const * pNextDvr );
+#if ( MCU_SELECTED == RA6E1 )
+static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t const *pParData,
+                                 DeviceDriverMem_t const * const * pNxtDvr );
+#endif
 static returnStatus_t flush( PartitionData_t const *pPartitionData, DeviceDriverMem_t const * const * pNextDvr );
 static returnStatus_t dvr_ioctl( const void *pCmd, void *pData, PartitionData_t const *pPartitionData,
                                  DeviceDriverMem_t const * const * pNextDvr );
@@ -351,7 +351,7 @@ DeviceDriverMem_t sDeviceDriver_eFlash =
    .devWrite      = NULL,        // Write - not required by bootloader
    .devErase      = NULL,        // Erase - not required by bootloader
 #if ( MCU_SELECTED == RA6E1 )
-   .devBlankCheck = blankCheck,  // Blank check - not required by bootloader
+   .devBlankCheck = NULL,        // Blank check - not required by bootloader
 #endif
    .devFlush      = NULL,        // Flush - not required by bootloader
    .devIoctl      = NULL,        // ioctl function - Does Nothing for this implementation
@@ -964,7 +964,7 @@ static returnStatus_t erase( dSize destOffset, lCnt Cnt, PartitionData_t const *
 }
 #endif  /* NOT BOOTLOADER */
 
-#if ( MCU_SELECTED == RA6E1 )
+#if ( MCU_SELECTED == RA6E1 ) && (!defined(__BOOTLOADER))
 /***********************************************************************************************************************
 
    Function Name: blankCheck
