@@ -1527,13 +1527,15 @@ static const uomLpLookupEntry_t uomLoadProfileLookupTable [] =
    { 0x80280208, 0x0001,  383,    382,    381,    380,    379 },  // VA fund + harmonics MAX
    { 0x80280208, 0x0002,  388,    387,    386,    385,    384 },  // VA fund + harmonics MIN
    { 0x80280208, 0x0003,    0,     34,     34,     34,     34 },  // VA fund + harmonics SNAPSHOT
+   { 0x80300208, 0x0003,    0,     36,     36,     36,     36 },  // VB fund + harmonics SNAPSHOT
+   { 0x80380208, 0x0003,    0,     35,     35,     35,     35 },  // VC fund + harmonics SNAPSHOT
    { 0x80380209, 0x0004,  376,    165,    162,    433,    434 },  //Average VC fund + harmonics
    { 0x80300209, 0x0004,  377,    166,    163,   3059,   3058 },  //Average VB fund + harmonics
    { 0x80280209, 0x0004,  378,    164,    161,    375,    374 },  //Average VA fund + harmonics
    { 0x80000246, 0x0004,  370,    369,    368,    367,    366 },  //Temperature Avg
    { 0x80000246, 0x0001,  393,    392,    391,    390,    389 },  //Temperature Max
    { 0x80000246, 0x0002,  398,    397,    396,    395,    394 },  //Temperature Min
-   { 0x80000246, 0x0003,    0,     32,     32,     32,     32 },  // Temperature
+   { 0x80000246, 0x0003,    0,     32,     32,     32,     32 },  //Temperature
    { 0x8028020C, 0x0003,    0,     25,     25,     25,     25 },  //IA fund + harmonics SNAPSHOT
    { 0x8028020C, 0x0001,    0,    402,    401,    400,    399 },  //IA fund + harmonics MAX
    { 0x8028020C, 0x0002,    0,    407,    406,    405,    404 },  //IA fund + harmonics MIN
