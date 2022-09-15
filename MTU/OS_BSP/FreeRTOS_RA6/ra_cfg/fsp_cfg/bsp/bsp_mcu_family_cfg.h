@@ -310,7 +310,7 @@
 #endif
 #endif
 
-            #define BSP_CFG_ROM_REG_OFS1 (0xFFFFFEF8 | (1 << 2) | (3) |  (0 << 8))
+            #define BSP_CFG_ROM_REG_OFS1 (0xFFFFFEF8 | (0 << 2) | (1) |  (0 << 8))
 
             /* Used to create IELS values for the interrupt initialization table g_interrupt_event_link_select. */
             #define BSP_PRV_IELS_ENUM(vector)    (ELC_ ## vector)
