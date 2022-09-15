@@ -9,7 +9,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2013-2018 Aclara.  All Rights Reserved.
+   Copyright 2013-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -1468,45 +1468,48 @@ static const OL_tTableDef dircectLookupTbl_                                    =
  // lookup table for summation measurements
 static const uomLookupEntry_t masterSummationLookup [] =
 {
-   { 0x00024000, 0x0000, {     12,     57,     58,     59,    139 }, {    578,    587,    596,    605,    614 } },  // Wh Q1+Q4 fund + harmonics
-   { 0x00018000, 0x0000, {     15,    143,    145,    147,    149 }, {    579,    588,    597,    606,    615 } },  // Wh Q2+Q3 fund + harmonics
-   { 0x0003C000, 0x0000, {     19,     60,     61,     62,    242 }, {    580,    589,    598,    607,    616 } },  // Wh (Q1+Q4)+(Q2+Q3) fund + harmonics
-   { 0x0007C000, 0x0000, {     20,    105,    106,    107,    108 }, {    581,    590,    599,    608,    617 } },  // Wh (Q1+Q4)-(Q2+Q3) fund + harmonics
-   { 0x0000C001, 0x0000, {     13,    136,    137,    138,    140 }, {    582,    591,    600,    609,    618 } },  // varh Q1+Q2 fund + harmonics
-   { 0x00030001, 0x0000, {     16,    144,    146,    148,    150 }, {    583,    592,    601,    610,    619 } },  // varh Q3+Q4 fund + harmonics
-   { 0x0003C001, 0x0000, {    247,    243,    244,    245,    246 }, {    584,    593,    602,    611,    620 } },  // varh (Q1+Q2)+(Q3+Q4) fund + harmonics
-   { 0x0007C001, 0x0000, {     21,    103,    102,    101,    104 }, {    585,    594,    603,    612,    621 } },  // varh (Q1+Q2)-(Q3+Q4) fund + harmonics
-   { 0x0003C003, 0x0000, {   3338,   3771,   4201,   4631,   5061 }, {   3552,   3986,   4416,   4846,   5276 } }   // Phasor Apparent VAh, fund + harmonics (read)
+   { 0x00024000, 0x0000,     12,     57,     58,     59,    139,    578,    587,    596,    605,    614 },  // Wh Q1+Q4 fund + harmonics
+   { 0x00018000, 0x0000,     15,    143,    145,    147,    149,    579,    588,    597,    606,    615 },  // Wh Q2+Q3 fund + harmonics
+   { 0x8003C002, 0x0000,     17,    429,    430,    431,    432,    586,    595,    604,    613,    622 },  // total Energy VAh (Q1+Q4)+(Q2+Q3)
+   { 0x0003C000, 0x0000,     19,     60,     61,     62,    242,    580,    589,    598,    607,    616 },  // Wh (Q1+Q4)+(Q2+Q3) fund + harmonics
+   { 0x0007C000, 0x0000,     20,    105,    106,    107,    108,    581,    590,    599,    608,    617 },  // Wh (Q1+Q4)-(Q2+Q3) fund + harmonics
+   { 0x0000C001, 0x0000,     13,    136,    137,    138,    140,    582,    591,    600,    609,    618 },  // varh Q1+Q2 fund + harmonics
+   { 0x00030001, 0x0000,     16,    144,    146,    148,    150,    583,    592,    601,    610,    619 },  // varh Q3+Q4 fund + harmonics
+   { 0x0003C001, 0x0000,    247,    243,    244,    245,    246,    584,    593,    602,    611,    620 },  // varh (Q1+Q2)+(Q3+Q4) fund + harmonics
+   { 0x0007C001, 0x0000,     21,    103,    102,    101,    104,    585,    594,    603,    612,    621 },  // varh (Q1+Q2)-(Q3+Q4) fund + harmonics
+   { 0x0003C003, 0x0000,   3338,   3771,   4201,   4631,   5061,   3552,   3986,   4416,   4846,   5276 }   // Phasor Apparent VAh, fund + harmonics (read)
 };
 
 
  // lookup table for maximum demand measurements
 static const uomLookupEntry_t masterMaxDemandLookup [] =
 {
-   { 0x00024400, 0x0000, {     45,    334,    335,    336,    337 }, {     88,     48,     50,     93,    169 } },  // W Q1+Q4 fund + harmonics
-   { 0x00018400, 0x0000, {    183,    338,    339,    340,    341 }, {    188,    173,    175,    177,    179 } },  // W Q2+Q3 fund + harmonics
-   { 0x0003C400, 0x0000, {    253,    346,    347,    344,    349 }, {     55,     97,     98,     99,     96 } },  // W (Q1+Q4)+(Q2+Q3) fund + harmonics
-   { 0x0007C400, 0x0000, {    250,    342,    343,    348,    345 }, {     56,     89,     90,     91,     92 } },  // W (Q1+Q4)-(Q2+Q3) fund + harmonics
-   { 0x0000C401, 0x0000, {     47,    201,    449,    454,    459 }, {    187,     49,     51,    168,    170 } },  // var Q1+Q2 fund + harmonics
-   { 0x00030401, 0x0000, {    228,    445,    450,    455,    460 }, {    229,    174,    176,    178,    180 } },  // var Q3+Q4 fund + harmonics
-   { 0x0003C401, 0x0000, {    254,    446,    451,    456,    461 }, {    257,    238,    239,    240,    241 } },  // var (Q1+Q2)+(Q3+Q4) fund + harmonics
-   { 0x0007C401, 0x0000, {    252,    447,    452,    457,    462 }, {    256,    234,    235,    236,    237 } },  // var (Q1+Q2)-(Q3+Q4) fund + harmonics
-   { 0x0003C403, 0x0000, {   7544,   5491,   6005,   6519,   7033 }, {   7796,   5748,   6262,   6776,   7290 } }   // Phasor Apparent VA, fund + harmonics
+   { 0x00024400, 0x0000,     45,    334,    335,    336,    337,     88,     48,     50,     93,    169 },  // W Q1+Q4 fund + harmonics
+   { 0x00018400, 0x0000,    183,    338,    339,    340,    341,    188,    173,    175,    177,    179 },  // W Q2+Q3 fund + harmonics
+   { 0x0003C400, 0x0000,    253,    346,    347,    344,    349,     55,     97,     98,     99,     96 },  // W (Q1+Q4)+(Q2+Q3) fund + harmonics
+   { 0x0007C400, 0x0000,    250,    342,    343,    348,    345,     56,     89,     90,     91,     92 },  // W (Q1+Q4)-(Q2+Q3) fund + harmonics
+   { 0x0000C401, 0x0000,     47,    201,    449,    454,    459,    187,     49,     51,    168,    170 },  // var Q1+Q2 fund + harmonics
+   { 0x00030401, 0x0000,    228,    445,    450,    455,    460,    229,    174,    176,    178,    180 },  // var Q3+Q4 fund + harmonics
+   { 0x0003C401, 0x0000,    254,    446,    451,    456,    461,    257,    238,    239,    240,    241 },  // var (Q1+Q2)+(Q3+Q4) fund + harmonics
+   { 0x0007C401, 0x0000,    252,    447,    452,    457,    462,    256,    234,    235,    236,    237 },  // var (Q1+Q2)-(Q3+Q4) fund + harmonics
+   { 0x0003C403, 0x0000,   7544,   5491,   6005,   6519,   7033,   7796,   5748,   6262,   6776,   7290 },  // Phasor Apparent VA, fund + harmonics
+   { 0x8003C402, 0x0000,    230,    448,    453,    458,    463,    231,    464,    465,    466,    467 }   // Apparent VA (Q1+Q4)+(Q2+Q3)
 };
 
 
  // lookup table for cumulative demand measurements
 static const uomLookupEntry_t masterCumulativeDemandLookup [] =
 {
-   { 0x00024400, 0x0000, {    468,    477,    486,    495,    504 }, {    513,    522,    531,    540,    549 } },  // W Q1+Q4 fund + harmonics
-   { 0x00018400, 0x0000, {    469,    478,    487,    496,    505 }, {    514,    523,    532,    541,    550 } },  // W Q2+Q3 fund + harmonics
-   { 0x0003C400, 0x0000, {    470,    479,    488,    497,    506 }, {    515,    524,    533,    542,    551 } },  // W (Q1+Q4)+(Q2+Q3) fund + harmonics
-   { 0x0007C400, 0x0000, {    471,    480,    489,    498,    507 }, {    516,    525,    534,    543,    552 } },  // W (Q1+Q4)-(Q2+Q3) fund + harmonics
-   { 0x0000C401, 0x0000, {    472,    481,    490,    499,    508 }, {    517,    526,    535,    544,    553 } },  // var Q1+Q2 fund + harmonics
-   { 0x00030401, 0x0000, {    473,    482,    491,    500,    509 }, {    518,    527,    536,    545,    554 } },  // var Q3+Q4 fund + harmonics
-   { 0x0003C401, 0x0000, {    474,    483,    492,    501,    510 }, {    519,    528,    537,    546,    555 } },  // var (Q1+Q2)+(Q3+Q4) fund + harmonics
-   { 0x0007C401, 0x0000, {    475,    484,    493,    502,    511 }, {    520,    529,    538,    547,    556 } },  // var (Q1+Q2)-(Q3+Q4) fund + harmonics
-   { 0x0003C403, 0x0000, {   8053,   8453,   8853,   9253,   9653 }, {   8253,   8653,   9053,   9453,   9853 } }   // Phasor Apparent VA, fund + harmonics
+   { 0x00024400, 0x0000,    468,    477,    486,    495,    504,    513,    522,    531,    540,    549 },  // W Q1+Q4 fund + harmonics
+   { 0x00018400, 0x0000,    469,    478,    487,    496,    505,    514,    523,    532,    541,    550 },  // W Q2+Q3 fund + harmonics
+   { 0x0003C400, 0x0000,    470,    479,    488,    497,    506,    515,    524,    533,    542,    551 },  // W (Q1+Q4)+(Q2+Q3) fund + harmonics
+   { 0x0007C400, 0x0000,    471,    480,    489,    498,    507,    516,    525,    534,    543,    552 },  // W (Q1+Q4)-(Q2+Q3) fund + harmonics
+   { 0x0000C401, 0x0000,    472,    481,    490,    499,    508,    517,    526,    535,    544,    553 },  // var Q1+Q2 fund + harmonics
+   { 0x00030401, 0x0000,    473,    482,    491,    500,    509,    518,    527,    536,    545,    554 },  // var Q3+Q4 fund + harmonics
+   { 0x0003C401, 0x0000,    474,    483,    492,    501,    510,    519,    528,    537,    546,    555 },  // var (Q1+Q2)+(Q3+Q4) fund + harmonics
+   { 0x0007C401, 0x0000,    475,    484,    493,    502,    511,    520,    529,    538,    547,    556 },  // var (Q1+Q2)-(Q3+Q4) fund + harmonics
+   { 0x8003C402, 0x0000,    476,    485,    494,    503,    512,    521,    530,    539,    548,    557 },  // Cumulative Total VA (Q1+Q4)+(Q2+Q3)
+   { 0x0003C403, 0x0000,   8053,   8453,   8853,   9253,   9653,   8253,   8653,   9053,   9453,   9853 }   // Phasor Apparent VA, fund + harmonics
 };
 
 
