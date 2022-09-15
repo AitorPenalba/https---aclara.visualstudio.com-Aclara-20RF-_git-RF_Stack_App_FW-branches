@@ -677,7 +677,7 @@ static void expt_frm_dump(void const * ext_frm_ptr)
    printf( "%s", pBuf );
 
    /* Execute software reset */
-   NVIC_SystemReset();
+   RESET();
 }
 /*lint +esym(818, ext_frm_ptr)   */
 
