@@ -675,6 +675,10 @@ int BL_MAIN_Main( void )
    DfwBlInfo_t             DFWinfo[ MAX_COPY_RANGES ];
    bool                    success = ( bool )true;
    bool                    copyAttempted = ( bool )false;
+#if ( MCU_SELECTED == RA6E1 )
+   uint32_t                crcDfwInfo;
+   uint32_t                expectedCrcDfwInfo;
+#endif
 
    WDOG_Disable();
 
@@ -710,23 +714,23 @@ int BL_MAIN_Main( void )
    /* Verify DFW Bootloader partition is accessible.  */
    if ( eSUCCESS == PAR_partitionFptr.parOpen( &pDFWinfo, ePART_DFW_BL_INFO, 0 ) )
    {
-      /* Verify both external NV and internal NV are accessible.  */
-      if ( eSUCCESS == PAR_partitionFptr.parOpen( &pNVinfo, ePART_DFW_PGM_IMAGE, 0 )  &&
-         ( eSUCCESS == PAR_partitionFptr.parOpen( &pCodeInfo, ePART_APP_CODE, 0 ) ) )
-      {
-         /* check for possible bootloader info */
-         while ( ( DFWInfoIdx < ARRAY_IDX_CNT( DFWinfo ) ) )  /* Loop while in valid DFWinfo[] range and */
-         {
 #if ( MCU_SELECTED == RA6E1)
-            /* is DFW INFO blank in the DFW BL INFO partition? */
-            if ( eSUCCESS == PAR_partitionFptr.parBlankCheck(
-                                                PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
-                                                sizeof( DfwBlInfo_t ), pDFWinfo ))
-            {
-               /* blank indicates no update, skip */
-            }
-            else
+      /* Check whether we need to update the application */
+      crcDfwInfo = bl_crc32( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, (uint8_t *) ( pDFWinfo->PhyStartingAddress + PART_DFW_BL_INFO_DATA_OFFSET), ( lCnt )sizeof( DFWinfo ) );
+      ( void ) PAR_partitionFptr.parRead( ( uint8_t * )&expectedCrcDfwInfo, ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWinfo ) ), sizeof( crcDfwInfo ), pDFWinfo );
+      if ( expectedCrcDfwInfo != crcDfwInfo )
+      {
+         /* CRC not matched - do nothing, go with the existing image */
+      }
+      else
+      {
 #endif
+         /* Verify both external NV and internal NV are accessible.  */
+         if ( eSUCCESS == PAR_partitionFptr.parOpen( &pNVinfo, ePART_DFW_PGM_IMAGE, 0 )  &&
+            ( eSUCCESS == PAR_partitionFptr.parOpen( &pCodeInfo, ePART_APP_CODE, 0 ) ) )
+         {
+            /* check for possible bootloader info */
+            while ( ( DFWInfoIdx < ARRAY_IDX_CNT( DFWinfo ) ) )  /* Loop while in valid DFWinfo[] range and */
             {
                /* Read an update segment from the DFW BL INFO partition.   */
                if ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
@@ -749,6 +753,9 @@ int BL_MAIN_Main( void )
                         DFWinfo[ DFWInfoIdx ].FailCount = 0;
                      }
 
+#if ( MCU_SELECTED == RA6E1)
+                     (void) PAR_partitionFptr.parErase( ( flAddr )0, PART_APP_CODE_SIZE, pCodeInfo );
+#endif
                      while ( Length != 0 )    /* Loop until all bytes in the range have been copied.  */
                      {
                         /* Calculate data to be copied per pass.  */
@@ -782,9 +789,9 @@ int BL_MAIN_Main( void )
                      }
                   }
                }
-            }
 
-            DFWInfoIdx++;  /* Bump to next update segment */
+               DFWInfoIdx++;  /* Bump to next update segment */
+            }
          }
       }
    }

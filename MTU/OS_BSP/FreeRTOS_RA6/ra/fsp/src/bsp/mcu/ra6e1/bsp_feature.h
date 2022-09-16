@@ -212,7 +212,7 @@
 #define BSP_FEATURE_FLASH_HP_DF_BLOCK_SIZE                (64U)
 #define BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE                (4U)
 #define BSP_FEATURE_FLASH_HP_HAS_FMEPROT                  (1)
-#define BSP_FEATURE_FLASH_HP_SUPPORTS_DUAL_BANK           (1)
+#define BSP_FEATURE_FLASH_HP_SUPPORTS_DUAL_BANK           (0)
 #define BSP_FEATURE_FLASH_HP_VERSION                      (40U)
 #define BSP_FEATURE_FLASH_LP_AWS_FAW_MASK                 (0) // Feature not available on this MCU
 #define BSP_FEATURE_FLASH_LP_AWS_FAW_SHIFT                (0) // Feature not available on this MCU
