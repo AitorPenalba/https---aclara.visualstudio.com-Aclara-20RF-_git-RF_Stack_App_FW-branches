@@ -592,7 +592,7 @@ void ALRM_RealTimeTask ( taskParameter )
                                           if( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_getMeterReading( iA, &readingInfo ) )
                                           {  // get the current value for phase A
                                              readingInfo.Value.uintValue = readingInfo.Value.uintValue / 10; // convert deci amps to amps
-                                             progEvent.eventKeyValueSize = ( uint8_t )readingInfo.valueSizeInBytes;
+                                             progEvent.eventKeyValueSize = (uint8_t)readingInfo.valueSizeInBytes;
                                              *( uint16_t * )keyVal[ progEvent.eventKeyValuePairsCount ].Key   = ( uint16_t )readingInfo.readingType;
                                              (void)memcpy (&keyVal[ progEvent.eventKeyValuePairsCount ].Value[0], (uint8_t *)&readingInfo.Value.uintValue, readingInfo.valueSizeInBytes );
                                              progEvent.eventKeyValuePairsCount++;
@@ -604,7 +604,7 @@ void ALRM_RealTimeTask ( taskParameter )
                                           if( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_getMeterReading( iB, &readingInfo ) )
                                           {  // get the current value for phase A
                                              readingInfo.Value.uintValue = readingInfo.Value.uintValue / 10; // convert deci amps to amps
-                                             progEvent.eventKeyValueSize = ( uint8_t )readingInfo.valueSizeInBytes;
+                                             progEvent.eventKeyValueSize = (uint8_t)readingInfo.valueSizeInBytes;
                                              *( uint16_t * )keyVal[ progEvent.eventKeyValuePairsCount ].Key   = ( uint16_t )readingInfo.readingType;
                                              (void)memcpy (&keyVal[ progEvent.eventKeyValuePairsCount ].Value[0], (uint8_t *)&readingInfo.Value.uintValue, readingInfo.valueSizeInBytes );
                                              progEvent.eventKeyValuePairsCount++;
@@ -616,7 +616,7 @@ void ALRM_RealTimeTask ( taskParameter )
                                           if( CIM_QUALCODE_SUCCESS == INTF_CIM_CMD_getMeterReading( iC, &readingInfo ) )
                                           {  // get the current value for phase A
                                              readingInfo.Value.uintValue = readingInfo.Value.uintValue / 10; // convert deci amps to amps
-                                             progEvent.eventKeyValueSize = ( uint8_t )readingInfo.valueSizeInBytes;
+                                             progEvent.eventKeyValueSize = (uint8_t)readingInfo.valueSizeInBytes;
                                              *( uint16_t * )keyVal[ progEvent.eventKeyValuePairsCount ].Key   = ( uint16_t )readingInfo.readingType;
                                              (void)memcpy (&keyVal[ progEvent.eventKeyValuePairsCount ].Value[0], (uint8_t *)&readingInfo.Value.uintValue, readingInfo.valueSizeInBytes );
                                              progEvent.eventKeyValuePairsCount++;

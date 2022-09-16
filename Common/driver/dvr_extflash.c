@@ -1317,10 +1317,10 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
 
          OS_TICK_Get_CurrentElapsedTicks(&endTime); /* update endtime to the latest ticktime */
 #endif   /* NOT BOOTLOADER  */
-         (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), ( bool )true ); /* check nvStatus for busy */
+         (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
          /* The following duplicate read of the flash chip's status ensures that we do not get a "stale" value. *
           * This was found on the K24 while looking for a serial flash corruption problem.                      */
-         (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), ( bool )true ); /* check nvStatus for busy */
+         (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
       } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
 
 #if ( MCU_SELECTED == RA6E1 )
@@ -1726,7 +1726,7 @@ static void disableWrites( uint8_t port )
       NV_SPI_MUTEXLOCK();
       NV_SPI_ChkSharedPortCfg(port);
       NV_CS_ACTIVE(); /* Activate the chip select  */
-      (void)NV_SPI_PORT_WRITE( port, &instr, sizeof(instr), ( bool )false ); /* WR the Instr to the chip */
+      (void)NV_SPI_PORT_WRITE( port, &instr, sizeof(instr), (bool)false ); /* WR the Instr to the chip */
       NV_CS_INACTIVE(); /* Activate the chip select  */
       NV_SPI_MUTEXUNLOCK();
 #ifndef __BOOTLOADER
@@ -1736,7 +1736,7 @@ static void disableWrites( uint8_t port )
          NV_SPI_MUTEXLOCK();
          NV_SPI_ChkSharedPortCfg(port);
          NV_CS_ACTIVE(); /* Activate the chip select  */
-         (void)NV_SPI_PORT_WRITE( port, &instr, sizeof(instr), ( bool )false ); /* WR the Instr to the chip */
+         (void)NV_SPI_PORT_WRITE( port, &instr, sizeof(instr), (bool)false ); /* WR the Instr to the chip */
          NV_CS_INACTIVE(); /* Activate the chip select  */
          NV_SPI_MUTEXUNLOCK();
          bUseHardwareBsy_ = 0;
@@ -1777,11 +1777,11 @@ static returnStatus_t localRead( uint8_t *pDest, const dSize nSrc, const lCnt Cn
       NV_SPI_MUTEXLOCK();
       NV_SPI_ChkSharedPortCfg(pDevice->port);
       NV_CS_ACTIVE(); /* Assert the chip select  */
-      eRetVal = NV_SPI_PORT_WRITE( pDevice->port, ( uint8_t * ) & sIA, sizeof ( sIA ), ( bool )true ); /* WR the Instr to the chip */
+      eRetVal = NV_SPI_PORT_WRITE( pDevice->port, ( uint8_t * ) & sIA, sizeof ( sIA ), (bool)true ); /* WR the Instr to the chip */
       if ( eSUCCESS == eRetVal )
       {
          /* Read from the SPI port */
-         eRetVal = NV_SPI_PORT_READ( pDevice->port, pDest, (uint16_t)Cnt, ( bool )false ); /* Read the data back */
+         eRetVal = NV_SPI_PORT_READ( pDevice->port, pDest, (uint16_t)Cnt, (bool)false ); /* Read the data back */
          if ( eSUCCESS == eRetVal )
          {
             INVB_invertBits( pDest, (uint16_t)Cnt ); /* Invert Every Byte Read */
@@ -1826,7 +1826,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
          NV_SPI_MUTEXLOCK();
          NV_SPI_ChkSharedPortCfg(pDevice->port);
          NV_CS_ACTIVE(); /* Activate the chip select  */
-         eRetVal = NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof ( instr ), ( bool )true ); /* WR the Instr to the chip */
+         eRetVal = NV_SPI_PORT_WRITE( pDevice->port, &instr, sizeof ( instr ), (bool)true ); /* WR the Instr to the chip */
          if ( eSUCCESS == eRetVal )
 
          {
@@ -1834,7 +1834,7 @@ static returnStatus_t IdNvMemory( SpiFlashDevice_t const *pDevice )
             uint8_t index;    /* Used to index through the sDeviceId table to find a match */
 
             /* Read the Device ID */
-            eRetVal = NV_SPI_PORT_READ( pDevice->port, &mfgId[0], sizeof(mfgId), ( bool )false ); /* Read the data back */
+            eRetVal = NV_SPI_PORT_READ( pDevice->port, &mfgId[0], sizeof(mfgId), (bool)false ); /* Read the data back */
             if ( eSUCCESS == eRetVal )
             {
                /* Search for the device ID in the table. */
@@ -1932,7 +1932,7 @@ static void isr_busy( void )
 void isr_busy( external_irq_callback_args_t * p_args )
 #endif
 {
-   ( void )DVR_EFL_BUSY_IRQ_DI();              /* Disable the ISR */
+   (void)DVR_EFL_BUSY_IRQ_DI();              /* Disable the ISR */
    if ( eRtosCmdsEn == rtosCmds_ )
    {
 #if ( MCU_SELECTED == NXP_K24 )
