@@ -68,7 +68,7 @@
 #define MAC_LINK_PARAMETERS               0  /* Supports Decoding MAC Link Parameters Messages */
 #define MAC_CMD_RESP_TIME_DIVERSITY       0  /* Not an EP feature */
 #define TX_THROTTLE_CONTROL               0  /* 0=No Tx Throttling, 1=Tx Throttling */
-#define BM_USE_KERNEL_AWARE_DEBUGGING     1  // TODO: RA6E1 Bob: remove this before release
+#define BM_USE_KERNEL_AWARE_DEBUGGING     0  /* This helps to see the name of the Buffer pool while debugging */
 #define GET_TEMPERATURE_FROM_RADIO        1  /* When GET_TEMPERATURE_FROM_RADIO set as 1 the radio temperature calculated using the RA6E1.
 
                                                While using the RA6E1 there are two methods for calculate the radio temperature.

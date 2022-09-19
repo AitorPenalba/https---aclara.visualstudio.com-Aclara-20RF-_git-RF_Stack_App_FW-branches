@@ -205,9 +205,9 @@ BM_EXTERN const bufferPoolParams_t BM_bufferPoolParams[14]   /* Note:  Must chan
    { "qBufferD36",     36,   100, eBM_DEBUG, eBM_INT_RAM    }, // Many DTLS_DEBUG alloc/free messages fit this smaller size
 #endif
 #endif
-   { "qBufferD120",    120,   40, /* 40, */ eBM_DEBUG, eBM_INT_RAM      }, // TODO: RA6E1 Bob: temporarily increase number of debug buffers, restore later!
+   { "qBufferD120",    120,   40, eBM_DEBUG, eBM_INT_RAM      },
    { "qBufferD192",    192,    5, eBM_DEBUG, eBM_INT_RAM      },
-   { "qBufferD400",    DEBUG_MSG_SIZE,    3, eBM_DEBUG,     eBM_INT_RAM      }  // Maximum debug line size. Very rare; may be used by dtls and PHY and U? command
+   { "qBufferD584",    DEBUG_MSG_SIZE,    3, eBM_DEBUG,     eBM_INT_RAM      }  // Maximum debug line size. Very rare; may be used by dtls and PHY and U? command
 #else //No BM_USE_KERNEL_AWARE_DEBUGGING
    /* size, count, Buffer Type */
    {    52,    30, eBM_APP,   eBM_INT_RAM    },
