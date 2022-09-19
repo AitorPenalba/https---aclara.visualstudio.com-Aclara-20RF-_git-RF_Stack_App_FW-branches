@@ -1492,7 +1492,7 @@
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.c</name>
                             </file>
                             <file>
-                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GFSKStruct2.h</name>
+                                <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\FreqDomMlseP4GfskStruct2.h</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\..\Common\NET\PHY\SoftDemodulator\SyncAndPayloadDemodulator\processDerotatedSPDSamples.c</name>
@@ -1874,7 +1874,7 @@
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\Mutex.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_aclara.h</name>
+                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\OS_aclara.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_que.h</name>
@@ -2358,7 +2358,7 @@
                 <name>$PROJ_DIR$\..\Common\APP_MSG_Handler.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Common\App_Msg_HandlerTable.h</name>
+                <name>$PROJ_DIR$\..\Common\APP_MSG_HandlerTable.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Common\demand.c</name>

@@ -259,7 +259,7 @@ returnStatus_t TMR_HandlerInit( void )
    if ( _tmrUtilSemCreated == false )
    {
       //TODO RA6: NRJ: determine if semaphores need to be counting
-      if ( OS_SEM_Create(&_tmrUtilSem, 20) && OS_MUTEX_Create(&_tmrUtilMutex) )
+      if ( OS_SEM_Create(&_tmrUtilSem, 400) && OS_MUTEX_Create(&_tmrUtilMutex) )
       {
          _tmrUtilSemCreated = true;
          (void)memset(_sTimer, 0, sizeof(_sTimer)); //Initialize Timer data-structure
