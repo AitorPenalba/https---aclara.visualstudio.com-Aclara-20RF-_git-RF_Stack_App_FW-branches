@@ -342,7 +342,7 @@ returnStatus_t TIME_SYS_Init( void )
    if ( (bool)false == _timeSysSemCreated )
    {
       // counting because need to ensure time_sys does not fall behind
-     if ( OS_SEM_Create(&_timeSysSem, 20 ) && OS_MUTEX_Create(&_timeVarsMutex) )
+     if ( OS_SEM_Create(&_timeSysSem, 400 ) && OS_MUTEX_Create(&_timeVarsMutex) )
      {  //Semaphore and Mutex create succeeded, initialize the data structure
 #if (EP == 1)
          FileStatus_t   fileStatusCfg;  //Contains the file status

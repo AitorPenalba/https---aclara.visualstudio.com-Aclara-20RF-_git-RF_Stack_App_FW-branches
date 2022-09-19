@@ -215,12 +215,10 @@ void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
       OS_SEM_PostFromIsrFailures++;
-      /* TODO: */
-      //      APP_ERR_PRINT("OS_SEM_POST!");
-      //      EVL_FirmwareError( "OS_SEM_Post" , file, line );
+      EVL_FirmwareError( "OS_SEM_PostFromIsr" , file, line );
    }
 
-   /* If xHigherPriorityTaskWoken was set to true you we should yield.  The actual macro used here is port specific. */
+   /* If xHigherPriorityTaskWoken was set to true we should yield.  The actual macro used here is port specific. */
    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 } /* end OS_SEM_POST_fromISR () */
 
@@ -238,13 +236,14 @@ void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
   Notes:
 
 *******************************************************************************/
+static uint32_t OS_SEM_PostFromIsrRetStatusFailures = 0;
 returnStatus_t OS_SEM_POST_fromISR_retStatus ( OS_SEM_Handle SemHandle, char *file, int line )
 {
    returnStatus_t eRetVal = eSUCCESS;
    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
    if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
-      OS_SEM_PostFromIsrFailures++;
+      OS_SEM_PostFromIsrRetStatusFailures++;
       eRetVal = eFAILURE;
    }
 

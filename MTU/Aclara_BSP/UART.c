@@ -421,12 +421,7 @@ returnStatus_t UART_init ( void )
       uartRingBuf[i].head = 0;
       uartRingBuf[i].tail = 0;
 
-      uint16_t semReceiveCount = 0;
-      if ( ( i == UART_MANUF_TEST ) || ( i == UART_DEBUG_PORT ) ) // TODO: check optical port needed counting semaphore
-      {
-         semReceiveCount = uartRingBuf[i].size;
-      }
-
+      uint16_t semReceiveCount = uartRingBuf[i].size;
       if( 0 == ( ( OS_SEM_Create  ( &UART_semHandle[i].receiveUART_sem, semReceiveCount ) ) &&
                  ( OS_SEM_Create  ( &UART_semHandle[i].transmitUART_sem, 0 ) )              &&
                  ( OS_MUTEX_Create( &UART_writeMutex[i] ) ) ) )
