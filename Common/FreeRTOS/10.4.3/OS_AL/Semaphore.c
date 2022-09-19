@@ -215,7 +215,6 @@ void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
       OS_SEM_PostFromIsrFailures++;
-//      APP_ERR_PRINT("OS_SEM_POST!");
       EVL_FirmwareError( "OS_SEM_PostFromIsr" , file, line );
    }
 
