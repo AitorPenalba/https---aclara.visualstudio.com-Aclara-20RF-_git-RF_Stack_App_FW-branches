@@ -15742,7 +15742,7 @@ uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
 }
 #endif
 
-#if (  TM_HARDFAULT == 1 )
+#if ( TM_HARDFAULT == 1 )
 /******************************************************************************
 
    Function Name: DBG_CommandLine_hardfault ( uint32_t argc, char *argv[] )
@@ -15759,12 +15759,10 @@ uint32_t DBG_CommandLine_Dtls( uint32_t argc, char *argv[] )
 ******************************************************************************/
 static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
 {
-
-   uint16_t command;
-   command = ( uint16_t )atoi( argv[1] );
-
+   /* command index provided? */
    if ( argc > 1 )
    {
+      uint16_t command = ( uint16_t )atoi( argv[1] );
       switch ( command )
       {
          case ( 1 ) :
@@ -15782,7 +15780,7 @@ static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
             SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk;
 
             volatile int x = 10;
-            volatile int y = 0;
+            /* volatile */ int y = 0;  // prevent compiler warning
             volatile int result;
             result = x / y;
 
@@ -15799,7 +15797,20 @@ static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
 
          default:
          {
-            INFO_printf( "Command %d not implemented", command );
+            /* handle unused interrupt (38..95) generation */
+            if ((command >= 38) && (command <= 95))
+            {
+               uint32_t index = command / 32;
+               uint32_t bit   = command % 32;
+
+               /* enable interrupt vectoring and trigger interrupt */
+               NVIC->ISER[index] = (1 << bit);
+               NVIC->ISPR[index] = (1 << bit);
+            }
+            else
+            {
+               INFO_printf( "Command %d not implemented", command );
+            }
             break;
          }
       }
@@ -15807,7 +15818,7 @@ static uint32_t DBG_CommandLine_hardfault( uint32_t argc, char *argv[] )
    else
    {
       INFO_printf( "USAGE: hardfault fault" );
-      INFO_printf( "fault: 1=SVC fault, 2=TBD ..." );
+      INFO_printf( "fault: 1=SVC fault, 2=div-by-0, 38-95=trigger unused int ..." );
    }
 
    return 0;

@@ -92,18 +92,22 @@ void bsp_irq_cfg (void)
 
     /* Place all vectors in non-secure state unless they are used in the secure project. */
     uint32_t interrupt_security_state[BSP_ICU_VECTOR_MAX_ENTRIES / BSP_PRV_BITS_PER_WORD];
-    memset(&interrupt_security_state, UINT8_MAX, sizeof(interrupt_security_state));
 
-    for (uint32_t i = 0U; i < BSP_ICU_VECTOR_MAX_ENTRIES; i++)
-    {
-        if (0U != g_interrupt_event_link_select[i])
-        {
-            /* This is a secure vector. Clear the associated bit. */
-            uint32_t index = i / BSP_PRV_BITS_PER_WORD;
-            uint32_t bit   = i % BSP_PRV_BITS_PER_WORD;
-            interrupt_security_state[index] &= ~(1U << bit);
-        }
-    }
+   /* Aclara modified: set the interrupt security state for all defined and unused interrupts to secure (0) */
+    memset(&interrupt_security_state, 0, sizeof(interrupt_security_state));
+//    memset(&interrupt_security_state, UINT8_MAX, sizeof(interrupt_security_state));
+//
+//    for (uint32_t i = 0U; i < BSP_ICU_VECTOR_MAX_ENTRIES; i++)
+//    {
+//        if (0U != g_interrupt_event_link_select[i])
+//        {
+//            /* This is a secure vector. Clear the associated bit. */
+//            uint32_t index = i / BSP_PRV_BITS_PER_WORD;
+//            uint32_t bit   = i % BSP_PRV_BITS_PER_WORD;
+//            interrupt_security_state[index] &= ~(1U << bit);
+//        }
+//    }
+    /* Aclara modified - End */
 
     /* The Secure Attribute managed within the ARM CPU NVIC must match the security attribution of IELSEn
      * (Reference section 13.2.9 in the RA6M4 manual R01UH0890EJ0050). */

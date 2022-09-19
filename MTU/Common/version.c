@@ -96,7 +96,7 @@
 #ifdef __BOOTLOADER
    #define BOOTLOADER_VER    ((uint8_t)2)    /* current bootloader version */
    #define BOOTLOADER_REV    ((uint8_t)0)    /* current bootloader revision */
-   #define BOOTLOADER_BUILD  ((uint16_t)5)   /* current bootloader build */
+   #define BOOTLOADER_BUILD  ((uint16_t)6)   /* current bootloader build */
 #else //Application version
    #define FIRMWARE_VER    ((uint8_t)3)      /* current firmware version */
    #define FIRMWARE_REV    ((uint8_t)0)      /* current firmware revision */
