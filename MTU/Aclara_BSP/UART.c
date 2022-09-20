@@ -421,7 +421,7 @@ returnStatus_t UART_init ( void )
       uartRingBuf[i].head = 0;
       uartRingBuf[i].tail = 0;
 
-      uint16_t semReceiveCount = uartRingBuf[i].size * 2;
+      uint16_t semReceiveCount = uartRingBuf[i].size * 2; /* Make sure we never run out of semaphore counts */
       if( 0 == ( ( OS_SEM_Create  ( &UART_semHandle[i].receiveUART_sem, semReceiveCount ) ) &&
                  ( OS_SEM_Create  ( &UART_semHandle[i].transmitUART_sem, 0 ) )              &&
                  ( OS_MUTEX_Create( &UART_writeMutex[i] ) ) ) )
