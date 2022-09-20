@@ -1752,6 +1752,10 @@ static void mfgpReadByte( uint8_t rxByte )
                   BM_free( commandBuf ); /* The queue was full so recipient will not get it so we must free buffer */
                }
             }
+            else
+            {
+               BM_free( commandBuf ); /* The queue was full so recipient will not get it so we must free buffer */
+            }
 #endif
 #if ( USE_USB_MFG != 0 )
             event_flags = OS_EVNT_Wait ( &CMD_events, 0xffffffff, (bool)false, ONE_SEC );

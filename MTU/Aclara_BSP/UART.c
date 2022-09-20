@@ -204,7 +204,7 @@ static void UART_CallbackHandler( enum_UART_ID UartId, bool echoRequired, uart_c
             {
                if ( ( echoRequired ) && ( UART_semHandle[ (uint32_t)UartId ].echoUART_sem != NULL ) )
                {
-                  OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
+                  (void)OS_SEM_Post_fromISR_retStatus( &UART_semHandle[ (uint32_t)UartId ].echoUART_sem );
                }
                currentEchoing[ (uint32_t)UartId ] = false;
             }
@@ -212,7 +212,7 @@ static void UART_CallbackHandler( enum_UART_ID UartId, bool echoRequired, uart_c
             {
                if ( transmitUARTEnable[ (uint32_t)UartId ] )
                {
-                  OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
+                  (void)OS_SEM_Post_fromISR_retStatus( &UART_semHandle[ (uint32_t)UartId ].transmitUART_sem );
                   transmitUARTEnable[ (uint32_t)UartId ] = false;
                }
             }
@@ -232,12 +232,12 @@ static void UART_CallbackHandler( enum_UART_ID UartId, bool echoRequired, uart_c
                }
                uartRingBuf[ (uint32_t)UartId ].pBuffer[ uartRingBuf[ (uint32_t)UartId ].head ] = ( uint8_t )p_args->data;
                uartRingBuf[ (uint32_t)UartId ].head = nextHead;
-               OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+               (void)OS_SEM_Post_fromISR_retStatus( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
             }
             else
             {
                TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].missingPacketsCozRingBuf );
-               OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+               (void)OS_SEM_Post_fromISR_retStatus( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
             }
             break;
          }
@@ -255,7 +255,7 @@ static void UART_CallbackHandler( enum_UART_ID UartId, bool echoRequired, uart_c
          {
             TM_UART_COUNTER_INC( uart_events[ (uint32_t)UartId ].eventErrOverflow );
             uartOverflow[ (uint32_t)UartId ] = (bool)true;
-            OS_SEM_Post_fromISR( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
+            (void)OS_SEM_Post_fromISR_retStatus( &UART_semHandle[ (uint32_t)UartId ].receiveUART_sem );
             break;
          }
          case UART_EVENT_BREAK_DETECT:
@@ -421,7 +421,7 @@ returnStatus_t UART_init ( void )
       uartRingBuf[i].head = 0;
       uartRingBuf[i].tail = 0;
 
-      uint16_t semReceiveCount = uartRingBuf[i].size;
+      uint16_t semReceiveCount = uartRingBuf[i].size * 2;
       if( 0 == ( ( OS_SEM_Create  ( &UART_semHandle[i].receiveUART_sem, semReceiveCount ) ) &&
                  ( OS_SEM_Create  ( &UART_semHandle[i].transmitUART_sem, 0 ) )              &&
                  ( OS_MUTEX_Create( &UART_writeMutex[i] ) ) ) )
