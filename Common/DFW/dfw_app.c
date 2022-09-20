@@ -2034,6 +2034,8 @@ static returnStatus_t doPatch( void )
                      if( eSUCCESS == PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo[0], ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ ) )
                      {
 #if ( MCU_SELECTED == RA6E1 )
+                       /* Add a CRC following the DFWBLInfo structure since a length of 0xFFFFFFFF
+                          is not guaranteed after erasing the DFW_BL_INFO partition as it is in K24 */
                        ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo ), ( bool )true, &crcDfwInfo, pDFWBLInfoPar_ );
                        ( void )PAR_partitionFptr.parWrite( ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWBLInfo ) ), ( uint8_t * )&crcDfwInfo,
                                                            ( lCnt )sizeof( crcDfwInfo ), pDFWBLInfoPar_ );
@@ -4207,12 +4209,12 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
          }
       }  //End of if ( eSUCCESS == retStatus ) // Update the Bootloader
 #elif ( MCU_SELECTED == RA6E1 )
-      OS_INT_disable(); // Enter critical section
+      OS_INT_disable(); // Enter critical section, Note: RA6 code flash P/E runs from RAM and any interrupt will vector to code flash causing an exception
       retStatus = PAR_partitionFptr.parErase( (lAddr) 0, BL_BACKUP_SIZE, pBLBackupPTbl );  // Erase the backup partition to write the new bootloader
       OS_INT_enable();  // Exit critical section
       if ( eSUCCESS == retStatus )
       {
-         OS_INT_disable(); // Enter critical section
+         OS_INT_disable(); // Enter critical section, Note: RA6 code flash P/E runs from RAM and any interrupt will vector to code flash causing an exception
          retStatus = copyPart2Part( (flAddr)0, BL_BACKUP_SIZE, &Buffer[0], sizeof( Buffer ), pDFWImagePTbl_, pBLBackupPTbl );
          OS_INT_enable();  // Exit critical section
          if ( eSUCCESS == retStatus )
@@ -4231,7 +4233,7 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                   bootStartupArea = FLASH_STARTUP_AREA_BLOCK0; // If Bootflg is 0, startup area is block 1 and we wrote new image in block 0. Hence the next startup area should be block 0
                }
 
-               OS_INT_disable(); // Enter critical section
+               OS_INT_disable(); // Enter critical section, Note: RA6 code flash P/E runs from RAM and any interrupt will vector to code flash causing an exception
                errStatus = R_FLASH_HP_StartUpAreaSelect( &g_flash0_ctrl, bootStartupArea, false ); // Modify the existing startup area => 0 to 1, 1 to 0
                OS_INT_enable();  // Exit critical section
                if ( errStatus != FSP_SUCCESS )

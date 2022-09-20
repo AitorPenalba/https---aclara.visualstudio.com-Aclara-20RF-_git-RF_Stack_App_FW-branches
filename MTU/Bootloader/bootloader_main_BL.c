@@ -718,13 +718,10 @@ int BL_MAIN_Main( void )
       /* Check whether we need to update the application */
       crcDfwInfo = bl_crc32( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, (uint8_t *) ( pDFWinfo->PhyStartingAddress + PART_DFW_BL_INFO_DATA_OFFSET), ( lCnt )sizeof( DFWinfo ) );
       ( void ) PAR_partitionFptr.parRead( ( uint8_t * )&expectedCrcDfwInfo, ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWinfo ) ), sizeof( crcDfwInfo ), pDFWinfo );
-      if ( expectedCrcDfwInfo != crcDfwInfo )
-      {
-         /* CRC not matched - do nothing, go with the existing image */
-      }
-      else
-      {
+      if ( expectedCrcDfwInfo == crcDfwInfo )
+         /* CRC matched - check for update */
 #endif
+      {
          /* Verify both external NV and internal NV are accessible.  */
          if ( eSUCCESS == PAR_partitionFptr.parOpen( &pNVinfo, ePART_DFW_PGM_IMAGE, 0 )  &&
             ( eSUCCESS == PAR_partitionFptr.parOpen( &pCodeInfo, ePART_APP_CODE, 0 ) ) )
@@ -754,6 +751,7 @@ int BL_MAIN_Main( void )
                      }
 
 #if ( MCU_SELECTED == RA6E1)
+                     // RA6E1: Internal flash driver does not perform automatic pre-erase so application code must be erased here
                      (void) PAR_partitionFptr.parErase( ( flAddr )0, PART_APP_CODE_SIZE, pCodeInfo );
 #endif
                      while ( Length != 0 )    /* Loop until all bytes in the range have been copied.  */
@@ -794,6 +792,12 @@ int BL_MAIN_Main( void )
             }
          }
       }
+#if ( MCU_SELECTED == RA6E1)
+      else
+      {
+         /* CRC not matched - do nothing, go with the existing image */
+      }
+#endif
    }
 
    /* Update the DFWinfo in ROM. */
