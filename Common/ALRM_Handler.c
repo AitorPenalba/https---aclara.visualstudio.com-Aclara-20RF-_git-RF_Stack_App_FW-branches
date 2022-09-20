@@ -160,7 +160,7 @@ static uint32_t ALRM_TroubleRisingEdgeCounter = 0, ALRM_TroubleFallingEdgeCounte
  **********************************************************************************************************************/
 static fsp_err_t meter_trouble_isr_init( void )
 {
-   fsp_err_t err = FSP_SUCCESS;
+   fsp_err_t err;
 
    /* Open external IRQ/ICU module */
    err = R_ICU_ExternalIrqOpen( &hmc_trouble_busy_ctrl, &hmc_trouble_busy_cfg );

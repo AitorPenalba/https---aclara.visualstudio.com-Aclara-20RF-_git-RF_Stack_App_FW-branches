@@ -81,7 +81,7 @@ fsp_err_t AGT_LPM_Timer_Init( void )
  **********************************************************************************************************************/
 fsp_err_t AGT_LPM_Timer_Start(void)
 {
-   fsp_err_t err = FSP_SUCCESS;
+   fsp_err_t err;
 
    agt_event_ = AGT_EVENT_INVALID; // Set it to invalid value
    /* Start AGT1 timer */
@@ -102,7 +102,7 @@ fsp_err_t AGT_LPM_Timer_Start(void)
  **********************************************************************************************************************/
 fsp_err_t AGT_LPM_Timer_Stop(void)
 {
-	fsp_err_t err = FSP_SUCCESS;
+	fsp_err_t err;
    timer_status_t agt_status = {0};
 
 	agt_status.state = TIMER_STATE_STOPPED; //Reset status
@@ -133,7 +133,7 @@ fsp_err_t AGT_LPM_Timer_Stop(void)
  **********************************************************************************************************************/
 fsp_err_t AGT_LPM_Timer_Configure( uint32_t period )
 {
-   fsp_err_t      err = FSP_SUCCESS;
+   fsp_err_t      err;
    uint32_t       timer_freq_hz;
    timer_info_t   info;
 

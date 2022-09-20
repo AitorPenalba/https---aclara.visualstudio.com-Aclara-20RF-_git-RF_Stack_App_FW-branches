@@ -83,7 +83,7 @@ uint16_t CRC_CUSTOM_16cal( uint16_t crc16Polynomial, uint16_t seed, const void *
        for( j = 0; j < 8; j++ )
        {
            if( calculatedCRC  & 0x8000 )
-               calculatedCRC = ( calculatedCRC << 1 ) ^ crc16Polynomial;
+               calculatedCRC = (uint16_t)( ( calculatedCRC << 1 ) ^ crc16Polynomial );
            else
                calculatedCRC <<= 1;
        }
@@ -118,7 +118,7 @@ uint32_t CRC_CUSTOM_32cal(uint32_t crc32Polynomial, uint32_t seed, const void *d
    const unsigned char *x = (const unsigned char *)data;
    for( i = 0; i < length; i++ )
    {
-       calculatedCRC  ^= x[i] << 24;
+       calculatedCRC  ^= ( (uint32_t)x[i] ) << 24;
        for( j = 0; j < 8; j++ )
        {
            if( calculatedCRC  & 0x80000000 )
