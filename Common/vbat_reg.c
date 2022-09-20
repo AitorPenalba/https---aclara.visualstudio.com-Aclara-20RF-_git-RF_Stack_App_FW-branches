@@ -143,7 +143,7 @@ void VBATREG_EnableRegisterAccess( void )
    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_OM_LPC_BATT);
    R_SYSTEM->VBTBER_b.VBAE = 0x01;  /* Enable access to VBTBKR */
    /* RA6E1 HRM: 11.2.4: Wait for at least 500 ns after writing 1 to VBAE, and then access VBTBKR. */
-   R_BSP_SoftwareDelay(1, BSP_DELAY_UNITS_MICROSECONDS); /* TODO: RA6: [DG]: Update the dealy to be 500ns */
+   R_BSP_SoftwareDelay(1, BSP_DELAY_UNITS_MICROSECONDS);
 #endif
 }
 

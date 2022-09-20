@@ -101,7 +101,7 @@
 /* TYPE DEFINITIONS */
 
 /* The folloing structure is taken from an MQX example showing how to use the system tick.  */
-#if (RTOS_SELECTION == MQX_RTOS) // TODO: RA6E1 - Handling in FreeRTOS
+#if (RTOS_SELECTION == MQX_RTOS)
 typedef struct my_isr_struct_mqx
 {
    void *         OLD_ISR_DATA;
@@ -2151,7 +2151,7 @@ static void GPS_PPS_IRQ_ISR( void )
  ******************************************************************************************************************/
 void TIME_SYS_HandlerTask( taskParameter )
 {
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS )
    MY_ISR_STRUCT_PTR_MQX  isr_ptr;    /* */
 #endif
    uint16_t     cnt;        /* Number of semaphores before the tick is processed. */
@@ -2179,7 +2179,7 @@ void TIME_SYS_HandlerTask( taskParameter )
 #endif
    /* The following code was taken from MQX example code for adding our timer code to the RTOS tick interrupt.  So, the
       following code will replace the RTOS tick interrupt with our own and then our ISR will call the RTOS tick. */
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS )
    isr_ptr               = (MY_ISR_STRUCT_PTR_MQX)_mem_alloc_zero(sizeof(MY_ISR_STRUCT_MQX));
    isr_ptr->OLD_ISR_DATA = _int_get_isr_data(INT_SysTick);                 /*lint !e641 */
    isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                      /*lint !e641 */

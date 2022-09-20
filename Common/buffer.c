@@ -216,11 +216,7 @@ returnStatus_t BM_init( void )
          for ( pool = 0; ( eSUCCESS == retVal ) && ( pool < BUFFER_N_POOLS ); pool++ )
          {
             // Create a queue to hold the buffer pointers for this pool
-//#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
             if ( OS_MSGQ_Create( &bufferPools_[pool], BM_bufferPoolParams[pool].cnt, (char *)BM_bufferPoolParams[pool].pName ) == false )
-//#else  // TODO: RA6E1: Remove the commented code
-//            if ( OS_MSGQ_Create( &bufferPools_[pool], BM_bufferPoolParams[pool].cnt ) == false )
-//#endif
             {
                //Message queue creation failed
                return eFAILURE;

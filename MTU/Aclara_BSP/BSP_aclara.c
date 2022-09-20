@@ -211,7 +211,6 @@ uint16_t BSP_Get_ResetStatus ( void )
    }
    else
    {
-      /* TODO: RA6E1: DO we need to report other Reset Causes ? */
       if ( R_SYSTEM->RSTSR0_b.PORF )
       {
          ResetStatus |= RESET_SOURCE_POWER_ON_RESET;

@@ -779,7 +779,7 @@ returnStatus_t SELF_testSecurity( void )
          retVal = eSUCCESS;
       }
    }
-#if ( MCU_SELECTED == RA6E1 ) //TODO: RA6E1: SG: Add this to the next release of the K24
+#if ( MCU_SELECTED == RA6E1 ) //TODO: K24: SG: Add this to the next release of the K24
    DBG_logPrintf( 'I', "SELF_testSecurity: Done - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
 #endif
    if ( eFAILURE == retVal )
@@ -822,7 +822,7 @@ returnStatus_t SELF_testNV( void )
       }
    }
 
-#if ( MCU_SELECTED == RA6E1 ) //TODO: RA6E1: SG: Add this to the next release of the K24
+#if ( MCU_SELECTED == RA6E1 ) //TODO: K24: SG: Add this to the next release of the K24
    DBG_logPrintf( 'I', "SELF_testNV: Done - Up time = %ld ms", OS_TICK_Get_ElapsedMilliseconds() );
 #endif
    return ( ( 0 == errCount ) ? eSUCCESS : eFAILURE );

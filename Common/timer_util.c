@@ -64,7 +64,7 @@
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS )
 typedef struct my_isr_struct
 {
    void *         OLD_ISR_DATA;
@@ -291,7 +291,7 @@ returnStatus_t TMR_HandlerInit( void )
 void TMR_HandlerTask( taskParameter )
 {
    timer_t           *pTimer;          /* Pointer to timer data structure */
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - ISR control for FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS )
    MY_ISR_STRUCT_PTR isr_ptr;          /* */
 
    /* The following code was taken from MQX example code for adding our timer code to the RTOS tick interrupt.  So, the
