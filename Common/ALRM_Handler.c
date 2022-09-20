@@ -1230,7 +1230,7 @@ void meter_trouble_isr_busy(external_irq_callback_args_t * p_args)
    {
       ALRM_TroubleFallingEdgeCounter++;
    }
-   OS_SEM_Post_fromISR( &MeterTroubleSem ); /* Post the semaphore */
+   ( void )OS_SEM_Post_fromISR_retStatus( &MeterTroubleSem ); /* Post the semaphore */
 #endif
    ( void )HMC_DIAGS_DoDiags( ( uint8_t )HMC_APP_API_CMD_ACTIVATE, NULL );
 }
