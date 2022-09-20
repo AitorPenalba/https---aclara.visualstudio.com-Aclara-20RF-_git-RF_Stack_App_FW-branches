@@ -541,7 +541,7 @@ returnStatus_t TIME_SYS_SetTimeFromRTC(void)
    (void)TIME_UTIL_ConvertDateFormatToSysFormat(&rtcTime, &sysTime); //Convert to system time format
    TIME_UTIL_ConvertSysFormatToSeconds(&sysTime, &mqxTime.SECONDS, &mqxTime.MILLISECONDS);
    mqxTime.MILLISECONDS = sysTime.time % TIME_TICKS_PER_SEC;
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6E1 - MQX dependent functions in FreeRTOS
+#if ( RTOS_SELECTION == MQX_RTOS )
    _time_set( &mqxTime );
 #endif
    TIME_SYS_SetSysDateTime(&sysTime);

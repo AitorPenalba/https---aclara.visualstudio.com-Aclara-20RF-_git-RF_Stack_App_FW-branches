@@ -1716,7 +1716,7 @@ static void mfgpReadByte( uint8_t rxByte )
          {
 #if !USE_USB_MFG
             (void)UART_write( mfgUart, (uint8_t*)mfgpLockInEffect, sizeof( mfgpLockInEffect ) );
-#if ( RTOS_SELECTION == MQX_RTOS )   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
+#if ( RTOS_SELECTION == MQX_RTOS )   // RA6E1 : This UART_flush not needed now for the debug and mfg port. Might be added in the future.
             (void)UART_flush ( mfgUart  );
 #endif
 #else
@@ -9936,7 +9936,7 @@ static void MFG_disconnectDtls ( uint32_t argc, char *argv[] )
 
 #if ( MCU_SELECTED == NXP_K24 )// TODO: RA6E1 Enable UART ioctl and UART rx (check if required)
 #if !USE_USB_MFG
-      UART_RX_flush( mfgUart );      // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
+      UART_RX_flush( mfgUart );      // RA6E1 : This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       ( void )UART_ioctl( mfgUart, (int32_t)IO_IOCTL_SERIAL_SET_FLAGS, &flags );
 #else
       usb_flush();
