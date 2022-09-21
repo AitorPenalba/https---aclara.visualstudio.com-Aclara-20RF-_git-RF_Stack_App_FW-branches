@@ -724,7 +724,7 @@ void OS_TASK_Create_All ( bool initSuccess )
    /* Install exception handler */
    (void)_int_install_exception_isr();
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   /* Interrupt handlers are configured by the Renesas BSP.  FreeRTOS is not involved so nothing to do here. */
+      // No equivalent operation for FreeRTOS.
 #endif
 
    /*lint -e{641} converting enum to int  */
