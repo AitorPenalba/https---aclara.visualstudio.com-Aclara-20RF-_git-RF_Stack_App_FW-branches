@@ -718,8 +718,8 @@ int BL_MAIN_Main( void )
       /* Check whether we need to update the application */
       crcDfwInfo = bl_crc32( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, (uint8_t *) ( pDFWinfo->PhyStartingAddress + PART_DFW_BL_INFO_DATA_OFFSET), ( lCnt )sizeof( DFWinfo ) );
       ( void ) PAR_partitionFptr.parRead( ( uint8_t * )&expectedCrcDfwInfo, ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWinfo ) ), sizeof( crcDfwInfo ), pDFWinfo );
+      /* Calculated CRC matches expected CRC? */
       if ( expectedCrcDfwInfo == crcDfwInfo )
-         /* CRC matched - check for update */
 #endif
       {
          /* Verify both external NV and internal NV are accessible.  */
