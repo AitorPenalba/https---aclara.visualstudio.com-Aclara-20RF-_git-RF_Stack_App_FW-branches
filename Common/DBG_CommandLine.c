@@ -838,6 +838,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( PORTABLE_DCU == 1)
    { "dfwmonitormode",  DBG_CommandLine_dfwMonMode,    "enable (1) or disable (0) mode to only print DFW responses\n" },
 #endif
+#if (MCU_SELECTED == RA6E1) && (TM_VERIFY_BOOT_UPDATE_RA6E1 == 1)
+   { "bootUpdateVerify",  DBG_CommandLine_BootUpdateVerify, "check whether bootloader can be updated by using swapping startup area functionality"},
+#endif
    { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
    { "virgin",       DBG_CommandLine_virgin,          "Erases flash chip and resets the micro" },
    { "virgindelay",  DBG_CommandLine_virginDelay,     "Erases signature; continues. Allows new code load and then virgin" },
@@ -7871,6 +7874,94 @@ static uint32_t DBG_CommandLine_dfwMonMode ( uint32_t argc, char *argv[] )
 } /* end DBG_CommandLine_dfwMonMode () */
 #endif // ( PORTABLE_DCU == 1)
 
+
+#if (MCU_SELECTED == RA6E1) && (TM_VERIFY_BOOT_UPDATE_RA6E1 == 1)
+#define BOOTLOADER_VERSION_ADDR_LOCATION  66            // 0x42 in the memory space
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_BootUpdateVerify
+
+   Purpose: This function will fill the bootbackup area by updating the boot version.
+            Once it is done, it will call the swap API and reset the processor
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: Once this test succeeds, the system will reboot and load with the updated boot version
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_BootUpdateVerify ( uint32_t argc, char *argv[] )
+{
+   uint8_t                 Buffer[READ_WRITE_BUFFER_SIZE]; // Holds data between read/write
+   PartitionData_t const   *pBLCodePTbl;                   // Pointer to Bootloader code partition
+   PartitionData_t const   *pBLBackupPTbl;                 // Pointer to Bootloader backup code partition
+   uint32_t                i = 0;
+   uint8_t                 versionBoot;
+   fsp_err_t               status;
+
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   else
+   {
+      if (  ( eSUCCESS == PAR_partitionFptr.parOpen( &pBLCodePTbl,   ePART_BL_CODE,   0L ) ) &&
+            ( eSUCCESS == PAR_partitionFptr.parOpen( &pBLBackupPTbl, ePART_BL_BACKUP, 0L ) ) )
+      {
+         if ( argc == 1 )
+         {
+            (void) PAR_partitionFptr.parRead( &versionBoot, BOOTLOADER_VERSION_ADDR_LOCATION, 1, pBLCodePTbl );
+            DBG_logPrintf( 'R',"Boot version %u", versionBoot );
+
+            (void) PAR_partitionFptr.parRead( &versionBoot, BOOTLOADER_VERSION_ADDR_LOCATION, 1, pBLBackupPTbl );
+            DBG_logPrintf( 'R',"Boot backup version %u", versionBoot );
+         }
+         else
+         {
+            OS_INT_disable(); // Enter critical section
+            (void) PAR_partitionFptr.parErase( (lAddr) 0, BL_BACKUP_SIZE, pBLBackupPTbl );
+            OS_INT_enable();  // Exit critical section
+            while( i < BL_BACKUP_SIZE )
+            {
+               (void) PAR_partitionFptr.parRead( &Buffer[0], i, READ_WRITE_BUFFER_SIZE, pBLCodePTbl );
+               if (i == 0)
+               {
+                  Buffer[BOOTLOADER_VERSION_ADDR_LOCATION] = Buffer[BOOTLOADER_VERSION_ADDR_LOCATION] + 1;   // At 66 (0x42) address the boot version is located. Updating the version by 1.
+               }
+
+               OS_INT_disable(); // Enter critical section
+               (void) PAR_partitionFptr.parWrite( i, &Buffer[0], READ_WRITE_BUFFER_SIZE, pBLBackupPTbl );
+               OS_INT_enable();  // Exit critical section
+               i += READ_WRITE_BUFFER_SIZE;
+            }
+
+            flash_startup_area_swap_t startupArea;
+            uint8_t btflg = R_FACI_HP->FAWMON_b.BTFLG;
+            if ( btflg == 1 )
+            {
+              startupArea = FLASH_STARTUP_AREA_BLOCK1;
+            }
+            else if ( btflg == 0 )
+            {
+               startupArea = FLASH_STARTUP_AREA_BLOCK0;
+            }
+
+            OS_INT_disable(); // Enter critical section
+            status = R_FLASH_HP_StartUpAreaSelect( &g_flash0_ctrl, startupArea, false );
+            OS_INT_enable();  // Exit critical section
+            if ( status == FSP_SUCCESS )
+            {
+               PWR_SafeReset(); // Reset to get the updated version of the bootloader
+            }
+         }
+      }
+   }
+
+   return ( 0 );
+}
+#endif
 /*******************************************************************************
 
    Function name: DBG_CommandLine_Versions
@@ -16349,7 +16440,7 @@ static uint32_t DBG_CommandLine_Queues ( uint32_t argc, char *argv[] )
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
 
-   Returns: retVal 
+   Returns: retVal
 
 ******************************************************************************/
 uint32_t DBG_CommandLine_RTC_UnitTest( uint32_t argc, char *argv[] )
