@@ -7876,7 +7876,9 @@ static uint32_t DBG_CommandLine_dfwMonMode ( uint32_t argc, char *argv[] )
 
 
 #if (MCU_SELECTED == RA6E1) && (TM_VERIFY_BOOT_UPDATE_RA6E1 == 1)
-#define BOOTLOADER_VERSION_ADDR_LOCATION  66            // 0x42 in the memory space
+extern const firmwareVersion_u   LNKR_BL_FW_VER_ADDR;   /* Address defined in Linker script */
+#define BOOTLOADER_VERSION_ADDR_LOCATION  ( (uint32_t)( &LNKR_BL_FW_VER_ADDR ) + 2 )  /* Getting the version of Bootloader - 0x0042 in the memory space */
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_BootUpdateVerify
