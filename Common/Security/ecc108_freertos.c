@@ -55,7 +55,7 @@
 #include "pwr_last_gasp.h"
 #endif
 
-#define WRITE_READ_IIC_TIMEOUT            120   // Timeout for read and write complete interrupts - 120ms /* TODO: SMG Check against longest execution time of the ECC508 - some are 115ms (+50ms as recommended) */
+#define WRITE_READ_IIC_TIMEOUT            120   // Timeout for read and write complete interrupts - 120ms /* TODO: RA6E1: SMG Check against longest execution time of the ECC508 - some are 115ms (+50ms as recommended) */
 #define IIC_TRANSMIT_MAX_VALUE            255  // TODO: RA6E1: Verify the working after integrating WolfSSL
 
 #if BSPCFG_ENABLE_II2C0 == 0        /*  Polled version   */
@@ -116,7 +116,7 @@ returnStatus_t SEC_init( void )
    returnStatus_t retVal;
 #if ( MCU_SELECTED == RA6E1 )
    uint32_t   startAddress;
-   uint32_t   length;
+   int32_t    length;
    uint8_t    fillBuffer[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };  // Fill FF in the secROM dtls structure at first time to act as blank region
 #endif
 
