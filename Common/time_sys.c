@@ -777,11 +777,10 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
    // We are going to access/modify lots of time related variables so get mutex
    //OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
 
-   // TODO: should there be an OS_INT_disable here?  It was removed in K24
-
    // Time adjustement is time sensitive.
    // We have to adjust time quickly
    // We don't want to grab the current time, make some computation and can't commit the updated value for a long time because of preemption by a higher priority tasks
+   OS_INT_disable( ); /* Disable interrupts - faster than mutex */
 
    getSysTime( &timeSys );
 
@@ -878,6 +877,8 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
       setSysTime( &timeSys );
    }
 
+   OS_INT_enable( );  /* Re-enable interrupts */
+
    for ( index = 0, pTimeSys = &_sTimeSys[0]; index < ARRAY_IDX_CNT(_sTimeSys); index++, pTimeSys++ )
    {  /* Check every alarm Slot */
       if ( pTimeSys->bTimerSlotInUse )
@@ -910,7 +911,6 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
       timeVars_.timeLastUpdated = date_Time;
    }
 
-   //OS_INT_enable( );  /* TODO: Should interrupts be enabled here instead? - comment from K24 change */
    //OS_MUTEX_Unlock( &_timeVarsMutex );  // Function will not return if it fails
 #if ( EP == 1 )
    (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t*)&timeVars_, (lCnt)sizeof(timeVars_));
