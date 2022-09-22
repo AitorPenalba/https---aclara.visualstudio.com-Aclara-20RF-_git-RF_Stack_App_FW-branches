@@ -2446,11 +2446,13 @@ static uint8_t ecc108e_InitHostAuthKey( void )
    diff2 = memcmp( intROM.sigKeys[ NETWORK_PUB_KEY_SECRET - FIRST_SIGNATURE_KEY ].key, secROM.sigKeys[ NETWORK_PUB_KEY_SECRET - FIRST_SIGNATURE_KEY ].key, ECC108_KEY_SIZE );
    diff3 = memcmp( intROM.sigKeys[ PUB_KEY_SECRET - FIRST_SIGNATURE_KEY ].key,         secROM.sigKeys[ PUB_KEY_SECRET - FIRST_SIGNATURE_KEY ].key,         ECC108_KEY_SIZE );
 
+#if ( MCU_SELECTED == NXP_K24 )   // RA6E1 - Flash security determined values are not in code flash
    if ( NV_FSEC_SEC( NV_FSEC ) != 2 )     /* Value of 2 means unsecured; all others secured. */
    {
       doUpdate = ( ( diff1 == 0 ) || ( diff2 == 0 ) || ( diff3 == 0 ) );  /* If any of the keys match the default, update. */
    }
    else
+#endif
    {
       /* Flash security is off - restore default keys */
       doUpdate = ( ( diff1 != 0 ) || ( diff2 != 0 ) || ( diff3 != 0 ) );  /* If any of the keys don't match the default, update. */

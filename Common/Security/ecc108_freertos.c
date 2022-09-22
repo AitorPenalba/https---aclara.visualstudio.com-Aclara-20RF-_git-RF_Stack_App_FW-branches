@@ -55,7 +55,7 @@
 #include "pwr_last_gasp.h"
 #endif
 
-#define WRITE_READ_IIC_TIMEOUT            10   // Timeout for read and write complete interrupts - 10 ticks /* TODO: SMG Check against longest execution time of the ECC508 - some are 115ms (+50ms as recommended) */
+#define WRITE_READ_IIC_TIMEOUT            120   // Timeout for read and write complete interrupts - 120ms /* TODO: RA6E1: SMG Check against longest execution time of the ECC508 - some are 115ms (+50ms as recommended) */
 #define IIC_TRANSMIT_MAX_VALUE            255  // TODO: RA6E1: Verify the working after integrating WolfSSL
 
 #if BSPCFG_ENABLE_II2C0 == 0        /*  Polled version   */
@@ -114,6 +114,11 @@ returnStatus_t SEC_init( void )
    uint8_t     localMAC[8];   /* MAC from ROM               */
    eui_addr_t  addr;          /* value from external NV */
    returnStatus_t retVal;
+#if ( MCU_SELECTED == RA6E1 )
+   uint32_t   startAddress;
+   int32_t    length;
+   uint8_t    fillBuffer[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };  // Fill FF in the secROM dtls structure at first time to act as blank region
+#endif
 
    retVal = PAR_partitionFptr.parOpen(&pSecurePart, ePART_ENCRYPT_KEY, 0);
    if (retVal != eSUCCESS)
@@ -166,6 +171,32 @@ returnStatus_t SEC_init( void )
 #else
                   PWR_unlockMutex(); /* Function will not return if it fails  */
 #endif
+#if ( MCU_SELECTED == RA6E1 )
+                  /* Update to FFFF in dtlsNetworkRootCA, dtlsHESubject, dtlsMSSubject, dtlsMfgSubject2 for RA6E1
+                     as the default values are random instead of FF in the data flash */
+                  /* Update ROM */
+                  if ( eSUCCESS == retVal )
+                  {
+                     startAddress = (dSize) offsetof( intFlashNvMap_t,dtlsNetworkRootCA );
+                     length = (dSize) offsetof( intFlashNvMap_t, publicKey ) - (dSize) offsetof( intFlashNvMap_t, dtlsNetworkRootCA );
+                     while ( length > 0 )
+                     {
+                        retVal = PAR_partitionFptr.parWrite( startAddress,
+                                                             fillBuffer,
+                                                             sizeof ( fillBuffer ),
+                                                             pSecurePart );
+                        if ( retVal != eSUCCESS )
+                        {
+                           retVal = eFAILURE;
+                           break;
+                        }
+
+                        startAddress += sizeof ( fillBuffer );
+                        length -= sizeof ( fillBuffer );
+                     }
+                  }
+#endif
+
                }
             }
             /* Now verify full MAC address with external NV */
@@ -218,20 +249,16 @@ uint8_t ecc108_open( void )
 
    if ( (bool)false == _i2cTransmitRecieveSemCreated )
    {
-      //TODO RA6: NRJ: determine if semaphores need to be counting
       if ( OS_SEM_Create( &_i2cTransmitRecieveSem , 0 ) )
       {
          _i2cTransmitRecieveSemCreated = true;
       }
    }
 
-   fsp_err_t err = R_IIC_MASTER_Open( &g_i2c_master0_ctrl, &g_i2c_master0_cfg );
-   if ( FSP_SUCCESS == err )
-   {
-       (void)ecc108c_wakeup( wakeup_response );   // This wakeup call here results in not communicating with the security chip as there will be another wakeup at every APIs
-   }
-
-   return ( uint8_t ) err;
+   OS_MUTEX_Lock( &I2Cmutex_ ); /* Function will not return if it fails */
+   (void) R_IIC_MASTER_Open( &g_i2c_master0_ctrl, &g_i2c_master0_cfg );
+   (void) ecc108c_wakeup( wakeup_response );   // This wakeup call here results in not communicating with the security chip as there will be another wakeup at every APIs
+   return ( uint8_t ) 0;
 }
 
 /***********************************************************************************************************************
@@ -245,8 +272,9 @@ uint8_t ecc108_open( void )
 ***********************************************************************************************************************/
 void ecc108_close( void )
 {
-    ( void ) ecc108p_sleep( );
-    ( void ) R_IIC_MASTER_Close( &g_i2c_master0_ctrl );
+   ( void ) ecc108p_sleep( );
+   ( void ) R_IIC_MASTER_Close( &g_i2c_master0_ctrl );
+   OS_MUTEX_Unlock( &I2Cmutex_ ); /*lint !e455 mutex release when device is closed   */ /* Function will not return if it fails  */
 }
 
 /***********************************************************************************************************************
