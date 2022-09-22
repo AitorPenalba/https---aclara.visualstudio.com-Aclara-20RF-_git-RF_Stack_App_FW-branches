@@ -268,8 +268,7 @@ STATIC          uint32_t TIME_maximumJumpsOfPostFailures[2][MAX_JUMPS_OF_POST_ER
 STATIC void getSysTime( sysTime_t *sysTime )
 {
    // Disable SysTick interrupt to keep data coherence because we are reading SYST registers that could roll over and date/time/tictoc would be out of sync
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable(); // This is critical but fast. Disable all interrupts.
    (void)memcpy( sysTime, &_timeSys, sizeof(sysTime_t) );
 #if ( MCU_SELECTED == NXP_K24 )
    sysTime->elapsedCycle = SYST_RVR+1; // Retrieve current SYST_RVR because it can change when tracking GPS UTC
@@ -289,7 +288,7 @@ STATIC void getSysTime( sysTime_t *sysTime )
    }
    sysTime->elapsedCycle -= SysTick->VAL;
 #endif
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable(); // Restore interrupts
 }
 
 /*****************************************************************************************************************
@@ -309,12 +308,11 @@ STATIC void getSysTime( sysTime_t *sysTime )
  ******************************************************************************************************************/
 STATIC void setSysTime( const sysTime_t *sysTime )
 {
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable(); // This is critical but fast. Disable all interrupts.
    (void)memcpy( &_timeSys, sysTime, sizeof(sysTime_t) );
    _timeSys.tictoc       = 0; // Set to 0 since setSysTime is usually rounded to 10ms so reset counter.
    _timeSys.elapsedCycle = 0; // Set to 0 since sysTime->elapsedCycle was likely not initialized
-   __set_PRIMASK(primask);
+   OS_INT_enable();
 }
 
 /*****************************************************************************************************************
@@ -778,8 +776,8 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
 
    // We are going to access/modify lots of time related variables so get mutex
    //OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // Disable all interrupts. This section is time critical.
+
+   // TODO: should there be an OS_INT_disable here?  It was removed in K24
 
    // Time adjustement is time sensitive.
    // We have to adjust time quickly
@@ -912,7 +910,7 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
       timeVars_.timeLastUpdated = date_Time;
    }
 
-   __set_PRIMASK(primask); // Restore interrupts
+   //OS_INT_enable( );  /* TODO: Should interrupts be enabled here instead? - comment from K24 change */
    //OS_MUTEX_Unlock( &_timeVarsMutex );  // Function will not return if it fails
 #if ( EP == 1 )
    (void)FIO_fwrite(&fileHndlTimeSys_, 0, (uint8_t*)&timeVars_, (lCnt)sizeof(timeVars_));
@@ -938,11 +936,10 @@ bool TIME_SYS_GetSysDateTime( sysTime_t *pSysTime )
 {
    bool boolSTValid;   /* Returns if system time is invalid */
 
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable();
    boolSTValid = TIME_SYS_IsTimeValid();
    getSysTime( pSysTime );
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
    return boolSTValid;
 }
@@ -968,12 +965,11 @@ bool TIME_SYS_IsTimeValid( void )
 {
    bool boolSTValid = false;
 
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable();
    if ( timeVars_.timeState == TIME_STATE_VALID_SYNC ) {
       boolSTValid = true;
    }
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
    return boolSTValid;
 }
@@ -995,11 +991,10 @@ bool TIME_SYS_IsTimeValid( void )
  ******************************************************************************************************************/
 void TIME_SYS_GetPupDateTime( sysTime_t *pPupTime )
 {
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable();
    pPupTime->date = _timePup.date;
    pPupTime->time = _timePup.time;
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 }
 
 #if (EP == 1)
@@ -1779,14 +1774,13 @@ bool TIME_SYS_GetRealCpuFreq( uint32_t *freq, TIME_SYS_SOURCE_e *source, uint32_
    uint32_t currenTime;
    uint32_t lastUpdate;
 
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable();
    *freq      = clockInfo_.freq; // Grab best frequency estimate
    lastUpdate = clockInfo_.freqLastUpdate;
    if ( source != NULL ) {
       *source = clockInfo_.source;
    }
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
    // CPU frequency is considered valid up to 1 minute after the last update
    // After that it is considered stale.
@@ -1825,11 +1819,10 @@ void TIME_SYS_SetRealCpuFreq( uint32_t freq, TIME_SYS_SOURCE_e source, bool rese
       clockInfo_.freqLastUpdate = TIME_UTIL_GetTimeInQSecFracFormat() >> 32; // Drop fractional part
    }
 
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable();
    clockInfo_.source = source;
    clockInfo_.freq = freq;
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 }
 
 #if ( DCU == 1 )
@@ -2257,10 +2250,9 @@ void TIME_SYS_HandlerTask( taskParameter )
 #if ( DCU == 1 )
       if (VER_getDCUVersion() != eDCU2) {
          // Copy current clock state
-         uint32_t primask = __get_PRIMASK();
-         __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+         OS_INT_disable();
          (void)memcpy( &clockInfoCopy, &clockInfo_, sizeof(clockInfoCopy));
-         __set_PRIMASK(primask); // Restore interrupts
+         OS_INT_enable();
 
          // GPS watchdog
          if (clockInfo_.WatchDogCounter) { // Decrement GPS watch dog until 0 which means we have stopped receiving PPS interrupts
@@ -2526,16 +2518,16 @@ void TIME_SYS_reqTimeoutCallback( uint8_t cmd, void *pData )
 #if ( RTOS_SELECTION == MQX_RTOS )
 STATIC void TIME_SYS_vApplicationTickHook( void * user_isr_ptr )
 {
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // Disable all interrupts so that we are not interrupted by another interrupt while processing this one.
    MY_ISR_STRUCT_PTR_MQX   isr_ptr;   /* */
+
+   OS_INT_disable();
 #if ( DCU == 1 )
    KERNEL_DATA_STRUCT_PTR  kd_ptr = _mqx_get_kernel_data();
    tickSystemClock(kd_ptr->CYCCNT); // Increment system and power-up time
 #else
    tickSystemClock(0); // Increment system and power-up time (argument ignored for EP)
 #endif
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
    /* This code is taken from the MQX example isr.c code to use the system tick to tick our own module. */
    isr_ptr = (MY_ISR_STRUCT_PTR_MQX)user_isr_ptr;
@@ -2552,8 +2544,7 @@ STATIC void TIME_SYS_vApplicationTickHook( void * user_isr_ptr )
 #elif ( RTOS_SELECTION == FREE_RTOS )
 void vApplicationTickHook()
 {
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // Disable all interrupts so that we are not interrupted by another interrupt while processing this one.
+   OS_INT_disable();
 
 #if ( DCU == 1 ) // TODO: RA6E1 Handle kernel for FreeRTOS
    KERNEL_DATA_STRUCT_PTR  kd_ptr = _mqx_get_kernel_data();
@@ -2561,7 +2552,7 @@ void vApplicationTickHook()
 #else
    tickSystemClock(0); // Increment system and power-up time (argument ignored for EP)
 #endif
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
    /* RTOS tick, signal the timer task */
    if ( _timeSysSemCreated == (bool)true )
@@ -2726,8 +2717,7 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
       }
       //else Jump above threshold
 
-      //TODO: Should get PRIMASK, don't want to re-enable if interrupts are already disabled
-      //TODO: Removed due to nested OS calls: __disable_interrupt(); // Disable all interrupts. This section is time critical.
+      //TODO: Should disable all interrupts? This section is time critical.
 
       // Try to adjust time as close as possible to timeSync if the offset wasn't clipped.
       // If the offset was clipped then just do a rough time adjument. We'll do better with the next timeSync hoppefuly.
@@ -2756,8 +2746,7 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
          _ticTocCntr = 1;    // Set to 1 because we are going to waste up to 10ms here.
                              // In other words, we are getting ready for the next 10ms tick that expects tictoc to be 1.
 
-         uint32_t primask = __get_PRIMASK();
-         __disable_interrupt(); // Disable all interrupts. This section is time critical.
+         OS_INT_disable();
          do {
             // Add processing latency to the timeSync time to compensate for processing delays
             timePlusLatency = syncTime.QSecFrac + TIME_UTIL_ConvertCyccntToQSecFracFormat(DWT_CYCCNT - pDataInd->timeStampCYCCNT);
@@ -2797,7 +2786,7 @@ returnStatus_t TIME_SYS_SetDateTimeFromMAC(MAC_DataInd_t const *pDataInd)
          TCXOToSystickError = 0;   // Reset error tracking
 #endif
 //End TODO
-         __set_PRIMASK(primask);   // Restore interrupts
+         OS_INT_enable();
 
 //         TIME_UTIL_PrintQSecFracFormat("syncTime          ", syncTime.QSecFrac);
 //         TIME_UTIL_PrintQSecFracFormat("timePlusLatency   ", timePlusLatency);

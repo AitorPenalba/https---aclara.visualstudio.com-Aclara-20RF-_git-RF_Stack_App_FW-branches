@@ -449,7 +449,7 @@ static returnStatus_t dvr_read( uint8_t *pDest, const dSize srcOffset, const lCn
 
    return (eSUCCESS);
 } /*lint !e715 !e818  Parameters passed in may not be used */
-                                
+
 /***********************************************************************************************************************
 
    Function Name: dvr_write
@@ -618,7 +618,7 @@ static returnStatus_t dvr_write( dSize destOffset, uint8_t const *pSrc, lCnt cnt
                }
             }
 #endif      /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
-      
+
             /* translate FSP error into an error similar to what would be returned by flashErase */
             retVal = ( FSP_SUCCESS == err ) ? eSUCCESS : eFAILURE;
 
@@ -832,7 +832,7 @@ static returnStatus_t blankCheck( dSize destOffset, lCnt cnt, PartitionData_t co
 #endif    /* for bootloader, do nothing, R_FLASH_HP_Erase is blocking when BGO is not enabled */
    }
    /*Note: if R_FLASH_HP_BlankCheck result is not FSP_SUCCESS, default result is NOT_BLANK */
-      
+
    /* translate FSP error into an error similar to what would be returned by flashErase */
    eRetVal = (( FLASH_RESULT_BLANK == blankCheckResult ) && (FSP_SUCCESS == err)) ? eSUCCESS : eFAILURE;
 
@@ -1453,12 +1453,10 @@ __ramfunc static returnStatus_t exeFlashCmdSeqSameBank( void ) /*lint !e129   __
    /* NOTE:  Disabling interrupts goes against our coding standards.  When writing to the same bank in the K60 as we're
       executing out of, this is necessary. */
 #ifndef __BOOTLOADER
-   bool           intsEnabled;     /* True when interrupts are enabled, otherwise false */
-   intsEnabled = BSP_IS_GLOBAL_INT_ENABLED();
-   if ( intsEnabled )
-   {
-      __disable_interrupt( ); /* Disable interrupts! */
-   }
+   // Use this method to ensure ALL interrupts are disabled (can't execute from flash while flash is being programed)
+   uint32_t       primask;
+   primask = __get_PRIMASK();
+   __set_PRIMASK(1); /* Disable ALL interrupts! */
 #endif   /* BOOTLOADER  */
 
    FTFE_BASE_PTR->FSTAT = FTFE_FSTAT_CCIF_MASK;/*lint !e456 */   /* Launch Command */
@@ -1467,10 +1465,7 @@ __ramfunc static returnStatus_t exeFlashCmdSeqSameBank( void ) /*lint !e129   __
    {}
 
 #ifndef __BOOTLOADER
-   if ( intsEnabled )
-   {
-      __enable_interrupt( );  /* Re-enable interrupts */
-   }
+   __set_PRIMASK(primask);
 #endif   /* BOOTLOADER  */
 
    if ( FTFE_BASE_PTR->FSTAT & (FTFE_FSTAT_ACCERR_MASK | FTFE_FSTAT_FPVIOL_MASK | FTFE_FSTAT_MGSTAT0_MASK) )/*lint !e456 */ /* Error? */

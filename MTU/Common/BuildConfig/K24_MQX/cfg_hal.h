@@ -70,8 +70,6 @@
 #define CLRWDT()                    WDOG_Kick()
 #define NOP()                       asm("nop")
 #define RESET()                     { SCB_AIRCR = SCB_AIRCR_VECTKEY(0x5FA)| SCB_AIRCR_SYSRESETREQ_MASK; while(1){} }
-#define DI()                        OS_INT_disable( )
-#define EI()                        ERROR! NOT DEFINED
 
 #ifdef _DEBUG_MODE                   /* When using debugger, don't use the sleep instruction, use a NOP instead. */
    #define SLEEP()                  NOP()

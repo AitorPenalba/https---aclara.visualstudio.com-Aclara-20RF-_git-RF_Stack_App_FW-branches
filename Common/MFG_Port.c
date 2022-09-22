@@ -6031,7 +6031,7 @@ static void MFGP_FlashSecurity( uint32_t argc, char *argv[] )
                    TODO: When interrupts are disabled, then verify NO RTOS scheduling calls can be made - seems likely in parWrite
                   ********************************************************************************/
                   uint32_t primask = __get_PRIMASK();
-                  __disable_interrupt();
+                  __set_PRIMASK(1);
                   retVal = PAR_partitionFptr.parWrite( destAddr, Lock ? &flashSecEnabled : &flashSecDisabled,
                                                         ( lCnt ) sizeof( fprot ), pImagePTbl );
                   __set_PRIMASK(primask); // Restore interrupts
@@ -6098,6 +6098,7 @@ static void MFGP_installationDateTime( uint32_t argc, char *argv[] )
 {
 
    uint32_t dateTimeVal = 0;
+
 #if ( EP == 1 )
    (void)ENDPT_CIM_CMD_getDateTimeValue( installationDateTime, &dateTimeVal );
 #else

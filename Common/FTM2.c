@@ -120,8 +120,6 @@ static void FTM2_INT_Handler( void )
 {
    uint32_t   i; // Loop counter
 
-//   __disable_interrupt();
-
    // Process each channel for interrupt
    for ( i=0; i<MAX_CHANNELS; i++) {
       // Check for channel interrupt
@@ -135,7 +133,6 @@ static void FTM2_INT_Handler( void )
       }
    }
 
-//   __enable_interrupt();
 }
 
 /*****************************************************************************************************************
