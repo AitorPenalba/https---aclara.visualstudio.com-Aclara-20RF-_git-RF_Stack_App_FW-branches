@@ -53,6 +53,7 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_TimeTicks( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_TimeFuture( uint32_t argc, char *argv[] );
 #endif
+
 #if ( TM_OS_EVENT_TEST == 1)
 uint32_t DBG_CommandLine_wdTest ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_EventSet( uint32_t argc, char *argv[] );
