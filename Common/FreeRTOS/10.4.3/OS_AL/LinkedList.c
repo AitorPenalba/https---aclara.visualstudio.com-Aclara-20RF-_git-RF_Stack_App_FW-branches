@@ -183,7 +183,6 @@ bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listE
    return OS_QUEUE_Insert(list, listPosition, listElement);
 #elif( RTOS_SELECTION == FREE_RTOS )
    bool retVal = (bool)false;
-//   bool found = verifyListElement(list, ( OS_Linked_List_Element_Ptr ) listPosition);
    if( verifyListElement(list, ( OS_Linked_List_Element_Ptr ) listPosition) )
    {
       if ( ( list->Head != NULL ) && ( list->Tail != NULL ) ) // TODO: RA6E1 Bob: redundant check.  Remove later.
