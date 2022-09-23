@@ -184,12 +184,10 @@ bool OS_LINKEDLIST_Insert (OS_List_Handle list,  void *listPosition, void *listE
    return OS_QUEUE_Insert(list, listPosition, listElement);
 #elif( RTOS_SELECTION == FREE_RTOS )
    bool retVal = (bool)false;
-   bool found  = (bool)false;
-
    found = verifyListElement(list, ( OS_Linked_List_Element_Ptr ) listPosition);
    if( found )
    {
-      if ( ( list->Head != NULL ) && ( list->Tail != NULL ) )
+      if ( ( list->Head != NULL ) && ( list->Tail != NULL ) ) // TODO: RA6E1 Bob: redundant check.  Remove later.
       {
          if ( verifyListElement( list, listElement ) )
          {
@@ -262,7 +260,7 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list, void *listElement )
 #if( RTOS_SELECTION == MQX_RTOS )
    OS_QUEUE_Remove(list, Elem);
 #elif( RTOS_SELECTION == FREE_RTOS )
-   if ( ( NULL == listElement ) || ( NULL == list ) )
+   if ( ( NULL == listElement ) || ( NULL == list ) ) // TODO: RA6E1 Future: create common parameter check function
    {
       OS_LINKEDLIST_TEST_PRINTF( "NULL handle or element passed to OS_LINKEDLIST_Remove");
       return;
@@ -272,7 +270,6 @@ void OS_LINKEDLIST_Remove ( OS_List_Handle list, void *listElement )
       OS_LINKEDLIST_TEST_PRINTF( "OS_LINKEDLIST_Remove called before OS_LINKEDLIST_Create");
       return;
    }
-   bool found = (bool)false;
 
    found = verifyListElement(list, (OS_Linked_List_Element_Ptr) listElement);
    if( found )
