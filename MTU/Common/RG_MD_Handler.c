@@ -401,6 +401,24 @@ buffer_t *RG_MD_BuildMetadataPacket(void)
                   }
 
                   break;
+               case hexBinary:
+               {
+                  char dbgStr[37];    // Enough for: "Ch=99, HexVal=0xWWXXYYZZ, NumBytes=4"
+                     uint8_t j;
+                     uint8_t lastLoc;
+
+                     powerOf10Code = 0;   // n/a for hexBinary values
+                     numberOfBytes = (uint8_t)reading.valueSizeInBytes;
+                     lastLoc = ( uint8_t )snprintf ( &dbgStr[0], sizeof( dbgStr ), "Ch=%2d, HexVal=0x", i );
+                     for ( j = 0; j < reading.valueSizeInBytes; j++ )
+                     {
+                        lastLoc += ( uint8_t )snprintf( &dbgStr[lastLoc], sizeof( dbgStr ) - lastLoc, "%02X", str[j] );
+                     }
+                     ( void )snprintf ( &dbgStr[lastLoc], sizeof( dbgStr ) - lastLoc, ", NumBytes=%d", reading.valueSizeInBytes );
+                     DBG_logPrintf( 'I', &dbgStr[0]);
+
+                  break;
+               }
                default:
                   getRdgValueStatus = CIM_QUALCODE_CODE_INDETERMINATE;
                   DBG_logPrintf( 'E', "Reading Type %d has unknown data type: %d", RG_MD_RdgType_[i], rdgDataType);

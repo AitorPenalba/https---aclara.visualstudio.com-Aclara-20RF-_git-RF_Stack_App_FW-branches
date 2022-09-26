@@ -942,6 +942,21 @@ const directLookup_t directLookupTable[] =
       .tbl.dataFmt                     = eNIFMT_INT32,
       .tbl.pFunct                      = NULL
    },
+   { // TODO: RA6E1 Bob: Added from kV2c version of this table; confirm that this is the right thing to do.
+      .quantity                        = edModel,                /* Unit of Measure */
+      .typecast                        = ASCIIStringValue,
+      .tbl.tblInfo.tableID             = BIG_ENDIAN_16BIT( STD_TBL_GENERAL_MANUFACTURE_ID ),
+      .tbl.tblInfo.offset[0]           = 0,
+      .tbl.tblInfo.offset[1]           = 0,
+      .tbl.tblInfo.offset[2]           = 0x04,
+      .tbl.tblInfo.cnt                 = BIG_ENDIAN_16BIT( 8 ),
+      .tbl.tblInfo.lsb                 = 0,
+      .tbl.tblInfo.width               = 0,
+      .tbl.multiplier15                = 1,
+      .tbl.multiplier12                = 0,
+      .tbl.dataFmt                     = eNIFMT_INT32,
+      .tbl.pFunct                      = NULL,
+   },
    {
       .quantity                        = highThresholdswell,   /* Unit of Measure */
       .typecast                        = uintValue,
@@ -1001,6 +1016,36 @@ const directLookup_t directLookupTable[] =
       .tbl.multiplier12                = 0,
       .tbl.dataFmt                     = eNIFMT_INT32,
       .tbl.pFunct                      = NULL
+   },
+   { // TODO: RA6E1 Bob: Added from the kV2c version of this file; confirm that this is the right thing to do.
+      .quantity                        = edMfgSerialNumber,
+      .typecast                        = ASCIIStringValue,
+      .tbl.tblInfo.tableID             = BIG_ENDIAN_16BIT( STD_TBL_GENERAL_MANUFACTURE_ID ),
+      .tbl.tblInfo.offset[0]           = 0,
+      .tbl.tblInfo.offset[1]           = 0,
+      .tbl.tblInfo.offset[2]           = 16,
+      .tbl.tblInfo.cnt                 = BIG_ENDIAN_16BIT( 16 ),
+      .tbl.tblInfo.lsb                 = 0,
+      .tbl.tblInfo.width               = 0,
+      .tbl.multiplier15                = 1,
+      .tbl.multiplier12                = 0,
+      .tbl.dataFmt                     = eNIFMT_INT32,
+      .tbl.pFunct                      = NULL,
+   },
+   { // TODO: RA6E1 Bob: Added from the kV2c version of this file; confirm that this is the right thing to do.
+      .quantity                        = ansiTableOID,
+      .typecast                        = hexBinary,
+      .tbl.tblInfo.tableID             = BIG_ENDIAN_16BIT( STD_TBL_GENERAL_CONFIGURATION ),
+      .tbl.tblInfo.offset[0]           = 0,
+      .tbl.tblInfo.offset[1]           = 0,
+      .tbl.tblInfo.offset[2]           = 3,
+      .tbl.tblInfo.cnt                 = BIG_ENDIAN_16BIT( 4 ),
+      .tbl.tblInfo.lsb                 = 0,
+      .tbl.tblInfo.width               = 0,
+      .tbl.multiplier15                = 1,
+      .tbl.multiplier12                = 0,
+      .tbl.dataFmt                     = eNIFMT_INT32,
+      .tbl.pFunct                      = NULL,
    },
    {
       .quantity                        = edProgramID,                   /* Meter Program ID */
