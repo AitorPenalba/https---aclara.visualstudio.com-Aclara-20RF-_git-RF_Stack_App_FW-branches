@@ -87,7 +87,9 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_AddElements( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_Dump( uint32_t argc, char *argv[] );
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )
 uint32_t DBG_CommandLine_RTC_UnitTest( uint32_t argc, char *argv[] );

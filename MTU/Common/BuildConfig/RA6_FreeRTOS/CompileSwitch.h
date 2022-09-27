@@ -308,7 +308,7 @@
 #define TM_QUEUE                          0
 #define TM_MSGQ                           0
 #define TM_EVENTS                         0
-#define TM_LINKED_LIST                    0
+#define TM_LINKED_LIST                    1
 #define TM_CRC_UNIT_TEST                  0
 #define TM_TIME_COMPOUND_TEST             0
 #define TM_OS_EVENT_TEST                  0 /* Test the time compound functions */

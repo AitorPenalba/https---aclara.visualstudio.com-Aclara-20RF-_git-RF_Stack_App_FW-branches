@@ -449,9 +449,9 @@ void *OS_LINKEDLIST_Next ( OS_List_Handle list, void *listElement );
 void *OS_LINKEDLIST_Dequeue  ( OS_List_Handle list );
 uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list );
 void *OS_LINKEDLIST_Head ( OS_List_Handle list );
-
-
-
+/* If TM_LINKED_LIST == 0 (release version), the following two functions will be created but empty.  Cannot use conditional compile here */
+char *OS_LINKEDLIST_ValidateList ( OS_List_Handle list, char *code );
+void OS_LINKEDLIST_DumpList      ( OS_List_Handle list, OS_Linked_List_Element *firstElement ); /* same */
 
 bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
 void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );
