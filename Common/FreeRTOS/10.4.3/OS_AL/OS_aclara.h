@@ -117,6 +117,19 @@
 #endif
 
 #if ( RTOS_SELECTION == MQX_RTOS )
+/* The MQX version of interrupt disable/enable will disable the RTOS tick and ALL peripheral interrupts.
+   Any Fault interrupt can still occur.
+   The SVCall interrupt is active, but the scheduler will not allow another task to run (PendSV priority lower than max allowed).
+      SVCall only occurs if an MQX call is made
+   If the active task blocks while interrupts are disabled, the state of the interrupts (disabled or enabled) depends on the
+      interrupt-disabled state of the next task MQX makes ready.
+         Bottom line: Do not allow task to block while interrupts are disabled.
+   The RTOS keeps track of nested disable calls and only enables after all have been completed.
+   NOTE:
+      Use of PRIMASK is discouraged - this disables ALL interrupts and is frequently called in MQX without regard to it being
+      already disabled (will re-enable interrupts without warning).
+      Bottom line: When using PRIMASK do not make any MQX calls.
+*/
 #define OS_INT_disable()                                     _int_disable()
 #define OS_INT_enable()                                       _int_enable()
 #define OS_INT_ISR_disable()                                 _int_disable()

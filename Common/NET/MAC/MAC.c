@@ -1725,17 +1725,16 @@ void MAC_Task ( taskParameter )
                            sysTime_t   sysTime1;
                            volatile uint64_t    syncFuture;
                            uint32_t    time;
-                           uint32_t primask = __get_PRIMASK();
-                           __disable_interrupt(); // Disable all interrupts. This section is time critical but fast fortunatly.
+
+                           OS_INT_disable();
                            TIME_SYS_GetSysDateTime( &sysTime );
                            time = DWT_CYCCNT; // Get time in CPU cycles
-                           __set_PRIMASK(primask); // Restore interrupts
+                           OS_INT_enable();
                            do {
-                              uint32_t primask = __get_PRIMASK();
-                              __disable_interrupt(); // Disable all interrupts. This section is time critical but fast fortunatly.
+                              OS_INT_disable();
                               TIME_SYS_GetSysDateTime( &sysTime1 );
                               time = DWT_CYCCNT; // Get time in CPU cycles
-                              __set_PRIMASK(primask); // Restore interrupts
+                              OS_INT_enable();
                            } while ( sysTime.time == sysTime1.time );
                            sysTime = sysTime1;
 

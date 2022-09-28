@@ -4095,7 +4095,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                {
                   retStatus = copyPart2Part( 0, BL_VECTOR_TABLE_SIZE, &Buffer[0], sizeof( Buffer ),
                                              pBLBackupPTbl, pBLCodePTbl );
-                  OS_INT_enable( );   // Enable as soon as possible
                   if ( eSUCCESS == retStatus )
                   {
                      if ( 0 != memcmp( ( flAddr * )pBLBackupPTbl->PhyStartingAddress,
@@ -4145,7 +4144,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                   if ( eSUCCESS == retStatus )  //Write BL vectors
                   {
                      retStatus = copyPart2Part( ( flAddr )0, INT_FLASH_ERASE_SIZE, &Buffer[0], sizeof( Buffer ), pDFWImagePTbl_, pBLCodePTbl );
-                     OS_INT_enable( );  // Enable as soon as possible
                      if ( eSUCCESS == retStatus )  //Check CRC of updated BL
                      {
                         /************************************************************************************************
@@ -4160,7 +4158,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                               Very time critical section.  If a spurious reset occurs here the unit is a brick
                            *********************************************************************************************/
                            /* Restore Backup vector table to the normal INTVECT */
-                           OS_INT_disable( ); //Disable interrupts to ensure this completes as quickly as possible
                            //Need seperate loop control variables
                            uint8_t           attemptsBkup = 3;
                            returnStatus_t    status;
@@ -4174,7 +4171,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                               {
                                  status = copyPart2Part( 0, BL_VECTOR_TABLE_SIZE, &Buffer[0], sizeof( Buffer ),
                                                          pBLBackupPTbl, pBLCodePTbl );
-                                 OS_INT_enable( );   // Enable as soon as possible
                                  if ( eSUCCESS == status )
                                  {
                                     if ( 0 != memcmp( ( flAddr * )pBLBackupPTbl->PhyStartingAddress,
@@ -4191,7 +4187,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                               first two vectors since the bootloader does not use any of the remaining vectors (interrupts
                               not enabled).
                            */
-                           OS_INT_enable( );   // See OS_INT_disable( ); above
                            /****************************************************************************************************
                               End of very time critical section.
                            *****************************************************************************************************/

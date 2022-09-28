@@ -83,8 +83,6 @@
 #elif ( MCU_SELECTED == RA6E1 )
 #define RESET()                     __NVIC_SystemReset()
 #endif
-#define DI()                        OS_INT_disable( )
-#define EI()                        ERROR! NOT DEFINED
 
 #ifdef _DEBUG_MODE                   /* When using debugger, don't use the sleep instruction, use a NOP instead. */
    #define SLEEP()                  NOP()
