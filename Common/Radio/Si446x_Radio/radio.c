@@ -997,7 +997,7 @@ static void Radio0_IRQ_ISR(void)
 void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #endif // RTOS_SELECTION
 {
-
+   OS_INT_disable();
    // There is no guarantee that this interrupt was from a time sync (it could be from preamble or FIFO almost full) but only the time sync interrupt will validate this value
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
 
@@ -1017,7 +1017,6 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #endif
 
    // Need to read those 3 counters together so disable interrupts if they are not disabled already
-   OS_INT_disable();
 #if ( MCU_SELECTED == NXP_K24 )
    cycleCounter   = DWT_CYCCNT;
    currentFTM     = (uint16_t)FTM1_CNT; // Connected to radio interrupt
