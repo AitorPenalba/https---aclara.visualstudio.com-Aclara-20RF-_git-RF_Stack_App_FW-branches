@@ -374,8 +374,9 @@ void APP_MSG_HandlerTask ( taskParameter )
 {
    buffer_t *pBuf;            //pointer to message
    bool     handlerMatchFound = ( bool )false;
-
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf( "APP_MSG_Handler_Task starting..." );
+#endif
 
    OS_TASK_Sleep ( 5000 );
 

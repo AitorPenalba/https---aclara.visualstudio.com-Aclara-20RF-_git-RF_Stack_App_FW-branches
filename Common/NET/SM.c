@@ -242,7 +242,9 @@ void SM_Task( taskParameter )
 #if ( RTOS_SELECTION == MQX_RTOS )
    (void)   Arg0;
 #endif
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("SM_Task starting...");
+#endif
    for (;;)
    {
       buffer_t *pReqBuf = NULL;
@@ -423,7 +425,9 @@ static void SM_SendConfirm(SM_Confirm_t const *pConfirm, buffer_t const *pReqBuf
          break;
       default              :  msg = "Unknown";
       }  /*lint !e788 not all enums are handled by the switch  */
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
       INFO_printf("CONFIRM:%s, handle:%d", msg, 0);
+#endif
    }
 }
 

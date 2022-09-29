@@ -81,7 +81,7 @@ extern const uint8_t uStartUpTblCnt;
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 
-#define PWRLG_PRINT_ENABLE       1  /* Enable to use LG_PRNT_INFO() */
+//#define PWRLG_PRINT_ENABLE       1  /* Moved this to features.h: Enable to use LG_PRNT_INFO() */
 
 #define ENABLE_LED               0  /* Set to non-zero to used LEDs for debugging purposes   */
 
