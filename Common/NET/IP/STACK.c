@@ -2740,7 +2740,9 @@ static bool Process_SetRequest(NWK_SetReq_t const *pSetReq)
 static bool Process_StartRequest(NWK_StartReq_t const *pStartReq)
 {
    (void) pStartReq;
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("StartReq");
+#endif
    pNwkConf->Type = eNWK_START_CONF;
 
    // Attempt to start
@@ -2753,7 +2755,9 @@ static bool Process_StartRequest(NWK_StartReq_t const *pStartReq)
       _state = eNWK_STATE_OPERATIONAL;
       pNwkConf->StartConf.eStatus = eNWK_START_SUCCESS;
    }
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("%s", NWK_StateMsg(_state));
+#endif
    return (bool)true;
 }
 
@@ -2776,7 +2780,9 @@ static bool Process_StopRequest(NWK_StopReq_t const *pStopReq)
    else{
       pNwkConf->StopConf.eStatus = eNWK_STOP_ERROR;
    }
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("%s", NWK_StateMsg(_state));
+#endif
    return (bool)true;
 }
 
@@ -2803,8 +2809,8 @@ static char* NWK_StateMsg(NWK_STATE_e state)
    char* msg="";
    switch(state)
    {
-      case eNWK_STATE_IDLE              : msg = "eNKW_STATE_IDLE"       ; break;
-      case eNWK_STATE_OPERATIONAL       : msg = "eNKW_STATE_OPERATIONAL"; break;
+      case eNWK_STATE_IDLE              : msg = "eNWK_STATE_IDLE"       ; break;
+      case eNWK_STATE_OPERATIONAL       : msg = "eNWK_STATE_OPERATIONAL"; break;
    }
    return msg;
 }

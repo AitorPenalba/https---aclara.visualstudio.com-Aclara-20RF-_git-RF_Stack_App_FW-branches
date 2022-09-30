@@ -1233,9 +1233,9 @@ void MAC_Task ( taskParameter )
    uint32_t       RxTime; // Tell PHY when the receiver SYNC should happen. This is for deterministic transmission.
 
    buffer_t *pRequestBuf = NULL;        // Handle to unconfirmed NWK request buffers
-
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("MAC_Task starting...");
-
+#endif
 #if ( EP == 1 )
 #if ( DEBUG_LAST_GASP_TASK == 0 )
 #if ( MCU_SELECTED == NXP_K24 )
@@ -1562,7 +1562,9 @@ void MAC_Task ( taskParameter )
                            }
                         }else
                         {
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
                            INFO_printf("CCA_PENDING");
+#endif
                            if(PHY_CcaRequest(phy.channel, phy_confirm_cb))
                            {
                               ConfigurePHYTimeout( ePHY_CCA_CONF, PHY_CCA_CONFIRM_TIMEOUT_MS );
@@ -1588,8 +1590,9 @@ void MAC_Task ( taskParameter )
                         phy.ePhyFraming        = ePHY_FRAMING_0;          // SRFN
                         phy.ePhyMode           = ePHY_MODE_1;             // 4-GFSK, 4800 baud
                         phy.ePhyModeParameters = ePHY_MODE_PARAMETERS_0;  // RS(63,59)  Reed-Solomon
-
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
                         INFO_printf("CCA_PENDING");
+#endif
 #if ( EP == 1 ) && ( TEST_TDMA == 1 )
                         if ( MAC_ConfigAttr.CsmaSkip ) {
                            phy.csmaAttempts = 0;
@@ -1677,7 +1680,7 @@ void MAC_Task ( taskParameter )
                      }
                   }
                }else
-#endif
+#endif // (DCU == 1)
                {  // SRFN Mode
 #if ( EP == 1 ) && ( TEST_TDMA == 1 )
                   if( phy.channelClear || MAC_ConfigAttr.CsmaSkip )
@@ -1686,8 +1689,12 @@ void MAC_Task ( taskParameter )
 #else
                   if( phy.channelClear )
                   {
+#if ( MCU_SELECTED == NXP_K24 )
                      if( P_Persistence_Get() )
-#endif
+#elif ( MCU_SELECTED == RA6E1 )
+                     if( P_Persistence_Get() || ( 0 != PWRLG_LLWU() ) ) /* Ignore p_persistence during last gasps */
+#endif // MCU_SELECTED
+#endif // ( EP == 1 ) && ( TEST_TDMA == 1 )
                      {
                         /* Build a Data.Request message from this data and send to the PHY layer */
    //                   INFO_printHex("Data:", phy.data, phy.size);
@@ -1806,7 +1813,7 @@ void MAC_Task ( taskParameter )
                         // unless quick abort is set
                         if (MAC_ConfigAttr.CsmaQuickAbort)
                         {
-                           INFO_printf("MAC!!!!QuickAbort");
+                           INFO_printf("MAC!!!!QuickAbort: RSTSR0=%02x, PWRLG_LLWU=%02x", R_SYSTEM->RSTSR0, PWRLG_LLWU() ); // TODO: RA6E1 Bob: remove since it won't work for K24
                            (void) TIME_UTIL_GetTimeInSecondsFormat( &CurrentTime );
                            MAC_FrameManag_PhyDataConfirm(eMAC_DATA_TRANSACTION_FAILED);
                            INFO_printf("PHY_READY");
@@ -1847,7 +1854,9 @@ void MAC_Task ( taskParameter )
                            INFO_printf("actual_delay: %li usec", OS_TICK_Get_Diff_InMicroseconds ( &phy.ccaDelayStart, &CurrentTicks  ));
 
                            // Now send another request
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
                            INFO_printf("CCA_PENDING");
+#endif
                            if(PHY_CcaRequest(phy.channel, phy_confirm_cb))
                            {
                               ConfigurePHYTimeout( ePHY_CCA_CONF, PHY_CCA_CONFIRM_TIMEOUT_MS );
@@ -1901,8 +1910,9 @@ void MAC_Task ( taskParameter )
 
                   // Print the measured delay
                   INFO_printf("delay : %li usec", OS_TICK_Get_Diff_InMicroseconds ( &phy.ccaDelayStart, &CurrentTicks  ));
-
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
                   INFO_printf("CCA_PENDING");
+#endif
                   if(PHY_CcaRequest(phy.channel, phy_confirm_cb))
                   {
                      ConfigurePHYTimeout( ePHY_CCA_CONF, PHY_CCA_CONFIRM_TIMEOUT_MS );
@@ -3651,7 +3661,9 @@ bool TxChannels_init(MAC_CHANNEL_SETS_e channelSets, MAC_CHANNEL_SET_INDEX_e cha
    }
 
    // This is just for information
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("Total channels = %u", numChannels);
+#endif
 
    return ( tx_channels.cnt != 0 );  /* Returns correct bool value */
 }
@@ -5541,8 +5553,9 @@ static bool Process_PingReq( buffer_t *pBuf )
 static bool Process_StartReq( MAC_StartReq_t const *pStartReq )
 {
    (void) pStartReq;
-
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("Process_StartReq");
+#endif
    pMacConf->Type = eMAC_START_CONF;
 
    if(_state == eMAC_STATE_IDLE)
