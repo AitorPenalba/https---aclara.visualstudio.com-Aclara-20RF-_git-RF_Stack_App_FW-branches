@@ -1813,7 +1813,7 @@ void MAC_Task ( taskParameter )
                         // unless quick abort is set
                         if (MAC_ConfigAttr.CsmaQuickAbort)
                         {
-                           INFO_printf("MAC!!!!QuickAbort: RSTSR0=%02x, PWRLG_LLWU=%02x", R_SYSTEM->RSTSR0, PWRLG_LLWU() );
+                           INFO_printf("MAC!!!!QuickAbort: RSTSR0=%02x, PWRLG_LLWU=%02x", R_SYSTEM->RSTSR0, PWRLG_LLWU() ); // TODO: RA6E1 Bob: remove since it won't work for K24
                            (void) TIME_UTIL_GetTimeInSecondsFormat( &CurrentTime );
                            MAC_FrameManag_PhyDataConfirm(eMAC_DATA_TRANSACTION_FAILED);
                            INFO_printf("PHY_READY");
