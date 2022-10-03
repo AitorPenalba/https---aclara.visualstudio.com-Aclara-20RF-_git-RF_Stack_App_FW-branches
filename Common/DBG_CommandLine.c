@@ -219,7 +219,12 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define MAX_INTERNAL_FLASH_READ_SIZE   100                      /* Maximum size of internal flash read's buffer */
 #endif // TM_INTERNAL_FLASH_TEST
 
-
+#if( MCU_SELECTED == RA6E1 )
+/* Key code for writing PRCR register. */
+#define BSP_PRV_PRCR_KEY                        (0xA500U)
+#define BSP_PRV_PRCR_UNLOCK                     ((BSP_PRV_PRCR_KEY) | 0x3U)
+#define BSP_PRV_PRCR_LOCK                       ((BSP_PRV_PRCR_KEY) | 0x0U)
+#endif
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -459,7 +464,13 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    { "clockswtest",  DBG_CommandLine_clockswtest,     "Count cycle counter at 2 different clock settings over 5 seconds" },
 #endif
+#if ( MCU_SELECTED == NXP_K24 )
    { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" },
+#elif ( MCU_SELECTED == RA6E1 )
+   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off 0-> HOCO   1-> MOCO   2-> LOCO   3-> MOSC   4-> SOSC\r\n"
+                     "                                   Example : clocktst 0 0 <-> Turn off HOCO clockout\r\n"
+                     "                                             clocktst 1 0 <-> Turn on HOCO clockout"},
+#endif
    { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
 #if ( MCU_SELECTED == RA6E1 )
    { "coreClocks",   DBG_CommandLine_CoreClocks,      "Display the CPU core clocks in Hz" },
@@ -2060,7 +2071,7 @@ uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
       if ( diffTickValue.xNumOfOverflows > 0 )
       {
          DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
-         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+         // RA6 : Currently we dont support  values greater than UINT32_MAX. Check if required
       }
 
       else
@@ -2145,7 +2156,7 @@ uint32_t DBG_CommandLine_TimeMin( uint32_t argc, char *argv[] )
       if ( diffTickValue.xNumOfOverflows > 0)
       {
          DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
-         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+         // RA6 :Currently we dont support  values greater than UINT32_MAX. Check if required
       }
       else
       {
@@ -2231,7 +2242,7 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] )
       if ( diffTickValue.xNumOfOverflows > 0 )
       {
          DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
-         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+         //RA6 : Currently we dont support  values greater than UINT32_MAX. Check if required
       }
 
       else
@@ -3728,6 +3739,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] )
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Head() */
 
+
 /*******************************************************************************
 
    Function name: DBG_CommandLine_OS_LinkedList_Next
@@ -5151,6 +5163,11 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
    uint8_t string[VER_HW_STR_LEN];   /* Version string including the two '.' and a NULL */
 
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+#if( MCU_SELECTED == RA6E1 )
+   static uint8_t clockOnOffCheck = 0;
+   uint32_t clockSource = 0;
+   static const char clockNames[8][5] = {"HOCO", "MOCO", "LOCO", "MOSC", "SOSC", "invl", "invl", "invl"};
+#endif
 #if ( MCU_SELECTED == NXP_K24 ) // The CLKOUT pin is grounded in the Y8409x K24 NIC, not in RA6E1
    /* Rev C HW, PTC3/CLKOUT pin is grounded */
    if ( 'C' == string[0] )
@@ -5160,20 +5177,42 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
       return( 0 );
    }
 #endif // ( MCU_SELECTED == NXP_K24 )
-   if( argc != 2 )      /* Must be at least on parameter */
+#if ( MCU_SELECTED == NXP_K24 )
+   if( argc != 2 )      /* Must be at least one parameter */
    {
       DBG_logPrintf( 'R', "1/0 (on/off) parameter required" );
    }
+#elif( MCU_SELECTED == RA6E1 )
+   if( argc != 3 )
+   {
+      DBG_logPrintf( 'R', "1/0 (on/off) and Clock source parameters required\r\n"
+                     "                                         Example : clocktst 0 0 <-> Turn off HOCO clockout\r\n"
+                     "                                         clocktst 1 0 <-> Turn on HOCO clockout\r\n"
+                     "                                         For more detail enter help cmd");
+   }
+#endif
    else
    {
       ( void )sscanf( argv[1], "%lu", &on ); /* Get user's request   */
+#if ( MCU_SELECTED == RA6E1 )
+      ( void )sscanf( argv[2], "%lu", &clockSource ); /* Get user's request   */
+#endif
       if( on == 0 )
       {
 #if ( MCU_SELECTED == NXP_K24 )
          SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
          OSC_CR &= ~( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Disable the clock output   */
 #elif ( MCU_SELECTED == RA6E1 )
-         DBG_logPrintf( 'R', "clocktst command is not currently supported for RA6E1"); // TODO: RA6E1 Bob: Support this?
+         if( clockOnOffCheck != clockSource )
+         {
+            DBG_logPrintf( 'R', "Missmatch find between the clock on and off" );
+         }
+         R_BSP_PinAccessEnable();
+         R_SYSTEM->PRCR = (uint16_t) BSP_PRV_PRCR_UNLOCK;
+         R_SYSTEM->CKOCR_b.CKOEN = 0;
+         R_SYSTEM->PRCR = (uint16_t) BSP_PRV_PRCR_LOCK;
+         R_BSP_PinCfg (BSP_IO_PORT_01_PIN_09, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
+         R_BSP_PinAccessDisable();
 #endif // MCU_SELECTED
 #if ( DCU == 1 )
          PORTE_PCR0 &= ~PORT_PCR_MUX( 7 );
@@ -5193,7 +5232,17 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
          SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
          SIM_SOPT2 |= ( SIM_SOPT2_CLKOUTSEL( 6 ) ); /* Select the external oscillator as the source clock */
 #elif ( MCU_SELECTED == RA6E1 )
-         DBG_logPrintf( 'R', "clocktst command is not currently supported for RA6E1"); // TODO: RA6E1 Bob: Support this?
+         clockOnOffCheck = clockSource;
+         R_BSP_PinAccessEnable();
+         R_BSP_PinCfg (BSP_IO_PORT_01_PIN_09, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_CLKOUT_COMP_RTC));
+         /* Unlock CGC and LPM protection registers. */
+         R_SYSTEM->PRCR = (uint16_t) BSP_PRV_PRCR_UNLOCK;
+         R_SYSTEM->CKOCR_b.CKOEN = 0; /* HRM section 8.2.21 says to set CKOEN to 0 before changing the clock source */
+         R_SYSTEM->CKOCR_b.CKOSEL = clockSource;
+         R_SYSTEM->CKOCR_b.CKODIV = 0;
+         R_SYSTEM->CKOCR_b.CKOEN = 1;
+         R_SYSTEM->PRCR = (uint16_t) BSP_PRV_PRCR_LOCK;
+         R_BSP_PinAccessDisable();
 #endif // MCU_SELECTED
 #if ( DCU == 1 )
 //         RTC_CR |= ( uint8_t )( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Enable the clock output    */
@@ -5208,7 +5257,7 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
    #endif // MCU_SELECTED
 #endif // ( DCU == 1 )
       }
-      DBG_logPrintf( 'R', "clock: %s", on == 0 ? "off" : "on" );
+      DBG_logPrintf( 'R', "clock: %s, selection: %s", on == 0 ? "off" : "on", &clockNames[clockSource][0] );
    }
    return 0;
 }
@@ -8087,7 +8136,7 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
                   OS_Get_OsVersion(), OS_Get_OsGenRevision(), OS_Get_OsLibDate() );
 #endif
 #if ( ( MCU_SELECTED == NXP_K24 ) || ( DCU == 1 ) )
-   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );  // TODO: RA6: Support this line
+   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );
 #endif
 #if ( MCU_SELECTED == RA6E1 )
    DBG_logPrintf( 'R', "BSP=%s IAR=%d", BSP_Get_BSPVersion(), __VER__ );

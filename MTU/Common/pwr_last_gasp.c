@@ -114,8 +114,17 @@ extern const uint8_t uStartUpTblCnt;
 #endif
 
 //These MAY become configurable
+/* This definition is for those NICs that use the Maxim boost converter chip */
 static const float fCapacitanceRevB          = ( float )10.0;     /* Rev B HW's Super cap capacitance value in Farads */
+/* These definitions are for the I-210+c NIC that uses the RA6E1 microcontroller */
+#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )          /* This is for the Rev A circuit board with the TI chip */
 static const float fCapacitanceRevC          = ( float )5.0;      /* Rev C HW's Super cap capacitance value in Farads */
+#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )        /* THis is for the Rev B circuit board with the TI chip */
+static const float fCapacitanceRevC          = ( float )10.0;     /* Rev C HW's Super cap capacitance value in Farads */
+#else
+/* This definition is for the I-210+c Y8409x NIC that uses the TI boost converter chip */
+static const float fCapacitanceRevC          = ( float )5.0;      /* Rev C HW's Super cap capacitance value in Farads */
+#endif
 #if ( MCU_SELECTED == NXP_K24 )
 static const float fEnergy30SecondSleep      = ( float )0.08;     /* Energy used to sleep 30 seconds */
 #elif ( MCU_SELECTED == RA6E1 )
