@@ -1638,7 +1638,7 @@ static void tx_FMR( HEEP_APPHDR_t const *heepHdr, enum_status methodStatus, EDEv
            bfield.RdgQualPres   = 0;
            bfield.rsvd2         = 0;
            bfield.pendPowerof10 = 0;
-           bfield.typecast      = (uint16_t)Boolean;
+           bfield.typecast      = (uint16_t)uintValue; // TODO: RA6E1 Bob: should not be building it here but this needs to be uintValue
 #if ( OTA_CHANNELS_ENABLED == 0 )
            bfield.rsvd1         = 0;
 #endif
