@@ -1706,6 +1706,7 @@ static void mfgpReadByte( uint8_t rxByte )
    else
    {
 #if 1 // TODO: RA6E1 Bob: I don't believe this needed to be different for FreeRTOS ( RTOS_SELECTION == MQX_RTOS )
+// TODO: RA6E1 Bob: CR+LF will cause two messages to be posted to the command processor, one a valid command and the second a null command.  Should we strip out the null command(s)?
       if( (rxByte == LINE_FEED_CHAR) || (rxByte == CARRIAGE_RETURN_CHAR) )
 #elif ( RTOS_SELECTION == FREE_RTOS )
       if( rxByte == CARRIAGE_RETURN_CHAR )
