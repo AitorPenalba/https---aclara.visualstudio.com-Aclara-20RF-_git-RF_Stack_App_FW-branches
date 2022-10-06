@@ -34,7 +34,7 @@
 /* TODO: RA6E1 Bob: When everyone is switched to Rev B equivalent hardware, this can be permanently changed to Rev B  */
 /* To build the firmware for the Y84081 Rev A board, use HAL_TARGET_Y84580_x_REV_A */
 /* To build the firmware for the Y84081 Rev B board, use HAL_TARGET_Y84580_x_REV_B */
-#define HAL_TARGET_HARDWARE     HAL_TARGET_Y84580_x_REV_A
+#define HAL_TARGET_HARDWARE     HAL_TARGET_Y84580_x_REV_B
 #define MCU_SELECTED            RA6E1
 #define RTOS_SELECTION          FREE_RTOS
 

@@ -824,7 +824,7 @@ const directLookup_t directLookupTable[] =
    },
    {
       .quantity                        = switchPositionStatus,          /* Switch open/close status   */
-      .typecast                        = Boolean,
+      .typecast                        = uintValue,                     // TODO: K24 Bob: changed from Boolean to uintValue on RA6
       .tbl.tblInfo.tableID             = BIG_ENDIAN_16BIT( MFG_TBL_LOAD_CONTROL_STATUS ),
       .tbl.tblInfo.offset[0]           = 0,
       .tbl.tblInfo.offset[1]           = 0,
