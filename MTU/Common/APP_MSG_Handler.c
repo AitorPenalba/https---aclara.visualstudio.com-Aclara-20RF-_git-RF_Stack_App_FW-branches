@@ -10,7 +10,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2014-2020 Aclara.  All Rights Reserved.
+   Copyright 2014-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -24,14 +24,12 @@
  **********************************************************************************************************************/
 
 /* INCLUDE FILES */
-#include <stdint.h>
-#include <stdbool.h>
 #include "project.h"
 #include "rand.h"
 
 #define APP_MSG_GLOBALS
-#include "App_Msg_Handler.h"
-#include "App_Msg_HandlerTable.h"
+#include "APP_MSG_Handler.h"
+#include "APP_MSG_HandlerTable.h"
 #undef APP_MSG_GLOBALS
 
 #include "rand.h"
