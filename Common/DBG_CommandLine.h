@@ -87,7 +87,9 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_AddElements( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] );
+uint32_t DBG_CommandLine_OS_LinkedList_Dump( uint32_t argc, char *argv[] );
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )
 uint32_t DBG_CommandLine_RTC_UnitTest( uint32_t argc, char *argv[] );
@@ -151,6 +153,9 @@ uint32_t DBG_CommandLine_getDstParams ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_virgin ( uint32_t argc, char *argv[] );
 #if (EP == 1) && ( ACLARA_LC == 0 ) && ( ACLARA_DA == 0 )
 uint32_t DBG_CommandLine_OnDemandRead ( uint32_t argc, char *argv[] );
+#endif
+#if (MCU_SELECTED == RA6E1) && (TM_VERIFY_BOOT_UPDATE_RA6E1 == 1)
+uint32_t DBG_CommandLine_BootUpdateVerify ( uint32_t argc, char *argv[] );
 #endif
 uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_Counters ( uint32_t argc, char *argv[] );

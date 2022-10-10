@@ -1058,8 +1058,9 @@ static uint32_t virtualTemperature_Delay( void )
 
    SlowDeg = PATemp + PHY_VIRTUAL_TEMP_TRANSITION_POINT - PHY_VIRTUAL_TEMP_LIMIT;
 
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // Disable all interrupts. We are accessing virtualTemperature structure that can be modified by the timer callback.
+   // Disable interrupts. We are accessing virtualTemperature structure that can be modified by the timer callback.
+   OS_INT_disable();
+
    // Check if we are in the slow of fast drop part
    if ( SlowDeg < 0 ) {
       SlowDeg = 0;
@@ -1067,7 +1068,7 @@ static uint32_t virtualTemperature_Delay( void )
    } else {
       FastDeg = ((virtualTemperature.vTemp + PHY_VIRTUAL_TEMP_RISE_PER_FRAME) - PHY_VIRTUAL_TEMP_TRANSITION_POINT) - PATemp;
    }
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
    if ( FastDeg < 0 ) {
       FastDeg = 0;
@@ -1279,8 +1280,9 @@ void PHY_Task( taskParameter )
 #endif // Not RA6E1.  This was already removed in the K24 baseline code
    timeout = ONE_SEC; // Do some background processing every second.
    defaultTimeout = timeout;
-
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("PHY_Task starting...");
+#endif
    pRequestBuf = NULL;
 
    virtualTemperature_Init();
@@ -2412,8 +2414,9 @@ static bool Process_CCAReq( PHY_Request_t const *pReq )
    bool     busy = false;
    uint32_t i; // Loop counter
    PHY_CCA_STATUS_e CCAstatus;
-
+#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("CCAReq channel=%d", pReq->CcaReq.channel);
+#endif
 
    // Only allowed in ready state
    if((_phy.state == ePHY_STATE_READY) || (_phy.state == ePHY_STATE_READY_TX))

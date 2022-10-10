@@ -997,9 +997,7 @@ static void Radio0_IRQ_ISR(void)
 void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #endif // RTOS_SELECTION
 {
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
-
+   OS_INT_disable();
    // There is no guarantee that this interrupt was from a time sync (it could be from preamble or FIFO almost full) but only the time sync interrupt will validate this value
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
 
@@ -1030,7 +1028,7 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    cycleCounter   = DWT_CYCCNT;
    currentFTM     = R_GPT1->GTCNT;    // Connected to radio interrupt
 #endif
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
 #if ( MCU_SELECTED == NXP_K24 )
    FTM_CnSC_REG(FTM1_BASE_PTR, 0) &= ~FTM_CnSC_CHF_MASK; // Acknowledge channel interrupt
@@ -1076,7 +1074,7 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #elif (RTOS_SELECTION == FREE_RTOS )
    RADIO_Event_Set(eRADIO_INT, (uint8_t)RADIO_0, (bool)true); /* Signal the event from the ISR */
 #endif // RTOS_SELECTION
-#endif // ( EP == 1 )
+#endif // EP
 }
 
 #if ( MCU_SELECTED == RA6E1 )
@@ -2005,16 +2003,14 @@ bool RADIO_TCXO_Get ( uint8_t radioNum, uint32_t *TCXOfreq, TIME_SYS_SOURCE_e *s
    uint32_t currentTime;
    uint32_t lastUpdate;
 
-   uint32_t primask = __get_PRIMASK();
-
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable();
 
    *TCXOfreq  = radio[radioNum].TCXOFreq;
    lastUpdate = radio[radioNum].TCXOLastUpdate;
    if ( source != NULL ) {
       *source = radio[radioNum].TCXOsource;
    }
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
    // TCXO frequency is considered valid for 30 days after the last update
    // After that it is considered stale.
@@ -2052,8 +2048,7 @@ bool RADIO_TCXO_Set ( uint8_t radioNum, uint32_t TCXOfreq, TIME_SYS_SOURCE_e sou
    // Sanity check on TCXO frequency
    // Make sure radio TCXO is within expected values (30MHz +/-25ppm)
    if ( (TCXOfreq > RADIO_TCXO_MIN) && (TCXOfreq < RADIO_TCXO_MAX) ) {
-      uint32_t primask = __get_PRIMASK();
-      __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+      OS_INT_disable();
 
       // Check if the new TCXO frequency is different than the current one.
       if ( radio[radioNum].TCXOFreq != TCXOfreq ) {
@@ -2061,7 +2056,7 @@ bool RADIO_TCXO_Set ( uint8_t radioNum, uint32_t TCXOfreq, TIME_SYS_SOURCE_e sou
          retVal = (bool)true;
       }
       radio[radioNum].TCXOsource = source; // Update the source even if frequency wasn't updated. We want to know who called this function last.
-      __set_PRIMASK(primask); // Restore interrupts
+      OS_INT_enable();
 
       // Update AFC error if TCXO frequency was changed
       if ( retVal ) {
@@ -3819,10 +3814,9 @@ static void updateTCXO ( uint8_t radioNum )
    uint32_t freq;
    union si446x_cmd_reply_union Si446xCmd;
 
-   uint32_t primask = __get_PRIMASK();
-   __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+   OS_INT_disable();
    freq = radio[radioNum].TCXOFreq;
-   __set_PRIMASK(primask); // Restore interrupts
+   OS_INT_enable();
 
    // Sanity check on TCXO frequency
    // Make sure radio TCXO is within expected values (30MHz +/-25ppm)

@@ -117,6 +117,19 @@
 #endif
 
 #if ( RTOS_SELECTION == MQX_RTOS )
+/* The MQX version of interrupt disable/enable will disable the RTOS tick and ALL peripheral interrupts.
+   Any Fault interrupt can still occur.
+   The SVCall interrupt is active, but the scheduler will not allow another task to run (PendSV priority lower than max allowed).
+      SVCall only occurs if an MQX call is made
+   If the active task blocks while interrupts are disabled, the state of the interrupts (disabled or enabled) depends on the
+      interrupt-disabled state of the next task MQX makes ready.
+         Bottom line: Do not allow task to block while interrupts are disabled.
+   The RTOS keeps track of nested disable calls and only enables after all have been completed.
+   NOTE:
+      Use of PRIMASK is discouraged - this disables ALL interrupts and is frequently called in MQX without regard to it being
+      already disabled (will re-enable interrupts without warning).
+      Bottom line: When using PRIMASK do not make any MQX calls.
+*/
 #define OS_INT_disable()                                     _int_disable()
 #define OS_INT_enable()                                       _int_enable()
 #define OS_INT_ISR_disable()                                 _int_disable()
@@ -436,9 +449,9 @@ void *OS_LINKEDLIST_Next ( OS_List_Handle list, void *listElement );
 void *OS_LINKEDLIST_Dequeue  ( OS_List_Handle list );
 uint16_t OS_LINKEDLIST_NumElements ( OS_List_Handle list );
 void *OS_LINKEDLIST_Head ( OS_List_Handle list );
-
-
-
+/* If TM_LINKED_LIST == 0 (release version), the following two functions will be created but empty.  Cannot use conditional compile here */
+char *OS_LINKEDLIST_ValidateList ( OS_List_Handle list, char *code );
+void OS_LINKEDLIST_DumpList      ( OS_List_Handle list, OS_Linked_List_Element *firstElement ); /* same */
 
 bool OS_MUTEX_Create ( OS_MUTEX_Handle MutexHandle );
 void OS_MUTEX_LOCK ( OS_MUTEX_Handle MutexHandle, char *file, int line );

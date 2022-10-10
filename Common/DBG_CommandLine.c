@@ -219,7 +219,12 @@ uint32_t DBG_CommandLine_SM_Config( uint32_t argc, char *argv[] );
 #define MAX_INTERNAL_FLASH_READ_SIZE   100                      /* Maximum size of internal flash read's buffer */
 #endif // TM_INTERNAL_FLASH_TEST
 
-
+#if( MCU_SELECTED == RA6E1 )
+/* Key code for writing PRCR register. */
+#define BSP_PRV_PRCR_KEY                        (0xA500U)
+#define BSP_PRV_PRCR_UNLOCK                     ((BSP_PRV_PRCR_KEY) | 0x3U)
+#define BSP_PRV_PRCR_LOCK                       ((BSP_PRV_PRCR_KEY) | 0x0U)
+#endif
 /* MACRO DEFINITIONS */
 
 /* TYPE DEFINITIONS */
@@ -459,7 +464,13 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_XCVR_9985_REV_A )
    { "clockswtest",  DBG_CommandLine_clockswtest,     "Count cycle counter at 2 different clock settings over 5 seconds" },
 #endif
+#if ( MCU_SELECTED == NXP_K24 )
    { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off" },
+#elif ( MCU_SELECTED == RA6E1 )
+   { "clocktst",     DBG_CommandLine_clocktst,        "1/0 Turn clkout signal on/off 0-> HOCO   1-> MOCO   2-> LOCO   3-> MOSC   4-> SOSC\r\n"
+                     "                                   Example : clocktst 0 0 <-> Turn off HOCO clockout\r\n"
+                     "                                             clocktst 1 0 <-> Turn on HOCO clockout"},
+#endif
    { "comment",      DBG_CommandLine_Comment,         "No action; allows comment in log" },
 #if ( MCU_SELECTED == RA6E1 )
    { "coreClocks",   DBG_CommandLine_CoreClocks,      "Display the CPU core clocks in Hz" },
@@ -838,6 +849,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
 #if ( PORTABLE_DCU == 1)
    { "dfwmonitormode",  DBG_CommandLine_dfwMonMode,    "enable (1) or disable (0) mode to only print DFW responses\n" },
 #endif
+#if (MCU_SELECTED == RA6E1) && (TM_VERIFY_BOOT_UPDATE_RA6E1 == 1)
+   { "bootUpdateVerify",  DBG_CommandLine_BootUpdateVerify, "check whether bootloader can be updated by using swapping startup area functionality"},
+#endif
    { "ver",          DBG_CommandLine_Versions,        "Display the current Versions of components" },
    { "virgin",       DBG_CommandLine_virgin,          "Erases flash chip and resets the micro" },
    { "virgindelay",  DBG_CommandLine_virginDelay,     "Erases signature; continues. Allows new code load and then virgin" },
@@ -907,7 +921,9 @@ static const struct_CmdLineEntry DBG_CmdTable[] =
    { "oslinkedlistinsert",   DBG_CommandLine_OS_LinkedList_Insert,      "Insert a element at a specific index in test LinkedList" },
    { "oslinkedlistnext",     DBG_CommandLine_OS_LinkedList_Next,        "Returns the Next element from test LinkedList" },
    { "oslinkedlisthead",     DBG_CommandLine_OS_LinkedList_Head,        "Returns the Head element from test LinkedList" },
-   { "oslinkedlistnumele",   DBG_CommandLine_OS_LinkedList_NumElements, "Adds LinkedList element and checks for the count" },
+   { "oslinkedlistaddele",   DBG_CommandLine_OS_LinkedList_AddElements, "Adds LinkedList element and checks for the count" },
+   { "oslinkedlistnumele",   DBG_CommandLine_OS_LinkedList_NumElements, "Returns the number of elements in the LinkedList" },
+   { "oslinkedlistdump",     DBG_CommandLine_OS_LinkedList_Dump,        "Dumps the linked list" },
 #endif
 #if ( TM_RTC_UNIT_TEST == 1 )
    { "rtcUnitTest",   DBG_CommandLine_RTC_UnitTest,      "Run the RTC_UnitTest" },
@@ -2055,7 +2071,7 @@ uint32_t DBG_CommandLine_TimeSec( uint32_t argc, char *argv[] )
       if ( diffTickValue.xNumOfOverflows > 0 )
       {
          DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
-         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+         // RA6 : Currently we dont support  values greater than UINT32_MAX. Check if required
       }
 
       else
@@ -2140,7 +2156,7 @@ uint32_t DBG_CommandLine_TimeMin( uint32_t argc, char *argv[] )
       if ( diffTickValue.xNumOfOverflows > 0)
       {
          DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
-         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+         // RA6 :Currently we dont support  values greater than UINT32_MAX. Check if required
       }
       else
       {
@@ -2226,7 +2242,7 @@ uint32_t DBG_CommandLine_TimeHour( uint32_t argc, char *argv[] )
       if ( diffTickValue.xNumOfOverflows > 0 )
       {
          DBG_logPrintf( 'R', "Current tick count value is greater than Max uint32_t value or UINT32_MAX" );
-         // TODO: RA6 [name_Balaji]:Currently we dont support  values greater than UINT32_MAX. Check if required
+         //RA6 : Currently we dont support  values greater than UINT32_MAX. Check if required
       }
 
       else
@@ -3282,7 +3298,14 @@ uint32_t DBG_CommandLine_BL_Test_Erase_BL_Info( uint32_t argc, char *argv[] )
 
 #endif
 
-#if ( TM_LINKED_LIST == 1)
+#if ( TM_LINKED_LIST == 1 )
+#define OS_LINKEDLIST_VALIDATE(a)                                                             \
+             { char os_ll_code;                                                               \
+               char *os_ll_msg;                                                               \
+               os_ll_msg = OS_LINKEDLIST_ValidateList( osLinkedListTestHandle, &os_ll_code ); \
+               DBG_logPrintf( os_ll_code, "%s", os_ll_msg );                                  \
+               OS_LINKEDLIST_DumpList( osLinkedListTestHandle, &LinkedListdata[0] );          \
+                                                                                                }
 /*******************************************************************************
 
    Function name: DBG_CommandLine_OS_LinkedList_Create
@@ -3313,6 +3336,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Create( uint32_t argc, char *argv[] )
       {
          DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
       }
+      OS_LINKEDLIST_VALIDATE();
    }
    else
    {
@@ -3325,8 +3349,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Create( uint32_t argc, char *argv[] )
 
    Function name: DBG_CommandLine_OS_LinkedList_NumElements
 
-   Purpose: This function will test OS_LINKEDLIST_NumElements function by
-             adding the number of elements from the user to the LinkedList
+   Purpose: This function returns the number of elements in the linked list
 
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
@@ -3336,6 +3359,33 @@ uint32_t DBG_CommandLine_OS_LinkedList_Create( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] )
 {
+   if ( argc == 1 )
+   {
+      DBG_logPrintf( 'R', "Linked List at location %08x contains %u elements",
+                  osLinkedListTestHandle, OS_LINKEDLIST_NumElements( osLinkedListTestHandle ) );
+   }
+   else
+   {
+      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
+   }
+   return ( 0 );
+}
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_AddElements
+
+   Purpose: This function will test OS_LINKEDLIST_NumElements function by
+             adding the number of elements from the user to the LinkedList
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_AddElements( uint32_t argc, char *argv[] )
+{
    returnStatus_t retVal = eFAILURE;
    uint8_t numElementToAdd;
    uint8_t numElementInsideList;
@@ -3343,17 +3393,17 @@ uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] 
    {
       numElementToAdd = ( uint32_t )atoi( argv[1] );
       /* Validate input from user */
-      if ( ( numElementToAdd > MAX_LINKEDLIST_DATA )
-           || ( numElementToAdd == MAX_LINKEDLIST_DATA ) )
+      if ( ( numElementToAdd > MAX_LINKEDLIST_DATA ) ||
+           ( numElementToAdd < 1 ) )
       {
-         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
+         DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be between 1 and %u", MAX_LINKEDLIST_DATA );
          return ( uint32_t )retVal;
       }
 
       /* Enqueue elements to the list */
-      for( uint8_t index = 0; index < numElementToAdd; index++ )
+      for( uint8_t index = 1; index <= numElementToAdd; index++ )
       {
-         OS_LINKEDLIST_Enqueue( osLinkedListTestHandle, &LinkedListdata[ index ] );
+         OS_LINKEDLIST_Enqueue( osLinkedListTestHandle, &LinkedListdata[ index-1 ] );
       }
 
       /* Get the Count from the API */
@@ -3363,23 +3413,25 @@ uint32_t DBG_CommandLine_OS_LinkedList_NumElements( uint32_t argc, char *argv[] 
       if ( numElementToAdd == numElementInsideList )
       {
          DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         OS_LINKEDLIST_VALIDATE();
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
+         OS_LINKEDLIST_VALIDATE();
       }
    }
    else if ( argc < 2 )
    {
-      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+      DBG_printf( "%s <numElementToAdd>", argv[0] );
    }
    else
    {
       DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too many arguments" );
    }
    return ( uint32_t )retVal;
-}/* end DBG_CommandLine_OS_LinkedList_NumElements() */
+}/* end DBG_CommandLine_OS_LinkedList_AddElements() */
 
 /*******************************************************************************
 
@@ -3404,16 +3456,10 @@ uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] )
    {
       indexElementToRemove = ( uint32_t )atoi( argv[1] );
       /* Validate input from user */
-      if ( ( indexElementToRemove > MAX_LINKEDLIST_DATA )
-           || ( indexElementToRemove == MAX_LINKEDLIST_DATA ) )
+      if (    ( indexElementToRemove > MAX_LINKEDLIST_DATA )
+           || ( indexElementToRemove < 1 ) )
       {
-         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
-         return ( uint32_t )retVal;
-      }
-
-      if ( LinkedListdata[ indexElementToRemove ].NEXT == NULL )
-      {
-         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Array Index already NULL" );
+         DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be between 1 and %u", MAX_LINKEDLIST_DATA );
          return ( uint32_t )retVal;
       }
 
@@ -3421,7 +3467,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] )
       numElementBeforeRemove = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
 
       /* Remove elements from the list */
-      OS_LINKEDLIST_Remove( osLinkedListTestHandle, &LinkedListdata[ indexElementToRemove ] );
+      OS_LINKEDLIST_Remove( osLinkedListTestHandle, &LinkedListdata[ indexElementToRemove-1 ] );
 
       /* Get the Count from the API */
       numElementAfterRemove = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
@@ -3429,17 +3475,19 @@ uint32_t DBG_CommandLine_OS_LinkedList_Remove( uint32_t argc, char *argv[] )
       if ( ( numElementAfterRemove + 1 ) == numElementBeforeRemove )
       {
          DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         OS_LINKEDLIST_VALIDATE();
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
+         OS_LINKEDLIST_VALIDATE();
       }
 
    }
    else if ( argc < 2 )
    {
-      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+      DBG_logPrintf( 'I', "%s <indexElementToRemove>", argv[0] );
    }
    else
    {
@@ -3472,10 +3520,10 @@ uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] )
    {
       indexElementToEnq = ( uint32_t )atoi( argv[1] );
       /* Validate input from user */
-      if ( ( indexElementToEnq > MAX_LINKEDLIST_DATA )
-           || ( indexElementToEnq == MAX_LINKEDLIST_DATA ) )
+      if (    ( indexElementToEnq > MAX_LINKEDLIST_DATA )
+           || ( indexElementToEnq < 1 ) )
       {
-         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
+         DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be between 1 and %u", MAX_LINKEDLIST_DATA );
          return ( uint32_t )retVal;
       }
 
@@ -3483,7 +3531,7 @@ uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] )
       numElementBeforeEnq = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
 
       /* Remove elements from the list */
-      OS_LINKEDLIST_Enqueue( osLinkedListTestHandle, &LinkedListdata[ indexElementToEnq ] );
+      OS_LINKEDLIST_Enqueue( osLinkedListTestHandle, &LinkedListdata[ indexElementToEnq-1 ] );
 
       /* Get the Count from the API */
       numElementAfterEnq = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
@@ -3495,13 +3543,13 @@ uint32_t DBG_CommandLine_OS_LinkedList_Enqueue( uint32_t argc, char *argv[] )
       }
       else
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
       }
-
+      OS_LINKEDLIST_VALIDATE();
    }
    else if ( argc < 2 )
    {
-      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+      DBG_logPrintf( 'I', "%s <indexElementToEnq>", argv[0] );
    }
    else
    {
@@ -3552,11 +3600,13 @@ uint32_t DBG_CommandLine_OS_LinkedList_Dequeue( uint32_t argc, char *argv[] )
       if ( ( numElementAfterDeq + 1 ) == numElementBeforeDeq )
       {
          DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         OS_LINKEDLIST_VALIDATE();
          retVal = eSUCCESS;
       }
       else
       {
          DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
+         OS_LINKEDLIST_VALIDATE();
       }
    }
    else
@@ -3593,21 +3643,12 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
       indexElementToInsertAfter = ( uint32_t )atoi( argv[1] );
       indexElementToInsert = ( uint32_t )atoi( argv[2] );
       /* Validate input from user */
-      if ( ( indexElementToInsert > MAX_LINKEDLIST_DATA )
-           || ( indexElementToInsert == MAX_LINKEDLIST_DATA )
-           || ( indexElementToInsertAfter > MAX_LINKEDLIST_DATA )
-           || ( indexElementToInsertAfter == MAX_LINKEDLIST_DATA )
+      if (    ( indexElementToInsert > MAX_LINKEDLIST_DATA )
+           || ( indexElementToInsert < 1 )
+           || ( indexElementToInsertAfter > MAX_LINKEDLIST_DATA ) /* 0 is legitimate, meaning insert at head of list */
               )
       {
-         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
-         return ( uint32_t )retVal;
-      }
-
-
-      if ( LinkedListdata[ indexElementToInsertAfter ].NEXT == NULL )
-      {
-
-         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure. LinkedList is already NULL" );
+         DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be between 1 and %u", MAX_LINKEDLIST_DATA );
          return ( uint32_t )retVal;
       }
 
@@ -3615,7 +3656,14 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
       numElementBeforeInsert = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
 
       /* Insert elements to the list */
-      isValueInserted = OS_LINKEDLIST_Insert( osLinkedListTestHandle, &LinkedListdata[ indexElementToInsertAfter ], &LinkedListdata[ indexElementToInsert ] );
+      if ( indexElementToInsertAfter == 0 )
+      {
+         isValueInserted = OS_LINKEDLIST_Insert( osLinkedListTestHandle, NULL, &LinkedListdata[ indexElementToInsert-1 ] );
+      }
+      else
+      {
+         isValueInserted = OS_LINKEDLIST_Insert( osLinkedListTestHandle, &LinkedListdata[ indexElementToInsertAfter-1 ], &LinkedListdata[ indexElementToInsert-1 ] );
+      }
 
       /* Get the Count from the API */
       numElementAfterInsert = OS_LINKEDLIST_NumElements( osLinkedListTestHandle );
@@ -3623,13 +3671,19 @@ uint32_t DBG_CommandLine_OS_LinkedList_Insert( uint32_t argc, char *argv[] )
       if ( numElementAfterInsert == ( numElementBeforeInsert + 1 ) )
       {
          DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success; isValueInserted = %u", (uint16_t)isValueInserted );
+         OS_LINKEDLIST_VALIDATE();
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure; isValueInserted = %u", (uint16_t)isValueInserted );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure; isValueInserted = %u", (uint16_t)isValueInserted );
+         OS_LINKEDLIST_VALIDATE();
       }
 
+   }
+   else if ( argc == 1 )
+   {
+      DBG_logPrintf( 'I', "%s <indexElementToInsertAfter> <indexElementToInsert>; use 0 for <indexElementToInsertAfter> to insert at head of list", argv[0] );
    }
    else if ( argc < 3 )
    {
@@ -3667,12 +3721,14 @@ uint32_t DBG_CommandLine_OS_LinkedList_Head( uint32_t argc, char *argv[] )
 
       if ( pHeadElement != NULL )
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success, pHeadElement = %08x", pHeadElement );
+         OS_LINKEDLIST_VALIDATE();
          retVal = eSUCCESS;
       }
       else
       {
          DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
+         OS_LINKEDLIST_VALIDATE();
       }
 
    }
@@ -3706,30 +3762,29 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
    {
       indexElement = ( uint32_t )atoi( argv[1] );
       /* Validate input from user */
-      if ( ( indexElement > MAX_LINKEDLIST_DATA )
-           || ( indexElement == MAX_LINKEDLIST_DATA ) )
+      if ( ( indexElement > MAX_LINKEDLIST_DATA ) ||
+           ( indexElement < 1 ) )
       {
-         DBG_logPrintf( 'R', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be less than 5" );
+         DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Invalid Array Index, Should be between 1 and %u", MAX_LINKEDLIST_DATA );
          return ( uint32_t )retVal;
       }
 
       /* Get next elements from the list */
-      pNextElement = OS_LINKEDLIST_Next( osLinkedListTestHandle, &LinkedListdata[ indexElement ] );
+      pNextElement = OS_LINKEDLIST_Next( osLinkedListTestHandle, &LinkedListdata[ indexElement-1 ] );
 
       if ( pNextElement != NULL )
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success" );
+         DBG_logPrintf( 'R', "Linkedlist_Test_Success Test Case Success; pNextElement = %08x", pNextElement );
          retVal = eSUCCESS;
       }
       else
       {
-         DBG_logPrintf( 'R', "Linkedlist_Test_Failure Test Case Failure" );
+         DBG_logPrintf( 'E', "Linkedlist_Test_Failure Test Case Failure" );
       }
-
    }
    else if ( argc < 2 )
    {
-      DBG_logPrintf( 'E', "ERROR - Linkedlist_Test_Failure Too few arguments" );
+      DBG_logPrintf( 'I', "%s <indexElement>", argv[0] );
    }
    else
    {
@@ -3738,6 +3793,23 @@ uint32_t DBG_CommandLine_OS_LinkedList_Next( uint32_t argc, char *argv[] )
    return ( uint32_t )retVal;
 }/* end DBG_CommandLine_OS_LinkedList_Next() */
 
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_OS_LinkedList_Dump
+
+   Purpose: This function dumps the linked list to the debug port
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: retVal - Successful status of this function
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_OS_LinkedList_Dump( uint32_t argc, char *argv[] )
+{
+   OS_LINKEDLIST_DumpList ( osLinkedListTestHandle, &LinkedListdata[0] );
+   return ( 0 );
+}
 #endif   //TM_LINKED_LIST
 
 /*******************************************************************************
@@ -5091,6 +5163,11 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
    uint8_t string[VER_HW_STR_LEN];   /* Version string including the two '.' and a NULL */
 
    ( void )VER_getHardwareVersion ( &string[0], sizeof(string) );
+#if( MCU_SELECTED == RA6E1 )
+   static uint8_t clockOnOffCheck = 0;
+   uint32_t clockSource = 0;
+   static const char clockNames[8][5] = {"HOCO", "MOCO", "LOCO", "MOSC", "SOSC", "invl", "invl", "invl"};
+#endif
 #if ( MCU_SELECTED == NXP_K24 ) // The CLKOUT pin is grounded in the Y8409x K24 NIC, not in RA6E1
    /* Rev C HW, PTC3/CLKOUT pin is grounded */
    if ( 'C' == string[0] )
@@ -5100,20 +5177,42 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
       return( 0 );
    }
 #endif // ( MCU_SELECTED == NXP_K24 )
-   if( argc != 2 )      /* Must be at least on parameter */
+#if ( MCU_SELECTED == NXP_K24 )
+   if( argc != 2 )      /* Must be at least one parameter */
    {
       DBG_logPrintf( 'R', "1/0 (on/off) parameter required" );
    }
+#elif( MCU_SELECTED == RA6E1 )
+   if( argc != 3 )
+   {
+      DBG_logPrintf( 'R', "1/0 (on/off) and Clock source parameters required\r\n"
+                     "                                         Example : clocktst 0 0 <-> Turn off HOCO clockout\r\n"
+                     "                                         clocktst 1 0 <-> Turn on HOCO clockout\r\n"
+                     "                                         For more detail enter help cmd");
+   }
+#endif
    else
    {
       ( void )sscanf( argv[1], "%lu", &on ); /* Get user's request   */
+#if ( MCU_SELECTED == RA6E1 )
+      ( void )sscanf( argv[2], "%lu", &clockSource ); /* Get user's request   */
+#endif
       if( on == 0 )
       {
 #if ( MCU_SELECTED == NXP_K24 )
          SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
          OSC_CR &= ~( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Disable the clock output   */
 #elif ( MCU_SELECTED == RA6E1 )
-         DBG_logPrintf( 'R', "clocktst command is not currently supported for RA6E1"); // TODO: RA6E1 Bob: Support this?
+         if( clockOnOffCheck != clockSource )
+         {
+            DBG_logPrintf( 'R', "Missmatch find between the clock on and off" );
+         }
+         R_BSP_PinAccessEnable();
+         R_SYSTEM->PRCR = (uint16_t) BSP_PRV_PRCR_UNLOCK;
+         R_SYSTEM->CKOCR_b.CKOEN = 0;
+         R_SYSTEM->PRCR = (uint16_t) BSP_PRV_PRCR_LOCK;
+         R_BSP_PinCfg (BSP_IO_PORT_01_PIN_09, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_DEBUG));
+         R_BSP_PinAccessDisable();
 #endif // MCU_SELECTED
 #if ( DCU == 1 )
          PORTE_PCR0 &= ~PORT_PCR_MUX( 7 );
@@ -5133,7 +5232,17 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
          SIM_SOPT2 &= ~( SIM_SOPT2_CLKOUTSEL( 7 ) ); /* Disable clock              */
          SIM_SOPT2 |= ( SIM_SOPT2_CLKOUTSEL( 6 ) ); /* Select the external oscillator as the source clock */
 #elif ( MCU_SELECTED == RA6E1 )
-         DBG_logPrintf( 'R', "clocktst command is not currently supported for RA6E1"); // TODO: RA6E1 Bob: Support this?
+         clockOnOffCheck = clockSource;
+         R_BSP_PinAccessEnable();
+         R_BSP_PinCfg (BSP_IO_PORT_01_PIN_09, ((uint32_t)IOPORT_CFG_PERIPHERAL_PIN | (uint32_t)IOPORT_PERIPHERAL_CLKOUT_COMP_RTC));
+         /* Unlock CGC and LPM protection registers. */
+         R_SYSTEM->PRCR = (uint16_t) BSP_PRV_PRCR_UNLOCK;
+         R_SYSTEM->CKOCR_b.CKOEN = 0; /* HRM section 8.2.21 says to set CKOEN to 0 before changing the clock source */
+         R_SYSTEM->CKOCR_b.CKOSEL = clockSource;
+         R_SYSTEM->CKOCR_b.CKODIV = 0;
+         R_SYSTEM->CKOCR_b.CKOEN = 1;
+         R_SYSTEM->PRCR = (uint16_t) BSP_PRV_PRCR_LOCK;
+         R_BSP_PinAccessDisable();
 #endif // MCU_SELECTED
 #if ( DCU == 1 )
 //         RTC_CR |= ( uint8_t )( OSC_CR_ERCLKEN_MASK << OSC_CR_ERCLKEN_SHIFT ); /* Enable the clock output    */
@@ -5148,7 +5257,7 @@ uint32_t DBG_CommandLine_clocktst( uint32_t argc, char *argv[] )
    #endif // MCU_SELECTED
 #endif // ( DCU == 1 )
       }
-      DBG_logPrintf( 'R', "clock: %s", on == 0 ? "off" : "on" );
+      DBG_logPrintf( 'R', "clock: %s, selection: %s", on == 0 ? "off" : "on", &clockNames[clockSource][0] );
    }
    return 0;
 }
@@ -7871,6 +7980,96 @@ static uint32_t DBG_CommandLine_dfwMonMode ( uint32_t argc, char *argv[] )
 } /* end DBG_CommandLine_dfwMonMode () */
 #endif // ( PORTABLE_DCU == 1)
 
+
+#if (MCU_SELECTED == RA6E1) && (TM_VERIFY_BOOT_UPDATE_RA6E1 == 1)
+extern const firmwareVersion_u   LNKR_BL_FW_VER_ADDR;   /* Address defined in Linker script */
+#define BOOTLOADER_VERSION_ADDR_LOCATION  ( (uint32_t)( &LNKR_BL_FW_VER_ADDR ) + 2 )  /* Getting the version of Bootloader - 0x0042 in the memory space */
+
+/*******************************************************************************
+
+   Function name: DBG_CommandLine_BootUpdateVerify
+
+   Purpose: This function will fill the bootbackup area by updating the boot version.
+            Once it is done, it will call the swap API and reset the processor
+
+   Arguments:  argc - Number of Arguments passed to this function
+               argv - pointer to the list of arguments passed to this function
+
+   Returns: FuncStatus - Successful status of this function - currently always 0 (success)
+
+   Notes: Once this test succeeds, the system will reboot and load with the updated boot version
+
+*******************************************************************************/
+uint32_t DBG_CommandLine_BootUpdateVerify ( uint32_t argc, char *argv[] )
+{
+   uint8_t                 Buffer[READ_WRITE_BUFFER_SIZE]; // Holds data between read/write
+   PartitionData_t const   *pBLCodePTbl;                   // Pointer to Bootloader code partition
+   PartitionData_t const   *pBLBackupPTbl;                 // Pointer to Bootloader backup code partition
+   uint32_t                i = 0;
+   uint8_t                 versionBoot;
+   fsp_err_t               status;
+
+   if ( argc > 2 )
+   {
+      DBG_logPrintf( 'R', "ERROR - Too many arguments" );
+   }
+   else
+   {
+      if (  ( eSUCCESS == PAR_partitionFptr.parOpen( &pBLCodePTbl,   ePART_BL_CODE,   0L ) ) &&
+            ( eSUCCESS == PAR_partitionFptr.parOpen( &pBLBackupPTbl, ePART_BL_BACKUP, 0L ) ) )
+      {
+         if ( argc == 1 )
+         {
+            (void) PAR_partitionFptr.parRead( &versionBoot, BOOTLOADER_VERSION_ADDR_LOCATION, 1, pBLCodePTbl );
+            DBG_logPrintf( 'R',"Boot version %u", versionBoot );
+
+            (void) PAR_partitionFptr.parRead( &versionBoot, BOOTLOADER_VERSION_ADDR_LOCATION, 1, pBLBackupPTbl );
+            DBG_logPrintf( 'R',"Boot backup version %u", versionBoot );
+         }
+         else
+         {
+            OS_INT_disable(); // Enter critical section
+            (void) PAR_partitionFptr.parErase( (lAddr) 0, BL_BACKUP_SIZE, pBLBackupPTbl );
+            OS_INT_enable();  // Exit critical section
+            while( i < BL_BACKUP_SIZE )
+            {
+               (void) PAR_partitionFptr.parRead( &Buffer[0], i, READ_WRITE_BUFFER_SIZE, pBLCodePTbl );
+               if (i == 0)
+               {
+                  Buffer[BOOTLOADER_VERSION_ADDR_LOCATION] = Buffer[BOOTLOADER_VERSION_ADDR_LOCATION] + 1;   // At 66 (0x42) address the boot version is located. Updating the version by 1.
+               }
+
+               OS_INT_disable(); // Enter critical section
+               (void) PAR_partitionFptr.parWrite( i, &Buffer[0], READ_WRITE_BUFFER_SIZE, pBLBackupPTbl );
+               OS_INT_enable();  // Exit critical section
+               i += READ_WRITE_BUFFER_SIZE;
+            }
+
+            flash_startup_area_swap_t startupArea;
+            uint8_t btflg = R_FACI_HP->FAWMON_b.BTFLG;
+            if ( btflg == 1 )
+            {
+              startupArea = FLASH_STARTUP_AREA_BLOCK1;
+            }
+            else if ( btflg == 0 )
+            {
+               startupArea = FLASH_STARTUP_AREA_BLOCK0;
+            }
+
+            OS_INT_disable(); // Enter critical section
+            status = R_FLASH_HP_StartUpAreaSelect( &g_flash0_ctrl, startupArea, false );
+            OS_INT_enable();  // Exit critical section
+            if ( status == FSP_SUCCESS )
+            {
+               PWR_SafeReset(); // Reset to get the updated version of the bootloader
+            }
+         }
+      }
+   }
+
+   return ( 0 );
+}
+#endif
 /*******************************************************************************
 
    Function name: DBG_CommandLine_Versions
@@ -7937,7 +8136,7 @@ uint32_t DBG_CommandLine_Versions ( uint32_t argc, char *argv[] )
                   OS_Get_OsVersion(), OS_Get_OsGenRevision(), OS_Get_OsLibDate() );
 #endif
 #if ( ( MCU_SELECTED == NXP_K24 ) || ( DCU == 1 ) )
-   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );  // TODO: RA6: Support this line
+   DBG_logPrintf( 'R', "Silicon Info: 0x%04x", SIM_SDID & 0xffff );
 #endif
 #if ( MCU_SELECTED == RA6E1 )
    DBG_logPrintf( 'R', "BSP=%s IAR=%d", BSP_Get_BSPVersion(), __VER__ );
@@ -16349,7 +16548,7 @@ static uint32_t DBG_CommandLine_Queues ( uint32_t argc, char *argv[] )
    Arguments:  argc - Number of Arguments passed to this function
                argv - pointer to the list of arguments passed to this function
 
-   Returns: retVal 
+   Returns: retVal
 
 ******************************************************************************/
 uint32_t DBG_CommandLine_RTC_UnitTest( uint32_t argc, char *argv[] )

@@ -174,12 +174,10 @@ uint16_t MAC_Codec_Encode ( const mac_frame_t *p, uint8_t *pDst, uint32_t *RxTim
             TIMESTAMP_t DateTime;
             uint64_t    fracTime;
 
-            uint32_t primask = __get_PRIMASK();
-            __disable_interrupt(); // Disable all interrupts. This section is time critical but fast fortunatly.
-
+            OS_INT_disable();
             time = DWT_CYCCNT; // Get time in CPU cycles
             fracTime = TIME_UTIL_GetTimeInQSecFracFormat();
-            __set_PRIMASK(primask); // Restore interrupts
+            OS_INT_enable();
 
             if ( fracTime )
             {  // Time is valid

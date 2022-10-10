@@ -308,7 +308,7 @@
 #define TM_QUEUE                          0
 #define TM_MSGQ                           0
 #define TM_EVENTS                         0
-#define TM_LINKED_LIST                    0
+#define TM_LINKED_LIST                    1
 #define TM_CRC_UNIT_TEST                  0
 #define TM_TIME_COMPOUND_TEST             0
 #define TM_OS_EVENT_TEST                  0 /* Test the time compound functions */
@@ -324,6 +324,7 @@
 #define TM_UART_EVENT_COUNTERS            0 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
 #define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  0 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
 #define TM_CREATE_TWO_BLABBER_TASKS       0 /* Create two tasks that output random numbers of messages on DBG port with random timing */
+#define TM_VERIFY_BOOT_UPDATE_RA6E1       0 /* Verify whether bootloader can be updated using swapping functionality of RA6E1 */
 #if ( TM_UART_EVENT_COUNTERS == 1 )
 #define TM_UART_COUNTER_INC(x) (x)++
 #else

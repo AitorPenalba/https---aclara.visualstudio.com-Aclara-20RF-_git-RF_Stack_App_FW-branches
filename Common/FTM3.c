@@ -120,9 +120,6 @@ static void FTM3_INT_Handler( void )
 {
    uint32_t   i; // Loop counter
 
-//   uint32_t primask = __get_PRIMASK();
-//   __disable_interrupt();
-
    // Process each channel for interrupt
    for ( i=0; i<MAX_CHANNELS; i++) {
       // Check for channel interrupt
@@ -136,7 +133,6 @@ static void FTM3_INT_Handler( void )
       }
    }
 
-//   __set_PRIMASK(primask); // Restore interrupts
 }
 
 /*****************************************************************************************************************

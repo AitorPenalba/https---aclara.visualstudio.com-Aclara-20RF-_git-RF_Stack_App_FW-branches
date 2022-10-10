@@ -1705,7 +1705,8 @@ static void mfgpReadByte( uint8_t rxByte )
 #endif // ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    else
    {
-#if ( RTOS_SELECTION == MQX_RTOS )
+#if 1 // TODO: RA6E1 Bob: I don't believe this needed to be different for FreeRTOS ( RTOS_SELECTION == MQX_RTOS )
+// TODO: RA6E1 Bob: CR+LF will cause two messages to be posted to the command processor, one a valid command and the second a null command.  Should we strip out the null command(s)?
       if( (rxByte == LINE_FEED_CHAR) || (rxByte == CARRIAGE_RETURN_CHAR) )
 #elif ( RTOS_SELECTION == FREE_RTOS )
       if( rxByte == CARRIAGE_RETURN_CHAR )
@@ -1776,7 +1777,7 @@ static void mfgpReadByte( uint8_t rxByte )
          }
 
       }
-#if ( MCU_SELECTED == RA6E1 )
+#if ( MCU_SELECTED == RA6E1 ) // TODO: RA6E1 Bob: If all testing of MFG port is favorable, this #if/#endif can be removed
       else if ( rxByte == LINE_FEED_CHAR )
       {
          rxByte = 0x0;
@@ -6031,7 +6032,7 @@ static void MFGP_FlashSecurity( uint32_t argc, char *argv[] )
                    TODO: When interrupts are disabled, then verify NO RTOS scheduling calls can be made - seems likely in parWrite
                   ********************************************************************************/
                   uint32_t primask = __get_PRIMASK();
-                  __disable_interrupt();
+                  __set_PRIMASK(1);
                   retVal = PAR_partitionFptr.parWrite( destAddr, Lock ? &flashSecEnabled : &flashSecDisabled,
                                                         ( lCnt ) sizeof( fprot ), pImagePTbl );
                   __set_PRIMASK(primask); // Restore interrupts
@@ -6098,6 +6099,7 @@ static void MFGP_installationDateTime( uint32_t argc, char *argv[] )
 {
 
    uint32_t dateTimeVal = 0;
+
 #if ( EP == 1 )
    (void)ENDPT_CIM_CMD_getDateTimeValue( installationDateTime, &dateTimeVal );
 #else

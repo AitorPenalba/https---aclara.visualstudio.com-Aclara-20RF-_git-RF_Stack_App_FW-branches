@@ -1638,7 +1638,8 @@ static void tx_FMR( HEEP_APPHDR_t const *heepHdr, enum_status methodStatus, EDEv
            bfield.RdgQualPres   = 0;
            bfield.rsvd2         = 0;
            bfield.pendPowerof10 = 0;
-           bfield.typecast      = (uint16_t)Boolean;
+// TODO: K24 Bob: This should be converted to uintValue in the K24, as well.
+           bfield.typecast      = (uint16_t)uintValue; // TODO: RA6E1 Bob: should not be building it here but this needs to be uintValue
 #if ( OTA_CHANNELS_ENABLED == 0 )
            bfield.rsvd1         = 0;
 #endif
@@ -1759,7 +1760,7 @@ void HMC_DS_ExecuteSD(HEEP_APPHDR_t *heepHdr, void *payloadBuf, uint16_t length)
       {  //Process the put request, prepare Full Meter Read structure
 
          action = (pExchangeWithID)payloadBuf;     /* Type-safe, local copy of payload  */
-         /* If the EventQty not one, or the ReadingQty is not zero, EP shall reply with a status code indicating a “BAD REQUEST”. */
+         /* If the EventQty not one, or the ReadingQty is not zero, EP shall reply with a status code indicating a â€œBAD REQUESTâ€. */
          if ( ( 1 == action->eventRdgQty.bits.eventQty ) && ( 0 == action->eventRdgQty.bits.rdgQty ) )
          {
 #if ( HMC_I210_PLUS_C == 1 )

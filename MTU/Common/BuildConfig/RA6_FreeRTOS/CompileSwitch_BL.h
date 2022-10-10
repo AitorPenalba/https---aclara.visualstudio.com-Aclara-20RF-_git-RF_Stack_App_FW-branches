@@ -324,6 +324,7 @@
 #define TM_UART_EVENT_COUNTERS            0 /* Various counters in UART.c and DBG_SerialDebug.c to figure out UART lockup issue */
 #define TM_ROUTE_UNKNOWN_MFG_CMDS_TO_DBG  0 /* Route any unrecognized commands on the MFG port to the DBG_CommandLine_Process function */
 #define TM_CREATE_TWO_BLABBER_TASKS       0 /* Create two tasks that output random numbers of messages on DBG port with random timing */
+#define TM_VERIFY_BOOT_UPDATE_RA6E1       0 /* Verify whether bootloader can be updated using swapping functionality of RA6E1 */
 #if ( TM_UART_EVENT_COUNTERS == 1 )
 #define TM_UART_COUNTER_INC(x) (x)++
 #else
@@ -334,6 +335,7 @@
 #define TM_HARDFAULT                      0 /* Enable hardfault command for testing */
 #define TM_BL_TEST_COMMANDS               0 /* Enable the Bootloader Test Commands */
 #define TM_VERIFY_TICK_TIME               0 /* Enable delta time printout from loop in STRT_Startup.c every 10 seconds; 0 disables this test */
+#define TM_TICKHOOK_SEMAPHORE_POST_ERRORS 1 /* Count number of semaphore post errors from the tickHooks of FreeRTOS (N/A for MQX) */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

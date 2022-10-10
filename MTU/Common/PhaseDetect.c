@@ -784,11 +784,11 @@ void sync_record_init(void)
 static
 void  sync_record_add(const sync_record_t *data)
 {
-   __disable_interrupt(); // Make operation atomic because this data is accessed from 2 tasks
+   OS_INT_disable(); // Make operation atomic because this data is accessed from 2 tasks
    int index = sync_data.index;
    sync_data.entry[index] = *data;
    sync_data.index = ++index % SYNC_ENTRY_COUNT;
-   __enable_interrupt();
+   OS_INT_enable();
 }
 
 /*! -----------------------------------------------------------------
@@ -797,17 +797,17 @@ void  sync_record_add(const sync_record_t *data)
 static
 bool sync_record_get(TIMESTAMP_t sync_time, sync_record_t *data)
 {
-   __disable_interrupt(); // Make operation atomic because this data is accessed from 2 tasks
+   OS_INT_disable(); // Make operation atomic because this data is accessed from 2 tasks
    for (int i=0; i<SYNC_ENTRY_COUNT; i++)
    {
       if (sync_data.entry[i].syncTime.QSecFrac == sync_time.QSecFrac)
       {
           *data = sync_data.entry[i];
-          __enable_interrupt();
+          OS_INT_enable();
           return true;
       }
    }
-   __enable_interrupt();
+   OS_INT_enable();
    return false;
 }
 
@@ -901,9 +901,8 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       static uint32_t   currentFTM;
       static uint32_t   capturedValue;
 #endif
-      uint32_t primask = __get_PRIMASK();
       // Need to read those 3 counters together so disable interrupts if they are not disabled already
-      __disable_interrupt(); // This is critical but fast. Disable all interrupts.
+      OS_INT_disable();
 #if ( MCU_SELECTED == NXP_K24 )
       cycleCounter  = DWT_CYCCNT;
       currentFTM    = (uint16_t)FTM3_CNT;
@@ -922,7 +921,7 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       cycleCounter       = DWT_CYCCNT;
       currentFTM         = R_GPT2->GTCNT;
 #endif
-      __set_PRIMASK(primask); // Restore interrupts
+      OS_INT_enable();
 
       // Convert FTM3_CNT into CYCCNT value
 #if ( MCU_SELECTED == NXP_K24 )

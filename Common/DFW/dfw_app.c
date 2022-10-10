@@ -1915,6 +1915,9 @@ static returnStatus_t doPatch( void )
             {
                uint32_t       waitTime;   // Time to wait in mS for system to be idle
                returnStatus_t sysLocked;  // Indicates if the Wait for Idle locked the sys busy mutex
+#if ( MCU_SELECTED == RA6E1 )
+               uint32_t       crcDfwInfo;
+#endif
 
                //TODO: Somewhere in here it needs to "purge" the HEEP/Stack messages before swapping
                dfwUnitTestToggleOutput_TST2( 500, 1, 3 );
@@ -2030,8 +2033,15 @@ static returnStatus_t doPatch( void )
 #endif
                      if( eSUCCESS == PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo[0], ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ ) )
                      {
-                        DFW_PRNT_INFO( "Resetting Processor" );
-                        dfwVars.ePatchState = eDFWP_BL_SWAP;
+#if ( MCU_SELECTED == RA6E1 )
+                       /* Add a CRC following the DFWBLInfo structure since a length of 0xFFFFFFFF
+                          is not guaranteed after erasing the DFW_BL_INFO partition as it is in K24 */
+                       ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo ), ( bool )true, &crcDfwInfo, pDFWBLInfoPar_ );
+                       ( void )PAR_partitionFptr.parWrite( ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWBLInfo ) ), ( uint8_t * )&crcDfwInfo,
+                                                           ( lCnt )sizeof( crcDfwInfo ), pDFWBLInfoPar_ );
+#endif
+                       DFW_PRNT_INFO( "Resetting Processor" );
+                       dfwVars.ePatchState = eDFWP_BL_SWAP;
                      }
                      else
                      {
@@ -3949,20 +3959,27 @@ static returnStatus_t verifySignature( eDfwDecryptState_t decryptStatus,
 **********************************************************************************************************************/
 static returnStatus_t updateBootloader( uint32_t crcBl )
 {
-   uint32_t                i;                              // Loop counter
    uint8_t                 Buffer[READ_WRITE_BUFFER_SIZE]; // Holds data between read/write
-   lCnt                    Size;                           // # of bytes to copy (i.e. Registers data partition size)
-   lCnt                    ReadCount;                      // Maximum number of bytes that can be copied
+   returnStatus_t          retStatus = eFAILURE;           // Error code
    PartitionData_t const   *pBLCodePTbl;                   // Pointer to Bootloader code partition
    PartitionData_t const   *pBLBackupPTbl;                 // Pointer to Bootloader backup code partition
+#if ( MCU_SELECTED == NXP_K24 )
+   uint32_t                i;                              // Loop counter
+   lCnt                    Size;                           // # of bytes to copy (i.e. Registers data partition size)
+   lCnt                    ReadCount;                      // Maximum number of bytes that can be copied
    flAddr                  addrOffset;                     // BL_Backup Address offset from "real" BL image
    flAddr                  *pIntVect;                      // Pointer to interrupt vector entry
    uint8_t                 attempts;                       // Number of times to attempt updating the BL code partition
-   returnStatus_t          retStatus = eFAILURE;           // Error code
+#elif ( MCU_SELECTED == RA6E1 )
+   flash_startup_area_swap_t  bootStartupArea;             // Determines the startup area whether it is block 0 or block 1
+   uint8_t                    bootFlg;                     // Flag to indicate the startup area - 0 or 1
+   fsp_err_t                  errStatus;                   // RA6 FSP error status
+#endif
 
    if (  ( eSUCCESS == PAR_partitionFptr.parOpen( &pBLCodePTbl,   ePART_BL_CODE,   0L ) ) &&
          ( eSUCCESS == PAR_partitionFptr.parOpen( &pBLBackupPTbl, ePART_BL_BACKUP, 0L ) ) )
    {
+#if ( MCU_SELECTED == NXP_K24 )
       ( void )PAR_partitionFptr.parSize( ePART_BL_CODE, &Size );           // Get partition size
       pIntVect = ( flAddr * )( BL_VECTOR_TABLE_START + sizeof( flAddr ) ); // Skip the first vector (SP init)
       retStatus = eSUCCESS;
@@ -4078,7 +4095,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                {
                   retStatus = copyPart2Part( 0, BL_VECTOR_TABLE_SIZE, &Buffer[0], sizeof( Buffer ),
                                              pBLBackupPTbl, pBLCodePTbl );
-                  OS_INT_enable( );   // Enable as soon as possible
                   if ( eSUCCESS == retStatus )
                   {
                      if ( 0 != memcmp( ( flAddr * )pBLBackupPTbl->PhyStartingAddress,
@@ -4128,7 +4144,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                   if ( eSUCCESS == retStatus )  //Write BL vectors
                   {
                      retStatus = copyPart2Part( ( flAddr )0, INT_FLASH_ERASE_SIZE, &Buffer[0], sizeof( Buffer ), pDFWImagePTbl_, pBLCodePTbl );
-                     OS_INT_enable( );  // Enable as soon as possible
                      if ( eSUCCESS == retStatus )  //Check CRC of updated BL
                      {
                         /************************************************************************************************
@@ -4143,7 +4158,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                               Very time critical section.  If a spurious reset occurs here the unit is a brick
                            *********************************************************************************************/
                            /* Restore Backup vector table to the normal INTVECT */
-                           OS_INT_disable( ); //Disable interrupts to ensure this completes as quickly as possible
                            //Need seperate loop control variables
                            uint8_t           attemptsBkup = 3;
                            returnStatus_t    status;
@@ -4157,7 +4171,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                               {
                                  status = copyPart2Part( 0, BL_VECTOR_TABLE_SIZE, &Buffer[0], sizeof( Buffer ),
                                                          pBLBackupPTbl, pBLCodePTbl );
-                                 OS_INT_enable( );   // Enable as soon as possible
                                  if ( eSUCCESS == status )
                                  {
                                     if ( 0 != memcmp( ( flAddr * )pBLBackupPTbl->PhyStartingAddress,
@@ -4174,7 +4187,6 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
                               first two vectors since the bootloader does not use any of the remaining vectors (interrupts
                               not enabled).
                            */
-                           OS_INT_enable( );   // See OS_INT_disable( ); above
                            /****************************************************************************************************
                               End of very time critical section.
                            *****************************************************************************************************/
@@ -4191,6 +4203,42 @@ static returnStatus_t updateBootloader( uint32_t crcBl )
             brick(); //If we got here the update BL failed
          }
       }  //End of if ( eSUCCESS == retStatus ) // Update the Bootloader
+#elif ( MCU_SELECTED == RA6E1 )
+      OS_INT_disable(); // Enter critical section, Note: RA6 code flash P/E runs from RAM and any interrupt will vector to code flash causing an exception
+      retStatus = PAR_partitionFptr.parErase( (lAddr) 0, BL_BACKUP_SIZE, pBLBackupPTbl );  // Erase the backup partition to write the new bootloader
+      OS_INT_enable();  // Exit critical section
+      if ( eSUCCESS == retStatus )
+      {
+         OS_INT_disable(); // Enter critical section, Note: RA6 code flash P/E runs from RAM and any interrupt will vector to code flash causing an exception
+         retStatus = copyPart2Part( (flAddr)0, BL_BACKUP_SIZE, &Buffer[0], sizeof( Buffer ), pDFWImagePTbl_, pBLBackupPTbl );
+         OS_INT_enable();  // Exit critical section
+         if ( eSUCCESS == retStatus )
+         {
+            // Verify Bootloader CRC of the copied new image
+            retStatus = verifyCrc( (flAddr) 0, PART_BL_BACKUP_SIZE, crcBl, pBLBackupPTbl );
+            if ( eSUCCESS == retStatus )
+            {
+               bootFlg = R_FACI_HP->FAWMON_b.BTFLG;  // Get the current startup area from the bootflag
+               if ( bootFlg == 1 )
+               {
+                 bootStartupArea = FLASH_STARTUP_AREA_BLOCK1;  // If Bootflg is 1, startup area is block 0 and we wrote new image in block 1. Hence the next startup area should be block 1
+               }
+               else if ( bootFlg == 0 )
+               {
+                  bootStartupArea = FLASH_STARTUP_AREA_BLOCK0; // If Bootflg is 0, startup area is block 1 and we wrote new image in block 0. Hence the next startup area should be block 0
+               }
+
+               OS_INT_disable(); // Enter critical section, Note: RA6 code flash P/E runs from RAM and any interrupt will vector to code flash causing an exception
+               errStatus = R_FLASH_HP_StartUpAreaSelect( &g_flash0_ctrl, bootStartupArea, false ); // Modify the existing startup area => 0 to 1, 1 to 0
+               OS_INT_enable();  // Exit critical section
+               if ( errStatus != FSP_SUCCESS )
+               {
+                  retStatus = eFAILURE;
+               }
+            }
+         }
+      }
+#endif
    }  // End of if ( ( eSUCCESS == PAR_partitionFptr.parOpen...
    return ( retStatus );
 }
