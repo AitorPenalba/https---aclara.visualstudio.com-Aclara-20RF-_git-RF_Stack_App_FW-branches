@@ -18,8 +18,6 @@
 /* INCLUDE FILES */
 #include "project.h"
 #include "hal_data.h"
-//#include <mqx.h>
-//#include "OS_aclara.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -39,7 +37,7 @@
   Function name: OS_TICK_Get_TickCount_HWTicks
 
   Purpose: This function will return the load the current Tick count value and the HW ticks
-           in the OS_TICK_Struct sructure
+           in the OS_TICK_Struct structure
 
   Arguments: TickValue - pointer to the current value of the OS Tick counter (populated by this function)
 

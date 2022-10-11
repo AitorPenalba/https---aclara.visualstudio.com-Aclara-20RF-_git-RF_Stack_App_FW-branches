@@ -1,7 +1,7 @@
 // <editor-fold defaultstate="collapsed" desc="File Header">
 /***********************************************************************************************************************
  *
- * Filename:   DFW_pckt.c
+ * Filename:   dfw_pckt.c
  *
  * Global Designator: DFWP_
  *
@@ -53,7 +53,7 @@
 /* INCLUDE FILES */
 
 #define DFWP_GLOBALS
-#include "DFW_pckt.h"
+#include "dfw_pckt.h"
 #undef DFWP_GLOBALS
 
 #include "partitions.h"

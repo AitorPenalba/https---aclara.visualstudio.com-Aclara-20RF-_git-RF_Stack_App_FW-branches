@@ -367,7 +367,6 @@ void PWRLG_Task( taskParameter )
          {
             printf("\nUnable to Start Tasks\n");
          }
-         /* TODO: RA6: Add exception Handler */
 #endif
       }
    }
@@ -1118,9 +1117,6 @@ void PWRLG_Startup( void )
                   if ( VBATREG_OUTAGE_DECLARATION_DELAY <= 60000 )
                   {
                      EnterVLLS( ( uint16_t )VBATREG_OUTAGE_DECLARATION_DELAY, LPTMR_MILLISECONDS, 1 );
-#if ( MCU_SELECTED == RA6E1 )
-                     RESET();  /* Forcing MCU to go through a reset */
-#endif
                   }
                   else
                   {
@@ -1133,12 +1129,7 @@ void PWRLG_Startup( void )
                   if ( PWRLG_MESSAGE_NUM() < PWRLG_MESSAGE_COUNT() ) /* Any messages left?   */
                   {
                      PWRLG_STATE_SET( PWRLG_STATE_TRANSMIT );
-#if ( MCU_SELECTED == NXP_K24 )
                      EnterVLLS( ( uint16_t ) 0, LPTMR_MILLISECONDS, 1 );   /* Continue with current time out value.  */
-#elif ( MCU_SELECTED == RA6E1 )
-                     EnterVLLS( ( uint16_t )0, LPTMR_SECONDS, 1 );        /* Continue with current time out value.  */
-                     //RESET();   /* Forcing the MCU to go through reset */ // TODO: DG: Review
-#endif
                   }
                   else  /* All messages sent, wait for power restored.   */
                   {
@@ -2834,7 +2825,7 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
    }
    else
    {
-      /* TODO: RA6: DG: Do we need to support this case */
+      /* Function should never be called with uCounter = 0 */
    }
    if ( LPTMR_MODE_PROGRAM_ONLY != eMode )
    {
@@ -2868,6 +2859,9 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
 {
    static uint16_t secs = 0, mSecs = 0;
    uint8_t tempMode = uMode;
+
+   /* Clear DPSRSTF flag */
+   R_SYSTEM->RSTSR0_b.DPSRSTF = 0;
 
    if ( ( LPTMR_MILLISECONDS == eUnits ) && ( uCounter > 1000 ) && ( uMode != 0 ) )
    {

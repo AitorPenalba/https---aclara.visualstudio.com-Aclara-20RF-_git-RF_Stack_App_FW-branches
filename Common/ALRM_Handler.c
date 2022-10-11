@@ -36,11 +36,11 @@
 #include "buffer.h"
 #include "file_io.h"
 #include "Temperature.h"
-#include "DFW_App.h"
+#include "dfw_app.h"
 #include "radio.h"
 #include "radio_hal.h"
 #if ( EP == 1 ) && ( LOG_IN_METER == 1 )
-#include "PWR_Task.h"
+#include "pwr_task.h"
 #endif
 #if ( EP == 1 )
 #include "PHY.h"

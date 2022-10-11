@@ -21,7 +21,6 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include <stdint.h>
 #include "project.h"
 
 #if ( PHASE_DETECTION == 1 )
@@ -34,12 +33,12 @@
 #include "time_sys.h"
 #include "time_util.h"
 #include "PhaseDetect.h"
-#include "heep_util.h"
+#include "HEEP_util.h"
 #if ( END_DEVICE_PROGRAMMING_DISPLAY == 1 )
 #include "hmc_display.h"
 #endif
 
-#include "HEEP.h"
+#include "heep.h"
 #include "EVL_event_log.h"
 #include "sys_clock.h"
 

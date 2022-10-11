@@ -21,7 +21,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #include <math.h>
 #include <string.h>
 #include "timer_util.h"
@@ -97,7 +96,7 @@ typedef struct
    uint8_t  segmentCount;
    uint8_t  packetId;
    uint16_t timerId; /* ID for alarm which will fire if it time to give up on missing segments */
-   TIMESTAMP_t timeStamp; /* TimeStamp associated with when the 1st segment was recieved */
+   TIMESTAMP_t timeStamp; /* TimeStamp associated with when the 1st segment was received */
    uint32_t timeStampCYCCNT;            /* CYCCNT time stamp associated with when the payload was received */
    uint8_t dstAddr[MAC_ADDRESS_SIZE];
    uint8_t srcAddr[MAC_ADDRESS_SIZE];

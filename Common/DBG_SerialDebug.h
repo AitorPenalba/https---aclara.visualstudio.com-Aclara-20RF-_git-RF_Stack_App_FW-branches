@@ -93,7 +93,8 @@ void    DBG_PortTimer_Manage ( void );
 void    DBG_PortEcho_Set ( bool val );
 bool    DBG_PortEcho_Get( void );
 #if ( TM_CREATE_TWO_BLABBER_TASKS == 1 )
-void           DBG_BlabberTask1( taskParameter );
-void           DBG_BlabberTask2( taskParameter );
-#endif // 1
+void    DBG_BlabberTask1( taskParameter );
+void    DBG_BlabberTask2( taskParameter );
+#endif
+
 #endif /* this must be the last line of the file */

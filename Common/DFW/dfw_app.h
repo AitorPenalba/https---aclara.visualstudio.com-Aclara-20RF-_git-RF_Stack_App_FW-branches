@@ -34,8 +34,6 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "project.h"
 #include "version.h"
 #include "time_util.h"
@@ -43,7 +41,6 @@
 #if ( ( EP == 1 ) && ( END_DEVICE_PROGRAMMING_CONFIG == 1 ) )
 #include "HEEP_util.h"
 #endif
-//#include <stdio.h>
 
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINTION */

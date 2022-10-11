@@ -35,7 +35,7 @@
 #include "MFG_Port.h"
 #include "dfwtd_config.h"
 #include "dfw_app.h"
-#include "Mac.h"
+#include "MAC.h"
 #include "cfg_app.h"
 #include "PHY.h"
 #include "dvr_intFlash_cfg.h"
@@ -53,7 +53,7 @@
 
 /*lint -esym(750,HEEP_UTIL_GLOBALS) */
 #define HEEP_UTIL_GLOBALS
-#include "HEEP_Util.h"
+#include "HEEP_util.h"
 #undef HEEP_UTIL_GLOBALS
 
 #include "APP_MSG_Handler.h"

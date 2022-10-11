@@ -43,16 +43,13 @@
 // <editor-fold defaultstate="collapsed" desc="Included Files">
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include <stdint.h>
 #include "project.h"
 
 #if ( REMOTE_DISCONNECT == 1 )
-
-#include <stdbool.h>
 #include <assert.h>
 #include "timer_util.h"
 #include "ansi_tables.h"
-#include "EVL_event_Log.h"
+#include "EVL_event_log.h"
 //#include "byteswap.h"
 #if ( HMC_I210_PLUS_C == 1 )
 #include "hmc_start.h"
@@ -72,7 +69,6 @@
 
 #if TM_SD_UNIT_TEST
 #define VERBOSE 0    /* Control level of debug printing  */
-#include <stdio.h>
 #include "DBG_SerialDebug.h"
 #endif
 #include "mode_config.h"

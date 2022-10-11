@@ -21,7 +21,6 @@
 
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
-#include <stdlib.h>
 #include <math.h>
 #include "portable_freescale.h"
 #include "project.h"
@@ -34,7 +33,7 @@
 #include "BSP_aclara.h"
 #include "file_io.h"
 #include "DBG_SerialDebug.h"
-#include "mac.h"
+#include "MAC.h"
 #include "radio.h"
 #include "radio_hal.h"
 #if (DCU == 1)

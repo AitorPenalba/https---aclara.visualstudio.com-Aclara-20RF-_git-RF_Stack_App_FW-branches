@@ -10,7 +10,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2012-2019 Aclara.  All Rights Reserved.
+   Copyright 2012-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -22,12 +22,11 @@
 /* Include files */
 #include "project.h"
 #include <string.h>
-#include <stdint.h>
 #include "SyncAndPayloadDemodulator.h"
 #include "findSYNC.h"
 #include "SoftDemodulator.h"
 #include "processDerotatedSPDSamples.h"
-#include "FreqDomMlseP4GFSKStruct2.h"
+#include "FreqDomMlseP4GfskStruct2.h"
 #include "radio_hal.h" //RADIO_0 for radio number for above function
 
 /* Function Definitions */

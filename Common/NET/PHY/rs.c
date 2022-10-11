@@ -98,7 +98,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "PHY_protocol.h"
+#include "PHY_Protocol.h"
 #include "rs.h"
 
 // Maximum values for MM, N, NN, TT and KK of any RS code used

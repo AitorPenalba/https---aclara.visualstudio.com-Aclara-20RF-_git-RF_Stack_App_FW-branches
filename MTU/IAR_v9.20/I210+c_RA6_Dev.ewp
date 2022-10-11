@@ -1877,9 +1877,6 @@
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\OS_aclara.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\os_que.h</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\Common\FreeRTOS\10.4.3\OS_AL\portable_aclara.h</name>
                 </file>
                 <file>
@@ -2091,7 +2088,7 @@
                 <name>$PROJ_DIR$\..\..\Common\HEEP_util.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\Common\HEEP_UTIL.h</name>
+                <name>$PROJ_DIR$\..\..\Common\HEEP_util.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\Common\invert_bits.c</name>

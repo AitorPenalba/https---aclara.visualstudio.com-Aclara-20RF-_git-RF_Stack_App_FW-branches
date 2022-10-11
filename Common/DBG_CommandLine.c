@@ -13620,6 +13620,69 @@ static int cmpfunc( const void *a, const void *b) {
 }
 
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+
+void NB_ExtNV_Task ( taskParameter );
+TaskHandle_t NB_ExtNV_TaskHandle;
+/**************************************************************************************************************************
+
+   Function Name: NB_ExtNV_Task
+
+   Purpose: This function is used in the Test Mode to enable NV activity during the Noise Band
+
+   Arguments:  taskParameter - Not used
+
+   Returns: None
+
+**************************************************************************************************************************/
+void NB_ExtNV_Task ( taskParameter )
+{
+   returnStatus_t         retVal;
+   PartitionData_t const  *partitionData;    /* Pointer to partition information   */
+   uint8_t                unitTestBuf[254]; /* Make this the size of a bank, minus the meta data  */
+   uint32_t               ReadRepeat = 4;
+   uint32_t               notifiedValue;
+   bool                   stopTest = (bool)false; // TODO: Make this static global and change the value from NB
+   static uint64_t        runCntr  = 0;
+
+   for(;;)
+   {
+      /*Bits in this RTOS task's notification value are set by the notifying
+      tasks and interrupts to indicate which events have occurred. */
+      xTaskNotifyWaitIndexed( 0,         /* Wait for 0th notification. */
+                             0x00,      /* Don't clear any notification bits on entry. */
+                             0xFFFFFFFFUL, /* Reset the notification value to 0 on exit. */
+                             &notifiedValue, /* Notified value pass out in notifiedValue. */
+                             portMAX_DELAY );  /* Block indefinitely. */
+      /* Process any events that have been latched in the notified value. */
+      if( ( notifiedValue & 0x01 ) != 0 )
+      {
+         /* Bit 0 was set - process whichever event is represented by bit 0. */
+         // NV Read
+         /* Find the NV test partition - don't care about update rate   */
+         retVal = PAR_partitionFptr.parOpen( &partitionData, ePART_NV_TEST, 0xffffffff );
+         if ( eSUCCESS == retVal )
+         {
+            /* Read the partition back, and compare with expected pattern (multiple times)  */
+            for ( uint32_t readLoop = ReadRepeat; readLoop; readLoop-- )
+            {
+               if( stopTest )
+               {
+                  break;
+               }
+               for( uint32_t i = 0; i < partitionData->lDataSize / sizeof( unitTestBuf ); i++ )
+               {
+                  runCntr++;
+                  (void)PAR_partitionFptr.parRead( &unitTestBuf[0], 0, sizeof( unitTestBuf ), partitionData );
+               }
+            }
+         }
+      }
+   }
+
+}
+
+/**************************************************************************************************************************/
+
 typedef struct
 {
    char RadioSPI;
@@ -13669,7 +13732,18 @@ static bool checkOptions( char inputByte, char *option, char pAllowed[] )
    return ( (bool)true ); // found a matching option
 }
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+/**************************************************************************************************************************
 
+   Function Name: DBG_CommandLine_NoiseBand
+
+   Purpose: Executes the NoiseBand Test
+
+   Arguments:  uint32_t argc
+               char *argv[] - options for the test
+
+   Returns: uint32_t
+
+**************************************************************************************************************************/
 uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
 {
    uint32_t      time;
@@ -13701,6 +13775,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    OS_TICK_Struct  time1, time2;
    uint32_t        TimeDiff;
    OS_TASK_id      tidFilter;
+   bool            enableNV_activity = (bool) false;
 #else
    static uint16_t start = 0;
    static uint16_t end   = 0;
@@ -13827,6 +13902,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          DBG_printf( "             For 1,2,3,4: H=High Drive, M=Mid Drive, L=Low Drive, N=NMOS, P=PMOS" );
          DBG_printf( "             For 5,6,7,8: H=High Output/Mid Drive, L=Low Output/Mid Drive, I=Input, U=Pulled-Up Input, J=JTAG" );
          DBG_printf( "             Do NOT use L or H for option 8 when a meter is connected as the output pins will conflict" );
+         DBG_printf( "       (optional) NV Read Activity during the test");
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
       }
       return ( 0 );
@@ -13935,6 +14011,11 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          {
             return ( 0 );
          }
+      }
+      if ( argc >= 12 )
+      {
+         enableNV_activity = ( uint8_t )atoi( argv[11] );
+         ( void )xTaskCreate( NB_ExtNV_Task, "NB_NV_TST", 500, 0, FREE_RTOS_TASK_PRIORITY_CONVERT(35), &NB_ExtNV_TaskHandle); //
       }
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       if ( radioNum >= (uint8_t)MAX_RADIO )
@@ -14337,6 +14418,10 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    }
    tidFilter = DBG_GetTaskFilter();           /* Save the debug filtering task id in case filtering is on */
    (void)DBG_SetTaskFilter( (OS_TASK_id)999 ); /* Turn off debug output from everything except for DBG task */
+   if( enableNV_activity )
+   {
+      xTaskNotifyIndexed( NB_ExtNV_TaskHandle, 0, ( 1UL ), eSetBits );
+   }
 #else
    DBG_logPrintf( 'R', "noiseband start" );
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
@@ -14410,6 +14495,10 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          totals[k] += deltas[k];
       }
    #endif // ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
+      if( enableNV_activity ) /* Notify again just in-case */
+      {
+         xTaskNotifyIndexed( NB_ExtNV_TaskHandle, 0, ( 1UL ), eSetBits );
+      }
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    }
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
@@ -14453,6 +14542,12 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       }
    }
 
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+   if( enableNV_activity )
+   {
+      vTaskDelete(NB_ExtNV_TaskHandle);
+   }
+#endif
    DBG_logPrintf( 'R', "noiseband end" );
 
    return ( 0 );
