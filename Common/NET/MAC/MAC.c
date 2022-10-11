@@ -993,7 +993,6 @@ returnStatus_t MAC_init ( void )
       uint8_t i;
 #if ( EP == 1 )
 #if ( DEBUG_LAST_GASP_TASK == 0 )
-#if ( MCU_SELECTED == NXP_K24 )
       if(PWRLG_LastGasp() == false)
 #else
       if(0)
