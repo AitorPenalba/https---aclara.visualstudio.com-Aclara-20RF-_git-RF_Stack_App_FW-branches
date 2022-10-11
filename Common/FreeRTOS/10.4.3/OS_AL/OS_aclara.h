@@ -491,7 +491,11 @@ OS_TASK_id              OS_TASK_GetID_fromName ( const char *taskName );
 bool                    OS_TASK_IsCurrentTask ( char const *pTaskName );
 char *                  OS_TASK_GetTaskName ( void );
 uint32_t                OS_TASK_UpdateCpuLoad ( void );
+#if ( RTOS_SELECTION == MQX_RTOS )
 void                    OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint32_t * CPULoad );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+void                    OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint16_t * CPULoad ); /* Values between 0 and 1000, no need for 32-bit */
+#endif
 void                    OS_TASK_Summary ( bool safePrint );
 
 

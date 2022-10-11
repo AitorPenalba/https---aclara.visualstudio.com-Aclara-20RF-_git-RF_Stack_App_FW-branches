@@ -83,7 +83,7 @@
                                                1 - RADIO_Temperature_Get : This function will only be used in the K24 implementation.
                                                                            It will therefore call ADC_Get_uP_Temperature if the soft demodulator is active*/
 
-#define DAC_CODE_CONFIG                   1  /* Supports DAC0 for TX Power Control */
+#define DAC_CODE_CONFIG                   0  /* Supports DAC0 for TX Power Control */
 #define LAST_GASP_RECONFIGURE_CLK         0  /* If enabled, the System Clock will be re-configured to use MOCO instead of Main Clock */
 #define LAST_GASP_USE_2_DEEP_SLEEP        1  /* If enabled, will use the different configurations of the Deep SW Standby Modes in Last Gasp to achieve the random sleep delay */
 #if( RTOS_SELECTION == FREE_RTOS )

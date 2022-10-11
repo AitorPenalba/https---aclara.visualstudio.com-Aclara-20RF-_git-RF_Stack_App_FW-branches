@@ -170,6 +170,9 @@ typedef enum
    eSD_SYNC_PAYL_DEMOD2_IDX,  //
    eSM_TSK_IDX,
    ePHY_TSK_IDX,
+#if ( RTOS_SELECTION == FREE_RTOS )
+   eTMR_SVC_IDX,              // Timer Service task that FreeRTOS creates by itself
+#endif
    eTMR_TSK_IDX,
    eTIME_TSK_IDX,
    eMFGP_RECV_TSK_IDX,
@@ -224,6 +227,7 @@ static uint32_t   TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track 
 static TD_STRUCT  *TASK_TD[eLAST_TSK_IDX];                       // Task descriptor list
 #elif ( RTOS_SELECTION == FREE_RTOS )
 static uint32_t   Task_RunTimeCounters_[eLAST_TSK_IDX];            // Local Copy of Run Time Counters for every Task
+static uint32_t   Task_PrevRunTimeCounters_[eLAST_TSK_IDX];        // Copy from the last pass
 #endif
 static uint32_t   cpuLoadIndex = 0;
 static uint32_t   CPUTotal;
@@ -318,6 +322,7 @@ const char pTskName_DbgBalbber2[]    = "BLAB2";
 const char pTskName_Idle[]          = "IDL";
 #elif ( RTOS_SELECTION == FREE_RTOS )
 const char pTskName_Idle[]          = "IDLE";
+const char pTskName_TmrSvc[]        = "Tmr Svc";
 #endif
 #if (SIGNAL_NW_STATUS == 1)
 const char pTskName_NwConn[]        = "NWCON";
@@ -339,6 +344,9 @@ const OS_TASK_Template_t  Task_template_list[] =
 #if ENABLE_PWR_TASKS
    { ePWR_TSK_IDX,              PWR_task,                     1000,  12, (char *)pTskName_Pwr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
    { ePWROR_TSK_IDX,            PWROR_Task,                   1700,  12, (char *)pTskName_PwrRestore, DEFAULT_ATTR, 0, 0 },
+#endif
+#if ( RTOS_SELECTION == FREE_RTOS ) /* NOTE: This is a dummy entry for FreeRTOS used to print details of Timer Service task */
+   { eTMR_SVC_IDX,              NULL,                            1,   0, (char *)pTskName_TmrSvc, 0, 0, 0 }, // Stack depth > 0 tells tasksummary to include
 #endif
 #if ENABLE_TMR_TASKS
    { eTMR_TSK_IDX,              TMR_HandlerTask,              1200,  14, (char *)pTskName_Tmr,    DEFAULT_ATTR|QUIET_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
@@ -413,7 +421,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 #else
    { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
-   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  35, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2500,  35, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_PAR_TASKS
    { ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },
@@ -496,6 +504,10 @@ void task_exception_handler( _mqx_uint para, void * stack_ptr );
 #if (RTOS_SELECTION == FREE_RTOS)
 static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName );
 static uint32_t       setIdleTaskPriority ( uint32_t NewPriority );
+static TaskHandle_t   taskHandle_[eLAST_TSK_IDX];           /* Vector of task handles, updated dynamically            */
+static uint32_t       numberOfTasks = 0;                    /* Number of tasks from last update of taskHandle vector  */
+static OS_MUTEX_Obj   taskUsageMutex_;                      /* Access protection for the calculated values            */
+static bool           taskUsageMutexCreated_ = (bool)false; /* Flag saying whether the mutex was successfully created */
 #endif
 
 /* ****************************************************************************************************************** */
@@ -741,9 +753,10 @@ void OS_TASK_Create_All ( bool initSuccess )
 #if ( RTOS_SELECTION == MQX_RTOS )
             if ( MQX_NULL_TASK_ID == (taskID = OS_TASK_Create(pTaskList) ) )
 #elif (RTOS_SELECTION == FREE_RTOS)
-            if( pTaskList->TASK_TEMPLATE_INDEX == eIDL_TSK_IDX )
+            if( ( pTaskList->TASK_TEMPLATE_INDEX == eIDL_TSK_IDX ) ||
+                ( pTaskList->TASK_TEMPLATE_INDEX == eTMR_SVC_IDX )    )
             {
-               continue; // Skip the Idle Task. We are using the Idle Task created by FreeRTOS
+               continue; // Skip the Idle Task and TmrSvr task. We are using the Idle Task created by FreeRTOS
             }
             if ( pdPASS != OS_TASK_Create(pTaskList) )
 #endif
@@ -1322,32 +1335,48 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
    OS_TASK_Template_t const *pTaskList; /* Pointer to task list which contains all tasks in the system */
    uint32_t                 CPULoad = 0;
    TaskStatus_t             taskStatusInfo;
-   TaskHandle_t             taskHandle;
 
-   // Rebuild the TASK_TD array each time to account for tasks that could be dead or invalid.
+   // Rebuild the list of task handles only when number of tasks changes since this is an expensive operation in FreeRTOS
+   uint32_t taskCount = uxTaskGetNumberOfTasks();
+   if ( taskCount != numberOfTasks )
+   {
+      for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+      {
+         if( pTaskList->TASK_TEMPLATE_INDEX == eIDL_TSK_IDX ) /* Is this the IDLE task? */
+         {
+            /* Get the task Handle for FreeRTOS Idle task */
+            taskHandle_[pTaskList->TASK_TEMPLATE_INDEX] = xTaskGetIdleTaskHandle();
+         }
+         else
+         {
+            /* Save the task handle for this task in our list into a static vector for faster access */
+            taskHandle_[pTaskList->TASK_TEMPLATE_INDEX] = xTaskGetHandle( ( char* )pTaskList->pcName );
+         }
+      }
+      numberOfTasks = taskCount; /* Update the number of running tasks so we don't do the above every time */
+   }
+
+   AGT_RunTimeStatsStop(); /* Stop the AGT counter pair while we collect the run time counters from FreeRTOS to prevent inconsistent results */
    for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
-      // Retrieve some task pointers
-      // Make sure task ID is valid. Invalid number means task is dead.
-      if( pTaskList->TASK_TEMPLATE_INDEX == eIDL_TSK_IDX )
+      Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;
+      if ( taskHandle_[pTaskList->TASK_TEMPLATE_INDEX] != NULL )
       {
-         /* Get the task Handle for FreeRTOS Idle task */
-         taskHandle = xTaskGetIdleTaskHandle();
-      }
-      else
-      {
-         taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
-      }
-      vTaskGetInfo( taskHandle, &taskStatusInfo, pdFALSE, eInvalid );  // No need to get the HighWaterMark and Task Stat, which are time consuming
-      if( 0 == strcmp( pTaskList->pcName, taskStatusInfo.pcTaskName ) )
-      {
-         Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = taskStatusInfo.ulRunTimeCounter;
-      }
-      else
-      {
-         Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;
+         vTaskGetInfo( taskHandle_[pTaskList->TASK_TEMPLATE_INDEX], &taskStatusInfo, pdFALSE, eInvalid );  // No need to get the HighWaterMark and Task Stat, which are time consuming
+         if( 0 == strcmp( pTaskList->pcName, taskStatusInfo.pcTaskName ) )
+         {
+            Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = taskStatusInfo.ulRunTimeCounter;
+         }
       }
    }
+   AGT_RunTimeStatsStart(); /* OK, data has been collected, restart the counters.  Some usage may be lost due to context switching during the above */
+
+   /* Lock the data table and CPUTotal to prevent a tasksummary command from getting inconsistent data */
+   if ( taskUsageMutexCreated_ == (bool)false )
+   {
+      taskUsageMutexCreated_ = OS_MUTEX_Create( &taskUsageMutex_ );
+   }
+   if ( taskUsageMutexCreated_ ) OS_MUTEX_Lock( &taskUsageMutex_ );
 
    CPUTotal = 0;
    cpuLoadIndex = (cpuLoadIndex+1)%TASK_CPULOAD_SIZE;
@@ -1355,17 +1384,24 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
    for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
       // Save CPU load for this task without the time spent in the interrupt
-      TASK_CPUload[pTaskList->TASK_TEMPLATE_INDEX][cpuLoadIndex] = Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX];
+      uint32_t deltaRunTimeCounter = ( Task_RunTimeCounters_    [pTaskList->TASK_TEMPLATE_INDEX] -
+                                       Task_PrevRunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX]   );
+      /* Check for the possibility of overflow and invert the wrapped around value if that occurred */
+      if ( deltaRunTimeCounter > 10 * STRT_BACKGROUND_CYCLE_SECONDS * R_BSP_SourceClockHzGet(FSP_PRIV_CLOCK_SUBCLOCK))
+      {
+         deltaRunTimeCounter = (uint32_t)0xFFFFFFFF - deltaRunTimeCounter;
+      }
+      Task_PrevRunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX];
+      TASK_CPUload[pTaskList->TASK_TEMPLATE_INDEX][cpuLoadIndex] = deltaRunTimeCounter;
 
       // The IDLE task run time is not counted toward the CPU load. Without doing this, the CPU load time would be %100
       if( pTaskList->TASK_TEMPLATE_INDEX != eIDL_TSK_IDX )
       {
-         CPULoad  += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX]; // Compute total CPU load
+         CPULoad  += deltaRunTimeCounter; // Compute total CPU load
       }
-      CPUTotal += Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX];    // This is the task run time including any time spent in the interrupt handler
-      Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;            // Reset task run time
+      CPUTotal += deltaRunTimeCounter;                                      // This is the task run time including any time spent in the interrupt handler
    }
-
+   if ( taskUsageMutexCreated_ ) OS_MUTEX_Unlock( &taskUsageMutex_ );       // TASK_CPUload, CPUTotal and cpuLoadIndex have all been updated and are consistent
    // Sanity check
    if ( CPULoad > CPUTotal ) {
       CPULoad = CPUTotal;
@@ -1398,20 +1434,19 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
  * Notes:
  *
  **********************************************************************************************************************/
+#if ( RTOS_SELECTION == MQX_RTOS )
 void OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint32_t * CPULoad )
 {
    uint32_t i; // Loop counter
 
-#if ( RTOS_SELECTION == MQX_RTOS )
    // Check if this is to retrieve the CPU load interrupt
    if ( taskIdx == 0xFFFFFFFF) {
       taskIdx = (uint32_t)eINT_TSK_IDX;
    }
-#endif
-
    for (i=0 ; i<TASK_CPULOAD_SIZE; i++) {
      // Retrieve CPU load
      // Make sure we don't divide by 0
+     // TODO: K24 Bob: the calculation below uses CPUTotal for all historical entries.  This is mathematically incorrect.  See below for RA6E1 fix.
      if ( CPUTotal != 0 ) {
         CPULoad[i] = (uint32_t)((((float)TASK_CPUload[taskIdx][(cpuLoadIndex+TASK_CPULOAD_SIZE-i)%TASK_CPULOAD_SIZE]*1000)/CPUTotal)+0.5);
      } else {
@@ -1419,6 +1454,32 @@ void OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint32_t * CPULoad )
      }
    }
 }
+#elif ( RTOS_SELECTION == FREE_RTOS )
+/***********************************************************************************************************************
+                     FreeRTOS Version of OS_TASK_GetCpuLoad
+***********************************************************************************************************************/
+void OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint16_t * CPULoad )
+{
+   uint32_t cpuTotal, i, j;
+   /* Loop through the historical run time counters for this task.  The entry at [taskIdx][cpuLoadIndex] is the most recent one */
+   for ( i = 0; i < TASK_CPULOAD_SIZE; i++ )
+   {
+      /* Sum up all the run time counters for all tasks to arrive at the total for the whole CPU, needed to calculate percentages */
+      cpuTotal = 0;
+      for ( j = 0; j < eLAST_TSK_IDX; j++ )
+      {
+         cpuTotal += TASK_CPUload[j][(cpuLoadIndex+TASK_CPULOAD_SIZE-i)%TASK_CPULOAD_SIZE];
+      }
+      /* Calculate the percent-times-10X for this task for each historical entry as the ratio of run time counter for this task to the total CPU */
+      if ( cpuTotal > 0 )
+      {
+         CPULoad[i] = (uint32_t)((((float)TASK_CPUload[taskIdx][(cpuLoadIndex+TASK_CPULOAD_SIZE-i)%TASK_CPULOAD_SIZE]*1000)/cpuTotal)+0.5);
+      } else {
+         CPULoad[i] = 0; /* Handle the possibility that cpuTotal is zero, returning zero to avoid divide by zero */
+      }
+   }
+}
+#endif // RTOS_SELECTION
 
 #if ( RTOS_SELECTION == MQX_RTOS )
 /***********************************************************************************************************************
@@ -1556,7 +1617,6 @@ void OS_TASK_Summary ( bool safePrint )
       }
 #endif
 
-      //_ticks_to_time(&task_td->TIMEOUT, &time);
       OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, CPULoad );
       (void)snprintf( str2, (int32_t)sizeof(str2), "%-10s 0x%05X %2u   %-29s 0x%05X    %08X  %3u%%%%   %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
                                      pTaskList->TASK_NAME,
@@ -1653,24 +1713,30 @@ void OS_TASK_Summary ( bool safePrint )
    TaskStatus_t               taskStatusInfo;
    TaskHandle_t               taskHandle;
    OS_TASK_Template_t const   *pTaskList;
-   uint32_t                   CPULoad[TASK_CPULOAD_SIZE];
+   uint16_t                   CPULoad[eLAST_TSK_IDX][TASK_CPULOAD_SIZE];
    char taskState[6][10] = { "Running", "Ready", "Blocked", "Suspended", "Deleted", "Invalid" };
    char taskInformation[8][25] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth",
                                     "TaskStackHighWaterMark", "TaskStackBase" };
    char taskInfo[10][25] = { "TName", "TNumber", "TCP", "TState", "TRTC", "TSD", "TSHWM", "TSB", "CPU load (last 10 secs)","(Oldest)"};
    char buffer[150];
+   static uint32_t passCounter = 0;
 
-   while( index < ((sizeof( taskInfo)/sizeof(taskInfo[0])) - 2) )  // Excluding the CPU Load Strings
+   if ( ( passCounter == 0 ) && ( safePrint ) ) /* Only print the dictionary of headings every 100 time and only if we are safe */
    {
-      if (safePrint)
+      while( index < ((sizeof( taskInfo)/sizeof(taskInfo[0])) - 2) )  // Excluding the CPU Load Strings
       {
-         DBG_printf( "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
+         if (safePrint)
+         {
+            DBG_printf( "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
+         }
+         else
+         {
+            DBG_LW_printf( "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
+         }
+         index++;
       }
-      else
-      {
-         DBG_LW_printf( "%20s : %s" ,taskInfo[ index ], taskInformation[ index ] );
-      }
-      index++;
+      passCounter++;
+      if ( passCounter >= 100) passCounter = 0;
    }
    snprintf( buffer, sizeof(buffer), "%-8s %4s %5s %8s %10s %5s %5s %10s %30s %15s\n", taskInfo[0], taskInfo[1], taskInfo[2], taskInfo[3], taskInfo[4],
                                       taskInfo[5], taskInfo[6], taskInfo[7], taskInfo[8], taskInfo[9] );
@@ -1683,48 +1749,71 @@ void OS_TASK_Summary ( bool safePrint )
    {
       DBG_LW_printf( buffer );
    }
+   if ( safePrint ) /* Only use the mutex if this is a normal task summary printout rather than one occurring in a high duty cycle situation */
+   {
+      /* Lock the data table to prevent a tasksummary command from getting inconsistent data */
+      if ( taskUsageMutexCreated_ == (bool)false )
+      {
+         taskUsageMutexCreated_ = OS_MUTEX_Create( &taskUsageMutex_ );
+      }
+      if ( taskUsageMutexCreated_ ) OS_MUTEX_Lock( &taskUsageMutex_ ); /* Lock the CPULoad table and several other variables */
+   }
+   /* While under mutex protection, make a quick pass through the CPU load table to calculate values for each task */
    for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
-      if( pTaskList->pvTaskCode != NULL )
+      OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, &CPULoad[pTaskList->TASK_TEMPLATE_INDEX][0] ); /* Get last 10 CPU loads in percent-times-10 */
+   }
+   if ( safePrint )
+   {
+      if ( taskUsageMutexCreated_ ) OS_MUTEX_Unlock( &taskUsageMutex_ ); /* Release the lock on CPULoad table */
+   }
+   /* Now we can "take our time" formatting the data for printing without holding the mutex.  However, with the current task priorities, this really  *
+    * doesn't matter because the DBG task is higher priority than the STRT task.  So we really don't need the mutex in this function.                 */
+   for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+   {
+      if( ( pTaskList->pvTaskCode != NULL )  || ( pTaskList->usStackDepth != 0 ) ) /* Only the IDLE task has both of these as 0 / NULL */
       {
-         taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
+         taskHandle = taskHandle_[pTaskList->TASK_TEMPLATE_INDEX];
       }
       else
       {
          taskHandle = xTaskGetIdleTaskHandle();
       }
-      vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid );
-      if( 0 != strcmp( pTaskList->pcName, taskStatusInfo.pcTaskName ) )
+      if ( taskHandle != NULL )
       {
-         continue;  // Skip the task that has been deleted
-      }
-      OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, CPULoad );
-      snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
-               ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, ( char* )taskState[ taskStatusInfo.eCurrentState ],
-               taskStatusInfo.ulRunTimeCounter, pTaskList->usStackDepth,
-               ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
-               taskStatusInfo.pxStackBase,
-               CPULoad[0]/10, CPULoad[0]%10,
-               CPULoad[1]/10, CPULoad[1]%10,
-               CPULoad[2]/10, CPULoad[2]%10,
-               CPULoad[3]/10, CPULoad[3]%10,
-               CPULoad[4]/10, CPULoad[4]%10,
-               CPULoad[5]/10, CPULoad[5]%10,
-               CPULoad[6]/10, CPULoad[6]%10,
-               CPULoad[7]/10, CPULoad[7]%10,
-               CPULoad[8]/10, CPULoad[8]%10,
-               CPULoad[9]/10, CPULoad[9]%10);
+         vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid ); /* Collect all interesting information about this task */
+         if( 0 != strcmp( pTaskList->pcName, taskStatusInfo.pcTaskName ) )
+         {
+            continue;  // Skip the task that has been deleted
+         }
+         uint16_t * pEntry = (uint16_t *)&CPULoad[pTaskList->TASK_TEMPLATE_INDEX][0]; /* Create pointer to the entry in CPULoad for this task */
+         snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
+                  ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, ( char* )taskState[ taskStatusInfo.eCurrentState ],
+                  taskStatusInfo.ulRunTimeCounter, pTaskList->usStackDepth,
+                  ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
+                  taskStatusInfo.pxStackBase,
+                  pEntry[0]/10, pEntry[0]%10,
+                  pEntry[1]/10, pEntry[1]%10,
+                  pEntry[2]/10, pEntry[2]%10,
+                  pEntry[3]/10, pEntry[3]%10,
+                  pEntry[4]/10, pEntry[4]%10,
+                  pEntry[5]/10, pEntry[5]%10,
+                  pEntry[6]/10, pEntry[6]%10,
+                  pEntry[7]/10, pEntry[7]%10,
+                  pEntry[8]/10, pEntry[8]%10,
+                  pEntry[9]/10, pEntry[9]%10);
 
-      if (safePrint)
-      {
-         buffer[strlen(buffer)-1] = 0; // remove \n. It will be added back when printed
-         DBG_printf( buffer );
-         // Throttle printing process because we don't have enough buffers
-         OS_TASK_Sleep(TEN_MSEC); // About how long it takes to print one line
-      }
-      else
-      {
-         DBG_LW_printf( buffer );
+         if (safePrint)
+         {
+            buffer[strlen(buffer)-1] = 0; // remove \n. It will be added back when printed
+            DBG_printf( buffer );
+            // Throttle printing process because we don't have enough buffers
+            OS_TASK_Sleep(TEN_MSEC); // About how long it takes to print one line
+         }
+         else
+         {
+            DBG_LW_printf( buffer );
+         }
       }
    }
 }
