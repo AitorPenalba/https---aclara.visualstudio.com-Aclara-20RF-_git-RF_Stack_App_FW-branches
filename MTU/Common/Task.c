@@ -1749,7 +1749,6 @@ void OS_TASK_Summary ( bool safePrint )
    {
       DBG_LW_printf( buffer );
    }
-   //_ticks_to_time(&task_td->TIMEOUT, &time);
    if ( safePrint ) /* Only use the mutex if this is a normal task summary printout rather than one occurring in a high duty cycle situation */
    {
       /* Lock the data table to prevent a tasksummary command from getting inconsistent data */
