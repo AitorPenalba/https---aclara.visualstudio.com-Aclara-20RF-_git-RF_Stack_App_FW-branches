@@ -308,7 +308,7 @@
 #define TM_QUEUE                          0
 #define TM_MSGQ                           0
 #define TM_EVENTS                         0
-#define TM_LINKED_LIST                    1
+#define TM_LINKED_LIST                    0
 #define TM_CRC_UNIT_TEST                  0
 #define TM_TIME_COMPOUND_TEST             0
 #define TM_OS_EVENT_TEST                  0 /* Test the time compound functions */
@@ -335,7 +335,7 @@
 #define TM_HARDFAULT                      1 /* Enable hardfault command for testing */
 #define TM_BL_TEST_COMMANDS               1 /* Enable the Bootloader Test Commands */
 #define TM_VERIFY_TICK_TIME               0 /* Enable delta time printout from loop in STRT_Startup.c every 10 seconds; 0 disables this test */
-#define TM_TICKHOOK_SEMAPHORE_POST_ERRORS 1 /* Count number of semaphore post errors from the tickHooks of FreeRTOS (N/A for MQX) */
+#define TM_TICKHOOK_SEMAPHORE_POST_ERRORS 0 /* Count number of semaphore post errors from the tickHooks of FreeRTOS (N/A for MQX) */
 //#define TEST_COM_UPDATE_APPLET    /* If defined, causes the com params to be set to unusual values. */
 //#define TM_HMC_APP                /* Enabled - Makes the application static variables global for watch window. */
 //#define TM_UART_BUF_CLR           /* When defined the UART buffers will clear when the port is opened. */

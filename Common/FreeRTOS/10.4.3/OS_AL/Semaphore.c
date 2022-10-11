@@ -222,7 +222,6 @@ void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 } /* end OS_SEM_POST_fromISR () */
 
-#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
 /*******************************************************************************
 
   Function name: OS_SEM_POST_fromISR_retStatus
@@ -236,14 +235,18 @@ void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
   Notes:
 
 *******************************************************************************/
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
 static uint32_t OS_SEM_PostFromIsrRetStatusFailures = 0;
+#endif
 returnStatus_t OS_SEM_POST_fromISR_retStatus ( OS_SEM_Handle SemHandle, char *file, int line )
 {
    returnStatus_t eRetVal = eSUCCESS;
    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
    if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
+#if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
       OS_SEM_PostFromIsrRetStatusFailures++;
+#endif
       eRetVal = eFAILURE;
    }
 
@@ -251,7 +254,6 @@ returnStatus_t OS_SEM_POST_fromISR_retStatus ( OS_SEM_Handle SemHandle, char *fi
    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
    return ( eRetVal );
 } /* end OS_SEM_POST_fromISR_retStatus () */
-#endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
 
 /*******************************************************************************
 

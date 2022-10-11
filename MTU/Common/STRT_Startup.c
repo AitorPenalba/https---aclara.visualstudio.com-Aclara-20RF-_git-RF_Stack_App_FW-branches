@@ -577,7 +577,7 @@ void STRT_StartupTask ( taskParameter )
 #endif
    for ( ;; )
    {
-      OS_TICK_Sleep ( &TickTime, ONE_SEC );
+      OS_TICK_Sleep ( &TickTime, STRT_BACKGROUND_CYCLE_SECONDS * ONE_SEC );
 #if ( TM_VERIFY_TICK_TIME != 0 )
       pass++;
       if ( pass == TM_VERIFY_TICK_TIME )
