@@ -93,7 +93,7 @@
 #endif
 
 #if ( USE_DTLS == 1 )
-#include "DTLS/DTLS.h"
+#include "DTLS/dtls.h"
 #endif
 #if ( USE_MTLS == 1 )
 #include "MTLS/mtls.h"
