@@ -2860,6 +2860,9 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
    static uint16_t secs = 0, mSecs = 0;
    uint8_t tempMode = uMode;
 
+   /* Clear DPSRSTF flag */
+   R_SYSTEM->RSTSR0_b.DPSRSTF = 0;
+
    if ( ( LPTMR_MILLISECONDS == eUnits ) && ( uCounter > 1000 ) && ( uMode != 0 ) )
    {
       /* In RA6E1, if we would like to achieve milliseconds precision, we need to use SW Standby Mode,

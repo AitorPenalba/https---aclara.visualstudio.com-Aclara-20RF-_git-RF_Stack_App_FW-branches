@@ -21,7 +21,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdlib.h>
 #if ( DCU == 1 )
 #include <stdio.h>
 #endif
@@ -996,9 +995,6 @@ returnStatus_t MAC_init ( void )
 #if ( DEBUG_LAST_GASP_TASK == 0 )
 #if ( MCU_SELECTED == NXP_K24 )
       if(PWRLG_LastGasp() == false)
-#elif ( MCU_SELECTED == RA6E1 )
-      if( !BRN_OUT() )
-#endif
 #else
       if(0)
 #endif
@@ -1238,11 +1234,7 @@ void MAC_Task ( taskParameter )
 #endif
 #if ( EP == 1 )
 #if ( DEBUG_LAST_GASP_TASK == 0 )
-#if ( MCU_SELECTED == NXP_K24 )
-      if(PWRLG_LastGasp() == true)
-#elif ( MCU_SELECTED == RA6E1 )
-      if( BRN_OUT() )
-#endif
+   if(PWRLG_LastGasp() == true)
 #else
    if(1)
 #endif
@@ -1692,7 +1684,7 @@ void MAC_Task ( taskParameter )
 #if ( MCU_SELECTED == NXP_K24 )
                      if( P_Persistence_Get() )
 #elif ( MCU_SELECTED == RA6E1 )
-                     if( P_Persistence_Get() || ( 0 != PWRLG_LLWU() ) ) /* Ignore p_persistence during last gasps */
+                     if( P_Persistence_Get() || ( 0 != PWRLG_LastGasp() ) ) /* Ignore p_persistence during last gasps */
 #endif // MCU_SELECTED
 #endif // ( EP == 1 ) && ( TEST_TDMA == 1 )
                      {
@@ -2106,11 +2098,7 @@ static void Process_DataIndication( const PHY_DataInd_t *phy_indication )
 
 #if EP == 1
 #if ( DEBUG_LAST_GASP_TASK == 0 )
-#if ( MCU_SELECTED == NXP_K24 )
       if(PWRLG_LastGasp() == false)
-#elif ( MCU_SELECTED == RA6E1 )
-      if( !BRN_OUT() )
-#endif
 #else
       if(0)
 #endif
@@ -3482,11 +3470,7 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
 #if EP == 1
 #if ( DEBUG_LAST_GASP_TASK == 0 )
       // Only allow configuration changes if NOT in Last Gasp Mode
-#if ( MCU_SELECTED == NXP_K24 )
       if(PWRLG_LastGasp() == false)
-#elif ( MCU_SELECTED == RA6E1 )
-      if( !BRN_OUT() )
-#endif
 #else
       if(0)
 #endif
