@@ -575,7 +575,7 @@ uint32_t UART_write ( enum_UART_ID UartId, const uint8_t *DataBuffer, uint32_t D
 #if ( ( OPTICAL_PASS_THROUGH != 0 ) && ( MQX_CPU == PSP_CPU_MK24F120M ) )
    if ( UartId == UART_OPTICAL_PORT )
    {
-      ( void )UART_flush( UartId );   // TODO: RA6E1 This UART_flush not needed now for the debug and mfg port. Might be added in the future.
+      ( void )UART_flush( UartId );   //RA6E1 : This UART_flush not needed now for the debug and mfg port. Might be added in the future.
       ( void )UART_ioctl( UartId, IO_IOCTL_SERIAL_WAIT_FOR_TC, NULL );
       ( void )UART_ioctl( UartId, IO_IOCTL_SERIAL_DISABLE_TX, NULL );
    }

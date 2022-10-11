@@ -216,11 +216,7 @@ returnStatus_t BM_init( void )
          for ( pool = 0; ( eSUCCESS == retVal ) && ( pool < BUFFER_N_POOLS ); pool++ )
          {
             // Create a queue to hold the buffer pointers for this pool
-//#if ( ( BM_USE_KERNEL_AWARE_DEBUGGING == 1 ) && ( RTOS_SELECTION == FREE_RTOS ) )
             if ( OS_MSGQ_Create( &bufferPools_[pool], BM_bufferPoolParams[pool].cnt, (char *)BM_bufferPoolParams[pool].pName ) == false )
-//#else  // TODO: RA6E1: Remove the commented code
-//            if ( OS_MSGQ_Create( &bufferPools_[pool], BM_bufferPoolParams[pool].cnt ) == false )
-//#endif
             {
                //Message queue creation failed
                return eFAILURE;
@@ -529,7 +525,7 @@ static buffer_t *bufAlloc( uint16_t minSize, eBM_BufferUsage_t type, const char 
          OS_TICK_Get_CurrentElapsedTicks( &CurrentTime );
 
          // Is this the first time we run out of buffers?
-#if ( RTOS_SELECTION == MQX_RTOS ) // TODO: RA6 [name_Balaji]: Verify the change
+#if ( RTOS_SELECTION == MQX_RTOS )
          if ( ( AllocWatchDog[type].TICKS[0] == 0 ) && ( AllocWatchDog[type].TICKS[1] == 0 ) )
 #elif( RTOS_SELECTION == FREE_RTOS )
          if ( ( AllocWatchDog[type].HW_TICKS == 0 ) && ( AllocWatchDog[type].tickCount == 0 ) )

@@ -38,7 +38,6 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 #define RADIO_SPI_NAME           "spi1:"
 #define SIG_ASSERT               ((uint8_t)0)
 #define SIG_RELEASE              ((uint8_t)1)
-#define USE_BSP_PINCFG_BY        0                       /* Use R_BSP_PinCfg_BY to set I/O pins */
 #define RADIO_0_SPI_PORT_NUM     ((uint8_t)1)            /* SPI Port # used in the Micro.       */
 #if ( MCU_SELECTED == NXP_K24 )
 #define RADIO_0_CS_ACTIVE()      GPIOB_PCOR = 1<<10      /* Radio chip select pin asserted      */
@@ -48,21 +47,12 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 #define RADIO_0_SDN_INACTIVE()   GPIOB_PCOR = 1<<19      /* Radio powered ON      */
 #define RADIO_0_SDN_TRIS()       { RADIO_0_SDN_ACTIVE(); PORTB_PCR19 = 0x100; GPIOB_PDDR |= (1<<19);}
 #elif ( MCU_SELECTED == RA6E1 )
-  #if ( USE_BSP_PINCFG_BY == 1 )  // TODO: RA6E1 Bob: ticket submitted to Renesas FAE to confirm that this should work
-#define RADIO_0_CS_ACTIVE()     R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_03, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | BSP_IO_LEVEL_LOW  ) )
-#define RADIO_0_CS_INACTIVE()   R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_03, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | BSP_IO_LEVEL_HIGH ) )
-#define RADIO_0_CS_TRIS()       R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_03, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-#define RADIO_0_SDN_ACTIVE()    R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_04, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | BSP_IO_LEVEL_HIGH ) )
-#define RADIO_0_SDN_INACTIVE()  R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_04, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | BSP_IO_LEVEL_LOW  ) )
-#define RADIO_0_SDN_TRIS()      R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_04, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-  #else
 #define RADIO_0_CS_ACTIVE()     R_BSP_PinWrite(BSP_IO_PORT_01_PIN_03, BSP_IO_LEVEL_LOW)
 #define RADIO_0_CS_INACTIVE()   R_BSP_PinWrite(BSP_IO_PORT_01_PIN_03, BSP_IO_LEVEL_HIGH)
 #define RADIO_0_CS_TRIS()       R_BSP_PinWrite(BSP_IO_PORT_01_PIN_03, BSP_IO_LEVEL_HIGH) // TODO: RA6E1 Bob: TRIS is functionally the same as HIGH due to pull-up
 #define RADIO_0_SDN_ACTIVE()    R_BSP_PinWrite(BSP_IO_PORT_01_PIN_04, BSP_IO_LEVEL_HIGH)
 #define RADIO_0_SDN_INACTIVE()  R_BSP_PinWrite(BSP_IO_PORT_01_PIN_04, BSP_IO_LEVEL_LOW)
 #define RADIO_0_SDN_TRIS()      R_BSP_PinWrite(BSP_IO_PORT_01_PIN_04, BSP_IO_LEVEL_HIGH) // TODO: RA6E1 Bob: TRIS is functionally the same as HIGH due to pull-up
-  #endif
 #endif
 #define RADIO_0_WP_USED          0                       /* Set to 1 if WP pin is used */
 
@@ -90,17 +80,10 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 /* For Last Gasp recovery from low power, Set PCR MUX for GPIO, Make Output, Disable OSC */
 #define RDO_OSC_EN_TRIS_LG()     { RDO_OSC_EN_OFF(); PORTC_PCR7 = 0x100; GPIOC_PDDR |= (1<<7);}
 #elif ( MCU_SELECTED == RA6E1 )
-  #if ( USE_BSP_PINCFG_BY == 1 )  // TODO: RA6E1 Bob: ticket submitted to Renesas FAE to confirm that this should work
-#define RDO_OSC_EN_OFF()        R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_05, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | BSP_IO_LEVEL_HIGH ) )
-#define RDO_OSC_EN_ON()         R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_05, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | BSP_IO_LEVEL_LOW  ) )
-#define RDO_OSC_EN_TRIS()       R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_05, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-#define RDO_OSC_EN_TRIS_LG()    R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_05, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-  #else
 #define RDO_OSC_EN_OFF()        R_BSP_PinWrite(BSP_IO_PORT_01_PIN_05, BSP_IO_LEVEL_HIGH)
 #define RDO_OSC_EN_ON()         R_BSP_PinWrite(BSP_IO_PORT_01_PIN_05, BSP_IO_LEVEL_LOW)
 #define RDO_OSC_EN_TRIS()       R_BSP_PinWrite(BSP_IO_PORT_01_PIN_05, BSP_IO_LEVEL_HIGH)
 #define RDO_OSC_EN_TRIS_LG()    R_BSP_PinWrite(BSP_IO_PORT_01_PIN_05, BSP_IO_LEVEL_HIGH)
-  #endif
 #endif
 
 // RX0TX1 Pin
@@ -112,17 +95,10 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 /* For Last Gasp recovery from low power, Set PCR MUX for GPIO, Make Output, RX */
 #define RDO_RX0TX1_TRIS_LG()     { RDO_RX0TX1_RX(); PORTC_PCR10 = 0x100; GPIOC_PDDR |= (1<<10);}
 #elif ( MCU_SELECTED == RA6E1 )
-  #if ( USE_BSP_PINCFG_BY == 1 )  // TODO: RA6E1 Bob: ticket submitted to Renesas FAE to confirm that this should work
-#define RDO_RX0TX1_RX()          R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_05, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | BSP_IO_LEVEL_LOW  ) )
-#define RDO_RX0TX1_TX()          R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_05, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | BSP_IO_LEVEL_HIGH ) )
-#define RDO_RX0TX1_TRIS()        R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_05, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-#define RDO_RX0TX1_TRIS_LG()     R_BSP_PinCfg_BY ( BSP_IO_PORT_01_PIN_05, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-  #else
 #define RDO_RX0TX1_RX()          R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_LOW)  /* Radio RX\TX to RX */
 #define RDO_RX0TX1_TX()          R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_HIGH) /* Radio RX\TX to TX */
 #define RDO_RX0TX1_TRIS()        R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_LOW)  /* Radio RX\TX to RX */
 #define RDO_RX0TX1_TRIS_LG()     R_BSP_PinWrite(BSP_IO_PORT_03_PIN_07, BSP_IO_LEVEL_LOW)  /* Radio RX\TX to RX */
-  #endif
 #endif
 
 // PA_EN Pin
@@ -183,35 +159,21 @@ typedef enum   /* Do NOT start at 0 - mqx uses 0 to DESELECT a SPI device  */
 #elif ( MCU_SELECTED == RA6E1 )
 // GPIO0 Pin P600
 #define RDO_0_GPIO0()            R_BSP_PinRead   (BSP_IO_PORT_06_PIN_00)
-  #if ( USE_BSP_PINCFG_BY == 1 )   // TODO: RA6E1 Bob: ticket submitted to Renesas FAE to confirm that this should work
-#define RDO_0_GPIO0_TRIS()       R_BSP_PinCfg_BY (BSP_IO_PORT_06_PIN_00, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-  #else
 #define RDO_0_GPIO0_TRIS()       // Utilize the initial configuration for GPIO0_SI4467 from bootstrap configuration
-  #endif
+
 
 //GPIO1 Pin P106
 #define RDO_0_GPIO1()            R_BSP_PinRead   (BSP_IO_PORT_01_PIN_06)
-  #if ( USE_BSP_PINCFG_BY == 1 )   // TODO: RA6E1 Bob: ticket submitted to Renesas FAE to confirm that this should work
-#define RDO_0_GPIO1_TRIS()       R_BSP_PinCfg_BY (BSP_IO_PORT_01_PIN_06, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-  #else
 #define RDO_0_GPIO1_TRIS()       // Utilize the initial configuration for GPIO1_SI4467 from bootstrap configuration
-  #endif
 
 //GPIO2 Pin P000
 #define RDO_0_GPIO2()            R_BSP_PinRead   (BSP_IO_PORT_00_PIN_00)
-  #if ( USE_BSP_PINCFG_BY == 1 )   // TODO: RA6E1 Bob: ticket submitted to Renesas FAE to confirm that this should work
-#define RDO_0_GPIO2_TRIS()       R_BSP_PinCfg_BY (BSP_IO_PORT_00_PIN_00, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-  #else
 #define RDO_0_GPIO2_TRIS()       // Utilize the initial configuration for GPIO2_SI4467 from bootstrap configuration
-  #endif
+
 
 //GPIO3 Pin P003
 #define RDO_0_GPIO3()            R_BSP_PinRead   (BSP_IO_PORT_00_PIN_03)
-  #if ( USE_BSP_PINCFG_BY == 1 )   // TODO: RA6E1 Bob: ticket submitted to Renesas FAE to confirm that this should work
-#define RDO_0_GPIO3_TRIS()       R_BSP_PinCfg_BY (BSP_IO_PORT_00_PIN_03, (uint8_t)( IOPORT_CFG_PORT_DIRECTION_INPUT                      ) )
-  #else
 #define RDO_0_GPIO3_TRIS()       // Utilize the initial configuration for GPIO3_SI4467 from bootstrap configuration
-  #endif
 
 #endif
 /* ------------------------------------------------------------------------------------------------------------------ */
