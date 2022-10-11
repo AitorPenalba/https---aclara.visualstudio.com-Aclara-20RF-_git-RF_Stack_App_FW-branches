@@ -1,6 +1,6 @@
 /***********************************************************************************************************************
  *
- * Filename: DFW_pckt.h
+ * Filename: dfw_pckt.h
  *
  * Contents: Saves downloaded packets and updates the Bit Field.  Also provides an API to return missing packets.
  *

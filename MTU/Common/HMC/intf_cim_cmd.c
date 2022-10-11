@@ -10,7 +10,7 @@
    A product of
    Aclara Technologies LLC
    Confidential and Proprietary
-   Copyright 2013-2018 Aclara.  All Rights Reserved.
+   Copyright 2013-2022 Aclara.  All Rights Reserved.
 
    PROPRIETARY NOTICE
    The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
@@ -49,10 +49,10 @@
 #include "meter_ansi_sig.h"
 #if ( ( END_DEVICE_PROGRAMMING_CONFIG == 1 ) || ( END_DEVICE_PROGRAMMING_FLASH >  ED_PROG_FLASH_NOT_SUPPORTED ) )
 #include "hmc_prg_mtr.h"
-#include "os_aclara.h"
+#include "OS_aclara.h"
 #endif
 #include "object_list.h"
-#include "HMC_seq_id.h"
+#include "hmc_seq_id.h"
 #include "byteswap.h"
 #endif   /* end of ENABLE_HMC_TASKS == 1  */
 #include <math.h>
@@ -115,7 +115,7 @@ PACK_END
 #endif
 
 #if ( HMC_I210_PLUS_C == 1 )
-// This structure is created to ease the process of caluculating the size and offset to retrieve base fw and patch fw
+// This structure is created to ease the process of calculating the size and offset to retrieve base fw and patch fw
 PACK_BEGIN
 typedef struct PACK_MID
 {

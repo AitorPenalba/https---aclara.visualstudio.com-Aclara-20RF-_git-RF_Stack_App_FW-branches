@@ -15,7 +15,6 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #include "OS_aclara.h"
 #include "BSP_aclara.h"
 #include "BUF_MemoryBuffers.h"

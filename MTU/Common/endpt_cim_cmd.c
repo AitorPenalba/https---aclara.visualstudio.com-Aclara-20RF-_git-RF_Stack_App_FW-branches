@@ -42,7 +42,7 @@
 #include "time_sys.h"
 #include "DBG_SerialDebug.h"
 #include "RG_MD_Handler.h"
-#include "APP_MSG_handler.h"
+#include "APP_MSG_Handler.h"
 #include "ID_intervalTask.h"
 #include "time_DST.h"
 #include "version.h"

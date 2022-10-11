@@ -25,7 +25,7 @@
 #include "STACK.h"
 
 #include "COMM.h"
-#include "App_Msg_Handler.h"
+#include "APP_MSG_Handler.h"
 #include "dtls.h"
 
 /* #DEFINE DEFINITIONS */

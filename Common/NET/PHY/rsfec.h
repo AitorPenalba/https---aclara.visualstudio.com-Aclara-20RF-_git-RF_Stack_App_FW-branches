@@ -5,7 +5,6 @@
  */
 
 #include "project.h"
-#include <stdbool.h>
 
 #define NBITS  6u			// Symbol size (if under 8 use only lsb's)
 #define NPOW   64u		    // Set to 2^NBITS

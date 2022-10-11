@@ -45,9 +45,9 @@
 #if ( FAKE_TRAFFIC == 1 )
 #include "PHY.h"
 #endif
-#include "PHY_protocol.h"
+#include "PHY_Protocol.h"
 
-#include "MAC_protocol.h"
+#include "MAC_Protocol.h"
 #include "MAC.h"
 
 #include "STACK_Protocol.h"
@@ -111,7 +111,7 @@
 
 #define TICK_VAL_TO_SEND_STATS ((TIME_TICKS_PER_HR*22)+(TIME_TICKS_PER_MIN*59)+(TIME_TICKS_PER_SEC*45))
 
-// List of suppported next header subtype
+// List of supported next header subtype
 #define NEXT_HEADER_NEXT_HOP_LIST_SUBTYPE 0
 
 #if( RTOS_SELECTION == FREE_RTOS )

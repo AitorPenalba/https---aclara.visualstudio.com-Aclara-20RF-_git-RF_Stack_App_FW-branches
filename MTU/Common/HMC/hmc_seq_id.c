@@ -41,7 +41,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #define HMC_seq_id_GLOBALS
-#include "HMC_seq_id.h"
+#include "hmc_seq_id.h"
 #undef  HMC_seq_id_GLOBALS
 // </editor-fold>
 

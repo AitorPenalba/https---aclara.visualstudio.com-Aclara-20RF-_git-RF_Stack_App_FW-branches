@@ -40,7 +40,7 @@
 #include "ecc108_freertos.h"
 #endif
 #include "byteswap.h"
-#include "App_Msg_Handler.h"
+#include "APP_MSG_Handler.h"
 #if ( EP == 1 )
 #include "pwr_last_gasp.h"
 #endif
