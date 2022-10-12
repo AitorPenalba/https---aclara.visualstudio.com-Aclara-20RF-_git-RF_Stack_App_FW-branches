@@ -202,8 +202,10 @@ static OS_MUTEX_Obj  _timeVarsMutex;                     /* Serialize access to 
 static OS_SEM_Obj    _timeSysSem;                        /* Semaphore to count the # of system ticks */
 static bool          _timeSysSemCreated = (bool)false;
 STATIC tTimeSys      _sTimeSys[MAX_ALARMS];              /* Manage alarm requests */
-
 static time_vars_t   timeVars_;                          /* Time related variable */
+#if ( RTOS_SELECTION == FREE_RTOS )
+static bool          timeSysTaskCreated_ = (bool)false;
+#endif
 
 #if ( EP == 1 )
 static FileHandle_t  fileHndlTimeSys_ = {0};             /* Contains the file handle information */
@@ -2184,7 +2186,8 @@ void TIME_SYS_HandlerTask( taskParameter )
    isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                      /*lint !e641 */
    _int_install_isr(INT_SysTick, TIME_SYS_vApplicationTickHook, isr_ptr);  /*lint !e641 !e64 !e534 */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   /* FreeRTOS uses the Tick Hook method to call so no initialization needed for that case */
+   /* FreeRTOS uses the Tick Hook method to call so no ISR initialization needed for that case */
+   timeSysTaskCreated_ = (bool)true;
 #endif
    cnt = (uint16_t)(SYS_TIME_TICK_IN_mS / portTICK_RATE_MS);
 
@@ -2562,7 +2565,12 @@ void vApplicationTickHook()
          TIME_tickHookSemaphorePostErrors++;
       }
 #else
-       OS_SEM_Post_fromISR( &_timeSysSem );
+#if ( RTOS_SELECTION == FREE_RTOS )
+      if( timeSysTaskCreated_ )
+#endif
+      {
+         OS_SEM_Post_fromISR( &_timeSysSem );
+      }
 #endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
    }
 

@@ -1655,7 +1655,16 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    timer_info_t   info;
    uint32_t       timer_freq_hz;
    uint32_t       period_counts = 0;
+   timer_status_t status;
+
    (void) R_AGT_InfoGet(&AGT0_ExtFlashBusy_ctrl, &info);
+
+   (void) R_AGT_StatusGet(&AGT0_ExtFlashBusy_ctrl, &status);
+   if( TIMER_STATE_COUNTING  == status.state )
+   {
+      /* Stop the timer. */
+      (void) R_AGT_Stop(&AGT0_ExtFlashBusy_ctrl);
+   }
 
    timer_freq_hz = info.clock_frequency;
    period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000); // TODO: RA6E1: This calculation overflows
