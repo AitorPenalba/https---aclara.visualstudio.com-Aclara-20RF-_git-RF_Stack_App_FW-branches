@@ -1087,7 +1087,6 @@
       <configSetting altId="irq.irq13.p015" configurationId="irq.irq13"/>
       <configSetting altId="irq.irq14.p505" configurationId="irq.irq14"/>
       <configSetting altId="irq.irq4.p111" configurationId="irq.irq4"/>
-      <configSetting altId="irq.irq9.p304" configurationId="irq.irq9"/>
       <configSetting altId="irq.mode.custom.free" configurationId="irq.mode"/>
       <configSetting altId="jtag_fslash_swd.mode.jtag.free" configurationId="jtag_fslash_swd.mode"/>
       <configSetting altId="jtag_fslash_swd.tck.p300" configurationId="jtag_fslash_swd.tck"/>
@@ -1183,9 +1182,6 @@
       <configSetting altId="p302.gpio_mode.gpio_mode_out.low" configurationId="p302.gpio_mode"/>
       <configSetting altId="p303.output.low" configurationId="p303"/>
       <configSetting altId="p303.gpio_mode.gpio_mode_out.low" configurationId="p303.gpio_mode"/>
-      <configSetting altId="p304.irq.irq9" configurationId="p304"/>
-      <configSetting altId="p304.gpio_irq.gpio_irq_enabled" configurationId="p304.gpio_irq"/>
-      <configSetting altId="p304.gpio_mode.gpio_mode_irq" configurationId="p304.gpio_mode"/>
       <configSetting altId="p305.output.low" configurationId="p305"/>
       <configSetting altId="p305.gpio_mode.gpio_mode_out.low" configurationId="p305.gpio_mode"/>
       <configSetting altId="p306.output.low" configurationId="p306"/>
