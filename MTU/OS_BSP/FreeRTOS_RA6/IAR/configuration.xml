@@ -951,7 +951,7 @@
     <config id="config.driver.sci_uart">
       <property id="config.driver.sci_uart.param_checking_enable" value="config.driver.sci_uart.param_checking_enable.bsp"/>
       <property id="config.driver.sci_uart.fifo_support" value="config.driver.sci_uart.fifo_support.enabled"/>
-      <property id="config.driver.sci_uart.dtc_support" value="config.driver.sci_uart.dtc_support.enabled"/>
+      <property id="config.driver.sci_uart.dtc_support" value="config.driver.sci_uart.dtc_support.disabled"/>
       <property id="config.driver.sci_uart.flow_control" value="config.driver.sci_uart.flow_control.disabled"/>
     </config>
     <config id="config.driver.ospi">
