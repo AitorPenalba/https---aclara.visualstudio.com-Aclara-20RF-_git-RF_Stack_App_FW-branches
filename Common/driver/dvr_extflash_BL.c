@@ -1648,7 +1648,7 @@ static void setBusyTimer( uint32_t busyTimer_uS )
 
 #elif ( MCU_SELECTED == RA6E1 )
 
-#if USE_POWER_MODE  // TODO: RA6E1: Remove if the above TODO is resolved
+#if USE_POWER_MODE
    bTmrIsrTriggered_ = 0;               /* Clear the triggered flag, will be set by ISR when tmr expires. */
 #endif
 
