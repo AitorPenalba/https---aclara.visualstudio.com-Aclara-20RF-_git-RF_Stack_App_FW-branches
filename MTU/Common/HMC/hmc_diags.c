@@ -77,7 +77,7 @@
 #if( RTOS_SELECTION == FREE_RTOS )
 #define HMC_DIAG_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
 #else
-#define HMC_DIAG_QUEUE_SIZE 0 
+#define HMC_DIAG_QUEUE_SIZE 0
 #endif
 
 
@@ -304,22 +304,9 @@ uint8_t HMC_DIAGS_DoDiags( uint8_t cmd, void *pData )
       case HMC_APP_API_CMD_STATUS:
       {
          buffer_t    *pBuf = NULL;  //Buffer used to point to the data in the msg queue
-         uint16_t     nQueueElements;
 
-         nQueueElements = OS_QUEUE_NumElements( &hmcDiagQueueHandle_ );
-         // DG: Avoid Buffer LEAK when HMC password is incorrect. HMC_DIAGs Allocates buffer every 5 min but service & Free once every 10 mins
-         // Dequeue Messages in this queue. If there are more than one, delete the old one's and service the latest.
-         while ( nQueueElements >= 1 )
-         {
-            pBuf = OS_QUEUE_Dequeue( &hmcDiagQueueHandle_ );
-            if ( nQueueElements > 1 )
-            {
-               HMC_DIAGS_PRNT_INFO('I', " Current No. of Elements in the Queue: %d", nQueueElements );
-               BM_free( pBuf );
-               HMC_DIAGS_PRNT_INFO('I', " Free stacked buffer !!");
-            }
-            nQueueElements--;
-         }
+         HMC_DIAGS_PurgeQueue();
+         pBuf = OS_QUEUE_Dequeue( &hmcDiagQueueHandle_ ); /* Dequeue the latest item  */
          if ( NULL != pBuf )
          {
             //Got message, check the alarm ID
@@ -479,3 +466,35 @@ uint8_t HMC_DIAGS_DoDiags( uint8_t cmd, void *pData )
    return( retVal );
 }
 /* ****************************************************************************************************************** */
+/***********************************************************************************************************************
+
+   Function name: HMC_DIAGS_PurgeQueue
+
+   Purpose: When the Host Meter Communication is broken either due to HW issue or due to incorrect password, purge all but one items from the Queue
+
+   Arguments: None
+
+   Returns: None
+
+ **********************************************************************************************************************/
+void HMC_DIAGS_PurgeQueue ( void )
+{
+   uint16_t     nQueueElements;
+   buffer_t     *pBuf = NULL;  //Buffer used to point to the data in the msg queue
+
+   nQueueElements = OS_QUEUE_NumElements( &hmcDiagQueueHandle_ );
+   // DG: Avoid Buffer LEAK when HMC password is incorrect. HMC_DIAGs Allocates buffer every 5 min but service & Free once every 10 mins
+   // Dequeue Messages in this queue. If there are more than one, delete the old one's and service the latest.
+   while ( nQueueElements > 1 )
+   {
+      pBuf = OS_QUEUE_Dequeue( &hmcDiagQueueHandle_ );
+      if ( nQueueElements > 1 )
+      {
+         HMC_DIAGS_PRNT_INFO('I', " Current No. of Elements in the Queue: %d", nQueueElements );
+         BM_free( pBuf );
+         HMC_DIAGS_PRNT_INFO('I', " Free stacked buffer !!");
+      }
+      nQueueElements--;
+   }
+
+}
