@@ -57,7 +57,6 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdlib.h>
 #if ( MCU_SELECTED == NXP_K24 )
 #include <bsp.h>
 #endif
@@ -68,6 +67,7 @@
 #include "buffer.h"
 #undef  BM_GLOBAL
 
+#include "time_sys.h"
 #include "EVL_event_log.h"
 
 /* ****************************************************************************************************************** */
@@ -749,7 +749,7 @@ void BM_showAlloc( bool safePrint )
    uint32_t i, j; // loop counter
    uint32_t nbBuffers;
    buffer_t *pBuf;
-   char     str[100];
+   char     str[110];
 
    OS_MUTEX_Lock( &bufMutex_ );
 #if ( RTOS_SELECTION == MQX_RTOS )
@@ -759,7 +759,7 @@ void BM_showAlloc( bool safePrint )
       DBG_printfNoCr( str );
    }
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   uint32_t size = snprintf( str, (int32_t)sizeof( str ), "\r\nAllocated buffers:\r\nPool reqSize poolSize        ptr  ptr->addr                 file  line\r\n" );
+   uint32_t size = snprintf( str, (int32_t)sizeof( str ), "\r\nAllocated buffers:\r\nPool reqSize poolSize        ptr  ptr->addr                 file  line  AlarmID\r\n" );
    if ( safePrint )
    {
       str[size-2] = '\0';
@@ -801,9 +801,15 @@ void BM_showAlloc( bool safePrint )
                   DBG_printfNoCr( str );
                }
 #elif ( RTOS_SELECTION == FREE_RTOS )
-               uint32_t size = snprintf( str, (int32_t)sizeof( str ), "  %2u %7u     %4u 0x%08X 0x%08X %20s %5u\r\n",
+
+               uint8_t alarmID = 255; // Invalid
+               if( pBuf->eSysFmt == eSYSFMT_TIME )
+               {
+                  alarmID = (( tTimeSysMsg * )( void * )&pBuf->data[0])->alarmId; //Alarm message
+               }
+               uint32_t size = snprintf( str, (int32_t)sizeof( str ), "  %2u %7u     %4u 0x%08X 0x%08X %20s %5u %4u\r\n",
                                  pBuf->x.bufPool, pBuf->x.dataLen, BM_bufferPoolParams[pBuf->x.bufPool].size,
-                                 pBuf, pBuf->data, pBuf->pfile, pBuf->line );
+                                 pBuf, pBuf->data, pBuf->pfile, pBuf->line, alarmID );
                if ( safePrint )
                {
                   str[size-2] = '\0';
