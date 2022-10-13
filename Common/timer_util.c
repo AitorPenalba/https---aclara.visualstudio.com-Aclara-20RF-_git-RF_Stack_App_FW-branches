@@ -31,10 +31,16 @@
  *        MAX_TIMERS //Maximum number of timers supported
  *
  ***********************************************************************************************************************
- * Copyright (c) 2013 Aclara Power-Line Systems Inc.  All rights reserved.  This program may not be reproduced, in whole
- * or in part, in any form or by any means whatsoever without the written permission of:
- *                ACLARA POWER-LINE SYSTEMS INC.
- *                ST. LOUIS, MISSOURI USA
+ * A product of
+ * Aclara Technologies LLC
+ * Confidential and Proprietary
+ * Copyright 2013-2022 Aclara.  All Rights Reserved.
+ *
+ * PROPRIETARY NOTICE
+ * The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+ * (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+ * authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may
+ * be used or copied only in accordance with the terms of such license.
  ***********************************************************************************************************************
  * Revision History:
  * 100710  MS    - Initial Release
@@ -45,7 +51,6 @@
 /* INCLUDE FILES */
 
 #include "project.h"
-#include <stdbool.h>
 #include <string.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
@@ -80,7 +85,10 @@ STATIC timer_t       _sTimer[MAX_TIMERS];          /* Manage timer requests */
 STATIC timer_t       *_TMR_headNode;               /* Link-list head */
 static OS_MUTEX_Obj  _tmrUtilMutex;                /* Serialize access to timer data-structure */
 static OS_SEM_Obj    _tmrUtilSem;                  /* Semaphore used by timer module to count the number of ticks */
-static bool        _tmrUtilSemCreated = false;
+static bool          _tmrUtilSemCreated = (bool)false;
+#if ( RTOS_SELECTION == FREE_RTOS )
+static bool          tmrTaskCreated_ = (bool)false;
+#endif
 
 #ifdef TM_TIMER_DEBUG
 nInt MaxTimersUsed = 0;
@@ -301,7 +309,8 @@ void TMR_HandlerTask( taskParameter )
    isr_ptr->OLD_ISR      = _int_get_isr(INT_SysTick);                   /*lint !e641  This code is from an example */
    _int_install_isr(INT_SysTick, TMR_vApplicationTickHook, isr_ptr);    /*lint !e641 !e64 !e534 code is from an example */
 #elif ( RTOS_SELECTION == FREE_RTOS )
-   /* FreeRTOS uses the Tick Hook method to call so no initialization needed for that case */
+   /* FreeRTOS uses the Tick Hook method to call so no ISR initialization needed for that case */
+   tmrTaskCreated_ = (bool)true;
 #endif
    /* End the example code! */
 
@@ -789,11 +798,14 @@ void TMR_vApplicationTickHook( void )
          TMR_tickHookSemaphorePostErrors++;
       }
 #else
-       OS_SEM_Post_fromISR( &_tmrUtilSem );
+#if ( RTOS_SELECTION == FREE_RTOS )
+      if( tmrTaskCreated_ )
+#endif
+      {
+         OS_SEM_Post_fromISR( &_tmrUtilSem );
+      }
 #endif // ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
    }
 }
 #endif
-
-// </editor-fold>
 /*lint +e454 +e456 The mutex is handled properly. */

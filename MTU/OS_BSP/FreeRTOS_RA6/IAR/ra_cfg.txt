@@ -137,7 +137,7 @@ FSP Configuration
       P301 49 GPIO - L None "Output mode (Initial Low)" - - "AGT0: AGTIO0; GPT4: GTIOC4B; IRQ: IRQ6; SCI2: RXD2; SCI9: CTS_RTS9; SPI0: SSLA2" TP119 IO - - 
       P302 48 GPIO - L None "Output mode (Initial Low)" - - "GPT4: GTIOC4A; IRQ: IRQ5; SCI2: TXD2; SPI0: SSLA3" Open IO - - 
       P303 47 GPIO - L - "Output mode (Initial Low)" - - "GPT7: GTIOC7B; SCI9: CTS9" Open IO - - 
-      P304 44 IRQ_IRQ9 - - IRQ9 "IRQ mode" - - "AGT2: AGTEE2; GPT7: GTIOC7A; IRQ: IRQ9" Open IO - - 
+      P304 44 - - - - Disabled - - "AGT2: AGTEE2; GPT7: GTIOC7A; IRQ: IRQ9" Open None - - 
       P305 43 GPIO - L None "Output mode (Initial Low)" - - "AGT2: AGTOB2; IRQ: IRQ8; QSPI: QSPCLK" Open IO - - 
       P306 42 GPIO - L - "Output mode (Initial Low)" - - "AGT2: AGTOA2; QSPI: QSSL" SKY_EN IO - SKY_EN 
       P307 41 GPIO - L - "Output mode (Initial Low)" - - "AGT4: AGTEE4; QSPI: QIO0" RX0TX1 IO - RX0TX1 
@@ -238,7 +238,7 @@ FSP Configuration
       P301 49 GPIO - L None "Input mode" - - "AGT0: AGTIO0; GPT4: GTIOC4B; IRQ: IRQ6; SCI2: RXD2; SCI9: CTS_RTS9; SPI0: SSLA2" TP119 IO - - 
       P302 48 GPIO - L None "Input mode" - - "GPT4: GTIOC4A; IRQ: IRQ5; SCI2: TXD2; SPI0: SSLA3" Open IO - - 
       P303 47 GPIO - L - "Input mode" - - "GPT7: GTIOC7B; SCI9: CTS9" Open IO - - 
-      P304 44 GPIO - - None "Input mode" - - "AGT2: AGTEE2; GPT7: GTIOC7A; IRQ: IRQ9" Open IO - - 
+      P304 44 GPIO - - - "Input mode" - - "AGT2: AGTEE2; GPT7: GTIOC7A; IRQ: IRQ9" Open None - - 
       P305 43 GPIO - L None "Input mode" - - "AGT2: AGTOB2; IRQ: IRQ8; QSPI: QSPCLK" Open IO - - 
       P306 42 GPIO - L - "Input mode" - - "AGT2: AGTOA2; QSPI: QSSL" SKY_EN IO - SKY_EN 
       P307 41 GPIO - L - "Input mode" - - "AGT4: AGTEE4; QSPI: QIO0" RX0TX1 IO - RX0TX1 
@@ -305,7 +305,7 @@ FSP Configuration
   Module "UART (r_sci_uart)"
     Parameter Checking: Default (BSP)
     FIFO Support: Enable
-    DTC Support: Enable
+    DTC Support: Disable
     Flow Control Support: Disable
     
   Module "CRC (r_crc)"

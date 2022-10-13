@@ -21,7 +21,7 @@
 
 /* INCLUDE FILES */
 #include "project.h"
-#include "EVL_event_log.h"
+#include "DBG_SerialDebug.h"
 
 /* #DEFINE DEFINITIONS */
 
@@ -49,7 +49,7 @@
   Returns: FuncStatus - True if Semaphore created successfully, False if error
 
   Notes: maxCount is only used in FreeRTOS.
-         If the maxcount is 0 then a binary semaphore is created,
+         If the max count is 0 then a binary semaphore is created,
 
 *******************************************************************************/
 bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
@@ -66,7 +66,6 @@ bool OS_SEM_Create ( OS_SEM_Handle SemHandle, uint32_t maxCount )
    }
    if( NULL == SemHandle )
    {
-      /* TODO: DG: Add Print */
       /* The semaphore could not be created because there was insufficient heap memory available for FreeRTOS to allocate the semaphore data structures.*/
       FuncStatus = false;
    }
@@ -94,7 +93,7 @@ void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 {
    if( pdFAIL == xSemaphoreGive(*SemHandle) )
    {
-      EVL_FirmwareError( "OS_SEM_Post" , file, line );
+      DBG_LW_printf("\nERROR:OS_SEM_POST call failed %s %d\n", file, line);
    }
 } /* end OS_SEM_Post () */
 
@@ -108,8 +107,8 @@ void OS_SEM_POST ( OS_SEM_Handle SemHandle, char *file, int line )
 
   Returns: If the Semaphore has been posted, then eSUCCESS otherwise eFAILURE
 
-  Notes: FreeRTOS has a limit to the the number of posts to a Semaphore whereas
-         MQX just used heap memory until it is exhaused.  Therefore, this version
+  Notes: FreeRTOS has a limit to the number of posts to a Semaphore whereas
+         MQX just used heap memory until it is exhausted.  Therefore, this version
          of the function is needed for FreeRTOS but not for MQX.
 
 *******************************************************************************/
@@ -118,6 +117,7 @@ returnStatus_t OS_SEM_POST_RetStatus ( OS_SEM_Handle SemHandle, char *file, int 
    returnStatus_t eRetVal = eSUCCESS;
    if( pdFAIL == xSemaphoreGive(*SemHandle) )
    {
+      DBG_LW_printf("\nERROR:OS_SEM_POST_RetStatus call failed %s %d\n", file, line);
       eRetVal = eFAILURE;
    }
    return ( eRetVal );
@@ -215,7 +215,7 @@ void OS_SEM_POST_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    if( pdFAIL == xSemaphoreGiveFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
       OS_SEM_PostFromIsrFailures++;
-      EVL_FirmwareError( "OS_SEM_PostFromIsr" , file, line );
+      DBG_LW_printf("\nERROR:OS_SEM_POST_fromISR call failed %s %d\n", file, line);
    }
 
    /* If xHigherPriorityTaskWoken was set to true we should yield.  The actual macro used here is port specific. */
@@ -247,6 +247,7 @@ returnStatus_t OS_SEM_POST_fromISR_retStatus ( OS_SEM_Handle SemHandle, char *fi
 #if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
       OS_SEM_PostFromIsrRetStatusFailures++;
 #endif
+      DBG_LW_printf("\nERROR:OS_SEM_POST_fromISR call failed %s %d\n", file, line);
       eRetVal = eFAILURE;
    }
 
@@ -273,9 +274,7 @@ void OS_SEM_PEND_fromISR ( OS_SEM_Handle SemHandle, char *file, int line )
    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
    if( pdFAIL == xSemaphoreTakeFromISR( *SemHandle, &xHigherPriorityTaskWoken ) )
    {
-      /* TODO: */
-      //      APP_ERR_PRINT("OS_SEM_PEND!");
-      //      EVL_FirmwareError( "OS_SEM_Pend" , file, line );
+      DBG_LW_printf("\nERROR:OS_SEM_PEND_fromISR call failed %s %d\n", file, line);
    }
 } /* end OS_SEM_PEND_fromISR () */
 
