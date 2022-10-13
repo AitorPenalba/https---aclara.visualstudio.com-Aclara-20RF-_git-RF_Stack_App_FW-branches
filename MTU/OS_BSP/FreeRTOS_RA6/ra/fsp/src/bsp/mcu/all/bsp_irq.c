@@ -45,6 +45,7 @@ void * gp_renesas_isr_context[BSP_ICU_VECTOR_MAX_ENTRIES];
 /***********************************************************************************************************************
  * Private global variables and functions
  **********************************************************************************************************************/
+/* Aclara modified: change definition from WEAK_REFERENCE to extern */
 /* When compiling a Product Specific RA6 project, there was an issue using WEAK references when importing the
    WEAK reference from a seperate library.  In this case, the FREE_RTOS library.  The compiler appears to not
    utilize the WEAK reference within the library, causing the the "g_interrupt_event_link_select" variable to be
@@ -63,6 +64,7 @@ const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENT
 #else
 extern const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_MAX_ENTRIES];
 #endif
+/* Aclara modified - End */
 /*******************************************************************************************************************//**
  * @addtogroup BSP_MCU
  *
