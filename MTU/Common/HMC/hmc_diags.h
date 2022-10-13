@@ -51,6 +51,7 @@ PACK_END
 /* FUNCTION PROTOTYPES */
 
 extern uint8_t HMC_DIAGS_DoDiags(uint8_t, void *);
+extern void    HMC_DIAGS_PurgeQueue ( void );
 
 #undef HMC_DIAGS_EXTERN
 
