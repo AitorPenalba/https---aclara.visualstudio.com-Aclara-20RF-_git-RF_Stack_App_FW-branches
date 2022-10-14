@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -138,8 +138,7 @@ fsp_err_t R_QSPI_DirectWrite(spi_flash_ctrl_t    * p_ctrl,
                              uint32_t const        bytes,
                              bool const            read_after_write);
 
-/* Aclara Modified: the Read API was modified witha new parameter to indictate
-   the read is a polling read. */
+/* Aclara Modified: the Read API was modified with a new parameter to indictate the read is a polling read. */
 fsp_err_t R_QSPI_DirectRead(spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead);
 
 fsp_err_t R_QSPI_SpiProtocolSet(spi_flash_ctrl_t * p_ctrl, spi_flash_protocol_t spi_protocol);

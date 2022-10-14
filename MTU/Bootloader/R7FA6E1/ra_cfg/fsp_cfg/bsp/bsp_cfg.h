@@ -1,6 +1,10 @@
 /* generated configuration header file - do not edit */
 #ifndef BSP_CFG_H_
 #define BSP_CFG_H_
+#ifdef __cplusplus
+            extern "C" {
+            #endif
+
 #include "bsp_clock_cfg.h"
             #include "bsp_mcu_family_cfg.h"
             #include "board_cfg.h"
@@ -30,7 +34,6 @@
             #define BSP_CFG_C_RUNTIME_INIT ((1))
             #define BSP_CFG_EARLY_INIT     ((0))
 
-            #define BSP_CFG_SOFT_RESET_SUPPORTED ((0)) // DEPRECATED, replace with BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
             #define BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET ((0))
 
             #ifndef BSP_CLOCK_CFG_MAIN_OSC_POPULATED
@@ -48,5 +51,9 @@
             #endif
             #ifndef BSP_CLOCK_CFG_SUBCLOCK_STABILIZATION_MS
             #define BSP_CLOCK_CFG_SUBCLOCK_STABILIZATION_MS 1000
+            #endif
+
+            #ifdef __cplusplus
+            }
             #endif
 #endif /* BSP_CFG_H_ */

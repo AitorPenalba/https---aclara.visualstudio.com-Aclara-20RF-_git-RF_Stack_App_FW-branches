@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -169,8 +169,7 @@ typedef BSP_CMSE_NONSECURE_CALL void (*volatile flash_hp_prv_ns_callback)(flash_
 #if BSP_FEATURE_FLASH_HP_SUPPORTS_DUAL_BANK
  #define FLASH_HP_PRV_DUALSEL_BANKMD_MASK             (0x7U)
  #define FLASH_HP_PRV_BANKSEL_BANKSWP_MASK            (0x7U)
- #define FLASH_HP_PRV_BANK1_START_ADDR                (0x00200000U)
- #define FLASH_HP_PRV_BANK1_MASK                      (~FLASH_HP_PRV_BANK1_START_ADDR)
+ #define FLASH_HP_PRV_BANK1_MASK                      (~BSP_FEATURE_FLASH_HP_CF_DUAL_BANK_START)
 #else
  #define FLASH_HP_PRV_BANK1_MASK                      (UINT32_MAX)
 #endif
@@ -660,7 +659,7 @@ fsp_err_t R_FLASH_HP_BlankCheck (flash_ctrl_t * const p_api_ctrl,
 
     /* Is this a request to Blank check Code Flash? */
     /* If the address is code flash check if the region is blank. If not blank return error. */
-    if (address < BSP_ROM_SIZE_BYTES)
+    if (address < BSP_FEATURE_FLASH_DATA_FLASH_START)
     {
         /* Blank checking for Code Flash does not require any FCU operations. The specified address area
          * can simply be checked for non 0xFF. */
@@ -1195,6 +1194,12 @@ static fsp_err_t flash_hp_write_data (flash_hp_instance_ctrl_t * const p_ctrl, u
 {
     volatile uint32_t wait_count;
 
+    if (0 == timeout)
+    {
+        /* Disable flash interrupts until command final is written. */
+        R_BSP_IrqDisable(p_ctrl->p_cfg->irq);
+    }
+
     /* Set block start address */
     R_FACI_HP->FSADDR = p_ctrl->dest_end_address;
 
@@ -1245,6 +1250,11 @@ static fsp_err_t flash_hp_write_data (flash_hp_instance_ctrl_t * const p_ctrl, u
 
             timeout--;
         }
+    }
+    else
+    {
+        /* Enable flash interrupts following write sequence. */
+        R_BSP_IrqEnableNoClear(p_ctrl->p_cfg->irq);
     }
 
     return FSP_SUCCESS;
@@ -1481,7 +1491,7 @@ static fsp_err_t r_flash_hp_write_bc_parameter_checking (flash_hp_instance_ctrl_
   #if BSP_FEATURE_FLASH_HP_SUPPORTS_DUAL_BANK
         if (0 == (FLASH_HP_PRV_DUALSEL_BANKMD_MASK & *flash_hp_dualsel))
         {
-            flash_address = flash_address % FLASH_HP_PRV_BANK1_START_ADDR;
+            flash_address = flash_address % BSP_FEATURE_FLASH_HP_CF_DUAL_BANK_START;
             rom_end       = BSP_ROM_SIZE_BYTES / 2;
         }
   #endif
@@ -1923,7 +1933,7 @@ static fsp_err_t flash_hp_df_erase (flash_hp_instance_ctrl_t * p_ctrl, uint32_t 
  * @retval     FSP_ERR_PE_FAILURE  Failed to exited P/E mode
  * @retval     FSP_ERR_CMD_LOCKED  Flash entered command locked state.
  **********************************************************************************************************************/
-static fsp_err_t flash_hp_pe_mode_exit ()
+static fsp_err_t flash_hp_pe_mode_exit (void)
 {
     /* See "Transition to Read Mode": Section 47.9.3.5 of the RA6M4 manual R01UH0890EJ0100. */
     /* FRDY and CMDLK are checked after the previous commands complete and do not need to be checked again. */
@@ -2040,7 +2050,7 @@ static fsp_err_t flash_hp_reset (flash_hp_instance_ctrl_t * p_ctrl)
  * @retval     FSP_ERR_TIMEOUT     Timeout executing flash_stop.
  * @retval     FSP_ERR_CMD_LOCKED  Peripheral in command locked state.
  **********************************************************************************************************************/
-static fsp_err_t flash_hp_stop ()
+static fsp_err_t flash_hp_stop (void)
 {
     /* See "Forced Stop Command": Section 47.9.3.13 of the RA6M4 manual R01UH0890EJ0100. If the CMDLK bit
      * is still set after issuing the force stop command return an error. */
@@ -2072,7 +2082,7 @@ static fsp_err_t flash_hp_stop ()
  * @retval     FSP_ERR_TIMEOUT     Timeout executing flash_stop.Failed to exited P/E mode
  * @retval     FSP_ERR_CMD_LOCKED  Peripheral in command locked state
  **********************************************************************************************************************/
-static fsp_err_t flash_hp_status_clear ()
+static fsp_err_t flash_hp_status_clear (void)
 {
     /* See "Status Clear Command": Section 47.9.3.12 of the RA6M4 manual R01UH0890EJ0100. */
     /* Timeout counter. */
