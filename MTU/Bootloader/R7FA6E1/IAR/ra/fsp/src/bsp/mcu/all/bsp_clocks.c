@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -72,6 +72,10 @@
 /* Locations of bitfields used to configure CLKOUT. */
 #define BSP_PRV_CKOCR_CKODIV_BIT                (4U)
 #define BSP_PRV_CKOCR_CKOEN_BIT                 (7U)
+
+/* Stop interval of at least 5 SOSC clock cycles between stop and restart of SOSC.
+ * Calculated based on 8Mhz of MOCO clock. */
+#define BSP_PRV_SUBCLOCK_STOP_INTERVAL_US       (1220U)
 
 #ifdef BSP_CFG_UCK_DIV
 
@@ -365,12 +369,26 @@
 static uint8_t bsp_clock_set_prechange(uint32_t requested_freq_hz);
 static void    bsp_clock_set_postchange(uint32_t updated_freq_hz, uint8_t new_rom_wait_state);
 
+#if BSP_CLOCK_CFG_SUBCLOCK_POPULATED
+ #if defined(__ICCARM__)
+
+void R_BSP_SubClockStabilizeWait(uint32_t delay_ms);
+
+  #pragma weak R_BSP_SubClockStabilizeWait
+
+ #elif defined(__GNUC__) || defined(__ARMCC_VERSION)
+
+void R_BSP_SubClockStabilizeWait(uint32_t delay_ms) __attribute__((weak));
+
+ #endif
+#endif
+
 #if !BSP_CFG_USE_LOW_VOLTAGE_MODE
 static void bsp_prv_operating_mode_opccr_set(uint8_t operating_mode);
 
 #endif
 
-#if !BSP_CFG_SOFT_RESET_SUPPORTED
+#if !BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
 static void bsp_prv_clock_set_hard_reset(void);
 
 #endif
@@ -746,7 +764,7 @@ void bsp_prv_clock_set (uint32_t clock, uint32_t sckdivcr)
 #endif
 }
 
-#if !BSP_CFG_SOFT_RESET_SUPPORTED
+#if !BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
 
 static void bsp_prv_clock_set_hard_reset (void)
 {
@@ -924,7 +942,7 @@ void bsp_clock_init (void)
     bsp_clock_freq_var_init();
 
 #if BSP_CLOCK_CFG_MAIN_OSC_POPULATED
- #if BSP_CFG_SOFT_RESET_SUPPORTED
+ #if BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
 
     /* Update the main oscillator drive, source, and wait states if the main oscillator is stopped.  If the main
      * oscillator is running, the drive, source, and wait states are assumed to be already set appropriately. */
@@ -953,20 +971,27 @@ void bsp_clock_init (void)
 #if BSP_FEATURE_CGC_HAS_SOSC
  #if BSP_CLOCK_CFG_SUBCLOCK_POPULATED
 
-    /* If the board has a subclock, set the subclock drive and start the subclock if the subclock is stopped.  If the
-     * subclock is running, the subclock drive is assumed to be set appropriately. */
-    if (R_SYSTEM->SOSCCR)
+    /* If Sub-Clock Oscillator is started at reset, stop it before configuring the subclock drive. */
+    if (0U == R_SYSTEM->SOSCCR)
     {
-        /* Configure the subclock drive if the subclock is not already running. */
-        R_SYSTEM->SOMCR  = ((BSP_CLOCK_CFG_SUBCLOCK_DRIVE << BSP_FEATURE_CGC_SODRV_SHIFT) & BSP_FEATURE_CGC_SODRV_MASK);
-        R_SYSTEM->SOSCCR = 0U;
-  #if (BSP_CLOCKS_SOURCE_CLOCK_SUBCLOCK == BSP_CFG_CLOCK_SOURCE) || (BSP_PRV_HOCO_USE_FLL)
+        /* Stop the Sub-Clock Oscillator to update the SOMCR register. */
+        R_SYSTEM->SOSCCR = 1U;
 
-        /* If the subclock is the system clock source OR if FLL is used, wait for stabilization. */
-        R_BSP_SoftwareDelay(BSP_CLOCK_CFG_SUBCLOCK_STABILIZATION_MS, BSP_DELAY_UNITS_MILLISECONDS);
-  #endif
+        /* Allow a stop interval of at least 5 SOSC clock cycles before configuring the drive capacity
+         * and restarting Sub-Clock Oscillator. */
+        R_BSP_SoftwareDelay(BSP_PRV_SUBCLOCK_STOP_INTERVAL_US, BSP_DELAY_UNITS_MICROSECONDS);
     }
 
+    /* Configure the subclock drive as subclock is not running. */
+    R_SYSTEM->SOMCR = ((BSP_CLOCK_CFG_SUBCLOCK_DRIVE << BSP_FEATURE_CGC_SODRV_SHIFT) & BSP_FEATURE_CGC_SODRV_MASK);
+
+    /* Restart the Sub-Clock Oscillator. */
+    R_SYSTEM->SOSCCR = 0U;
+  #if (BSP_CLOCKS_SOURCE_CLOCK_SUBCLOCK == BSP_CFG_CLOCK_SOURCE) || (BSP_PRV_HOCO_USE_FLL)
+
+    /* If the subclock is the system clock source OR if FLL is used, wait for stabilization. */
+    R_BSP_SubClockStabilizeWait(BSP_CLOCK_CFG_SUBCLOCK_STABILIZATION_MS);
+  #endif
  #else
     R_SYSTEM->SOSCCR = 1U;
  #endif
@@ -997,7 +1022,7 @@ void bsp_clock_init (void)
 #endif
 
 #if !BSP_CFG_USE_LOW_VOLTAGE_MODE
- #if BSP_CFG_SOFT_RESET_SUPPORTED
+ #if BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
 
     /* Switch to high-speed to prevent any issues with the subsequent clock configurations. */
     bsp_prv_operating_mode_set(BSP_PRV_OPERATING_MODE_HIGH_SPEED);
@@ -1044,7 +1069,7 @@ void bsp_clock_init (void)
  #endif
 #endif
 #if BSP_PRV_MOCO_USED
- #if BSP_CFG_SOFT_RESET_SUPPORTED
+ #if BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
 
     /* If the MOCO is not running, start it and wait for it to stabilize using a software delay. */
     if (0U != R_SYSTEM->MOCOCR)
@@ -1057,7 +1082,7 @@ void bsp_clock_init (void)
  #endif
 #endif
 #if BSP_PRV_LOCO_USED
- #if BSP_CFG_SOFT_RESET_SUPPORTED
+ #if BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
 
     /* If the LOCO is not running, start it and wait for it to stabilize using a software delay. */
     if (0U != R_SYSTEM->LOCOCR)
@@ -1127,7 +1152,13 @@ void bsp_clock_init (void)
 #endif
 
     /* Set source clock and dividers. */
-#if BSP_CFG_SOFT_RESET_SUPPORTED
+#if BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
+ #if BSP_TZ_SECURE_BUILD
+
+    /* In case of soft reset, make sure callback pointer is NULL initially. */
+    g_bsp_clock_update_callback = NULL;
+ #endif
+
     bsp_prv_clock_set(BSP_CFG_CLOCK_SOURCE, BSP_PRV_STARTUP_SCKDIVCR);
 #else
     bsp_prv_clock_set_hard_reset();
@@ -1137,7 +1168,7 @@ void bsp_clock_init (void)
 #if !BSP_CFG_USE_LOW_VOLTAGE_MODE
  #if BSP_PRV_STARTUP_OPERATING_MODE != BSP_PRV_OPERATING_MODE_HIGH_SPEED
   #if BSP_PRV_PLL_SUPPORTED
-   #if BSP_CFG_SOFT_RESET_SUPPORTED
+   #if BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
     if (BSP_PRV_OPERATING_MODE_LOW_SPEED == BSP_PRV_STARTUP_OPERATING_MODE)
     {
         /* If the MCU has a PLL, ensure PLL is stopped and stable before entering low speed mode. */
@@ -1174,7 +1205,7 @@ void bsp_clock_init (void)
     R_SYSTEM->BCKCR   = BSP_CFG_BCLK_OUTPUT - 1U;
     R_SYSTEM->EBCKOCR = 1U;
  #else
-  #if BSP_CFG_SOFT_RESET_SUPPORTED
+  #if BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
     R_SYSTEM->EBCKOCR = 0U;
   #endif
  #endif
@@ -1187,7 +1218,7 @@ void bsp_clock_init (void)
 
     /* Configure CLKOUT. */
 #if BSP_CFG_CLKOUT_SOURCE == BSP_CLOCKS_CLOCK_DISABLED
- #if BSP_CFG_SOFT_RESET_SUPPORTED
+ #if BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET
     R_SYSTEM->CKOCR = 0U;
  #endif
 #else
@@ -1355,6 +1386,25 @@ void bsp_clock_init (void)
     R_FACI_LP->PFBER = 1;
 #endif
 }
+
+#if BSP_CLOCK_CFG_SUBCLOCK_POPULATED
+
+/*******************************************************************************************************************//**
+ * This function is called during SOSC stabilization when Sub-Clock oscillator is populated.
+ * This function is declared as a weak symbol higher up in this file because it is meant to be overridden by a user
+ * implemented version. One of the main uses for this function is to update the IWDT/WDT Refresh Register if an
+ * application starts IWDT/WDT automatically after reset. To use this function just copy this function into your own
+ * code and modify it to meet your needs.
+ *
+ * @param[in]  delay_ms    Stabilization Time for the clock.
+ **********************************************************************************************************************/
+void R_BSP_SubClockStabilizeWait (uint32_t delay_ms)
+{
+    /* Wait for clock to stabilize. */
+    R_BSP_SoftwareDelay(delay_ms, BSP_DELAY_UNITS_MILLISECONDS);
+}
+
+#endif
 
 /*******************************************************************************************************************//**
  * Increases the ROM and RAM wait state settings to the minimum required based on the requested clock change.
