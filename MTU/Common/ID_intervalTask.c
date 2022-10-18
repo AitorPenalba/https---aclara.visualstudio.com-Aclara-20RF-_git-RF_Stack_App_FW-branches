@@ -26,9 +26,7 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #include <math.h>
-#include <stdlib.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #endif
@@ -172,7 +170,7 @@ typedef struct
 #define ID_MAX_BYTES_PER_ALL_CHANNELS     ((uint16_t)256)
 
 #if( RTOS_SELECTION == FREE_RTOS )
-#define INTERVAL_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#define INTERVAL_NUM_MSGQ_ITEMS 1
 #else
 #define INTERVAL_NUM_MSGQ_ITEMS 0
 #endif

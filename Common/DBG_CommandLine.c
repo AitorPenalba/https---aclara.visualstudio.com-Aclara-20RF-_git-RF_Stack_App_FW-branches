@@ -6644,8 +6644,8 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
       GetConf.eStatus = ePHY_GET_SUCCESS;
    }
    if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-      DBG_logPrintf( 'R', "Functnl Rev = %8sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(), 3) );
-      DBG_logPrintf( 'R', "RevLtr      =   %c", ADC_GetHWRevLetter() );
+      DBG_logPrintf( 'R', "Functnl Rev = %5sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(), 3) );
+      DBG_logPrintf( 'R', "RevLtr      = %c", ADC_GetHWRevLetter() );
       if ( argc != 0 )
       {
          temperatureC = (int32_t)( 10 * GetConf.val.Temperature );

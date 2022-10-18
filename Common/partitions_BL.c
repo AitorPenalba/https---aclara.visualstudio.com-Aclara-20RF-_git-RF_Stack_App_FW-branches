@@ -53,7 +53,7 @@
 #include "timer_util.h"
 #ifdef PARTITION_TABLE_LOG_ENABLE
 #include "logger.h"
-#include "os_aclara.h"
+#include "OS_aclara.h"
 #endif
 #endif /* NOT BOOTLOADER  */
 

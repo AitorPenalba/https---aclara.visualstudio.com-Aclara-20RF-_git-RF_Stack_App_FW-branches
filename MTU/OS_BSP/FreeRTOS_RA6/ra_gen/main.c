@@ -108,6 +108,8 @@
 #if ( DEBUG_LAST_GASP_TASK == 0 )
                     if ( PWRLG_LastGasp() )
                     {
+                       /* Clear DPSRSTF flag */
+                       R_SYSTEM->RSTSR0_b.DPSRSTF = 0;
                        /* Init LastGasp tasks. */
                        OS_TASK_Create_PWRLG();
                     }
