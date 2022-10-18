@@ -4775,10 +4775,17 @@ static void MFGP_dsBuReadingTypes( uint32_t argc, char *argv[] )
       if ( 2 == argc )
       {
          if ( HD_TOTAL_CHANNELS == sscanf( argv[1],
+#if ( HD_TOTAL_CHANNELS == 32 )
+                           "%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,"
+                           "%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu",
+#elif ( HD_TOTAL_CHANNELS == 64 )
                            "%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,"
                            "%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,"
                            "%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,"
                            "%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu",
+#else
+#error "HD_TOTAL_CHANNELS must be defined as 32 or 64"
+#endif
                            &uDsBuReadingType[0],
                            &uDsBuReadingType[1],
                            &uDsBuReadingType[2],
@@ -4810,6 +4817,9 @@ static void MFGP_dsBuReadingTypes( uint32_t argc, char *argv[] )
                            &uDsBuReadingType[28],
                            &uDsBuReadingType[29],
                            &uDsBuReadingType[30],
+#if ( HD_TOTAL_CHANNELS == 32 )
+                           &uDsBuReadingType[31] ) )
+#else
                            &uDsBuReadingType[31],
                            &uDsBuReadingType[32],
                            &uDsBuReadingType[33],
@@ -4843,9 +4853,11 @@ static void MFGP_dsBuReadingTypes( uint32_t argc, char *argv[] )
                            &uDsBuReadingType[61],
                            &uDsBuReadingType[62],
                            &uDsBuReadingType[63] ) )
+#endif // HD_TOTAL_CHANNELS
          {
             HD_setDsBuReadingTypes( uDsBuReadingType );
          }
+
       }
    }
    else
@@ -4855,8 +4867,12 @@ static void MFGP_dsBuReadingTypes( uint32_t argc, char *argv[] )
 
    // Now read and print out the current values.
    HD_getDsBuReadingTypes( uDsBuReadingType );
+#if ( HD_TOTAL_CHANNELS == 32 )
+   MFG_printf( "%s %u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+#else
    MFG_printf( "%s %u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,"
-              "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
+                  "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
+#endif
                argv[0],
                uDsBuReadingType[0],
                uDsBuReadingType[1],
@@ -4889,6 +4905,9 @@ static void MFGP_dsBuReadingTypes( uint32_t argc, char *argv[] )
                uDsBuReadingType[28],
                uDsBuReadingType[29],
                uDsBuReadingType[30],
+#if ( HD_TOTAL_CHANNELS == 32 )
+               uDsBuReadingType[31] );
+#else
                uDsBuReadingType[31],
                uDsBuReadingType[32],
                uDsBuReadingType[33],
@@ -4922,6 +4941,7 @@ static void MFGP_dsBuReadingTypes( uint32_t argc, char *argv[] )
                uDsBuReadingType[61],
                uDsBuReadingType[62],
                uDsBuReadingType[63] );
+#endif // HD_TOTAL_CHANNELS
 }
 
 /***********************************************************************************************************************

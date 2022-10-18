@@ -315,6 +315,7 @@
 #define TM_INTERNAL_FLASH_TEST            0
 #define TM_BSP_SW_DELAY                   0 /* Tests the Renesas R_BSP_SoftwareDelay function */
 #define TM_ENHANCE_NOISEBAND_FOR_RA6E1    1 /* Enhancements to Noiseband: 1MHz clock test, list frequencies, control GPIO pins, extra HMC traffic */
+#define TM_NOISEBAND_RSSI_TIMING          1 /* Toggle port pin before and after call to si446x_get_modem_status to verify RSSI measurement timing */
 #define TM_NOISEBAND_LOWEST_CAP_VOLTAGE   1 /* Capture lowest super-cap voltage during a noiseband run (requires TM_ENHANCE_NOISEBAND_FOR_RA6E1 = 1) */
 #define TM_DELAY_FOR_TACKED_ON_LED        0 /* Adds some 2 second delays so that tacked-on LED is more human-visible */
 #define TM_MEASURE_SLEEP_TIMES            0 /* Adds a debug command to measure the actual sleep times based on the CYCCNT */
