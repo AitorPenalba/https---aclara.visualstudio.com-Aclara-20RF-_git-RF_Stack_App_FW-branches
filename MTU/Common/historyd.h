@@ -41,15 +41,12 @@
 /* CONSTANTS */
 
 /* MACRO DEFINITIONS */
-#if ( ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) || \
-      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B ) || \
-      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84020_1_REV_A ) || \
-      ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84001_REV_A   )       )
+#if ( ( HMC_I210_PLUS_C == 1 ) || ( HMC_I210_PLUS == 1 ) )
 #define HD_TOTAL_CHANNELS      32  //Number of channels for daily shift for I-210+ and +c meters
-#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84030_1_REV_A ) // TODO: KV2C-RA6E1 Bob: Makes sure this works for kV2c
+#elif ( HMC_KV == 1 )
 #define HD_TOTAL_CHANNELS      64  //Number of channels for daily shift for kV2c meters
 #else
-#undef HD_TOTAL_CHANNELS // For the non-metering products, there should not be any daily shift data
+#undef HD_TOTAL_CHANNELS           // For the non-metering products, there should not be any daily shift data
 #endif
 
 /* TYPE DEFINITIONS */
