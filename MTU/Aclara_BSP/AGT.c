@@ -68,6 +68,10 @@ fsp_err_t AGT_LPM_Timer_Init( void )
    if( !agt_lpm_open_ )
    {
       err = R_AGT_Open(&AGT1_LPM_Wakeup_ctrl, &AGT1_LPM_Wakeup_cfg);
+      if( FSP_SUCCESS == err )
+      {
+         agt_lpm_open_ = (bool)true;
+      }
    }
 
    return err;

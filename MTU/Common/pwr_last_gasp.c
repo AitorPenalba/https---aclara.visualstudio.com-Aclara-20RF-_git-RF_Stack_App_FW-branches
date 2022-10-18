@@ -866,8 +866,9 @@ void PWRLG_Startup( void )
    LG_PRNT_INFO( "RSTSR0 0x%02X\n",  R_SYSTEM->RSTSR0 );
    LG_PRNT_INFO( "RSTSR1 0x%02X\n",  R_SYSTEM->RSTSR1 );
    LG_PRNT_INFO( "RSTSR2 0x%02X\n",  R_SYSTEM->RSTSR2 );
-   LG_PRNT_INFO( "RTC_INT 0x%02X\n", R_SYSTEM->DPSIFR2_b.DRTCAIF );
    LG_PRNT_INFO( "PF_INT 0x%02X\n",  R_SYSTEM->DPSIFR1_b.DIRQ11F );
+   LG_PRNT_INFO( "RTC_INT 0x%02X\n", R_SYSTEM->DPSIFR2_b.DRTCAIF );
+   LG_PRNT_INFO( "AGT_INT 0x%02X\n", R_SYSTEM->DPSIFR3_b.DAGT1IF );
 #endif
    VBATREG_EnableRegisterAccess();
 
@@ -925,7 +926,7 @@ void PWRLG_Startup( void )
       /* This block handles timer event.   */
       if ( ( uLLWU_F3 & LLWU_F3_MWUF0_MASK ) != 0  )
 #elif ( MCU_SELECTED == RA6E1 )
-      if ( R_SYSTEM->DPSIFR2_b.DRTCAIF != 0 )  /* RTC Alarm Interrupt */
+      if ( ( 0 != R_SYSTEM->DPSIFR2_b.DRTCAIF ) || ( 0 != R_SYSTEM->DPSIFR3_b.DAGT1IF ) )   /* RTC Alarm or AGT Interrupt */
 #endif
       {
          if ( !BRN_OUT() )                         /* If power is on... */
@@ -2891,6 +2892,10 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
          PWRLG_SECOND_SLEEP_COUNTER_SET( secs );  // Next Sleep counter in Secs
 #endif
       }
+   }
+   else if( ( LPTMR_MILLISECONDS == eUnits ) && ( uCounter < 1000 ) && ( uMode == 1 ) )
+   {
+      uMode = APP_LPM_DEEP_SW_STANDBY_STATE_AGT; // Configure the right mode based on the parameters.
    }
 
    LG_PRNT_INFO( "\nEnter LPM, count: %d, units: %d, mode: %d\n", uCounter, ( uint8_t )eUnits, uMode );

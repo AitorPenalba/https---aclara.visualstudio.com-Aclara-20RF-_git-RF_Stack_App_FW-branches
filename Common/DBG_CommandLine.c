@@ -6644,14 +6644,14 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
       GetConf.eStatus = ePHY_GET_SUCCESS;
    }
    if (GetConf.eStatus == ePHY_GET_SUCCESS) {
-      DBG_logPrintf( 'R', "Functnl Rev = %5sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(), 3) );
+      DBG_logPrintf( 'R', "Functnl Rev =%6sV", DBG_printFloat(floatStr, ADC_GetHWRevVoltage(), 3) );
       DBG_logPrintf( 'R', "RevLtr      = %c", ADC_GetHWRevLetter() );
       if ( argc != 0 )
       {
          temperatureC = (int32_t)( 10 * GetConf.val.Temperature );
          temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
          //The space between the "%" and "4" is actually a flag that specifies the plus sign (+) is "invisible" so positicve and negative numbers are justified the same
-         DBG_logPrintf( 'R', "Radio Temp  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+         DBG_logPrintf( 'R', "Radio Temp  = % 3d.%1dF, % 3d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
       }
 
 #if ( MCU_SELECTED == NXP_K24 )
@@ -6665,7 +6665,7 @@ uint32_t DBG_CommandLine_GetHWInfo ( uint32_t argc, char *argv[] )
    {
       temperatureC = (int32_t)( 10 * Temperature );
       temperatureF = (int32_t)( (float)temperatureC * 9 / 5 + 320.5 ); //Add 320.5 since value is x10 and round up to 0.1
-      DBG_logPrintf( 'R', "Radio Temp  = % 4d.%1dF, % 4d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
+      DBG_logPrintf( 'R', "Radio Temp  = % 3d.%1dF, % 3d.%1dC", temperatureF/10, temperatureF%10, temperatureC/10, temperatureC%10 );
    }
    else
    {
