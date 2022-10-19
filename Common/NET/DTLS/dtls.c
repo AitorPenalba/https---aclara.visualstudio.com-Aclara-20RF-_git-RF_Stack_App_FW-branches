@@ -1445,7 +1445,6 @@ static void DtlsRfConnectNonBlocking( bool connectOnlyQuickSession )
       DtlsSessionStateChangedCallback( DTLS_SESSION_CONNECTED_e );
    }
 #if ( EP == 1 )
-
    else if ( PWRLG_LastGasp() == 1 )
    {
       OS_TASK_Sleep( OS_WAIT_FOREVER );

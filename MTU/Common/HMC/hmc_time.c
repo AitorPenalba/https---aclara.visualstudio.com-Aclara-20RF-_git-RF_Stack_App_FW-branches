@@ -163,7 +163,7 @@ static uint8_t                bigEndian_;                      /* Indicator of m
 #endif
 
 #if( RTOS_SELECTION == FREE_RTOS )
-#define HMC_TIME_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
+#define HMC_TIME_QUEUE_SIZE 1
 #else
 #define HMC_TIME_QUEUE_SIZE 0
 #endif

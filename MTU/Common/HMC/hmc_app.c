@@ -83,7 +83,7 @@
 
 #define APPLET_IDLE_COUNT  (uint8_t)20
 #if( RTOS_SELECTION == FREE_RTOS )
-#define HMC_APP_QUEUE_SIZE 10 //NRJ: TODO Figure out sizing
+#define HMC_APP_QUEUE_SIZE 4 //NRJ: TODO: RA6E1 Figure out sizing
 #else
 #define HMC_APP_QUEUE_SIZE 0
 #endif

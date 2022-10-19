@@ -167,7 +167,6 @@ static fsp_err_t meter_trouble_isr_init( void )
    if(FSP_SUCCESS == err)
    {
       /* Enable ICU module */
-//      DBG_printf("\nOpen Meter Trouble Busy IRQ");
       err = R_ICU_ExternalIrqEnable( &hmc_trouble_busy_ctrl );
    }
    return err;
@@ -1090,6 +1089,7 @@ void ALRM_RealTimeTask ( taskParameter )
       // A condition was discovered above requiring the processor to be reset
       if ( resetProc )
       {
+         ALRM_PRNT_WARN('A', "Meter Program Changed! Rebooting!");
          (void)DFWA_WaitForSysIdle(ALRM_RESET_GRACE_PERIOD);   // Do not need unlock mutex since reset inevitable
          //Keep all other tasks from running
          /* Increase the priority of the power and idle tasks. */

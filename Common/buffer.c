@@ -807,7 +807,7 @@ void BM_showAlloc( bool safePrint )
                {
                   alarmID = (( tTimeSysMsg * )( void * )&pBuf->data[0])->alarmId; //Alarm message
                }
-               uint32_t size = snprintf( str, (int32_t)sizeof( str ), "  %2u %7u     %4u 0x%08X 0x%08X %20s %5u %4u\r\n",
+               uint32_t size = snprintf( str, (int32_t)sizeof( str ), "  %2u %7u     %4u 0x%08X 0x%08X %20s %5u %6u\r\n",
                                  pBuf->x.bufPool, pBuf->x.dataLen, BM_bufferPoolParams[pBuf->x.bufPool].size,
                                  pBuf, pBuf->data, pBuf->pfile, pBuf->line, alarmID );
                if ( safePrint )

@@ -4067,7 +4067,6 @@ bool PHY_Channel_Set(uint8_t index, uint16_t chan)
    ConfigAttr.Channels[index] = chan;
 #if ( EP == 1 )
       if(PWRLG_LastGasp() == false)
-
 #endif
    {  // Not in low power mode, so save this
       writeConfig();

@@ -126,7 +126,7 @@ static volatile bool dmdResetDone_;                //Indicates demand reset comp
 
 /* MACRO DEFINITIONS */
 #if( RTOS_SELECTION == FREE_RTOS )
-#define DEMAND_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#define DEMAND_NUM_MSGQ_ITEMS 1
 #else
 #define DEMAND_NUM_MSGQ_ITEMS 0
 #endif
