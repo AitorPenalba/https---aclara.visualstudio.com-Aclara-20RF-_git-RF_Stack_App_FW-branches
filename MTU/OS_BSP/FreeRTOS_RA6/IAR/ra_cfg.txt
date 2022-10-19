@@ -162,7 +162,7 @@ FSP Configuration
       P502 78 QSPI_QIO0 - L None "Peripheral mode" - - "AGT2: AGTOA2; ICU: IRQ12; QSPI: QIO0; USB FS: USB_OVRCURB" SPIQ_MOSI IO - QSPI_Flash 
       P503 79 QSPI_QIO1 - L - "Peripheral mode" - - "AGT2: AGTOB2; GPT_POEGC: GTETRGC; QSPI: QIO1; USB FS: USB_EXICEN" SPIQ_MISO IO - QSPI_Flash 
       P504 80 GPIO - L - "Output mode (Initial Low)" - - "AGT3: AGTOA3; GPT_POEGD: GTETRGD; QSPI: QIO2; USB FS: USB_ID" /WP_FLASH IO - /WP_FLASH 
-      P505 81 ICU_IRQ14 - - IRQ14 "IRQ mode" - - "AGT3: AGTOB3; ICU: IRQ14; QSPI: QIO3" T_I-210+C_METER IO - T_I-210+C_METER 
+      P505 81 ICU_IRQ14 - - IRQ14 "IRQ mode" - - "AGT3: AGTOB3; ICU: IRQ14; QSPI: QIO3" Miso_Busy IO - T_I-210+C_METER 
       P600 67 GPIO - - - "Input mode" - - "AGT3: AGTIO3; CAC: CACREF; CGC: CLKOUT; GPT6: GTIOC6B; SCI9: SCK9" GPIO0_SI4467 IO - GPIO0_SI4460 
       P601 66 SCI9_RXD9 - L - "Peripheral mode" - - "AGT3: AGTEE3; GPT6: GTIOC6A; SCI9: RXD9" UART9_RX_OPT I - "Reserved for KV2C: UART4_TX" 
       P602 65 SCI9_TXD9 - L - "Peripheral mode" - - "AGT3: AGTO3; GPT7: GTIOC7B; SCI9: TXD9" UART9_TX_OPT O - "Reserved for KV2C: UART4_RX" 
@@ -263,7 +263,7 @@ FSP Configuration
       P502 78 GPIO - L None "Input mode" - - "AGT2: AGTOA2; ICU: IRQ12; QSPI: QIO0; USB FS: USB_OVRCURB" SPIQ_MOSI IO - QSPI_Flash 
       P503 79 GPIO - L - "Input mode" - - "AGT2: AGTOB2; GPT_POEGC: GTETRGC; QSPI: QIO1; USB FS: USB_EXICEN" SPIQ_MISO IO - QSPI_Flash 
       P504 80 GPIO - L - "Input mode" - - "AGT3: AGTOA3; GPT_POEGD: GTETRGD; QSPI: QIO2; USB FS: USB_ID" /WP_FLASH IO - /WP_FLASH 
-      P505 81 GPIO - - None "Input mode" - - "AGT3: AGTOB3; ICU: IRQ14; QSPI: QIO3" T_I-210+C_METER IO - T_I-210+C_METER 
+      P505 81 GPIO - - None "Input mode" - - "AGT3: AGTOB3; ICU: IRQ14; QSPI: QIO3" Miso_Busy IO - T_I-210+C_METER 
       P600 67 GPIO - - - "Input mode" - - "AGT3: AGTIO3; CAC: CACREF; CGC: CLKOUT; GPT6: GTIOC6B; SCI9: SCK9" GPIO0_SI4467 IO - GPIO0_SI4460 
       P601 66 GPIO - L - "Input mode" - - "AGT3: AGTEE3; GPT6: GTIOC6A; SCI9: RXD9" UART9_RX_OPT I - "Reserved for KV2C: UART4_TX" 
       P602 65 GPIO - L - "Input mode" - - "AGT3: AGTO3; GPT7: GTIOC7B; SCI9: TXD9" UART9_TX_OPT O - "Reserved for KV2C: UART4_RX" 
@@ -877,7 +877,7 @@ FSP Configuration
       
     Instance "hmc_trouble_busy External IRQ (r_icu)"
       Name: hmc_trouble_busy
-      Channel: 14
+      Channel: 4
       Trigger: Both Edges
       Digital Filtering: Disabled
       Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
@@ -900,7 +900,7 @@ FSP Configuration
       
     Instance "miso_busy External IRQ (r_icu)"
       Name: miso_busy
-      Channel: 4
+      Channel: 14
       Trigger: Rising
       Digital Filtering: Disabled
       Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64

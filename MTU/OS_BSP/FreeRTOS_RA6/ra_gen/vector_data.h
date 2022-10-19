@@ -100,10 +100,10 @@
         #define ICU_IRQ13_IRQn          ((IRQn_Type) 32) /* ICU IRQ13 (External pin interrupt 13) */
         #define VECTOR_NUMBER_AGT1_INT ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
         #define AGT1_INT_IRQn          ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
-        #define VECTOR_NUMBER_ICU_IRQ14 ((IRQn_Type) 34) /* ICU IRQ14 (External pin interrupt 14) */
-        #define ICU_IRQ14_IRQn          ((IRQn_Type) 34) /* ICU IRQ14 (External pin interrupt 14) */
-        #define VECTOR_NUMBER_ICU_IRQ4 ((IRQn_Type) 35) /* ICU IRQ4 (External pin interrupt 4) */
-        #define ICU_IRQ4_IRQn          ((IRQn_Type) 35) /* ICU IRQ4 (External pin interrupt 4) */
+        #define VECTOR_NUMBER_ICU_IRQ4 ((IRQn_Type) 34) /* ICU IRQ4 (External pin interrupt 4) */
+        #define ICU_IRQ4_IRQn          ((IRQn_Type) 34) /* ICU IRQ4 (External pin interrupt 4) */
+        #define VECTOR_NUMBER_ICU_IRQ14 ((IRQn_Type) 35) /* ICU IRQ14 (External pin interrupt 14) */
+        #define ICU_IRQ14_IRQn          ((IRQn_Type) 35) /* ICU IRQ14 (External pin interrupt 14) */
         #define VECTOR_NUMBER_GPT2_COUNTER_OVERFLOW ((IRQn_Type) 36) /* GPT2 COUNTER OVERFLOW (Overflow) */
         #define GPT2_COUNTER_OVERFLOW_IRQn          ((IRQn_Type) 36) /* GPT2 COUNTER OVERFLOW (Overflow) */
         #define VECTOR_NUMBER_GPT2_CAPTURE_COMPARE_B ((IRQn_Type) 37) /* GPT2 CAPTURE COMPARE B (Compare match B) */
