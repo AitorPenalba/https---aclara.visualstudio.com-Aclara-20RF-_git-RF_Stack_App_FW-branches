@@ -707,7 +707,7 @@
     </module>
     <module id="module.driver.external_irq_on_icu.1187114507">
       <property id="module.driver.external_irq.name" value="hmc_trouble_busy"/>
-      <property id="module.driver.external_irq.channel" value="14"/>
+      <property id="module.driver.external_irq.channel" value="4"/>
       <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_both_edge"/>
       <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.false"/>
       <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
@@ -730,7 +730,7 @@
     </module>
     <module id="module.driver.external_irq_on_icu.2093440699">
       <property id="module.driver.external_irq.name" value="miso_busy"/>
-      <property id="module.driver.external_irq.channel" value="4"/>
+      <property id="module.driver.external_irq.channel" value="14"/>
       <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_rising"/>
       <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.false"/>
       <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
@@ -1068,7 +1068,7 @@
     <comment propertyId="p502.comment" value="SPIQ_MOSI"/>
     <comment propertyId="p503.comment" value="SPIQ_MISO"/>
     <comment propertyId="p504.comment" value="/WP_FLASH"/>
-    <comment propertyId="p505.comment" value="T_I-210+C_METER"/>
+    <comment propertyId="p505.comment" value="Miso_Busy"/>
     <comment propertyId="p600.comment" value="GPIO0_SI4467"/>
     <comment propertyId="p601.comment" value="UART9_RX_OPT"/>
     <comment propertyId="p602.comment" value="UART9_TX_OPT"/>

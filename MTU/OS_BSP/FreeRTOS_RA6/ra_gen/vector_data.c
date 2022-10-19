@@ -41,8 +41,8 @@
             [31] = agt_int_isr, /* AGT0 INT (AGT interrupt) */
             [32] = r_icu_isr, /* ICU IRQ13 (External pin interrupt 13) */
             [33] = agt_int_isr, /* AGT1 INT (AGT interrupt) */
-            [34] = r_icu_isr, /* ICU IRQ14 (External pin interrupt 14) */
-            [35] = r_icu_isr, /* ICU IRQ4 (External pin interrupt 4) */
+            [34] = r_icu_isr, /* ICU IRQ4 (External pin interrupt 4) */
+            [35] = r_icu_isr, /* ICU IRQ14 (External pin interrupt 14) */
             [36] = gpt_counter_overflow_isr, /* GPT2 COUNTER OVERFLOW (Overflow) */
             [37] = gpt_capture_b_isr, /* GPT2 CAPTURE COMPARE B (Compare match B) */
 

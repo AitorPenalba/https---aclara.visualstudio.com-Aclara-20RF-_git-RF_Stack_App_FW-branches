@@ -11,14 +11,14 @@
 agt_instance_ctrl_t AGT5_RunTimeStats_1_ctrl;
 const agt_extended_cfg_t AGT5_RunTimeStats_1_extend =
 {
-    .count_source     = AGT_CLOCK_AGT_UNDERFLOW,
-    .agto             = AGT_PIN_CFG_DISABLED,
+    .count_source            = AGT_CLOCK_AGT_UNDERFLOW,
+    .agto                    = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtoa = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtob = AGT_PIN_CFG_DISABLED,
-    .measurement_mode = AGT_MEASURE_DISABLED,
-    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
-    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
-    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+    .measurement_mode        = AGT_MEASURE_DISABLED,
+    .agtio_filter            = AGT_AGTIO_FILTER_NONE,
+    .enable_pin              = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge            = AGT_TRIGGER_EDGE_RISING,
 };
 const timer_cfg_t AGT5_RunTimeStats_1_cfg =
 {
@@ -50,14 +50,14 @@ const timer_instance_t AGT5_RunTimeStats_1 =
 agt_instance_ctrl_t AGT4_RunTimeStats_0_ctrl;
 const agt_extended_cfg_t AGT4_RunTimeStats_0_extend =
 {
-    .count_source     = AGT_CLOCK_SUBCLOCK,
-    .agto             = AGT_PIN_CFG_DISABLED,
+    .count_source            = AGT_CLOCK_SUBCLOCK,
+    .agto                    = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtoa = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtob = AGT_PIN_CFG_DISABLED,
-    .measurement_mode = AGT_MEASURE_DISABLED,
-    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
-    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
-    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+    .measurement_mode        = AGT_MEASURE_DISABLED,
+    .agtio_filter            = AGT_AGTIO_FILTER_NONE,
+    .enable_pin              = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge            = AGT_TRIGGER_EDGE_RISING,
 };
 const timer_cfg_t AGT4_RunTimeStats_0_cfg =
 {
@@ -89,14 +89,14 @@ const timer_instance_t AGT4_RunTimeStats_0 =
 agt_instance_ctrl_t agt2_Freq_Sync_ctrl;
 const agt_extended_cfg_t agt2_Freq_Sync_extend =
 {
-    .count_source     = AGT_CLOCK_SUBCLOCK,
-    .agto             = AGT_PIN_CFG_DISABLED,
+    .count_source            = AGT_CLOCK_SUBCLOCK,
+    .agto                    = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtoa = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtob = AGT_PIN_CFG_DISABLED,
-    .measurement_mode = AGT_MEASURE_DISABLED,
-    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
-    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
-    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+    .measurement_mode        = AGT_MEASURE_DISABLED,
+    .agtio_filter            = AGT_AGTIO_FILTER_NONE,
+    .enable_pin              = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge            = AGT_TRIGGER_EDGE_RISING,
 };
 const timer_cfg_t agt2_Freq_Sync_cfg =
 {
@@ -296,7 +296,7 @@ sci_uart_instance_ctrl_t     g_uart_lpm_dbg_ctrl;
 
 #define DEBUG_BAUD_RATE 115200 /* Aclara added: allow static (boot-up) configuration of the debug serial port baud rate */
 
-baud_setting_t               g_uart_lpm_dbg_baud_setting =
+            baud_setting_t               g_uart_lpm_dbg_baud_setting =
             {
 /* Aclara Modified: configure UART based on BAUD RATE selection */
 #if ( DEBUG_BAUD_RATE == 115200 )
@@ -448,15 +448,15 @@ const lpm_instance_t g_lpm_SW_Standby =
 agt_instance_ctrl_t AGT1_LPM_Wakeup_ctrl;/* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
 const agt_extended_cfg_t AGT1_LPM_Wakeup_extend =
 {
-    .count_source     = AGT_CLOCK_SUBCLOCK,
-    .agto             = AGT_PIN_CFG_DISABLED,
+    .count_source            = AGT_CLOCK_SUBCLOCK,
+    .agto                    = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtoa = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtob = AGT_PIN_CFG_DISABLED,
-    .measurement_mode = AGT_MEASURE_DISABLED,
-    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
-    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
-    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
-};/* Note: If this configuration is changed to be non-const then we need to add additional checking in the AGT module */
+    .measurement_mode        = AGT_MEASURE_DISABLED,
+    .agtio_filter            = AGT_AGTIO_FILTER_NONE,
+    .enable_pin              = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge            = AGT_TRIGGER_EDGE_RISING,
+};
 const timer_cfg_t AGT1_LPM_Wakeup_cfg =
 {
     .mode                = TIMER_MODE_ONE_SHOT,
@@ -503,14 +503,14 @@ const crc_instance_t g_crc1 =
 agt_instance_ctrl_t AGT0_ExtFlashBusy_ctrl;
 const agt_extended_cfg_t AGT0_ExtFlashBusy_extend =
 {
-    .count_source     = AGT_CLOCK_SUBCLOCK,
-    .agto             = AGT_PIN_CFG_DISABLED,
+    .count_source            = AGT_CLOCK_SUBCLOCK,
+    .agto                    = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtoa = AGT_PIN_CFG_DISABLED,
     .agtoab_settings_b.agtob = AGT_PIN_CFG_DISABLED,
-    .measurement_mode = AGT_MEASURE_DISABLED,
-    .agtio_filter     = AGT_AGTIO_FILTER_NONE,
-    .enable_pin       = AGT_ENABLE_PIN_NOT_USED,
-    .trigger_edge     = AGT_TRIGGER_EDGE_RISING,
+    .measurement_mode        = AGT_MEASURE_DISABLED,
+    .agtio_filter            = AGT_AGTIO_FILTER_NONE,
+    .enable_pin              = AGT_ENABLE_PIN_NOT_USED,
+    .trigger_edge            = AGT_TRIGGER_EDGE_RISING,
 };
 const timer_cfg_t AGT0_ExtFlashBusy_cfg =
 {
@@ -623,10 +623,10 @@ transfer_info_t g_transfer1_info =
     .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_FIXED,
     .transfer_settings_word_b.size           = TRANSFER_SIZE_2_BYTE,
     .transfer_settings_word_b.mode           = TRANSFER_MODE_NORMAL,
-    .p_dest              = (void *) NULL,
-    .p_src               = (void const *) NULL,
-    .num_blocks          = 0,
-    .length              = 0,
+    .p_dest                                  = (void *) NULL,
+    .p_src                                   = (void const *) NULL,
+    .num_blocks                              = 0,
+    .length                                  = 0,
 };
 
 const dtc_extended_cfg_t g_transfer1_cfg_extend =
@@ -657,10 +657,10 @@ transfer_info_t g_transfer0_info =
     .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
     .transfer_settings_word_b.size           = TRANSFER_SIZE_2_BYTE,
     .transfer_settings_word_b.mode           = TRANSFER_MODE_NORMAL,
-    .p_dest              = (void *) NULL,
-    .p_src               = (void const *) NULL,
-    .num_blocks          = 0,
-    .length              = 0,
+    .p_dest                                  = (void *) NULL,
+    .p_src                                   = (void const *) NULL,
+    .num_blocks                              = 0,
+    .length                                  = 0,
 };
 
 const dtc_extended_cfg_t g_transfer0_cfg_extend =
