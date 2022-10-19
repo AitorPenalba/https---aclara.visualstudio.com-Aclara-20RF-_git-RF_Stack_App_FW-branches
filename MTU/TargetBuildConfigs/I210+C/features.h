@@ -69,20 +69,17 @@
 #define MAC_CMD_RESP_TIME_DIVERSITY       0  /* Not an EP feature */
 #define TX_THROTTLE_CONTROL               0  /* 0=No Tx Throttling, 1=Tx Throttling */
 #define BM_USE_KERNEL_AWARE_DEBUGGING     0  /* This helps to see the name of the Buffer pool while debugging */
-#define GET_TEMPERATURE_FROM_RADIO        1  /* When GET_TEMPERATURE_FROM_RADIO set as 1 the radio temperature calculated using the RA6E1.
-
+#define GET_TEMPERATURE_FROM_RADIO        1  /* When GET_TEMPERATURE_FROM_RADIO set as 1, radio temperature is considered as the CPU temperature.
                                                While using the RA6E1 there are two methods for calculate the radio temperature.
                                                1 - RADIO_Temperature_Update :   Only called from SoftDemodulator.c to update
                                                                                 RADIO_Temperature using the average calculation.
                                                2 - RADIO_Get_Chip_Temperature : Either get a radio temperature if Soft Demod is not active
                                                                                 or to return the current average temperature in static variable RADIO_Temperature
                                                                                 if Soft Demod is active.
-
-                                               When GET_TEMPERATURE_FROM_RADIO set as 0 the radio temperature calculated using the K24.
+                                               When GET_TEMPERATURE_FROM_RADIO set as 0 the radio temperature is obtained from the K24 MCU.
                                                While using the K24 one method for calculate the radio temperature.
                                                1 - RADIO_Temperature_Get : This function will only be used in the K24 implementation.
-                                                                           It will therefore call ADC_Get_uP_Temperature if the soft demodulator is active*/
-
+                                                                           It will therefore call ADC_Get_uP_Temperature if the soft demodulator is active */
 #define DAC_CODE_CONFIG                   0  /* Supports DAC0 for TX Power Control */
 #define LAST_GASP_RECONFIGURE_CLK         0  /* If enabled, the System Clock will be re-configured to use MOCO instead of Main Clock */
 #define LAST_GASP_USE_2_DEEP_SLEEP        1  /* If enabled, will use the different configurations of the Deep SW Standby Modes in Last Gasp to achieve the random sleep delay */
@@ -93,5 +90,4 @@
 #define GENERATE_RUN_TIME_STATS           0
 #endif
 #endif
-#define LG_UPDATE_RADIO_MODE              1 /* Change the Radio mode to Standby during CSMA back-off time in LastGasp. This is in development not verified yet */
 #define PWRLG_PRINT_ENABLE                1  /* Enable to use LG_PRNT_INFO() */

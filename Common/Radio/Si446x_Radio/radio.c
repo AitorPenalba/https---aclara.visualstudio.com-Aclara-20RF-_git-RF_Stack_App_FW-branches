@@ -19,13 +19,11 @@
  **********************************************************************************************************************/
 
 #include "project.h"
-#include <stdlib.h>
 #include <math.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
 #endif
-#include "CompileSwitch.h"
 #include "compiler_types.h"
 #include "buffer.h"
 #include "PHY_Protocol.h"
@@ -5954,17 +5952,10 @@ static void StandbyRx(void)
    uint8_t      radioNum;
 
    INFO_printf("StandbyRx");
-
    // For each radio
    // On the samwise board, the first radio (0) is configured with the RX Channel ( outbound channel )
    // On the frodo board, the first radio (0) is configured with the TX Channel
    // The remaining radios (1-8) are configured with the RX Channels
-#if ( EP == 1 )
-#if ( MCU_SELECTED == RA6E1 )  /* TODO: Remove this conditional. Only here to make the Hex compare happy */
-   if( PWRLG_LastGasp() == false )
-#endif
-#endif
-   {
    for(radioNum = (uint8_t)RADIO_FIRST_RX; radioNum < PHY_RCVR_COUNT; radioNum++)
    {
       // Is radio configured?
@@ -5983,15 +5974,6 @@ static void StandbyRx(void)
          }
       }
    }
-   }
-#if ( EP == 1 )
-#if ( MCU_SELECTED == RA6E1 ) /* TODO: Remove this conditional. Only here to make the Hex compare happy */
-   else
-   {
-      (void)si446x_change_state((uint8_t)RADIO_0, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_SLEEP);  // Force standby state
-   }
-#endif
-#endif
 }
 
 /*!

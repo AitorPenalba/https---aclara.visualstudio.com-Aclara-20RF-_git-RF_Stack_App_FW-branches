@@ -1089,6 +1089,7 @@ void ALRM_RealTimeTask ( taskParameter )
       // A condition was discovered above requiring the processor to be reset
       if ( resetProc )
       {
+         ALRM_PRNT_WARN('A', "Meter Program Changed! Rebooting!");
          (void)DFWA_WaitForSysIdle(ALRM_RESET_GRACE_PERIOD);   // Do not need unlock mutex since reset inevitable
          //Keep all other tasks from running
          /* Increase the priority of the power and idle tasks. */
