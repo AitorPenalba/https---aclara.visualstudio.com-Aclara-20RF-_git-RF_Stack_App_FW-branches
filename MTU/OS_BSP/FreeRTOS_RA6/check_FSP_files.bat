@@ -1,6 +1,6 @@
 :: Check for differences between the RASC created FSP folders and the locked-in bootloader folders
 @echo off
-echo Check for RA6E1 Bootloader FSP File Changes, Version 1.1, 8/30/22
+echo Check for RA6E1 FSP File Changes, Version 1.1, 8/30/22
 
 :: set Winmerge install location
 set WINMERGE_PATH="C:\Program Files\WinMerge\WinMergeU.exe"

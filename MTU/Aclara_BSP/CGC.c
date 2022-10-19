@@ -186,23 +186,23 @@ void CGC_Switch_SystemClock_to_MOCO( void )
    fsp_err_t         err;
    cgc_clocks_cfg_t  clocks_cfg;
 
-   clocks_cfg.system_clock          = CGC_CLOCK_MOCO;
-   clocks_cfg.divider_cfg.iclk_div  = CGC_SYS_CLOCK_DIV_2;
-   clocks_cfg.divider_cfg.pclka_div = CGC_SYS_CLOCK_DIV_4;
-   clocks_cfg.divider_cfg.pclkb_div = CGC_SYS_CLOCK_DIV_4;
-   clocks_cfg.divider_cfg.pclkc_div = CGC_SYS_CLOCK_DIV_4;
-   clocks_cfg.divider_cfg.pclkd_div = CGC_SYS_CLOCK_DIV_4;
-   clocks_cfg.divider_cfg.bclk_div  = CGC_SYS_CLOCK_DIV_4;
-   clocks_cfg.divider_cfg.fclk_div  = CGC_SYS_CLOCK_DIV_2;
-   clocks_cfg.mainosc_state         = CGC_CLOCK_CHANGE_STOP;
-   clocks_cfg.hoco_state            = CGC_CLOCK_CHANGE_STOP;
-   clocks_cfg.moco_state            = CGC_CLOCK_CHANGE_START;
-   clocks_cfg.loco_state            = CGC_CLOCK_CHANGE_STOP;
-   clocks_cfg.pll_state             = CGC_CLOCK_CHANGE_STOP;
-   clocks_cfg.pll_cfg.source_clock  = CGC_CLOCK_MOCO;      // unused
-   clocks_cfg.pll_cfg.multiplier    = CGC_PLL_MUL_10_0;    // unused
-   clocks_cfg.pll_cfg.divider       = CGC_PLL_DIV_2;       // unused
-   clocks_cfg.pll2_state            = CGC_CLOCK_CHANGE_STOP;
+   clocks_cfg.system_clock                      = CGC_CLOCK_MOCO;
+   clocks_cfg.divider_cfg.sckdivcr_b.iclk_div   = CGC_SYS_CLOCK_DIV_2;
+   clocks_cfg.divider_cfg.sckdivcr_b.pclka_div  = CGC_SYS_CLOCK_DIV_4;
+   clocks_cfg.divider_cfg.sckdivcr_b.pclkb_div  = CGC_SYS_CLOCK_DIV_4;
+   clocks_cfg.divider_cfg.sckdivcr_b.pclkc_div  = CGC_SYS_CLOCK_DIV_4;
+   clocks_cfg.divider_cfg.sckdivcr_b.pclkd_div  = CGC_SYS_CLOCK_DIV_4;
+   clocks_cfg.divider_cfg.sckdivcr_b.bclk_div   = CGC_SYS_CLOCK_DIV_4;
+   clocks_cfg.divider_cfg.sckdivcr_b.fclk_div   = CGC_SYS_CLOCK_DIV_2;
+   clocks_cfg.mainosc_state                     = CGC_CLOCK_CHANGE_STOP;
+   clocks_cfg.hoco_state                        = CGC_CLOCK_CHANGE_STOP;
+   clocks_cfg.moco_state                        = CGC_CLOCK_CHANGE_START;
+   clocks_cfg.loco_state                        = CGC_CLOCK_CHANGE_STOP;
+   clocks_cfg.pll_state                         = CGC_CLOCK_CHANGE_STOP;
+   clocks_cfg.pll_cfg.source_clock              = CGC_CLOCK_MOCO;      // unused
+   clocks_cfg.pll_cfg.multiplier                = CGC_PLL_MUL_10_0;    // unused
+   clocks_cfg.pll_cfg.divider                   = CGC_PLL_DIV_2;       // unused
+   clocks_cfg.pll2_state                        = CGC_CLOCK_CHANGE_STOP;
 
    R_BSP_SoftwareDelay( BSP_FEATURE_CGC_MOCO_STABILIZATION_MAX_US, BSP_DELAY_UNITS_MICROSECONDS );
    /* Change the Clock Source */
