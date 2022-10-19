@@ -4,16 +4,18 @@
 #include <stdint.h>
 #include "bsp_api.h"
 #include "common_data.h"
-#include "r_dac.h"
-#include "r_dac_api.h"
-#include "r_iwdt.h"
-#include "r_wdt_api.h"
-#include "r_lpm.h"
-#include "r_lpm_api.h"
 #include "r_agt.h"
 #include "r_timer_api.h"
-#include "r_icu.h"
-#include "r_external_irq_api.h"
+#include "r_gpt.h"
+#include "r_timer_api.h"
+#include "r_lpm.h"
+#include "r_lpm_api.h"
+#include "r_iwdt.h"
+            #include "r_wdt_api.h"
+#include "r_dac.h"
+#include "r_dac_api.h"
+#include "r_sci_uart.h"
+            #include "r_uart_api.h"
 #include "r_crc.h"
 #include "r_crc_api.h"
 #include "r_flash_hp.h"
@@ -23,18 +25,13 @@
 #include "r_dtc.h"
 #include "r_transfer_api.h"
 #include "r_spi.h"
-#include "r_gpt.h"
-#include "r_timer_api.h"
 #include "r_rtc.h"
 #include "r_rtc_api.h"
 #include "r_adc.h"
 #include "r_adc_api.h"
-#include "r_sci_uart.h"
-#include "r_uart_api.h"
 #include "r_iic_master.h"
 #include "r_i2c_master_api.h"
 FSP_HEADER
-
 /** AGT Timer Instance */
 extern const timer_instance_t AGT5_RunTimeStats_1;
 
@@ -45,7 +42,6 @@ extern const timer_cfg_t AGT5_RunTimeStats_1_cfg;
 #ifndef NULL
 void NULL(timer_callback_args_t * p_args);
 #endif
-
 /** AGT Timer Instance */
 extern const timer_instance_t AGT4_RunTimeStats_0;
 
@@ -56,35 +52,6 @@ extern const timer_cfg_t AGT4_RunTimeStats_0_cfg;
 #ifndef NULL
 void NULL(timer_callback_args_t * p_args);
 #endif
-
-/** Timer on GPT Instance. */
-extern const timer_instance_t GPT2_ZCD_Meter;
-
-/** Access the GPT instance using these structures when calling API functions directly (::p_api is not used). */
-extern gpt_instance_ctrl_t GPT2_ZCD_Meter_ctrl;
-extern const timer_cfg_t GPT2_ZCD_Meter_cfg;
-
-#ifndef ZCD_hwIsr
-void ZCD_hwIsr(timer_callback_args_t * p_args);
-#endif
-
-/** DAC on DAC Instance. */
-extern const dac_instance_t g_dac0_ULPC;
-
-/** Access the DAC instance using these structures when calling API functions directly (::p_api is not used). */
-extern dac_instance_ctrl_t g_dac0_ULPC_ctrl;
-extern const dac_cfg_t g_dac0_ULPC_cfg;
-/** WDT on IWDT Instance. */
-extern const wdt_instance_t g_wdt0;
-
-/** Access the IWDT instance using these structures when calling API functions directly (::p_api is not used). */
-extern iwdt_instance_ctrl_t g_wdt0_ctrl;
-extern const wdt_cfg_t g_wdt0_cfg;
-
-#ifndef NULL
-void NULL(wdt_callback_args_t * p_args);
-#endif
-
 /** AGT Timer Instance */
 extern const timer_instance_t agt2_Freq_Sync;
 
@@ -95,30 +62,39 @@ extern const timer_cfg_t agt2_Freq_Sync_cfg;
 #ifndef NULL
 void NULL(timer_callback_args_t * p_args);
 #endif
+/** Timer on GPT Instance. */
+extern const timer_instance_t GPT2_ZCD_Meter;
 
+/** Access the GPT instance using these structures when calling API functions directly (::p_api is not used). */
+extern gpt_instance_ctrl_t GPT2_ZCD_Meter_ctrl;
+extern const timer_cfg_t GPT2_ZCD_Meter_cfg;
 
-/** External IRQ on ICU Instance. */
-extern const external_irq_instance_t miso_busy;
-
-/** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
-extern icu_instance_ctrl_t miso_busy_ctrl;
-extern const external_irq_cfg_t miso_busy_cfg;
-
-#ifndef isr_busy
-void isr_busy(external_irq_callback_args_t * p_args);
+#ifndef ZCD_hwIsr
+void ZCD_hwIsr(timer_callback_args_t * p_args);
 #endif
+/** lpm Instance */
+extern const lpm_instance_t g_lpm_DeepSWStandby_AGT;
 
-/** External IRQ on ICU Instance. */
-extern const external_irq_instance_t hmc_trouble_busy;
+/** Access the LPM instance using these structures when calling API functions directly (::p_api is not used). */
+extern lpm_instance_ctrl_t g_lpm_DeepSWStandby_AGT_ctrl;
+extern const lpm_cfg_t g_lpm_DeepSWStandby_AGT_cfg;
+/** WDT on IWDT Instance. */
+extern const wdt_instance_t g_wdt0;
 
-/** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
-extern icu_instance_ctrl_t hmc_trouble_busy_ctrl;
-extern const external_irq_cfg_t hmc_trouble_busy_cfg;
 
-#ifndef meter_trouble_isr_busy
-void meter_trouble_isr_busy(external_irq_callback_args_t * p_args);
+/** Access the IWDT instance using these structures when calling API functions directly (::p_api is not used). */
+extern iwdt_instance_ctrl_t g_wdt0_ctrl;
+extern const wdt_cfg_t g_wdt0_cfg;
+
+#ifndef NULL
+void NULL(wdt_callback_args_t * p_args);
 #endif
+/** DAC on DAC Instance. */
+extern const dac_instance_t g_dac0_ULPC;
 
+/** Access the DAC instance using these structures when calling API functions directly (::p_api is not used). */
+extern dac_instance_ctrl_t g_dac0_ULPC_ctrl;
+extern const dac_cfg_t g_dac0_ULPC_cfg;
 /** UART on SCI Instance. */
 extern const uart_instance_t      g_uart_lpm_dbg;
 
@@ -130,7 +106,6 @@ extern const sci_uart_extended_cfg_t g_uart_lpm_dbg_cfg_extend;
 #ifndef lpm_dbg_uart_callback
 void lpm_dbg_uart_callback( uart_callback_args_t* p_args );
 #endif
-
 /** lpm Instance */
 extern const lpm_instance_t g_lpm_DeepSWStandby;
 
@@ -143,14 +118,6 @@ extern const lpm_instance_t g_lpm_SW_Standby;
 /** Access the LPM instance using these structures when calling API functions directly (::p_api is not used). */
 extern lpm_instance_ctrl_t g_lpm_SW_Standby_ctrl;
 extern const lpm_cfg_t g_lpm_SW_Standby_cfg;
-
-/** lpm Instance */
-extern const lpm_instance_t g_lpm_DeepSWStandby_AGT;
-
-/** Access the LPM instance using these structures when calling API functions directly (::p_api is not used). */
-extern lpm_instance_ctrl_t g_lpm_DeepSWStandby_AGT_ctrl;
-extern const lpm_cfg_t g_lpm_DeepSWStandby_AGT_cfg;
-
 /** AGT Timer Instance */
 extern const timer_instance_t AGT1_LPM_Wakeup;
 
@@ -160,16 +127,6 @@ extern const timer_cfg_t AGT1_LPM_Wakeup_cfg;
 
 #ifndef agt1_timer_callback
 void agt1_timer_callback(timer_callback_args_t * p_args);
-#endif
-/** External IRQ on ICU Instance. */
-extern const external_irq_instance_t g_external_irq0;
-
-/** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
-extern icu_instance_ctrl_t g_external_irq0_ctrl;
-extern const external_irq_cfg_t g_external_irq0_cfg;
-
-#ifndef Radio0_IRQ_ISR
-void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args);
 #endif
 extern const crc_instance_t g_crc1;
 extern crc_instance_ctrl_t g_crc1_ctrl;
@@ -302,16 +259,6 @@ void NULL(adc_callback_args_t * p_args);
             #ifndef mfg_uart_callback
             void mfg_uart_callback(uart_callback_args_t * p_args);
             #endif
-/** External IRQ on ICU Instance. */
-extern const external_irq_instance_t pf_meter;
-
-/** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
-extern icu_instance_ctrl_t pf_meter_ctrl;
-extern const external_irq_cfg_t pf_meter_cfg;
-
-#ifndef isr_brownOut
-void isr_brownOut(external_irq_callback_args_t * p_args);
-#endif
 /* I2C Master on IIC Instance. */
 extern const i2c_master_instance_t g_i2c_master0;
 

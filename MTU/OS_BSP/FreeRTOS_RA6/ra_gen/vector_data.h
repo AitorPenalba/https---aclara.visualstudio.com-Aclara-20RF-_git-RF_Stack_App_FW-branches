@@ -1,6 +1,9 @@
 /* generated vector header file - do not edit */
         #ifndef VECTOR_DATA_H
         #define VECTOR_DATA_H
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
                 /* Number of interrupts allocated */
         #ifndef VECTOR_DATA_IRQ_COUNT
         #define VECTOR_DATA_IRQ_COUNT    (38)
@@ -105,4 +108,7 @@
         #define GPT2_COUNTER_OVERFLOW_IRQn          ((IRQn_Type) 36) /* GPT2 COUNTER OVERFLOW (Overflow) */
         #define VECTOR_NUMBER_GPT2_CAPTURE_COMPARE_B ((IRQn_Type) 37) /* GPT2 CAPTURE COMPARE B (Compare match B) */
         #define GPT2_CAPTURE_COMPARE_B_IRQn          ((IRQn_Type) 37) /* GPT2 CAPTURE COMPARE B (Compare match B) */
+        #ifdef __cplusplus
+        }
+        #endif
         #endif /* VECTOR_DATA_H */

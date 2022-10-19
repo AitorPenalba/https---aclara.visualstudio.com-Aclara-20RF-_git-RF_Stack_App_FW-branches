@@ -1754,12 +1754,6 @@
                     <name>$PROJ_DIR$\..\ra\fsp\inc\api\r_lvd_api.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\ra\fsp\src\r_ospi\r_ospi.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\ra\fsp\inc\instances\r_ospi.h</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\ra\fsp\src\r_poeg\r_poeg.c</name>
                 </file>
                 <file>

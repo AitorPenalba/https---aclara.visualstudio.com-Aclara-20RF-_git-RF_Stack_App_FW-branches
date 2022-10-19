@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -53,6 +53,12 @@
 #define AGT_PRV_AGTCMSR_VALID_BITS              (0x77U)
 
 #define AGT_PRV_MIN_CLOCK_FREQ                  (0U)
+
+#if 1U == BSP_FEATURE_AGT_HAS_AGTW
+ #define AGT_IODEFINE(reg)    R_AGTW0_ ## reg
+#else
+ #define AGT_IODEFINE(reg)    R_AGT0_ ## reg
+#endif
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -217,6 +223,15 @@ fsp_err_t R_AGT_Start (timer_ctrl_t * const p_ctrl)
     fsp_err_t err = r_agt_common_preamble(p_instance_ctrl);
     FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
 
+    /* Reload period register for one-shot timers. This must be done here instead of in the underflow interrupt because
+     * setting AGTCR.TSTOP causes AGT to be reset after 3 cycles of the count source. When the AGT count source is much
+     * slower than the core clock, 3 cycles of the count source is too long to wait in an interrupt. */
+    if (TIMER_MODE_ONE_SHOT == p_instance_ctrl->p_cfg->mode)
+    {
+        /* Set counter to period minus one. */
+        r_agt_period_register_set(p_instance_ctrl, p_instance_ctrl->period);
+    }
+
     /* Start timer */
     p_instance_ctrl->p_reg->AGTCR = AGT_PRV_AGTCR_START_TIMER;
 
@@ -229,6 +244,7 @@ fsp_err_t R_AGT_Start (timer_ctrl_t * const p_ctrl)
         /* Verify the timer is started before modifying any other AGT registers. Reference section 25.4.1 "Count
          * Operation Start and Stop Control" in the RA6M3 manual R01UH0886EJ0100. */
         FSP_HARDWARE_REGISTER_WAIT(1U, p_instance_ctrl->p_reg->AGTCR_b.TCSTF);
+
  #if BSP_FEATURE_AGT_HAS_AGTW
         p_instance_ctrl->p_reg->AGTCMA = UINT32_MAX;
         p_instance_ctrl->p_reg->AGTCMB = UINT32_MAX;
@@ -414,22 +430,13 @@ fsp_err_t R_AGT_DutyCycleSet (timer_ctrl_t * const p_ctrl, uint32_t const duty_c
     }
  #endif
 
-    uint32_t temp_duty_cycle_counts         = duty_cycle_counts;
-    uint32_t agtcmsr_agtoab_start_level_bit = 1U << 2 << (4 * pin);
-    agt_extended_cfg_t const * p_extend     = (agt_extended_cfg_t const *) p_instance_ctrl->p_cfg->p_extend;
-    if (p_extend->agtoab_settings & agtcmsr_agtoab_start_level_bit)
-    {
-        /* Invert duty cycle if this pin starts high since the high portion is at the beginning of the cycle. */
-        temp_duty_cycle_counts = p_instance_ctrl->period - temp_duty_cycle_counts - 1;
-    }
-
     /* Set duty cycle. */
  #if BSP_FEATURE_AGT_HAS_AGTW
     volatile uint32_t * const p_agtcm = &p_instance_ctrl->p_reg->AGTCMA;
-    p_agtcm[pin] = temp_duty_cycle_counts;
+    p_agtcm[pin] = duty_cycle_counts;
  #else
     volatile uint16_t * const p_agtcm = &p_instance_ctrl->p_reg->AGTCMA;
-    p_agtcm[pin] = (uint16_t) temp_duty_cycle_counts;
+    p_agtcm[pin] = (uint16_t) duty_cycle_counts;
  #endif
 
     return FSP_SUCCESS;
@@ -738,7 +745,7 @@ static void r_agt_hardware_cfg (agt_instance_ctrl_t * const p_instance_ctrl, tim
     uint32_t tedgsel = 0U;
     uint32_t agtioc  = p_extend->agtio_filter;
 
-    uint32_t mode = p_extend->measurement_mode & R_AGT0_AGTMR1_TMOD_Msk;
+    uint32_t mode = p_extend->measurement_mode & AGT_IODEFINE(AGTMR1_TMOD_Msk);
 
     uint32_t edge = 0U;
     if (AGT_CLOCK_PCLKB == p_extend->count_source)
@@ -747,7 +754,7 @@ static void r_agt_hardware_cfg (agt_instance_ctrl_t * const p_instance_ctrl, tim
         {
             /* Toggle the second bit if the count_source_int is not 0 to map PCLKB / 8 to 1 and PCLKB / 2 to 3. */
             count_source_int   = p_cfg->source_div ^ 2U;
-            count_source_int <<= R_AGT0_AGTMR1_TCK_Pos;
+            count_source_int <<= AGT_IODEFINE(AGTMR1_TCK_Pos);
         }
     }
 
@@ -758,9 +765,9 @@ static void r_agt_hardware_cfg (agt_instance_ctrl_t * const p_instance_ctrl, tim
         mode             = AGT_PRV_AGTMR1_TMOD_EVENT_COUNTER;
         count_source_int = 0U;
 
-        edge   |= (p_extend->trigger_edge & R_AGT0_AGTMR1_TEDGPL_Msk);
-        agtioc |= (p_extend->enable_pin & R_AGT0_AGTIOC_TIOGT_Msk);
-        p_instance_ctrl->p_reg->AGTISR   = (p_extend->enable_pin & R_AGT0_AGTISR_EEPS_Msk);
+        edge   |= (p_extend->trigger_edge & AGT_IODEFINE(AGTMR1_TEDGPL_Msk));
+        agtioc |= (p_extend->enable_pin & AGT_IODEFINE(AGTIOC_TIOGT_Msk));
+        p_instance_ctrl->p_reg->AGTISR   = (p_extend->enable_pin & AGT_IODEFINE(AGTISR_EEPS_Msk));
         p_instance_ctrl->p_reg->AGTIOSEL = (uint8_t) (p_extend->count_source & (uint8_t) ~AGT_CLOCK_AGTIO);
     }
 #endif
@@ -776,6 +783,16 @@ static void r_agt_hardware_cfg (agt_instance_ctrl_t * const p_instance_ctrl, tim
 
     uint32_t agtmr1 = (count_source_int | edge) | mode;
 
+#if BSP_FEATURE_RTC_HAS_ROPSEL
+    if (AGT_CLOCK_SUBCLOCK == p_extend->count_source)
+    {
+        /* Clear the RCR4_b.ROPSEL bit if AGT uses Sub-clock. This is necessary as ROPSEL bit is undefined after
+         * MCU Reset and if it is set to 1, the Sub-clock output to AGT stops in Software Standby mode. */
+        R_RTC->RCR4_b.ROPSEL = 0U;
+        FSP_HARDWARE_REGISTER_WAIT(R_RTC->RCR4_b.ROPSEL, 0U);
+    }
+#endif
+
     /* Configure output settings. */
 
 #if AGT_CFG_OUTPUT_SUPPORT_ENABLE
@@ -790,12 +807,12 @@ static void r_agt_hardware_cfg (agt_instance_ctrl_t * const p_instance_ctrl, tim
                                        p_instance_ctrl->p_cfg->duty_cycle_counts - 1;
         uint32_t agtcma = p_instance_ctrl->p_cfg->duty_cycle_counts;
         uint32_t agtcmb = p_instance_ctrl->p_cfg->duty_cycle_counts;
-        if (AGT_PIN_CFG_START_LEVEL_HIGH == p_extend->agtoa)
+        if (AGT_PIN_CFG_START_LEVEL_HIGH == p_extend->agtoab_settings_b.agtoa)
         {
             agtcma = inverted_duty_cycle;
         }
 
-        if (AGT_PIN_CFG_START_LEVEL_HIGH == p_extend->agtob)
+        if (AGT_PIN_CFG_START_LEVEL_HIGH == p_extend->agtoab_settings_b.agtob)
         {
             agtcmb = inverted_duty_cycle;
         }
@@ -813,12 +830,12 @@ static void r_agt_hardware_cfg (agt_instance_ctrl_t * const p_instance_ctrl, tim
     if (AGT_PIN_CFG_DISABLED != p_extend->agto)
     {
         /* Set the TOE bit if AGTO is enabled.  AGTO can be enabled in any mode. */
-        agtioc |= (1U << R_AGT0_AGTIOC_TOE_Pos);
+        agtioc |= (1U << AGT_IODEFINE(AGTIOC_TOE_Pos));
 
         if (AGT_PIN_CFG_START_LEVEL_LOW == p_extend->agto)
         {
             /* Configure the start level of AGTO. */
-            tedgsel |= (1U << R_AGT0_AGTIOC_TEDGSEL_Pos);
+            tedgsel |= (1U << AGT_IODEFINE(AGTIOC_TEDGSEL_Pos));
         }
     }
 #endif
@@ -837,7 +854,7 @@ static void r_agt_hardware_cfg (agt_instance_ctrl_t * const p_instance_ctrl, tim
         else
         {
             /* Use the trigger edge for pulse period or event counting modes. */
-            tedgsel = (p_extend->trigger_edge & R_AGT0_AGTIOC_TEDGSEL_Msk);
+            tedgsel = (p_extend->trigger_edge & AGT_IODEFINE(AGTIOC_TEDGSEL_Msk));
         }
     }
 #endif
@@ -974,13 +991,10 @@ void agt_int_isr (void)
         uint8_t agtcmsr = p_instance_ctrl->p_reg->AGTCMSR;
 #endif
 
-        /* Stop timer */
+        /* Stop timer. This resets the timer period (AGT register). The AGT register is reconfigured in R_AGT_Start(). */
         p_instance_ctrl->p_reg->AGTCR = AGT_PRV_AGTCR_FORCE_STOP;
         agtcr &= AGT_PRV_AGTCR_STATUS_FLAGS;
         p_instance_ctrl->p_reg->AGTCR = (uint8_t) agtcr;
-
-        /* Set counter to period minus one. */
-        r_agt_period_register_set(p_instance_ctrl, p_instance_ctrl->period);
 
 #if AGT_CFG_OUTPUT_SUPPORT_ENABLE
 
@@ -1009,7 +1023,7 @@ void agt_int_isr (void)
             callback_args = *p_args;
         }
 
-        if (agtcr & R_AGT0_AGTCR_TUNDF_Msk)
+        if (agtcr & AGT_IODEFINE(AGTCR_TUNDF_Msk))
         {
             p_args->event = TIMER_EVENT_CYCLE_END;
         }
