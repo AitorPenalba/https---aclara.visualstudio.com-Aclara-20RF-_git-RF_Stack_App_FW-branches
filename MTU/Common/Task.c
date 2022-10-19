@@ -496,7 +496,7 @@ const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 #if (RTOS_SELECTION == FREE_RTOS)
 static taskHandleLookup_t  taskHandleTable_[eLAST_TSK_IDX]; // table to store file handles matched to task name
 static uint32_t            numberOfTasks = 0;                    /* Number of tasks from last update of taskHandle vector  */
-//static OS_MUTEX_Obj        taskUsageMutex_;                      /* Access protection for the calculated values            */
+//static OS_MUTEX_Obj        taskUsageMutex_;     //TODO: RA6E1 Bob: Remove before release  /* Access protection for the calculated values            */
 //static bool                taskUsageMutexCreated_ = (bool)false; /* Flag saying whether the mutex was successfully created */
 #endif
 

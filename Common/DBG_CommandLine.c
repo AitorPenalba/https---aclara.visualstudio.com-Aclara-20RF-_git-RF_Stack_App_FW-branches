@@ -13645,7 +13645,7 @@ static int cmpfunc( const void *a, const void *b) {
 bool DBG_NoisebandFlashQSPI_Open( uint8_t option )
 {
    bool retVal = (bool)false;
-   if ( option <= 2 ) /* Option 3 was intended to fake a write to the serial flash without its charge pump running but this didn't work */
+   if ( option <= 2 )
    {
       returnStatus_t eRetVal = PAR_partitionFptr.parOpen( &NB_partitionData, ePART_NV_TEST, 0xffffffff );
       if ( eSUCCESS == eRetVal )
@@ -13682,11 +13682,8 @@ void DBG_NoisebandFlashQSPI_Access( void )
    {
       if ( NB_partitionOption == 1 )
       {
-         for ( uint32_t readLoop = ReadRepeat; readLoop; readLoop-- )
-         {
-            runCntr++;
-            (void)PAR_partitionFptr.parRead( &NB_unitTestBuf[0], 0, sizeof( NB_unitTestBuf ), NB_partitionData );
-         }
+         runCntr++;
+         (void)PAR_partitionFptr.parRead( &NB_unitTestBuf[0], 0, sizeof( NB_unitTestBuf ), NB_partitionData );
       } else if ( NB_partitionOption == 2 )
       {
          runCntr++;
@@ -14462,9 +14459,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    }
    tidFilter = DBG_GetTaskFilter();           /* Save the debug filtering task id in case filtering is on */
    (void)DBG_SetTaskFilter( (OS_TASK_id)999 ); /* Turn off debug output from everything except for DBG task */
-   if( enableNV_activity )
-   {
-   }
 #else
    DBG_logPrintf( 'R', "noiseband start" );
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
