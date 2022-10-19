@@ -222,10 +222,11 @@ typedef enum
    eLAST_TSK_IDX // Keep this last
 }eOsTaskIndex_t;
 
-static uint32_t   TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE]; // Keep track of the CPU load for each task for the last 10 seconds.
+static uint32_t   TASK_CPUload[eLAST_TSK_IDX][TASK_CPULOAD_SIZE];  // Keep track of the CPU load for each task for the last 10 seconds.
 #if ( RTOS_SELECTION == MQX_RTOS )
-static TD_STRUCT  *TASK_TD[eLAST_TSK_IDX];                       // Task descriptor list
+static TD_STRUCT  *TASK_TD[eLAST_TSK_IDX];                         // Task descriptor list
 #elif ( RTOS_SELECTION == FREE_RTOS )
+static uint32_t   TASK_CPUtotal[TASK_CPULOAD_SIZE];                // Keep track of the CPU total load for the last 10 seconds
 static uint32_t   Task_RunTimeCounters_[eLAST_TSK_IDX];            // Local Copy of Run Time Counters for every Task
 static uint32_t   Task_PrevRunTimeCounters_[eLAST_TSK_IDX];        // Copy from the last pass
 #endif
@@ -421,7 +422,7 @@ const OS_TASK_Template_t  Task_template_list[] =
 #else
    { eDBG_PRNT_TSK_IDX,         DBG_TxTask,                    680,  34, (char *)pTskName_Print,  DEFAULT_ATTR|QUIET_MODE_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 #endif
-   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2500,  35, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
+   { eDBG_TSK_IDX,              DBG_CommandLineTask,          2000,  35, (char *)pTskName_Dbg,    DEFAULT_ATTR|FAIL_INIT_MODE_ATTR|RFTEST_MODE_ATTR, 0, 0 },
 
 #if ENABLE_PAR_TASKS
    { ePAR_TSK_IDX,              PAR_appTask,                   600,  36, (char *)pTskName_Par,    DEFAULT_ATTR, 0, 0 },
@@ -495,8 +496,8 @@ const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 #if (RTOS_SELECTION == FREE_RTOS)
 static taskHandleLookup_t  taskHandleTable_[eLAST_TSK_IDX]; // table to store file handles matched to task name
 static uint32_t            numberOfTasks = 0;                    /* Number of tasks from last update of taskHandle vector  */
-static OS_MUTEX_Obj        taskUsageMutex_;                      /* Access protection for the calculated values            */
-static bool                taskUsageMutexCreated_ = (bool)false; /* Flag saying whether the mutex was successfully created */
+//static OS_MUTEX_Obj        taskUsageMutex_;     //TODO: RA6E1 Bob: Remove before release  /* Access protection for the calculated values            */
+//static bool                taskUsageMutexCreated_ = (bool)false; /* Flag saying whether the mutex was successfully created */
 #endif
 
 /* ****************************************************************************************************************** */
@@ -1373,12 +1374,12 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
       }
    }
 
-   /* Lock the data table and CPUTotal to prevent a tasksummary command from getting inconsistent data */
-   if ( taskUsageMutexCreated_ == (bool)false )
-   {
-      taskUsageMutexCreated_ = OS_MUTEX_Create( &taskUsageMutex_ );
-   }
-   if ( taskUsageMutexCreated_ ) OS_MUTEX_Lock( &taskUsageMutex_ );
+//   /* Lock the data table and CPUTotal to prevent a tasksummary command from getting inconsistent data */
+//   if ( taskUsageMutexCreated_ == (bool)false )
+//   {
+//      taskUsageMutexCreated_ = OS_MUTEX_Create( &taskUsageMutex_ );
+//   }
+//   if ( taskUsageMutexCreated_ ) OS_MUTEX_Lock( &taskUsageMutex_ );
 
    CPUTotal = 0;
    cpuLoadIndex = (cpuLoadIndex+1)%TASK_CPULOAD_SIZE;
@@ -1403,7 +1404,8 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
       }
       CPUTotal += deltaRunTimeCounter;                                      // This is the task run time including any time spent in the interrupt handler
    }
-   if ( taskUsageMutexCreated_ ) OS_MUTEX_Unlock( &taskUsageMutex_ );       // TASK_CPUload, CPUTotal and cpuLoadIndex have all been updated and are consistent
+   TASK_CPUtotal[cpuLoadIndex] = CPUTotal;                                  // Save the CPU total value for subsequent calculations
+//   if ( taskUsageMutexCreated_ ) OS_MUTEX_Unlock( &taskUsageMutex_ );       // TASK_CPUload, CPUTotal and cpuLoadIndex have all been updated and are consistent
    // Sanity check
    if ( CPULoad > CPUTotal ) {
       CPULoad = CPUTotal;
@@ -1460,18 +1462,14 @@ void OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint32_t * CPULoad )
 /***********************************************************************************************************************
                      FreeRTOS Version of OS_TASK_GetCpuLoad
 ***********************************************************************************************************************/
-void OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint16_t * CPULoad )
+void OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint32_t * CPULoad )
 {
-   uint32_t cpuTotal, i, j;
+   uint32_t cpuTotal, i;
    /* Loop through the historical run time counters for this task.  The entry at [taskIdx][cpuLoadIndex] is the most recent one */
    for ( i = 0; i < TASK_CPULOAD_SIZE; i++ )
    {
-      /* Sum up all the run time counters for all tasks to arrive at the total for the whole CPU, needed to calculate percentages */
-      cpuTotal = 0;
-      for ( j = 0; j < eLAST_TSK_IDX; j++ )
-      {
-         cpuTotal += TASK_CPUload[j][(cpuLoadIndex+TASK_CPULOAD_SIZE-i)%TASK_CPULOAD_SIZE];
-      }
+      /* Get the total CPU run time counter summation for each 1 second period */
+      cpuTotal = TASK_CPUtotal[ (cpuLoadIndex+TASK_CPULOAD_SIZE-i) % TASK_CPULOAD_SIZE ];
       /* Calculate the percent-times-10X for this task for each historical entry as the ratio of run time counter for this task to the total CPU */
       if ( cpuTotal > 0 )
       {
@@ -1715,7 +1713,7 @@ void OS_TASK_Summary ( bool safePrint )
    TaskStatus_t               taskStatusInfo;
    TaskHandle_t               taskHandle;
    OS_TASK_Template_t const   *pTaskList;
-   uint16_t                   CPULoad[eLAST_TSK_IDX][TASK_CPULOAD_SIZE];
+   uint32_t                   CPULoad[TASK_CPULOAD_SIZE];
    char taskState[6][10] = { "Running", "Ready", "Blocked", "Suspended", "Deleted", "Invalid" };
    char taskInformation[8][25] = { "TaskName", "TaskNumber", "TaskCurrentPriority", "TaskState", "TaskRunTimeCounter", "TaskStackDepth",
                                     "TaskStackHighWaterMark", "TaskStackBase" };
@@ -1751,24 +1749,24 @@ void OS_TASK_Summary ( bool safePrint )
    {
       DBG_LW_printf( buffer );
    }
-   if ( safePrint ) /* Only use the mutex if this is a normal task summary printout rather than one occurring in a high duty cycle situation */
-   {
-      /* Lock the data table to prevent a tasksummary command from getting inconsistent data */
-      if ( taskUsageMutexCreated_ == (bool)false )
-      {
-         taskUsageMutexCreated_ = OS_MUTEX_Create( &taskUsageMutex_ );
-      }
-      if ( taskUsageMutexCreated_ ) OS_MUTEX_Lock( &taskUsageMutex_ ); /* Lock the CPULoad table and several other variables */
-   }
-   /* While under mutex protection, make a quick pass through the CPU load table to calculate values for each task */
-   for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
-   {
-      OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, &CPULoad[pTaskList->TASK_TEMPLATE_INDEX][0] ); /* Get last 10 CPU loads in percent-times-10 */
-   }
-   if ( safePrint )
-   {
-      if ( taskUsageMutexCreated_ ) OS_MUTEX_Unlock( &taskUsageMutex_ ); /* Release the lock on CPULoad table */
-   }
+//   if ( safePrint ) /* Only use the mutex if this is a normal task summary printout rather than one occurring in a high duty cycle situation */
+//   {
+//      /* Lock the data table to prevent a tasksummary command from getting inconsistent data */
+//      if ( taskUsageMutexCreated_ == (bool)false )
+//      {
+//         taskUsageMutexCreated_ = OS_MUTEX_Create( &taskUsageMutex_ );
+//      }
+//      if ( taskUsageMutexCreated_ ) OS_MUTEX_Lock( &taskUsageMutex_ ); /* Lock the CPULoad table and several other variables */
+//   }
+//   /* While under mutex protection, make a quick pass through the CPU load table to calculate values for each task */
+//   for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
+//   {
+//      OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, CPULoad ); /* Get last 10 CPU loads in percent-times-10 */
+//   }
+//   if ( safePrint )
+//   {
+//      if ( taskUsageMutexCreated_ ) OS_MUTEX_Unlock( &taskUsageMutex_ ); /* Release the lock on CPULoad table */
+//   }
    /* Now we can "take our time" formatting the data for printing without holding the mutex.  However, with the current task priorities, this really  *
     * doesn't matter because the DBG task is higher priority than the STRT task.  So we really don't need the mutex in this function.                 */
    for ( pTaskList = &Task_template_list[ 0 ]; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
@@ -1784,23 +1782,22 @@ void OS_TASK_Summary ( bool safePrint )
       if ( taskHandle != NULL )
       {
          vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid ); /* Collect all interesting information about this task */
-
-         uint16_t * pEntry = (uint16_t *)&CPULoad[pTaskList->TASK_TEMPLATE_INDEX][0]; /* Create pointer to the entry in CPULoad for this task */
+         OS_TASK_GetCpuLoad( pTaskList->TASK_TEMPLATE_INDEX, CPULoad ); /* Get last 10 CPU loads in percent-times-10 */
          snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
                   ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, ( char* )taskState[ taskStatusInfo.eCurrentState ],
                   taskStatusInfo.ulRunTimeCounter, pTaskList->usStackDepth,
                   ( taskStatusInfo.usStackHighWaterMark )*4, // Stack depth is divided by four while creating the task. So multiply StackHighWaterMark by four while print in debuglog
                   taskStatusInfo.pxStackBase,
-                  pEntry[0]/10, pEntry[0]%10,
-                  pEntry[1]/10, pEntry[1]%10,
-                  pEntry[2]/10, pEntry[2]%10,
-                  pEntry[3]/10, pEntry[3]%10,
-                  pEntry[4]/10, pEntry[4]%10,
-                  pEntry[5]/10, pEntry[5]%10,
-                  pEntry[6]/10, pEntry[6]%10,
-                  pEntry[7]/10, pEntry[7]%10,
-                  pEntry[8]/10, pEntry[8]%10,
-                  pEntry[9]/10, pEntry[9]%10);
+                                  CPULoad[0]/10, CPULoad[0]%10,
+                                  CPULoad[1]/10, CPULoad[1]%10,
+                                  CPULoad[2]/10, CPULoad[2]%10,
+                                  CPULoad[3]/10, CPULoad[3]%10,
+                                  CPULoad[4]/10, CPULoad[4]%10,
+                                  CPULoad[5]/10, CPULoad[5]%10,
+                                  CPULoad[6]/10, CPULoad[6]%10,
+                                  CPULoad[7]/10, CPULoad[7]%10,
+                                  CPULoad[8]/10, CPULoad[8]%10,
+                                  CPULoad[9]/10, CPULoad[9]%10);
 
          if (safePrint)
          {

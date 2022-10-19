@@ -39,6 +39,9 @@
 #include "si446x_cmd.h"
 #include "si446x_prop.h"
 #include "DBG_SerialDebug.h"
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#include "DBG_CommandLine.h"
+#endif
 #include "time_util.h"
 #include "ascii.h"
 #if ( MCU_SELECTED == NXP_K24 )
@@ -5222,9 +5225,16 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
 
    // Get RSSI values
    for (i=0; i<nSamples; i++) {
+      DBG_NoisebandFlashQSPI_Access(); /* Perform an I/O operation to the serial flash chip on QSPI to see if it creates RF noise */
       wait_us((uint32_t)rate);
+#if ( ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) && ( TM_NOISEBAND_RSSI_TIMING == 1 ) )
+      R_BSP_PinCfg( BSP_IO_PORT_04_PIN_06, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_HIGH ) ); // TODO: RA6E1 Bob: Remove before release
+#endif
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.
       buf[i] = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
+#if ( ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) && ( TM_NOISEBAND_RSSI_TIMING == 1 ) )
+      R_BSP_PinCfg( BSP_IO_PORT_04_PIN_06, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_LOW  ) ); // TODO: RA6E1 Bob: Remove before release
+#endif
    }
 #if ( EP == 1 )
 #if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )

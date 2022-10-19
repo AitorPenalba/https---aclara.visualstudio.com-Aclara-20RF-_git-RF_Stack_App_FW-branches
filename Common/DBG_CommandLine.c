@@ -55,6 +55,9 @@
 #include "COMM.h"
 //#include "time_util.h"
 #include "dvr_DAC0.h"
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#include "dvr_extflash.h" /* Needed to allow noiseband command to disable writes to the serial flash chip */
+#endif
 #include "radio.h"
 #include "radio_hal.h"
 #include "PHY.h"
@@ -358,6 +361,14 @@ static uint32_t DBG_CommandLine_SyncError( uint32_t argc, char *argv[] );
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
 uint32_t DBG_CommandLine_NoiseBandClkOn ( uint32_t argc, char *argv[] );
 uint32_t DBG_CommandLine_NoiseBandClkOff( uint32_t argc, char *argv[] );
+/* These variables are used for the noiseband option that causes QSPI activity to the serial flash chip  */
+static   PartitionData_t const  *NB_partitionData;    /* Pointer to partition information */
+static   uint8_t                 NB_unitTestBuf[254]; /* Make this the size of a bank, minus the meta data  */
+#define                          NB_CHUNK_SIZE ( 32 )
+#define                          NB_CHUNKS     ( sizeof(NB_unitTestBuf) / NB_CHUNK_SIZE )
+static   uint32_t                NB_nextChunk = 0;    /* Which chunk to write next */
+static   bool                    NB_partitionOpen = (bool)false;
+static   uint8_t                 NB_partitionOption = 0;
 #define GPIO_PIN_TRISTATE 1
 typedef struct
 {
@@ -13620,67 +13631,89 @@ static int cmpfunc( const void *a, const void *b) {
 }
 
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
-
-void NB_ExtNV_Task ( taskParameter );
-TaskHandle_t NB_ExtNV_TaskHandle;
 /**************************************************************************************************************************
 
-   Function Name: NB_ExtNV_Task
+   Function Name: DBG_NoisebandFlashQSPI_Open
 
-   Purpose: This function is used in the Test Mode to enable NV activity during the Noise Band
+   Purpose: This function is used to open a test partition for use during noiseband to assess QSPI noise into our receiver
 
-   Arguments:  taskParameter - Not used
+   Arguments:  option - 1 = READ serial flash during noiseband; 2 = WRITE serial flash during noiseband
+
+   Returns: True if the option value was OK and the partition is open
+
+**************************************************************************************************************************/
+bool DBG_NoisebandFlashQSPI_Open( uint8_t option )
+{
+   bool retVal = (bool)false;
+   if ( option <= 2 )
+   {
+      returnStatus_t eRetVal = PAR_partitionFptr.parOpen( &NB_partitionData, ePART_NV_TEST, 0xffffffff );
+      if ( eSUCCESS == eRetVal )
+      {
+         NB_partitionOpen = (bool)true;
+         NB_partitionOption = option;
+         NB_nextChunk = 0;
+         retVal = (bool)true;
+      }
+   }
+   else
+   {
+      NB_partitionOpen = (bool)false;
+      NB_partitionOption = 0;
+   }
+   return ( retVal );
+}
+/**************************************************************************************************************************
+
+   Function Name: DBG_NoisebandFlashQSPI_Access
+
+   Purpose: This function is used to read or write a test partition for use during noiseband to assess QSPI noise into our receiver
+
+   Arguments:  None
 
    Returns: None
 
 **************************************************************************************************************************/
-void NB_ExtNV_Task ( taskParameter )
+void DBG_NoisebandFlashQSPI_Access( void )
 {
-   returnStatus_t         retVal;
-   PartitionData_t const  *partitionData;    /* Pointer to partition information   */
-   uint8_t                unitTestBuf[254]; /* Make this the size of a bank, minus the meta data  */
-   uint32_t               ReadRepeat = 4;
-   uint32_t               notifiedValue;
-   bool                   stopTest = (bool)false; // TODO: Make this static global and change the value from NB
    static uint64_t        runCntr  = 0;
-
-   for(;;)
+   uint32_t               ReadRepeat = 1;
+   if ( NB_partitionOpen )
    {
-      /*Bits in this RTOS task's notification value are set by the notifying
-      tasks and interrupts to indicate which events have occurred. */
-      xTaskNotifyWaitIndexed( 0,         /* Wait for 0th notification. */
-                             0x00,      /* Don't clear any notification bits on entry. */
-                             0xFFFFFFFFUL, /* Reset the notification value to 0 on exit. */
-                             &notifiedValue, /* Notified value pass out in notifiedValue. */
-                             portMAX_DELAY );  /* Block indefinitely. */
-      /* Process any events that have been latched in the notified value. */
-      if( ( notifiedValue & 0x01 ) != 0 )
+      if ( NB_partitionOption == 1 )
       {
-         /* Bit 0 was set - process whichever event is represented by bit 0. */
-         // NV Read
-         /* Find the NV test partition - don't care about update rate   */
-         retVal = PAR_partitionFptr.parOpen( &partitionData, ePART_NV_TEST, 0xffffffff );
-         if ( eSUCCESS == retVal )
+         runCntr++;
+         (void)PAR_partitionFptr.parRead( &NB_unitTestBuf[0], 0, sizeof( NB_unitTestBuf ), NB_partitionData );
+      } else if ( NB_partitionOption == 2 )
+      {
+         runCntr++;
+         dSize offset = NB_nextChunk * NB_CHUNK_SIZE;
+         if ( NB_nextChunk == 0)
          {
-            /* Read the partition back, and compare with expected pattern (multiple times)  */
-            for ( uint32_t readLoop = ReadRepeat; readLoop; readLoop-- )
-            {
-               if( stopTest )
-               {
-                  break;
-               }
-               for( uint32_t i = 0; i < partitionData->lDataSize / sizeof( unitTestBuf ); i++ )
-               {
-                  runCntr++;
-                  (void)PAR_partitionFptr.parRead( &unitTestBuf[0], 0, sizeof( unitTestBuf ), partitionData );
-               }
-            }
+            for ( uint32_t i = 0; i < sizeof(NB_unitTestBuf); i++ ) { NB_unitTestBuf[i] = (uint8_t)( runCntr + i ); }
          }
+         (void)PAR_partitionFptr.parWrite( offset, &NB_unitTestBuf[offset], (lCnt)NB_CHUNK_SIZE, NB_partitionData );
+         NB_nextChunk++;
+         if ( NB_nextChunk >= NB_CHUNKS) NB_nextChunk = 0;
       }
    }
-
 }
+/**************************************************************************************************************************
 
+   Function Name: DBG_NoisebandFlashQSPI_Close
+
+   Purpose: This function is used to close a test partition for use during noiseband to assess QSPI noise into our receiver
+
+   Arguments:  None
+
+   Returns: None
+
+**************************************************************************************************************************/
+void DBG_NoisebandFlashQSPI_Close( void )
+{
+   (void)PAR_partitionFptr.parClose( NB_partitionData );
+   NB_partitionOpen = (bool)false;
+}
 /**************************************************************************************************************************/
 
 typedef struct
@@ -13775,7 +13808,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    OS_TICK_Struct  time1, time2;
    uint32_t        TimeDiff;
    OS_TASK_id      tidFilter;
-   bool            enableNV_activity = (bool) false;
+   uint8_t         enableNV_activity = 0;
 #else
    static uint16_t start = 0;
    static uint16_t end   = 0;
@@ -13897,18 +13930,18 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          DBG_printf( "       (optional) boost 0=LDO only(default), 1=Boost, abort if Vcap is low, 2=Boost, ignore Vcap, 3=Boost, wait for Vcap" );
          DBG_printf( "       (optional) HMC traffic: 0=Normal, 1=One LogOff/LogOn, 2=One Update LCD, 3=Disable other tasks, 4=Update LP Data" );
          DBG_printf( "                               5=Update LCD Continuously" );
+         DBG_printf( "       (optional) NV Read Activity during the test");
          DBG_printf( "       (optional) port pin configuration during test: 12345678 or ________" );
          DBG_printf( "           1=rSPIdrv:H|M|L 2=rSDNdrv:H|M|L|N|P 3=rCSdrv:H|M|L|N|P 4=rOSCdrv:H|M|L|N|P 5=MCUrGPIO:I|U 6=JTAG:H|L|J 7=Unused:L|H|I|P 8=Meter:L|H|I|P " );
          DBG_printf( "             For 1,2,3,4: H=High Drive, M=Mid Drive, L=Low Drive, N=NMOS, P=PMOS" );
          DBG_printf( "             For 5,6,7,8: H=High Output/Mid Drive, L=Low Output/Mid Drive, I=Input, U=Pulled-Up Input, J=JTAG" );
          DBG_printf( "             Do NOT use L or H for option 8 when a meter is connected as the output pins will conflict" );
-         DBG_printf( "       (optional) NV Read Activity during the test");
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 0 )
       }
       return ( 0 );
    }
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
-   if ( argc > 11 )
+   if ( argc > 12 )
 #else
    if ( argc > 9 ) // Keep code identical for K24
 #endif
@@ -13983,11 +14016,22 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       {
          testModeHMC = ( uint8_t )atoi( argv[9] ); // test mode for HMC traffic during noiseband test
       }
-
-      portPins = ports; // Start off with the values from the previous run
       if ( argc >= 11 )
       {
-         ports_s *pPorts = (ports_s *)argv[10]; /* Point to the string containing the 9th parameter to noiseband */
+         enableNV_activity = ( uint8_t )atoi( argv[10] );
+         if ( enableNV_activity )
+         {
+            if ( ! DBG_NoisebandFlashQSPI_Open( enableNV_activity ) ) /* Open the partition for reads or writes during the test */
+            {
+               DBG_printf(" You have entered an invalid value for the NV activity during noiseband parameter" );
+               return ( 0 );
+            }
+         }
+      }
+      portPins = ports; // Start off with the values from the previous run
+      if ( argc >= 12 )
+      {
+         ports_s *pPorts = (ports_s *)argv[11]; /* Point to the string containing the 9th parameter to noiseband */
          bool optionsOK = (bool)false;
          if (                      checkOptions( pPorts->RadioSPI,  (char *)&portPins.RadioSPI,  "_HML"   ) )  {
             if (                   checkOptions( pPorts->RadioSDN,  (char *)&portPins.RadioSDN,  "_HMLNP" ) )  {
@@ -14011,11 +14055,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          {
             return ( 0 );
          }
-      }
-      if ( argc >= 12 )
-      {
-         enableNV_activity = ( uint8_t )atoi( argv[11] );
-         ( void )xTaskCreate( NB_ExtNV_Task, "NB_NV_TST", 500, 0, FREE_RTOS_TASK_PRIORITY_CONVERT(35), &NB_ExtNV_TaskHandle); //
       }
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
       if ( radioNum >= (uint8_t)MAX_RADIO )
@@ -14103,7 +14142,7 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    // This minimum sampling rate is around 320usec per read.
    // RSSI read will take a minimum time which is bounded by the SPI rate and radio turn around time.
 #elif ( MCU_SELECTED == RA6E1 )
-#define MINIMUM_TIME 130 // microseconds based on OS_TICK_Get_Diff_InMicroseconds measurements on RA6E1/FreeRTOS
+#define MINIMUM_TIME 185 // microseconds based on port pin toggling
 #define PAUSE_MSEC     5 // milliseconds
 #endif
    if (samplingRate < MINIMUM_TIME) {
@@ -14120,6 +14159,8 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    #define DELAY_SEC          10 // How long to delay between batches of DELAY_CHANS channels
    #define ENERGY_IN_CAP 3600000 // Magic number to keep super-cap voltage above 2.1V
    time += ( (uint32_t) ( nbChannels * ACTUAL_PAUSE_MSEC ) ) + 1000 * (1 + waittime);     /* account for PAUSE_MSEC and requested delay at start */
+   if ( enableNV_activity == 1 ) time += (uint32_t)( nbChannels * ((float)nSamples ) * 0.165f ); /* account for serial flash read time  */
+   if ( enableNV_activity == 2 ) time += (uint32_t)( nbChannels * ((float)nSamples ) * 3.000f ); /* account for serial flash write time */
    if ( boost != 0 )
    {
       time += (uint32_t)nbChannels * (PWR_3P6LDO_EN_ON_DLY_MS + PWR_3V6BOOST_EN_ON_DLY_MS ); // Boost/LDO time delays
@@ -14418,10 +14459,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
    }
    tidFilter = DBG_GetTaskFilter();           /* Save the debug filtering task id in case filtering is on */
    (void)DBG_SetTaskFilter( (OS_TASK_id)999 ); /* Turn off debug output from everything except for DBG task */
-   if( enableNV_activity )
-   {
-      xTaskNotifyIndexed( NB_ExtNV_TaskHandle, 0, ( 1UL ), eSetBits );
-   }
 #else
    DBG_logPrintf( 'R', "noiseband start" );
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
@@ -14495,10 +14532,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
          totals[k] += deltas[k];
       }
    #endif // ( TM_INSTRUMENT_NOISEBAND_TIMING == 1 )
-      if( enableNV_activity ) /* Notify again just in-case */
-      {
-         xTaskNotifyIndexed( NB_ExtNV_TaskHandle, 0, ( 1UL ), eSetBits );
-      }
 #endif // ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
    }
 #if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
@@ -14542,12 +14575,6 @@ uint32_t DBG_CommandLine_NoiseBand ( uint32_t argc, char *argv[] )
       }
    }
 
-#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
-   if( enableNV_activity )
-   {
-      vTaskDelete(NB_ExtNV_TaskHandle);
-   }
-#endif
    DBG_logPrintf( 'R', "noiseband end" );
 
    return ( 0 );

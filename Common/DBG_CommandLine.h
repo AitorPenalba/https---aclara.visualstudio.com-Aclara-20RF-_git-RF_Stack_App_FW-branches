@@ -328,7 +328,9 @@ void DBG_CommandLine_InvokeDebugCommandFromManufacturingPort ( char * pString );
 #endif
 
 #endif /* CompileSwitch_H */
-
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+void DBG_NoisebandFlashQSPI_Access( void );
+#endif
 /* FUNCTION DEFINITIONS */
 
 #endif /* this must be the last line of the file */
