@@ -132,7 +132,7 @@
             #define configTIMER_TASK_PRIORITY (30)  /* TODO: RA6: DG: Review this config */
             #endif
             #ifndef configTIMER_QUEUE_LENGTH
-            #define configTIMER_QUEUE_LENGTH (10)  /* TODO: RA6: DG: Review this config */
+            #define configTIMER_QUEUE_LENGTH (1)
             #endif
             #ifndef configTIMER_TASK_STACK_DEPTH
             #define configTIMER_TASK_STACK_DEPTH (128)  /* TODO: RA6: DG: Review this config */

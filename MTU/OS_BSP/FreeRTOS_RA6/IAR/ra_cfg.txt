@@ -305,7 +305,7 @@ FSP Configuration
   Module "UART (r_sci_uart)"
     Parameter Checking: Default (BSP)
     FIFO Support: Enable
-    DTC Support: Enable
+    DTC Support: Disable
     Flow Control Support: Disable
     RS-485 Support: Disable
     

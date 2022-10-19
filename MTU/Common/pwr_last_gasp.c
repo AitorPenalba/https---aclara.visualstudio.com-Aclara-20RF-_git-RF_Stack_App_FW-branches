@@ -1440,7 +1440,6 @@ void PWRLG_Begin( uint16_t anomalyCount )
    DBG_LW_printf( "Vcap: %-6s\n", DBG_printFloat( floatStr, Vcap, 3 ) );
    DBG_logPrintf( 'I', "HW Rev Letter: %c ", hwRevLetter_);
 
-   R_BSP_SoftwareDelay( 1, BSP_DELAY_UNITS_SECONDS );
 #if ( LG_WORST_CASE_TEST == 1 )
    DBG_LW_printf(" \n !!!! This is Last Gasp Worst Case Test Code( Revision: 1) !!!! \n");
 #warning "Update the Revision"

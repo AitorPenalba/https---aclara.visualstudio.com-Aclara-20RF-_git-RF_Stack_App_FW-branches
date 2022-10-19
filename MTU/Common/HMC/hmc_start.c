@@ -69,6 +69,7 @@
 #include "serial.h"
 #endif
 #include "hmc_config.h"
+#include "hmc_diags.h"
 
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
@@ -679,6 +680,7 @@ uint8_t HMC_STRT_LogOn( uint8_t ucCmd, void far *pPtr )
          HMC_STRT_RestartDelay();  /* About 39.9 seconds */
          update_ = ( uint8_t )HMC_APP_API_RPLY_IDLE;
          retVal = update_;
+         HMC_DIAGS_PurgeQueue();
 #else
          update_ = ( uint8_t )HMC_APP_API_RPLY_IDLE;
          retVal = update_;

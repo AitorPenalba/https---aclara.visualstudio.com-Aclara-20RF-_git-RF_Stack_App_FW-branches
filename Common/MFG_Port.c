@@ -6873,7 +6873,7 @@ static void MFG_DateTime ( uint32_t argc, char *argv[] )
    /* Always print read back value  */
    ( void )TIME_UTIL_GetTimeInSecondsFormat( &sTime );
    locdateTime = sTime.seconds;
-   MFG_logPrintf( "%s %d\n", argv[ 0 ], locdateTime );
+   MFG_logPrintf( "%s %lu\n", argv[ 0 ], locdateTime );
 }
 /*******************************************************************************
 

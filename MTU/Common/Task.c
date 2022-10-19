@@ -493,7 +493,10 @@ const OS_TASK_Template_t  OS_template_list_last_gasp[] =
 /* ****************************************************************************************************************** */
 /* FILE VARIABLE DEFINITIONS */
 #if (RTOS_SELECTION == FREE_RTOS)
-static taskHandleLookup_t taskHandleTable[eLAST_TSK_IDX]; // table to store file handles matched to task name
+static taskHandleLookup_t  taskHandleTable_[eLAST_TSK_IDX]; // table to store file handles matched to task name
+static uint32_t            numberOfTasks = 0;                    /* Number of tasks from last update of taskHandle vector  */
+static OS_MUTEX_Obj        taskUsageMutex_;                      /* Access protection for the calculated values            */
+static bool                taskUsageMutexCreated_ = (bool)false; /* Flag saying whether the mutex was successfully created */
 #endif
 
 /* ****************************************************************************************************************** */
@@ -504,10 +507,6 @@ void task_exception_handler( _mqx_uint para, void * stack_ptr );
 #if (RTOS_SELECTION == FREE_RTOS)
 static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName );
 static uint32_t       setIdleTaskPriority ( uint32_t NewPriority );
-static TaskHandle_t   taskHandle_[eLAST_TSK_IDX];           /* Vector of task handles, updated dynamically            */
-static uint32_t       numberOfTasks = 0;                    /* Number of tasks from last update of taskHandle vector  */
-static OS_MUTEX_Obj   taskUsageMutex_;                      /* Access protection for the calculated values            */
-static bool           taskUsageMutexCreated_ = (bool)false; /* Flag saying whether the mutex was successfully created */
 #endif
 
 /* ****************************************************************************************************************** */
@@ -827,12 +826,12 @@ taskCreateReturnValue_t OS_TASK_Create ( OS_TASK_Template_t const *pTaskList )
 #elif (RTOS_SELECTION == FREE_RTOS)
    retVal = xTaskCreate( pTaskList->pvTaskCode, pTaskList->pcName, pTaskList->usStackDepth/4, pTaskList->pvParameters,
                       FREE_RTOS_TASK_PRIORITY_CONVERT(pTaskList->uxPriority),
-                      &taskHandleTable[pTaskList->TASK_TEMPLATE_INDEX].taskHandle );
+                      &taskHandleTable_[pTaskList->TASK_TEMPLATE_INDEX].taskHandle );
 
    if( pdPASS == retVal )
    {
       // update the task handle lookup table index location with the newly created task's name
-      taskHandleTable[pTaskList->TASK_TEMPLATE_INDEX].taskName = pTaskList->pcName;
+      taskHandleTable_[pTaskList->TASK_TEMPLATE_INDEX].taskName = pTaskList->pcName;
    }
 #endif
 
@@ -1021,15 +1020,13 @@ static uint32_t setIdleTaskPriority ( uint32_t NewPriority )
 #if (RTOS_SELECTION == FREE_RTOS)
 static TaskHandle_t * getFreeRtosTaskHandle( char const *pTaskName )
 {
-   /* DG: 08/04/22: We can use the FreeRTOS function instead of inventing our own */
    TaskHandle_t *retTaskHandlePtr = NULL; // return value, initialize to NULL and will get updated later
 
-   uint8_t loopCtr;
-   for( loopCtr = 0; ARRAY_IDX_CNT(taskHandleTable); loopCtr++)
+   for( uint8_t loopCtr = 0; ARRAY_IDX_CNT(taskHandleTable_); loopCtr++ )
    {  // loop through the task template list looking for a matching task name
-      if( strcmp(taskHandleTable[loopCtr].taskName, pTaskName) == 0)
+      if( strcmp(taskHandleTable_[loopCtr].taskName, pTaskName) == 0)
       {  // we found a matching task name, assign the return value and break out of loop
-         retTaskHandlePtr = &taskHandleTable[loopCtr].taskHandle;
+         retTaskHandlePtr = &taskHandleTable_[loopCtr].taskHandle;
          break;
       }
    }
@@ -1175,11 +1172,11 @@ OS_TASK_id OS_TASK_GetID_fromName ( const char *taskName )
 #if (RTOS_SELECTION == MQX_RTOS) /* MQX */
    return ( _task_get_id_from_name( taskName ) );
 #elif (RTOS_SELECTION == FREE_RTOS)
-   TaskHandle_t  taskHandle;
+   TaskHandle_t  *pTaskHandle;
    TaskStatus_t  taskDetails;
 
-   taskHandle = xTaskGetHandle( taskName );
-   vTaskGetInfo(taskHandle, &taskDetails, pdFALSE, eRunning );
+   pTaskHandle = getFreeRtosTaskHandle( taskName );
+   vTaskGetInfo( *pTaskHandle, &taskDetails, pdFALSE, eRunning );
 
    return ( taskDetails.xTaskNumber );
 #endif
@@ -1345,31 +1342,36 @@ uint32_t OS_TASK_UpdateCpuLoad ( void )
          if( pTaskList->TASK_TEMPLATE_INDEX == eIDL_TSK_IDX ) /* Is this the IDLE task? */
          {
             /* Get the task Handle for FreeRTOS Idle task */
-            taskHandle_[pTaskList->TASK_TEMPLATE_INDEX] = xTaskGetIdleTaskHandle();
+            taskHandleTable_[pTaskList->TASK_TEMPLATE_INDEX].taskHandle = xTaskGetIdleTaskHandle();
          }
+         else if( pTaskList->TASK_TEMPLATE_INDEX == eTMR_SVC_IDX )
+         {
+            /* Save the task handle for this task in our list into a static vector for faster access */
+            taskHandleTable_[pTaskList->TASK_TEMPLATE_INDEX].taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
+         }
+#if 0 // TODO: DG: This section is not required because the TaskHandleTable_ is updated when the tasks are created. In addtion we can remove the for loop as well.
          else
          {
             /* Save the task handle for this task in our list into a static vector for faster access */
-            taskHandle_[pTaskList->TASK_TEMPLATE_INDEX] = xTaskGetHandle( ( char* )pTaskList->pcName );
+            taskHandleTable_[pTaskList->TASK_TEMPLATE_INDEX].taskHandle = xTaskGetHandle( ( char* )pTaskList->pcName );
          }
+#endif
       }
       numberOfTasks = taskCount; /* Update the number of running tasks so we don't do the above every time */
    }
 
-   AGT_RunTimeStatsStop(); /* Stop the AGT counter pair while we collect the run time counters from FreeRTOS to prevent inconsistent results */
    for ( pTaskList = Task_template_list; 0 != pTaskList->TASK_TEMPLATE_INDEX; pTaskList++ )
    {
       Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = 0;
-      if ( taskHandle_[pTaskList->TASK_TEMPLATE_INDEX] != NULL )
+      if ( taskHandleTable_[pTaskList->TASK_TEMPLATE_INDEX].taskHandle != NULL )
       {
-         vTaskGetInfo( taskHandle_[pTaskList->TASK_TEMPLATE_INDEX], &taskStatusInfo, pdFALSE, eInvalid );  // No need to get the HighWaterMark and Task Stat, which are time consuming
+         vTaskGetInfo( taskHandleTable_[pTaskList->TASK_TEMPLATE_INDEX].taskHandle, &taskStatusInfo, pdFALSE, eInvalid );  // No need to get the HighWaterMark and Task Stat, which are time consuming
          if( 0 == strcmp( pTaskList->pcName, taskStatusInfo.pcTaskName ) )
          {
             Task_RunTimeCounters_[pTaskList->TASK_TEMPLATE_INDEX] = taskStatusInfo.ulRunTimeCounter;
          }
       }
    }
-   AGT_RunTimeStatsStart(); /* OK, data has been collected, restart the counters.  Some usage may be lost due to context switching during the above */
 
    /* Lock the data table and CPUTotal to prevent a tasksummary command from getting inconsistent data */
    if ( taskUsageMutexCreated_ == (bool)false )
@@ -1773,7 +1775,7 @@ void OS_TASK_Summary ( bool safePrint )
    {
       if( ( pTaskList->pvTaskCode != NULL )  || ( pTaskList->usStackDepth != 0 ) ) /* Only the IDLE task has both of these as 0 / NULL */
       {
-         taskHandle = taskHandle_[pTaskList->TASK_TEMPLATE_INDEX];
+         taskHandle = taskHandleTable_[pTaskList->TASK_TEMPLATE_INDEX].taskHandle;
       }
       else
       {
@@ -1782,10 +1784,7 @@ void OS_TASK_Summary ( bool safePrint )
       if ( taskHandle != NULL )
       {
          vTaskGetInfo( taskHandle, &taskStatusInfo, pdTRUE, eInvalid ); /* Collect all interesting information about this task */
-         if( 0 != strcmp( pTaskList->pcName, taskStatusInfo.pcTaskName ) )
-         {
-            continue;  // Skip the task that has been deleted
-         }
+
          uint16_t * pEntry = (uint16_t *)&CPULoad[pTaskList->TASK_TEMPLATE_INDEX][0]; /* Create pointer to the entry in CPULoad for this task */
          snprintf( buffer, sizeof(buffer), "%-8s %4d %8u %8s %10lu %5u %5u   0x%08X %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u %2u.%1u\n",
                   ( char* )pTaskList->pcName, taskStatusInfo.xTaskNumber, taskStatusInfo.uxCurrentPriority, ( char* )taskState[ taskStatusInfo.eCurrentState ],
@@ -1836,7 +1835,7 @@ void OS_TASK_Summary ( bool safePrint )
 void OS_TASK_Create_STRT( void )
 {
    // initialize the task handle lookup table, this table will be updated as we create each task
-   (void)memset( (uint8_t *)&taskHandleTable, 0, sizeof(taskHandleTable) );
+   (void)memset( (uint8_t *)&taskHandleTable_, 0, sizeof(taskHandleTable_) );
    if ( pdPASS != OS_TASK_Create( &Task_template_list[0] ) )
    {
       printf("Unable to create STRT");
@@ -1859,7 +1858,7 @@ void OS_TASK_Create_STRT( void )
 void OS_TASK_Create_PWRLG( void )
 {
    // initialize the task handle lookup table, this table will be updated as we create each task
-   (void)memset( (uint8_t *)&taskHandleTable, 0, sizeof(taskHandleTable) );
+   (void)memset( (uint8_t *)&taskHandleTable_, 0, sizeof(taskHandleTable_) );
 
    if ( pdPASS != OS_TASK_Create( &OS_template_list_last_gasp[0] ) )
    {
