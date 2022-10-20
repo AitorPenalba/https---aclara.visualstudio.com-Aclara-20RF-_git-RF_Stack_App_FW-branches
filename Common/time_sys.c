@@ -2546,7 +2546,7 @@ STATIC void TIME_SYS_vApplicationTickHook( void * user_isr_ptr )
 #elif ( RTOS_SELECTION == FREE_RTOS )
 void vApplicationTickHook()
 {
-   OS_INT_disable();
+   uint32_t old_mask_level = OS_INT_ISR_disable();
 
 #if ( DCU == 1 )
    KERNEL_DATA_STRUCT_PTR  kd_ptr = _mqx_get_kernel_data();
@@ -2554,7 +2554,7 @@ void vApplicationTickHook()
 #else
    tickSystemClock(0); // Increment system and power-up time (argument ignored for EP)
 #endif
-   OS_INT_enable();
+   OS_INT_ISR_enable(old_mask_level);
 
    /* RTOS tick, signal the timer task */
    if ( _timeSysSemCreated == (bool)true )
