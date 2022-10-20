@@ -2780,9 +2780,7 @@ static bool Process_StopRequest(NWK_StopReq_t const *pStopReq)
    else{
       pNwkConf->StopConf.eStatus = eNWK_STOP_ERROR;
    }
-#if ( PWRLG_PRINT_ENABLE == 0 ) // Thin out the debug if we are debugging last gasp
    INFO_printf("%s", NWK_StateMsg(_state));
-#endif
    return (bool)true;
 }
 

@@ -506,7 +506,7 @@ void ALRM_RealTimeTask ( taskParameter )
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
          #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
-         #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev B (P1B) hardware"
+/* Rev B is now the standard hardware version so no warning message is necessary */
 #else
          #error "Invalid value for HAL_TARGET_HARDWARE"
 #endif

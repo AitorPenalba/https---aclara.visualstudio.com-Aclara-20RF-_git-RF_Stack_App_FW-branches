@@ -13677,7 +13677,6 @@ bool DBG_NoisebandFlashQSPI_Open( uint8_t option )
 void DBG_NoisebandFlashQSPI_Access( void )
 {
    static uint64_t        runCntr  = 0;
-   uint32_t               ReadRepeat = 1;
    if ( NB_partitionOpen )
    {
       if ( NB_partitionOption == 1 )
