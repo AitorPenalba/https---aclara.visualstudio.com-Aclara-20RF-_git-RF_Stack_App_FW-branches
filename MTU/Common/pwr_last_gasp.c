@@ -302,7 +302,6 @@ void PWRLG_Task( taskParameter )
    uint8_t                    hwVerString[VER_HW_STR_LEN];
 
    // Create the semaphore used to signal TX complete.
-   //TODO NRJ: determine if semaphores need to be counting
    ( void )OS_SEM_Create( &TxDoneSem, 0 );
 
    // Seed the random number generator for P persistence test in the MAC.
@@ -723,13 +722,6 @@ void PWRLG_TxFailure( void )
       ( void )PHY_SetRequest( ePhyAttr_CcaThreshold, &ccaThreshold );
       ( void )PHY_SetRequest( ePhyAttr_CcaOffset, &ccaOffset );
       /* No need to worry about the resetting the parameters, as in this mode, we are only making the changes to the RAM copy. */
-#if 0  /* TODO: Remove; TEST CODE  */
-      GetConf = MAC_GetRequest( eMacAttr_CsmaPValue );
-      if ( GetConf.eStatus == eMAC_GET_SUCCESS )
-      {
-         LG_PRNT_INFO("\nP-VALUE: %s\n",DBG_printFloat(floatStr[1], GetConf.val.CsmaPValue, 1));
-      }
-#endif
    }
 #endif
 

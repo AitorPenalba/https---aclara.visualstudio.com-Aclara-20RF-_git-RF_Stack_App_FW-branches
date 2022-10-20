@@ -2548,7 +2548,7 @@ void vApplicationTickHook()
 {
    OS_INT_disable();
 
-#if ( DCU == 1 ) // TODO: RA6E1 Handle kernel for FreeRTOS
+#if ( DCU == 1 )
    KERNEL_DATA_STRUCT_PTR  kd_ptr = _mqx_get_kernel_data();
    tickSystemClock(kd_ptr->CYCCNT); // Increment system and power-up time
 #else

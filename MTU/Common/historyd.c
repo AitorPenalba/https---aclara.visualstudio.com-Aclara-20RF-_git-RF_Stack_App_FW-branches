@@ -90,7 +90,7 @@
 #define HD_CHAN_ERROR_SET(x)   ( hdFileData_.Data.histDataChErrors |=  ((uint64_t) 1 << x) )
 
 #if( RTOS_SELECTION == FREE_RTOS )
-#define HD_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#define HD_NUM_MSGQ_ITEMS 1
 #else
 #define HD_NUM_MSGQ_ITEMS 0
 #endif
@@ -783,7 +783,6 @@ void HD_DailyShiftTask ( taskParameter )
             }
          }
       }
-
       else
       {
          (void)memcpy((uint8_t *)&timeMsg, &pBuf->data[0], sizeof(timeMsg)); //lint !e740

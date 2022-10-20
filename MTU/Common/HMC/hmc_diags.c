@@ -75,7 +75,7 @@
 #endif
 
 #if( RTOS_SELECTION == FREE_RTOS )
-#define HMC_DIAG_QUEUE_SIZE 2 //NRJ: TODO Figure out sizing
+#define HMC_DIAG_QUEUE_SIZE 2
 #else
 #define HMC_DIAG_QUEUE_SIZE 0
 #endif

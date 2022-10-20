@@ -74,6 +74,9 @@
 */
 #define OS_INT_disable()                                 _int_disable()
 #define OS_INT_enable()                                  _int_enable()
+#define OS_INT_ISR_disable()                             _int_disable()
+#define OS_INT_ISR_enable()                              _int_enable()
+#define OS_TASK_Yield()                                  _sched_yield()
 
 #define OS_EVNT_Set(EventHandle, EventMask)              OS_EVNT_SET(EventHandle, EventMask, __FILE__, __LINE__)
 #define OS_EVNT_Wait(EventHandle, EventMask, WaitForAll, Timeout) OS_EVNT_WAIT(EventHandle, EventMask, WaitForAll, Timeout, __FILE__, __LINE__)
@@ -88,6 +91,11 @@
 
 #define OS_SEM_Post(SemHandle)                           OS_SEM_POST(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend(SemHandle, TimeoutMs)                OS_SEM_PEND(SemHandle, TimeoutMs, __FILE__, __LINE__)
+#define OS_SEM_Post_fromISR(SemHandle)                   OS_SEM_POST(SemHandle, __FILE__, __LINE__)
+/* NOTE: OS_SEM_Pend_fromISR(SemHandle) is not supported in MQX */
+
+#define taskParameter         uint32_t Arg0
+#define OS_TASK_Template_t    TASK_TEMPLATE_STRUCT
 
 /* TYPE DEFINITIONS */
 typedef LWEVENT_STRUCT        OS_EVNT_Obj, *OS_EVNT_Handle;
@@ -97,6 +105,7 @@ typedef QUEUE_STRUCT          OS_QUEUE_Obj, *OS_QUEUE_Handle;
 typedef LWSEM_STRUCT          OS_SEM_Obj, *OS_SEM_Handle;
 typedef MQX_TICK_STRUCT       OS_TICK_Struct;
 typedef _task_id              OS_TASK_id;
+typedef _task_id              taskCreateReturnValue_t;
 
 typedef struct
 {
@@ -222,6 +231,8 @@ extern const char pTskName_Sleep[];
 /* FILE VARIABLE DEFINITIONS */
 
 /* FUNCTION PROTOTYPES */
+
+
 bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );
