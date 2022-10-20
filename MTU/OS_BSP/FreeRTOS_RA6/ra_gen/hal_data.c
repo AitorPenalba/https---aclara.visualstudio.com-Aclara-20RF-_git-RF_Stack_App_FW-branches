@@ -1,7 +1,5 @@
 /* generated HAL source file - do not edit */
 #include "hal_data.h"
-#include "cfg_hal_defs.h" /* Aclara modification to know which board is being used */
-#include "hal.h"          /* Aclara modification to know which board is being used */
 
 /* Macros to tie dynamic ELC links to ADC_TRIGGER_SYNC_ELC option in adc_trigger_t. */
 #define ADC_TRIGGER_ADC0        ADC_TRIGGER_SYNC_ELC

@@ -1,5 +1,8 @@
 /* generated common source file - do not edit */
 #include "common_data.h"
+#include "cfg_hal_defs.h" /* Aclara modification to know which board is being used */
+#include "hal.h"          /* Aclara modification to know which board is being used */
+
 elc_instance_ctrl_t g_elc_ctrl;
 
 extern const elc_cfg_t g_elc_cfg;
