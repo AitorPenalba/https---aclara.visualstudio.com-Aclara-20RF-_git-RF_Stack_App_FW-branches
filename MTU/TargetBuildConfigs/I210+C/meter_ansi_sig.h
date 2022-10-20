@@ -68,8 +68,7 @@
 /* Ansi Manufacturer Tables */
 #define MFG_TBL_GE_DEVICE_TABLE               ((uint16_t)  0 | 0x0800)
 #define MFG_TBL_MEMORY_TABLE                  ((uint16_t) 12 | 0x0800)
-#define MFG_TBL_PROGRAM_CONSTANTS_1           ((uint16_t) 66 | 0x0800)
-#define MFG_TBL_PROGRAM_CONSTANTS_2           ((uint16_t) 67 | 0x0800)
+#define MFG_TBL_PROGRAM_CONSTANTS             ((uint16_t) 67 | 0x0800)
 #define MFG_TBL_ERROR_CAUTION                 ((uint16_t) 68 | 0x0800)
 #define MFG_TBL_ERROR_HISTORY                 ((uint16_t) 69 | 0x0800)
 #define MFG_TBL_DISPLAY_CONFIG                ((uint16_t) 70 | 0x0800)
@@ -943,20 +942,6 @@ const directLookup_t directLookupTable[] =
       .tbl.dataFmt                     = eNIFMT_INT32,
       .tbl.pFunct                      = NULL
    },
-   {
-      .quantity                        = Hz,                            /* Frequency   */
-      .tbl.tblInfo.tableID             = BIG_ENDIAN_16BIT( MFG_TBL_PROGRAM_CONSTANTS_1 ),
-      .tbl.tblInfo.offset[0]           = 0,
-      .tbl.tblInfo.offset[1]           = 0,
-      .tbl.tblInfo.offset[2]           = 0,
-      .tbl.tblInfo.cnt                 = BIG_ENDIAN_16BIT( 1 ),
-      .tbl.tblInfo.lsb                 = 0,
-      .tbl.tblInfo.width               = 0,
-      .tbl.multiplier15                = 1,
-      .tbl.multiplier12                = 0,
-      .tbl.dataFmt                     = eNIFMT_INT32,
-      .tbl.pFunct                      = NULL,
-   },
    { // TODO: RA6E1 Bob: Added from kV2c version of this table; confirm that this is the right thing to do.
       .quantity                        = edModel,                /* Unit of Measure */
       .typecast                        = ASCIIStringValue,
@@ -1065,7 +1050,7 @@ const directLookup_t directLookupTable[] =
    {
       .quantity                        = edProgramID,                   /* Meter Program ID */
       .typecast                        = uintValue,
-      .tbl.tblInfo.tableID             = BIG_ENDIAN_16BIT( MFG_TBL_PROGRAM_CONSTANTS_2 ),
+      .tbl.tblInfo.tableID             = BIG_ENDIAN_16BIT( MFG_TBL_PROGRAM_CONSTANTS ),
       .tbl.tblInfo.offset[0]           = 0,
       .tbl.tblInfo.offset[1]           = 0,
       .tbl.tblInfo.offset[2]           = 154,

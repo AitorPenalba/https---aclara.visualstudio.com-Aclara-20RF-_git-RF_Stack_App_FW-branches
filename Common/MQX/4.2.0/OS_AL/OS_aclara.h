@@ -88,6 +88,8 @@
 
 #define OS_SEM_Post(SemHandle)                           OS_SEM_POST(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend(SemHandle, TimeoutMs)                OS_SEM_PEND(SemHandle, TimeoutMs, __FILE__, __LINE__)
+#define OS_SEM_Post_fromISR(SemHandle)                   OS_SEM_POST(SemHandle, __FILE__, __LINE__)
+#define OS_SEM_Pend_fromISR(SemHandle)                   OS_SEM_PEND(SemHandle, __FILE__, __LINE__)
 
 /* TYPE DEFINITIONS */
 typedef LWEVENT_STRUCT        OS_EVNT_Obj, *OS_EVNT_Handle;
@@ -222,6 +224,8 @@ extern const char pTskName_Sleep[];
 /* FILE VARIABLE DEFINITIONS */
 
 /* FUNCTION PROTOTYPES */
+
+
 bool OS_EVNT_Create ( OS_EVNT_Handle EventHandle );
 void OS_EVNT_SET ( OS_EVNT_Handle EventHandle, uint32_t EventMask, char *file, int line );
 uint32_t OS_EVNT_WAIT ( OS_EVNT_Handle EventHandle, uint32_t EventMask, bool WaitForAll, uint32_t Timeout, char *file, int line );

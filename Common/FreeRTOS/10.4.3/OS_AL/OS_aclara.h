@@ -169,11 +169,9 @@
 #define OS_SEM_Post(SemHandle)                           OS_SEM_POST(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend(SemHandle, TimeoutMs)                OS_SEM_PEND(SemHandle, TimeoutMs, __FILE__, __LINE__)
 
-#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
 #define OS_SEM_Post_fromISR(SemHandle)                   OS_SEM_POST_fromISR(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend_fromISR(SemHandle)                   OS_SEM_PEND_fromISR(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Post_fromISR_retStatus(SemHandle)         OS_SEM_POST_fromISR_retStatus(SemHandle, __FILE__, __LINE__)
-#endif
 
 // Mapping HTONS and HTONL with Byte_Swap internal APIs
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */

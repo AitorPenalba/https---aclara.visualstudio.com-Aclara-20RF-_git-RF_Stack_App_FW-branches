@@ -1947,9 +1947,7 @@ void isr_busy( external_irq_callback_args_t * p_args )
    (void)DVR_EFL_BUSY_IRQ_DI();              /* Disable the ISR */
    if ( eRtosCmdsEn == rtosCmds_ )
    {
-#if ( MCU_SELECTED == NXP_K24 )
-      OS_SEM_Post( &extFlashSem_ );  /* Post the semaphore */
-#elif ( MCU_SELECTED == RA6E1 )
+#if ( MCU_SELECTED == RA6E1 )
    #if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
       DVR_ExtflashInterruptCounter++;
       if ( 0 != DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] )
@@ -1960,8 +1958,8 @@ void isr_busy( external_irq_callback_args_t * p_args )
          DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] = 0;
       }
    #endif
-      OS_SEM_Post_fromISR( &extFlashSem_ );  /* Post the semaphore */
 #endif
+      OS_SEM_Post_fromISR( &extFlashSem_ );  /* Post the semaphore */
    }
 #if !RTOS
    bBusyIsr_ = true;

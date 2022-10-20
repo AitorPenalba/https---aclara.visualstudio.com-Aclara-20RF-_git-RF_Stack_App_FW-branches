@@ -352,7 +352,7 @@ void PWROR_Task( taskParameter )
 returnStatus_t PWROR_init( void )
 {
    returnStatus_t retVal = eFAILURE;
-   //TODO RA6: NRJ: determine if semaphores need to be counting
+
    if ( ( true == OS_SEM_Create( &PWROR_HMC_Sem, 0 ) ) && ( true == OS_SEM_Create( &PWROR_PWR_Sem, 0 ) ) )
    {
       retVal = eSUCCESS;
