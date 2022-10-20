@@ -173,9 +173,7 @@ uint8_t NetworkId_Get(void); // Needs to be called by MAC task only
 
 void MAC_MacAddress_Get(uint8_t       macAddress[MAC_ADDRESS_SIZE]);
 void MAC_MacAddress_Set(uint8_t const macAddress[MAC_ADDRESS_SIZE]);
-#if 0 /* TODO: Queue handle for FreeRTOS */
-returnStatus_t MAC_OR_PM_Handler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
-#endif
+
 /* this function goes away once we have a MAC address in the security chip */
 /*lint -esym(578,macAddress)  */
 // This just gets the 40-bit extension address
@@ -208,10 +206,6 @@ uint32_t MAC_PingRequest( uint16_t handle, eui_addr_t const dst_address, uint8_t
 uint16_t MAC_RandomChannel_Get(MAC_CHANNEL_SETS_e channelSets, MAC_CHANNEL_SET_INDEX_e channelSetIndex);
 bool     TxChannels_init(MAC_CHANNEL_SETS_e channelSets, MAC_CHANNEL_SET_INDEX_e channelSetIndex);
 #endif
-#if 0 /* TODO: Queue handle for FreeRTOS */
-returnStatus_t MAC_TimeSourceHandler( enum_MessageMethod action, meterReadingType id, void *value, OR_PM_Attr_t *attr );
-#endif
-
 
 typedef enum MAC_COUNTER_e
 {

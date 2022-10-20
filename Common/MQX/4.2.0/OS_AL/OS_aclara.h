@@ -92,7 +92,7 @@
 #define OS_SEM_Post(SemHandle)                           OS_SEM_POST(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend(SemHandle, TimeoutMs)                OS_SEM_PEND(SemHandle, TimeoutMs, __FILE__, __LINE__)
 #define OS_SEM_Post_fromISR(SemHandle)                   OS_SEM_POST(SemHandle, __FILE__, __LINE__)
-#define OS_SEM_Pend_fromISR(SemHandle)                   OS_SEM_PEND(SemHandle, __FILE__, __LINE__)
+/* NOTE: OS_SEM_Pend_fromISR(SemHandle) is not supported in MQX */
 
 #define taskParameter         uint32_t Arg0
 #define OS_TASK_Template_t    TASK_TEMPLATE_STRUCT
