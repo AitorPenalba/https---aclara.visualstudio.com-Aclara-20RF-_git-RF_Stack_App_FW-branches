@@ -133,7 +133,7 @@
 #define OS_INT_disable()                                     _int_disable()
 #define OS_INT_enable()                                       _int_enable()
 #define OS_INT_ISR_disable()                                 _int_disable()
-#define OS_INT_ISR_enable()                                   _int_enable()
+#define OS_INT_ISR_enable(x)                                  _int_enable()
 #define OS_TASK_Yield()                                      _sched_yield()
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #define OS_INT_disable()                               taskENTER_CRITICAL()

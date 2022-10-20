@@ -901,7 +901,8 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       static uint32_t   capturedValue;
 #endif
       // Need to read those 3 counters together so disable interrupts if they are not disabled already
-      OS_INT_disable();
+      uint32_t old_mask_level = OS_INT_ISR_disable();
+
 #if ( MCU_SELECTED == NXP_K24 )
       cycleCounter  = DWT_CYCCNT;
       currentFTM    = (uint16_t)FTM3_CNT;
@@ -920,7 +921,7 @@ void ZCD_hwIsr(timer_callback_args_t * p_args)
       cycleCounter       = DWT_CYCCNT;
       currentFTM         = R_GPT2->GTCNT;
 #endif
-      OS_INT_enable();
+      OS_INT_ISR_enable(old_mask_level);
 
       // Convert FTM3_CNT into CYCCNT value
 #if ( MCU_SELECTED == NXP_K24 )

@@ -765,7 +765,7 @@ void DBG_LW_printf( char const *fmt, ... )
 #endif
 #endif
 
-   OS_INT_disable( );
+   uint32_t old_mask_level = OS_INT_ISR_disable();
 #if (MCU_SELECTED == NXP_K24 )
    if ( ioptr == NULL )
    {
@@ -797,7 +797,7 @@ void DBG_LW_printf( char const *fmt, ... )
 #endif
    }
 
-   OS_INT_enable( );
+   OS_INT_ISR_enable(old_mask_level);
 
 #if ( MCU_SELECTED == RA6E1 )
    R_SCI4->SCR_b.RIE = 0x01; /* Enable RX Interrupts */
