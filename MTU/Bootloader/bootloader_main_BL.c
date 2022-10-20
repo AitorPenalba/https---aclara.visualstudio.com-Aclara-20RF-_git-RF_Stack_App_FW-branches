@@ -36,7 +36,6 @@
 
 /* ****************************************************************************************************************** */
 /* Macro Definitions */
-#define MAX_COPY_RANGES          2        /* Maximum number of ranges to copy from NV to ROM.   */
 #define BOOTLOADER_UT_ENABLE     0        /* Enabled the bootloader unit test code */
 #define DEBOUNCE_CHECK_LIMIT     10       /* number of iterations to check PF */
 #define DEBOUNCE_CHECK_MS_DELAY  10       /* ms delay between successive checks of PF */
@@ -672,11 +671,10 @@ int BL_MAIN_Main( void )
    uint32_t                calculatedCRC; /* CRC calculated by bootloader app. */
    uint32_t                bytesCopied;   /* Number of bytes copied from ext. NV to int. flash. */
    dSize                   DFWInfoIdx = 0;/* Loop counter (number of ranges copied) */
-   DfwBlInfo_t             DFWinfo[ MAX_COPY_RANGES ];
+   DfwBlInfoCrc_t          DFWinfo;
    bool                    success = ( bool )true;
    bool                    copyAttempted = ( bool )false;
 #if ( MCU_SELECTED == RA6E1 )
-   uint32_t                crcDfwInfo;
    uint32_t                expectedCrcDfwInfo;
 #endif
 
@@ -716,10 +714,10 @@ int BL_MAIN_Main( void )
    {
 #if ( MCU_SELECTED == RA6E1)
       /* Check whether we need to update the application */
-      crcDfwInfo = bl_crc32( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, (uint8_t *) ( pDFWinfo->PhyStartingAddress + PART_DFW_BL_INFO_DATA_OFFSET), ( lCnt )sizeof( DFWinfo ) );
-      ( void ) PAR_partitionFptr.parRead( ( uint8_t * )&expectedCrcDfwInfo, ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWinfo ) ), sizeof( crcDfwInfo ), pDFWinfo );
+      DFWinfo.crcDfwInfo = bl_crc32( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, (uint8_t *) ( pDFWinfo->PhyStartingAddress + PART_DFW_BL_INFO_DATA_OFFSET), ( lCnt )sizeof( DFWinfo.DFWinformation ) );
+      ( void ) PAR_partitionFptr.parRead( ( uint8_t * )&expectedCrcDfwInfo, ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWinfo.DFWinformation ) ), sizeof( DFWinfo.crcDfwInfo ), pDFWinfo );
       /* Calculated CRC matches expected CRC? */
-      if ( expectedCrcDfwInfo == crcDfwInfo )
+      if ( expectedCrcDfwInfo == DFWinfo.crcDfwInfo )
 #endif
       {
          /* Verify both external NV and internal NV are accessible.  */
@@ -727,27 +725,27 @@ int BL_MAIN_Main( void )
             ( eSUCCESS == PAR_partitionFptr.parOpen( &pCodeInfo, ePART_APP_CODE, 0 ) ) )
          {
             /* check for possible bootloader info */
-            while ( ( DFWInfoIdx < ARRAY_IDX_CNT( DFWinfo ) ) )  /* Loop while in valid DFWinfo[] range and */
+            while ( ( DFWInfoIdx < ARRAY_IDX_CNT( DFWinfo.DFWinformation ) ) )  /* Loop while in valid DFWinfo[] range and */
             {
                /* Read an update segment from the DFW BL INFO partition.   */
-               if ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo[ DFWInfoIdx ],
+               if ( eSUCCESS == PAR_partitionFptr.parRead( ( uint8_t * )&DFWinfo.DFWinformation[ DFWInfoIdx ],
                                                    PART_DFW_BL_INFO_DATA_OFFSET + ( DFWInfoIdx * sizeof( DfwBlInfo_t ) ),
                                                    sizeof( DfwBlInfo_t ), pDFWinfo ))
                {
                   /* update info length indicates an image is available? */
-                  if ( DFWinfo[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
+                  if ( DFWinfo.DFWinformation[ DFWInfoIdx ].Length != 0xffffffff )  /* If there's data to copy. */
                   {
                      /* collect update info and begin update */
-                     CRCAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
-                     CRCLength   =  DFWinfo[ DFWInfoIdx ].Length;
-                     expectedCRC =  DFWinfo[ DFWInfoIdx ].CRC;
+                     CRCAddr     =  DFWinfo.DFWinformation[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
+                     CRCLength   =  DFWinfo.DFWinformation[ DFWInfoIdx ].Length;
+                     expectedCRC =  DFWinfo.DFWinformation[ DFWInfoIdx ].CRC;
 
-                     SrcAddr     =  DFWinfo[ DFWInfoIdx ].SrcAddr;   /* Save src addr, dst addr and length for loop. */
-                     DstAddr     =  DFWinfo[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
-                     Length      =  DFWinfo[ DFWInfoIdx ].Length;    /* Save CRC start addr, length and expected value. */
-                     if ( DFWinfo[ DFWInfoIdx ].FailCount == 0xffffffff )   /* If errCount is "erased", set to 0.  */
+                     SrcAddr     =  DFWinfo.DFWinformation[ DFWInfoIdx ].SrcAddr;   /* Save src addr, dst addr and length for loop. */
+                     DstAddr     =  DFWinfo.DFWinformation[ DFWInfoIdx ].DstAddr;   /* Save CRC start addr, length and expected value. */
+                     Length      =  DFWinfo.DFWinformation[ DFWInfoIdx ].Length;    /* Save CRC start addr, length and expected value. */
+                     if ( DFWinfo.DFWinformation[ DFWInfoIdx ].FailCount == 0xffffffff )   /* If errCount is "erased", set to 0.  */
                      {
-                        DFWinfo[ DFWInfoIdx ].FailCount = 0;
+                        DFWinfo.DFWinformation[ DFWInfoIdx ].FailCount = 0;
                      }
 
 #if ( MCU_SELECTED == RA6E1)
@@ -782,7 +780,7 @@ int BL_MAIN_Main( void )
 
                      if ( calculatedCRC != expectedCRC )
                      {
-                        DFWinfo[ DFWInfoIdx ].FailCount++;
+                        DFWinfo.DFWinformation[ DFWInfoIdx ].FailCount++;
                         success = ( bool )false;
                      }
                   }
@@ -808,8 +806,8 @@ int BL_MAIN_Main( void )
       BL_MAIN_delayForStablePower(); /* check to make sure power is stable before write */
 
       /*lint -e{645} if copyAttemped is true, DFWinfo has been initialized.   */
-      if ( eSUCCESS != PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )DFWinfo,
-                                                   sizeof( DFWinfo ), pDFWinfo ) )
+      if ( eSUCCESS != PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )DFWinfo.DFWinformation,
+                                                   sizeof( DFWinfo.DFWinformation ), pDFWinfo ) )
       {
          success = ( bool ) false;
       }
