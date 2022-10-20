@@ -247,7 +247,6 @@ returnStatus_t OS_SEM_POST_fromISR_retStatus ( OS_SEM_Handle SemHandle, char *fi
 #if ( TM_TICKHOOK_SEMAPHORE_POST_ERRORS == 1 )
       OS_SEM_PostFromIsrRetStatusFailures++;
 #endif
-      DBG_LW_printf("\nERROR:OS_SEM_POST_fromISR call failed %s %d\n", file, line);
       eRetVal = eFAILURE;
    }
 
