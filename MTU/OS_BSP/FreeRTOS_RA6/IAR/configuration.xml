@@ -202,10 +202,6 @@
       <description>Low Voltage Detection</description>
       <originalPack>Renesas.RA.3.5.0.pack</originalPack>
     </component>
-    <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_ospi" variant="" vendor="Renesas" version="3.5.0">
-      <description>Octa Serial Peripheral Interface Flash</description>
-      <originalPack>Renesas.RA.3.5.0.pack</originalPack>
-    </component>
     <component apiversion="" class="HAL Drivers" condition="" group="all" subgroup="r_poeg" variant="" vendor="Renesas" version="3.5.0">
       <description>Port Output Enable for GPT</description>
       <originalPack>Renesas.RA.3.5.0.pack</originalPack>
@@ -689,7 +685,7 @@
     </module>
     <module id="module.driver.external_irq_on_icu.1187114507">
       <property id="module.driver.external_irq.name" value="hmc_trouble_busy"/>
-      <property id="module.driver.external_irq.channel" value="14"/>
+      <property id="module.driver.external_irq.channel" value="4"/>
       <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_both_edge"/>
       <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.false"/>
       <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
@@ -712,7 +708,7 @@
     </module>
     <module id="module.driver.external_irq_on_icu.2093440699">
       <property id="module.driver.external_irq.name" value="miso_busy"/>
-      <property id="module.driver.external_irq.channel" value="4"/>
+      <property id="module.driver.external_irq.channel" value="14"/>
       <property id="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_rising"/>
       <property id="module.driver.external_irq.filter_enable" value="module.driver.external_irq.filter_enable.false"/>
       <property id="module.driver.external_irq.pclk_div" value="module.driver.external_irq.pclk_div.pclk_div_by_64"/>
@@ -954,13 +950,6 @@
       <property id="config.driver.sci_uart.dtc_support" value="config.driver.sci_uart.dtc_support.disabled"/>
       <property id="config.driver.sci_uart.flow_control" value="config.driver.sci_uart.flow_control.disabled"/>
     </config>
-    <config id="config.driver.ospi">
-      <property id="config.driver.ospi.param_checking_enable" value="config.driver.ospi.param_checking_enable.bsp"/>
-      <property id="config.driver.ospi.dmac_support" value="config.driver.ospi.dmac_support.disabled"/>
-    </config>
-    <config id="config.driver.ospi_ram">
-      <property id="config.driver.ospi_ram.param_checking_enable" value="config.driver.ospi_ram.param_checking_enable.bsp"/>
-    </config>
     <config id="config.driver.gpt">
       <property id="config.driver.gpt.param_checking_enable" value="config.driver.gpt.param_checking_enable.bsp"/>
       <property id="config.driver.gpt.output_support_enable" value="config.driver.gpt.output_support_enable.disabled"/>
@@ -972,7 +961,7 @@
     </config>
     <config id="config.driver.spi">
       <property id="config.driver.spi.param_checking_enable" value="config.driver.spi.param_checking_enable.bsp"/>
-      <property id="config.driver.spi.dtc_enable" value="config.driver.spi.dtc_enable.enabled"/>
+      <property id="config.driver.spi.dtc_enable" value="config.driver.spi.dtc_enable.disabled"/>
       <property id="config.driver.spi.rxi_transmit" value="config.driver.spi.rxi_transmit.disabled"/>
     </config>
     <config id="config.driver.qspi">

@@ -333,7 +333,7 @@ FSP Configuration
     
   Module "SPI (r_spi)"
     Parameter Checking: Default (BSP)
-    Enable Support for using DTC: Enabled
+    Enable Support for using DTC: Disabled
     Enable Transmitting from RXI Interrupt: Disabled
     
   Module "Transfer (r_dtc)"
@@ -855,7 +855,7 @@ FSP Configuration
       
     Instance "hmc_trouble_busy External IRQ (r_icu)"
       Name: hmc_trouble_busy
-      Channel: 14
+      Channel: 4
       Trigger: Both Edges
       Digital Filtering: Disabled
       Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
@@ -878,7 +878,7 @@ FSP Configuration
       
     Instance "miso_busy External IRQ (r_icu)"
       Name: miso_busy
-      Channel: 4
+      Channel: 14
       Trigger: Rising
       Digital Filtering: Disabled
       Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled): PCLK / 64
