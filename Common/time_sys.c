@@ -99,7 +99,7 @@
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
-/* The folloing structure is taken from an MQX example showing how to use the system tick.  */
+/* The following structure is taken from an MQX example showing how to use the system tick.  */
 #if (RTOS_SELECTION == MQX_RTOS)
 typedef struct my_isr_struct_mqx
 {
@@ -269,7 +269,8 @@ STATIC          uint32_t TIME_maximumJumpsOfPostFailures[2][MAX_JUMPS_OF_POST_ER
 STATIC void getSysTime( sysTime_t *sysTime )
 {
    // Disable SysTick interrupt to keep data coherence because we are reading SYST registers that could roll over and date/time/tictoc would be out of sync
-   OS_INT_disable(); // This is critical but fast. Disable all interrupts.
+   // This is critical but fast. Disable all interrupts.
+   uint32_t old_mask_level = OS_INT_ISR_disable();  /* This fn is also be called from an Interrupt i.e. Radio0_IRQ_ISR */
    (void)memcpy( sysTime, &_timeSys, sizeof(sysTime_t) );
 #if ( MCU_SELECTED == NXP_K24 )
    sysTime->elapsedCycle = SYST_RVR+1; // Retrieve current SYST_RVR because it can change when tracking GPS UTC
@@ -289,7 +290,7 @@ STATIC void getSysTime( sysTime_t *sysTime )
    }
    sysTime->elapsedCycle -= SysTick->VAL;
 #endif
-   OS_INT_enable(); // Restore interrupts
+   OS_INT_ISR_enable(old_mask_level); // Restore interrupts
 }
 
 /*****************************************************************************************************************
@@ -778,7 +779,7 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
    // We are going to access/modify lots of time related variables so get mutex
    //OS_MUTEX_Lock( &_timeVarsMutex ); // Function will not return if it fails
 
-   // Time adjustement is time sensitive.
+   // Time adjustment is time sensitive.
    // We have to adjust time quickly
    // We don't want to grab the current time, make some computation and can't commit the updated value for a long time because of preemption by a higher priority tasks
    OS_INT_disable( ); /* Disable interrupts - faster than mutex */
@@ -794,7 +795,7 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
       timeSys.time        = INVALID_SYS_TIME;
       timeSys.tictoc      = INVALID_SYS_TICTOC;
       sysTickTime         = INVALID_SYS_TIME;
-      timeVars_.timeState = TIME_STATE_INVALID;  // Setting the time to 1970/01/01 00:00:00 is the equivalent of settting the time to invalid
+      timeVars_.timeState = TIME_STATE_INVALID;  // Setting the time to 1970/01/01 00:00:00 is the equivalent of setting the time to invalid
       bLocalTimeChanged   = (bool)true;
    }
    else
@@ -817,7 +818,7 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
 #if ( DCU == 1 )
       if (VER_getDCUVersion() != eDCU2) {
          if ( clockInfo_.WatchDogCounter ) {
-            // Use GPS time only after we are synchronized to GPS. This is to avoid suddent time jump
+            // Use GPS time only after we are synchronized to GPS. This is to avoid sudden time jump
             // Use the time at face value otherwise
             if ( !firstCall ) {
                // GPS is present which means interrupts are generated every 5 seconds
@@ -864,9 +865,9 @@ void TIME_SYS_SetSysDateTime( const sysTime_t *pSysTime )
                ( (timeSys.date  * (uint64_t)TIME_TICKS_PER_DAY) + timeSys.time );
 
 #if ( DCU == 1 )
-   // If time received doesn't change current time then don't ajust.
+   // If time received doesn't change current time then don't adjust.
    // This is what should happen most of the time when GPS is working.
-   // This is to prevent prevent the time from being jerked around by millseconds.
+   // This is to prevent the time from being jerked around by milliseconds.
    if (  (VER_getDCUVersion() == eDCU2) ||
        ( (VER_getDCUVersion() != eDCU2) &&
        ( (timeSys.date != pSysTime->date) || ((timeSys.time/5000) != (sysTickTime/5000)) ||
@@ -937,10 +938,10 @@ bool TIME_SYS_GetSysDateTime( sysTime_t *pSysTime )
 {
    bool boolSTValid;   /* Returns if system time is invalid */
 
-   OS_INT_disable();
+   uint32_t old_mask_level = OS_INT_ISR_disable(); /* This fn is also be called from an Interrupt i.e. Radio0_IRQ_ISR */
    boolSTValid = TIME_SYS_IsTimeValid();
    getSysTime( pSysTime );
-   OS_INT_enable();
+   OS_INT_ISR_enable(old_mask_level);
 
    return boolSTValid;
 }
@@ -966,11 +967,11 @@ bool TIME_SYS_IsTimeValid( void )
 {
    bool boolSTValid = false;
 
-   OS_INT_disable();
+   uint32_t old_mask_level = OS_INT_ISR_disable();  /* This fn is also be called from an Interrupt i.e. Radio0_IRQ_ISR */
    if ( timeVars_.timeState == TIME_STATE_VALID_SYNC ) {
       boolSTValid = true;
    }
-   OS_INT_enable();
+   OS_INT_ISR_enable(old_mask_level);
 
    return boolSTValid;
 }
@@ -1775,13 +1776,13 @@ bool TIME_SYS_GetRealCpuFreq( uint32_t *freq, TIME_SYS_SOURCE_e *source, uint32_
    uint32_t currenTime;
    uint32_t lastUpdate;
 
-   OS_INT_disable();
+   uint32_t old_mask_level = OS_INT_ISR_disable();  /* This fn would also be called from an Interrupt i.e. Radio0_IRQ_ISR */
    *freq      = clockInfo_.freq; // Grab best frequency estimate
    lastUpdate = clockInfo_.freqLastUpdate;
    if ( source != NULL ) {
       *source = clockInfo_.source;
    }
-   OS_INT_enable();
+   OS_INT_ISR_enable(old_mask_level);
 
    // CPU frequency is considered valid up to 1 minute after the last update
    // After that it is considered stale.

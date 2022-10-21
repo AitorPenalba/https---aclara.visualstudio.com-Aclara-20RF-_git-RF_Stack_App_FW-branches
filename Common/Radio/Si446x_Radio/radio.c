@@ -998,7 +998,7 @@ static void Radio0_IRQ_ISR(void)
 void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #endif // RTOS_SELECTION
 {
-   OS_INT_disable();
+   uint32_t old_mask_level = OS_INT_ISR_disable();
    // There is no guarantee that this interrupt was from a time sync (it could be from preamble or FIFO almost full) but only the time sync interrupt will validate this value
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
 
@@ -1029,7 +1029,7 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    cycleCounter   = DWT_CYCCNT;
    currentFTM     = R_GPT1->GTCNT;    // Connected to radio interrupt
 #endif
-   OS_INT_enable();
+   OS_INT_ISR_enable(old_mask_level);
 
 #if ( MCU_SELECTED == NXP_K24 )
    FTM_CnSC_REG(FTM1_BASE_PTR, 0) &= ~FTM_CnSC_CHF_MASK; // Acknowledge channel interrupt

@@ -276,7 +276,7 @@ const external_irq_cfg_t miso_busy_cfg =
     #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
     .channel             = 4,                               /* Modification to generated file by Aclara */
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
-    #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev B (P1B) hardware"
+    /* Rev B is now the standard hardware version so no warning message is necessary */
     .channel             = 14,                              /* Modification to generated file by Aclara */
 #else                                                       /* Modification to generated file by Aclara */
    #error "Invalid value for HAL_TARGET_HARDWARE"           /* Modification to generated file by Aclara */
@@ -324,7 +324,7 @@ const external_irq_cfg_t hmc_trouble_busy_cfg =
     .channel             = 14,                              /* Modification to generated file by Aclara */
     #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
-    #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev B (P1B) hardware"
+    /* Rev B is now the standard hardware version so no warning message is necessary */
     .channel             =  4,                              /* Modification to generated file by Aclara */
 #else                                                       /* Modification to generated file by Aclara */
    #error "Invalid value for HAL_TARGET_HARDWARE"           /* Modification to generated file by Aclara */

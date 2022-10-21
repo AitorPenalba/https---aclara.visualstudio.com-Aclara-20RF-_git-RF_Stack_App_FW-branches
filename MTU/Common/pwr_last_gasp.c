@@ -378,7 +378,7 @@ void PWRLG_Task( taskParameter )
    DBG_logPrintf( 'I', "\n" );
    DBG_logPrintf( 'I', "Running: %u of %u", pSysMem->uMessageCounts.sent + 1, pSysMem->uMessageCounts.total  );
    DBG_logPrintf( 'I', "PWRLG_STATE: %d", PWRLG_STATE() );
-   DBG_logPrintf( 'I', "Vcap:            %-6s", DBG_printFloat( floatStr, Vcap, 3 ) );
+   DBG_logPrintf( 'I', "Vcap: %-6s", DBG_printFloat( floatStr, Vcap, 3 ) );
    DBG_logPrintf( 'I', "PWR Qual count: %d", pVbatMem->pwrQualCount );
    DBG_logPrintf( 'I', "outage: %d, Short outage: %d", PWRLG_OUTAGE(), VBATREG_SHORT_OUTAGE );
    DBG_logPrintf( 'I', "HW Rev Letter: %c ", hwRevLetter_);
