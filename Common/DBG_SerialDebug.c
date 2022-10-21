@@ -762,7 +762,7 @@ void DBG_LW_printf( char const *fmt, ... )
 #endif
 #endif
 
-   uint32_t old_mask_level = OS_INT_ISR_disable();
+   uint32_t old_mask_level = OS_INT_ISR_disable(); /* This fn is also be called from an Interrupt, hence use the ISR safe */
 #if (MCU_SELECTED == NXP_K24 )
    if ( ioptr == NULL )
    {
