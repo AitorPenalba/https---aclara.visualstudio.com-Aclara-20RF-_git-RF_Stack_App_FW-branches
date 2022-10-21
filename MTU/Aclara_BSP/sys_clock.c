@@ -1,4 +1,3 @@
-// <editor-fold defaultstate="collapsed" desc="File Header">
 /***********************************************************************************************************************
  *
  * Filename:   sys_clock.c
@@ -8,10 +7,15 @@
  * Contents: Configures the system clock(s)
  *
  ***********************************************************************************************************************
- * Copyright (c) 2013 Aclara Power-Line Systems Inc.  All rights reserved.  This program may not be reproduced, in whole
- * or in part, in any form or by any means whatsoever without the written permission of:
- *                ACLARA POWER-LINE SYSTEMS INC.
- *                ST. LOUIS, MISSOURI USA
+   A product of Aclara Technologies LLC
+   Confidential and Proprietary
+   Copyright 2013-2021 Aclara.  All Rights Reserved.
+
+   PROPRIETARY NOTICE
+   The information contained in this document is private to Aclara Technologies LLC an Ohio limited liability company
+   (Aclara).  This information may not be published, reproduced, or otherwise disseminated without the express written
+   authorization of Aclara.  Any software or firmware described in this document is furnished under a license and may be
+   used or copied only in accordance with the terms of such license.
  ***********************************************************************************************************************
  *
  * $Log$ kdavlin Created May 23, 2013
@@ -22,8 +26,6 @@
  * 03/31/15 - mkv - Update getBusClock() to return value from mqx instead of #define value which was incorrect.
  *
  **********************************************************************************************************************///
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="Include Files">
 /* INCLUDE FILES */
 #include "project.h"
 #ifndef __BOOTLOADER
@@ -245,8 +247,6 @@ void sleepDeep( void )
 #endif
 }
 /* ****************************************************************************************************************** */
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="uint32_t getBusClock( void )">
 /***********************************************************************************************************************
  *
  * Function Name: getBusClock
@@ -271,14 +271,10 @@ uint32_t getBusClock( void )
    return BSP_BUS_CLOCK;
 #endif
 #elif ( MCU_SELECTED == RA6E1 )
-#ifndef __BOOTLOADER
    return ( R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKB) ); // TODO: RA6E1 Bob: Verify that PCLKB is the correct bus clock
-#else
-   return BSP_BUS_CLOCK;   //TODO: is this correct or needed?
-#endif // __BOOTLOADER
 #endif // ( MCU SELECTED )
 }
-// </editor-fold>
+
 #ifndef __BOOTLOADER
 // <editor-fold defaultstate="collapsed" desc="uint32_t getCoreClock( void )">
 /***********************************************************************************************************************

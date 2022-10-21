@@ -133,7 +133,7 @@
 #define OS_INT_disable()                                     _int_disable()
 #define OS_INT_enable()                                       _int_enable()
 #define OS_INT_ISR_disable()                                 _int_disable()
-#define OS_INT_ISR_enable()                                   _int_enable()
+#define OS_INT_ISR_enable(x)                                  _int_enable()
 #define OS_TASK_Yield()                                      _sched_yield()
 #elif ( RTOS_SELECTION == FREE_RTOS )
 #define OS_INT_disable()                               taskENTER_CRITICAL()
@@ -169,11 +169,9 @@
 #define OS_SEM_Post(SemHandle)                           OS_SEM_POST(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend(SemHandle, TimeoutMs)                OS_SEM_PEND(SemHandle, TimeoutMs, __FILE__, __LINE__)
 
-#if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
 #define OS_SEM_Post_fromISR(SemHandle)                   OS_SEM_POST_fromISR(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Pend_fromISR(SemHandle)                   OS_SEM_PEND_fromISR(SemHandle, __FILE__, __LINE__)
 #define OS_SEM_Post_fromISR_retStatus(SemHandle)         OS_SEM_POST_fromISR_retStatus(SemHandle, __FILE__, __LINE__)
-#endif
 
 // Mapping HTONS and HTONL with Byte_Swap internal APIs
 #if ( RTOS_SELECTION == FREE_RTOS ) /* FREE_RTOS */
@@ -491,11 +489,7 @@ OS_TASK_id              OS_TASK_GetID_fromName ( const char *taskName );
 bool                    OS_TASK_IsCurrentTask ( char const *pTaskName );
 char *                  OS_TASK_GetTaskName ( void );
 uint32_t                OS_TASK_UpdateCpuLoad ( void );
-#if ( RTOS_SELECTION == MQX_RTOS )
 void                    OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint32_t * CPULoad );
-#elif ( RTOS_SELECTION == FREE_RTOS )
-void                    OS_TASK_GetCpuLoad ( OS_TASK_id taskIdx, uint16_t * CPULoad ); /* Values between 0 and 1000, no need for 32-bit */
-#endif
 void                    OS_TASK_Summary ( bool safePrint );
 
 

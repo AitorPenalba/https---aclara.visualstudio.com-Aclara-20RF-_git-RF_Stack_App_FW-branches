@@ -1267,7 +1267,7 @@ void vPortEnterCritical (void)
     if (uxCriticalNesting == 1)
     {
         g_mask_level_before_disable = old_mask_level;
-//        configASSERT((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) == 0);  // Aclara: TODO: RA6E1: This line prevents the HardFault Prints
+        configASSERT((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) == 0);
     }
 }
 

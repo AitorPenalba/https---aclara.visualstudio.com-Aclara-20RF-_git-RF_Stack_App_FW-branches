@@ -20,7 +20,7 @@ Copyright 2018 Aclara.  All Rights Reserved.
 #include "DBG_SerialDebug.h"
 #include "endpt_cim_cmd.h"
 #include "hdlc_frame.h"
-#include "heep_util.h"
+#include "HEEP_util.h"
 #include "tunnel_util.h"
 #include "sm_protocol.h"
 #include "sm.h"

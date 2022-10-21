@@ -175,9 +175,6 @@ typedef enum
 /* FILE VARIABLE DEFINITIONS */
 
 static OS_SEM_Obj       TxDoneSem;            /* Used to signal message transmit completed. */
-#if ( LG_UPDATE_RADIO_MODE == 1 )
-static OS_SEM_Obj       PhyConfirm_;          /* Used to signal phy state change completed. */
-#endif
 static volatile uint8_t TxSuccessful;
 #if ( DEBUG_PWRLG != 0 )
 #define uLLWU_F3     ( VBATREG_RFSYS_BASE_PTR->uLLWU_F3 )
@@ -204,9 +201,6 @@ static void             TxCallback( MAC_DATA_STATUS_e status, uint16_t Req_Resp_
 static void             LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR_Mode eMode );
 static void             LptmrEnable( bool bEnableInterrupt );
 static bool             powerStable( bool curState );
-#if ( LG_UPDATE_RADIO_MODE == 1 )
-static void             phy_confirm_cb(PHY_Confirm_t const *confirm, buffer_t const *pReqBuf);
-#endif
 #if ( ( MCU_SELECTED == RA6E1 ) && ( LAST_GASP_USE_2_DEEP_SLEEP == 1 ) )
 static void             Process_SecondDeepSleep ( void );
 #endif
@@ -308,11 +302,7 @@ void PWRLG_Task( taskParameter )
    uint8_t                    hwVerString[VER_HW_STR_LEN];
 
    // Create the semaphore used to signal TX complete.
-   //TODO NRJ: determine if semaphores need to be counting
    ( void )OS_SEM_Create( &TxDoneSem, 0 );
-#if ( LG_UPDATE_RADIO_MODE == 1 )
-   ( void )OS_SEM_Create( &PhyConfirm_, 0 );
-#endif
 
    // Seed the random number generator for P persistence test in the MAC.
    aclara_srand( PWRLG_MILLISECONDS() );
@@ -388,7 +378,7 @@ void PWRLG_Task( taskParameter )
    DBG_logPrintf( 'I', "\n" );
    DBG_logPrintf( 'I', "Running: %u of %u", pSysMem->uMessageCounts.sent + 1, pSysMem->uMessageCounts.total  );
    DBG_logPrintf( 'I', "PWRLG_STATE: %d", PWRLG_STATE() );
-   DBG_logPrintf( 'I', "Vcap:            %-6s", DBG_printFloat( floatStr, Vcap, 3 ) );
+   DBG_logPrintf( 'I', "Vcap: %-6s", DBG_printFloat( floatStr, Vcap, 3 ) );
    DBG_logPrintf( 'I', "PWR Qual count: %d", pVbatMem->pwrQualCount );
    DBG_logPrintf( 'I', "outage: %d, Short outage: %d", PWRLG_OUTAGE(), VBATREG_SHORT_OUTAGE );
    DBG_logPrintf( 'I', "HW Rev Letter: %c ", hwRevLetter_);
@@ -439,10 +429,6 @@ void PWRLG_Task( taskParameter )
          while ( !TxSuccessful && ( VBATREG_CURR_TX_ATTEMPT < VBATREG_MAX_TX_ATTEMPTS ) )
          {
             RDO_PA_EN_ON();  /* Enable the Radio PA  */
-#if ( LG_UPDATE_RADIO_MODE == 1 )
-            (void)PHY_StartRequest( ( PHY_START_e )ePHY_START_READY, phy_confirm_cb );
-            (void)OS_SEM_Pend( &PhyConfirm_, 500 ); /* Wait up to 500ms */
-#endif
 
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
             // Option 2
@@ -460,10 +446,6 @@ void PWRLG_Task( taskParameter )
             if ( !TxSuccessful )
             {
                RDO_PA_EN_OFF();  /* Disable the Radio PA  */
-#if ( LG_UPDATE_RADIO_MODE == 1 )
-               /* Change the radio mode to STANDBY which results in lower power */
-               (void)PHY_StartRequest( ( PHY_START_e )ePHY_START_STANDBY, NULL );
-#endif
 #if ( ENABLE_TRACE_PINS_LAST_GASP != 0 )
                // Option 2
                TRACE_D1_LOW();
@@ -740,13 +722,6 @@ void PWRLG_TxFailure( void )
       ( void )PHY_SetRequest( ePhyAttr_CcaThreshold, &ccaThreshold );
       ( void )PHY_SetRequest( ePhyAttr_CcaOffset, &ccaOffset );
       /* No need to worry about the resetting the parameters, as in this mode, we are only making the changes to the RAM copy. */
-#if 0  /* TODO: Remove; TEST CODE  */
-      GetConf = MAC_GetRequest( eMacAttr_CsmaPValue );
-      if ( GetConf.eStatus == eMAC_GET_SUCCESS )
-      {
-         LG_PRNT_INFO("\nP-VALUE: %s\n",DBG_printFloat(floatStr[1], GetConf.val.CsmaPValue, 1));
-      }
-#endif
    }
 #endif
 
@@ -866,8 +841,9 @@ void PWRLG_Startup( void )
    LG_PRNT_INFO( "RSTSR0 0x%02X\n",  R_SYSTEM->RSTSR0 );
    LG_PRNT_INFO( "RSTSR1 0x%02X\n",  R_SYSTEM->RSTSR1 );
    LG_PRNT_INFO( "RSTSR2 0x%02X\n",  R_SYSTEM->RSTSR2 );
-   LG_PRNT_INFO( "RTC_INT 0x%02X\n", R_SYSTEM->DPSIFR2_b.DRTCAIF );
    LG_PRNT_INFO( "PF_INT 0x%02X\n",  R_SYSTEM->DPSIFR1_b.DIRQ11F );
+   LG_PRNT_INFO( "RTC_INT 0x%02X\n", R_SYSTEM->DPSIFR2_b.DRTCAIF );
+   LG_PRNT_INFO( "AGT_INT 0x%02X\n", R_SYSTEM->DPSIFR3_b.DAGT1IF );
 #endif
    VBATREG_EnableRegisterAccess();
 
@@ -925,7 +901,7 @@ void PWRLG_Startup( void )
       /* This block handles timer event.   */
       if ( ( uLLWU_F3 & LLWU_F3_MWUF0_MASK ) != 0  )
 #elif ( MCU_SELECTED == RA6E1 )
-      if ( R_SYSTEM->DPSIFR2_b.DRTCAIF != 0 )  /* RTC Alarm Interrupt */
+      if ( ( 0 != R_SYSTEM->DPSIFR2_b.DRTCAIF ) || ( 0 != R_SYSTEM->DPSIFR3_b.DAGT1IF ) )   /* RTC Alarm or AGT Interrupt */
 #endif
       {
          if ( !BRN_OUT() )                         /* If power is on... */
@@ -1024,9 +1000,6 @@ void PWRLG_Startup( void )
                   LG_PRNT_INFO( "Wait for LP EXIT\n\r" );
                   PWRLG_STATE_SET( PWRLG_STATE_WAIT_LP_EXIT );
                   EnterVLLS( VBATREG_POWER_RESTORATION_TIMER, LPTMR_MILLISECONDS, 1 );  //DG: Why???
-#if ( MCU_SELECTED == RA6E1 )
-                  RESET();  /* Forcing MCU to go through a reset */
-#endif
                }
             }
          }
@@ -1129,7 +1102,11 @@ void PWRLG_Startup( void )
                   if ( PWRLG_MESSAGE_NUM() < PWRLG_MESSAGE_COUNT() ) /* Any messages left?   */
                   {
                      PWRLG_STATE_SET( PWRLG_STATE_TRANSMIT );
+#if ( MCU_SELECTED == NXP_K24 )
                      EnterVLLS( ( uint16_t ) 0, LPTMR_MILLISECONDS, 1 );   /* Continue with current time out value.  */
+#elif ( MCU_SELECTED == RA6E1 )
+                     EnterVLLS( ( uint16_t ) 1, LPTMR_MILLISECONDS, 2 );   /* Continue with current time out value.  */
+#endif
                   }
                   else  /* All messages sent, wait for power restored.   */
                   {
@@ -1328,7 +1305,6 @@ static void NextSleep( void )
          EnterVLLS( 1, LPTMR_MILLISECONDS, 1 );
 #if ( ( MCU_SELECTED == RA6E1 ) && ( LAST_GASP_USE_2_DEEP_SLEEP == 0 ) )
          EnterVLLS( 0, LPTMR_SECONDS, 1 ); /* Forcing MCU to go through a reset */
-         // RESET();  /* Forcing MCU to go through a reset */
 #endif
       }
    }
@@ -1360,7 +1336,6 @@ static void NextSleep( void )
 #if ( ( MCU_SELECTED == RA6E1 ) && ( LAST_GASP_USE_2_DEEP_SLEEP == 0 ) )
          /* In K24, above line make the MCU go through a reset, where as for RA6, we need to force it to go through reset to keep the same functionality */
          EnterVLLS( 0, LPTMR_SECONDS, 1 );
-         //RESET();
 #endif
       }
    }
@@ -2795,7 +2770,6 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
 {
    /* Note: In RA6E1, RTC Alarm is used for LPTMR_SECONDS and Deep Software Standby Mode
             In RA6E1, AGT Alarm is used for LPTMR_MILLISECONDS and Software Standby Mode */
-
    if ( uCounter != 0 ) /* If 0 time requested, resume with existing settings.   */
    {
       switch( eUnits )
@@ -2822,10 +2796,8 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
          }
       }
    }
-   else
-   {
-      /* Function should never be called with uCounter = 0 */
-   }
+   else { /* Function should never be called with uCounter = 0 */ }
+
    if ( LPTMR_MODE_PROGRAM_ONLY != eMode )
    {
       LptmrEnable( ( bool )true );
@@ -2834,7 +2806,6 @@ static void LptmrStart( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, PWRLG_LPTMR
       {
          AGT_LPM_Timer_Wait();
       }
-
    }
 }
 
@@ -2894,6 +2865,10 @@ static void EnterLowPowerMode( uint16_t uCounter, PWRLG_LPTMR_Units eUnits, uint
          PWRLG_SECOND_SLEEP_COUNTER_SET( secs );  // Next Sleep counter in Secs
 #endif
       }
+   }
+   else if( ( LPTMR_MILLISECONDS == eUnits ) && ( uCounter < 1000 ) && ( uMode == 1 ) )
+   {
+      uMode = APP_LPM_DEEP_SW_STANDBY_STATE_AGT; // Configure the right mode based on the parameters.
    }
 
    LG_PRNT_INFO( "\nEnter LPM, count: %d, units: %d, mode: %d\n", uCounter, ( uint8_t )eUnits, uMode );

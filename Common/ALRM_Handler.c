@@ -167,7 +167,6 @@ static fsp_err_t meter_trouble_isr_init( void )
    if(FSP_SUCCESS == err)
    {
       /* Enable ICU module */
-//      DBG_printf("\nOpen Meter Trouble Busy IRQ");
       err = R_ICU_ExternalIrqEnable( &hmc_trouble_busy_ctrl );
    }
    return err;
@@ -507,7 +506,7 @@ void ALRM_RealTimeTask ( taskParameter )
 #if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
          #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
-         #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev B (P1B) hardware"
+/* Rev B is now the standard hardware version so no warning message is necessary */
 #else
          #error "Invalid value for HAL_TARGET_HARDWARE"
 #endif
@@ -1090,6 +1089,7 @@ void ALRM_RealTimeTask ( taskParameter )
       // A condition was discovered above requiring the processor to be reset
       if ( resetProc )
       {
+         ALRM_PRNT_WARN('A', "Meter Program Changed! Rebooting!");
          (void)DFWA_WaitForSysIdle(ALRM_RESET_GRACE_PERIOD);   // Do not need unlock mutex since reset inevitable
          //Keep all other tasks from running
          /* Increase the priority of the power and idle tasks. */

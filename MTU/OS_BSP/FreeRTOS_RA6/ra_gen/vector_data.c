@@ -49,7 +49,7 @@
             [34] = r_icu_isr, /* ICU IRQ14 (External pin interrupt 14) */
             [35] = r_icu_isr, /* ICU IRQ4 (External pin interrupt 4) */
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
-#warning "Configuring miso_busy/trouble interrupt vectors for Y84580 Rev B (P1B) hardware"
+            /* Rev B is now the standard hardware version so no warning message is necessary */
             [34] = r_icu_isr, /* ICU IRQ4 (External pin interrupt 4) */
             [35] = r_icu_isr, /* ICU IRQ14 (External pin interrupt 14) */
 #endif  /* Aclara Modified - End */
@@ -162,7 +162,7 @@
             [34] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ14), /* ICU IRQ14 (External pin interrupt 14) */
             [35] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ4), /* ICU IRQ4 (External pin interrupt 4) */
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
-#warning "Configuring miso_busy/trouble interrupt vectors for Y84580 Rev B (P1B) hardware"
+            /* Rev B is now the standard hardware version so no warning message is necessary */
             [34] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ4), /* ICU IRQ4 (External pin interrupt 4) */
             [35] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ14), /* ICU IRQ14 (External pin interrupt 14) */
 #endif  /* Aclara Modified - End */

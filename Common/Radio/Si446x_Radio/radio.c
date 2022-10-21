@@ -19,13 +19,11 @@
  **********************************************************************************************************************/
 
 #include "project.h"
-#include <stdlib.h>
 #include <math.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #include <bsp.h>
 #endif
-#include "CompileSwitch.h"
 #include "compiler_types.h"
 #include "buffer.h"
 #include "PHY_Protocol.h"
@@ -39,6 +37,9 @@
 #include "si446x_cmd.h"
 #include "si446x_prop.h"
 #include "DBG_SerialDebug.h"
+#if ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 )
+#include "DBG_CommandLine.h"
+#endif
 #include "time_util.h"
 #include "ascii.h"
 #if ( MCU_SELECTED == NXP_K24 )
@@ -997,7 +998,7 @@ static void Radio0_IRQ_ISR(void)
 void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
 #endif // RTOS_SELECTION
 {
-   OS_INT_disable();
+   uint32_t old_mask_level = OS_INT_ISR_disable();
    // There is no guarantee that this interrupt was from a time sync (it could be from preamble or FIFO almost full) but only the time sync interrupt will validate this value
    radio[(uint8_t)RADIO_0].tentativeSyncTime.QSecFrac = TIME_UTIL_GetTimeInQSecFracFormat();
 
@@ -1028,7 +1029,7 @@ void Radio0_IRQ_ISR(external_irq_callback_args_t * p_args)
    cycleCounter   = DWT_CYCCNT;
    currentFTM     = R_GPT1->GTCNT;    // Connected to radio interrupt
 #endif
-   OS_INT_enable();
+   OS_INT_ISR_enable(old_mask_level);
 
 #if ( MCU_SELECTED == NXP_K24 )
    FTM_CnSC_REG(FTM1_BASE_PTR, 0) &= ~FTM_CnSC_CHF_MASK; // Acknowledge channel interrupt
@@ -5222,9 +5223,16 @@ float RADIO_Get_RSSI(uint8_t radioNum, uint16_t chan, uint8_t *buf, uint16_t nSa
 
    // Get RSSI values
    for (i=0; i<nSamples; i++) {
+      DBG_NoisebandFlashQSPI_Access(); /* Perform an I/O operation to the serial flash chip on QSPI to see if it creates RF noise */
       wait_us((uint32_t)rate);
+#if ( ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) && ( TM_NOISEBAND_RSSI_TIMING == 1 ) )
+      R_BSP_PinCfg( BSP_IO_PORT_04_PIN_06, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_HIGH ) ); // TODO: RA6E1 Bob: Remove before release
+#endif
       (void)si446x_get_modem_status(radioNum, 0xFF, &Si446xCmd); // Don't clear int.
       buf[i] = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
+#if ( ( TM_ENHANCE_NOISEBAND_FOR_RA6E1 == 1 ) && ( TM_NOISEBAND_RSSI_TIMING == 1 ) )
+      R_BSP_PinCfg( BSP_IO_PORT_04_PIN_06, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_LOW  ) ); // TODO: RA6E1 Bob: Remove before release
+#endif
    }
 #if ( EP == 1 )
 #if ( TM_NOISEBAND_LOWEST_CAP_VOLTAGE == 1 )
@@ -5954,17 +5962,10 @@ static void StandbyRx(void)
    uint8_t      radioNum;
 
    INFO_printf("StandbyRx");
-
    // For each radio
    // On the samwise board, the first radio (0) is configured with the RX Channel ( outbound channel )
    // On the frodo board, the first radio (0) is configured with the TX Channel
    // The remaining radios (1-8) are configured with the RX Channels
-#if ( EP == 1 )
-#if ( MCU_SELECTED == RA6E1 )  /* TODO: Remove this conditional. Only here to make the Hex compare happy */
-   if( PWRLG_LastGasp() == false )
-#endif
-#endif
-   {
    for(radioNum = (uint8_t)RADIO_FIRST_RX; radioNum < PHY_RCVR_COUNT; radioNum++)
    {
       // Is radio configured?
@@ -5983,15 +5984,6 @@ static void StandbyRx(void)
          }
       }
    }
-   }
-#if ( EP == 1 )
-#if ( MCU_SELECTED == RA6E1 ) /* TODO: Remove this conditional. Only here to make the Hex compare happy */
-   else
-   {
-      (void)si446x_change_state((uint8_t)RADIO_0, SI446X_CMD_CHANGE_STATE_ARG_NEXT_STATE1_NEW_STATE_ENUM_SLEEP);  // Force standby state
-   }
-#endif
-#endif
 }
 
 /*!

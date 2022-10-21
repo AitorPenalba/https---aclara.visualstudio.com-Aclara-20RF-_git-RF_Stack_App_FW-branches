@@ -26,9 +26,7 @@
 /* ****************************************************************************************************************** */
 /* INCLUDE FILES */
 #include "project.h"
-#include <stdbool.h>
 #include <math.h>
-#include <stdlib.h>
 #if ( RTOS_SELECTION == MQX_RTOS )
 #include <mqx.h>
 #endif
@@ -172,7 +170,7 @@ typedef struct
 #define ID_MAX_BYTES_PER_ALL_CHANNELS     ((uint16_t)256)
 
 #if( RTOS_SELECTION == FREE_RTOS )
-#define INTERVAL_NUM_MSGQ_ITEMS 10 //NRJ: TODO Figure out sizing
+#define INTERVAL_NUM_MSGQ_ITEMS 1
 #else
 #define INTERVAL_NUM_MSGQ_ITEMS 0
 #endif
@@ -1671,16 +1669,19 @@ void ID_task( taskParameter )
 
                   else  /*  Else, not using time diversity, send the message immediately. */
                   {
-                     if ( heepHdr.Method_Status != RequestedEntityTooLarge )
+                     if ( NULL != pMessage )
                      {
-                        /* Send the message to message handler. The called function will free the buffer */
-                        (void)HEEP_MSG_Tx( &heepHdr, pMessage );
+                        if ( heepHdr.Method_Status != RequestedEntityTooLarge )
+                        {
+                           /* Send the message to message handler. The called function will free the buffer */
+                           (void)HEEP_MSG_Tx( &heepHdr, pMessage );
+                        }
+                        else  /* No content to send, but must send header with status. */
+                        {
+                           (void)HEEP_MSG_TxHeepHdrOnly( &heepHdr );
+                        }
+                        pMessage = NULL;
                      }
-                     else  /* No content to send, but must send header with status. */
-                     {
-                        (void)HEEP_MSG_TxHeepHdrOnly( &heepHdr );
-                     }
-                     pMessage = NULL;
                   }
                }
                else  /* Only other value returned by IntervalBubbleup() is RequestedEntityTooLarge */

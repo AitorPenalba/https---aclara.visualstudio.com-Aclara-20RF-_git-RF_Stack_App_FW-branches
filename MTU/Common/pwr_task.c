@@ -219,7 +219,7 @@ void PWR_task( taskParameter )
    ( void )brownOut_isr_init();
 #endif
 #if ( MCU_SELECTED == RA6E1 )
-#if 1 /* TEST */ // TODO: RA6E1: DG: Remove later
+#if 0 /* TEST */ // Helper Debug Code
    PWRLG_print_LG_Flags();
 #endif
 #endif
@@ -545,7 +545,6 @@ returnStatus_t PWR_TSK_init( void )
    if ( OS_MUTEX_Create( &PWR_Mutex ) && OS_MUTEX_Create(&Embedded_Pwr_Mutex) && OS_SEM_Create( &PWR_Sem, 0 ) )
    {
 #if ( SIMULATE_POWER_DOWN == 1 )
-      //TODO RA6: NRJ: determine if semaphores need to be counting
       (void) OS_SEM_Create( &PWR_SimulatePowerDn_Sem, 0 );     /* Creating the Semaphore */
 #endif
       if ( eSUCCESS == FIO_fopen( &fileHndlPowerDownCount, ePART_SEARCH_BY_TIMING, ( uint16_t )eFN_PWR,
@@ -1010,17 +1009,9 @@ void isr_brownOut( external_irq_callback_args_t * p_args )
    BRN_OUT_IRQ_DI();        /* Disable the ISR */
 #if ( SIMULATE_POWER_DOWN == 1 )
    /* Adding a semaphore to keep the ISR as short as possible */
-#if ( RTOS_SELECTION == MQX_RTOS )
-   OS_SEM_Post( &PWR_SimulatePowerDn_Sem ); /* Post the semaphore */
-#elif ( RTOS_SELECTION == FREE_RTOS )
    OS_SEM_Post_fromISR( &PWR_SimulatePowerDn_Sem ); /* Post the semaphore */
 #endif
-#endif
-#if ( RTOS_SELECTION == MQX_RTOS )
-   OS_SEM_Post( &PWR_Sem ); /* Post the semaphore */
-#elif ( RTOS_SELECTION == FREE_RTOS )
-   OS_SEM_Post_fromISR( &PWR_Sem );
-#endif
+   OS_SEM_Post_fromISR( &PWR_Sem );  /* Post the semaphore */
 }
 
 /***********************************************************************************************************************

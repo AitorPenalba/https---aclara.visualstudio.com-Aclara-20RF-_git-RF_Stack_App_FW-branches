@@ -1022,7 +1022,7 @@
     <comment propertyId="p108.comment" value="JTAG_TMS"/>
     <comment propertyId="p109.comment" value="JTAG_TDO"/>
     <comment propertyId="p110.comment" value="JTAG_TDI"/>
-    <comment propertyId="p111.comment" value="Miso_Busy"/>
+    <comment propertyId="p111.comment" value="T_I-210+C_METER"/>
     <comment propertyId="p112.comment" value="UART2_TX_AMR"/>
     <comment propertyId="p113.comment" value="UART2_RX_AMR"/>
     <comment propertyId="p114.comment" value="ZCD_METER"/>

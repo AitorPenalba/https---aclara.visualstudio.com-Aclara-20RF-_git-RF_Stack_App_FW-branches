@@ -1218,10 +1218,10 @@ static int32_t EventLogWrite( PartitionData_t const *nvram, RingBufferHead_s *he
       nBytesOver = length - RINGBUFFER_AVAILABLE_SPACE( head );
       if( eFAILURE == EventLogMakeRoom( nvram, head, nBytesOver ) )
       {  /* We were unable to make room to store the next event due to a data corruption issue in the
-           event logger.  We need to erase the event log partition that has experienced corruption. */
+            event logger.  We need to erase the event log partition that has experienced corruption. */
          if( eFAILURE == ( retVal = eraseEventLogPartition( nvram->ePartition ) ) )
          {
-           length = (uint32_t)EVL_ERROR;
+            length = (uint32_t)EVL_ERROR;
          }
       }
    }
@@ -1278,7 +1278,6 @@ static int32_t EventLogWrite( PartitionData_t const *nvram, RingBufferHead_s *he
 #else
       PWR_unlockMutex(); // Function will not return if it fails
 #endif
-
       if ( retVal != eSUCCESS )
       {
          ERR_printf( "EventLogWrite failed" );
@@ -1462,7 +1461,7 @@ void EVL_GetThresholds( uint8_t *rtThreshold, uint8_t *oThreshold )
 uint8_t EVL_getAmBuMaxTimeDiversity( void )
 {
    uint8_t uAmBuMaxTimeDiversity;
-   uAmBuMaxTimeDiversity =  _EvlMetaData.amBuMaxTimeDiversity;
+   uAmBuMaxTimeDiversity = _EvlMetaData.amBuMaxTimeDiversity;
    return( uAmBuMaxTimeDiversity );
 }
 
@@ -1553,7 +1552,6 @@ returnStatus_t EVL_Initalize( void )
    if ( rVal == eSUCCESS )
    {
 #if ( LAST_GASP_SIMULATION == 1 ) && ( EP == 1 )
-      //TODO RA6: NRJ: determine if semaphores need to be counting
       if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS, "EVL") && OS_SEM_Create( &SimLGTxDoneSem, 0 ) )
 #else
       if ( OS_MUTEX_Create(&_EVL_MUTEX) && OS_MSGQ_Create(&EvlAlarmHandler_MsgQ_, EVL_NUM_MSGQ_ITEMS, "EVL") )

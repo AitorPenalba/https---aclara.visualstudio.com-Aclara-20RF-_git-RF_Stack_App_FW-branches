@@ -30,7 +30,7 @@
 /* INCLUDE FILES */
 
 #ifndef __BOOTLOADER
-#include "os_aclara.h"
+#include "OS_aclara.h"
 #include "portable_freescale.h"
 #endif   /* __BOOTLOADER   */
 

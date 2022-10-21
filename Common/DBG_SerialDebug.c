@@ -32,7 +32,6 @@
 #include "project.h"
 #include <stdarg.h>
 #include <string.h>
-#include <stdlib.h>
 #include <limits.h>
 #include <math.h>
 #if ( MCU_SELECTED == NXP_K24 )
@@ -45,9 +44,7 @@
 #endif
 #include <file_io.h>
 #include "timer_util.h"
-//#include "time_sys.h"
 #include "DBG_SerialDebug.h"
-//#include "ascii.h"
 #include "time_util.h"
 #include "buffer.h"
 //#ifndef BSP_DEFAULT_IO_CHANNEL_DEFINED
@@ -765,7 +762,7 @@ void DBG_LW_printf( char const *fmt, ... )
 #endif
 #endif
 
-   OS_INT_disable( );
+   uint32_t old_mask_level = OS_INT_ISR_disable(); /* This fn is also be called from an Interrupt, hence use the ISR safe */
 #if (MCU_SELECTED == NXP_K24 )
    if ( ioptr == NULL )
    {
@@ -797,8 +794,7 @@ void DBG_LW_printf( char const *fmt, ... )
 #endif
    }
 
-   OS_INT_enable( );
-
+   OS_INT_ISR_enable(old_mask_level);
 #if ( MCU_SELECTED == RA6E1 )
    R_SCI4->SCR_b.RIE = 0x01; /* Enable RX Interrupts */
    R_SCI4->SCR_b.TIE = 0x01; /* Enable TX Interrupts */

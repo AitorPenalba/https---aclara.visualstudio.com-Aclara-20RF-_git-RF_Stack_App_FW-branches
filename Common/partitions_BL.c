@@ -53,14 +53,14 @@
 #include "timer_util.h"
 #ifdef PARTITION_TABLE_LOG_ENABLE
 #include "logger.h"
-#include "os_aclara.h"
+#include "OS_aclara.h"
 #endif
 #endif /* NOT BOOTLOADER  */
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
 
-/* The partition open command may search for timeing that best fits the timing requirements until the ID exceeds this
+/* The partition open command may search for timing that best fits the timing requirements until the ID exceeds this
  * value.  */
 #define MAX_AUTO_SEARCH_TIMING   ((uint8_t)0x80)
 
