@@ -219,7 +219,7 @@ void PWR_task( taskParameter )
    ( void )brownOut_isr_init();
 #endif
 #if ( MCU_SELECTED == RA6E1 )
-#if 0 /* TEST */ // TODO: RA6E1: Helper Debug Code
+#if 0 /* TEST */ // Helper Debug Code
    PWRLG_print_LG_Flags();
 #endif
 #endif
