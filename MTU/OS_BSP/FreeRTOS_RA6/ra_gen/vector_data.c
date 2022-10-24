@@ -1,7 +1,7 @@
 /* generated vector source file - do not edit */
         #include "bsp_api.h"
 
-        extern void HardFault_Handler( void );      /* Aclara Added: add unused interrupt handler extern */
+        extern void HardFault_Handler( void );      /* Aclara Added: add unused interrupt handler extern  */
 
         /* Do not build these data structures if no interrupts are currently allocated because IAR will have build errors. */
         #if VECTOR_DATA_IRQ_COUNT > 0
