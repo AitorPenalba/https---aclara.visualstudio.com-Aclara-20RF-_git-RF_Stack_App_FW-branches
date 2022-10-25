@@ -44,11 +44,11 @@ const external_irq_cfg_t miso_busy_cfg =
     .irq                 = FSP_INVALID_VECTOR,              /* Modification to generated file by Aclara */
   #endif                                                    /* Modification to generated file by Aclara */
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
-  #if defined(VECTOR_NUMBER_ICU_IRQ14)
+#if defined(VECTOR_NUMBER_ICU_IRQ14)
     .irq                 = VECTOR_NUMBER_ICU_IRQ14,
-  #else
+#else
     .irq                 = FSP_INVALID_VECTOR,
-  #endif
+#endif
 #endif                                                      /* Modification to generated file by Aclara */
 };
 /* Instance structure to use this module. */
@@ -67,7 +67,7 @@ const external_irq_cfg_t hmc_trouble_busy_cfg =
     #warning "You have built project EP_FreeRTOS_RA6 for Y84580 Rev A (P1A) hardware"
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
     /* Rev B is now the standard hardware version so no warning message is necessary */
-    .channel             =  4,
+    .channel             = 4,
 #else                                                       /* Modification to generated file by Aclara */
    #error "Invalid value for HAL_TARGET_HARDWARE"           /* Modification to generated file by Aclara */
 #endif                                                      /* Modification to generated file by Aclara */
@@ -90,11 +90,11 @@ const external_irq_cfg_t hmc_trouble_busy_cfg =
     .irq                 = FSP_INVALID_VECTOR,              /* Modification to generated file by Aclara */
   #endif                                                    /* Modification to generated file by Aclara */
 #elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )  /* Modification to generated file by Aclara */
-  #if defined(VECTOR_NUMBER_ICU_IRQ4)
+#if defined(VECTOR_NUMBER_ICU_IRQ4)
     .irq                 = VECTOR_NUMBER_ICU_IRQ4,
-  #else
+#else
     .irq                 = FSP_INVALID_VECTOR,
-  #endif                                                    /* Modification to generated file by Aclara */
+#endif                                                      /* Modification to generated file by Aclara */
 #endif
 };
 /* Instance structure to use this module. */

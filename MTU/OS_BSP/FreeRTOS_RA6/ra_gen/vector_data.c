@@ -41,19 +41,8 @@
             [31] = agt_int_isr, /* AGT0 INT (AGT interrupt) */
             [32] = r_icu_isr, /* ICU IRQ13 (External pin interrupt 13) */
             [33] = agt_int_isr, /* AGT1 INT (AGT interrupt) */
-
-/* Aclara Modified: swap miso_busy and hmc_trouble busy interrupts based on hardware */
-// TODO: RA6E1 Bob: Once the whole team is converted to Rev B equivalent hardware, this can revert to Rev B only
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
-#warning "Configuring miso_busy/trouble interrupt vectors for Y84580 Rev A (P1A) hardware"
-            [34] = r_icu_isr, /* ICU IRQ14 (External pin interrupt 14) */
-            [35] = r_icu_isr, /* ICU IRQ4 (External pin interrupt 4) */
-#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
-            /* Rev B is now the standard hardware version so no warning message is necessary */
             [34] = r_icu_isr, /* ICU IRQ4 (External pin interrupt 4) */
             [35] = r_icu_isr, /* ICU IRQ14 (External pin interrupt 14) */
-#endif  /* Aclara Modified - End */
-
             [36] = gpt_counter_overflow_isr, /* GPT2 COUNTER OVERFLOW (Overflow) */
             [37] = gpt_capture_b_isr, /* GPT2 CAPTURE COMPARE B (Compare match B) */
 
@@ -154,19 +143,8 @@
             [31] = BSP_PRV_IELS_ENUM(EVENT_AGT0_INT), /* AGT0 INT (AGT interrupt) */
             [32] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ13), /* ICU IRQ13 (External pin interrupt 13) */
             [33] = BSP_PRV_IELS_ENUM(EVENT_AGT1_INT), /* AGT1 INT (AGT interrupt) */
-
-/* Aclara Modified: swap miso_busy and hmc_trouble busy interrupts based on hardware */
-// TODO: RA6E1 Bob: Once the whole team is converted to Rev B equivalent hardware, this can revert to Rev B only
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A )
-#warning "Configuring miso_busy/trouble interrupt vectors for Y84580 Rev A (P1A) hardware"
-            [34] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ14), /* ICU IRQ14 (External pin interrupt 14) */
-            [35] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ4), /* ICU IRQ4 (External pin interrupt 4) */
-#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
-            /* Rev B is now the standard hardware version so no warning message is necessary */
             [34] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ4), /* ICU IRQ4 (External pin interrupt 4) */
             [35] = BSP_PRV_IELS_ENUM(EVENT_ICU_IRQ14), /* ICU IRQ14 (External pin interrupt 14) */
-#endif  /* Aclara Modified - End */
-
             [36] = BSP_PRV_IELS_ENUM(EVENT_GPT2_COUNTER_OVERFLOW), /* GPT2 COUNTER OVERFLOW (Overflow) */
             [37] = BSP_PRV_IELS_ENUM(EVENT_GPT2_CAPTURE_COMPARE_B), /* GPT2 CAPTURE COMPARE B (Compare match B) */
         };

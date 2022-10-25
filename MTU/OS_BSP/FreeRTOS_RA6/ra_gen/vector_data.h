@@ -1,10 +1,6 @@
 /* generated vector header file - do not edit */
         #ifndef VECTOR_DATA_H
         #define VECTOR_DATA_H
-
-#include "cfg_hal_defs.h" /* Aclara modification to know which board is being used */
-#include "hal.h"          /* Aclara modification to know which board is being used */
-
         #ifdef __cplusplus
         extern "C" {
         #endif
@@ -104,23 +100,10 @@
         #define ICU_IRQ13_IRQn          ((IRQn_Type) 32) /* ICU IRQ13 (External pin interrupt 13) */
         #define VECTOR_NUMBER_AGT1_INT ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
         #define AGT1_INT_IRQn          ((IRQn_Type) 33) /* AGT1 INT (AGT interrupt) */
-
-/* Aclara Modified: swap miso_busy and hmc_trouble busy interrupts based on hardware */
-// TODO: RA6E1 Bob: Once the whole team is converted to Rev B equivalent hardware, this can revert to Rev B only
-#if ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_A ) /* Modification to generated file by Aclara */
-        #define VECTOR_NUMBER_ICU_IRQ14 ((IRQn_Type) 34) /* ICU IRQ14 (External pin interrupt 14) */
-        #define ICU_IRQ14_IRQn          ((IRQn_Type) 34) /* ICU IRQ14 (External pin interrupt 14) */
-        #define VECTOR_NUMBER_ICU_IRQ4  ((IRQn_Type) 35) /* ICU IRQ4 (External pin interrupt 4) */
-        #define ICU_IRQ4_IRQn           ((IRQn_Type) 35) /* ICU IRQ4 (External pin interrupt 4) */
-#elif ( HAL_TARGET_HARDWARE == HAL_TARGET_Y84580_x_REV_B )
-        #define VECTOR_NUMBER_ICU_IRQ4  ((IRQn_Type) 34) /* ICU IRQ4 (External pin interrupt 4) */
-        #define ICU_IRQ4_IRQn           ((IRQn_Type) 34) /* ICU IRQ4 (External pin interrupt 4) */
+        #define VECTOR_NUMBER_ICU_IRQ4 ((IRQn_Type) 34) /* ICU IRQ4 (External pin interrupt 4) */
+        #define ICU_IRQ4_IRQn          ((IRQn_Type) 34) /* ICU IRQ4 (External pin interrupt 4) */
         #define VECTOR_NUMBER_ICU_IRQ14 ((IRQn_Type) 35) /* ICU IRQ14 (External pin interrupt 14) */
         #define ICU_IRQ14_IRQn          ((IRQn_Type) 35) /* ICU IRQ14 (External pin interrupt 14) */
-#else
-   #error "Invalid value for HAL_TARGET_HARDWARE"
-#endif  /* Aclara Modified - End */
-
         #define VECTOR_NUMBER_GPT2_COUNTER_OVERFLOW ((IRQn_Type) 36) /* GPT2 COUNTER OVERFLOW (Overflow) */
         #define GPT2_COUNTER_OVERFLOW_IRQn          ((IRQn_Type) 36) /* GPT2 COUNTER OVERFLOW (Overflow) */
         #define VECTOR_NUMBER_GPT2_CAPTURE_COMPARE_B ((IRQn_Type) 37) /* GPT2 CAPTURE COMPARE B (Compare match B) */
