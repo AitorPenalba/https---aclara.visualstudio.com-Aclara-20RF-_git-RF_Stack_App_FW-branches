@@ -2103,11 +2103,10 @@ static returnStatus_t doPatch( void )
                DfwBlInfoCrc_t  DFWBLInfo;
 #if ( MCU_SELECTED == RA6E1 )
                uint32_t        expectedCrcDfwInfo;
-               ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo.DFWinformation ), ( bool )true, &DFWBLInfo.crcDfwInfo, pDFWBLInfoPar_ );
-               ( void ) PAR_partitionFptr.parRead( ( uint8_t * )&expectedCrcDfwInfo, ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWBLInfo.DFWinformation ) ), sizeof( DFWBLInfo.crcDfwInfo ), pDFWBLInfoPar_ );
-#endif       
-               ( void )memset( DFWBLInfo.DFWinformation, 0, sizeof ( DFWBLInfo.DFWinformation ) );
-               ( void )PAR_partitionFptr.parRead( ( uint8_t * )&DFWBLInfo.DFWinformation[0], PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo.DFWinformation ), pDFWBLInfoPar_ );
+               ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo.DFWinformation ), ( bool )true, &expectedCrcDfwInfo, pDFWBLInfoPar_ );
+#endif           
+               ( void )memset( ( uint8_t * )&DFWBLInfo, 0, sizeof ( DFWBLInfo ) );
+               ( void )PAR_partitionFptr.parRead( ( uint8_t * )&DFWBLInfo, PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
                
                //Did BL do the swap?
                if ( ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[0].FailCount ) && ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[1].FailCount ) 
