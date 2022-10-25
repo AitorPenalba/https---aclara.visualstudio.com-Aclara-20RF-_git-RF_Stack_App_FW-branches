@@ -3228,7 +3228,8 @@ static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length, bool eraseOnly
 uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
 {
    DfwBlInfoCrc_t DFWinfo;
-
+   crc32Cfg_t     crcCfg;              /* CRC configuration - Don't change elements in this structure!!! */
+   
    /* command must include CRC value */
    if ( argc < 2 )
    {
@@ -3252,8 +3253,11 @@ uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
    DFWinfo.DFWinformation[1].Length = 0xFFFFFFFF;
    DFWinfo.DFWinformation[1].CRC = 0xFFFFFFFF;
    DFWinfo.DFWinformation[1].FailCount = 0xFFFFFFFF;
-
-   return write_BL_Info((uint8_t*) &DFWinfo.DFWinformation, sizeof(DFWinfo.DFWinformation), false);
+   
+   CRC32_init( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, eCRC32_RESULT_INVERT, &crcCfg ); /* Init CRC */
+   DFWinfo.crcDfwInfo = CRC32_calc( &DFWinfo.DFWinformation[0], sizeof( DFWinfo.DFWinformation ), &crcCfg ); /* Update the CRC */
+   
+   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo), false);
 }
 
 /*******************************************************************************
