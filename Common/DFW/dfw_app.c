@@ -2100,14 +2100,13 @@ static returnStatus_t doPatch( void )
 #else
             case eDFWP_BL_SWAP:
             {
-               DfwBlInfoCrc_t  DFWBLInfo;
+               DfwBlInfoCrc_t  DFWBLInfo;          
+               ( void )memset( ( uint8_t * )&DFWBLInfo, 0, sizeof ( DFWBLInfo ) );
+               ( void )PAR_partitionFptr.parRead( ( uint8_t * )&DFWBLInfo, PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
 #if ( MCU_SELECTED == RA6E1 )
                uint32_t        expectedCrcDfwInfo;
                ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo.DFWinformation ), ( bool )true, &expectedCrcDfwInfo, pDFWBLInfoPar_ );
-#endif           
-               ( void )memset( ( uint8_t * )&DFWBLInfo, 0, sizeof ( DFWBLInfo ) );
-               ( void )PAR_partitionFptr.parRead( ( uint8_t * )&DFWBLInfo, PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
-               
+#endif               
                //Did BL do the swap?
                if ( ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[0].FailCount ) && ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[1].FailCount ) 
 #if ( MCU_SELECTED == RA6E1 )
@@ -2128,7 +2127,7 @@ static returnStatus_t doPatch( void )
                   ( void )DFWA_setFileVars( &dfwVars );
                }
                // In either case keep BL from updating
-               ( void )memset( DFWBLInfo.DFWinformation, 0xFF, sizeof ( DFWBLInfo.DFWinformation ) );
+               ( void )memset( ( uint8_t * )&DFWBLInfo, 0xFF, sizeof ( DFWBLInfo ) );
                ( void )PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo.DFWinformation[0], ( lCnt )sizeof( DFWBLInfo.DFWinformation ), pDFWBLInfoPar_ );
                // Erase entire NV Image partition
                ( void )PAR_partitionFptr.parErase( 0, PART_NV_DFW_PGM_IMAGE_SIZE, pDFWImagePTbl_ );
