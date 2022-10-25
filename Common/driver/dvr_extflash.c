@@ -1333,8 +1333,10 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
             (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
          } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
 
-#if ( MCU_SELECTED == RA6E1 )
+#ifndef __BOOTLOADER
       }
+#endif
+#if ( MCU_SELECTED == RA6E1 )
       /* We are done polling the status bit.  We need indicate that the transaction is complete by closing the
          SPI bus cycle.  We no longer turn off QSPI Direct Communication Mode in this macro.                    */
       POLLING_READ_EXIT();

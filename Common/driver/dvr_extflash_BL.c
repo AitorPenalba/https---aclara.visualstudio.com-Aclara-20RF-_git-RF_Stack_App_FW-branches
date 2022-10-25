@@ -1290,39 +1290,52 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       nvStatus = STATUS_BUSY_MASK;                /* Set to true, it should be overwritten below. */
 
 #ifndef __BOOTLOADER
-      /* create start and end struct to maintain elapsed time during busy loop */
-      OS_TICK_Struct startTime, endTime;
-      OS_TICK_Get_CurrentElapsedTicks(&startTime);
-      endTime = startTime;
+#if ( MCU_SELECTED == RA6E1 )
+      /* For the SST parts, it is likely that the write has already completed so bypass all the timing overhead */
+      R_BSP_SoftwareDelay( (uint32_t)1, BSP_DELAY_UNITS_MICROSECONDS ); /* Delay minimum of 1 microsecond */
+      (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
+      /* The following duplicate read of the flash chip's status ensures that we do not get a "stale" value. *
+      * This was found on the K24 while looking for a serial flash corruption problem.                      */
+      (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
+      if ( 0 != (STATUS_BUSY_MASK & nvStatus ) )
+      {
+#endif
+         /* create start and end struct to maintain elapsed time during busy loop */
+         OS_TICK_Struct startTime, endTime;
+         OS_TICK_Get_CurrentElapsedTicks(&startTime);
+         endTime = startTime;
 
-      /* Calculate sleep time to be 20 percent of busy time, we don't want to sleep entire busyTime */
-      OS_TICK_Struct TickTime;
-      uint32_t sleepTime = u32BusyTime_uS / ( uint32_t )( 1000 * 5 );
+         /* Calculate sleep time to be 20 percent of busy time, we don't want to sleep entire busyTime */
+         OS_TICK_Struct TickTime;
+         uint32_t sleepTime = u32BusyTime_uS / ( uint32_t )( 1000 * 5 );
 #endif   /* NOT BOOTLOADER  */
 
-      do /* Spin here until the chip returns a nvStatus of NOT busy. */
-      {
+         do /* Spin here until the chip returns a nvStatus of NOT busy. */
+         {
 
 #ifndef __BOOTLOADER
-         /* Break out of loop if max write execution time of part has expired */
-         if ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds( &startTime, &endTime ) > u32BusyTime_uS )
-         {
-            retVal = eFAILURE;
-            break;
-         }
+            /* Break out of loop if max write execution time of part has expired */
+            if ( (uint32_t)OS_TICK_Get_Diff_InMicroseconds( &startTime, &endTime ) > u32BusyTime_uS )
+            {
+               retVal = eFAILURE;
+               break;
+            }
 
-         /* Get current Ticktime and put the task to sleep 20 percent of busyTime */
-         OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
-         OS_TICK_Sleep ( &TickTime, sleepTime );
+            /* Get current Ticktime and put the task to sleep 20 percent of busyTime */
+            OS_TICK_Get_CurrentElapsedTicks ( &TickTime );
+            OS_TICK_Sleep ( &TickTime, sleepTime );
 
-         OS_TICK_Get_CurrentElapsedTicks(&endTime); /* update endtime to the latest ticktime */
+            OS_TICK_Get_CurrentElapsedTicks(&endTime); /* update endtime to the latest ticktime */
 #endif   /* NOT BOOTLOADER  */
-         (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
-         /* The following duplicate read of the flash chip's status ensures that we do not get a "stale" value. *
-          * This was found on the K24 while looking for a serial flash corruption problem.                      */
-         (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
-      } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
+            (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
+            /* The following duplicate read of the flash chip's status ensures that we do not get a "stale" value. *
+             * This was found on the K24 while looking for a serial flash corruption problem.                      */
+            (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
+         } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
 
+#ifndef __BOOTLOADER
+      }
+#endif
 #if ( MCU_SELECTED == RA6E1 )
       /* We are done polling the status bit.  We need indicate that the transaction is complete by closing the
          SPI bus cycle.  We no longer turn off QSPI Direct Communication Mode in this macro.                    */
@@ -1514,7 +1527,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
       else  /* Use AAI feature   */
       {
          /* If both bytes of data being written is in the erased state, skip the write.  */
-         bytesToWrite = AAI_WORD_PGM_SIZE;  // TODO: RA6: Look at conditional compile solution to handle K24 and RA6 hex file compare
+         bytesToWrite = AAI_WORD_PGM_SIZE;
          if ( Cnt < bytesToWrite ) /* If the Cnt is less than the bytes to be written, only write Cnt # of bytes. */
          {
             bytesToWrite = Cnt;
@@ -1580,7 +1593,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_OUTPUT | (uint32_t)BSP_IO_LEVEL_LOW ) );
                R_BSP_PinCfg ( NV_BUSY_INTERRUPT_PIN, ( (uint32_t)IOPORT_CFG_PORT_DIRECTION_INPUT                               ) );
                /* The SST chips require chip select to be inactive (signal high) for at least 1 microsecond, give it at least 2usec  */
-               uint32_t loops = SystemCoreClock / 6000000; /* Delay for 2 microseconds.  The constant is determined empirically.     */
+               uint32_t loops = SystemCoreClock / 3000000; /* Delay for 2 microseconds.  The constant is determined empirically.     */
                for ( uint32_t loop = 0; loop < loops; loop++) { NOP(); }
                NV_CS_ACTIVE(); /* Activate the chip select to tell the SST chip to assert SO low for busy, high when write completes */
             }
@@ -1612,7 +1625,7 @@ static returnStatus_t localWriteBytesToSPI( dSize nDest, uint8_t *pSrc, lCnt Cnt
       pSrc += bytesToWrite; /*lint !e662 : Range is checked with an ASSERT before this is called. */
    }
    disableWrites( pDevice->port ); /* Disable writes. */
-#if ( ( MCU_SELECTED == RA6E1 ) && ( TM_EXT_FLASH_BUSY_TIMING == 1 ) )
+   #if ( ( MCU_SELECTED == RA6E1 ) && ( TM_EXT_FLASH_BUSY_TIMING == 1 ) )
    R_BSP_PinCfg( BSP_IO_PORT_04_PIN_06, (uint32_t)( IOPORT_CFG_PORT_DIRECTION_OUTPUT | IOPORT_CFG_PORT_OUTPUT_LOW ) );
 #endif
    return ( eRetVal );
@@ -1657,7 +1670,6 @@ static void setBusyTimer( uint32_t busyTimer_uS )
    uint32_t       period_counts = 0;
 
    (void) R_AGT_InfoGet(&AGT0_ExtFlashBusy_ctrl, &info);
-   (void) R_AGT_Stop(&AGT0_ExtFlashBusy_ctrl);   /* Stop the timer */
 
    timer_freq_hz = info.clock_frequency;
    period_counts = (uint32_t) (((uint64_t) timer_freq_hz * busyTimer_uS) / 1000); // TODO: RA6E1: This calculation overflows
@@ -1937,9 +1949,7 @@ void isr_busy( external_irq_callback_args_t * p_args )
    (void)DVR_EFL_BUSY_IRQ_DI();              /* Disable the ISR */
    if ( eRtosCmdsEn == rtosCmds_ )
    {
-#if ( MCU_SELECTED == NXP_K24 )
-      OS_SEM_Post( &extFlashSem_ );  /* Post the semaphore */
-#elif ( MCU_SELECTED == RA6E1 )
+#if ( MCU_SELECTED == RA6E1 )
    #if ( TM_EXT_FLASH_BUSY_TIMING == 1 )
       DVR_ExtflashInterruptCounter++;
       if ( 0 != DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] )
@@ -1950,8 +1960,8 @@ void isr_busy( external_irq_callback_args_t * p_args )
          DVR_ExtflashInterruptTiming[DVR_ExtflashIndex] = 0;
       }
    #endif
-      OS_SEM_Post_fromISR( &extFlashSem_ );  /* Post the semaphore */
 #endif
+      OS_SEM_Post_fromISR( &extFlashSem_ );  /* Post the semaphore */
    }
 #if !RTOS
    bBusyIsr_ = true;

@@ -11,7 +11,6 @@
 #include "r_cgc_api.h"
 /* Aclara added: include FreeRTOS and associated includes */
 #include "FreeRTOS.h"
-#include "semphr.h"
 #include "message_buffer.h"
 #include "semphr.h"
 #include "queue.h"
