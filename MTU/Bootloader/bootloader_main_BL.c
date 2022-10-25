@@ -804,10 +804,10 @@ int BL_MAIN_Main( void )
       /* Test Case: After flash write completed, but DFWinfo had not been updated yet */
       BOOTLOADER_TEST(TESTCASE_2);
       BL_MAIN_delayForStablePower(); /* check to make sure power is stable before write */
-
+      DFWinfo.crcDfwInfo = bl_crc32( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, (uint8_t *) ( pDFWinfo->PhyStartingAddress + PART_DFW_BL_INFO_DATA_OFFSET), ( lCnt )sizeof( DFWinfo.DFWinformation ) );
       /*lint -e{645} if copyAttemped is true, DFWinfo has been initialized.   */
-      if ( eSUCCESS != PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )DFWinfo.DFWinformation,
-                                                   sizeof( DFWinfo.DFWinformation ), pDFWinfo ) )
+      if ( eSUCCESS != PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWinfo,
+                                                   sizeof( DFWinfo ), pDFWinfo ) )
       {
          success = ( bool ) false;
       }
