@@ -2128,7 +2128,7 @@ static returnStatus_t doPatch( void )
                }
                // In either case keep BL from updating
                ( void )memset( ( uint8_t * )&DFWBLInfo, 0xFF, sizeof ( DFWBLInfo ) );
-               ( void )PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo.DFWinformation[0], ( lCnt )sizeof( DFWBLInfo.DFWinformation ), pDFWBLInfoPar_ );
+               ( void )PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo, ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
                // Erase entire NV Image partition
                ( void )PAR_partitionFptr.parErase( 0, PART_NV_DFW_PGM_IMAGE_SIZE, pDFWImagePTbl_ );
                break;
