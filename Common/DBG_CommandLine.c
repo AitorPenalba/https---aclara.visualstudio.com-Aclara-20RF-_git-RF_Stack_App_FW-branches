@@ -4021,7 +4021,11 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
 {
    char     *endptr;
    uint8_t  buffer[ 64 ];        /* Data read from NV */
+#if ( RTOS_SELECTION == MQX_RTOS )
    uint8_t  respDataHex[ ( sizeof( buffer ) * 3 ) + ( sizeof( buffer ) / 16 ) + 1 ];
+#elif ( RTOS_SELECTION == FREE_RTOS )
+   uint8_t  respDataHex[ ( sizeof( buffer ) * 3 ) + 2 * ( sizeof( buffer ) / 16 ) + 1 ];
+#endif
    uint32_t offset;
    uint16_t bytesLeft;           /* Running count of bytes read, decreasing   */
    uint16_t part;
@@ -4061,12 +4065,20 @@ uint32_t DBG_CommandLine_NvRead ( uint32_t argc, char *argv[] )
                      {
                         if ( ( ( i % 16 ) == 0 ) && ( i != 0 ) )
                         {
+#if ( RTOS_SELECTION == MQX_RTOS )
                            pPtr += sprintf( ( char * )pPtr, "\n" );
+#elif ( RTOS_SELECTION == FREE_RTOS )  /* UART driver that Aclara wrote for RA6E1 needs \r\n */
+                           pPtr += sprintf( ( char * )pPtr, "\r\n" );
+#endif
                         }
                         pPtr += sprintf( ( char * )pPtr, "%02X ", buffer[ i ] );
                      }
                      *pPtr = 0;
-                     DBG_printf( "%s", &respDataHex[0] );
+#if ( RTOS_SELECTION == MQX_RTOS )  /* UART driver that Aclara wrote for RA6E1 needs \r\n */
+                     DBG_logPrintf( 'R', "Partition: %d, Offset: 0x%x\n%s", part, offset, &respDataHex[0] );
+#elif ( RTOS_SELECTION == FREE_RTOS )
+                     DBG_logPrintf( 'R', "Partition: %d, Offset: 0x%x\r\n%s", part, offset, &respDataHex[0] );
+#endif
                      OS_TASK_Sleep( TEN_MSEC );
                      bytesLeft -= cnt;
                      offset += cnt;
