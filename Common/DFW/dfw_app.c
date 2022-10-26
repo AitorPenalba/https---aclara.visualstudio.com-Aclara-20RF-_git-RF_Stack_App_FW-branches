@@ -2108,6 +2108,12 @@ static returnStatus_t doPatch( void )
                ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo.DFWinformation ), ( bool )true, &expectedCrcDfwInfo, pDFWBLInfoPar_ );
 #endif               
                //Did BL do the swap?
+               /* The DFWBLInfo.crcDfwInfo COULD be wrong because the Bootloader was unable to complete the write of FailCount AND update crcDfwInfo.
+                  The BL only writes those fields when it completes the update.
+                  When FailCount is DEFAULT and crcDfwInfo is OK means the BL did NOT attempt the update and the patch failed.
+                  When FailCount is not DEFAULT OR crcDfwInfo is bad means the BL completed the update.
+                  The first is normal, the second COULD happen if the BL failed to write crcDfwInfo.
+              */
                if ( ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[0].FailCount ) && ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[1].FailCount ) 
 #if ( MCU_SELECTED == RA6E1 )
                    &&( expectedCrcDfwInfo != DFWBLInfo.crcDfwInfo )
