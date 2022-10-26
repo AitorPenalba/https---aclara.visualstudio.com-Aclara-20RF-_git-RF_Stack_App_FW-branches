@@ -1298,8 +1298,8 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
       * This was found on the K24 while looking for a serial flash corruption problem.                      */
       (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
       if ( 0 != (STATUS_BUSY_MASK & nvStatus ) )
-      {
 #endif
+      {
          /* create start and end struct to maintain elapsed time during busy loop */
          OS_TICK_Struct startTime, endTime;
          OS_TICK_Get_CurrentElapsedTicks(&startTime);
@@ -1332,7 +1332,6 @@ static returnStatus_t busyCheck( const SpiFlashDevice_t *pDevice, uint32_t u32Bu
              * This was found on the K24 while looking for a serial flash corruption problem.                      */
             (void)NV_SPI_PORT_READ( pDevice->port, &nvStatus, sizeof(nvStatus), (bool)true ); /* check nvStatus for busy */
          } while ( STATUS_BUSY_MASK & nvStatus ); /* break out of do while loop when status is not busy */
-
 #ifndef __BOOTLOADER
       }
 #endif
