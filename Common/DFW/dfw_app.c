@@ -2116,7 +2116,7 @@ static returnStatus_t doPatch( void )
               */
                if ( ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[0].FailCount ) && ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[1].FailCount ) 
 #if ( MCU_SELECTED == RA6E1 )
-                   &&( expectedCrcDfwInfo != DFWBLInfo.crcDfwInfo )
+                   &&( expectedCrcDfwInfo == DFWBLInfo.crcDfwInfo )
 #endif
                     )
                {
@@ -2133,6 +2133,7 @@ static returnStatus_t doPatch( void )
                   ( void )DFWA_setFileVars( &dfwVars );
                }
                // In either case keep BL from updating
+               // Writing DFWBLInfo.crcDfwInfo to FF's is OK here
                ( void )memset( ( uint8_t * )&DFWBLInfo, 0xFF, sizeof ( DFWBLInfo ) );
                ( void )PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo, ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
                // Erase entire NV Image partition

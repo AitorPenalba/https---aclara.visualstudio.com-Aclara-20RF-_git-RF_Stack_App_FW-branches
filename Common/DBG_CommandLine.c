@@ -3288,7 +3288,7 @@ uint32_t DBG_CommandLine_BL_Test_Clear_BL_Info( uint32_t argc, char *argv[] )
    DFWinfo.DFWinformation[1].DstAddr = 0xFFFFFFFF;
    DFWinfo.DFWinformation[1].FailCount = 0xFFFFFFFF;
    DFWinfo.DFWinformation[1].CRC = 0xFFFFFFFF;
-
+   DFWinfo.crcDfwInfo = 0xFFFFFFFF;   // Writing DFWBLInfo.crcDfwInfo to FF's is OK here
    return write_BL_Info((uint8_t*) &DFWinfo.DFWinformation, sizeof(DFWinfo.DFWinformation), false);
 }
 

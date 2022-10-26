@@ -105,7 +105,7 @@
 #error Invalid Application device - Select ony one of EP, PORTABLE_DCU or MFG_MODE_DCU
 #endif
 
-#define DFW_TEST_KEY                   1  /* 1=Use DFW test key, 0=Used default DFW Key */
+#define DFW_TEST_KEY                   0  /* 1=Use DFW test key, 0=Used default DFW Key */
 #define DFW_XZCOMPRESS_BSPATCHING      1  /* Update firmware patching technique - Uses XZ for decompression and minibs for patching */
 /* Note:  All of the following DFW tests must be disabled "0" before releasing code! */
 /* Select one below for DFW testing */

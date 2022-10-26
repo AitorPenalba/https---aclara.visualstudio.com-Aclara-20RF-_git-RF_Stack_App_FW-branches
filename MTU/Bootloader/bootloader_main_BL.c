@@ -725,6 +725,10 @@ int BL_MAIN_Main( void )
             ( eSUCCESS == PAR_partitionFptr.parOpen( &pCodeInfo, ePART_APP_CODE, 0 ) ) )
          {
             /* check for possible bootloader info */
+            /* TODO: Future Improvement: If the App updates fail, this loop should keep trying until successful.
+               May want/need to include RESET() after a number of attempts.
+               This also only writes the DFWBLInfo structure when the App is valid.
+            */
             while ( ( DFWInfoIdx < ARRAY_IDX_CNT( DFWinfo.DFWinformation ) ) )  /* Loop while in valid DFWinfo[] range and */
             {
                /* Read an update segment from the DFW BL INFO partition.   */
@@ -804,7 +808,9 @@ int BL_MAIN_Main( void )
       /* Test Case: After flash write completed, but DFWinfo had not been updated yet */
       BOOTLOADER_TEST(TESTCASE_2);
       BL_MAIN_delayForStablePower(); /* check to make sure power is stable before write */
-      DFWinfo.crcDfwInfo = bl_crc32( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, (uint8_t *) ( pDFWinfo->PhyStartingAddress + PART_DFW_BL_INFO_DATA_OFFSET), ( lCnt )sizeof( DFWinfo.DFWinformation ) );
+#if ( MCU_SELECTED == RA6E1 )
+      DFWinfo.crcDfwInfo = bl_crc32( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, (uint8_t *) &DFWinfo, ( lCnt )sizeof( DFWinfo.DFWinformation ) );
+#endif
       /*lint -e{645} if copyAttemped is true, DFWinfo has been initialized.   */
       if ( eSUCCESS != PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWinfo,
                                                    sizeof( DFWinfo ), pDFWinfo ) )
