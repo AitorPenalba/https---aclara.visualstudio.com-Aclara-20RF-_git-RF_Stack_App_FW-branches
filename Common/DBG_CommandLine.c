@@ -3224,12 +3224,12 @@ static uint32_t write_BL_Info(uint8_t* pDFWinfo, uint32_t length, bool eraseOnly
    Returns: retVal - Successful status of this function
 
 *******************************************************************************/
-#define MAX_COPY_RANGES          2          /* Maximum number of ranges to copy from NV to ROM.   */
 #define UNUSED_APP_OFFSET       0xD0000     /* unused section of APP Code space - this will place the data at APP_START + OFFSET (0xD4000) */
 uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
 {
-   DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ];
-
+   DfwBlInfoCrc_t DFWinfo;
+   crc32Cfg_t     crcCfg;              /* CRC configuration - Don't change elements in this structure!!! */
+   
    /* command must include CRC value */
    if ( argc < 2 )
    {
@@ -3242,18 +3242,21 @@ uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
    DBG_logPrintf( 'I', "Using %d (0x%08X) for test data CRC32", dataCrc32, dataCrc32 );
 
    /* setup test data */
-   DFWinfo[0].SrcAddr = 0L;
-   DFWinfo[0].DstAddr = UNUSED_APP_OFFSET;
-   DFWinfo[0].Length = TEST_DATA_SIZE;
-   DFWinfo[0].CRC = dataCrc32;               // add user entered CRC value (see output of write DFW image command for calculated value)
-   DFWinfo[0].FailCount = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[0].SrcAddr = 0L;
+   DFWinfo.DFWinformation[0].DstAddr = UNUSED_APP_OFFSET;
+   DFWinfo.DFWinformation[0].Length = TEST_DATA_SIZE;
+   DFWinfo.DFWinformation[0].CRC = dataCrc32;               // add user entered CRC value (see output of write DFW image command for calculated value)
+   DFWinfo.DFWinformation[0].FailCount = 0xFFFFFFFF;
 
-   DFWinfo[1].SrcAddr = 0xFFFFFFFF;
-   DFWinfo[1].DstAddr = 0xFFFFFFFF;
-   DFWinfo[1].Length = 0xFFFFFFFF;
-   DFWinfo[1].CRC = 0xFFFFFFFF;
-   DFWinfo[1].FailCount = 0xFFFFFFFF;
-
+   DFWinfo.DFWinformation[1].SrcAddr = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[1].DstAddr = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[1].Length = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[1].CRC = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[1].FailCount = 0xFFFFFFFF;
+   
+   CRC32_init( CRC32_DFW_START_VALUE, CRC32_DFW_POLY, eCRC32_RESULT_INVERT, &crcCfg ); /* Init CRC */
+   DFWinfo.crcDfwInfo = CRC32_calc( &DFWinfo.DFWinformation[0], sizeof( DFWinfo.DFWinformation ), &crcCfg ); /* Update the CRC */
+   
    return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo), false);
 }
 
@@ -3271,22 +3274,22 @@ uint32_t DBG_CommandLine_BL_Test_Write_BL_Info( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_BL_Test_Clear_BL_Info( uint32_t argc, char *argv[] )
 {
-   DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ];
+   DfwBlInfoCrc_t DFWinfo;
 
    /* clear test data to 0xFFs */
-   DFWinfo[0].Length = 0xFFFFFFFF;
-   DFWinfo[0].SrcAddr = 0xFFFFFFFF;
-   DFWinfo[0].DstAddr = 0xFFFFFFFF;
-   DFWinfo[0].FailCount = 0xFFFFFFFF;
-   DFWinfo[0].CRC = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[0].Length = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[0].SrcAddr = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[0].DstAddr = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[0].FailCount = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[0].CRC = 0xFFFFFFFF;
 
-   DFWinfo[1].Length = 0xFFFFFFFF;
-   DFWinfo[1].SrcAddr = 0xFFFFFFFF;
-   DFWinfo[1].DstAddr = 0xFFFFFFFF;
-   DFWinfo[1].FailCount = 0xFFFFFFFF;
-   DFWinfo[1].CRC = 0xFFFFFFFF;
-
-   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo), false);
+   DFWinfo.DFWinformation[1].Length = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[1].SrcAddr = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[1].DstAddr = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[1].FailCount = 0xFFFFFFFF;
+   DFWinfo.DFWinformation[1].CRC = 0xFFFFFFFF;
+   DFWinfo.crcDfwInfo = 0xFFFFFFFF;   // Writing DFWBLInfo.crcDfwInfo to FF's is OK here
+   return write_BL_Info((uint8_t*) &DFWinfo.DFWinformation, sizeof(DFWinfo.DFWinformation), false);
 }
 
 /*******************************************************************************
@@ -3303,8 +3306,9 @@ uint32_t DBG_CommandLine_BL_Test_Clear_BL_Info( uint32_t argc, char *argv[] )
 *******************************************************************************/
 uint32_t DBG_CommandLine_BL_Test_Erase_BL_Info( uint32_t argc, char *argv[] )
 {
-   DfwBlInfo_t DFWinfo[ MAX_COPY_RANGES ] = {0};
-   return write_BL_Info((uint8_t*) &DFWinfo, sizeof(DFWinfo), true);
+   DfwBlInfoCrc_t DFWinfo;
+   ( void )memset( DFWinfo.DFWinformation, 0, sizeof ( DFWinfo.DFWinformation ) );
+   return write_BL_Info((uint8_t*) &DFWinfo.DFWinformation, sizeof(DFWinfo.DFWinformation), true);
 }
 
 #endif

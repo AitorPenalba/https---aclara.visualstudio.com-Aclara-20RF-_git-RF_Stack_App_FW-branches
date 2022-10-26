@@ -53,7 +53,7 @@
 
 /* ****************************************************************************************************************** */
 /* MACRO DEFINITIONS */
-
+#define MAX_COPY_RANGES          2        /* Maximum number of ranges to copy from NV to ROM.   */
 /* ****************************************************************************************************************** */
 /* TYPE DEFINITIONS */
 
@@ -125,6 +125,13 @@ typedef struct
   uint32_t     FailCount;  /* Number of attempts before CRC validated.  */
 } DfwBlInfo_t, * pDfwBlInfo_t;
 
+typedef struct
+{
+   DfwBlInfo_t             DFWinformation[ MAX_COPY_RANGES ];
+#if ( MCU_SELECTED == RA6E1 )
+   uint32_t                crcDfwInfo;
+#endif
+}DfwBlInfoCrc_t;
 /* ****************************************************************************************************************** */
 /* CONSTANTS */
 

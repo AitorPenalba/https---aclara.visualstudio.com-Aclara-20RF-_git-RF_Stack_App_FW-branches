@@ -1915,9 +1915,6 @@ static returnStatus_t doPatch( void )
             {
                uint32_t       waitTime;   // Time to wait in mS for system to be idle
                returnStatus_t sysLocked;  // Indicates if the Wait for Idle locked the sys busy mutex
-#if ( MCU_SELECTED == RA6E1 )
-               uint32_t       crcDfwInfo;
-#endif
 
                //TODO: Somewhere in here it needs to "purge" the HEEP/Stack messages before swapping
                dfwUnitTestToggleOutput_TST2( 500, 1, 3 );
@@ -2003,42 +2000,42 @@ static returnStatus_t doPatch( void )
                         ( void )PAR_partitionFptr.parErase( ( lAddr )0x0, INT_FLASH_ERASE_SIZE, pDFWBLInfoPar_ );
                      }
 
-                     DfwBlInfo_t  DFWBLInfo[2];
+                     DfwBlInfoCrc_t  DFWBLInfo;
 
                      /* Write the DFW_BL Info... */
                      /* Set the Source as the offset into the ePART_DFW_PGM_IMAGE partition */
-                     DFWBLInfo[0].SrcAddr   = PART_APP_CODE_OFFSET;
+                     DFWBLInfo.DFWinformation[0].SrcAddr   = PART_APP_CODE_OFFSET;
                      /* Set the Destination as the offset into the ePART_APP_CODE partition as the BL sees it */
-                     DFWBLInfo[0].DstAddr   = 0;
-                     DFWBLInfo[0].Length    = PART_APP_CODE_SIZE;
-                     DFWBLInfo[0].FailCount = DFW_BL_FAILCOUNT_DEFAULT;
+                     DFWBLInfo.DFWinformation[0].DstAddr   = 0;
+                     DFWBLInfo.DFWinformation[0].Length    = PART_APP_CODE_SIZE;
+                     DFWBLInfo.DFWinformation[0].FailCount = DFW_BL_FAILCOUNT_DEFAULT;
 #ifdef PART_APP_UPPER_CODE_OFFSET
                      /* Set the Source as the offset into the ePART_DFW_PGM_IMAGE partition */
-                     DFWBLInfo[1].SrcAddr   = PART_APP_UPPER_CODE_OFFSET;
+                     DFWBLInfo.DFWinformation[1].SrcAddr   = PART_APP_UPPER_CODE_OFFSET;
                      /* Set the Destination as the offset into the ePART_APP_CODE partition as the BL sees it */
-                     DFWBLInfo[1].DstAddr   = PART_APP_UPPER_CODE_OFFSET - PART_APP_CODE_OFFSET;
-                     DFWBLInfo[1].Length    = PART_APP_UPPER_CODE_SIZE;
-                     DFWBLInfo[1].FailCount = DFW_BL_FAILCOUNT_DEFAULT;
+                     DFWBLInfo.DFWinformation[1].DstAddr   = PART_APP_UPPER_CODE_OFFSET - PART_APP_CODE_OFFSET;
+                     DFWBLInfo.DFWinformation[1].Length    = PART_APP_UPPER_CODE_SIZE;
+                     DFWBLInfo.DFWinformation[1].FailCount = DFW_BL_FAILCOUNT_DEFAULT;
 #else
                      /* Set all values to "blank" - no operation required. */
-                     DFWBLInfo[1].SrcAddr   = 0xffffffff;
-                     DFWBLInfo[1].DstAddr   = 0xffffffff;
-                     DFWBLInfo[1].Length    = 0xffffffff;
-                     DFWBLInfo[1].FailCount = 0xffffffff;
+                     DFWBLInfo.DFWinformation[1].SrcAddr   = 0xffffffff;
+                     DFWBLInfo.DFWinformation[1].DstAddr   = 0xffffffff;
+                     DFWBLInfo.DFWinformation[1].Length    = 0xffffffff;
+                     DFWBLInfo.DFWinformation[1].FailCount = 0xffffffff;
 #endif
                      /* Recalculate the CRC for each section independently */
-                     ( void )calcCRC( ( flAddr )PART_APP_CODE_OFFSET,       PART_APP_CODE_SIZE,       ( bool )true, &DFWBLInfo[0].CRC, pDFWImagePTbl_ );
+                     ( void )calcCRC( ( flAddr )PART_APP_CODE_OFFSET,       PART_APP_CODE_SIZE,       ( bool )true, &DFWBLInfo.DFWinformation[0].CRC, pDFWImagePTbl_ );
 #ifdef PART_APP_UPPER_CODE_OFFSET
-                     ( void )calcCRC( ( flAddr )PART_APP_UPPER_CODE_OFFSET, PART_APP_UPPER_CODE_SIZE, ( bool )true, &DFWBLInfo[1].CRC, pDFWImagePTbl_ );
+                     ( void )calcCRC( ( flAddr )PART_APP_UPPER_CODE_OFFSET, PART_APP_UPPER_CODE_SIZE, ( bool )true, &DFWBLInfo.DFWinformation[1].CRC, pDFWImagePTbl_ );
 #endif
-                     if( eSUCCESS == PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo[0], ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ ) )
+                     if( eSUCCESS == PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo.DFWinformation[0], ( lCnt )sizeof( DFWBLInfo.DFWinformation ), pDFWBLInfoPar_ ) )
                      {
 #if ( MCU_SELECTED == RA6E1 )
                        /* Add a CRC following the DFWBLInfo structure since a length of 0xFFFFFFFF
                           is not guaranteed after erasing the DFW_BL_INFO partition as it is in K24 */
-                       ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo ), ( bool )true, &crcDfwInfo, pDFWBLInfoPar_ );
-                       ( void )PAR_partitionFptr.parWrite( ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWBLInfo ) ), ( uint8_t * )&crcDfwInfo,
-                                                           ( lCnt )sizeof( crcDfwInfo ), pDFWBLInfoPar_ );
+                       ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo.DFWinformation ), ( bool )true, &DFWBLInfo.crcDfwInfo, pDFWBLInfoPar_ );
+                       ( void )PAR_partitionFptr.parWrite( ( PART_DFW_BL_INFO_DATA_OFFSET + ( lCnt )sizeof( DFWBLInfo.DFWinformation ) ), ( uint8_t * )&DFWBLInfo.crcDfwInfo,
+                                                           ( lCnt )sizeof( DFWBLInfo.crcDfwInfo ), pDFWBLInfoPar_ );
 #endif
                        DFW_PRNT_INFO( "Resetting Processor" );
                        dfwVars.ePatchState = eDFWP_BL_SWAP;
@@ -2103,13 +2100,25 @@ static returnStatus_t doPatch( void )
 #else
             case eDFWP_BL_SWAP:
             {
-               DfwBlInfo_t  DFWBLInfo[2];
-
-               ( void )memset( DFWBLInfo, 0, sizeof ( DFWBLInfo ) );
-               ( void )PAR_partitionFptr.parRead( ( uint8_t * )&DFWBLInfo[0], PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
-
+               DfwBlInfoCrc_t  DFWBLInfo;          
+               ( void )memset( ( uint8_t * )&DFWBLInfo, 0, sizeof ( DFWBLInfo ) );
+               ( void )PAR_partitionFptr.parRead( ( uint8_t * )&DFWBLInfo, PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
+#if ( MCU_SELECTED == RA6E1 )
+               uint32_t        expectedCrcDfwInfo;
+               ( void )calcCRC( ( flAddr )PART_DFW_BL_INFO_DATA_OFFSET, ( lCnt )sizeof( DFWBLInfo.DFWinformation ), ( bool )true, &expectedCrcDfwInfo, pDFWBLInfoPar_ );
+#endif               
                //Did BL do the swap?
-               if ( ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo[0].FailCount ) && ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo[1].FailCount ) )
+               /* The DFWBLInfo.crcDfwInfo COULD be wrong because the Bootloader was unable to complete the write of FailCount AND update crcDfwInfo.
+                  The BL only writes those fields when it completes the update.
+                  When FailCount is DEFAULT and crcDfwInfo is OK means the BL did NOT attempt the update and the patch failed.
+                  When FailCount is not DEFAULT OR crcDfwInfo is bad means the BL completed the update.
+                  The first is normal, the second COULD happen if the BL failed to write crcDfwInfo.
+              */
+               if ( ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[0].FailCount ) && ( DFW_BL_FAILCOUNT_DEFAULT == DFWBLInfo.DFWinformation[1].FailCount ) 
+#if ( MCU_SELECTED == RA6E1 )
+                   &&( expectedCrcDfwInfo == DFWBLInfo.crcDfwInfo )
+#endif
+                    )
                {
                   //TODO: Handle special case where BL did not attempt the swap?
                   // In the wrong state so abort the DFW
@@ -2124,8 +2133,9 @@ static returnStatus_t doPatch( void )
                   ( void )DFWA_setFileVars( &dfwVars );
                }
                // In either case keep BL from updating
-               ( void )memset( DFWBLInfo, 0xFF, sizeof ( DFWBLInfo ) );
-               ( void )PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo[0], ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
+               // Writing DFWBLInfo.crcDfwInfo to FF's is OK here
+               ( void )memset( ( uint8_t * )&DFWBLInfo, 0xFF, sizeof ( DFWBLInfo ) );
+               ( void )PAR_partitionFptr.parWrite( PART_DFW_BL_INFO_DATA_OFFSET, ( uint8_t * )&DFWBLInfo, ( lCnt )sizeof( DFWBLInfo ), pDFWBLInfoPar_ );
                // Erase entire NV Image partition
                ( void )PAR_partitionFptr.parErase( 0, PART_NV_DFW_PGM_IMAGE_SIZE, pDFWImagePTbl_ );
                break;
