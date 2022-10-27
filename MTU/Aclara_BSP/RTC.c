@@ -83,7 +83,9 @@ returnStatus_t RTC_init( void )
 
    if( (bool)false == RTC_isRunning() )
    {
-      //1. Select clock (already performed in RTC_Open)
+      //1. Select clock source (no longer performed in RTC_Open)
+      R_RTC_ClockSourceSet(&g_rtc0_ctrl);
+
       //2. Stop and Select Binary Mode (already performed in RTC Open)
       R_RTC->RCR2 = (R_RTC_RCR2_CNTMD_Msk & ~R_RTC_RCR2_START_Msk);
       FSP_HARDWARE_REGISTER_WAIT( R_RTC->RCR2, (R_RTC_RCR2_CNTMD_Msk & ~R_RTC_RCR2_START_Msk)); //Wait for RTC to complete
@@ -413,7 +415,7 @@ void RTC_ConfigureAlarm( uint32_t seconds )
 
    rtc_time_get( &time );        // Get current value of the Registers
    time.BCount.Word += seconds;  // Add the time delay
-   
+
    R_RTC->BCNT0AR   = time.BCount.Byte[0];
    R_RTC->BCNT1AR   = time.BCount.Byte[1];
    R_RTC->BCNT2AR   = time.BCount.Byte[2];

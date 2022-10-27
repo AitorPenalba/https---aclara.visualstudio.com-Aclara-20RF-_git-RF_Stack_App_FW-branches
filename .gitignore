@@ -129,3 +129,7 @@ mtu/iar_v9.20/*debug
 *.out_nochecksum
 *.rpd
 *.sbd
+*.api_xml
+*.secure_azone
+*.secure_xml
+/MTU/OS_BSP/FreeRTOS_RA6/IAR/memory_regions.icf

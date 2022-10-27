@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -187,7 +187,7 @@ typedef union u_cgc_divider_cfg
         uint32_t                      : 1;
         cgc_sys_clock_div_t fclk_div  : 3; ///< Divider value for FCLK
         uint32_t                      : 1;
-    };
+    } sckdivcr_b;
 } cgc_divider_cfg_t;
 
 /** USB clock divider values */

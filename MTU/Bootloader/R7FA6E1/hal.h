@@ -31,7 +31,7 @@
 /* ****************************************************************************************************************** */
 /* GLOBAL DEFINITIONS */
 
-#define HAL_TARGET_HARDWARE     HAL_TARGET_Y84580_x_REV_A
+#define HAL_TARGET_HARDWARE     HAL_TARGET_Y84580_x_REV_B
 #define MCU_SELECTED            RA6E1
 #define RTOS_SELECTION          BARE_METAL
 

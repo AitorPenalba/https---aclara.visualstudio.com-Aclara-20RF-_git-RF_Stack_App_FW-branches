@@ -113,6 +113,7 @@ const rtc_api_t g_rtc_on_rtc =
 {
     .open               = R_RTC_Open,
     .close              = R_RTC_Close,
+    .clockSourceSet     = R_RTC_ClockSourceSet,
     .calendarTimeGet    = R_RTC_CalendarTimeGet,
     .calendarTimeSet    = R_RTC_CalendarTimeSet,
     .calendarAlarmGet   = R_RTC_CalendarAlarmGet,
@@ -227,18 +228,21 @@ fsp_err_t R_RTC_Open (rtc_ctrl_t * const p_ctrl, rtc_cfg_t const * const p_cfg)
 
     r_rtc_config_rtc_interrupts(p_instance_ctrl, p_cfg);
 
-    /* Check if the RTC is already running */
-    if (R_RTC->RCR2_b.START == 0)
-    {
-        /* Initialize registers. */
-        R_RTC->RCR1 = 0U;
-        R_RTC->RCR2 = 0U;
+#if BSP_FEATURE_RTC_HAS_ROPSEL
+
+    /* Clear the RCR4_b.ROPSEL bit as it's value is undefined after MCU Reset and if its set to 1,
+     * the RTC operates in low-consumption clock mode. */
+    R_RTC->RCR4_b.ROPSEL = 0U;
+    FSP_HARDWARE_REGISTER_WAIT(R_RTC->RCR4_b.ROPSEL, 0U);
+#endif
+
+#if RTC_CFG_OPEN_SET_CLOCK_SOURCE
 
         /* Set the clock source for RTC.
          * The count source must be selected only once before making the initial settings of the RTC registers
          * at power on. (see section 26.2.19 RTC Control Register 4 (RCR4) of the RA6M3 manual R01UH0886EJ0100)*/
         r_rtc_set_clock_source(p_instance_ctrl, p_cfg);
-    }
+#endif
 
     /** Mark driver as open by initializing it to "RTC" in its ASCII equivalent. */
     p_instance_ctrl->open = RTC_OPEN;
@@ -289,6 +293,34 @@ fsp_err_t R_RTC_Close (rtc_ctrl_t * const p_ctrl)
     }
 
     p_instance_ctrl->open = 0U;
+
+    return FSP_SUCCESS;
+}
+
+/*******************************************************************************************************************//**
+ * Sets the RTC clock source. Implements @ref rtc_api_t::clockSourceSet.
+ *
+ * Example:
+ * @snippet r_rtc_example.c R_RTC_ClockSourceSet
+ *
+ * @retval FSP_SUCCESS          Initialization was successful and RTC has started.
+ * @retval FSP_ERR_ASSERTION    Invalid p_ctrl or p_cfg pointer.
+ * @retval FSP_ERR_NOT_OPEN     Driver is not opened.
+ **********************************************************************************************************************/
+fsp_err_t R_RTC_ClockSourceSet (rtc_ctrl_t * const p_ctrl)
+{
+    rtc_instance_ctrl_t * p_instance_ctrl = (rtc_instance_ctrl_t *) p_ctrl;
+
+    /* Parameter checking */
+#if RTC_CFG_PARAM_CHECKING_ENABLE
+    FSP_ASSERT(NULL != p_instance_ctrl);
+    FSP_ERROR_RETURN(RTC_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
+#endif
+
+    /* Set the clock source for RTC.
+     * The count source must be selected only once before making the initial settings of the RTC registers
+     * at power on. (see section 26.2.19 RTC Control Register 4 (RCR4) of the RA6M3 manual R01UH0886EJ0100)*/
+    r_rtc_set_clock_source(p_instance_ctrl, p_instance_ctrl->p_cfg);
 
     return FSP_SUCCESS;
 }
@@ -797,6 +829,10 @@ static void r_rtc_set_clock_source (rtc_instance_ctrl_t * const p_ctrl, rtc_cfg_
 
     /* Set the START bit to 0 */
     r_rtc_start_bit_update(0U);
+
+    /* Initialize registers. */
+    R_RTC->RCR1 = 0U;
+    R_RTC->RCR2 = 0U;
 
     /* Force RTC to 24 hour mode. Set HR24 bit in the RCR2 register */
     R_RTC->RCR2_b.HR24 = 1U;

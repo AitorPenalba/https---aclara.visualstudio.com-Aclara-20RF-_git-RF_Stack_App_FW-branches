@@ -94,82 +94,82 @@ FSP Configuration
     R7FA6E10F2CFP.pincfg -> g_bsp_pin_cfg
       AVCC0 88 SYSTEM_AVCC0 - - - - - - - - IO "Read only" - 
       AVSS0 89 SYSTEM_AVSS0 - - - - - - - - IO "Read only" - 
-      P000 100 - - - - Disabled - - "ADC0: AN000; IRQ: IRQ6-DS" - None - - 
-      P001 99 - - - - Disabled - - "ADC0: AN001; IRQ: IRQ7-DS" - None - - 
-      P002 98 - - - - Disabled - - "ADC0: AN002; IRQ: IRQ8-DS" - None - - 
+      P000 100 - - - - Disabled - - "ADC0: AN000; ICU: IRQ6-DS" - None - - 
+      P001 99 - - - - Disabled - - "ADC0: AN001; ICU: IRQ7-DS" - None - - 
+      P002 98 - - - - Disabled - - "ADC0: AN002; ICU: IRQ8-DS" - None - - 
       P003 97 - - - - Disabled - - "ADC0: AN003" - None - - 
-      P004 96 - - - - Disabled - - "ADC0: AN004; IRQ: IRQ9-DS" - None - - 
-      P005 95 - - - - Disabled - - "ADC0: AN005; IRQ: IRQ10-DS" - None - - 
-      P006 94 - - - - Disabled - - "ADC0: AN006; IRQ: IRQ11-DS" - None - - 
+      P004 96 - - - - Disabled - - "ADC0: AN004; ICU: IRQ9-DS" - None - - 
+      P005 95 - - - - Disabled - - "ADC0: AN005; ICU: IRQ10-DS" - None - - 
+      P006 94 - - - - Disabled - - "ADC0: AN006; ICU: IRQ11-DS" - None - - 
       P007 93 - - - - Disabled - - "ADC0: AN007" - None - - 
-      P008 92 - - - - Disabled - - "ADC0: AN008; IRQ: IRQ12-DS" - None - - 
+      P008 92 - - - - Disabled - - "ADC0: AN008; ICU: IRQ12-DS" - None - - 
       P014 85 - - - - Disabled - - "ADC0: AN012; DAC120: DA0" - None - - 
-      P015 84 - - - - Disabled - - "ADC0: AN013; IRQ: IRQ13" - None - - 
-      P100 75 - - - - Disabled - - "AGT0: AGTIO0; GPT5: GTIOC5B; GPT_POEG: GTETRGA; IRQ: IRQ2; QSPI: QSPCLK; SCI0: RXD0; SCI1: SCK1; SPI1: MISO1" - None - - 
-      P101 74 - - - - Disabled - - "AGT0: AGTEE0; GPT5: GTIOC5A; GPT_POEG: GTETRGB; IRQ: IRQ1; QSPI: QIO1; SCI0: TXD0; SCI1: CTS_RTS1; SPI1: MOSI1" - None - - 
+      P015 84 - - - - Disabled - - "ADC0: AN013; ICU: IRQ13" - None - - 
+      P100 75 - - - - Disabled - - "AGT0: AGTIO0; GPT5: GTIOC5B; GPT_POEGA: GTETRGA; ICU: IRQ2; QSPI: QSPCLK; SCI0: RXD0; SCI1: SCK1; SPI1: MISO1" - None - - 
+      P101 74 - - - - Disabled - - "AGT0: AGTEE0; GPT5: GTIOC5A; GPT_POEGB: GTETRGB; ICU: IRQ1; QSPI: QIO1; SCI0: TXD0; SCI1: CTS_RTS1; SPI1: MOSI1" - None - - 
       P102 73 - - - - Disabled - - "ADC0: ADTRG0; AGT0: AGTO0; CAN0: CRX0; GPT2: GTIOC2B; QSPI: QIO0; SCI0: SCK0; SPI1: RSPCK1" - None - - 
       P103 72 - - - - Disabled - - "AGT2: AGTIO2; CAN0: CTX0; GPT2: GTIOC2A; QSPI: QIO3; SCI0: CTS_RTS0; SPI1: SSLB0" - None - - 
-      P104 71 - - - - Disabled - - "AGT2: AGTEE2; GPT1: GTIOC1B; GPT_POEG: GTETRGB; IRQ: IRQ1; QSPI: QIO2; SPI1: SSLB1" - None - - 
-      P105 70 - - - - Disabled - - "AGT2: AGTO2; GPT1: GTIOC1A; GPT_POEG: GTETRGA; IRQ: IRQ0; SPI1: SSLB2" - None - - 
+      P104 71 - - - - Disabled - - "AGT2: AGTEE2; GPT1: GTIOC1B; GPT_POEGB: GTETRGB; ICU: IRQ1; QSPI: QIO2; SPI1: SSLB1" - None - - 
+      P105 70 - - - - Disabled - - "AGT2: AGTO2; GPT1: GTIOC1A; GPT_POEGA: GTETRGA; ICU: IRQ0; SPI1: SSLB2" - None - - 
       P106 69 - - - - Disabled - - "AGT0: AGTOB0; SPI1: SSLB3" - None - - 
       P107 68 - - - - Disabled - - "AGT0: AGTOA0" - None - - 
       P108 51 JTAG/SWD_TMS - L - "Peripheral mode" - - "AGT3: AGTOA3; JTAG/SWD: SWDIO; JTAG/SWD: TMS; SCI9: CTS_RTS9; SPI0: SSLA0" - IO - - 
       P109 52 JTAG/SWD_TDO - L - "Peripheral mode" - - "AGT3: AGTOB3; CGC: CLKOUT; GPT1: GTIOC1A; JTAG/SWD: TDO; JTAG/SWD: TRACESWO; SCI9: TXD9; SPI0: MOSI0" - IO - - 
-      P110 53 JTAG/SWD_TDI - L None "Peripheral mode" - - "AGT3: AGTEE3; GPT1: GTIOC1B; IRQ: IRQ3; JTAG/SWD: TDI; SCI2: CTS_RTS2; SCI9: RXD9; SPI0: MISO0" - IO - - 
-      P111 54 - - - - Disabled - - "AGT5: AGTOA5; IRQ: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" - None - - 
+      P110 53 JTAG/SWD_TDI - L None "Peripheral mode" - - "AGT3: AGTEE3; GPT1: GTIOC1B; ICU: IRQ3; JTAG/SWD: TDI; SCI2: CTS_RTS2; SCI9: RXD9; SPI0: MISO0" - IO - - 
+      P111 54 - - - - Disabled - - "AGT5: AGTOA5; ICU: IRQ4; SCI2: SCK2; SCI9: SCK9; SPI0: RSPCK0" - None - - 
       P112 55 - - - - Disabled - - "AGT5: AGTOB5; QSPI: QSSL; SCI1: SCK1; SCI2: TXD2; SPI0: SSLA0; SSIE0: SSISCK0" - None - - 
       P113 56 - - - - Disabled - - "AGT5: AGTEE5; GPT2: GTIOC2A; SCI2: RXD2; SSIE0: SSIWS0" - None - - 
       P114 57 - - - - Disabled - - "AGT5: AGTIO5; GPT2: GTIOC2B; SCI9: CTS9; SSIE0: SSIRXD0" - None - - 
       P115 58 - - - - Disabled - - "GPT4: GTIOC4A; SSIE0: SSITXD0" - None - - 
-      P200 40 - - - - Disabled - - "IRQ: NMI" - None - - 
+      P200 40 - - - - Disabled - - "ICU: NMI" - None - - 
       P201 39 - - - - Disabled - - "SYSTEM: MD" - None - - 
-      P205 32 - - - - Disabled - - "AGT1: AGTO1; CGC: CLKOUT; ETHER_RMII: ET0_WOL; GPT4: GTIOC4A; IIC1: SCL1; IRQ: IRQ1-DS; SCI4: TXD4; SCI9: CTS_RTS9; SDHI0: SD0DAT3; SPI0: SSLA0; USB FS: USB_OVRCURA_A-DS" - None - - 
-      P206 31 - - - - Disabled - - "ETHER_RMII: ET0_LINKSTA; IIC1: SDA1; IRQ: IRQ0-DS; SCI4: RXD4; SCI9: CTS9; SDHI0: SD0DAT2; SPI0: SSLA1; SSIE0: SSIDATA0; USB FS: USB_VBUSEN" - None - - 
+      P205 32 - - - - Disabled - - "AGT1: AGTO1; CGC: CLKOUT; ETHER_RMII: ET0_WOL; GPT4: GTIOC4A; ICU: IRQ1-DS; IIC1: SCL1; SCI4: TXD4; SCI9: CTS_RTS9; SDHI0: SD0DAT3; SPI0: SSLA0; USB FS: USB_OVRCURA_A-DS" - None - - 
+      P206 31 - - - - Disabled - - "ETHER_RMII: ET0_LINKSTA; ICU: IRQ0-DS; IIC1: SDA1; SCI4: RXD4; SCI9: CTS9; SDHI0: SD0DAT2; SPI0: SSLA1; SSIE0: SSIDATA0; USB FS: USB_VBUSEN" - None - - 
       P207 30 - - - - Disabled - - "QSPI: QSSL; SCI4: TXD4; SPI0: SSLA2" - None - - 
       P208 37 - - - - Disabled - - "ETHER_RMII: ET0_LINKSTA; QSPI: QIO3; SDHI0: SD0DAT0; TRACE: TRDATA3" - None - - 
       P209 36 - - - - Disabled - - "AGT5: AGTEE5; ETHER_RMII: ET_EXOUT; QSPI: QIO2; SDHI0: SD0WP; TRACE: TRDATA2" - None - - 
       P210 35 - - - - Disabled - - "AGT5: AGTOB5; ETHER_RMII: ET0_WOL; QSPI: QIO1; SDHI0: SD0CD; TRACE: TRDATA1" - None - - 
       P211 34 - - - - Disabled - - "AGT5: AGTOA5; ETHER_RMII: ET0_MDIO; QSPI: QIO0; SDHI0: SD0CMD; TRACE: TRDATA0" - None - - 
-      P212 14 - - - - Disabled - - "AGT1: AGTEE1; GPT_POEG: GTETRGD; IRQ: IRQ3; SCI1: RXD1; SYSTEM: EXTAL" - None - - 
-      P213 13 - - - - Disabled - - "AGT2: AGTEE2; GPT_POEG: GTETRGC; IRQ: IRQ2; SCI1: TXD1; SYSTEM: XTAL" - None - - 
+      P212 14 - - - - Disabled - - "AGT1: AGTEE1; CGC: EXTAL; GPT_POEGD: GTETRGD; ICU: IRQ3; SCI1: RXD1" - None - - 
+      P213 13 - - - - Disabled - - "AGT2: AGTEE2; CGC: XTAL; GPT_POEGC: GTETRGC; ICU: IRQ2; SCI1: TXD1" - None - - 
       P214 33 - - - - Disabled - - "AGT5: AGTO5; ETHER_RMII: ET0_MDC; QSPI: QSPCLK; SDHI0: SD0CLK; TRACE: TRCLK" - None - - 
       P300 50 JTAG/SWD_TCK - L - "Peripheral mode" - - "JTAG/SWD: SWCLK; JTAG/SWD: TCK; SPI0: SSLA1" - IO - - 
-      P301 49 - - - - Disabled - - "AGT0: AGTIO0; GPT4: GTIOC4B; IRQ: IRQ6; SCI2: RXD2; SCI9: CTS_RTS9; SPI0: SSLA2" - None - - 
-      P302 48 - - - - Disabled - - "GPT4: GTIOC4A; IRQ: IRQ5; SCI2: TXD2; SPI0: SSLA3" - None - - 
+      P301 49 - - - - Disabled - - "AGT0: AGTIO0; GPT4: GTIOC4B; ICU: IRQ6; SCI2: RXD2; SCI9: CTS_RTS9; SPI0: SSLA2" - None - - 
+      P302 48 - - - - Disabled - - "GPT4: GTIOC4A; ICU: IRQ5; SCI2: TXD2; SPI0: SSLA3" - None - - 
       P303 47 - - - - Disabled - - "GPT7: GTIOC7B; SCI9: CTS9" - None - - 
-      P304 44 - - - - Disabled - - "AGT2: AGTEE2; GPT7: GTIOC7A; IRQ: IRQ9" - None - - 
-      P305 43 - - - - Disabled - - "AGT2: AGTOB2; IRQ: IRQ8; QSPI: QSPCLK" - None - - 
+      P304 44 - - - - Disabled - - "AGT2: AGTEE2; GPT7: GTIOC7A; ICU: IRQ9" - None - - 
+      P305 43 - - - - Disabled - - "AGT2: AGTOB2; ICU: IRQ8; QSPI: QSPCLK" - None - - 
       P306 42 - - - - Disabled - - "AGT2: AGTOA2; QSPI: QSSL" - None - - 
       P307 41 - - - - Disabled - - "AGT4: AGTEE4; QSPI: QIO0" - None - - 
-      P400 1 - - - - Disabled - - "AGT1: AGTIO1; ETHER_RMII: ET0_WOL; GPT6: GTIOC6A; IIC0: SCL0; IRQ: IRQ0; SCI4: SCK4; SSIE0: AUDIO_CLK" - None - - 
-      P401 2 - - - - Disabled - - "CAN0: CTX0; ETHER_RMII: ET0_MDC; GPT6: GTIOC6B; GPT_POEG: GTETRGA; IIC0: SDA0; IRQ: IRQ5-DS; SCI4: CTS_RTS4" - None - - 
-      P402 3 - - - - Disabled - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; CAC: CACREF; CAN0: CRX0; ETHER_RMII: ET0_MDIO; IRQ: IRQ4-DS; RTC: RTCIC0; SCI4: CTS4; SSIE0: AUDIO_CLK" - None - - 
-      P403 4 - - - - Disabled - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_LINKSTA; IRQ: IRQ14-DS; RTC: RTCIC1; SSIE0: SSISCK0" - None - - 
-      P404 5 - - - - Disabled - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_EXOUT; IRQ: IRQ15-DS; RTC: RTCIC2; SSIE0: SSIWS0" - None - - 
+      P400 1 - - - - Disabled - - "AGT1: AGTIO1; ETHER_RMII: ET0_WOL; GPT6: GTIOC6A; ICU: IRQ0; IIC0: SCL0; SCI4: SCK4; SSIE0: AUDIO_CLK" - None - - 
+      P401 2 - - - - Disabled - - "CAN0: CTX0; ETHER_RMII: ET0_MDC; GPT6: GTIOC6B; GPT_POEGA: GTETRGA; ICU: IRQ5-DS; IIC0: SDA0; SCI4: CTS_RTS4" - None - - 
+      P402 3 - - - - Disabled - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; CAC: CACREF; CAN0: CRX0; ETHER_RMII: ET0_MDIO; ICU: IRQ4-DS; RTC: RTCIC0; SCI4: CTS4; SSIE0: AUDIO_CLK" - None - - 
+      P403 4 - - - - Disabled - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_LINKSTA; ICU: IRQ14-DS; RTC: RTCIC1; SSIE0: SSISCK0" - None - - 
+      P404 5 - - - - Disabled - - "AGT0: AGTIO0; AGT1: AGTIO1; AGT2: AGTIO2; AGT3: AGTIO3; ETHER_RMII: ET0_EXOUT; ICU: IRQ15-DS; RTC: RTCIC2; SSIE0: SSIWS0" - None - - 
       P405 6 - - - - Disabled - - "ETHER_RMII: RMII0_TXD_EN; GPT1: GTIOC1A; SSIE0: SSITXD0" - None - - 
       P406 7 - - - - Disabled - - "AGT5: AGTO5; ETHER_RMII: RMII0_TXD1; GPT1: GTIOC1B; SSIE0: SSIRXD0" - None - - 
       P407 25 - - - - Disabled - - "ADC0: ADTRG0; AGT0: AGTIO0; ETHER_RMII: ET0_EXOUT; GPT6: GTIOC6A; IIC0: SDA0; RTC: RTCOUT; SCI4: CTS_RTS4; SPI0: SSLA3; USB FS: USB_VBUS" - None - - 
-      P408 24 - - - - Disabled - - "AGT2: AGTOB2; ETHER_RMII: RMII0_CRS_DV; GPT6: GTIOC6B; IIC0: SCL0; IRQ: IRQ7; SCI3: RXD3; SCI4: CTS4; USB FS: USB_ID" - None - - 
-      P409 23 - - - - Disabled - - "AGT2: AGTOA2; ETHER_RMII: RMII0_RX_ER; IRQ: IRQ6; SCI3: TXD3; USB FS: USB_EXICEN" - None - - 
-      P410 22 - - - - Disabled - - "AGT1: AGTOB1; ETHER_RMII: RMII0_RXD1; IRQ: IRQ5; SCI0: RXD0; SCI3: SCK3; SDHI0: SD0DAT1; SPI1: MISO1" - None - - 
-      P411 21 - - - - Disabled - - "AGT1: AGTOA1; ETHER_RMII: RMII0_RXD0; IRQ: IRQ4; SCI0: TXD0; SCI3: CTS_RTS3; SDHI0: SD0DAT0; SPI1: MOSI1" - None - - 
+      P408 24 - - - - Disabled - - "AGT2: AGTOB2; ETHER_RMII: RMII0_CRS_DV; GPT6: GTIOC6B; ICU: IRQ7; IIC0: SCL0; SCI3: RXD3; SCI4: CTS4; USB FS: USB_ID" - None - - 
+      P409 23 - - - - Disabled - - "AGT2: AGTOA2; ETHER_RMII: RMII0_RX_ER; ICU: IRQ6; SCI3: TXD3; USB FS: USB_EXICEN" - None - - 
+      P410 22 - - - - Disabled - - "AGT1: AGTOB1; ETHER_RMII: RMII0_RXD1; ICU: IRQ5; SCI0: RXD0; SCI3: SCK3; SDHI0: SD0DAT1; SPI1: MISO1" - None - - 
+      P411 21 - - - - Disabled - - "AGT1: AGTOA1; ETHER_RMII: RMII0_RXD0; ICU: IRQ4; SCI0: TXD0; SCI3: CTS_RTS3; SDHI0: SD0DAT0; SPI1: MOSI1" - None - - 
       P412 20 - - - - Disabled - - "AGT1: AGTEE1; ETHER_RMII: REF50CK0; SCI0: SCK0; SCI3: CTS3; SDHI0: SD0CMD; SPI1: RSPCK1" - None - - 
       P413 19 - - - - Disabled - - "AGT3: AGTEE3; ETHER_RMII: RMII0_TXD0; SCI0: CTS_RTS0; SDHI0: SD0CLK; SPI1: SSLB0" - None - - 
-      P414 18 - - - - Disabled - - "AGT5: AGTIO5; ETHER_RMII: RMII0_TXD; IRQ: IRQ9; SCI0: CTS0; SDHI0: SD0WP; SPI1: SSLB1" - None - - 
-      P415 17 - - - - Disabled - - "AGT4: AGTIO4; ETHER_RMII: RMII0_TXD_EN; IRQ: IRQ8; SDHI0: SD0CD; SPI1: SSLB2; USB FS: USB_VBUSEN" - None - - 
+      P414 18 - - - - Disabled - - "AGT5: AGTIO5; ETHER_RMII: RMII0_TXD; ICU: IRQ9; SCI0: CTS0; SDHI0: SD0WP; SPI1: SSLB1" - None - - 
+      P415 17 - - - - Disabled - - "AGT4: AGTIO4; ETHER_RMII: RMII0_TXD_EN; ICU: IRQ8; SDHI0: SD0CD; SPI1: SSLB2; USB FS: USB_VBUSEN" - None - - 
       P500 76 QSPI_QSPCLK - L - "Peripheral mode" - - "AGT0: AGTOA0; CAC: CACREF; QSPI: QSPCLK; USB FS: USB_VBUSEN" - IO - - 
-      P501 77 QSPI_QSSL - L None "Peripheral mode" - - "AGT0: AGTOB0; IRQ: IRQ11; QSPI: QSSL; USB FS: USB_OVRCURA" - IO - - 
-      P502 78 QSPI_QIO0 - L None "Peripheral mode" - - "AGT2: AGTOA2; IRQ: IRQ12; QSPI: QIO0; USB FS: USB_OVRCURB" - IO - - 
-      P503 79 QSPI_QIO1 - L - "Peripheral mode" - - "AGT2: AGTOB2; GPT_POEG: GTETRGC; QSPI: QIO1; USB FS: USB_EXICEN" - IO - - 
-      P504 80 - - - - Disabled - - "AGT3: AGTOA3; GPT_POEG: GTETRGD; QSPI: QIO2; USB FS: USB_ID" - None - - 
-      P505 81 - - - - Disabled - - "AGT3: AGTOB3; IRQ: IRQ14; QSPI: QIO3" - None - - 
+      P501 77 QSPI_QSSL - L None "Peripheral mode" - - "AGT0: AGTOB0; ICU: IRQ11; QSPI: QSSL; USB FS: USB_OVRCURA" - IO - - 
+      P502 78 QSPI_QIO0 - L None "Peripheral mode" - - "AGT2: AGTOA2; ICU: IRQ12; QSPI: QIO0; USB FS: USB_OVRCURB" - IO - - 
+      P503 79 QSPI_QIO1 - L - "Peripheral mode" - - "AGT2: AGTOB2; GPT_POEGC: GTETRGC; QSPI: QIO1; USB FS: USB_EXICEN" - IO - - 
+      P504 80 - - - - Disabled - - "AGT3: AGTOA3; GPT_POEGD: GTETRGD; QSPI: QIO2; USB FS: USB_ID" - None - - 
+      P505 81 - - - - Disabled - - "AGT3: AGTOB3; ICU: IRQ14; QSPI: QIO3" - None - - 
       P600 67 - - - - Disabled - - "AGT3: AGTIO3; CAC: CACREF; CGC: CLKOUT; GPT6: GTIOC6B; SCI9: SCK9" - None - - 
       P601 66 - - - - Disabled - - "AGT3: AGTEE3; GPT6: GTIOC6A; SCI9: RXD9" - None - - 
       P602 65 - - - - Disabled - - "AGT3: AGTO3; GPT7: GTIOC7B; SCI9: TXD9" - None - - 
       P608 59 - - - - Disabled - - "GPT4: GTIOC4B" - None - - 
       P609 60 - - - - Disabled - - "AGT5: AGTO5; GPT5: GTIOC5A" - None - - 
       P610 61 - - - - Disabled - - "AGT4: AGTO4; GPT5: GTIOC5B" - None - - 
-      P708 16 - - - - Disabled - - "IRQ: IRQ11; SCI1: RXD1; SPI1: SSLB3" - None - - 
+      P708 16 - - - - Disabled - - "ICU: IRQ11; SCI1: RXD1; SPI1: SSLB3" - None - - 
       RES 38 SYSTEM_RES - - - - - - - - IO "Read only" - 
       USB_DM 27 SYSTEM_USB_DM - - - - - - - - IO "Read only" - 
       USB_DP 28 SYSTEM_USB_DP - - - - - - - - IO "Read only" - 
@@ -190,8 +190,8 @@ FSP Configuration
       VSS 63 SYSTEM_VSS - - - - - - - - IO "Read only" - 
       VSS 83 SYSTEM_VSS - - - - - - - - IO "Read only" - 
       VSS_USB 26 SYSTEM_VSS_USB - - - - - - - - IO "Read only" - 
-      XCIN 10 SYSTEM_XCIN - - - - - - - - IO "Read only" - 
-      XCOUT 11 SYSTEM_XCOUT - - - - - - - - IO "Read only" - 
+      XCIN 10 CGC_XCIN - - - - - - - - IO "Read only" - 
+      XCOUT 11 CGC_XCOUT - - - - - - - - IO "Read only" - 
     
   User Events
     

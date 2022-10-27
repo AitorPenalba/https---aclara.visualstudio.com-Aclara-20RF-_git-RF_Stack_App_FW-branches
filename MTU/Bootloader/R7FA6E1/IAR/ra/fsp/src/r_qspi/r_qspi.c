@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -57,8 +57,8 @@ static void qspi_d0_byte_write_dual_mode(uint8_t byte);
 static void qspi_d0_byte_write_standard(uint8_t byte);
 
 static void r_qspi_direct_write_sub(uint8_t const * const p_src, uint32_t const bytes, bool const read_after_write);
-// Aclara Modified: parameter added to handle polled read
-static void r_qspi_direct_read_sub(uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead);
+
+static void r_qspi_direct_read_sub(uint8_t * const p_dest, uint32_t const bytes);
 static bool r_qspi_status_sub(qspi_instance_ctrl_t * p_instance_ctrl);
 
 static fsp_err_t r_qspi_xip(qspi_instance_ctrl_t * p_instance_ctrl, uint8_t code, bool enter_mode);
@@ -101,19 +101,19 @@ static void(*const gp_qspi_prv_byte_write[3]) (uint8_t byte) =
 
 const spi_flash_api_t g_qspi_on_spi_flash =
 {
-    .open            = R_QSPI_Open,
-    .directWrite     = R_QSPI_DirectWrite,
-    .directRead      = R_QSPI_DirectRead,
-    .directTransfer  = R_QSPI_DirectTransfer,
-    .spiProtocolSet  = R_QSPI_SpiProtocolSet,
-    .write           = R_QSPI_Write,
-    .erase           = R_QSPI_Erase,
-    .statusGet       = R_QSPI_StatusGet,
-    .xipEnter        = R_QSPI_XipEnter,
-    .xipExit         = R_QSPI_XipExit,
-    .bankSet         = R_QSPI_BankSet,
-    .autoCalibrate   = R_QSPI_AutoCalibrate,
-    .close           = R_QSPI_Close,
+    .open           = R_QSPI_Open,
+    .directWrite    = R_QSPI_DirectWrite,
+    .directRead     = R_QSPI_DirectRead,
+    .directTransfer = R_QSPI_DirectTransfer,
+    .spiProtocolSet = R_QSPI_SpiProtocolSet,
+    .write          = R_QSPI_Write,
+    .erase          = R_QSPI_Erase,
+    .statusGet      = R_QSPI_StatusGet,
+    .xipEnter       = R_QSPI_XipEnter,
+    .xipExit        = R_QSPI_XipExit,
+    .bankSet        = R_QSPI_BankSet,
+    .autoCalibrate  = R_QSPI_AutoCalibrate,
+    .close          = R_QSPI_Close,
 };
 
 /***********************************************************************************************************************
@@ -235,16 +235,8 @@ fsp_err_t R_QSPI_DirectWrite (spi_flash_ctrl_t    * p_ctrl,
  * @retval FSP_ERR_NOT_OPEN            Driver is not opened.
  * @retval FSP_ERR_INVALID_MODE        This function must be called after R_QSPI_DirectWrite with read_after_write set
  *                                     to true.
- *
- * Aclara Modified: A new polling read parameter was added to the direct read
- * API. This parameter, when true, will prevent the direct communication access
- * from being turned off and continous polling of the read without the need to
- * write a new read request command.
- *
- * NOTE: The POLLING_READ_EXIT() macro must be utilized after utilizing this funtion in order to exit QSPI Direct
- * Communication Mode which would normally occur when pollingRead is false.
  **********************************************************************************************************************/
-fsp_err_t R_QSPI_DirectRead (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead)
+fsp_err_t R_QSPI_DirectRead (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes)
 {
     qspi_instance_ctrl_t * p_instance_ctrl = (qspi_instance_ctrl_t *) p_ctrl;
 
@@ -263,7 +255,7 @@ fsp_err_t R_QSPI_DirectRead (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, 
 #endif
 
     /* Read data from QSPI. */
-    r_qspi_direct_read_sub(p_dest, bytes, pollingRead);
+    r_qspi_direct_read_sub(p_dest, bytes);
 
     return FSP_SUCCESS;
 }
@@ -744,13 +736,8 @@ static void r_qspi_direct_write_sub (uint8_t const * const p_src, uint32_t const
  *
  * @param[in] p_dest                   Pointer to store data
  * @param[in] bytes                    Number of bytes to read
- * @param[in] pollingRead              Indicates the read is a polling read
- * Aclara Modified: A new polling read parameter was added to the direct read
- * API. This parameter, when true, will prevent the direct communication access
- * from being turned off and continous polling of the read without the need to
- * write a new read request command.
  **********************************************************************************************************************/
-static void r_qspi_direct_read_sub (uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead)
+static void r_qspi_direct_read_sub (uint8_t * const p_dest, uint32_t const bytes)
 {
     /* Read data from QSPI. */
     for (uint32_t i = 0; i < bytes; i++)
@@ -758,15 +745,12 @@ static void r_qspi_direct_read_sub (uint8_t * const p_dest, uint32_t const bytes
         p_dest[i] = (uint8_t) R_QSPI->SFMCOM;
     }
 
-    if( !pollingRead )
-    {
-       /* Close the SPI bus cycle. Reference section 39.10.3 "Generating the SPI Bus Cycle during Direct
-        * Communication" in the RA6M3 manual R01UH0886EJ0100. */
-       R_QSPI->SFMCMD = 1U;
+    /* Close the SPI bus cycle. Reference section 39.10.3 "Generating the SPI Bus Cycle during Direct
+     * Communication" in the RA6M3 manual R01UH0886EJ0100. */
+    R_QSPI->SFMCMD = 1U;
 
-       /* Return to ROM access mode */
-       R_QSPI->SFMCMD = 0U;
-    }
+    /* Return to ROM access mode */
+    R_QSPI->SFMCMD = 0U;
 }
 
 #if QSPI_CFG_SUPPORT_EXTENDED_SPI_MULTI_LINE_PROGRAM

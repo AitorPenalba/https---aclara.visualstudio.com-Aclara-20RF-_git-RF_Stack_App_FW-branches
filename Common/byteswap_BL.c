@@ -5,7 +5,7 @@
  *
  * Global Designator: BS
  *
- * Contents: Swaps bytes of a string for little to big endian converstions
+ * Contents: Swaps bytes of a string for little to big endian conversions
  *
  ******************************************************************************
  * A product of

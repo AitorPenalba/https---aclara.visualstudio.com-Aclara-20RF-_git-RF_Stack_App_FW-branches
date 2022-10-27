@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -394,6 +394,7 @@ __STATIC_INLINE void R_BSP_PinCfg (bsp_io_port_pin_t pin, uint32_t cfg)
     R_PFS->PORT[pin >> 8].PIN[pin & BSP_IO_PRV_8BIT_MASK].PmnPFS = cfg;
 }
 
+/* Aclara modified: add helper function for pin configuration */
 /******************************* THIS FUNCTION IS FROM ACLARA TECHNOLOGIES LLC *************************************//**
  * Configure just the lower byte of the SFR for a pin. If PFS protection is enabled, disable PFS protection using
  * R_BSP_PinAccessEnable() before calling this function.  This allows changing both the direction and output state
@@ -407,6 +408,7 @@ __STATIC_INLINE void R_BSP_PinCfg_BY (bsp_io_port_pin_t pin, uint8_t cfg_BY) // 
     /* Configure a pin. */
     R_PFS->PORT[pin >> 8].PIN[pin & BSP_IO_PRV_8BIT_MASK].PmnPFS_BY = cfg_BY;
 }
+/* Aclara modified - End */
 /*******************************************************************************************************************//**
  * Enable access to the PFS registers. Uses a reference counter to protect against interrupts that could occur
  * via multiple threads or an ISR re-entering this code.

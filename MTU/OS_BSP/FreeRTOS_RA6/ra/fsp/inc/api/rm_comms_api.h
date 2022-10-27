@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -40,7 +40,7 @@
  **********************************************************************************************************************/
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
  #include "platform.h"
-#elif defined(__CCRL__) || defined(__ICCRL__) || defined(__RL78__)
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL78__)
  #include <stddef.h>
  #include <stdbool.h>
  #include "r_cg_macrodriver.h"
@@ -50,7 +50,7 @@
 #endif
 
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
-#elif defined(__CCRL__) || defined(__ICCRL__) || defined(__RL78__)
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL78__)
 #else
 
 /* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
@@ -163,7 +163,7 @@ typedef struct st_rm_comms_instance
 } rm_comms_instance_t;
 
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
-#elif defined(__CCRL__) || defined(__ICCRL__) || defined(__RL78__)
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL78__)
 #else
 
 /* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */

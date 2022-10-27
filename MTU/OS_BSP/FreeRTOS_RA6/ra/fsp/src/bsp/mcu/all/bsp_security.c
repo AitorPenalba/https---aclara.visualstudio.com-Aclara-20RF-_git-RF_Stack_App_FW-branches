@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -266,7 +266,9 @@ void R_BSP_SecurityInit (void)
     R_PSCU->MSSAR = BSP_TZ_CFG_MSSAR;
 
     /* Initialize Type 2 SARs. */
+  #ifdef BSP_TZ_CFG_CSAR
     R_CPSCU->CSAR    = BSP_TZ_CFG_CSAR;        /* Cache Security Attribution. */
+  #endif
     R_SYSTEM->RSTSAR = BSP_TZ_CFG_RSTSAR;      /* RSTSRn Security Attribution. */
     R_SYSTEM->LVDSAR = BSP_TZ_CFG_LVDSAR;      /* LVD Security Attribution. */
     R_SYSTEM->CGFSAR = BSP_TZ_CFG_CGFSAR;      /* CGC Security Attribution. */

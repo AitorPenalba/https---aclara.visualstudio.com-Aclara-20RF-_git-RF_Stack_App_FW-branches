@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -228,13 +228,8 @@ typedef struct st_spi_flash_api
      * @param[in]  p_ctrl               Pointer to a driver handle
      * @param[out] p_dest               Pointer to read raw data into
      * @param[in]  bytes                Number of bytes to read
-     *
-     * Aclara Added: Polling parameter was added to Read API to indicate
-     *               that the current read is a polling read. Direct communication
-     *               access behavior will be controlled by this parameter.
-     * @param[in] pollingRead           Indicate the read is a polling read
      **/
-    fsp_err_t (* directRead)(spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes, bool const pollingRead);
+    fsp_err_t (* directRead)(spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, uint32_t const bytes);
 
     /** Direct Read/Write raw data to the SPI flash.
      * @par Implemented as

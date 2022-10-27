@@ -30,7 +30,7 @@
 /* INCLUDE FILES */
 
 #ifndef __BOOTLOADER
-#include "os_aclara.h"
+#include "OS_aclara.h"
 #include "portable_freescale.h"
 #endif   /* __BOOTLOADER   */
 
@@ -248,7 +248,8 @@
 #define ED_PROG_FLASH_BASECODE_ONLY 2
 #define ED_PROG_FLASH_SUPPORT_ALL   3
 
-
+/* STRT - rate at which run-time counters are collected */
+#define STRT_BACKGROUND_CYCLE_SECONDS 1    /* Collect once per second */
 
 /* Timers - timer_util.c/h module */
 

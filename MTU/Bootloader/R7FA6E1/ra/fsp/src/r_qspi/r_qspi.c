@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -263,7 +263,7 @@ fsp_err_t R_QSPI_DirectRead (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_dest, 
 #endif
 
     /* Read data from QSPI. */
-    r_qspi_direct_read_sub(p_dest, bytes, pollingRead);
+    r_qspi_direct_read_sub(p_dest, bytes, pollingRead); /* Aclara modified: added polling parameter */
 
     return FSP_SUCCESS;
 }
@@ -758,15 +758,15 @@ static void r_qspi_direct_read_sub (uint8_t * const p_dest, uint32_t const bytes
         p_dest[i] = (uint8_t) R_QSPI->SFMCOM;
     }
 
-    if( !pollingRead )
-    {
+    if( !pollingRead )  /* Aclara modified: close SPI bus cycle if not polling */
+    {                   /* Aclara modified */
        /* Close the SPI bus cycle. Reference section 39.10.3 "Generating the SPI Bus Cycle during Direct
         * Communication" in the RA6M3 manual R01UH0886EJ0100. */
        R_QSPI->SFMCMD = 1U;
 
        /* Return to ROM access mode */
        R_QSPI->SFMCMD = 0U;
-    }
+    }                   /* Aclara modified */
 }
 
 #if QSPI_CFG_SUPPORT_EXTENDED_SPI_MULTI_LINE_PROGRAM

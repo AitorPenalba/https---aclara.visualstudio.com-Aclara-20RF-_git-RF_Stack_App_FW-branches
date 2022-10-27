@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -84,6 +84,8 @@
 
 #define BSP_FEATURE_ADC_B_TSN_CALIBRATION32_MASK          (0U)
 #define BSP_FEATURE_ADC_B_TSN_SLOPE                       (0U)
+#define BSP_FEATURE_ADC_B_UNIT_0_CHANNELS                    (0U)
+#define BSP_FEATURE_ADC_B_UNIT_1_CHANNELS                    (0U)
 
 #define BSP_FEATURE_AGT_VALID_CHANNEL_MASK                (0x3F)
 #define BSP_FEATURE_AGT_MAX_CHANNEL_NUM                   (5)
@@ -129,6 +131,7 @@
 
 #define BSP_FEATURE_CANFD_NUM_CHANNELS                    (0U) // Feature not available on this MCU
 #define BSP_FEATURE_CANFD_LITE                            (0U)
+#define BSP_FEATURE_CANFD_FD_SUPPORT                         (0U)
 
 #define BSP_FEATURE_CGC_HAS_BCLK                          (0U)
 #define BSP_FEATURE_CGC_HAS_FCLK                          (1U)
@@ -164,6 +167,7 @@
 #define BSP_FEATURE_CGC_SODRV_SHIFT                       (0x01U)
 #define BSP_FEATURE_CGC_STARTUP_OPCCR_MODE                (0)
 
+#define BSP_FEATURE_CRYPTO_HAS_SCE7_MISSING_PROCS            (0)
 #define BSP_FEATURE_CRYPTO_HAS_AES                        (0)
 #define BSP_FEATURE_CRYPTO_HAS_AES_WRAPPED                (0)
 #define BSP_FEATURE_CRYPTO_HAS_ECC                        (0)
@@ -173,6 +177,9 @@
 #define BSP_FEATURE_CRYPTO_HAS_RSA_WRAPPED                (0)
 #define BSP_FEATURE_CRYPTO_HAS_CTR_DRBG                   (1)
 #define BSP_FEATURE_CRYPTO_HAS_SCE9                       (1)
+#define BSP_FEATURE_CRYPTO_HAS_SCE5B                         (0)
+#define BSP_FEATURE_CRYPTO_HAS_SCE7                          (0)
+#define BSP_FEATURE_CRYPTO_HAS_SCE5                          (0)
 
 #define BSP_FEATURE_CTSU_CTSUCHAC_REGISTER_COUNT          (0) // Feature not available on this MCU
 #define BSP_FEATURE_CTSU_CTSUCHTRC_REGISTER_COUNT         (0) // Feature not available on this MCU
@@ -213,6 +220,7 @@
 #define BSP_FEATURE_FLASH_HP_DF_WRITE_SIZE                (4U)
 #define BSP_FEATURE_FLASH_HP_HAS_FMEPROT                  (1)
 #define BSP_FEATURE_FLASH_HP_SUPPORTS_DUAL_BANK           (0) // ACLARA Modified: remove support for DUAL BANK - not needed
+#define BSP_FEATURE_FLASH_HP_CF_DUAL_BANK_START              (0x00200000U)
 #define BSP_FEATURE_FLASH_HP_VERSION                      (40U)
 #define BSP_FEATURE_FLASH_LP_AWS_FAW_MASK                 (0) // Feature not available on this MCU
 #define BSP_FEATURE_FLASH_LP_AWS_FAW_SHIFT                (0) // Feature not available on this MCU
@@ -258,6 +266,8 @@
 #define BSP_FEATURE_IOPORT_ELC_PORTS                      (0x001EU)
 #define BSP_FEATURE_IOPORT_HAS_ETHERNET                   (1U)
 
+#define BSP_FEATURE_KINT_HAS_MSTP                            (0U)
+
 #define BSP_FEATURE_LPM_CHANGE_MSTP_ARRAY                 (0U)
 #define BSP_FEATURE_LPM_CHANGE_MSTP_REQUIRED              (0U)
 #define BSP_FEATURE_LPM_DPSIEGR_MASK                      (0x13DFF3U)
@@ -298,6 +308,8 @@
 
 #define BSP_FEATURE_QSPI_DEVICE_START_ADDRESS             (0x60000000U)
 
+#define BSP_FEATURE_RTC_HAS_ROPSEL                           (0U)
+
 #define BSP_FEATURE_SCI_VERSION                           (1U)
 #define BSP_FEATURE_SCI_ADDRESS_MATCH_CHANNELS            (0x219U)
 #define BSP_FEATURE_SCI_CHANNELS                          (0x21FU)
@@ -321,6 +333,7 @@
 #define BSP_FEATURE_SPI_CLK                               (FSP_PRIV_CLOCK_PCLKA)
 #define BSP_FEATURE_SPI_HAS_SPCR3                         (1U)
 #define BSP_FEATURE_SPI_HAS_SSL_LEVEL_KEEP                (1U)
+#define BSP_FEATURE_SPI_SSL_LEVEL_KEEP_VALID_CHANNEL_MASK    (0x3U)
 #define BSP_FEATURE_SPI_MAX_CHANNEL                       (2U)
 
 #define BSP_FEATURE_SRAM_SRAMWTSC_WAIT_CYCLE_ENABLE       (0x01U)

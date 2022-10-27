@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2021] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
  * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
@@ -135,15 +135,15 @@ BSP_DONT_REMOVE const exc_ptr_t __Vectors[BSP_CORTEX_VECTOR_TABLE_ENTRIES] BSP_P
     NMI_Handler,                                               /*      NMI Handler               */
                                                                /*      TODO NRJ: RA6E1 May change NMI to Hardfault handler if not handled by BSP */
     HardFault_Handler,                                         /*      Hard Fault Handler        */
-    HardFault_Handler,                                         /*      MPU Fault Handler         */
-    HardFault_Handler,                                         /*      Bus Fault Handler         */
-    HardFault_Handler,                                         /*      Usage Fault Handler       */
-    HardFault_Handler,                                         /*      Secure Fault Handler      */
+    HardFault_Handler,                                         /*      MPU Fault Handler         */ /* Aclara modified: use common fault handler */
+    HardFault_Handler,                                         /*      Bus Fault Handler         */ /* Aclara modified: use common fault handler */
+    HardFault_Handler,                                         /*      Usage Fault Handler       */ /* Aclara modified: use common fault handler */
+    HardFault_Handler,                                         /*      Secure Fault Handler      */ /* Aclara modified: use common fault handler */
     0,                                                         /*      Reserved                  */
     0,                                                         /*      Reserved                  */
     0,                                                         /*      Reserved                  */
     SVC_Handler,                                               /*      SVCall Handler            */
-    HardFault_Handler,                                         /*      Debug Monitor Handler     */
+    HardFault_Handler,                                         /*      Debug Monitor Handler     */ /* Aclara modified: use common fault handler */
     0,                                                         /*      Reserved                  */
     PendSV_Handler,                                            /*      PendSV Handler            */
     SysTick_Handler,                                           /*      SysTick Handler           */

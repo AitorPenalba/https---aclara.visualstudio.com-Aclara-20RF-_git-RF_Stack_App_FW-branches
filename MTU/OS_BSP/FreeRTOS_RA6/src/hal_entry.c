@@ -48,6 +48,7 @@ void R_BSP_WarmStart (bsp_warm_start_event_t event)
        /* Clear the IOKEEP bit after deep software standby */
        (void)R_LPM_IoKeepClear(NULL);   // Input parameter is unused
 
+       /* Configure pins. */
        R_IOPORT_Open(&g_ioport_ctrl, g_ioport.p_cfg);
 
        PWRLG_BSP_Setup();
