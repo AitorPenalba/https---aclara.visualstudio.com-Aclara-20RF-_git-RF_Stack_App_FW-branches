@@ -73,7 +73,7 @@
 
 /* #DEFINE DEFINITIONS */
 #define MAC_ACK_WAIT_DURATION_DEFAULT              60       // Default AckWaitDuration
-#define MAC_ACK_DELAY_DURATION_DEFAULT             10       // Default AckDelayDuration
+#define MAC_ACK_DELAY_DURATION_DEFAULT             00       // Default AckDelayDuration
 #define MAC_CSMA_MAX_ATTEMPTS_DEFAULT              10
 #define MAC_CSMA_MAX_ATTEMPTS_LIMIT                20
 
