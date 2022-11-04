@@ -395,7 +395,7 @@ static void MFGP_macTxFrames                 ( uint32_t argc, char *argv[] );
 static void MFGP_macAckWaitDuration          ( uint32_t argc, char *argv[] );
 static void MFGP_macAckDelayDuration         ( uint32_t argc, char *argv[] );
 static void MFGP_macPacketId                 ( uint32_t argc, char *argv[] );
-static void MFGP_macIsChannelAccessConstrained ( uint32_t argc, char *argv[] );
+static void MFGP_macChannelAccessConstrained ( uint32_t argc, char *argv[] );
 static void MFGP_macIsFNG                    ( uint32_t argc, char *argv[] );
 static void MFGP_macIsIAG                    ( uint32_t argc, char *argv[] );
 static void MFGP_macIsRouter                 ( uint32_t argc, char *argv[] );
@@ -782,7 +782,7 @@ static const struct_CmdLineEntry MFGP_CmdTable[] =
    {  "macChannelSetsCount",        MFGP_macChannelSetsCount,        "Get MAC ChannelSetsCount" },
    {  "macPacketId",                MFGP_macPacketId,                "Get MAC PacketId" },
    {  "macTxFrames",                    MFGP_macTxFrames,                    "Get TxFrames"},
-   {  "macIsChannelAccessConstrained",  MFGP_macIsChannelAccessConstrained,  "Get/Set macIsChannelAccessConstrained"},
+   {  "macChannelAccessConstrained",  MFGP_macChannelAccessConstrained,  "Get/Set macChannelAccessConstrained"},
    {  "macIsFNG",                       MFGP_macIsFNG,                       "Get/Set macIsFNG"},
    {  "macIsIAG",                       MFGP_macIsIAG,                       "Get/Set macIsIAG"},
    {  "macIsRouter",                    MFGP_macIsRouter,                    "Get/Set macIsRouter"},
@@ -2662,7 +2662,7 @@ static void MFGP_macState                    ( uint32_t argc, char *argv[] )
 /** **********************************************************************************************************************
  *
  *  **********************************************************************************************************************/
-static void MFGP_macIsChannelAccessConstrained ( uint32_t argc, char *argv[] )
+static void MFGP_macChannelAccessConstrained ( uint32_t argc, char *argv[] )
 {
    MacAttrSetGet(argc, argv, eMacAttr_IsChannelAccessConstrained, BOOL_VALUE_TYPE);
 }
