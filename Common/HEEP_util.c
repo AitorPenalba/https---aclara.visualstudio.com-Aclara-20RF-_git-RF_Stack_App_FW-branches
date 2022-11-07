@@ -3143,7 +3143,7 @@ returnStatus_t MAC_OR_PM_Handler( enum_MessageMethod action, meterReadingType id
          {
             if ( sizeof(GetConf.val.TransactionTimeout) <= MAX_OR_PM_PAYLOAD_SIZE ) //lint !e506 !e774
             {  //The reading will fit in the buffer
-               GetConf = MAC_GetRequest( eMacAttr_IsChannelAccessConstrained );
+               GetConf = MAC_GetRequest( eMacAttr_ChannelAccessConstrained );
                if ( GetConf.eStatus == eMAC_GET_SUCCESS )
                {
                   *(uint8_t *)value = GetConf.val.IsChannelAccessConstrained;

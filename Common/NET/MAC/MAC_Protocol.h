@@ -241,7 +241,7 @@ typedef enum
 #endif
 
 #if 1
-   eMacAttr_IsChannelAccessConstrained,
+   eMacAttr_ChannelAccessConstrained,
    eMacAttr_IsFNG,
    eMacAttr_IsIAG,
    eMacAttr_IsRouter,

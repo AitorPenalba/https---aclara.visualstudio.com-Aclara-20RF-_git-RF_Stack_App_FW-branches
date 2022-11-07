@@ -2664,7 +2664,7 @@ static void MFGP_macState                    ( uint32_t argc, char *argv[] )
  *  **********************************************************************************************************************/
 static void MFGP_macChannelAccessConstrained ( uint32_t argc, char *argv[] )
 {
-   MacAttrSetGet(argc, argv, eMacAttr_IsChannelAccessConstrained, BOOL_VALUE_TYPE);
+   MacAttrSetGet(argc, argv, eMacAttr_ChannelAccessConstrained, BOOL_VALUE_TYPE);
 }
 
 /** **********************************************************************************************************************

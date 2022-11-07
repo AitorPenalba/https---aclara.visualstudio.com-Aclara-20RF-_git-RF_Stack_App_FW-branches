@@ -252,7 +252,7 @@ static const char mac_attr_names[][27] = // Don't forget to update the size usin
 #if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
    [eMacAttr_CmdRespMaxTimeDiversity   ] =  "CmdRespMaxTimeDiversity",
 #endif
-   [eMacAttr_IsChannelAccessConstrained ] =  "IsChannelAccessConstrained",
+   [eMacAttr_ChannelAccessConstrained ] =  "ChannelAccessConstrained",
    [eMacAttr_IsFNG                      ] =  "IsFNG",
    [eMacAttr_IsIAG                      ] =  "IsIAG",
    [eMacAttr_IsRouter                   ] =  "IsRouter"
@@ -2759,7 +2759,7 @@ MAC_GET_STATUS_e MAC_Attribute_Get( MAC_GetReq_t const *pGetReq, MAC_ATTRIBUTES_
 #if ( MAC_CMD_RESP_TIME_DIVERSITY == 1 )
       case eMacAttr_CmdRespMaxTimeDiversity:       val->macCmdRespMaxTimeDiversity = MAC_ConfigAttr.macCmdRespMaxTimeDiversity;     break;
 #endif
-      case eMacAttr_IsChannelAccessConstrained:    val->IsChannelAccessConstrained = MAC_ConfigAttr.IsChannelAccessConstrained; break;
+      case eMacAttr_ChannelAccessConstrained:    val->IsChannelAccessConstrained = MAC_ConfigAttr.IsChannelAccessConstrained; break;
       case eMacAttr_IsFNG:                         val->IsFNG                      = MAC_ConfigAttr.IsFNG;                      break;
       case eMacAttr_IsIAG:                         val->IsIAG                      = MAC_ConfigAttr.IsIAG;                      break;
       case eMacAttr_IsRouter:                      val->IsRouter                   = MAC_ConfigAttr.IsRouter;                   break;
@@ -3427,7 +3427,7 @@ static MAC_SET_STATUS_e  MAC_Attribute_Set( MAC_SetReq_t const *pSetReq)
 #if ( EP == 1 ) && ( TEST_TDMA == 1)
       case eMacAttr_TxSlot:                        eStatus = TxSlot_Set(                     pSetReq->val.TxSlot                   ); break;
 #endif
-      case eMacAttr_IsChannelAccessConstrained:    eStatus = eMAC_SET_READONLY; break;
+      case eMacAttr_ChannelAccessConstrained:    eStatus = eMAC_SET_READONLY; break;
       case eMacAttr_IsFNG:                         eStatus = IsFNG_Set   (  pSetReq->val.IsFNG                    ); break;
       case eMacAttr_IsIAG:                         eStatus = IsIAG_Set   (  pSetReq->val.IsIAG                    ); break;
       case eMacAttr_IsRouter:                      eStatus = IsRouter_Set(  pSetReq->val.IsRouter                 ); break;
